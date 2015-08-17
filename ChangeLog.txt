@@ -1,0 +1,15 @@
+BrandonsCore
+###### 1.0.0.2 #######
+-moved potion asm to Potion ID Helper to fix vanilla compatibility.
+
+###### 1.0.0.3 #######
+-transferred the code that expends the potion array from BrandonsCore to PotionIDHelper.
+
+###### 1.0.0.4 #######
+-fixed server crash when installed with Draconic Evolution.
+
+###### 1.0.0.5 #######
+-added a process handler and used it to handle the Draconic Evolution reactor explosion.
+-added some more helper methods for Draconic Evolution.  
+
+
