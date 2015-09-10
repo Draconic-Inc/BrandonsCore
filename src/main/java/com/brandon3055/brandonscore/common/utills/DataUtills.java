@@ -166,4 +166,26 @@ public class DataUtills {
 			this.i2 = i2;
 		}
 	}
+
+	public static class XZPair<X, Z>{
+		public X x;
+		public Z z;
+
+		public XZPair(X x, Z z){
+			this.x = x;
+			this.z = z;
+		}
+	}
+
+	public static class XYZTri<X, Y, Z>{
+		public X x;
+		public Y y;
+		public Z z;
+
+		public XYZTri(X x, Y y, Z z){
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
 }
