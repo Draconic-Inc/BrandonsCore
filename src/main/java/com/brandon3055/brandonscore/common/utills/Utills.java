@@ -82,7 +82,7 @@ public class Utills {
 	 * @param z2 point B z
 	 * @return The distance between point A and point B
 	 */
-	public static double getDistance(double x1, double y1, double z1, double x2, double y2, double z2){
+	public static double getDistanceAtoB(double x1, double y1, double z1, double x2, double y2, double z2){
 		double dx = x1-x2;
 		double dy = y1-y2;
 		double dz = z1-z2;
@@ -97,7 +97,7 @@ public class Utills {
 	 * @param z2 point B z
 	 * @return The distance between point A and point B
 	 */
-	public static double getDistance(double x1, double z1, double x2, double z2){
+	public static double getDistanceAtoB(double x1, double z1, double x2, double z2){
 		double dx = x1-x2;
 		double dz = z1-z2;
 		return Math.sqrt((dx*dx + dz*dz ));
@@ -191,4 +191,7 @@ public class Utills {
 
 		return result;
 	}
+
+	/**Simple method to convert a Double object to a primitive int*/
+	public static int toInt(double d) { return (int)d; }
 }
