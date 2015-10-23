@@ -37,11 +37,10 @@ public class InfoHelper {
 
 	@SuppressWarnings("unchecked")
 	public static void addLore(ItemStack stack, List list, boolean addLeadingLine){
-		//if (ConfigHandler.disableLore) return; todo
 		String[] lore = getLore(stack);
 		if (addLeadingLine) list.add("");
 		if (lore == null) {
-			list.add("" + EnumChatFormatting.ITALIC + "" + EnumChatFormatting.DARK_PURPLE + "Invalid lore localization see console for details");
+			list.add("" + EnumChatFormatting.ITALIC + "" + EnumChatFormatting.DARK_PURPLE + "Invalid lore localization! (something is broken)");
 			return;
 		}
 		for (String s : lore) list.add("" + EnumChatFormatting.ITALIC + "" + EnumChatFormatting.DARK_PURPLE + s);
@@ -68,7 +67,7 @@ public class InfoHelper {
 		String rawLore = StatCollector.translateToLocal(unlocalizeLore);
 
 		if (rawLore.contains(unlocalizeLore)){
-			LogHelper.error("Invalid or missing Lore localization \""+unlocalizeLore+"\"");
+			//LogHelper.error("Invalid or missing Lore localization \""+unlocalizeLore+"\"");
 			return null;
 		}
 

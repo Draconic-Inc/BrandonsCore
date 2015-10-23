@@ -1,5 +1,8 @@
 BrandonsCore
 
+###### 1.0.0.8 #######
+-Updated the info helper class in an attempt to fix a mod conflict with the DE item lore.
+
 ###### 1.0.0.7 #######
 -added a zip handler.
 -added a few utility methods. 
