@@ -73,6 +73,23 @@ public class Utills {
 	}
 
 	/**
+	 * Add commas to a number e.g. 161253126 > 161,253,126
+	 */
+	public static String addCommas(long value){
+		String rawNumber = String.valueOf(value);
+		String formattedNumber = "";
+		do {
+			int end = rawNumber.length();
+			int start = Math.max(0, end - 3);
+			String part = rawNumber.substring(start, end);
+			rawNumber = rawNumber.substring(0, start);
+			formattedNumber = part + (formattedNumber.length() > 0 ? "," : "") + formattedNumber;
+
+		}while (rawNumber.length() > 0);
+		return formattedNumber;
+	}
+
+	/**
 	 * Calculates the exact distance between two points in 3D space
 	 * @param x1 point A x
 	 * @param y1 point A y

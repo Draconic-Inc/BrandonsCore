@@ -19,7 +19,7 @@ public class BrandonsCore
 {
 	public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "BrandonsCore";
-    public static final String VERSION = "1.0.0.8";//MC Update, Major version, Minor Version, Release number (private or public)
+    public static final String VERSION = "1.0.0.9";//MC Update, Major version, Minor Version, Release number (private or public)
 
 	@Mod.Instance(BrandonsCore.MODID)
 	public static BrandonsCore instance;
@@ -27,13 +27,13 @@ public class BrandonsCore
 	@SidedProxy(clientSide = "com.brandon3055.brandonscore.client.ClientProxy", serverSide = "com.brandon3055.brandonscore.common.CommonProxy")
 	public static CommonProxy proxy;
 
-	@NetworkCheckHandler //todo
+	@NetworkCheckHandler
 	public boolean networkCheck(Map<String, String> map, Side side) {
 		return true;
 	}
 
 	public BrandonsCore(){
-		LogHelper.info("Hello Minecraft!!!!!!!!!!!");
+		LogHelper.info("Hello Minecraft!!!");
 	}
 
 	@EventHandler

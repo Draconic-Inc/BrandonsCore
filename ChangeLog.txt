@@ -1,5 +1,9 @@
 BrandonsCore
 
+###### 1.0.0.9 #######
+-Added ClientUtills.class
+-Moved base gui classes from DE to BC for easy use in other mods.
+
 ###### 1.0.0.8 #######
 -Updated the info helper class in an attempt to fix a mod conflict with the DE item lore.
 
