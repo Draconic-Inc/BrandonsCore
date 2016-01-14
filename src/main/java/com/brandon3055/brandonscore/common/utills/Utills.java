@@ -46,13 +46,13 @@ public class Utills {
 		if (value < 1000L)
 			return String.valueOf(value);
 		else if (value < 1000000L)
-			return String.valueOf(Math.round(value)/1000L) + "K";
+			return String.valueOf(Math.round(value)/1000D) + "K";
 		else if (value < 1000000000L)
-			return String.valueOf(Math.round(value/1000L)/1000L) + "M";
+			return String.valueOf(Math.round(value/1000L)/1000D) + "M";
 		else if (value < 1000000000000L)
-			return String.valueOf(Math.round(value/1000000L)/1000L) + "B";
+			return String.valueOf(Math.round(value/1000000L)/1000D) + "B";
 		else
-			return String.valueOf(Math.round(value/1000000000L)/1000L) + "T";
+			return String.valueOf(Math.round(value/1000000000L)/1000D) + "T";
 	}
 
 	/**
