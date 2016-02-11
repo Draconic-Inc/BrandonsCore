@@ -1,5 +1,8 @@
 BrandonsCore
 
+###### 1.0.0.10 #######
+-fix: Put a texture in the wrong location when i moved the gui base classes.
+
 ###### 1.0.0.9 #######
 -Added ClientUtills.class
 -Moved base gui classes from DE to BC for easy use in other mods.
