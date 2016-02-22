@@ -15,6 +15,7 @@ public class ComponentCollection extends ComponentBase {
 	protected int ySize;
 	protected List<String> deadGroups = new ArrayList<String>();
 	protected GUIBase gui;
+	private boolean openBoarders = false;
 
 
 	public ComponentCollection(int x, int y, int xSize, int ySize, GUIBase gui) {
@@ -81,6 +82,15 @@ public class ComponentCollection extends ComponentBase {
 			}
 		}
 		//removeScheduled();
+	}
+
+	@Override
+	public void keyTyped(char par1, int par2) {
+		for (ComponentBase component : components){
+			if (component.isEnabled()) {
+				component.keyTyped(par1, par2);
+			}
+		}
 	}
 
 	public List<ComponentBase> getComponents() { return components; }
@@ -153,4 +163,11 @@ public class ComponentCollection extends ComponentBase {
 			component.updateScreen();
 		}
 	}
+
+	public ComponentCollection setOpenBoarders() {
+		openBoarders = true;
+		return this;
+	}
+
+	public boolean openBoarders() { return openBoarders; }
 }

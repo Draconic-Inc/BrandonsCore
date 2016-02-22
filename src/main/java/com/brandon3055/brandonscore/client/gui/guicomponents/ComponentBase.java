@@ -220,6 +220,8 @@ public abstract class ComponentBase extends Gui {
 	public void mouseClicked(int x, int y, int button){
 	}
 
+
+
 	public void setWorldAndResolution(Minecraft mc, int width, int height)
 	{
 
@@ -233,4 +235,6 @@ public abstract class ComponentBase extends Gui {
 	public String ttl(String unlocalizedName){return StatCollector.translateToLocal(unlocalizedName);}
 
 	public void updateScreen(){}
+
+	protected void keyTyped(char par1, int par2) {}
 }

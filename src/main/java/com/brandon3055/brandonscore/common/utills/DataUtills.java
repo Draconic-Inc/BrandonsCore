@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.common.lib.References;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 import java.text.DecimalFormat;
 
@@ -111,6 +112,38 @@ public class DataUtills {
 		}
 	}
 
+	public static void writeObjectToCompound(NBTTagCompound compound, Object value, int datatype, String name){
+		switch (datatype){
+			case References.BYTE_ID:
+				compound.setByte(name, (Byte) value);
+				break;
+			case References.SHORT_ID:
+				compound.setShort(name, (Short) value);
+				break;
+			case References.INT_ID:
+				compound.setInteger(name, (Integer) value);
+				break;
+			case References.LONG_ID:
+				compound.setLong(name, (Long) value);
+				break;
+			case References.FLOAT_ID:
+				compound.setFloat(name, (Float) value);
+				break;
+			case References.DOUBLE_ID:
+				compound.setDouble(name, (Double) value);
+				break;
+//			case References.CHAR_ID:
+//				ItemNBTHelper.setChar(stack, value.name, (Byte)value.value);
+//				break;
+			case References.STRING_ID:
+				compound.setString(name, (String) value);
+				break;
+			case References.BOOLEAN_ID:
+				compound.setBoolean(name, (Boolean) value);
+				break;
+		}
+	}
+
 	public static Object readObjectFromItem(ItemStack stack, int dataType, String name, Object defaultExpected){
 		switch (dataType){
 			case References.BYTE_ID:
@@ -157,6 +190,29 @@ public class DataUtills {
 		return null;
 	}
 
+	public static Object readObjectFromCompound(NBTTagCompound compound, int dataType, String name, Object defaultExpected){
+		switch (dataType){
+			case References.BYTE_ID:
+				return compound.hasKey(name) ? compound.getByte(name) : (Byte)defaultExpected;
+			case References.SHORT_ID:
+				return compound.hasKey(name) ? compound.getShort(name) : (Short)defaultExpected;
+			case References.INT_ID:
+				return compound.hasKey(name) ? compound.getInteger(name) : (Integer)defaultExpected;
+			case References.LONG_ID:
+				return compound.hasKey(name) ? compound.getLong(name) : (Long)defaultExpected;
+			case References.FLOAT_ID:
+				return compound.hasKey(name) ? compound.getFloat(name) : (Float)defaultExpected;
+			case References.DOUBLE_ID:
+				return compound.hasKey(name) ? compound.getDouble(name) : (Double)defaultExpected;
+			//case References.CHAR_ID:
+			case References.STRING_ID:
+				return compound.hasKey(name) ? compound.getString(name) : (String)defaultExpected;
+			case References.BOOLEAN_ID:
+				return compound.hasKey(name) ? compound.getBoolean(name) : (Boolean)defaultExpected;
+		}
+		return null;
+	}
+
 	public static class IntPair
 	{
 		public int i1;
@@ -177,6 +233,10 @@ public class DataUtills {
 			this.x = x;
 			this.z = z;
 		}
+
+		public X getKey() { return x; }
+
+		public Z getValue() { return z; }
 	}
 
 	public static class XYZTri<X, Y, Z>{

@@ -33,15 +33,17 @@ public abstract class GUIBase extends GuiContainer {
 	@Override
 	protected void mouseClicked(int x, int y, int button) {
 		super.mouseClicked(x, y, button);
-		if (collection.isMouseOver(x - this.guiLeft, y - this.guiTop)) {
+		if (collection.isMouseOver(x - this.guiLeft, y - this.guiTop) || collection.openBoarders()) {
 			collection.mouseClicked(x - this.guiLeft, y - this.guiTop, button);
 		}
 	}
 
+
+
 	@Override
 	protected void mouseMovedOrUp(int x, int y, int button) {
 		super.mouseMovedOrUp(x, y, button);
-		if (collection.isMouseOver(x - this.guiLeft, y - this.guiTop)) {
+		if (collection.isMouseOver(x - this.guiLeft, y - this.guiTop) || collection.openBoarders()) {
 			//if (button >= 0) collection.mouseUp(x - this.guiLeft, y - this.guiTop, button);
 		}
 	}
@@ -55,7 +57,7 @@ public abstract class GUIBase extends GuiContainer {
 	@Override
 	protected void keyTyped(char par1, int par2) {
 		super.keyTyped(par1, par2);
-		//collection.keyTyped(par1, par2);
+		collection.keyTyped(par1, par2);
 	}
 
 	public void preRender(float mouseX, float mouseY) {}
@@ -127,4 +129,8 @@ public abstract class GUIBase extends GuiContainer {
 	public int getXSize() { return xSize; }
 
 	public int getYSize() { return ySize; }
+
+	/**This can be used by components to contact the GUI and the gui can then do some custom operation for that component
+	 * Added so ComponentTextField can let the gui know when it has been changed*/
+	public void componentCallBack(ComponentBase component) {}
 }

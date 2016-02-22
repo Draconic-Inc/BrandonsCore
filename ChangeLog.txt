@@ -1,4 +1,10 @@
 BrandonsCore
+###### 1.0.0.11 #######
+*Changes required for Draconic Evolution*
+-added a couple methods to GuiHelper.class
+-added some additional functionality to the gui system. 
+-added methods to DataUtills.class to read and write data directly to NBT.
+-added ComponentTextField.class used in DE's tool config gui. 
 
 ###### 1.0.0.10 #######
 -fix: Put a texture in the wrong location when i moved the gui base classes.
