@@ -2,7 +2,7 @@
 {
   "modid": "BrandonsCore",
   "name": "Brandon's Core",
-  "description": "",
+  "description": "Example placeholder mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "http://minecraft.curseforge.com/projects/brandons-core",
