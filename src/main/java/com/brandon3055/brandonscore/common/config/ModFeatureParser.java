@@ -38,7 +38,7 @@ public class ModFeatureParser {
 		this.modTabs = modTabs;
 	}
 
-	public void loadFeatures(Class<? extends FeatureCollection> collection){
+	public void loadFeatures(Class collection){
 		for (Field field : collection.getFields()){
 			if (field.isAnnotationPresent(Feature.class)){
 				try {
@@ -147,6 +147,11 @@ public class ModFeatureParser {
 			String variant = s.substring(s.indexOf(":") + 1);
 			ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(fullName, variant));
 		}
+	}
+
+	public boolean isEnabled(Object feature){
+		if (!featureStates.containsKey(feature)) return false;
+		else return featureStates.get(feature);
 	}
 
 	private static class FeatureEntry {

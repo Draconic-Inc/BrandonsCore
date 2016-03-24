@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ModConfigProperty {
-	public String name() default "";
+	public String name();
 
 	public String category();
 
