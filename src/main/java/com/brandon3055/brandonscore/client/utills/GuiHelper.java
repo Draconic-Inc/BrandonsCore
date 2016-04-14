@@ -1,20 +1,29 @@
 package com.brandon3055.brandonscore.client.utills;
 
+import com.brandon3055.brandonscore.client.ResourceHelperBC;
+import com.brandon3055.brandonscore.utills.InfoHelper;
+import com.brandon3055.brandonscore.utills.Utills;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by Brandon on 28/06/2014.
+ *  Created by Brandon on 28/06/2014.
  */
-public class GuiHelper {
+public class GuiHelper { //TODO replace all GL11 calls with GLStateManager
 	public static final double PXL128 = 0.0078125;
 	public static final double PXL256 = 0.00390625;
 
@@ -28,12 +37,12 @@ public class GuiHelper {
 
 	public static void drawTexturedRect(double x, double y, double width, double height, int u, int v, int uSize, int vSize, double zLevel, double pxl){
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-		worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-		worldrenderer.pos(x, y + height, zLevel).tex( u * pxl, (v + vSize) * pxl).endVertex();
-		worldrenderer.pos(x + width, y + height, zLevel).tex((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
-		worldrenderer.pos(x + width, y, zLevel).tex((u + uSize) * pxl, v * pxl).endVertex();
-		worldrenderer.pos(x, y, 		   zLevel).tex(u * pxl, v * pxl).endVertex();
+		VertexBuffer vertexBuffer = tessellator.getBuffer();
+		vertexBuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
+		vertexBuffer.pos(x, y + height, zLevel).tex( u * pxl, (v + vSize) * pxl).endVertex();
+		vertexBuffer.pos(x + width, y + height, zLevel).tex((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
+		vertexBuffer.pos(x + width, y, zLevel).tex((u + uSize) * pxl, v * pxl).endVertex();
+		vertexBuffer.pos(x, y, zLevel).tex(u * pxl, v * pxl).endVertex();
 		tessellator.draw();
 	}
 
@@ -64,7 +73,7 @@ public class GuiHelper {
 
 			int adjX = x + 12;
 			int adjY = y - 12;
-			int i1 = 8;
+			int i1 = 6;
 
 			if (list.size() > 1)
 			{
@@ -113,7 +122,7 @@ public class GuiHelper {
 		}
 	}
 
-	public static void drawGradientRect(int x1, int y1, int x2, int y2, int colour1, int colour2, float fade, double scale) {
+	public static void drawGradientRect(int left, int top, int right, int bottom, int colour1, int colour2, float fade, double scale) {
 		float f = ((colour1 >> 24 & 255) / 255.0F) * fade;
 		float f1 = (float)(colour1 >> 16 & 255) / 255.0F;
 		float f2 = (float)(colour1 >> 8 & 255) / 255.0F;
@@ -122,24 +131,101 @@ public class GuiHelper {
 		float f5 = (float)(colour2 >> 16 & 255) / 255.0F;
 		float f6 = (float)(colour2 >> 8 & 255) / 255.0F;
 		float f7 = (float)(colour2 & 255) / 255.0F;
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-		GL11.glShadeModel(GL11.GL_SMOOTH);
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		Tessellator tessellator = Tessellator.getInstance();
-		WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-		worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-		worldrenderer.color(f1, f2, f3, f);
-		worldrenderer.pos((double) x2, (double) y1, 300D).endVertex();
-		worldrenderer.pos((double) x1, (double) y1, 300D).endVertex();
-		worldrenderer.color(f5, f6, f7, f4);
-		worldrenderer.pos((double) x1, (double) y2, 300D).endVertex();
-		worldrenderer.pos((double) x2, (double)y2, 300D).endVertex();
-		tessellator.draw();
-		GL11.glShadeModel(GL11.GL_FLAT);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        vertexbuffer.pos((double)right, (double)top, 300D).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.pos((double)left, (double)top, 300D).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.pos((double)left, (double)bottom, 300D).color(f5, f6, f7, f4).endVertex();
+        vertexbuffer.pos((double)right, (double)bottom, 300D).color(f5, f6, f7, f4).endVertex();
+        tessellator.draw();
+        GlStateManager.shadeModel(GL11.GL_FLAT);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
 	}
+
+    /**Draws a simple vertical energy bar with no tool tip*/
+    public static void drawEnergyBar(Gui gui, int posX, int posZ, int size, long energy, long maxEnergy) {
+        drawEnergyBar(gui, posX, posZ, size, false, energy, maxEnergy, false, 0, 0);
+    }
+
+    /**Draws an energy bar in a gui at the given position
+     * @param size is the length of the energy bar.
+     * @param horizontal will rotate the bar clockwise 90 degrees.
+     */
+    @SuppressWarnings("all")
+    public static void drawEnergyBar(Gui gui, int posX, int posY, int size, boolean horizontal, long energy, long maxEnergy, boolean toolTip, int mouseX, int mouseY){
+        ResourceHelperBC.bindTexture("textures/gui/energyGui.png");
+        int draw = (int)((double)energy / (double)maxEnergy * (size-2));
+
+        boolean inRect = isInRect(posX, posY, size, 14, mouseX, mouseY);
+
+        if (horizontal){
+            int x = posY;
+            posY = posX;
+            posX = x;
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(size + (posY * 2), 0, 0);
+            GlStateManager.rotate(90, 0, 0, 1);
+        }
+
+        GlStateManager.color(1F, 1F, 1F);
+        gui.drawTexturedModalRect(posX, posY, 0, 0, 14, size);
+        gui.drawTexturedModalRect(posX, posY + size - 1, 0, 255, 14, 1);
+        gui.drawTexturedModalRect(posX + 1, posY + size - draw - 1, 14, size - draw, 12, draw);
+
+        if (horizontal){
+            GlStateManager.popMatrix();
+        }
+
+        if (toolTip && inRect){
+            List<String> list = new ArrayList<String>();
+            list.add(InfoHelper.ITC()+I18n.translateToLocal("gui.de.energyStorage.txt"));
+            list.add(InfoHelper.HITC()+Utills.formatNumber(energy)+" / "+Utills.formatNumber(maxEnergy));
+            list.add(TextFormatting.GRAY+"["+Utills.addCommas(energy)+" RF]");
+            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, 1F, 1F, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+        }
+    }
+
+    public static void drawGuiBaseBackground(Gui gui, int posX, int posY, int xSize, int ySize){
+        ResourceHelperBC.bindTexture("textures/gui/baseGui.png");
+        GlStateManager.color(1F, 1F, 1F);
+        gui.drawTexturedModalRect(posX, posY, 0, 0, xSize-3, ySize-3);
+        gui.drawTexturedModalRect(posX + xSize - 3, posY, 253, 0, 3, ySize-3);
+        gui.drawTexturedModalRect(posX, posY + ySize - 3, 0, 253, xSize - 3, 3);
+        gui.drawTexturedModalRect(posX + xSize - 3, posY + ySize - 3, 253, 253, 3, 3);
+    }
+
+    /**
+     * Draws the players inventory slots into the gui.
+     * note. X-Size is 162
+     * */
+    public static void drawPlayerSlots(Gui gui, int posX, int posY, boolean center){
+        ResourceHelperBC.bindTexture("textures/gui/widgets.png");
+
+        if (center) {
+            posX -= 81;
+        }
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 9; x++) {
+                gui.drawTexturedModalRect(posX + x * 18, posY + y * 18, 138, 0, 18, 18);
+            }
+        }
+
+        for (int x = 0; x < 9; x++) {
+            gui.drawTexturedModalRect(posX + x*18, posY + 58, 138, 0, 18, 18);
+        }
+    }
+
+    public static void drawCenteredString(FontRenderer fontRendererIn, String text, int x, int y, int color, boolean dropShadow)
+    {
+        fontRendererIn.drawString(text, (float)(x - fontRendererIn.getStringWidth(text) / 2), (float)y, color, dropShadow);
+    }
 }

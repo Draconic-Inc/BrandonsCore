@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client.gui.guicomponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -64,7 +64,7 @@ public class ComponentTextureButton extends ComponentButton {
 			int xSize = this.xSize;
 			int ySize = this.ySize;
 			Tessellator tessellator = Tessellator.getInstance();
-			WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+			VertexBuffer worldrenderer = tessellator.getBuffer();
 
 			if (isMouseOver(mouseX, mouseY)){
 				GL11.glDisable(GL11.GL_ALPHA_TEST);

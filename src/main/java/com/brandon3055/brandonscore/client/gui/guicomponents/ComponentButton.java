@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.client.gui.guicomponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import org.lwjgl.opengl.GL11;
@@ -104,7 +105,7 @@ public class ComponentButton extends ComponentBase {
 
 	@Override
 	public void mouseClicked(int x, int y, int button) {
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 1.0F));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.ui_button_click, 1.0F));
 		gui.buttonClicked(buttonId, button);
 	}
 }

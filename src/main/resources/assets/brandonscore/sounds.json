@@ -1,0 +1,12 @@
+{
+  "portal": {
+    "category": "player",
+    "sounds": [
+      {
+        "name": "portal",
+        "stream": false
+      }
+    ]
+  }
+}
+

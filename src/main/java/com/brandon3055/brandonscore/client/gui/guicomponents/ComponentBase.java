@@ -8,10 +8,10 @@ package com.brandon3055.brandonscore.client.gui.guicomponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -211,7 +211,7 @@ public abstract class ComponentBase extends Gui {
 			}
 			else
 			{
-				list.set(k, EnumChatFormatting.GRAY + (String)list.get(k));
+				list.set(k, TextFormatting.GRAY + (String)list.get(k));
 			}
 		}
 
@@ -234,7 +234,7 @@ public abstract class ComponentBase extends Gui {
 	}
 
 	/**Translate To Local*/
-	public String ttl(String unlocalizedName){return StatCollector.translateToLocal(unlocalizedName);}
+	public String ttl(String unlocalizedName){return I18n.translateToLocal(unlocalizedName);}
 
 	public void updateScreen(){}
 

@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client;
 
-import com.brandon3055.brandonscore.common.CommonProxy;
+import com.brandon3055.brandonscore.CommonProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;

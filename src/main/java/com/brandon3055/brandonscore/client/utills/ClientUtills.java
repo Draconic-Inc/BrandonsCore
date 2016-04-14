@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.utills;
 
-import com.brandon3055.brandonscore.common.utills.LogHelper;
+import com.brandon3055.brandonscore.utills.LogHelper;
 
 import java.net.URI;
 

@@ -22,23 +22,24 @@ version= "2.1.0.11"
 group= "com.brandon3055.brandonscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BrandonsCore"
 
-//jar {
-//    manifest {
-//        attributes 'FMLCorePlugin': 'com.brandon3055.brandonscore.asm.LoadingPlugin',
-//                'FMLCorePluginContainsFMLMod': 'true'
-//    }
-//}
+jar {
+    manifest {
+       // attributes 'FMLCorePlugin': 'com.brandon3055.brandonscore.asm.LoadingPlugin', 'FMLCorePluginContainsFMLMod': 'true'
+        attributes 'FMLAT': 'DraconicEvolution_at.cfg'
+    }
+}
 
 minecraft {
-    version = "1.8.9-11.15.1.1726"
+    version = "1.9-12.16.0.1863-1.9"
     runDir = "run"
-    
+
+    //clientJvmArgs +=
     // the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not allways work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "stable_22"
+	mappings = "snapshot_20160312"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 

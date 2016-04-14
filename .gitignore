@@ -1,22 +1,26 @@
-# eclipse
-bin
-*.launch
-.settings
-.metadata
-.classpath
-.project
+# Exclude Everything!!!
 
-# idea
-out
-*.ipr
-*.iws
-*.iml
-.idea
+/*
 
-# gradle
-build
-.gradle
+# Except the stuff i want to keep
 
-# other
-eclipse
-run
+# Gradle Stuff
+!gradle/
+!gradlew
+!gradlew.bat
+!build.gradle
+!build.properties
+!settings.gradle
+
+# Git Stuff
+!.gitignore
+
+# Other Important Files
+!LICENSE
+!README.md
+!Change Log.txt
+!VERSION.txt
+
+# Other Important Folders
+!src/
+*.class
