@@ -1,4 +1,7 @@
 BrandonsCore
+###### 1.0.0.12 #######
+-fixed mcmod.inf0 (This is not an important update everything will work just fine with build 11)
+
 ###### 1.0.0.11 #######
 *Changes required for Draconic Evolution*
 -added a couple methods to GuiHelper.class

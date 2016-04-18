@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "BrandonsCore",
+  "name": "Brandon's Core",
+  "description": "This is the core and library mod used for a lot of my current mods",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "http://minecraft.curseforge.com/projects/brandons-core",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["brandon3055"],
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
