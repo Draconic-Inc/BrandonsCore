@@ -105,7 +105,7 @@ public class PacketSyncableObject implements IMessage {
         this.tilePos = tile.getPos();
         this.index = syncableIndex;
         this.longValue = longValue;
-        this.dataType = VEC3I_INDEX;
+        this.dataType = LONG_INDEX;
     }
 
     @Override

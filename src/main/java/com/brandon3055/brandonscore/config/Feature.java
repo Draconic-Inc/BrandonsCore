@@ -36,6 +36,8 @@ public @interface Feature {
 	/**used For Blocks*/
 	public Class<? extends TileEntity> tileEntity() default TileEntity.class;
 
-	/**used For All*/
+	/**used For All
+     * set to -1 to exclude from creative tab.
+     * */
 	public int cTab() default 0;
 }

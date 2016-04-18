@@ -14,6 +14,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -33,6 +34,7 @@ public class TileBCBase extends TileEntity {
     private Map<Byte, SyncableObject> syncableObjectMap = new HashMap<Byte, SyncableObject>();
     private int objIndexCount = 0;
     private int viewRange = -1;
+    private boolean shouldRefreshOnState = true;
 
     //region Sync
     public void detectAndSendChanges() {
@@ -51,7 +53,9 @@ public class TileBCBase extends TileEntity {
     public void detectAndSendChangesToPlayer(boolean forceSync, EntityPlayerMP playerMP) {
         if (worldObj.isRemote) return;
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.syncInContainer) syncableObject.detectAndSendChanges(this, playerMP, forceSync);
+            if (syncableObject.syncInContainer) {
+                syncableObject.detectAndSendChanges(this, playerMP, forceSync);
+            }
         }
     }
 
@@ -68,9 +72,12 @@ public class TileBCBase extends TileEntity {
 
     public void receiveSyncPacketFromServer(PacketSyncableObject packet) {
         if (syncableObjectMap.containsKey(packet.index)) {
+            SyncableObject object = syncableObjectMap.get(packet.index);
+            object.updateReceived(packet);
 
-            syncableObjectMap.get(packet.index).updateReceived(packet);
-            if (syncableObjectMap.get(packet.index).updateOnReceived) updateBlock();
+            if (object.updateOnReceived) {
+                updateBlock();
+            }
         }
     }
 
@@ -150,9 +157,17 @@ public class TileBCBase extends TileEntity {
         chunk.setChunkModified();
     }
 
-    public static <T> T getCastTileAt(World world, BlockPos posAt, Class<T> clazz) {
+    public static <T> T getCastTileAt(IBlockAccess world, BlockPos posAt, Class<T> clazz) {
         TileEntity tile = world.getTileEntity(posAt);
         return (tile != null && clazz.isAssignableFrom(tile.getClass())) ? clazz.cast(tile) : null;
+    }
+
+    /**
+     * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
+     * Note that this should NOT be used in cases where the block has a different tile depending on its state.
+     * */
+    public void setShouldRefreshOnBlockChange(){
+        shouldRefreshOnState = false;
     }
     //endregion
 
@@ -182,5 +197,10 @@ public class TileBCBase extends TileEntity {
                 syncableObject.fromNBT(compound);
             }
         }
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
+        return shouldRefreshOnState ? oldState != newSate : (oldState.getBlock() != newSate.getBlock());
     }
 }

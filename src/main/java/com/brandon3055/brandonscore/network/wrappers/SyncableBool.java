@@ -38,15 +38,14 @@ public class SyncableBool extends SyncableObject {
 			else if (player instanceof EntityPlayerMP){
 				BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, value, updateOnReceived), (EntityPlayerMP)player);
 			}
-			else LogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
 		}
 	}
 
 	@Override
 	public void updateReceived(PacketSyncableObject packet) {
 		if (packet.dataType == PacketSyncableObject.BOOLEAN_INDEX){
-			value = packet.booleanValue;
-		}
+            value = packet.booleanValue;
+        }
 	}
 
 	@Override
