@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.client.utills;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
-import com.brandon3055.brandonscore.utills.InfoHelper;
-import com.brandon3055.brandonscore.utills.Utills;
+import com.brandon3055.brandonscore.utils.InfoHelper;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  *  Created by Brandon on 28/06/2014.
  */
-public class GuiHelper { //TODO replace all GL11 calls with GLStateManager
+public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Note to self: GuiUtils is a thing.
 	public static final double PXL128 = 0.0078125;
 	public static final double PXL256 = 0.00390625;
 
@@ -187,8 +187,8 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager
         if (toolTip && inRect){
             List<String> list = new ArrayList<String>();
             list.add(InfoHelper.ITC()+I18n.translateToLocal("gui.de.energyStorage.txt"));
-            list.add(InfoHelper.HITC()+Utills.formatNumber(energy)+" / "+Utills.formatNumber(maxEnergy));
-            list.add(TextFormatting.GRAY+"["+Utills.addCommas(energy)+" RF]");
+            list.add(InfoHelper.HITC()+ Utils.formatNumber(energy)+" / "+ Utils.formatNumber(maxEnergy));
+            list.add(TextFormatting.GRAY+"["+ Utils.addCommas(energy)+" RF]");
             drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, 1F, 1F, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
         }
     }

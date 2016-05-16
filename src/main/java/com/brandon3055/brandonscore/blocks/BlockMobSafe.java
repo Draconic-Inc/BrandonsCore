@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
@@ -21,7 +22,7 @@ public class BlockMobSafe extends BlockBCore {
 	//region Resistance
     @Override
     public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity) {
-        return false;
+        return entity instanceof EntityPlayer;//This should allow fake players to now break this block
     }
 
     @Override

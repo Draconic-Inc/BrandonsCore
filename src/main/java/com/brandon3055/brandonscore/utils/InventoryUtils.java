@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 /**
  * Everything in this class is borrowed from openblocks

@@ -1,13 +1,13 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 import java.text.DecimalFormat;
 
 /**
  * Created by Brandon on 31/12/2014.
  */
-public class DataUtills {
+public class DataUtils {
 
-	public static DataUtills instance = new DataUtills();
+	public static DataUtils instance = new DataUtils();
 
 //	public void writeObjectToBytes(ByteBuf bytes, int dataType, Object object){
 //		switch (dataType){

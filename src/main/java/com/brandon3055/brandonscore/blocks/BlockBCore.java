@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.blocks;
 
-import com.brandon3055.brandonscore.utills.ItemNBTHelper;
+import com.brandon3055.brandonscore.api.IDataRetainerTile;
+import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -25,7 +26,7 @@ public class BlockBCore extends Block {
 	public static final String TILE_DATA_TAG = "DETileData";
 
 	public BlockBCore() {
-		this(Material.rock);
+		this(Material.ROCK);
 	}
 
 	public BlockBCore(Material material) {

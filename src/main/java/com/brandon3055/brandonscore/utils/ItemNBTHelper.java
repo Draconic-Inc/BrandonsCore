@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

@@ -1,10 +1,11 @@
 package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.api.IDataRetainerTile;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
 import com.brandon3055.brandonscore.network.PacketTileMessage;
 import com.brandon3055.brandonscore.network.wrappers.SyncableObject;
-import com.brandon3055.brandonscore.utills.LogHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -86,7 +87,7 @@ public class TileBCBase extends TileEntity {
             Field f = ReflectionHelper.findField(PlayerManager.class, "playerViewRadius", "field_72698_e");
             f.setAccessible(true);
             try {
-                viewRange = f.getInt(((WorldServer) worldObj).getPlayerChunkManager());
+                viewRange = f.getInt(((WorldServer) worldObj).getPlayerChunkMap());
             }
             catch (IllegalAccessException e) {
                 LogHelper.error("A THING BROKE!!!!!!!");

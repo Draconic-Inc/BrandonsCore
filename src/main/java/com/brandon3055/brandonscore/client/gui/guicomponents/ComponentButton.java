@@ -105,7 +105,7 @@ public class ComponentButton extends ComponentBase {
 
 	@Override
 	public void mouseClicked(int x, int y, int button) {
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.ui_button_click, 1.0F));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 		gui.buttonClicked(buttonId, button);
 	}
 }

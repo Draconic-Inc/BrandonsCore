@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.network.wrappers;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
-import com.brandon3055.brandonscore.utills.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;

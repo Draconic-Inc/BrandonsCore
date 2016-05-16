@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.blocks;
 import cofh.api.energy.EnergyStorage;
 import cofh.api.energy.IEnergyContainerItem;
 import cofh.api.energy.IEnergyReceiver;
+import com.brandon3055.brandonscore.api.IDataRetainerTile;
 import com.brandon3055.brandonscore.network.wrappers.SyncableInt;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -15,7 +16,7 @@ import net.minecraft.util.EnumFacing;
  * The base tile for energy providers and receivers that do not have inventories. When extending ether implement implement IEnergyReceiver,
  * IEnergyProvider or both. //Untested...
  */
-public class TileEnergyBase extends TileBCBase implements IDataRetainerTile{
+public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
 	//to-do add additional functionality as needed
 
 	public final SyncableInt energyStored = new SyncableInt(0, false, true);
@@ -60,7 +61,7 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile{
 	@Override
 	public void writeDataToNBT(NBTTagCompound compound) {
 		energyStorage.writeToNBT(compound);
-	}
+    }
 
 	@Override
 	public void readDataFromNBT(NBTTagCompound compound) {

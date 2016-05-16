@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
 import com.brandon3055.brandonscore.lib.Vec3I;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
-import com.brandon3055.brandonscore.utills.LogHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -50,7 +50,7 @@ public class SyncableVec3I extends SyncableObject {
 
 	@Override
 	public void updateReceived(PacketSyncableObject packet) {
-		if (packet.dataType == PacketSyncableObject.INT_INDEX){
+		if (packet.dataType == PacketSyncableObject.VEC3I_INDEX){
 			vec = packet.vec3I.copy();
 		}
 	}

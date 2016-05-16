@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 import com.google.common.base.Objects;
 import com.google.common.primitives.Ints;

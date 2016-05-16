@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.config;
 
 import com.brandon3055.brandonscore.blocks.ItemBlockBCore;
-import com.brandon3055.brandonscore.utills.LogHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
@@ -81,8 +81,8 @@ public class ModFeatureParser {
         for (FeatureEntry entry : featureEntries) {
             if (!entry.enabled) continue;
 
-            if (entry.featureObj instanceof ICustomRegestry) {
-                ((ICustomRegestry) entry.featureObj).registerFeature(entry.feature);
+            if (entry.featureObj instanceof ICustomRegistry) {
+                ((ICustomRegistry) entry.featureObj).registerFeature(entry.feature);
                 continue;
             }
 
@@ -98,7 +98,6 @@ public class ModFeatureParser {
                 if (!entry.feature.itemBlock().isAssignableFrom(ItemBlockBCore.class)) {
                     GameRegistry.register(block);
 
-                    //region HIDE THE UGLY STUFF!!!
                     try {
                         Constructor<? extends ItemBlock> constructor = entry.feature.itemBlock().getConstructor(Block.class, FeatureWrapper.class);
                         ItemBlock itemBlock = constructor.newInstance(block, new FeatureWrapper(entry.feature));
@@ -109,7 +108,6 @@ public class ModFeatureParser {
                         LogHelper.error("NOOOOOOOO!!!!!!!!!!!...... It broke... [%s]", entry.feature.name());
                         e.printStackTrace();
                     }
-                    //endregion
 
                 } else {
                     GameRegistry.register(block);
@@ -152,21 +150,27 @@ public class ModFeatureParser {
 
             if (entry.featureObj instanceof Block) {
                 Block block = (Block) entry.featureObj;
-                LogHelper.info("Register Render Block: "+block);
+
                 if (entry.feature.variantMap().length > 0) {
                     registerVariants(Item.getItemFromBlock(block), entry.feature);
-                } else
+                }
+                else {
                     ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.name()));
+                }
             } else if (entry.featureObj instanceof Item) {
                 Item item = (Item) entry.featureObj;
+
                 if (!entry.feature.stateOverride().isEmpty()) {
                     String s = entry.feature.stateOverride().substring(0, entry.feature.stateOverride().indexOf("#"));
                     s += entry.feature.stateOverride().substring(entry.feature.stateOverride().indexOf("#")).toLowerCase();
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + s));
-                } else if (entry.feature.variantMap().length > 0) {
+                }
+                else if (entry.feature.variantMap().length > 0) {
                     registerVariants(item, entry.feature);
-                } else
+                }
+                else {
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.name()));
+                }
             }
         }
     }

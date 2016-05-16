@@ -1,5 +1,6 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
+import com.brandon3055.brandonscore.lib.Vec3D;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -9,7 +10,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 /**
  * Created by Brandon on 25/07/2014.
  */
-public class Utills {
+public class Utils {
 
 //	public static IEntitySelector selectLivingBase = new IEntitySelector() {todo Update
 //		@Override
@@ -107,14 +108,18 @@ public class Utills {
 		return Math.sqrt((dx*dx + dy*dy + dz*dz));
 	}
 
-	/**
-	 * Calculates the exact distance between two points in 2D space
-	 * @param x1 point A x
-	 * @param z1 point A z
-	 * @param x2 point B x
-	 * @param z2 point B z
-	 * @return The distance between point A and point B
-	 */
+    public static double getDistanceAtoB(Vec3D pos1, Vec3D pos2){
+        return getDistanceAtoB(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
+    }
+
+        /**
+         * Calculates the exact distance between two points in 2D space
+         * @param x1 point A x
+         * @param z1 point A z
+         * @param x2 point B x
+         * @param z2 point B z
+         * @return The distance between point A and point B
+         */
 	public static double getDistanceAtoB(double x1, double z1, double x2, double z2){
 		double dx = x1-x2;
 		double dz = z1-z2;

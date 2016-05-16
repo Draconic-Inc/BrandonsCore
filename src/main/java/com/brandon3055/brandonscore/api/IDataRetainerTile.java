@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.blocks;
+package com.brandon3055.brandonscore.api;
 
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -14,10 +14,10 @@ public interface IDataRetainerTile {
 	 * Data saved in this method will also be saved to the ItemBlock when the tile is harvested so it can be restored
 	 * when the tile is placed.
 	 * */
-	public void writeDataToNBT(NBTTagCompound dataCompound);
+	void writeDataToNBT(NBTTagCompound dataCompound);
 
 	/**
 	 * This is where any data saved in writeDataToNBT should be loaded from NBT.
 	 * */
-	public void readDataFromNBT(NBTTagCompound dataCompound);
+	void readDataFromNBT(NBTTagCompound dataCompound);
 }

@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -21,12 +21,12 @@ public class MultiBlockHelper {
 			return state.getBlock().isAir(state, world, pos);
 		}
 		else {
-			return Block.blockRegistry.getNameForObject(state.getBlock()).toString().equals(name);
+			return Block.REGISTRY.getNameForObject(state.getBlock()).toString().equals(name);
 		}
 	}
 
 	public void setBlock(String name, World world, BlockPos pos){
-		Block block = Block.blockRegistry.getObject(new ResourceLocation(name));
+		Block block = Block.REGISTRY.getObject(new ResourceLocation(name));
 		if (block != null){
 			world.setBlockState(pos, block.getDefaultState());
 		}

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.blocks.properties;
 
-import com.brandon3055.brandonscore.utills.ArrayUtils;
-import com.brandon3055.brandonscore.utills.LogHelper;
+import com.brandon3055.brandonscore.utils.ArrayUtils;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.properties.PropertyHelper;

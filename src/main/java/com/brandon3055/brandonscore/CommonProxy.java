@@ -4,12 +4,16 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 /**
  * Created by Brandon on 14/5/2015.
  */
 public class CommonProxy {
 
+    public void preInit(FMLPreInitializationEvent event){
+
+    }
 
 	public boolean isDedicatedServer() {return true;}
 

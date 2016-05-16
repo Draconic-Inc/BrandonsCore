@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.lib.BCSoundEvents;

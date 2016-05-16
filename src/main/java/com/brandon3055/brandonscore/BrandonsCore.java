@@ -2,9 +2,10 @@ package com.brandon3055.brandonscore;
 
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
 import com.brandon3055.brandonscore.network.PacketTileMessage;
-import com.brandon3055.brandonscore.utills.LogHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "BrandonsCore";
-    public static final String VERSION = "2.1.0.11";//MC Update, Major version, Minor Version, Release number (private or public)
+    public static final String VERSION = "${mod_version}";//MC Update, Major version, Minor Version, Release number (private or public)
 
     @Mod.Instance(BrandonsCore.MODID)
     public static BrandonsCore instance;
@@ -47,6 +48,8 @@ public class BrandonsCore {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        proxy.preInit(event);
+
         FileHandler.init(event);
         ProcessHandler.init();
         registerNetwork();
@@ -56,5 +59,6 @@ public class BrandonsCore {
         network = NetworkRegistry.INSTANCE.newSimpleChannel("BrCoreNet");
         network.registerMessage(PacketSyncableObject.Handler.class, PacketSyncableObject.class, 0, Side.CLIENT);
         network.registerMessage(PacketTileMessage.Handler.class, PacketTileMessage.class, 1, Side.SERVER);
+        network.registerMessage(PacketSpawnParticle.Handler.class, PacketSpawnParticle.class, 2, Side.CLIENT);
     }
 }

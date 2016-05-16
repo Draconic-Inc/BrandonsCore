@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.config;
 
-import com.brandon3055.brandonscore.utills.LogHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraftforge.common.config.Configuration;
 
 import java.lang.reflect.Field;

@@ -43,7 +43,7 @@ public class ItemEnergyContainer extends Item implements IEnergyContainerItem {
 		return this;
 	}
 
-	public ItemEnergyContainer  setMaxTransfer(int maxTransfer) {
+	public ItemEnergyContainer setMaxTransfer(int maxTransfer) {
 
 		setMaxReceive(maxTransfer);
 		setMaxExtract(maxTransfer);

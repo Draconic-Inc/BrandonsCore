@@ -1,9 +1,11 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Random;
 
 /**
  * Created by covers1624 on 3/21/2016.
@@ -238,5 +240,22 @@ public class LogHelper {
             warn("*  at %s%s", trace[i].toString(), i == 7 ? "..." : "");
         }
         warn("****************************************");
+    }
+
+    public static String[] comment = {
+            "Sorry I did not mean to do that... Please forgive me?",
+            "KABOOM!!!! It Blew Up!!!!",
+            "Oh Sh** what was it this time!?!?",
+            "WHAT DID YOU DO!?!?!?!.. Oh never mind that was me...",
+            "HA! You thought you were going to play minecraft today? NO! You get to play \"Decode the Crash Report\" "
+    };
+
+    public static void fatalErrorMessage(String error){
+        error(comment[new Random(System.nanoTime()).nextInt(comment.length)]);
+        error("*************************************************************************************");
+        error("It looks like a fatal error occurred which has caused the game to crash... [%s]", error);
+        error("Please go here for assistance: https://github.com/brandon3055/BrandonsCore/issues");
+        error("You can also try the #DraconicEvolution IRC channel on espernet");
+        error("*************************************************************************************");
     }
 }

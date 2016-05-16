@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 //import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;

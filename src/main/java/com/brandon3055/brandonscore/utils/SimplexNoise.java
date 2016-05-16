@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.utills;
+package com.brandon3055.brandonscore.utils;
 
 /**
  * Simplex Noise in 2D, 3D and 4D. Based on the example code of this paper:

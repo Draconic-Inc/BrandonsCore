@@ -110,4 +110,9 @@ public class Vec3I {
 
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return (y + z * 31) * 31 + x;
+    }
 }

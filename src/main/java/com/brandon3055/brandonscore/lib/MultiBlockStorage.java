@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.utills.MultiBlockHelper;
+import com.brandon3055.brandonscore.utils.MultiBlockHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 

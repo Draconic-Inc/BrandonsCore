@@ -178,7 +178,7 @@ public class PacketTileMessage implements IMessage {
 		@Override
 		public IMessage onMessage(PacketTileMessage message, MessageContext ctx) {
 			if (ctx.side == Side.SERVER){
-                PacketSyncObject syncPacket = new PacketSyncObject<PacketTileMessage>(message, ctx) {
+                PacketSyncObject syncPacket = new PacketSyncObject<PacketTileMessage, IMessage>(message, ctx) {
                     @Override
                     public void run() {
                         TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(message.tilePos);
