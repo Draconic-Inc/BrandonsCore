@@ -78,6 +78,11 @@ def commonManifest = {
     attributes 'FMLAT': 'DraconicEvolution_at.cfg'
 }
 
+jar {
+    classifier = 'universal'
+    manifest commonManifest
+}
+
 task srcJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
