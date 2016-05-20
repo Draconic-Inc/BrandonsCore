@@ -166,8 +166,8 @@ public class TileBCBase extends TileEntity {
     /**
      * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
      * Note that this should NOT be used in cases where the block has a different tile depending on its state.
-     * */
-    public void setShouldRefreshOnBlockChange(){
+     */
+    public void setShouldRefreshOnBlockChange() {
         shouldRefreshOnState = false;
     }
     //endregion

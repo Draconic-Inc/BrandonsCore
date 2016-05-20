@@ -6,16 +6,16 @@ import net.minecraft.launchwrapper.IClassTransformer;
  * Created by Brandon on 27/5/2015.
  */
 public class ClassTransformer implements IClassTransformer {
-	@Override
-	public byte[] transform(String name, String transformedName, byte[] bytes) {
+    @Override
+    public byte[] transform(String name, String transformedName, byte[] bytes) {
 //		if (transformedName.equals("net.minecraft.potion.Potion")) return patchPotionClass(bytes);
 //		else if (transformedName.equals("net.minecraft.network.play.server.S1DPacketEntityEffect")) return patchEffectPacket(bytes);
 //		else if (transformedName.equals("net.minecraft.network.play.server.S1EPacketRemoveEntityEffect")) return patchRemoveEffectPacket(bytes);
 //		else if (transformedName.equals("net.minecraft.client.network.NetHandlerPlayClient")) return patchClientNetHandlerClass(bytes);
 //		else if (transformedName.equals("net.minecraft.potion.PotionEffect")) return patchPotionEffect(bytes);
 
-		return bytes;
-	}
+        return bytes;
+    }
 
 //	private byte[] patchPotionClass(byte[] basicClass) {
 //		ClassNode classNode = new ClassNode();

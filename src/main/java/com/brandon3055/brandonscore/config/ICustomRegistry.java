@@ -5,5 +5,5 @@ package com.brandon3055.brandonscore.config;
  * Implemented by blocks and items that require different registration code
  */
 public interface ICustomRegistry {
-	public void registerFeature(Feature feature);
+    public void registerFeature(Feature feature);
 }

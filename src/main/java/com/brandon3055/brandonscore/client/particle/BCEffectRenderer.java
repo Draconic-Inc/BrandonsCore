@@ -104,12 +104,12 @@ public class BCEffectRenderer {
                 EntityFX entityFX = entry.getValue();
 
                 int layer = entityFX.getFXLayer();
-                int mask = entityFX.isTransparent() ? 0 : 1;
+                int mask = entityFX.func_187111_c() ? 0 : 1;
 
                 if (array[layer][mask].size() >= 6000) {
                     Object o = array[layer][mask].removeFirst();
                     if (o instanceof EntityFX) {
-                        ((EntityFX)o).setExpired();
+                        ((EntityFX) o).setExpired();
                     }
                 }
 
@@ -211,7 +211,7 @@ public class BCEffectRenderer {
         Tessellator tessellator = Tessellator.getInstance();
 
         for (int layer = 0; layer < 4; layer++) {
-        //    renderParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
+            //    renderParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
             renderTexturedParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
         }
 
@@ -266,7 +266,7 @@ public class BCEffectRenderer {
     }
 
     private void renderTexturedParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float f, float f1, float f2, float f3, float f4) {
-        for (ResourceLocation resourceLocation : texturedRenderQueue.keySet()){
+        for (ResourceLocation resourceLocation : texturedRenderQueue.keySet()) {
             ResourceHelperBC.bindTexture(resourceLocation);
 
             ArrayDeque<EntityFX>[][] texRenderQueue = texturedRenderQueue.get(resourceLocation);
@@ -317,14 +317,11 @@ public class BCEffectRenderer {
 
     //endregion
 
-    public String getStatistics()
-    {
+    public String getStatistics() {
         int i = 0;
 
-        for (int j = 0; j < 4; ++j)
-        {
-            for (int k = 0; k < 2; ++k)
-            {
+        for (int j = 0; j < 4; ++j) {
+            for (int k = 0; k < 2; ++k) {
                 for (ArrayDeque<EntityFX>[][] list : texturedRenderQueue.values()) {
                     i += list[j][k].size();
                 }

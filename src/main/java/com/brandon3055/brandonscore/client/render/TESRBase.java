@@ -29,8 +29,9 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
     private boolean isLightSet = false;
     private float lastBrightnessX = 0;
     private float lastBrightnessY = 0;
-    public void setLighting(float light){
-        if (!isLightSet){
+
+    public void setLighting(float light) {
+        if (!isLightSet) {
             lastBrightnessX = OpenGlHelper.lastBrightnessX;
             lastBrightnessY = OpenGlHelper.lastBrightnessY;
             isLightSet = true;
@@ -39,27 +40,27 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light, light);
     }
 
-    public void resetLighting(){
-        if (isLightSet){
+    public void resetLighting() {
+        if (isLightSet) {
             isLightSet = false;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lastBrightnessX, lastBrightnessY);
         }
         GlStateManager.enableLighting();
     }
 
-    public void translateScaleTranslate(double translate, double x, double y, double z){
+    public void translateScaleTranslate(double translate, double x, double y, double z) {
         GlStateManager.translate(translate, translate, translate);
         GlStateManager.scale(x, y, z);
         GlStateManager.translate(-translate, -translate, -translate);
     }
 
-    public void translateRotateTranslate(double translate, float angle, float x, float y, float z){
+    public void translateRotateTranslate(double translate, float angle, float x, float y, float z) {
         GlStateManager.translate(translate, translate, translate);
         GlStateManager.rotate(angle, x, y, z);
         GlStateManager.translate(-translate, -translate, -translate);
     }
 
-    public void preRenderFancy(){
+    public void preRenderFancy() {
         GlStateManager.glTexParameteri(3553, 10242, 10497);
         GlStateManager.glTexParameteri(3553, 10243, 10497);
         GlStateManager.disableCull();
@@ -70,14 +71,14 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
 
     /**
      * Call before rendering transparent
-     * */
-    public void midRenderFancy(){
+     */
+    public void midRenderFancy() {
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.depthMask(false);
     }
 
-    public void postRenderFancy(){
+    public void postRenderFancy() {
         GlStateManager.enableTexture2D();
         GlStateManager.depthMask(true);
         GlStateManager.disableBlend();

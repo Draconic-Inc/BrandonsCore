@@ -15,20 +15,23 @@ import net.minecraft.world.World;
  */
 public class BlockMobSafe extends BlockBCore {
 
-	public BlockMobSafe(Material material) {
-		super(material);
-	}
+    public BlockMobSafe(Material material) {
+        super(material);
+    }
 
-	//region Resistance
+    //region Resistance
     @Override
     public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity) {
         return entity instanceof EntityPlayer;//This should allow fake players to now break this block
     }
 
     @Override
-	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {}
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+    }
 
-	@Override
-	public boolean canDropFromExplosion(Explosion explosionIn) {return false;}
-	//endregion
+    @Override
+    public boolean canDropFromExplosion(Explosion explosionIn) {
+        return false;
+    }
+    //endregion
 }

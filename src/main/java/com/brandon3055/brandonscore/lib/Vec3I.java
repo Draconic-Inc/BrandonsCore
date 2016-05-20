@@ -12,21 +12,22 @@ public class Vec3I {
     public int y;
     public int z;
 
-    public Vec3I(){}
+    public Vec3I() {
+    }
 
-    public Vec3I(int x, int y, int z){
+    public Vec3I(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public Vec3I(Vec3I vec3I){
+    public Vec3I(Vec3I vec3I) {
         this.x = vec3I.x;
         this.y = vec3I.y;
         this.z = vec3I.z;
     }
 
-    public Vec3I(BlockPos pos){
+    public Vec3I(BlockPos pos) {
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
@@ -44,7 +45,7 @@ public class Vec3I {
         this.z = vec.z;
     }
 
-    public void set(BlockPos pos){
+    public void set(BlockPos pos) {
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
@@ -86,11 +87,11 @@ public class Vec3I {
         this.z -= z;
     }
 
-    public Vec3I copy(){
+    public Vec3I copy() {
         return new Vec3I(this);
     }
 
-    public BlockPos getPos(){
+    public BlockPos getPos() {
         return new BlockPos(x, y, z);
     }
 
@@ -104,7 +105,7 @@ public class Vec3I {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        Vec3I other = (Vec3I)obj;
+        Vec3I other = (Vec3I) obj;
 
         if (x == other.x && y == other.y && z == other.z) return true;
 

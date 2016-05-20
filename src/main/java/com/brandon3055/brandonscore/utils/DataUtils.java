@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
  */
 public class DataUtils {
 
-	public static DataUtils instance = new DataUtils();
+    public static DataUtils instance = new DataUtils();
 
 //	public void writeObjectToBytes(ByteBuf bytes, int dataType, Object object){
 //		switch (dataType){
@@ -207,48 +207,50 @@ public class DataUtils {
 //		return null;
 //	}
 
-	public static class IntPair
-	{
-		public int i1;
-		public int i2;
+    public static class IntPair {
+        public int i1;
+        public int i2;
 
-		public IntPair(int i1, int i2)
-		{
-			this.i1 = i1;
-			this.i2 = i2;
-		}
-	}
+        public IntPair(int i1, int i2) {
+            this.i1 = i1;
+            this.i2 = i2;
+        }
+    }
 
-	public static class XZPair<X, Z>{
-		public X x;
-		public Z z;
+    public static class XZPair<X, Z> {
+        public X x;
+        public Z z;
 
-		public XZPair(X x, Z z){
-			this.x = x;
-			this.z = z;
-		}
+        public XZPair(X x, Z z) {
+            this.x = x;
+            this.z = z;
+        }
 
-		public X getKey() { return x; }
+        public X getKey() {
+            return x;
+        }
 
-		public Z getValue() { return z; }
-	}
+        public Z getValue() {
+            return z;
+        }
+    }
 
-	public static class XYZTri<X, Y, Z>{
-		public X x;
-		public Y y;
-		public Z z;
+    public static class XYZTri<X, Y, Z> {
+        public X x;
+        public Y y;
+        public Z z;
 
-		public XYZTri(X x, Y y, Z z){
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-	}
+        public XYZTri(X x, Y y, Z z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
 
-	public static String formatFileSize(long size) {
-		if(size <= 0) return "0";
-		final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
-		int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
-		return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
-	}
+    public static String formatFileSize(long size) {
+        if (size <= 0) return "0";
+        final String[] units = new String[]{"B", "kB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
 }

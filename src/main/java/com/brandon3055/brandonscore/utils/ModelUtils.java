@@ -33,15 +33,14 @@ public class ModelUtils implements IResourceManagerReloadListener {
     public static Map<IBlockState, List<BakedQuad>> quadCache = new HashMap<IBlockState, List<BakedQuad>>();
     public static Map<ResourceLocation, IBakedModel> bakedModelCache = new HashMap<ResourceLocation, IBakedModel>();
 
-    public static List<BakedQuad> getModelQuads(IBlockState state){
-        if (!quadCache.containsKey(state)){
+    public static List<BakedQuad> getModelQuads(IBlockState state) {
+        if (!quadCache.containsKey(state)) {
             IBakedModel blockModel = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(state);
             List<BakedQuad> listQuads = new ArrayList<BakedQuad>();
 
-            if (blockModel instanceof OBJModel.OBJBakedModel){
+            if (blockModel instanceof OBJModel.OBJBakedModel) {
                 listQuads.addAll(blockModel.getQuads(state, null, 0));
-            }
-            else {
+            } else {
                 for (EnumFacing face : EnumFacing.VALUES) {
                     listQuads.addAll(blockModel.getQuads(state, face, 0));
                 }
@@ -56,7 +55,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
         return new ArrayList<BakedQuad>();
     }
 
-    public static void renderQuads(List<BakedQuad> listQuads){
+    public static void renderQuads(List<BakedQuad> listQuads) {
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         int i = 0;
@@ -73,7 +72,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
         }
     }
 
-    public static void renderQuadsRGB(List<BakedQuad> listQuads, float r, float g, float b){
+    public static void renderQuadsRGB(List<BakedQuad> listQuads, float r, float g, float b) {
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         int i = 0;
@@ -90,7 +89,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
         }
     }
 
-    public static void renderQuadsARGB(List<BakedQuad> listQuads, int ARGB_Hex){
+    public static void renderQuadsARGB(List<BakedQuad> listQuads, int ARGB_Hex) {
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         int i = 0;
@@ -108,7 +107,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
     }
 
     public static IBakedModel loadBakedModel(ResourceLocation modelLocation) {
-        if (!bakedModelCache.containsKey(modelLocation)){
+        if (!bakedModelCache.containsKey(modelLocation)) {
             try {
                 IModel model = ModelLoaderRegistry.getModel(modelLocation);
                 IBakedModel bakedModel = model.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, new Function<ResourceLocation, TextureAtlasSprite>() {
@@ -120,8 +119,9 @@ public class ModelUtils implements IResourceManagerReloadListener {
                 });
 
                 bakedModelCache.put(modelLocation, bakedModel);
-            }catch (Exception e){
-                LogHelper.fatalErrorMessage("Error at ModelUtils.loadBakedModel, Resource: "+modelLocation.toString());
+            }
+            catch (Exception e) {
+                LogHelper.fatalErrorMessage("Error at ModelUtils.loadBakedModel, Resource: " + modelLocation.toString());
                 throw new RuntimeException(e);
             }
         }

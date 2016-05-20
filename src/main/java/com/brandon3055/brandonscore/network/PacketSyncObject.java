@@ -17,7 +17,7 @@ public abstract class PacketSyncObject<REQ extends IMessage, REPLY extends IMess
 
     public final MessageContext ctx;
 
-    public PacketSyncObject(REQ message, MessageContext ctx){
+    public PacketSyncObject(REQ message, MessageContext ctx) {
         this.message = message;
         this.ctx = ctx;
     }
@@ -25,17 +25,17 @@ public abstract class PacketSyncObject<REQ extends IMessage, REPLY extends IMess
     @Override
     public abstract void run();
 
-    public void addPacketServer(){
-        if (ctx.side == Side.CLIENT){
+    public void addPacketServer() {
+        if (ctx.side == Side.CLIENT) {
             LogHelper.error("[SyncPacket#addPacketServer] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
             return;
         }
         ctx.getServerHandler().playerEntity.getServer().addScheduledTask(this);
     }
 
-    public void addPacketClient(){
-        if (ctx.side == Side.SERVER){
-            LogHelper.error("[SyncPacket#addPacketClient] HAY!!! I caught you this time! WRONG SIDE!!!! - "+message.getClass());
+    public void addPacketClient() {
+        if (ctx.side == Side.SERVER) {
+            LogHelper.error("[SyncPacket#addPacketClient] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
             return;
         }
         Minecraft.getMinecraft().addScheduledTask(this);

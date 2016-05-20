@@ -10,27 +10,23 @@ import net.minecraft.util.SoundEvent;
  */
 public class BCSoundEvents {
 
-	public static final SoundEvent portalSound;
+    public static final SoundEvent portalSound;
 
-	private static SoundEvent getRegisteredSoundEvent(String id)
-	{
-		SoundEvent soundevent = (SoundEvent)SoundEvent.REGISTRY.getObject(new ResourceLocation(id));
+    private static SoundEvent getRegisteredSoundEvent(String id) {
+        SoundEvent soundevent = (SoundEvent) SoundEvent.soundEventRegistry.getObject(new ResourceLocation(id));
 
-		if (soundevent == null)
-		{
-			throw new IllegalStateException("Invalid Sound requested: " + id);
-		}
-		else
-		{
-			return soundevent;
-		}
-	}
+        if (soundevent == null) {
+            throw new IllegalStateException("Invalid Sound requested: " + id);
+        } else {
+            return soundevent;
+        }
+    }
 
-	static {
-		if (!Bootstrap.isRegistered()) {
-			throw new RuntimeException("Accessed Sounds before Bootstrap!");
-		} else {
-			portalSound = getRegisteredSoundEvent("brandonscore:portal");
-		}
-	}
+    static {
+        if (!Bootstrap.isRegistered()) {
+            throw new RuntimeException("Accessed Sounds before Bootstrap!");
+        } else {
+            portalSound = getRegisteredSoundEvent("brandonscore:portal");
+        }
+    }
 }

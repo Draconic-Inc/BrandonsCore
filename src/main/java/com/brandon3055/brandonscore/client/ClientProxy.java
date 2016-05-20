@@ -19,41 +19,41 @@ public class ClientProxy extends CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
         BCEffectHandler.initialize();
-        ((IReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelUtils());
+        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelUtils());
     }
 
     @Override
-	public boolean isDedicatedServer() {
-		return false;
-	}
+    public boolean isDedicatedServer() {
+        return false;
+    }
 
-	@Override
-	public MinecraftServer getMCServer() {
-		return super.getMCServer();
-	}
+    @Override
+    public MinecraftServer getMCServer() {
+        return super.getMCServer();
+    }
 
-	@Override
-	public World getClientWorld() {
-		return Minecraft.getMinecraft().theWorld;
-	}
+    @Override
+    public World getClientWorld() {
+        return Minecraft.getMinecraft().theWorld;
+    }
 
-	@Override
-	public boolean isSpaceDown() {
-		return Minecraft.getMinecraft().gameSettings.keyBindJump.isKeyDown();
-	}
+    @Override
+    public boolean isSpaceDown() {
+        return Minecraft.getMinecraft().gameSettings.keyBindJump.isKeyDown();
+    }
 
-	@Override
-	public boolean isShiftDown() {
-		return Minecraft.getMinecraft().gameSettings.keyBindSneak.isKeyDown();
-	}
+    @Override
+    public boolean isShiftDown() {
+        return Minecraft.getMinecraft().gameSettings.keyBindSneak.isKeyDown();
+    }
 
-	@Override
-	public boolean isCtrlDown() {
-		return Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown();
-	}
+    @Override
+    public boolean isCtrlDown() {
+        return Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown();
+    }
 
-	@Override
-	public EntityPlayer getClientPlayer() {
-		return Minecraft.getMinecraft().thePlayer;
-	}
+    @Override
+    public EntityPlayer getClientPlayer() {
+        return Minecraft.getMinecraft().thePlayer;
+    }
 }

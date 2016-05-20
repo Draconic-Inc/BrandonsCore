@@ -53,15 +53,14 @@ public class BCEffectHandler {
     /**
      * Spawns a particle in the world respecting the current particle settings.
      * Can be called server side (Will automatically send a packet to all clients in range to spawn client side)
-     * */
+     */
     public static void spawnFX(int particleID, World world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, double viewRange, int... args) {
         if (!world.isRemote) {
             BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), xCoord, yCoord, zCoord, viewRange));
-        }
-        else {
-            if (isInRange(xCoord, yCoord, zCoord, viewRange) && effectRenderer != null){
+        } else {
+            if (isInRange(xCoord, yCoord, zCoord, viewRange) && effectRenderer != null) {
 
-                if (!particleRegistry.containsKey(particleID)){
+                if (!particleRegistry.containsKey(particleID)) {
                     LogHelper.error("Attempted to spawn an unregistered particle ID (%s)", particleID);
                     return;
                 }
@@ -69,7 +68,7 @@ public class BCEffectHandler {
                 Minecraft mc = Minecraft.getMinecraft();
                 int particleSetting = mc.gameSettings.particleSetting;
 
-                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)){
+                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)) {
                     return;
                 }
 
@@ -81,7 +80,7 @@ public class BCEffectHandler {
 
     /**
      * Spawns with a range of 64.
-     * */
+     */
     public static void spawnFX(int particleID, World world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... args) {
         spawnFX(particleID, world, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, 64, args);
     }
@@ -89,11 +88,10 @@ public class BCEffectHandler {
     public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, double viewRange, int... args) {
         if (!world.isRemote) {
             BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.x, pos.y, pos.z, viewRange));
-        }
-        else {
-            if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null){
+        } else {
+            if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
 
-                if (!particleRegistry.containsKey(particleID)){
+                if (!particleRegistry.containsKey(particleID)) {
                     LogHelper.error("Attempted to spawn an unregistered particle ID (%s)", particleID);
                     return;
                 }
@@ -101,7 +99,7 @@ public class BCEffectHandler {
                 Minecraft mc = Minecraft.getMinecraft();
                 int particleSetting = mc.gameSettings.particleSetting;
 
-                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)){
+                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)) {
                     return;
                 }
 
@@ -113,7 +111,7 @@ public class BCEffectHandler {
 
     /**
      * Spawns with a range of 64.
-     * */
+     */
     public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args) {
         spawnFX(particleID, world, pos, speed, 64, args);
     }
@@ -168,8 +166,7 @@ public class BCEffectHandler {
         double var15 = mc.getRenderViewEntity().posX - x;
         double var17 = mc.getRenderViewEntity().posY - y;
         double var19 = mc.getRenderViewEntity().posZ - z;
-        if (var15 * var15 + var17 * var17 + var19 * var19 > vewRange * vewRange)
-        {
+        if (var15 * var15 + var17 * var17 + var19 * var19 > vewRange * vewRange) {
             return false;
         }
         return true;

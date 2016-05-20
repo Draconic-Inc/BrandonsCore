@@ -20,9 +20,9 @@ public abstract class MessageHandlerWrapper<REQ extends IMessage, REPLY extends 
             }
         };
 
-        if (ctx.side == Side.CLIENT){
+        if (ctx.side == Side.CLIENT) {
             syncObject.addPacketClient();
-        }else {
+        } else {
             syncObject.addPacketServer();
         }
 

@@ -13,28 +13,25 @@ import java.util.Map;
  */
 public class ResourceHelperBC {
 
-	private static ResourceLocation vanillaParticles;
-	private static Map<String, ResourceLocation> cachedResources = new HashMap<String, ResourceLocation>();
-	public static final String RESOURCE_PREFIX = BrandonsCore.MODID.toLowerCase() + ":";
+    private static ResourceLocation vanillaParticles;
+    private static Map<String, ResourceLocation> cachedResources = new HashMap<String, ResourceLocation>();
+    public static final String RESOURCE_PREFIX = BrandonsCore.MODID.toLowerCase() + ":";
 
-	public static void bindTexture(ResourceLocation texture) {
-		Minecraft.getMinecraft().renderEngine.bindTexture(texture);
-	}
+    public static void bindTexture(ResourceLocation texture) {
+        Minecraft.getMinecraft().renderEngine.bindTexture(texture);
+    }
 
-	public static ResourceLocation getResource(String rs)
-	{
-		if (!cachedResources.containsKey(rs)) cachedResources.put(rs, new ResourceLocation(RESOURCE_PREFIX+rs));
-		return cachedResources.get(rs);
-	}
+    public static ResourceLocation getResource(String rs) {
+        if (!cachedResources.containsKey(rs)) cachedResources.put(rs, new ResourceLocation(RESOURCE_PREFIX + rs));
+        return cachedResources.get(rs);
+    }
 
-	public static ResourceLocation getResourceRAW(String rs)
-	{
-		if (!cachedResources.containsKey(rs)) cachedResources.put(rs, new ResourceLocation(rs));
-		return cachedResources.get(rs);
-	}
+    public static ResourceLocation getResourceRAW(String rs) {
+        if (!cachedResources.containsKey(rs)) cachedResources.put(rs, new ResourceLocation(rs));
+        return cachedResources.get(rs);
+    }
 
-	public static void bindTexture(String rs)
-	{
-		bindTexture(getResource(rs));
-	}
+    public static void bindTexture(String rs) {
+        bindTexture(getResource(rs));
+    }
 }

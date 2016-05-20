@@ -15,19 +15,19 @@ import java.util.List;
  */
 public class ItemBlockBCore extends ItemBlock {
 
-	public ItemBlockBCore(Block block, FeatureWrapper feature){
-		super(block);
-	}
+    public ItemBlockBCore(Block block, FeatureWrapper feature) {
+        super(block);
+    }
 
-	public ItemBlockBCore(Block block) {
-		super(block);
-	}
+    public ItemBlockBCore(Block block) {
+        super(block);
+    }
 
-	@Override
-	public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
-		super.addInformation(stack, playerIn, tooltip, advanced);
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BlockBCore.TILE_DATA_TAG)){
-			tooltip.add(I18n.translateToLocal("info.de.hasSavedData.txt"));
-		}
-	}
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+        super.addInformation(stack, playerIn, tooltip, advanced);
+        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BlockBCore.TILE_DATA_TAG)) {
+            tooltip.add(I18n.translateToLocal("info.de.hasSavedData.txt"));
+        }
+    }
 }

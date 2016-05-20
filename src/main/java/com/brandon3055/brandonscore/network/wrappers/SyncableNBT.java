@@ -14,14 +14,14 @@ public class SyncableNBT extends SyncableObject {
 //	public NBTTagCompound value;
 //	private NBTTagCompound lastTickValue;
 
-	public SyncableNBT(NBTTagCompound value, boolean syncInTile, boolean syncInContainer) {
-		super(syncInTile, syncInContainer);
-	//	this.value = this.lastTickValue = value;
-	}
+    public SyncableNBT(NBTTagCompound value, boolean syncInTile, boolean syncInContainer) {
+        super(syncInTile, syncInContainer);
+        //	this.value = this.lastTickValue = value;
+    }
 
-	@Override
-	public void detectAndSendChanges(TileBCBase tile, EntityPlayer player, boolean forceSync) {
-	//If i implement this be sure to check each tag and only sent tags that have changed.
+    @Override
+    public void detectAndSendChanges(TileBCBase tile, EntityPlayer player, boolean forceSync) {
+        //If i implement this be sure to check each tag and only sent tags that have changed.
 //		if (!lastTickValue.equals(value)) {
 //			lastTickValue = value;
 //			if (tile != null) {
@@ -32,24 +32,24 @@ public class SyncableNBT extends SyncableObject {
 //			}
 //			else LogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
 //		}
-	}
+    }
 
-	@Override
-	public void updateReceived(PacketSyncableObject packet) {
+    @Override
+    public void updateReceived(PacketSyncableObject packet) {
 //		if (packet.dataType == PacketSyncableObject.TAG_INDEX){
 //			value = packet.compound;
 //		}
-	}
+    }
 
-	@Override
-	public void toNBT(NBTTagCompound compound) {
+    @Override
+    public void toNBT(NBTTagCompound compound) {
 
-	}
+    }
 
-	@Override
-	public void fromNBT(NBTTagCompound compound) {
+    @Override
+    public void fromNBT(NBTTagCompound compound) {
 
-	}
+    }
 
 
 }

@@ -21,9 +21,10 @@ public class PacketSpawnParticle implements IMessage {
     private double zSpeed;
     private int[] args;
 
-    public PacketSpawnParticle() {}
+    public PacketSpawnParticle() {
+    }
 
-    public PacketSpawnParticle(int particleID, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... args){
+    public PacketSpawnParticle(int particleID, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... args) {
         this.particleID = particleID;
         this.xCoord = xCoord;
         this.yCoord = yCoord;
@@ -44,7 +45,7 @@ public class PacketSpawnParticle implements IMessage {
         buf.writeDouble(ySpeed);
         buf.writeDouble(zSpeed);
         buf.writeByte(args.length);
-        for (int i : args){
+        for (int i : args) {
             buf.writeInt(i);
         }
     }
@@ -60,7 +61,7 @@ public class PacketSpawnParticle implements IMessage {
         zSpeed = buf.readDouble();
         int argsL = buf.readByte();
         args = new int[argsL];
-        for (int i = 0; i < argsL; i++){
+        for (int i = 0; i < argsL; i++) {
             args[i] = buf.readInt();
         }
 
