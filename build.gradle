@@ -49,32 +49,31 @@ if (System.getenv("BUILD_NUMBER") != null) {
 }
 
 dependencies {
-    compile "codechicken:CodeChickenLib:${config.minecraft_version}-${config.CCLIB_version}:deobf"
+    compile "codechicken:CodeChickenLib:${config.minecraft_version}-${config.ccl_version}:deobf"
 }
 
 
-processResources
-        {
-            // this will ensure that this task is redone when the versions change.
-            inputs.property "version", project.version
-            inputs.property "mcversion", project.minecraft.version
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
-            // replace stuff in mcmod.info, nothing else
-            from(sourceSets.main.resources.srcDirs) {
-                include 'mcmod.info'
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
 
-                // replace version and mcversion
-                expand 'version': project.version, 'mcversion': project.minecraft.version
-            }
+        // replace version and mcversion
+        expand 'version': project.version, 'mc_version': project.minecraft.version, 'ccl_version': config.ccl_version
+    }
 
-            // copy everything else, thats not the mcmod.info
-            from(sourceSets.main.resources.srcDirs) {
-                exclude 'mcmod.info'
-            }
-        }
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
 
 def commonManifest = {
-    // attributes 'FMLCorePlugin': 'com.brandon3055.brandonscore.asm.LoadingPlugin', 'FMLCorePluginContainsFMLMod': 'true'
+    attributes 'FMLCorePlugin': 'codechicken.core.launch.DepLoader'
     attributes 'FMLAT': 'DraconicEvolution_at.cfg'
 }
 
