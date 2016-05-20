@@ -23,72 +23,71 @@ import java.util.List;
  * This is the base block class form all blocks.
  */
 public class BlockBCore extends Block {
-	public static final String TILE_DATA_TAG = "DETileData";
+    public static final String TILE_DATA_TAG = "DETileData";
 
-	public BlockBCore() {
-		this(Material.ROCK);
-	}
+    public BlockBCore() {
+        this(Material.rock);
+    }
 
-	public BlockBCore(Material material) {
-		super(material);
-		this.setHardness(5F);
-		this.setResistance(10F);
-	}
+    public BlockBCore(Material material) {
+        super(material);
+        this.setHardness(5F);
+        this.setResistance(10F);
+    }
 
-	//region Rename field names
-	@Override
-	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
-		super.getSubBlocks(item, tab, list);
-	}
+    //region Rename field names
+    @Override
+    public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
+        super.getSubBlocks(item, tab, list);
+    }
 
-	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		super.onBlockPlacedBy(world, pos, state, placer, stack);
+    @Override
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        super.onBlockPlacedBy(world, pos, state, placer, stack);
 
-		TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getTileEntity(pos);
 
-		if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)){
-			((IDataRetainerTile)tile).readDataFromNBT(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
-		}
-	}
-	//endregion
+        if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)) {
+            ((IDataRetainerTile) tile).readDataFromNBT(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
+        }
+    }
+    //endregion
 
-	//region Setters & Getters
-	public BlockBCore setHarvestTool(String toolClass, int level){
-		this.setHarvestLevel(toolClass, level);
-		return this;
-	}
+    //region Setters & Getters
+    public BlockBCore setHarvestTool(String toolClass, int level) {
+        this.setHarvestLevel(toolClass, level);
+        return this;
+    }
 
-	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-		ItemStack stack = super.getPickBlock(state, target, world, pos, player);
+    @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+        ItemStack stack = super.getPickBlock(state, target, world, pos, player);
 
-		TileEntity tileEntity = world.getTileEntity(pos);
+        TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof IDataRetainerTile){
-			NBTTagCompound customData = new NBTTagCompound();
-			((IDataRetainerTile)tileEntity).writeDataToNBT(customData);
-			ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
-		}
+        if (tileEntity instanceof IDataRetainerTile) {
+            NBTTagCompound customData = new NBTTagCompound();
+            ((IDataRetainerTile) tileEntity).writeDataToNBT(customData);
+            ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
+        }
 
-		return stack;
-	}
+        return stack;
+    }
 
-	//endregion
+    //endregion
 
-	@Override
-	public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
-		if (te instanceof IDataRetainerTile){
-			ItemStack stack = new ItemStack(Item.getItemFromBlock(state.getBlock()));
-			NBTTagCompound customData = new NBTTagCompound();
-			((IDataRetainerTile)te).writeDataToNBT(customData);
-			ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
-			spawnAsEntity(world, pos, stack);
-			world.removeTileEntity(pos);
-		}
-		else {
-			super.harvestBlock(world, player, pos, state, te, heldStack);
-		}
-	}
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
+        if (te instanceof IDataRetainerTile) {
+            ItemStack stack = new ItemStack(Item.getItemFromBlock(state.getBlock()));
+            NBTTagCompound customData = new NBTTagCompound();
+            ((IDataRetainerTile) te).writeDataToNBT(customData);
+            ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
+            spawnAsEntity(world, pos, stack);
+            world.removeTileEntity(pos);
+        } else {
+            super.harvestBlock(world, player, pos, state, te, heldStack);
+        }
+    }
 }
 
