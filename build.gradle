@@ -74,7 +74,7 @@ processResources {
 
 def commonManifest = {
     attributes 'FMLCorePlugin': 'codechicken.core.launch.DepLoader'
-    attributes 'FMLAT': 'DraconicEvolution_at.cfg'
+    attributes 'FMLAT': 'BrandonsCore_at.cfg'
 }
 
 jar {

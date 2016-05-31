@@ -16,6 +16,8 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,6 +28,7 @@ import java.util.Map;
  */
 public class BCEffectHandler {
     private static BCEffectHandler instance = new BCEffectHandler();
+    @SideOnly(Side.CLIENT)
     public static BCEffectRenderer effectRenderer = new BCEffectRenderer(null);
     public static Map<Integer, PairKV<IBCParticleFactory, ResourceLocation>> particleRegistry = new LinkedHashMap<Integer, PairKV<IBCParticleFactory, ResourceLocation>>();
     private static int lastIndex = -1;
@@ -40,9 +43,15 @@ public class BCEffectHandler {
      * Registers a particle and its texture sheet with the CE Effect Handler. Its best to use the same sheet for as many
      * particles as possible for best performance.
      */
+    @SideOnly(Side.CLIENT)
     public static int registerFX(ResourceLocation particleSheet, IBCParticleFactory factory) {
         lastIndex++;
         particleRegistry.put(lastIndex, new PairKV<IBCParticleFactory, ResourceLocation>(factory, particleSheet));
+        return lastIndex;
+    }
+
+    public static int registerFXServer() {
+        lastIndex++;
         return lastIndex;
     }
 
@@ -113,13 +122,14 @@ public class BCEffectHandler {
      * Spawns with a range of 64.
      */
     public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args) {
-        spawnFX(particleID, world, pos, speed, 64, args);
+        spawnFX(particleID, world, pos, speed, 32, args);
     }
 
     //endregion
 
     //region Events
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
@@ -137,6 +147,7 @@ public class BCEffectHandler {
         effectRenderer.clearEffects(event.getWorld());
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
         Minecraft.getMinecraft().mcProfiler.startSection("DEParticles");
@@ -145,6 +156,7 @@ public class BCEffectHandler {
     }
 
     //TODO Move this to a separate client event handler if i ever need this event elsewhere
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void debugOverlay(RenderGameOverlayEvent.Text event) {
         if (event.getLeft().size() >= 5 && effectRenderer != null) {
@@ -158,6 +170,7 @@ public class BCEffectHandler {
 
     //region helpers
 
+    @SideOnly(Side.CLIENT)
     public static boolean isInRange(double x, double y, double z, double vewRange) {
         Minecraft mc = Minecraft.getMinecraft();
 

@@ -21,6 +21,10 @@ public class BCEntityFX extends EntityFX {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 
+    public void setScale(float scale) {
+        this.particleScale = scale;
+    }
+
     public void moveEntityNoClip(double x, double y, double z) {
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, 0.0D, 0.0D));

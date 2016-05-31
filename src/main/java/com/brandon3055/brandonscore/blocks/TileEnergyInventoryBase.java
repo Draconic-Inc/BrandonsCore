@@ -19,7 +19,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
     //to-do add additional functionality as needed
 
     public final SyncableInt energyStored = new SyncableInt(0, false, true);
-    protected EnergyStorage energyStorage = new EnergyStorage(0, 0, 0);
+    public EnergyStorage energyStorage = new EnergyStorage(0, 0, 0);
 
     @Override
     public void detectAndSendChanges(boolean forceSync) {
@@ -35,10 +35,10 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         super.detectAndSendChangesToPlayer(forceSync, playerMP);
     }
 
-    protected void setCapacityAndTransfer(int capacity, int receive, int transfer) {
+    protected void setCapacityAndTransfer(int capacity, int receive, int extract) {
         energyStorage.setCapacity(capacity);
         energyStorage.setMaxReceive(receive);
-        energyStorage.setMaxExtract(transfer);
+        energyStorage.setMaxExtract(extract);
     }
 
     public int getEnergyStored(EnumFacing from) {
@@ -55,6 +55,10 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
 
     public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate) {
         return energyStorage.receiveEnergy(maxReceive, simulate);
+    }
+
+    public boolean canConnectEnergy(EnumFacing from) {
+        return true;
     }
 
     @Override

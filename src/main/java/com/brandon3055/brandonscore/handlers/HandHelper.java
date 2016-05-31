@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.handlers;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -26,12 +27,21 @@ public class HandHelper {
     }
 
     /**
-     * Returns the first item found in ether of the players hands that is an instance of the given class, starting with the main hand
+     * Returns the first item found in ether of the players hands that is the same as the given item
      */
-    public static <E> ItemStack getInstanceOf(EntityPlayer player, Class<E> clazz) {
-        if (player.getHeldItemMainhand() != null && clazz.isAssignableFrom(player.getHeldItemMainhand().getItem().getClass())) {
+    public static ItemStack getItem(EntityPlayer player, Item item) {
+        if (player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() == item) {
             return player.getHeldItemMainhand();
-        } else if (player.getHeldItemOffhand() != null && clazz.isAssignableFrom(player.getHeldItemOffhand().getItem().getClass())) {
+        } else if (player.getHeldItemOffhand() != null && player.getHeldItemOffhand().getItem() == item) {
+            return player.getHeldItemOffhand();
+        }
+        return null;
+    }
+
+    public static ItemStack getItemStack(EntityPlayer player, ItemStack itemStack) {
+        if (player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() == itemStack.getItem() && player.getHeldItemMainhand().getItemDamage() == itemStack.getItemDamage()) {
+            return player.getHeldItemMainhand();
+        } else if (player.getHeldItemOffhand() != null && player.getHeldItemOffhand().getItem() == itemStack.getItem() && player.getHeldItemOffhand().getItemDamage() == itemStack.getItemDamage()) {
             return player.getHeldItemOffhand();
         }
         return null;

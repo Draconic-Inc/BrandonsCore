@@ -30,12 +30,18 @@ public class SyncableByte extends SyncableObject {
     public void detectAndSendChanges(TileBCBase tile, EntityPlayer player, boolean forceSync) {
         if (lastTickValue != value || forceSync) {
             lastTickValue = value;
-            tile.dirtyBlock();
+
+            if (shouldSave) {
+                tile.dirtyBlock();
+            }
+
             if (player == null) {
                 BrandonsCore.network.sendToAllAround(new PacketSyncableObject(tile, index, value, updateOnReceived), tile.syncRange());
-            } else if (player instanceof EntityPlayerMP) {
+            }
+            else if (player instanceof EntityPlayerMP) {
                 BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, value, updateOnReceived), (EntityPlayerMP) player);
-            } else LogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
+            }
+            else LogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
         }
     }
 

@@ -60,6 +60,10 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
         return energyStorage.receiveEnergy(maxReceive, simulate);
     }
 
+    public boolean canConnectEnergy(EnumFacing from) {
+        return true;
+    }
+
     @Override
     public void writeDataToNBT(NBTTagCompound compound) {
         energyStorage.writeToNBT(compound);

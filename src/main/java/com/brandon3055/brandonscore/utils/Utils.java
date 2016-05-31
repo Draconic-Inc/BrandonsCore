@@ -7,10 +7,15 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by Brandon on 25/07/2014.
  */
 public class Utils {
+
+    private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
+
 
 //	public static IEntitySelector selectLivingBase = new IEntitySelector() {todo Update
 //		@Override
@@ -50,34 +55,14 @@ public class Utils {
      * Add commas to a number e.g. 161253126 > 161,253,126
      */
     public static String addCommas(int value) {
-        String rawNumber = String.valueOf(value);
-        String formattedNumber = "";
-        do {
-            int end = rawNumber.length();
-            int start = Math.max(0, end - 3);
-            String part = rawNumber.substring(start, end);
-            rawNumber = rawNumber.substring(0, start);
-            formattedNumber = part + (formattedNumber.length() > 0 ? "," : "") + formattedNumber;
-
-        } while (rawNumber.length() > 0);
-        return formattedNumber;
+        return energyValue.format(value);
     }
 
     /**
      * Add commas to a number e.g. 161253126 > 161,253,126
      */
     public static String addCommas(long value) {
-        String rawNumber = String.valueOf(value);
-        String formattedNumber = "";
-        do {
-            int end = rawNumber.length();
-            int start = Math.max(0, end - 3);
-            String part = rawNumber.substring(start, end);
-            rawNumber = rawNumber.substring(0, start);
-            formattedNumber = part + (formattedNumber.length() > 0 ? "," : "") + formattedNumber;
-
-        } while (rawNumber.length() > 0);
-        return formattedNumber;
+        return energyValue.format(value);
     }
 
     /**

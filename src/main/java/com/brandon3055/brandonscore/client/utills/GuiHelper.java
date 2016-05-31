@@ -47,7 +47,8 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
     }
 
     public static void drawHoveringText(List list, int x, int y, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
-        if (!list.isEmpty()) {
+        net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
+        if (false && !list.isEmpty()) {
             GL11.glPushMatrix();
             GL11.glDisable(GL12.GL_RESCALE_NORMAL);
             GL11.glDisable(GL11.GL_LIGHTING);
