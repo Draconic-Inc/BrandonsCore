@@ -7,7 +7,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -190,10 +189,10 @@ public class PacketTileMessage implements IMessage {
         return pktIndex;
     }
 
-    public static class Handler implements IMessageHandler<PacketTileMessage, IMessage> {
+    public static class Handler extends MessageHandlerWrapper<PacketTileMessage, IMessage> {
 
         @Override
-        public IMessage onMessage(PacketTileMessage message, MessageContext ctx) {
+        public IMessage handleMessage(PacketTileMessage message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
                 PacketSyncObject syncPacket = new PacketSyncObject<PacketTileMessage, IMessage>(message, ctx) {
                     @Override

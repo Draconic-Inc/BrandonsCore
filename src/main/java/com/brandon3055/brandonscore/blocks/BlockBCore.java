@@ -26,7 +26,7 @@ public class BlockBCore extends Block {
     public static final String TILE_DATA_TAG = "DETileData";
 
     public BlockBCore() {
-        this(Material.rock);
+        this(Material.ROCK);
     }
 
     public BlockBCore(Material material) {

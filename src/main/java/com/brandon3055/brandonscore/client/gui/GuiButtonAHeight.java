@@ -19,7 +19,7 @@ public class GuiButtonAHeight extends GuiButton {
 		if (this.visible)
 		{
 			FontRenderer fontrenderer = minecraft.fontRendererObj;
-			minecraft.getTextureManager().bindTexture(buttonTextures);
+			minecraft.getTextureManager().bindTexture(BUTTON_TEXTURES);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 			this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
 			int k = this.getHoverState(this.hovered);

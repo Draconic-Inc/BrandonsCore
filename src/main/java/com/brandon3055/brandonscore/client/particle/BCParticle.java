@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
-import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -11,13 +11,13 @@ import net.minecraft.world.World;
  * I wanted this for a thing... I dont actually remember what it is now but...
  * Im just going to add it so when i remember the thing it is here!
  */
-public class BCEntityFX extends EntityFX {
+public class BCParticle extends Particle {
 
-    protected BCEntityFX(World worldIn, Vec3D pos) {
+    protected BCParticle(World worldIn, Vec3D pos) {
         super(worldIn, pos.x, pos.y, pos.z);
     }
 
-    public BCEntityFX(World worldIn, Vec3D pos, Vec3D speed) {
+    public BCParticle(World worldIn, Vec3D pos, Vec3D speed) {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 

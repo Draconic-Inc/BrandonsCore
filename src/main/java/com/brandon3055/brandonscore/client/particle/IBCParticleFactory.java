@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
-import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.world.World;
 
 /**
@@ -9,5 +9,5 @@ import net.minecraft.world.World;
  */
 public interface IBCParticleFactory {
 
-    EntityFX getEntityFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args);
+    Particle getEntityFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args);
 }

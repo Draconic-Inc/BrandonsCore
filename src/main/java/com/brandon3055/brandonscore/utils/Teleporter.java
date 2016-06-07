@@ -194,7 +194,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
             EntityPlayerMP player = (EntityPlayerMP) entity;
             player.closeScreen();//added
             player.dimension = destination.dimension;
-            player.playerNetServerHandler.sendPacket(new SPacketRespawn(player.dimension, player.worldObj.getDifficulty(), destinationWorld.getWorldInfo().getTerrainType(), player.interactionManager.getGameType()));
+            player.connection.sendPacket(new SPacketRespawn(player.dimension, player.worldObj.getDifficulty(), destinationWorld.getWorldInfo().getTerrainType(), player.interactionManager.getGameType()));
             ((WorldServer) startWorld).thePlayerManager.removePlayer(player);
 
             startWorld.playerEntities.remove(player);
@@ -242,7 +242,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
             if (interDimensional) {
                 player.mcServer.getPlayerList().preparePlayer(player, (WorldServer) destinationWorld);
             }
-            player.playerNetServerHandler.setPlayerLocation(destination.xCoord, destination.yCoord, destination.zCoord, player.rotationYaw, player.rotationPitch);
+            player.connection.setPlayerLocation(destination.xCoord, destination.yCoord, destination.zCoord, player.rotationYaw, player.rotationPitch);
         }
 
         destinationWorld.updateEntityWithOptionalForce(entity, false);
@@ -254,10 +254,10 @@ public class Teleporter //todo give this class a full test when the dislocator i
             player.mcServer.getPlayerList().syncPlayerInventory(player);
 
             for (PotionEffect potionEffect : player.getActivePotionEffects()) {
-                player.playerNetServerHandler.sendPacket(new SPacketEntityEffect(player.getEntityId(), potionEffect));
+                player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), potionEffect));
             }
 
-            player.playerNetServerHandler.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
+            player.connection.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
             FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, startWorld.provider.getDimension(), destinationWorld.provider.getDimension());
         }
         entity.setLocationAndAngles(destination.xCoord, destination.yCoord, destination.zCoord, destination.yaw, entity.rotationPitch);

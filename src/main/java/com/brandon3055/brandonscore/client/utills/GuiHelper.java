@@ -10,7 +10,9 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
 import org.lwjgl.opengl.GL11;
@@ -116,7 +118,7 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         }
     }
 
-    public static void drawGradientRect(int left, int top, int right, int bottom, int colour1, int colour2, float fade, double scale) {
+    public static void drawGradientRect(int left, int top, int right, int bottom, int colour1, int colour2, float fade, double zLevel) {
         float f = ((colour1 >> 24 & 255) / 255.0F) * fade;
         float f1 = (float) (colour1 >> 16 & 255) / 255.0F;
         float f2 = (float) (colour1 >> 8 & 255) / 255.0F;
@@ -133,10 +135,10 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        vertexbuffer.pos((double) right, (double) top, 300D).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.pos((double) left, (double) top, 300D).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.pos((double) left, (double) bottom, 300D).color(f5, f6, f7, f4).endVertex();
-        vertexbuffer.pos((double) right, (double) bottom, 300D).color(f5, f6, f7, f4).endVertex();
+        vertexbuffer.pos((double) right, (double) top, zLevel).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.pos((double) left, (double) top, zLevel).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.pos((double) left, (double) bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        vertexbuffer.pos((double) right, (double) bottom, zLevel).color(f5, f6, f7, f4).endVertex();
         tessellator.draw();
         GlStateManager.shadeModel(GL11.GL_FLAT);
         GlStateManager.disableBlend();
@@ -224,5 +226,20 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
 
     public static void drawCenteredString(FontRenderer fontRendererIn, String text, int x, int y, int color, boolean dropShadow) {
         fontRendererIn.drawString(text, (float) (x - fontRendererIn.getStringWidth(text) / 2), (float) y, color, dropShadow);
+    }
+
+    public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale){
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(x, y, 300);
+        GlStateManager.scale(scale, scale, scale);
+        GlStateManager.rotate(180, 1, 0, 0);
+
+        mc.getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.NONE);
+
+        GlStateManager.popMatrix();
+    }
+
+    public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour){
+        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour, 1F, 0);
     }
 }

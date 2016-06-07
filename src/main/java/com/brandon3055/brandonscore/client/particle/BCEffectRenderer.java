@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
-import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -29,12 +29,12 @@ public class BCEffectRenderer {
 
     //Textured Particle Queue
     @SuppressWarnings("unchecked")
-//        private final ArrayDeque<EntityFX>[][] renderQueue = new ArrayDeque[4][];
-    private final Map<ResourceLocation, ArrayDeque<EntityFX>[][]> texturedRenderQueue = new HashMap<ResourceLocation, ArrayDeque<EntityFX>[][]>();
+//        private final ArrayDeque<Particle>[][] renderQueue = new ArrayDeque[4][];
+    private final Map<ResourceLocation, ArrayDeque<Particle>[][]> texturedRenderQueue = new HashMap<ResourceLocation, ArrayDeque<Particle>[][]>();
 
     //Particles that need to be injected into the render queues next tick;
-//        private final Queue<EntityFX> queueEntityFX = new ArrayDeque<EntityFX>();
-    private final Queue<PairKV<ResourceLocation, EntityFX>> queueTexturedEntityFX = new ArrayDeque<PairKV<ResourceLocation, EntityFX>>();
+//        private final Queue<Particle> queueParticle = new ArrayDeque<Particle>();
+    private final Queue<PairKV<ResourceLocation, Particle>> queueTexturedParticle = new ArrayDeque<PairKV<ResourceLocation, Particle>>();
 
     @SuppressWarnings("unchecked")
     public BCEffectRenderer(World worldObj) {
@@ -44,21 +44,21 @@ public class BCEffectRenderer {
 //                this.renderQueue[i] = new ArrayDeque[2];
 //
 //                for (int j = 0; j < 2; ++j) {
-//                    this.renderQueue[i][j] = new ArrayDeque<EntityFX>();
+//                    this.renderQueue[i][j] = new ArrayDeque<Particle>();
 //                }
 //            }
     }
 
     //region Adders
 
-//        public void addEffect(EntityFX entityFX) {
-//            if (entityFX == null) return;
-//            queueEntityFX.add(entityFX);
+//        public void addEffect(Particle Particle) {
+//            if (Particle == null) return;
+//            queueParticle.add(Particle);
 //        }
 
-    public void addEffect(ResourceLocation resourceLocation, EntityFX entityFX) {
-        if (resourceLocation == null || entityFX == null) return;
-        queueTexturedEntityFX.add(new PairKV<ResourceLocation, EntityFX>(resourceLocation, entityFX));
+    public void addEffect(ResourceLocation resourceLocation, Particle Particle) {
+        if (resourceLocation == null || Particle == null) return;
+        queueTexturedParticle.add(new PairKV<ResourceLocation, Particle>(resourceLocation, Particle));
     }
 
     //endregion
@@ -74,46 +74,46 @@ public class BCEffectRenderer {
 
         //region Add Queued Effects
 
-//            if (!queueEntityFX.isEmpty()) {
-//                for (EntityFX entityfx = this.queueEntityFX.poll(); entityfx != null; entityfx = this.queueEntityFX.poll()) {
-//                    int layer = entityfx.getFXLayer();
-//                    int mask = entityfx.func_187111_c() ? 0 : 1;
+//            if (!queueParticle.isEmpty()) {
+//                for (Particle Particle = this.queueParticle.poll(); Particle != null; Particle = this.queueParticle.poll()) {
+//                    int layer = Particle.getFXLayer();
+//                    int mask = Particle.func_187111_c() ? 0 : 1;
 //
 //                    if (this.renderQueue[layer][mask].size() >= 16384) {
 //                        this.renderQueue[layer][mask].removeFirst();
 //                    }
 //
-//                    this.renderQueue[layer][mask].add(entityfx);
+//                    this.renderQueue[layer][mask].add(Particle);
 //                }
 //            }
 
-        if (!queueTexturedEntityFX.isEmpty()) {
-            for (PairKV<ResourceLocation, EntityFX> entry = queueTexturedEntityFX.poll(); entry != null; entry = queueTexturedEntityFX.poll()) {
+        if (!queueTexturedParticle.isEmpty()) {
+            for (PairKV<ResourceLocation, Particle> entry = queueTexturedParticle.poll(); entry != null; entry = queueTexturedParticle.poll()) {
                 if (!texturedRenderQueue.containsKey(entry.getKey())) {
                     ArrayDeque[][] array = new ArrayDeque[4][];
                     for (int i = 0; i < 4; i++) {
                         array[i] = new ArrayDeque[2];
                         for (int j = 0; j < 2; ++j) {
-                            array[i][j] = new ArrayDeque<EntityFX>();
+                            array[i][j] = new ArrayDeque<Particle>();
                         }
                     }
                     texturedRenderQueue.put(entry.getKey(), array);
                 }
 
                 ArrayDeque[][] array = texturedRenderQueue.get(entry.getKey());
-                EntityFX entityFX = entry.getValue();
+                Particle Particle = entry.getValue();
 
-                int layer = entityFX.getFXLayer();
-                int mask = entityFX.func_187111_c() ? 0 : 1;
+                int layer = Particle.getFXLayer();
+                int mask = Particle.isTransparent() ? 0 : 1;
 
                 if (array[layer][mask].size() >= 6000) {
                     Object o = array[layer][mask].removeFirst();
-                    if (o instanceof EntityFX) {
-                        ((EntityFX) o).setExpired();
+                    if (o instanceof Particle) {
+                        ((Particle) o).setExpired();
                     }
                 }
 
-                array[layer][mask].add(entityFX);
+                array[layer][mask].add(Particle);
             }
         }
 
@@ -126,7 +126,7 @@ public class BCEffectRenderer {
         for (int i = 0; i < 2; ++i) {
             //        this.worldObj.theProfiler.startSection(i + "");
             //this.tickAndRemoveDead(renderQueue[layer][i]);
-            for (ArrayDeque<EntityFX>[][] queue : texturedRenderQueue.values()) {
+            for (ArrayDeque<Particle>[][] queue : texturedRenderQueue.values()) {
                 this.tickAndRemoveDead(queue[layer][i]);
             }
 
@@ -136,15 +136,15 @@ public class BCEffectRenderer {
         //    this.worldObj.theProfiler.endSection();
     }
 
-    private void tickAndRemoveDead(Queue<EntityFX> queue) {
+    private void tickAndRemoveDead(Queue<Particle> queue) {
         if (!queue.isEmpty()) {
-            Iterator<EntityFX> iterator = queue.iterator();
+            Iterator<Particle> iterator = queue.iterator();
 
             while (iterator.hasNext()) {
-                EntityFX entityfx = iterator.next();
-                tickParticle(entityfx);
+                Particle Particle = iterator.next();
+                tickParticle(Particle);
 
-                if (!entityfx.isAlive()) {
+                if (!Particle.isAlive()) {
                     iterator.remove();
                 }
             }
@@ -160,7 +160,7 @@ public class BCEffectRenderer {
 //                }
 //            }
 
-        for (ArrayDeque<EntityFX>[][] array : texturedRenderQueue.values()) {
+        for (ArrayDeque<Particle>[][] array : texturedRenderQueue.values()) {
             for (int layer = 0; layer < 4; ++layer) {
                 for (int mask = 0; mask < 2; ++mask) {
                     array[layer][mask].clear();
@@ -170,7 +170,7 @@ public class BCEffectRenderer {
 
     }
 
-    private void tickParticle(final EntityFX particle) {
+    private void tickParticle(final Particle particle) {
         try {
             particle.onUpdate();
         }
@@ -178,12 +178,12 @@ public class BCEffectRenderer {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Ticking Particle");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being ticked");
             final int i = particle.getFXLayer();
-            crashreportcategory.addCrashSectionCallable("Particle", new Callable<String>() {
+            crashreportcategory.addCrashSection("Particle", new Callable<String>() {
                 public String call() throws Exception {
                     return particle.toString();
                 }
             });
-            crashreportcategory.addCrashSectionCallable("Particle Type", new Callable<String>() {
+            crashreportcategory.addCrashSection("Particle Type", new Callable<String>() {
                 public String call() throws Exception {
                     return i == 0 ? "MISC_TEXTURE" : (i == 1 ? "TERRAIN_TEXTURE" : (i == 3 ? "ENTITY_PARTICLE_TEXTURE" : "Unknown - " + i));
                 }
@@ -202,9 +202,9 @@ public class BCEffectRenderer {
         float f2 = ActiveRenderInfo.getRotationYZ();
         float f3 = ActiveRenderInfo.getRotationXY();
         float f4 = ActiveRenderInfo.getRotationXZ();
-        EntityFX.interpPosX = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double) partialTicks;
-        EntityFX.interpPosY = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double) partialTicks;
-        EntityFX.interpPosZ = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double) partialTicks;
+        Particle.interpPosX = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double) partialTicks;
+        Particle.interpPosY = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double) partialTicks;
+        Particle.interpPosZ = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double) partialTicks;
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         GlStateManager.alphaFunc(516, 0.003921569F);
@@ -239,16 +239,16 @@ public class BCEffectRenderer {
 //                    VertexBuffer vertexbuffer = tessellator.getBuffer();
 //                    vertexbuffer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
 //
-//                    for (final EntityFX entityfx : renderQueue[layer][j]) {
+//                    for (final Particle Particle : renderQueue[layer][j]) {
 //                        try {
-//                            entityfx.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
+//                            Particle.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
 //                        }
 //                        catch (Throwable throwable) {
 //                            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
 //                            CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
 //                            crashreportcategory.addCrashSectionCallable("Particle", new Callable<String>() {
 //                                public String call() throws Exception {
-//                                    return entityfx.toString();
+//                                    return Particle.toString();
 //                                }
 //                            });
 //                            crashreportcategory.addCrashSectionCallable("Particle Type", new Callable<String>() {
@@ -269,7 +269,7 @@ public class BCEffectRenderer {
         for (ResourceLocation resourceLocation : texturedRenderQueue.keySet()) {
             ResourceHelperBC.bindTexture(resourceLocation);
 
-            ArrayDeque<EntityFX>[][] texRenderQueue = texturedRenderQueue.get(resourceLocation);
+            ArrayDeque<Particle>[][] texRenderQueue = texturedRenderQueue.get(resourceLocation);
 
             for (int j = 0; j < 2; ++j) {
                 final int i_f = layer;
@@ -288,19 +288,19 @@ public class BCEffectRenderer {
                     VertexBuffer vertexbuffer = tessellator.getBuffer();
                     vertexbuffer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
 
-                    for (final EntityFX entityfx : texRenderQueue[layer][j]) {
+                    for (final Particle Particle : texRenderQueue[layer][j]) {
                         try {
-                            entityfx.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
+                            Particle.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
                         }
                         catch (Throwable throwable) {
                             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
                             CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
-                            crashreportcategory.addCrashSectionCallable("Particle", new Callable<String>() {
+                            crashreportcategory.addCrashSection("Particle", new Callable<String>() {
                                 public String call() throws Exception {
-                                    return entityfx.toString();
+                                    return Particle.toString();
                                 }
                             });
-                            crashreportcategory.addCrashSectionCallable("Particle Type", new Callable<String>() {
+                            crashreportcategory.addCrashSection("Particle Type", new Callable<String>() {
                                 public String call() throws Exception {
                                     return i_f == 0 ? "MISC_TEXTURE" : (i_f == 1 ? "TERRAIN_TEXTURE" : (i_f == 3 ? "ENTITY_PARTICLE_TEXTURE" : "Unknown - " + i_f));
                                 }
@@ -322,7 +322,7 @@ public class BCEffectRenderer {
 
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 2; ++k) {
-                for (ArrayDeque<EntityFX>[][] list : texturedRenderQueue.values()) {
+                for (ArrayDeque<Particle>[][] list : texturedRenderQueue.values()) {
                     i += list[j][k].size();
                 }
             }

@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.blocks.TileBCBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
@@ -49,16 +49,16 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
         for (int i = 0; i < this.listeners.size(); ++i) {
-            ICrafting icrafting = this.listeners.get(i);
+            IContainerListener icrafting = this.listeners.get(i);
             if (icrafting instanceof EntityPlayerMP && tile != null) {
                 tile.detectAndSendChangesToPlayer(false, (EntityPlayerMP) icrafting);
             }
         }
     }
 
-    @Override
-    public void onCraftGuiOpened(ICrafting listener) {
-        super.onCraftGuiOpened(listener);
+    @Override//TODO is this the new OnCraftGuiOpened?
+    public void addListener(IContainerListener listener) {
+        super.addListener(listener);
         if (listener instanceof EntityPlayerMP && tile != null) {
             tile.detectAndSendChangesToPlayer(true, (EntityPlayerMP) listener);
         }

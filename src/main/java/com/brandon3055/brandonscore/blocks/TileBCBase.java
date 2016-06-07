@@ -10,9 +10,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.management.PlayerManager;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -21,6 +20,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +83,7 @@ public class TileBCBase extends TileEntity {
 
     public NetworkRegistry.TargetPoint syncRange() {
         if (viewRange == -1 && !worldObj.isRemote) {
-            Field f = ReflectionHelper.findField(PlayerManager.class, "playerViewRadius", "field_72698_e");
+            Field f = ReflectionHelper.findField(PlayerChunkMap.class, "playerViewRadius", "field_72698_e");
             f.setAccessible(true);
             try {
                 viewRange = f.getInt(((WorldServer) worldObj).getPlayerChunkMap());
@@ -98,8 +98,9 @@ public class TileBCBase extends TileEntity {
         return new NetworkRegistry.TargetPoint(worldObj.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), viewRange * 16);
     }
 
+    @Nullable
     @Override
-    public Packet<?> getDescriptionPacket() {
+    public SPacketUpdateTileEntity getUpdatePacket() {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
 
         if (this instanceof IDataRetainerTile) {
@@ -111,6 +112,30 @@ public class TileBCBase extends TileEntity {
         }
 
         return new SPacketUpdateTileEntity(this.pos, 0, nbttagcompound);
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        NBTTagCompound compound = super.getUpdateTag();
+
+        if (this instanceof IDataRetainerTile) {
+            ((IDataRetainerTile) this).writeDataToNBT(compound);
+        }
+
+        for (SyncableObject syncableObject : syncableObjectMap.values()) {
+            if (syncableObject.shouldSave) {
+                syncableObject.toNBT(compound);
+            }
+        }
+
+        writeExtraNBT(compound);
+
+        return compound;
+    }
+
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        super.handleUpdateTag(tag);//todo?
     }
 
     @Override
@@ -171,8 +196,15 @@ public class TileBCBase extends TileEntity {
     }
     //endregion
 
+    /**
+     * Write any extra data that needs to be saved to NBT that is not saved via a syncable field
+     * */
+    public void writeExtraNBT(NBTTagCompound compound){}
+
+    public void readExtraNBT(NBTTagCompound compound){}
+
     @Override
-    public void writeToNBT(NBTTagCompound compound) {
+    public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
         if (this instanceof IDataRetainerTile) {
             ((IDataRetainerTile) this).writeDataToNBT(compound);
@@ -183,10 +215,14 @@ public class TileBCBase extends TileEntity {
                 syncableObject.toNBT(compound);
             }
         }
+
+        writeExtraNBT(compound);
+
+        return compound;
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
+    public final void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         if (this instanceof IDataRetainerTile) {
             ((IDataRetainerTile) this).readDataFromNBT(compound);
@@ -197,6 +233,8 @@ public class TileBCBase extends TileEntity {
                 syncableObject.fromNBT(compound);
             }
         }
+
+        readExtraNBT(compound);
     }
 
     @Override

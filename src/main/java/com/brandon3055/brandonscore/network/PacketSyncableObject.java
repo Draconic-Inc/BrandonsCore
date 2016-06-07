@@ -9,7 +9,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -197,10 +196,10 @@ public class PacketSyncableObject implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<PacketSyncableObject, IMessage> {
+    public static class Handler extends MessageHandlerWrapper<PacketSyncableObject, IMessage> {
 
         @Override
-        public IMessage onMessage(PacketSyncableObject message, MessageContext ctx) {
+        public IMessage handleMessage(PacketSyncableObject message, MessageContext ctx) {
             if (ctx.side == Side.CLIENT) {
                 PacketSyncObject packetSyncObject = new PacketSyncObject<PacketSyncableObject, IMessage>(message, ctx) {
                     @Override

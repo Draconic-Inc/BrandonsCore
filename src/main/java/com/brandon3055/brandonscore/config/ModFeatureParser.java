@@ -10,6 +10,8 @@ import net.minecraft.item.ItemBlock;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -135,6 +137,7 @@ public class ModFeatureParser {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     public void registerRendering() {
         for (FeatureEntry entry : featureEntries) {
             if (!entry.enabled) continue;
