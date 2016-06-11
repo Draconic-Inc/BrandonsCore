@@ -22,7 +22,7 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
         if (stack != null) {
             //RenderHelper.enableStandardItemLighting();
             //GlStateManager.enableLighting();
-            Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.NONE);
+            Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
         }
     }
 

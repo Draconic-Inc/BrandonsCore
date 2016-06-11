@@ -49,6 +49,9 @@ public class BlockBCore extends Block {
 
         if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)) {
             ((IDataRetainerTile) tile).readDataFromNBT(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
+//            if (tile instanceof TileBCBase){
+//                //((TileBCBase) tile).updateBlock(); ToDo Needed?
+//            }
         }
     }
     //endregion
@@ -62,6 +65,10 @@ public class BlockBCore extends Block {
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
+
+        if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()){
+            stack.setItemDamage(getMetaFromState(state));
+        }
 
         TileEntity tileEntity = world.getTileEntity(pos);
 

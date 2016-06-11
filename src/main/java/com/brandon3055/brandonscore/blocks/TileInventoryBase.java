@@ -64,7 +64,11 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
 
     @Override
     public void setInventorySlotContents(int index, ItemStack stack) {
-        inventoryStacks[index] = stack;//todo Safety check
+        if (index < 0 || index >= inventoryStacks.length){
+            return;
+        }
+
+        inventoryStacks[index] = stack;
 
         if (stack != null && stack.stackSize > getInventoryStackLimit()) {
             stack.stackSize = getInventoryStackLimit();
