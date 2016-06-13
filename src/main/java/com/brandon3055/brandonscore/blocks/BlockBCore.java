@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class BlockBCore extends Block {
     public static final String TILE_DATA_TAG = "DETileData";
+    protected boolean isFullCube = true;
 
     public BlockBCore() {
         this(Material.ROCK);
@@ -81,6 +82,11 @@ public class BlockBCore extends Block {
         return stack;
     }
 
+    public BlockBCore setIsFullCube(boolean value){
+        isFullCube = value;
+        return this;
+    }
+
     //endregion
 
     @Override
@@ -95,6 +101,16 @@ public class BlockBCore extends Block {
         } else {
             super.harvestBlock(world, player, pos, state, te, heldStack);
         }
+    }
+
+    @Override
+    public boolean isFullCube(IBlockState state) {
+        return isFullCube;
+    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state) {
+        return isFullCube;
     }
 }
 
