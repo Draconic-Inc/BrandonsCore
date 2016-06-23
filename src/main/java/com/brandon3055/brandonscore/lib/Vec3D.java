@@ -97,6 +97,20 @@ public class Vec3D {
         return this;
     }
 
+    public Vec3D multiply(Vec3D vec) {
+        this.x *= vec.x;
+        this.y *= vec.y;
+        this.z *= vec.z;
+        return this;
+    }
+
+    public Vec3D multiply(double x, double y, double z) {
+        this.x *= x;
+        this.y *= y;
+        this.z *= z;
+        return this;
+    }
+
     public Vec3D copy() {
         return new Vec3D(this);
     }

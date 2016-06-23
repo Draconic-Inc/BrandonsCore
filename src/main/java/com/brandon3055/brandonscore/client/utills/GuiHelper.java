@@ -6,10 +6,7 @@ import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
@@ -228,7 +225,25 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         fontRendererIn.drawString(text, (float) (x - fontRendererIn.getStringWidth(text) / 2), (float) y, color, dropShadow);
     }
 
+    public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale){
+        RenderHelper.enableGUIStandardItemLighting();
+        GlStateManager.translate(0.0F, 0.0F, 32.0F);
+        //this.zLevel = 200.0F;
+        mc.getRenderItem().zLevel = 200.0F;
+        net.minecraft.client.gui.FontRenderer font = null;
+        if (stack != null) font = stack.getItem().getFontRenderer(stack);
+        if (font == null) font = mc.fontRendererObj;
+        mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
+        String count = stack.stackSize > 1 ? String.valueOf(stack.stackSize) : "";
+        mc.getRenderItem().renderItemOverlayIntoGUI(font, stack, x, y, count);
+        //this.zLevel = 0.0F;
+        mc.getRenderItem().zLevel = 0.0F;
+    }
+
     public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale){
+        if (stack == null){
+            return;
+        }
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, 300);
         GlStateManager.scale(scale, scale, scale);

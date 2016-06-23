@@ -26,6 +26,7 @@ public class PacketSyncableObject implements IMessage {
     public static final byte TAG_INDEX = 6;
     public static final byte VEC3I_INDEX = 7;
     public static final byte LONG_INDEX = 8;
+    public static final byte SHORT_INDEX = 9;
 
 
     public BlockPos tilePos;
@@ -34,6 +35,7 @@ public class PacketSyncableObject implements IMessage {
     public float floatValue = 0F;
     public double doubleValue = 0;
     public int intValue = 0;
+    public short shortValue = 0;
     public byte byteValue = 0;
     public boolean booleanValue = false;
     public NBTTagCompound compound;
@@ -57,6 +59,13 @@ public class PacketSyncableObject implements IMessage {
         this.index = syncableIndex;
         this.byteValue = byteValue;
         this.dataType = BYTE_INDEX;
+    }
+
+    public PacketSyncableObject(TileBCBase tile, byte syncableIndex, short shortValue, boolean updateOnReceived) {
+        this.tilePos = tile.getPos();
+        this.index = syncableIndex;
+        this.shortValue = shortValue;
+        this.dataType = SHORT_INDEX;
     }
 
     public PacketSyncableObject(TileBCBase tile, byte syncableIndex, int intValue, boolean updateOnReceived) {
@@ -148,6 +157,9 @@ public class PacketSyncableObject implements IMessage {
             case LONG_INDEX:
                 buf.writeLong(longValue);
                 break;
+            case SHORT_INDEX:
+                buf.writeShort(shortValue);
+                break;
         }
     }
 
@@ -192,6 +204,9 @@ public class PacketSyncableObject implements IMessage {
                 break;
             case LONG_INDEX:
                 longValue = buf.readLong();
+                break;
+            case SHORT_INDEX:
+                shortValue = buf.readShort();
                 break;
         }
     }
