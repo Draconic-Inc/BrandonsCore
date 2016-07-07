@@ -12,6 +12,7 @@ import net.minecraft.world.World;
  * Im just going to add it so when i remember the thing it is here!
  */
 public class BCParticle extends Particle {
+    protected float texturesPerRow = 16F;
 
     protected BCParticle(World worldIn, Vec3D pos) {
         super(worldIn, pos.x, pos.y, pos.z);
@@ -34,10 +35,10 @@ public class BCParticle extends Particle {
 
     @Override
     public void renderParticle(VertexBuffer vertexbuffer, Entity entity, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
-        float minU = (float) this.particleTextureIndexX / 16.0F;
-        float maxU = minU + 0.0624375F;
-        float minV = (float) this.particleTextureIndexY / 16.0F;
-        float maxV = minV + 0.0624375F;
+        float minU = (float) this.particleTextureIndexX / texturesPerRow;
+        float maxU = minU + 1F / texturesPerRow;//0.0624375F;
+        float minV = (float) this.particleTextureIndexY / texturesPerRow;
+        float maxV = minV + 1F / texturesPerRow;//0.0624375F;
         float scale = 0.1F * this.particleScale;
 
         if (this.particleTexture != null) {

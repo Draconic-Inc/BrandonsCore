@@ -16,7 +16,6 @@ public class Utils {
 
     private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
 
-
 //	public static IEntitySelector selectLivingBase = new IEntitySelector() {todo Update
 //		@Override
 //		public boolean isEntityApplicable(Entity entity) {

@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.utils.Utils;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -14,6 +15,12 @@ public class Vec3D {
     public double z;
 
     public Vec3D() {
+    }
+
+    public Vec3D(Entity entity) {
+        this.x = entity.posX;
+        this.y = entity.posY;
+        this.z = entity.posZ;
     }
 
     public Vec3D(double x, double y, double z) {

@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.utills;
+package com.brandon3055.brandonscore.client.utils;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.utils.InfoHelper;
@@ -13,10 +13,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -45,73 +43,144 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         tessellator.draw();
     }
 
-    public static void drawHoveringText(List list, int x, int y, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
+    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
         net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
-        if (false && !list.isEmpty()) {
-            GL11.glPushMatrix();
-            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
+//        if (false && !list.isEmpty()) {
+//            GL11.glPushMatrix();
+//            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+//            GL11.glDisable(GL11.GL_LIGHTING);
+//            GL11.glDisable(GL11.GL_DEPTH_TEST);
+////            GL11.glScaled(scale, scale, 1);
+////            x = (int) (x / scale);
+////            y = (int) (y / scale);
+//
+//            int k = 0;
+//            Iterator iterator = list.iterator();
+//
+//            while (iterator.hasNext()) {
+//                String s = (String) iterator.next();
+//                int l = font.getStringWidth(s);
+//
+//                if (l > k) {
+//                    k = l;
+//                }
+//            }
+//
+//            int adjX = x + 12;
+//            int adjY = y - 12;
+//            int i1 = 6;
+//
+//            if (list.size() > 1) {
+//                i1 += 2 + (list.size() - 1) * 10;
+//            }
+//
+//            if (adjX + k > (int) (guiWidth / scale)) {
+//                adjX -= 28 + k;
+//            }
+//
+//            if (adjY + i1 + 6 > (int) (guiHeight / scale)) {
+//                adjY = (int) (guiHeight / scale) - i1 - 6;
+//            }
+//
+//            int j1 = -267386864;
+//            drawGradientRect(adjX - 3, adjY - 4, adjX + k + 3, adjY - 3, j1, j1, fade, scale);
+//            drawGradientRect(adjX - 3, adjY + i1 + 3, adjX + k + 3, adjY + i1 + 4, j1, j1, fade, scale);
+//            drawGradientRect(adjX - 3, adjY - 3, adjX + k + 3, adjY + i1 + 3, j1, j1, fade, scale);
+//            drawGradientRect(adjX - 4, adjY - 3, adjX - 3, adjY + i1 + 3, j1, j1, fade, scale);
+//            drawGradientRect(adjX + k + 3, adjY - 3, adjX + k + 4, adjY + i1 + 3, j1, j1, fade, scale);
+//            int k1 = 1347420415;
+//            int l1 = (k1 & 16711422) >> 1 | k1 & -16777216;
+//            drawGradientRect(adjX - 3, adjY - 3 + 1, adjX - 3 + 1, adjY + i1 + 3 - 1, k1, l1, fade, scale);
+//            drawGradientRect(adjX + k + 2, adjY - 3 + 1, adjX + k + 3, adjY + i1 + 3 - 1, k1, l1, fade, scale);
+//            drawGradientRect(adjX - 3, adjY - 3, adjX + k + 3, adjY - 3 + 1, k1, k1, fade, scale);
+//            drawGradientRect(adjX - 3, adjY + i1 + 2, adjX + k + 3, adjY + i1 + 3, l1, l1, fade, scale);
+//
+//            for (int i2 = 0; i2 < list.size(); ++i2) {
+//                String s1 = (String) list.get(i2);
+//
+//                GL11.glEnable(GL11.GL_BLEND);
+//                GL11.glDisable(GL11.GL_ALPHA_TEST);
+//                OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+//                font.drawStringWithShadow(s1, adjX, adjY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
+//
+//                adjY += 10;
+//            }
+//
+//            GL11.glEnable(GL11.GL_LIGHTING);
+//            GL11.glEnable(GL11.GL_DEPTH_TEST);
+//            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+//            GL11.glPopMatrix();
+//        }
+    }
+
+    public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
+        if (!list.isEmpty()) {
+            GlStateManager.pushMatrix();
+            GlStateManager.disableRescaleNormal();
+            RenderHelper.disableStandardItemLighting();
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepth();
             GL11.glScaled(scale, scale, 1);
-            x = (int) (x / scale);
-            y = (int) (y / scale);
+            mouseX = (int) (mouseX / scale);
+            mouseY = (int) (mouseY / scale);
 
-            int k = 0;
-            Iterator iterator = list.iterator();
+            int tooltipTextWidth = 0;
 
-            while (iterator.hasNext()) {
-                String s = (String) iterator.next();
+            for (Object aList : list) {
+                String s = (String) aList;
                 int l = font.getStringWidth(s);
 
-                if (l > k) {
-                    k = l;
+                if (l > tooltipTextWidth) {
+                    tooltipTextWidth = l;
                 }
             }
 
-            int adjX = x + 12;
-            int adjY = y - 12;
-            int i1 = 6;
+            int tooltipX = mouseX + 12;
+            int tooltipY = mouseY - 12;
+            int tooltipHeight = 6;
 
             if (list.size() > 1) {
-                i1 += 2 + (list.size() - 1) * 10;
+                tooltipHeight += 2 + (list.size() - 1) * 10;
             }
 
-            if (adjX + k > (int) (guiWidth / scale)) {
-                adjX -= 28 + k;
+            if (tooltipX + tooltipTextWidth > (int) (guiWidth / scale)) {
+                tooltipX -= 28 + tooltipTextWidth;
             }
 
-            if (adjY + i1 + 6 > (int) (guiHeight / scale)) {
-                adjY = (int) (guiHeight / scale) - i1 - 6;
+            if (tooltipY + tooltipHeight + 6 > (int) (guiHeight / scale)) {
+                tooltipY = (int) (guiHeight / scale) - tooltipHeight - 6;
             }
 
-            int j1 = -267386864;
-            drawGradientRect(adjX - 3, adjY - 4, adjX + k + 3, adjY - 3, j1, j1, fade, scale);
-            drawGradientRect(adjX - 3, adjY + i1 + 3, adjX + k + 3, adjY + i1 + 4, j1, j1, fade, scale);
-            drawGradientRect(adjX - 3, adjY - 3, adjX + k + 3, adjY + i1 + 3, j1, j1, fade, scale);
-            drawGradientRect(adjX - 4, adjY - 3, adjX - 3, adjY + i1 + 3, j1, j1, fade, scale);
-            drawGradientRect(adjX + k + 3, adjY - 3, adjX + k + 4, adjY + i1 + 3, j1, j1, fade, scale);
+            int backgroundColor = -267386864;
+            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor, fade, scale);
+            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor, fade, scale);
+            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
+            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
+            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
             int k1 = 1347420415;
             int l1 = (k1 & 16711422) >> 1 | k1 & -16777216;
-            drawGradientRect(adjX - 3, adjY - 3 + 1, adjX - 3 + 1, adjY + i1 + 3 - 1, k1, l1, fade, scale);
-            drawGradientRect(adjX + k + 2, adjY - 3 + 1, adjX + k + 3, adjY + i1 + 3 - 1, k1, l1, fade, scale);
-            drawGradientRect(adjX - 3, adjY - 3, adjX + k + 3, adjY - 3 + 1, k1, k1, fade, scale);
-            drawGradientRect(adjX - 3, adjY + i1 + 2, adjX + k + 3, adjY + i1 + 3, l1, l1, fade, scale);
+            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, k1, l1, fade, scale);
+            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, k1, l1, fade, scale);
+            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, k1, k1, fade, scale);
+            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, l1, l1, fade, scale);
 
-            for (int i2 = 0; i2 < list.size(); ++i2) {
+            int i2 = 0;
+            while (i2 < list.size()) {
                 String s1 = (String) list.get(i2);
-
-                GL11.glEnable(GL11.GL_BLEND);
-                GL11.glDisable(GL11.GL_ALPHA_TEST);
+                GlStateManager.enableBlend();
+                GlStateManager.disableAlpha();
                 OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-                font.drawStringWithShadow(s1, adjX, adjY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
-
-                adjY += 10;
+                font.drawStringWithShadow(s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
+                GlStateManager.enableAlpha();
+                tooltipY += 10;
+                ++i2;
             }
 
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
-            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-            GL11.glPopMatrix();
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepth();
+            RenderHelper.enableStandardItemLighting();
+            GlStateManager.enableRescaleNormal();
+            GlStateManager.popMatrix();
         }
     }
 
@@ -186,7 +255,7 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
             list.add(InfoHelper.ITC() + I18n.translateToLocal("gui.de.energyStorage.txt"));
             list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
             list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
-            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, 1F, 1F, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
         }
     }
 
@@ -221,11 +290,18 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         }
     }
 
-    public static void drawCenteredString(FontRenderer fontRendererIn, String text, int x, int y, int color, boolean dropShadow) {
-        fontRendererIn.drawString(text, (float) (x - fontRendererIn.getStringWidth(text) / 2), (float) y, color, dropShadow);
+    public static void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
+        fontRenderer.drawString(text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color, dropShadow);
     }
 
-    public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale){
+    public static void drawCenteredSplitString(FontRenderer fontRenderer, String str, int x, int y, int wrapWidth, int color, boolean dropShadow) {
+        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
+            drawCenteredString(fontRenderer, s, x, y, color, dropShadow);
+            y += fontRenderer.FONT_HEIGHT;
+        }
+    }
+
+    public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale) {
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.translate(0.0F, 0.0F, 32.0F);
         //this.zLevel = 200.0F;
@@ -240,8 +316,8 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         mc.getRenderItem().zLevel = 0.0F;
     }
 
-    public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale){
-        if (stack == null){
+    public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale) {
+        if (stack == null) {
             return;
         }
         GlStateManager.pushMatrix();
@@ -254,7 +330,11 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
         GlStateManager.popMatrix();
     }
 
-    public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour){
+    public static void drawGradientRect(int posX, int posY, int xSize, int ySize, int colour, int colour2) {
+        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour2, 1F, 0);
+    }
+
+    public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour) {
         drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour, 1F, 0);
     }
 }

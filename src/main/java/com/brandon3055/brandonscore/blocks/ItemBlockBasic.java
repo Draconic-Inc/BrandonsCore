@@ -25,7 +25,7 @@ public class ItemBlockBasic extends ItemBlockBCore {
     @Override
     public String getUnlocalizedName(ItemStack stack) {
         if (getHasSubtypes() && feature.nameMap.containsKey(stack.getItemDamage())) {
-            return (super.getUnlocalizedName(stack) + "." + feature.nameMap.get(stack.getItemDamage())).replaceAll("=", ".");
+            return (super.getUnlocalizedName(stack) + "." + feature.nameMap.get(stack.getItemDamage())).replaceAll("=", ".").replaceAll(",", ".");
         } else return super.getUnlocalizedName(stack);
     }
 }

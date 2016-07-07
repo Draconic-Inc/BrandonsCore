@@ -3,9 +3,9 @@ package com.brandon3055.brandonscore.utils;
 //import cofh.api.energy.IEnergyContainerItem;
 
 import cofh.api.energy.IEnergyContainerItem;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import org.lwjgl.input.Keyboard;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class InfoHelper {
 		IEnergyContainerItem item = (IEnergyContainerItem)stack.getItem();
 		String energy = Utils.formatNumber(item.getEnergyStored(stack));
         String maxEnergy = Utils.formatNumber(item.getMaxEnergyStored(stack));
-		list.add(I18n.translateToLocal("info.de.charge.txt") + ": " + energy + " / " + maxEnergy + " RF");
+		list.add(I18n.format("info.bc.charge.txt") + ": " + energy + " / " + maxEnergy + " RF");
     }
 
     @SuppressWarnings("unchecked")
@@ -49,7 +49,7 @@ public class InfoHelper {
     @SuppressWarnings("unchecked")
     public static void addEnergyAndLore(ItemStack stack, List list) {
         if (!isShiftKeyDown())
-            list.add(I18n.translateToLocal("info.de.hold.txt") + " " + TextFormatting.AQUA + "" + TextFormatting.ITALIC + I18n.translateToLocal("info.de.shift.txt") + TextFormatting.RESET + " " + TextFormatting.GRAY + I18n.translateToLocal("info.de.forDetails.txt"));
+            list.add(I18n.format("info.de.hold.txt") + " " + TextFormatting.AQUA + "" + TextFormatting.ITALIC + I18n.format("info.de.shift.txt") + TextFormatting.RESET + " " + TextFormatting.GRAY + I18n.format("info.de.forDetails.txt"));
         else {
             addEnergyInfo(stack, list);
             addLore(stack, list);
@@ -61,7 +61,7 @@ public class InfoHelper {
      */
     public static String[] getLore(ItemStack stack) {
         String unlocalizeLore = stack.getItem().getUnlocalizedName() + ".lore";
-        String rawLore = I18n.translateToLocal(unlocalizeLore);
+        String rawLore = I18n.format(unlocalizeLore);
 
         if (rawLore.contains(unlocalizeLore)) {
             //LogHelper.error("Invalid or missing Lore localization \""+unlocalizeLore+"\"");
@@ -101,7 +101,7 @@ public class InfoHelper {
     @SuppressWarnings("unchecked")
     public static boolean holdShiftForDetails(List list, boolean inverted) {
         if (isShiftKeyDown() == inverted)
-            list.add(I18n.translateToLocal("info.de.hold.txt") + " " + TextFormatting.AQUA + "" + TextFormatting.ITALIC + I18n.translateToLocal("info.de.shift.txt") + TextFormatting.RESET + " " + TextFormatting.GRAY + I18n.translateToLocal("info.de.forDetails.txt"));
+            list.add(I18n.format("info.bc.holdShiftForDetails.txt", TextFormatting.AQUA + "" + TextFormatting.ITALIC, TextFormatting.RESET + "" + TextFormatting.GRAY));
         return isShiftKeyDown();
     }
 

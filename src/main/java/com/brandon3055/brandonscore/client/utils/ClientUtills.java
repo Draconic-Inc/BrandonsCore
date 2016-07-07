@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.utills;
+package com.brandon3055.brandonscore.client.utils;
 
 import com.brandon3055.brandonscore.utils.LogHelper;
 

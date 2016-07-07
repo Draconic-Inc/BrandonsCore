@@ -1,8 +1,14 @@
 package com.brandon3055.brandonscore.items;
 
 import cofh.api.energy.IEnergyContainerItem;
+import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.List;
 
 /**
  * Created by brandon3055 on 31/05/2016.
@@ -15,6 +21,18 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     private int extract;
 
     public ItemEnergyBase(){}
+
+    //region Item
+
+    @Override
+    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+        subItems.add(new ItemStack(itemIn));
+        ItemStack stack = new ItemStack(itemIn);
+        setEnergy(stack, getCapacity(stack));
+        subItems.add(stack);
+    }
+
+    //endregion
 
     //region Energy
 
@@ -86,6 +104,31 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
         return getCapacity(container);
     }
 
+    public void setEnergy(ItemStack container, int energy) {
+        if (energy > getCapacity(container)) {
+            energy = getCapacity(container);
+        }
+        else if (energy < 0) {
+            energy = 0;
+        }
+
+        ItemNBTHelper.setInteger(container, "Energy", energy);
+    }
+
+    public void modifyEnergy(ItemStack container, int modify) {
+        int energy = ItemNBTHelper.getInteger(container, "Energy", 0);
+        energy += modify;
+
+        if (energy > getCapacity(container)) {
+            energy = getCapacity(container);
+        }
+        else if (energy < 0) {
+            energy = 0;
+        }
+
+        ItemNBTHelper.setInteger(container, "Energy", energy);
+    }
+
     //endregion
 
     //region Display
@@ -98,6 +141,11 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
         return 1D - ((double)getEnergyStored(stack) / (double)getMaxEnergyStored(stack));
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+        InfoHelper.addEnergyInfo(stack, tooltip);
     }
 
     //endregion

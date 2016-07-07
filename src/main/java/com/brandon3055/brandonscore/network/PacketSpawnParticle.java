@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.network;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
+import com.brandon3055.draconicevolution.utils.LogHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -19,12 +20,13 @@ public class PacketSpawnParticle implements IMessage {
     private double xSpeed;
     private double ySpeed;
     private double zSpeed;
+    private double viewRange;
     private int[] args;
 
     public PacketSpawnParticle() {
     }
 
-    public PacketSpawnParticle(int particleID, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... args) {
+    public PacketSpawnParticle(int particleID, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, double viewRange, int... args) {
         this.particleID = particleID;
         this.xCoord = xCoord;
         this.yCoord = yCoord;
@@ -32,6 +34,7 @@ public class PacketSpawnParticle implements IMessage {
         this.xSpeed = xSpeed;
         this.ySpeed = ySpeed;
         this.zSpeed = zSpeed;
+        this.viewRange = viewRange;
         this.args = args;
     }
 
@@ -44,6 +47,7 @@ public class PacketSpawnParticle implements IMessage {
         buf.writeDouble(xSpeed);
         buf.writeDouble(ySpeed);
         buf.writeDouble(zSpeed);
+        buf.writeDouble(viewRange);
         buf.writeByte(args.length);
         for (int i : args) {
             buf.writeInt(i);
@@ -59,6 +63,7 @@ public class PacketSpawnParticle implements IMessage {
         xSpeed = buf.readDouble();
         ySpeed = buf.readDouble();
         zSpeed = buf.readDouble();
+        viewRange = buf.readDouble();
         int argsL = buf.readByte();
         args = new int[argsL];
         for (int i = 0; i < argsL; i++) {
@@ -73,7 +78,8 @@ public class PacketSpawnParticle implements IMessage {
         public IMessage handleMessage(PacketSpawnParticle message, MessageContext ctx) {
 
             if (ctx.side == Side.CLIENT) {
-                BCEffectHandler.spawnFX(message.particleID, BrandonsCore.proxy.getClientWorld(), message.xCoord, message.yCoord, message.zCoord, message.xSpeed, message.ySpeed, message.zSpeed, 32000);
+                LogHelper.info("Spawn Particle");
+                BCEffectHandler.spawnFX(message.particleID, BrandonsCore.proxy.getClientWorld(), message.xCoord, message.yCoord, message.zCoord, message.xSpeed, message.ySpeed, message.zSpeed, message.viewRange, message.args);
             }
 
             return null;

@@ -154,12 +154,20 @@ public class Teleporter //todo give this class a full test when the dislocator i
             writeProtected = compound.getBoolean("WP");
         }
 
-        public void sendEntityToCoords(Entity entity) {
-            entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, BCSoundEvents.portalSound, SoundCategory.PLAYERS, 0.1F, entity.worldObj.rand.nextFloat() * 0.1F + 0.9F, false);//todo check that this works  (Sound)
+        public void teleport(Entity entity) {
+            teleport(entity, false);
+        }
+
+        public void teleport(Entity entity, boolean teleportSound) {
+            if (teleportSound) {
+                entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, BCSoundEvents.portalSound, SoundCategory.PLAYERS, 0.1F, entity.worldObj.rand.nextFloat() * 0.1F + 0.9F, false);//todo check that this works  (Sound)
+            }
 
             teleportEntity(entity, this);
 
-            entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, BCSoundEvents.portalSound, SoundCategory.PLAYERS, 0.1F, entity.worldObj.rand.nextFloat() * 0.1F + 0.9F, false);
+            if (teleportSound) {
+                entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, BCSoundEvents.portalSound, SoundCategory.PLAYERS, 0.1F, entity.worldObj.rand.nextFloat() * 0.1F + 0.9F, false);
+            }
         }
 
         public void setDimentionName(String dimentionName) {

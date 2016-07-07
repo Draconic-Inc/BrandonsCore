@@ -14,58 +14,42 @@ public final class ItemNBTHelper {
     }
 
     public static ItemStack setByte(ItemStack stack, String tag, byte b) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setByte(tag, b);
-        stack.setTagCompound(compound);
+        getCompound(stack).setByte(tag, b);
         return stack;
     }
 
     public static ItemStack setBoolean(ItemStack stack, String tag, boolean b) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setBoolean(tag, b);
-        stack.setTagCompound(compound);
+        getCompound(stack).setBoolean(tag, b);
         return stack;
     }
 
     public static ItemStack setShort(ItemStack stack, String tag, short s) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setShort(tag, s);
-        stack.setTagCompound(compound);
+        getCompound(stack).setShort(tag, s);
         return stack;
     }
 
     public static ItemStack setInteger(ItemStack stack, String tag, int i) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setInteger(tag, i);
-        stack.setTagCompound(compound);
+        getCompound(stack).setInteger(tag, i);
         return stack;
     }
 
     public static ItemStack setLong(ItemStack stack, String tag, long i) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setLong(tag, i);
-        stack.setTagCompound(compound);
+        getCompound(stack).setLong(tag, i);
         return stack;
     }
 
     public static ItemStack setFloat(ItemStack stack, String tag, float f) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setFloat(tag, f);
-        stack.setTagCompound(compound);
+        getCompound(stack).setFloat(tag, f);
         return stack;
     }
 
     public static ItemStack setDouble(ItemStack stack, String tag, double d) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setDouble(tag, d);
-        stack.setTagCompound(compound);
+        getCompound(stack).setDouble(tag, d);
         return stack;
     }
 
     public static ItemStack setString(ItemStack stack, String tag, String s) {
-        NBTTagCompound compound = getCompound(stack);
-        compound.setString(tag, s);
-        stack.setTagCompound(compound);
+        getCompound(stack).setString(tag, s);
         return stack;
     }
 

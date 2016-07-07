@@ -29,11 +29,13 @@ import java.util.Map;
 public class BCEffectHandler {
     private static BCEffectHandler instance = new BCEffectHandler();
     @SideOnly(Side.CLIENT)
-    public static BCEffectRenderer effectRenderer = new BCEffectRenderer(null);
+    public static BCEffectRenderer effectRenderer;
     public static Map<Integer, PairKV<IBCParticleFactory, ResourceLocation>> particleRegistry = new LinkedHashMap<Integer, PairKV<IBCParticleFactory, ResourceLocation>>();
     private static int lastIndex = -1;
 
-    public static void initialize() {
+    @SideOnly(Side.CLIENT)
+    public static void iniEffectRenderer() {
+        effectRenderer = new BCEffectRenderer(null);
         MinecraftForge.EVENT_BUS.register(instance);
     }
 
@@ -64,39 +66,48 @@ public class BCEffectHandler {
      * Can be called server side (Will automatically send a packet to all clients in range to spawn client side)
      */
     public static void spawnFX(int particleID, World world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, double viewRange, int... args) {
-        if (!world.isRemote) {
-            BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), xCoord, yCoord, zCoord, viewRange));
-        } else {
-            if (isInRange(xCoord, yCoord, zCoord, viewRange) && effectRenderer != null) {
-
-                if (!particleRegistry.containsKey(particleID)) {
-                    LogHelper.error("Attempted to spawn an unregistered particle ID (%s)", particleID);
-                    return;
-                }
-
-                Minecraft mc = Minecraft.getMinecraft();
-                int particleSetting = mc.gameSettings.particleSetting;
-
-                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)) {
-                    return;
-                }
-
-                PairKV<IBCParticleFactory, ResourceLocation> pair = particleRegistry.get(particleID);
-                effectRenderer.addEffect(pair.getValue(), pair.getKey().getEntityFX(particleID, world, new Vec3D(xCoord, yCoord, zCoord), new Vec3D(xSpeed, ySpeed, zSpeed), args));
-            }
-        }
+        spawnFX(particleID, world, new Vec3D(xCoord, yCoord, zCoord), new Vec3D(xSpeed, ySpeed, zSpeed), viewRange, args);
+//        if (!world.isRemote) {
+//            BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, viewRange, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), xCoord, yCoord, zCoord, viewRange));
+//        } else {
+//            if (isInRange(xCoord, yCoord, zCoord, viewRange) && effectRenderer != null) {
+//
+//                if (!particleRegistry.containsKey(particleID)) {
+//                    LogHelper.error("Attempted to spawn an unregistered particle ID (%s)", particleID);
+//                    return;
+//                }
+//
+//                Minecraft mc = Minecraft.getMinecraft();
+//                int particleSetting = mc.gameSettings.particleSetting;
+//
+//                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)) {
+//                    return;
+//                }
+//
+//                PairKV<IBCParticleFactory, ResourceLocation> pair = particleRegistry.get(particleID);
+//                effectRenderer.addEffect(pair.getValue(), pair.getKey().getEntityFX(particleID, world, new Vec3D(xCoord, yCoord, zCoord), new Vec3D(xSpeed, ySpeed, zSpeed), args));
+//            }
+//        }
     }
 
     /**
      * Spawns with a range of 64.
      */
     public static void spawnFX(int particleID, World world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... args) {
-        spawnFX(particleID, world, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, 64, args);
+        spawnFX(particleID, world, new Vec3D(xCoord, yCoord, zCoord), new Vec3D(xSpeed, ySpeed, zSpeed), 32, args);
+        //spawnFX(particleID, world, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, 64, args);
+    }
+
+    /**
+     * Spawns with a range of 64.
+     */
+    public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args) {
+        spawnFX(particleID, world, pos, speed, 32, args);
     }
 
     public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, double viewRange, int... args) {
         if (!world.isRemote) {
-            BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.x, pos.y, pos.z, viewRange));
+            BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, viewRange, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.x, pos.y, pos.z, viewRange));
         } else {
             if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
 
@@ -116,13 +127,6 @@ public class BCEffectHandler {
                 effectRenderer.addEffect(pair.getValue(), pair.getKey().getEntityFX(particleID, world, pos, speed, args));
             }
         }
-    }
-
-    /**
-     * Spawns with a range of 64.
-     */
-    public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args) {
-        spawnFX(particleID, world, pos, speed, 32, args);
     }
 
     //endregion

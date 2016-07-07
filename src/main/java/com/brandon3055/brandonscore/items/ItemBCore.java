@@ -25,5 +25,4 @@ public class ItemBCore extends Item {
         }
         else return super.getUnlocalizedName(stack);
     }
-
 }
