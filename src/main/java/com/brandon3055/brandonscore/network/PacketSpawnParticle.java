@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.network;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
-import com.brandon3055.draconicevolution.utils.LogHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -78,7 +77,6 @@ public class PacketSpawnParticle implements IMessage {
         public IMessage handleMessage(PacketSpawnParticle message, MessageContext ctx) {
 
             if (ctx.side == Side.CLIENT) {
-                LogHelper.info("Spawn Particle");
                 BCEffectHandler.spawnFX(message.particleID, BrandonsCore.proxy.getClientWorld(), message.xCoord, message.yCoord, message.zCoord, message.xSpeed, message.ySpeed, message.zSpeed, message.viewRange, message.args);
             }
 
