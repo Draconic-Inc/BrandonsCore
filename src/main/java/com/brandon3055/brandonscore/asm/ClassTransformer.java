@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.asm;
 
-import codechicken.lib.asm.*;
+import codechicken.lib.asm.ASMHelper;
+import codechicken.lib.asm.ModularASMTransformer;
+import codechicken.lib.asm.ObfMapping;
 import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
-
-import java.util.Map;
 
 /**
  * Created by Brandon on 27/5/2015.
@@ -16,8 +16,8 @@ public class ClassTransformer implements IClassTransformer {
     private ModularASMTransformer transformer = new ModularASMTransformer();
 
     public ClassTransformer() {
-        Map<String, ASMBlock> blocks = ASMReader.loadResource("/assets/brandonscore/asm/hooks.asm");
-        transformer.add(new ModularASMTransformer.MethodInjector(new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "func_77557_a", "(Lnet/minecraft/item/Item;)Z"), blocks.get("i_EnchantmetTypeCheck"), true));
+        //Map<String, ASMBlock> blocks = ASMReader.loadResource("/assets/brandonscore/asm/hooks.asm");
+        //transformer.add(new ModularASMTransformer.MethodInjector(new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "func_77557_a", "(Lnet/minecraft/item/Item;)Z"), blocks.get("i_EnchantmetTypeCheck"), true));
     }
 
     @Override
@@ -25,7 +25,7 @@ public class ClassTransformer implements IClassTransformer {
         //return transformer.transform(name, bytes);
 
         //if (transformedName.equals("net.minecraft.enchantment.EnumEnchantmentType")) {
-            return transformer.transform(name, bytes);
+            //return transformer.transform(name, bytes);
         //}
 
         //return bytes;
@@ -72,7 +72,7 @@ public class ClassTransformer implements IClassTransformer {
 ////            IRETURN
 //        }
 //
-//        return bytes;
+        return bytes;
     }
 
     public static LabelNode getFirstLabel(InsnList instructions){
