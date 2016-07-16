@@ -38,15 +38,15 @@ public class CommonProxy {
         return false;
     }
 
-    public boolean isSpaceDown() {
+    public boolean isJumpKeyDown() {
         return false;
     }
 
-    public boolean isCtrlDown() {
+    public boolean isSprintKeyDown() {
         return false;
     }
 
-    public boolean isShiftDown() {
+    public boolean isSneakKeyDown() {
         return false;
     }
 

@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.lib.BCSoundEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,7 +10,6 @@ import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -155,19 +153,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         }
 
         public void teleport(Entity entity) {
-            teleport(entity, false);
-        }
-
-        public void teleport(Entity entity, boolean teleportSound) {
-            if (teleportSound) {
-                entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, BCSoundEvents.portalSound, SoundCategory.PLAYERS, 0.1F, entity.worldObj.rand.nextFloat() * 0.1F + 0.9F, false);//todo check that this works  (Sound)
-            }
-
             teleportEntity(entity, this);
-
-            if (teleportSound) {
-                entity.worldObj.playSound(entity.posX, entity.posY, entity.posZ, BCSoundEvents.portalSound, SoundCategory.PLAYERS, 0.1F, entity.worldObj.rand.nextFloat() * 0.1F + 0.9F, false);
-            }
         }
 
         public void setDimentionName(String dimentionName) {

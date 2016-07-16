@@ -38,17 +38,17 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public boolean isSpaceDown() {
+    public boolean isJumpKeyDown() {
         return Minecraft.getMinecraft().gameSettings.keyBindJump.isKeyDown();
     }
 
     @Override
-    public boolean isShiftDown() {
+    public boolean isSneakKeyDown() {
         return Minecraft.getMinecraft().gameSettings.keyBindSneak.isKeyDown();
     }
 
     @Override
-    public boolean isCtrlDown() {
+    public boolean isSprintKeyDown() {
         return Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown();
     }
 

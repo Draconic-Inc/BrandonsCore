@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.api.IDataRetainerTile;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -76,6 +77,7 @@ public class BlockBCore extends Block {
         if (tileEntity instanceof IDataRetainerTile) {
             NBTTagCompound customData = new NBTTagCompound();
             ((IDataRetainerTile) tileEntity).writeDataToNBT(customData);
+            LogHelper.info(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
         }
 
@@ -95,6 +97,7 @@ public class BlockBCore extends Block {
             ItemStack stack = new ItemStack(Item.getItemFromBlock(state.getBlock()));
             NBTTagCompound customData = new NBTTagCompound();
             ((IDataRetainerTile) te).writeDataToNBT(customData);
+            LogHelper.info(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
             spawnAsEntity(world, pos, stack);
             world.removeTileEntity(pos);

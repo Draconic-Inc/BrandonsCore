@@ -97,7 +97,7 @@ public class ModFeatureParser {
                     block.setCreativeTab(modTabs[entry.feature.cTab()]);
                 }
 
-                if (!entry.feature.itemBlock().isAssignableFrom(ItemBlockBCore.class)) {
+                if (ItemBlockBCore.class.isAssignableFrom(entry.feature.itemBlock())) {
                     GameRegistry.register(block);
 
                     try {

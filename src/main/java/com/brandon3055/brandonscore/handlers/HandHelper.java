@@ -46,4 +46,16 @@ public class HandHelper {
         }
         return null;
     }
+
+    public static boolean isHoldingItemEther(EntityPlayer player, Item item){
+        if (player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() == item){
+            return true;
+        }
+        else if (player.getHeldItemOffhand() != null && player.getHeldItemOffhand().getItem() == item){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
