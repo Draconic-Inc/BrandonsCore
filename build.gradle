@@ -40,6 +40,7 @@ minecraft {
     runDir = "run"
     mappings = "${config.mappings}"
     replace '${mod_version}', project.config.mod_version
+    replaceIn "BrandonsCore.java"
 }
 
 String buildNo = "1"

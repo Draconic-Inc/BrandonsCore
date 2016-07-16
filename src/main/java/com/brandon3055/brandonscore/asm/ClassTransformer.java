@@ -16,13 +16,13 @@ public class ClassTransformer implements IClassTransformer {
     private ModularASMTransformer transformer = new ModularASMTransformer();
 
     public ClassTransformer() {
-        //Map<String, ASMBlock> blocks = ASMReader.loadResource("/assets/brandonscore/asm/hooks.asm");
-        //transformer.add(new ModularASMTransformer.MethodInjector(new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "func_77557_a", "(Lnet/minecraft/item/Item;)Z"), blocks.get("i_EnchantmetTypeCheck"), true));
+    //    Map<String, ASMBlock> blocks = ASMReader.loadResource("/assets/brandonscore/asm/hooks.asm");
+    //    transformer.add(new ModularASMTransformer.MethodInjector(new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "func_77557_a", "(Lnet/minecraft/item/Item;)Z"), blocks.get("i_EnchantmetTypeCheck"), true));
     }
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] bytes) {
-        //return transformer.transform(name, bytes);
+        return bytes;//transformer.transform(name, bytes);
 
         //if (transformedName.equals("net.minecraft.enchantment.EnumEnchantmentType")) {
             //return transformer.transform(name, bytes);
@@ -72,7 +72,7 @@ public class ClassTransformer implements IClassTransformer {
 ////            IRETURN
 //        }
 //
-        return bytes;
+  //      return bytes;
     }
 
     public static LabelNode getFirstLabel(InsnList instructions){

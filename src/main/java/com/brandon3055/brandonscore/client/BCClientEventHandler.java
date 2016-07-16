@@ -2,8 +2,7 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
-import com.brandon3055.draconicevolution.DraconicEvolution;
-import com.brandon3055.draconicevolution.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
@@ -45,7 +44,7 @@ public class BCClientEventHandler {
 			remountTicksRemaining--;
 			if (remountTicksRemaining == 0){
 				LogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
-				DraconicEvolution.network.sendToServer(new PacketUpdateMount(-1));
+				BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
 			}
 		}
     }
