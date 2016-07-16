@@ -164,7 +164,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
 
     @SuppressWarnings("unchecked")
     private static Entity teleportEntity(Entity entity, TeleportLocation destination) {
-        if (entity == null || entity.worldObj.isRemote) return entity;
+        if (entity == null || entity.worldObj.isRemote || entity.isBeingRidden()) return entity;
 
         World startWorld = entity.worldObj;
         World destinationWorld = BrandonsCore.proxy.getMCServer().worldServerForDimension(destination.dimension);
@@ -175,7 +175,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         }
 
         Entity mount = entity.getRidingEntity();
-        if (entity.getRidingEntity() != null) {
+        if (mount != null && mount != entity) {
             entity.dismountRidingEntity();
             mount = teleportEntity(mount, destination);
         }
@@ -257,6 +257,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         entity.setLocationAndAngles(destination.xCoord, destination.yCoord, destination.zCoord, destination.yaw, entity.rotationPitch);
 
         if (mount != null) {
+
             entity.startRiding(mount);
             if ((entity instanceof EntityPlayerMP)) {
                 destinationWorld.updateEntityWithOptionalForce(entity, true);

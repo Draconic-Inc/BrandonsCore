@@ -8,6 +8,7 @@ import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 /**
@@ -20,6 +21,7 @@ public class ClientProxy extends CommonProxy {
         super.preInit(event);
         BCEffectHandler.iniEffectRenderer();
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelUtils());
+        MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
     }
 
     @Override
