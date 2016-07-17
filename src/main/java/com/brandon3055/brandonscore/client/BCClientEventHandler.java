@@ -28,7 +28,7 @@ public class BCClientEventHandler {
     @SubscribeEvent
     public void joinWorld(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof EntityPlayerSP) {
-            BrandonsCore.getNetwork().sendToServer(new PacketUpdateMount(0));
+            BrandonsCore.network.sendToServer(new PacketUpdateMount(0));
         }
     }
 
@@ -44,7 +44,7 @@ public class BCClientEventHandler {
 			remountTicksRemaining--;
 			if (remountTicksRemaining == 0){
 				LogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
-				BrandonsCore.getNetwork().sendToServer(new PacketUpdateMount(-1));
+                BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
 			}
 		}
     }

@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
-import com.brandon3055.brandonscore.proxy.SainProxyHandler;
+import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -167,7 +167,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         if (entity == null || entity.worldObj.isRemote || entity.isBeingRidden()) return entity;
 
         World startWorld = entity.worldObj;
-        World destinationWorld = SainProxyHandler.getMCServer().worldServerForDimension(destination.dimension);
+        World destinationWorld = BrandonsCore.proxy.getMCServer().worldServerForDimension(destination.dimension);
 
         if (destinationWorld == null) {
             LogHelper.error("Destination world dose not exist!");

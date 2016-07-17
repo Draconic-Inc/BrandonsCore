@@ -38,9 +38,9 @@ public class SyncableVec3I extends SyncableObject {
             lastTickVec = vec.copy();
             tile.dirtyBlock();
             if (player == null) {
-                BrandonsCore.getNetwork().sendToAllAround(new PacketSyncableObject(tile, index, vec, updateOnReceived), tile.syncRange());
+                BrandonsCore.network.sendToAllAround(new PacketSyncableObject(tile, index, vec, updateOnReceived), tile.syncRange());
             } else if (player instanceof EntityPlayerMP) {
-                BrandonsCore.getNetwork().sendTo(new PacketSyncableObject(tile, index, vec, updateOnReceived), (EntityPlayerMP) player);
+                BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, vec, updateOnReceived), (EntityPlayerMP) player);
             } else LogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
         }
     }

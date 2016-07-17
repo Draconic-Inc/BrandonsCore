@@ -107,7 +107,7 @@ public class BCEffectHandler {
 
     public static void spawnFX(int particleID, World world, Vec3D pos, Vec3D speed, double viewRange, int... args) {
         if (!world.isRemote) {
-            BrandonsCore.getNetwork().sendToAllAround(new PacketSpawnParticle(particleID, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, viewRange, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.x, pos.y, pos.z, viewRange));
+            BrandonsCore.network.sendToAllAround(new PacketSpawnParticle(particleID, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, viewRange, args), new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.x, pos.y, pos.z, viewRange));
         } else {
             if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
 
