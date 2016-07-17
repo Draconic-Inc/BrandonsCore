@@ -13,12 +13,9 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-
-import java.util.Map;
 
 @Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME)
 public class BrandonsCore {
@@ -32,12 +29,16 @@ public class BrandonsCore {
     @SidedProxy(clientSide = "com.brandon3055.brandonscore.proxy.ClientProxy", serverSide = "com.brandon3055.brandonscore.proxy.CommonProxy")
     public static CommonProxy proxy;
 
-    public static SimpleNetworkWrapper network;
+    private static SimpleNetworkWrapper network;
 
-    @NetworkCheckHandler//TODO
-    public boolean networkCheck(Map<String, String> map, Side side) {
-        return true;
+    public static SimpleNetworkWrapper getNetwork() {
+        return instance.network;
     }
+
+//    @NetworkCheckHandler//TODO
+//    public boolean networkCheck(Map<String, String> map, Side side) {
+//        return true;
+//    }
 
     public BrandonsCore() {
         LogHelper.info("Hello Minecraft!!!");

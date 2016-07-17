@@ -40,7 +40,7 @@ public class PacketUpdateMount implements IMessage {
                     ctx.getServerHandler().playerEntity.dismountRidingEntity();
                     return null;
                 } else if (ctx.getServerHandler().playerEntity.getRidingEntity() != null) {
-                    BrandonsCore.network.sendTo(new PacketUpdateMount(ctx.getServerHandler().playerEntity.getRidingEntity().getEntityId()), ctx.getServerHandler().playerEntity);
+                    BrandonsCore.getNetwork().sendTo(new PacketUpdateMount(ctx.getServerHandler().playerEntity.getRidingEntity().getEntityId()), ctx.getServerHandler().playerEntity);
                     return null;
                 }
                 return null;

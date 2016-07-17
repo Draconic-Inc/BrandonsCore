@@ -157,7 +157,7 @@ public class TileBCBase extends TileEntity {
      * Send a message to the server side tile
      */
     public void sendPacketToServer(PacketTileMessage packet) {
-        BrandonsCore.network.sendToServer(packet);
+        BrandonsCore.getNetwork().sendToServer(packet);
     }
 
     /**

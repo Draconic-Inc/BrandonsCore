@@ -32,9 +32,9 @@ public class SyncableShort extends SyncableObject {
             lastTickValue = value;
             tile.dirtyBlock();
             if (player == null) {
-                BrandonsCore.network.sendToAllAround(new PacketSyncableObject(tile, index, value, updateOnReceived), tile.syncRange());
+                BrandonsCore.getNetwork().sendToAllAround(new PacketSyncableObject(tile, index, value, updateOnReceived), tile.syncRange());
             } else if (player instanceof EntityPlayerMP) {
-                BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, value, updateOnReceived), (EntityPlayerMP) player);
+                BrandonsCore.getNetwork().sendTo(new PacketSyncableObject(tile, index, value, updateOnReceived), (EntityPlayerMP) player);
             } else LogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
         }
     }
