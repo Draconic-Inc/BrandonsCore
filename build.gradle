@@ -44,11 +44,11 @@ minecraft {
     makeObfSourceJar = false
 }
 
-String buildNo = "1"
+String buildNo = "22"
 if (System.getenv("BUILD_NUMBER") != null) {
     buildNo = System.getenv("BUILD_NUMBER")
-    version = version + ".${buildNo}"
 }
+version = version + ".${buildNo}"
 
 dependencies {
     compile "codechicken:CodeChickenLib:${config.minecraft_version}-${config.ccl_version}:deobf"
