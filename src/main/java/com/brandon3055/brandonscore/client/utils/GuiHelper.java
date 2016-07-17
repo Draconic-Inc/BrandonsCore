@@ -273,7 +273,7 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
      * note. X-Size is 162
      */
     public static void drawPlayerSlots(Gui gui, int posX, int posY, boolean center) {
-        ResourceHelperBC.bindTexture("textures/gui/widgets.png");
+        ResourceHelperBC.bindTexture("textures/gui/bcWidgets.png");
 
         if (center) {
             posX -= 81;

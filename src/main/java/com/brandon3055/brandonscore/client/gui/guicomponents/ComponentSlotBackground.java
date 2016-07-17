@@ -8,7 +8,7 @@ import net.minecraft.util.ResourceLocation;
  */
 public class ComponentSlotBackground extends ComponentBase {
 
-    private static final ResourceLocation widgets = new ResourceLocation("brandonscore:textures/gui/Widgets.png");
+    private static final ResourceLocation widgets = new ResourceLocation("brandonscore:textures/gui/bcWidgets.png");
 
     public ComponentSlotBackground(int x, int y) {
         super(x, y);

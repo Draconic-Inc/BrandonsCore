@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
  * Created by Brandon on 31/12/2014.
  */
 public class ComponentItemRenderer extends ComponentBase {
-    private static final ResourceLocation texture = new ResourceLocation("brandonscore:textures/gui/Widgets.png");
+    private static final ResourceLocation texture = new ResourceLocation("brandonscore:textures/gui/bcWidgets.png");
 
     ItemStack stack;
 
