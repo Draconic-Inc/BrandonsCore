@@ -41,6 +41,7 @@ minecraft {
     mappings = "${config.mappings}"
     replace '${mod_version}', project.config.mod_version
     replaceIn "BrandonsCore.java"
+    makeObfSourceJar = false
 }
 
 String buildNo = "1"
@@ -58,25 +59,22 @@ processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
+    inputs.property "ccl_version", config.ccl_version
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
+        include '*.info'
 
         // replace version and mcversion
         expand 'version': project.version, 'mc_version': project.minecraft.version, 'ccl_version': config.ccl_version
-    }
-
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
     }
 
     rename '(.+_at.cfg)', 'META-INF/$1'
 }
 
 def commonManifest = {
-//    attributes 'FMLCorePlugin': 'codechicken.core.launch.DepLoader'
+    attributes 'FMLCorePlugin': 'codechicken.core.launch.DepLoader'
+    attributes 'FMLCorePluginContainsFMLMod': 'true'
     //attributes 'FMLCorePlugin': 'com.brandon3055.brandonscore.asm.LoadingPlugin' https://unascribed.com/t/51f2cc7e.txt
     attributes 'FMLAT': 'BrandonsCore_at.cfg'
 }
