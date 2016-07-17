@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore;
+package com.brandon3055.brandonscore.proxy;
 
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraft.entity.player.EntityPlayer;

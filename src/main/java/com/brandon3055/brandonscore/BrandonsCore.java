@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
 import com.brandon3055.brandonscore.network.PacketTileMessage;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
+import com.brandon3055.brandonscore.proxy.CommonProxy;
 import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -28,12 +29,12 @@ public class BrandonsCore {
     @Mod.Instance(BrandonsCore.MODID)
     public static BrandonsCore instance;
 
-    @SidedProxy(clientSide = "com.brandon3055.brandonscore.client.ClientProxy", serverSide = "com.brandon3055.brandonscore.CommonProxy")
+    @SidedProxy(clientSide = "com.brandon3055.brandonscore.proxy.ClientProxy", serverSide = "com.brandon3055.brandonscore.proxy.CommonProxy")
     public static CommonProxy proxy;
 
     public static SimpleNetworkWrapper network;
 
-    @NetworkCheckHandler
+    @NetworkCheckHandler//TODO
     public boolean networkCheck(Map<String, String> map, Side side) {
         return true;
     }

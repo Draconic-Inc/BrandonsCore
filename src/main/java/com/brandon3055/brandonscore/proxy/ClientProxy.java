@@ -1,6 +1,6 @@
-package com.brandon3055.brandonscore.client;
+package com.brandon3055.brandonscore.proxy;
 
-import com.brandon3055.brandonscore.CommonProxy;
+import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
