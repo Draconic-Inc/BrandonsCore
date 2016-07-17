@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
 import com.brandon3055.brandonscore.network.PacketTileMessage;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
+import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -16,6 +17,12 @@ public class NetworkManager {
     private static SimpleNetworkWrapper network;
 
     public static SimpleNetworkWrapper getNetwork() {
+        if (network == null) {
+            LogHelper.error("WHAT THE FUCK IS GOING ON HERE!?!?!?!?!?!");
+
+            throw new RuntimeException("The network is somehow null... THIS SHOULD NOT BE POSSIBLE!!!!!!!!");
+        }
+
         return network;
     }
 

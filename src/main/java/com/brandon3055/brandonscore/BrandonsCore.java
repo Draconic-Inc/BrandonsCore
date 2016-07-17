@@ -5,11 +5,9 @@ import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.proxy.CommonProxy;
 import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 @Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME)
 public class BrandonsCore {
@@ -23,9 +21,9 @@ public class BrandonsCore {
     @SidedProxy(clientSide = "com.brandon3055.brandonscore.proxy.ClientProxy", serverSide = "com.brandon3055.brandonscore.proxy.CommonProxy")
     public static CommonProxy proxy;
 
-    public static SimpleNetworkWrapper getNetwork() {
-        return NetworkManager.getNetwork();
-    }
+//    public static SimpleNetworkWrapper getNetwork() {
+//        return NetworkManager.getNetwork();
+//    }
 
 //    @NetworkCheckHandler//TODO
 //    public boolean networkCheck(Map<String, String> map, Side side) {
@@ -36,14 +34,16 @@ public class BrandonsCore {
         LogHelper.info("Hello Minecraft!!!");
     }
 
-    @EventHandler
+    @Mod.EventHandler
     public void serverStart(FMLServerStartingEvent event) {
 
     }
 
-    @EventHandler
+    @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         proxy.preInit(event);
+
+        LogHelper.bigInfo("BrandonsCore Pre Initialization");
 
         FileHandler.init(event);
         ProcessHandler.init();
