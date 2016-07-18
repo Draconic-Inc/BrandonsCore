@@ -25,7 +25,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         protected float pitch;
         protected float yaw;
         protected String name;
-        protected String dimentionName = "";
+        protected String dimensionName = "";
         protected boolean writeProtected = false;
 
         public TeleportLocation() {
@@ -77,7 +77,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         }
 
         public String getDimensionName() {
-            return dimentionName;
+            return dimensionName;
         }
 
         public float getPitch() {
@@ -136,7 +136,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
             compound.setFloat("Pitch", pitch);
             compound.setFloat("Yaw", yaw);
             compound.setString("Name", name);
-            compound.setString("DimentionName", dimentionName);
+            compound.setString("DimentionName", dimensionName);
             compound.setBoolean("WP", writeProtected);
         }
 
@@ -148,7 +148,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
             pitch = compound.getFloat("Pitch");
             yaw = compound.getFloat("Yaw");
             name = compound.getString("Name");
-            dimentionName = compound.getString("DimentionName");
+            dimensionName = compound.getString("DimentionName");
             writeProtected = compound.getBoolean("WP");
         }
 
@@ -156,8 +156,8 @@ public class Teleporter //todo give this class a full test when the dislocator i
             teleportEntity(entity, this);
         }
 
-        public void setDimentionName(String dimentionName) {
-            this.dimentionName = dimentionName;
+        public void setDimensionName(String dimensionName) {
+            this.dimensionName = dimensionName;
         }
     }
 
