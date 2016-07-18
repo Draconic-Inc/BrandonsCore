@@ -103,37 +103,39 @@ artifacts {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "file:///var/www/maven")
-            pom {
-                groupId = project.group
-                version = project.version
-                artifactId = project.archivesBaseName
-                project {
-                    name project.archivesBaseName
-                    packaging 'jar'
-                    description 'BrandonsCore'
-                    url 'https://github.com/brandon3055/BrandonsCore'
-                    scm {
+            if (project.hasProperty("local_maven")) {
+                repository(url: "file://${local_maven}")
+                pom {
+                    groupId = project.group
+                    version = project.version
+                    artifactId = project.archivesBaseName
+                    project {
+                        name project.archivesBaseName
+                        packaging 'jar'
+                        description 'BrandonsCore'
                         url 'https://github.com/brandon3055/BrandonsCore'
-                        connection 'scm:git:git@github.com:brandon3055/BrandonsCore.git'
-                        developerConnection 'scm:git:git@github.com:brandon3055/BrandonsCore.git'
-                    }
-                    issueManagement {
-                        system 'github'
-                        url 'https://github.com/brandon3055/BrandonsCore/issues'
-                    }
-                    licenses {
-                        license {
-                            name 'License'
-                            url 'https://raw.githubusercontent.com/brandon3055/BrandonsCore/master/LICENSE.txt'
-                            distribution 'repo'
+                        scm {
+                            url 'https://github.com/brandon3055/BrandonsCore'
+                            connection 'scm:git:git@github.com:brandon3055/BrandonsCore.git'
+                            developerConnection 'scm:git:git@github.com:brandon3055/BrandonsCore.git'
                         }
-                    }
-                    developers {
-                        developer {
-                            id 'brandon3055'
-                            name 'brandon3055'
-                            roles { role 'developer' }
+                        issueManagement {
+                            system 'github'
+                            url 'https://github.com/brandon3055/BrandonsCore/issues'
+                        }
+                        licenses {
+                            license {
+                                name 'License'
+                                url 'https://raw.githubusercontent.com/brandon3055/BrandonsCore/master/LICENSE.txt'
+                                distribution 'repo'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id 'brandon3055'
+                                name 'brandon3055'
+                                roles { role 'developer' }
+                            }
                         }
                     }
                 }
