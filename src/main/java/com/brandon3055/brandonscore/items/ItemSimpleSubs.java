@@ -36,6 +36,9 @@ public class ItemSimpleSubs extends ItemBCore {
     public String getUnlocalizedName(ItemStack stack) {
         if (getHasSubtypes() && nameMap.containsKey(stack.getItemDamage())) {
             return (super.getUnlocalizedName(stack) + "." + nameMap.get(stack.getItemDamage())).replaceAll("=", ".");
-        } else return super.getUnlocalizedName(stack);
+        }
+        else {
+            return super.getUnlocalizedName(stack);
+        }
     }
 }

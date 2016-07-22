@@ -337,4 +337,14 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
     public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour) {
         drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour, 1F, 0);
     }
+
+    public static void drawBorderedRect(int posX, int posY, int xSize, int ySize, int borderWidth, int innerColour, int borderColour) {
+        drawColouredRect(posX, posY, xSize, borderWidth, borderColour);
+        drawColouredRect(posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
+
+        drawColouredRect(posX, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
+        drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
+
+        drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), innerColour);
+    }
 }

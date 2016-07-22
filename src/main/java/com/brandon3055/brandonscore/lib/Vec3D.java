@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
+import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -125,6 +126,8 @@ public class Vec3D {
     public BlockPos getPos() {
         return new BlockPos(x, y, z);
     }
+
+    public Vector3 toVector3() { return new Vector3(x, y, z); }
 
     @Override
     public String toString() {

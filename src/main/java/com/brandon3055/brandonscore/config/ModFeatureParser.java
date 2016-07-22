@@ -23,8 +23,9 @@ import java.util.Map;
 /**
  * Created by brandon3055 on 18/3/2016.
  * Features Refer to Blocks and Items.
- * This class is responsible for storing a list of all blocks and items in the mod.
- * As well as handling the config for each block and item.
+ * This class is responsible for the registration of all features in a mod including registering rendering.
+ * It also generates and reads configs for all features as it registers (Or dose not register) them.
+ * And it stores a list of all features registered by every mod using this class for feature registration.
  */
 public class ModFeatureParser {
 
@@ -33,14 +34,21 @@ public class ModFeatureParser {
     private static final String CATEGORY_BLOCKS = "Blocks";
     private static final String CATEGORY_ITEMS = "Items";
 
-    private static Map<Object, Boolean> featureStates = new HashMap<Object, Boolean>();
-    private static List<FeatureEntry> featureEntries = new ArrayList<FeatureEntry>();
+    private static final Map<Object, Boolean> featureStates = new HashMap<Object, Boolean>();
+    private static final List<FeatureEntry> featureEntries = new ArrayList<FeatureEntry>();
 
+    /**
+     * @param modid modid of the mod implementing this instance of ModFeatureParser
+     * @param modTabs list of creative tabs that belong to the mod
+     */
     public ModFeatureParser(String modid, CreativeTabs[] modTabs) {
         this.modid = modid;
         this.modTabs = modTabs;
     }
 
+    /**
+     * @param collection A class containing all of the mods "Features" Look at Draconic Evolution for an example implementation
+     */
     public void loadFeatures(Class collection) {
         for (Field field : collection.getFields()) {
             if (field.isAnnotationPresent(Feature.class)) {
@@ -55,6 +63,11 @@ public class ModFeatureParser {
         }
     }
 
+    /**
+     * Generates or reads the config setting for every loaded feature.
+     * Must be called AFTER loadFeatures
+     * @param configuration the mods configuration
+     */
     public void loadFeatureConfig(Configuration configuration) {
         try {
             for (FeatureEntry entry : featureEntries) {
@@ -79,6 +92,10 @@ public class ModFeatureParser {
         }
     }
 
+    /**
+     * Registers all features that are not disabled via the config.
+     * Must be called AFTER loadFeatureConfig
+     */
     public void registerFeatures() {
         for (FeatureEntry entry : featureEntries) {
             if (!entry.enabled) continue;
@@ -137,6 +154,10 @@ public class ModFeatureParser {
         }
     }
 
+    /**
+     * Registers the rendering for all loaded and enabled features.
+     * Must be called AFTER registerFeatures, during Pre Initialization and from your Client Proxy
+     */
     @SideOnly(Side.CLIENT)
     public void registerRendering() {
         for (FeatureEntry entry : featureEntries) {
@@ -184,9 +205,23 @@ public class ModFeatureParser {
         }
     }
 
-    public boolean isEnabled(Object feature) {
-        if (!featureStates.containsKey(feature)) return false;
-        else return featureStates.get(feature);
+    /**
+     * Returns true if this object has been registered with a ModFeatureParser
+     * */
+    public static boolean isFeature(Object object) {
+        return featureStates.containsKey(object);
+    }
+
+    /**
+     * Returns true if feature is enabled. Applies to all mods using a ModFeatureParser instance
+     * */
+    public static boolean isEnabled(Object feature) {
+        if (!featureStates.containsKey(feature)) {
+            return false;
+        }
+        else {
+            return featureStates.get(feature);
+        }
     }
 
     private static class FeatureEntry {
