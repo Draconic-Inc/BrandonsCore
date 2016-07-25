@@ -216,17 +216,10 @@ public class PacketSyncableObject implements IMessage {
         @Override
         public IMessage handleMessage(PacketSyncableObject message, MessageContext ctx) {
             if (ctx.side == Side.CLIENT) {
-                PacketSyncObject packetSyncObject = new PacketSyncObject<PacketSyncableObject, IMessage>(message, ctx) {
-                    @Override
-                    public void run() {
-                        TileEntity tile = FMLClientHandler.instance().getWorldClient().getTileEntity(message.tilePos);
-                        if (tile instanceof TileBCBase) {
-                            ((TileBCBase) tile).receiveSyncPacketFromServer(message);
-                        }
-                    }
-                };
-
-                packetSyncObject.addPacketClient();
+                TileEntity tile = FMLClientHandler.instance().getWorldClient().getTileEntity(message.tilePos);
+                if (tile instanceof TileBCBase) {
+                    ((TileBCBase) tile).receiveSyncPacketFromServer(message);
+                }
             }
             return null;
         }

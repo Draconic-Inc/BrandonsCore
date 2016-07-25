@@ -182,11 +182,6 @@ public class TileBCBase extends TileEntity {
         chunk.setChunkModified();
     }
 
-//    public static <T> T getCastTileAt(IBlockAccess world, BlockPos posAt, Class<T> clazz) {
-//        TileEntity tile = world.getTileEntity(posAt);
-//        return (tile != null && clazz.isAssignableFrom(tile.getClass())) ? clazz.cast(tile) : null;
-//    }
-
     /**
      * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
      * Note that this should NOT be used in cases where the block has a different tile depending on its state.
