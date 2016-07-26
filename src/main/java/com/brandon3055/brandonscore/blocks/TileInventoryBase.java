@@ -73,6 +73,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
         if (stack != null && stack.stackSize > getInventoryStackLimit()) {
             stack.stackSize = getInventoryStackLimit();
         }
+        markDirty();
     }
 
     @Override
@@ -141,7 +142,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
         return null;
     }
 
-    private void writeInventoryToNBT(NBTTagCompound compound) {
+    protected void writeInventoryToNBT(NBTTagCompound compound) {
         NBTTagCompound[] tag = new NBTTagCompound[inventoryStacks.length];
 
         for (int i = 0; i < inventoryStacks.length; i++) {
@@ -155,7 +156,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
         }
     }
 
-    private void readInventoryFromNBT(NBTTagCompound compound) {
+    protected void readInventoryFromNBT(NBTTagCompound compound) {
         NBTTagCompound[] tag = new NBTTagCompound[inventoryStacks.length];
 
         for (int i = 0; i < inventoryStacks.length; i++) {

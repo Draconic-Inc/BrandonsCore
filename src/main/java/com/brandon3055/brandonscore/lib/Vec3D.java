@@ -36,6 +36,12 @@ public class Vec3D {
         this.z = vec3I.z;
     }
 
+    public Vec3D(Vector3 vector3) {
+        this.x = vector3.x;
+        this.y = vector3.y;
+        this.z = vector3.z;
+    }
+
     public Vec3D(BlockPos pos) {
         this.x = pos.getX();
         this.y = pos.getY();
@@ -164,5 +170,9 @@ public class Vec3D {
         Vec3D offset = vecTo.copy();
         offset.subtract(vecFrom);
         return new Vec3D(offset.x / distance, offset.y / distance, offset.z / distance);
+    }
+
+    public static Vec3D getCenter(BlockPos pos) {
+        return new Vec3D(pos).add(0.5, 0.5, 0.5);
     }
 }

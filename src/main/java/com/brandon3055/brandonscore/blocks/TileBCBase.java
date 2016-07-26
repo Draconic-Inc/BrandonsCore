@@ -111,6 +111,8 @@ public class TileBCBase extends TileEntity {
             syncableObject.toNBT(nbttagcompound);
         }
 
+        writeExtraNBT(nbttagcompound);
+
         return new SPacketUpdateTileEntity(this.pos, 0, nbttagcompound);
     }
 
@@ -129,13 +131,13 @@ public class TileBCBase extends TileEntity {
         }
 
         writeExtraNBT(compound);
-
         return compound;
     }
 
     @Override
     public void handleUpdateTag(NBTTagCompound tag) {
         super.handleUpdateTag(tag);//todo?
+        readExtraNBT(tag);
     }
 
     @Override
@@ -147,6 +149,8 @@ public class TileBCBase extends TileEntity {
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
             syncableObject.fromNBT(pkt.getNbtCompound());
         }
+
+        readExtraNBT(pkt.getNbtCompound());
     }
 
     //endregion
