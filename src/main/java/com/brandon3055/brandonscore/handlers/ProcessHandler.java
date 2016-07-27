@@ -34,8 +34,12 @@ public class ProcessHandler {
 
             while (i.hasNext()) {
                 IProcess process = i.next();
-                if (process.isDead()) i.remove();
-                else process.updateProcess();
+                if (process.isDead()) {
+                    i.remove();
+                }
+                else {
+                    process.updateProcess();
+                }
             }
 
             if (!newProcesses.isEmpty()) {

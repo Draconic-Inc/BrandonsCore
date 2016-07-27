@@ -1,15 +1,14 @@
 package com.brandon3055.brandonscore;
 
+import com.brandon3055.brandonscore.command.CommandTickTime;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
-import com.brandon3055.brandonscore.network.PacketSpawnParticle;
-import com.brandon3055.brandonscore.network.PacketSyncableObject;
-import com.brandon3055.brandonscore.network.PacketTileMessage;
-import com.brandon3055.brandonscore.network.PacketUpdateMount;
+import com.brandon3055.brandonscore.network.*;
 import com.brandon3055.brandonscore.utils.LogHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -32,10 +31,10 @@ public class BrandonsCore {
         LogHelper.info("Hello Minecraft!!!");
     }
 
-//    @Mod.EventHandler
-//    public void serverStart(FMLServerStartingEvent event) {
-//        LogHelper.bigInfo("BrandonsCore Server Start");
-//    }
+    @Mod.EventHandler
+    public void serverStart(FMLServerStartingEvent event) {
+        event.registerServerCommand(new CommandTickTime());
+    }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -55,5 +54,6 @@ public class BrandonsCore {
         network.registerMessage(PacketSpawnParticle.Handler.class, PacketSpawnParticle.class, 2, Side.CLIENT);
         network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 3, Side.CLIENT);
         network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 4, Side.SERVER);
+        network.registerMessage(PacketTickTime.Handler.class, PacketTickTime.class, 5, Side.CLIENT);
     }
 }

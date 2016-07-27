@@ -159,6 +159,11 @@ public class Teleporter //todo give this class a full test when the dislocator i
         public void setDimensionName(String dimensionName) {
             this.dimensionName = dimensionName;
         }
+
+        @Override
+        public int hashCode() {
+            return (xCoord + "-" + yCoord + "-" + zCoord + "-" + name + "-" + dimensionName + "-" + dimension + "-" + yaw + "-" + pitch).hashCode();
+        }
     }
 
 
