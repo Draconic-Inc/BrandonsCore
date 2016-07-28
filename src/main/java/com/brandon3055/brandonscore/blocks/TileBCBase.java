@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.network.PacketSyncableObject;
 import com.brandon3055.brandonscore.network.PacketTileMessage;
 import com.brandon3055.brandonscore.network.wrappers.SyncableObject;
 import com.brandon3055.brandonscore.utils.LogHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -193,6 +194,12 @@ public class TileBCBase extends TileEntity {
     public void setShouldRefreshOnBlockChange() {
         shouldRefreshOnState = false;
     }
+
+    public IBlockState getState(Block expectedBlock) {
+        IBlockState state = worldObj.getBlockState(pos);
+        return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
+    }
+
     //endregion
 
     /**
