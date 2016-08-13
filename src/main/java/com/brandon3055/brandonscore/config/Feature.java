@@ -18,41 +18,41 @@ public @interface Feature {
     /**
      * used For All
      */
-    public String name();
+    String name();
 
     /**
      * used For All
      */
-    public boolean isActive() default true;
+    boolean isActive() default true;
 
     /**
      * used For All
      */
-    public boolean isConfigurable() default true;
+    boolean isConfigurable() default true;
 
     /**
      * used For All
      */
-    public String[] variantMap() default {};
+    String[] variantMap() default {};
 
     /**
      * used For Items with a single variant
      */
-    public String stateOverride() default "";
+    String stateOverride() default "";
 
     /**
      * used For Blocks
      */
-    public Class<? extends ItemBlock> itemBlock() default ItemBlock.class;
+    Class<? extends ItemBlock> itemBlock() default ItemBlock.class;
 
     /**
      * used For Blocks
      */
-    public Class<? extends TileEntity> tileEntity() default TileEntity.class;
+    Class<? extends TileEntity> tileEntity() default TileEntity.class;
 
     /**
      * used For All
      * set to -1 to exclude from creative tab.
      */
-    public int cTab() default 0;
+    int cTab() default 0;
 }

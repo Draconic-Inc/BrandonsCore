@@ -5,6 +5,8 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 24/3/2016.
@@ -12,28 +14,49 @@ import java.lang.reflect.Field;
  */
 public class ModConfigProcessor {
 
-    private Class configClass;
     private Configuration config;
+    private Map<String, String> categoryComments;
+    private Class[] configClasses;
 
     public ModConfigProcessor() {
     }
 
-    public void processConfig(Class configClass, Configuration config) {
-        this.configClass = configClass;
+    public void initialize(Configuration config, Class... configClass) {
+        initialize(config, new HashMap<String, String>(), configClass);
+    }
+
+    public void initialize(Configuration config, Map<String, String> categoryComments, Class... configClasses) {
         this.config = config;
-        for (Field field : configClass.getFields()) {
-            if (field.isAnnotationPresent(ModConfigProperty.class)) {
-                ModConfigProperty property = field.getAnnotation(ModConfigProperty.class);
-                try {
-                    Object defaultValue = field.get(null);
-                    Object newValue = getConfigValue(defaultValue, config, property);
-                    field.set(null, newValue);
-                }
-                catch (Exception e) {
-                    LogHelper.error("Something when wrong while loading config value [" + property.name() + "]");
-                    e.printStackTrace();
+        this.categoryComments = categoryComments;
+        this.configClasses = configClasses;
+    }
+
+    public void loadConfig() {
+        if (config == null || configClasses == null) {
+            throw new RuntimeException("A mod using ModConfigProcessor attempted to load configuration before initializing the config processor or after initializing with null arguments");
+        }
+
+        for (Class clazz : configClasses) {
+            for (Field field : clazz.getFields()) {
+                if (field.isAnnotationPresent(ModConfigProperty.class)) {
+                    ModConfigProperty property = field.getAnnotation(ModConfigProperty.class);
+                    try {
+                        Object defaultValue = field.get(null);
+                        Object newValue = getConfigValue(defaultValue, config, property);
+                        field.set(null, newValue);
+                    }
+                    catch (Exception e) {
+                        LogHelper.error("Something when wrong while loading config value [" + property.name() + "]");
+                        e.printStackTrace();
+                    }
                 }
             }
+        }
+
+        for (String category : categoryComments.keySet()) {
+            //if (config.hasCategory(category)) {
+                config.setCategoryComment(category, categoryComments.get(category));
+            //}
         }
 
         saveConfig();
@@ -42,19 +65,26 @@ public class ModConfigProcessor {
     public static Object getConfigValue(Object defaultValue, Configuration configuration, ModConfigProperty property) throws Exception {
         if (defaultValue instanceof Boolean) {
             return configuration.get(property.category(), property.name(), (Boolean) defaultValue, property.comment()).getBoolean((Boolean) defaultValue);
-        } else if (defaultValue instanceof boolean[]) {
+        }
+        else if (defaultValue instanceof boolean[]) {
             return configuration.get(property.category(), property.name(), (boolean[]) defaultValue, property.comment()).getBooleanList();
-        } else if (defaultValue instanceof Double) {
+        }
+        else if (defaultValue instanceof Double) {
             return configuration.get(property.category(), property.name(), (Double) defaultValue, property.comment()).getDouble((Double) defaultValue);
-        } else if (defaultValue instanceof double[]) {
+        }
+        else if (defaultValue instanceof double[]) {
             return configuration.get(property.category(), property.name(), (double[]) defaultValue, property.comment()).getDoubleList();
-        } else if (defaultValue instanceof Integer) {
+        }
+        else if (defaultValue instanceof Integer) {
             return configuration.get(property.category(), property.name(), (Integer) defaultValue, property.comment()).getInt((Integer) defaultValue);
-        } else if (defaultValue instanceof int[]) {
+        }
+        else if (defaultValue instanceof int[]) {
             return configuration.get(property.category(), property.name(), (int[]) defaultValue, property.comment()).getIntList();
-        } else if (defaultValue instanceof String) {
+        }
+        else if (defaultValue instanceof String) {
             return configuration.get(property.category(), property.name(), (String) defaultValue, property.comment()).getString();
-        } else if (defaultValue instanceof String[]) {
+        }
+        else if (defaultValue instanceof String[]) {
             return configuration.get(property.category(), property.name(), (String[]) defaultValue, property.comment()).getStringList();
         }
         throw new Exception("Config data class is unknown");

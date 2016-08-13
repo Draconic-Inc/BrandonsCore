@@ -9,9 +9,19 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ModConfigProperty {
-    public String name();
 
-    public String category();
+    /**
+     * @return the name of this config property.
+     */
+    String name();
 
-    public String comment() default "";
+    /**
+     * @return the category for this config property.
+     */
+    String category();
+
+    /**
+     * @return the comment for this config property.
+     */
+    String comment() default "";
 }

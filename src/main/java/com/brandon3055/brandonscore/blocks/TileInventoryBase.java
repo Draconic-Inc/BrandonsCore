@@ -84,9 +84,9 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
     @Override
     public boolean isUseableByPlayer(EntityPlayer player) {
         if (worldObj == null) {
-            return false;    //todo Was this supposed to be true?
+            return false;
         }
-        if (worldObj.getTileEntity(pos) != this) {
+        else if (worldObj.getTileEntity(pos) != this) {
             return false;
         }
         return player.getDistanceSq(pos.add(0.5, 0.5, 0.5)) < 64;

@@ -78,17 +78,18 @@ public class ModFeatureParser {
 
                 String category = entry.featureObj instanceof Block ? CATEGORY_BLOCKS : CATEGORY_ITEMS;
 
-                entry.enabled = configuration.get(category, entry.feature.name(), entry.feature.isActive()).getBoolean(entry.feature.isActive());
+                entry.enabled = configuration.get(category, entry.feature.name(), entry.feature.isActive()).setRequiresMcRestart(true).getBoolean(entry.feature.isActive());
                 featureStates.put(entry.featureObj, entry.enabled);
             }
-
         }
         catch (Exception var4) {
             LogHelper.error("Error Loading Block/Item Config");
             var4.printStackTrace();
         }
         finally {
-            if (configuration.hasChanged()) configuration.save();
+            if (configuration.hasChanged()) {
+                configuration.save();
+            }
         }
     }
 

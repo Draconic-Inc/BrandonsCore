@@ -116,7 +116,7 @@ public class BCClientEventHandler {
 
         int i = 0;
         for (Integer dim : sortingOrder) {
-            if (dimTickTimes.get(dim) == null) {
+            if (dimTickTimes.get(dim) == null || !DimensionManager.isDimensionRegistered(dim)) {
                 continue;
             }
 

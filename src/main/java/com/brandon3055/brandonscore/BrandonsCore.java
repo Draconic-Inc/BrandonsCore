@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "BrandonsCore";
-    public static final String VERSION = "${mod_version}";//MC Update, Major version, Minor Version, Release number (private or public)
+    public static final String VERSION = "${mod_version}";
 
     @Mod.Instance(BrandonsCore.MODID)
     public static BrandonsCore instance;
@@ -39,9 +39,6 @@ public class BrandonsCore {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         proxy.preInit(event);
-
-
-
         FileHandler.init(event);
         ProcessHandler.init();
         registerNetwork();
@@ -57,3 +54,4 @@ public class BrandonsCore {
         network.registerMessage(PacketTickTime.Handler.class, PacketTickTime.class, 5, Side.CLIENT);
     }
 }
+

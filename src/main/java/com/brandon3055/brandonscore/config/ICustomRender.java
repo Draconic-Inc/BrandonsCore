@@ -11,10 +11,10 @@ public interface ICustomRender {
      * Use this to register a custom renderer for the block.
      */
     @SideOnly(Side.CLIENT)
-    public void registerRenderer(Feature feature);
+    void registerRenderer(Feature feature);
 
     /**
      * Return true if the normal json model should still be registered for the item
      */
-    public boolean registerNormal(Feature feature);
+    boolean registerNormal(Feature feature);
 }
