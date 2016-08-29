@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -45,12 +45,12 @@ public class PlayerSlot {//todo Maby move to API? Depends if this gets used in a
             stacks = player.inventory.offHandInventory;
         }
         else {
-            LogHelper.bigError("PlayerSlot#getStackInSlot Invalid or null category! This should not be possible! [%s]... Fix your Shit!", category);
+            BCLogHelper.bigError("PlayerSlot#getStackInSlot Invalid or null category! This should not be possible! [%s]... Fix your Shit!", category);
             return null;
         }
 
         if (slot < 0 || slot >= stacks.length){
-            LogHelper.bigError("PlayerSlot#getStackInSlot Hay! I just saved you an index out of bounds! Be grateful and fix your shit!");
+            BCLogHelper.bigError("PlayerSlot#getStackInSlot Hay! I just saved you an index out of bounds! Be grateful and fix your shit!");
             return null;
         }
 
@@ -74,7 +74,7 @@ public class PlayerSlot {//todo Maby move to API? Depends if this gets used in a
 
         public static EnumInvCategory fromIndex(int index){
             if (index > 2 || index < 0){
-                LogHelper.bigError("PlayerSlot.EnumInvCategory#fromIndex Attempt to read invalid index! [%s]", index);
+                BCLogHelper.bigError("PlayerSlot.EnumInvCategory#fromIndex Attempt to read invalid index! [%s]", index);
                 return indexMap[0];
             }
             return indexMap[index];

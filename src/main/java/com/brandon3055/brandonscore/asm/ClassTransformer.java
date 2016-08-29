@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.asm;
 import codechicken.lib.asm.ASMHelper;
 import codechicken.lib.asm.ModularASMTransformer;
 import codechicken.lib.asm.ObfMapping;
-import com.brandon3055.brandonscore.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
@@ -87,21 +87,21 @@ public class ClassTransformer implements IClassTransformer {
 
     private static void debug(byte[] bytes) {
         ObfMapping mapping = new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "canEnchantItem", "(Lnet/minecraft/item/Item;)Z");
-        LogHelper.info("\n");
+        BCLogHelper.info("\n");
         ClassNode classNode = new ClassNode();
         ClassReader reader = new ClassReader(bytes);
         reader.accept(classNode, 8);
         for (MethodNode node : classNode.methods) {
-            LogHelper.info(String.format("Name: [%s], Desc: [%s].", node.name, node.desc));
+            BCLogHelper.info(String.format("Name: [%s], Desc: [%s].", node.name, node.desc));
         }
         MethodNode methodNode = ASMHelper.findMethod(mapping, classNode);
         if (methodNode == null) {
-            LogHelper.info("Unable to find method!");
+            BCLogHelper.info("Unable to find method!");
         } else {
-            LogHelper.info("\n Instructions: \n");
-            LogHelper.info(ASMHelper.toString(methodNode.instructions));
+            BCLogHelper.info("\n Instructions: \n");
+            BCLogHelper.info(ASMHelper.toString(methodNode.instructions));
         }
-        LogHelper.info("\n");
+        BCLogHelper.info("\n");
 
     }
 }

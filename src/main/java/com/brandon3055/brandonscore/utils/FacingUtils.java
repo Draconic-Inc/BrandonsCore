@@ -23,6 +23,10 @@ public class FacingUtils {
      * Offsets for all 8 blocks around Z Axis
      */
     public static final BlockPos[] AROUND_Z;
+    /**
+     * A combination of the 3.
+     */
+    public static final BlockPos[] AROUND_ALL;
 
     /**
      * Facings for the 4 faces around X Axis
@@ -39,10 +43,30 @@ public class FacingUtils {
 
     static {
         AROUND_X = new BlockPos[]{new BlockPos(0, 1, -1), new BlockPos(0, 1, 0), new BlockPos(0, 1, 1), new BlockPos(0, 0, -1), new BlockPos(0, 0, 1), new BlockPos(0, -1, -1), new BlockPos(0, -1, 0), new BlockPos(0, -1, 1)};
-
         AROUND_Y = new BlockPos[]{new BlockPos(-1, 0, 1), new BlockPos(0, 0, 1), new BlockPos(1, 0, 1), new BlockPos(-1, 0, 0), new BlockPos(1, 0, 0), new BlockPos(-1, 0, -1), new BlockPos(0, 0, -1), new BlockPos(1, 0, -1)};
-
         AROUND_Z = new BlockPos[]{new BlockPos(1, 1, 0), new BlockPos(0, 1, 0), new BlockPos(-1, 1, 0), new BlockPos(1, 0, 0), new BlockPos(-1, 0, 0), new BlockPos(1, -1, 0), new BlockPos(0, -1, 0), new BlockPos(-1, -1, 0)};
+
+        List<BlockPos> list = new ArrayList<BlockPos>();
+
+        for (BlockPos pos : AROUND_X) {
+            if (!list.contains(pos)) {
+                list.add(pos);
+            }
+        }
+
+        for (BlockPos pos : AROUND_Y) {
+            if (!list.contains(pos)) {
+                list.add(pos);
+            }
+        }
+
+        for (BlockPos pos : AROUND_Z) {
+            if (!list.contains(pos)) {
+                list.add(pos);
+            }
+        }
+
+        AROUND_ALL = list.toArray(new BlockPos[0]);
 
         List<EnumFacing> x = new ArrayList<EnumFacing>();
         List<EnumFacing> y = new ArrayList<EnumFacing>();

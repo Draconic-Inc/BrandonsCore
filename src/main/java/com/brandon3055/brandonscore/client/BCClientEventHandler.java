@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
 import com.brandon3055.brandonscore.utils.LinkedHashList;
-import com.brandon3055.brandonscore.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -84,13 +84,13 @@ public class BCClientEventHandler {
 			Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
 			if (e != null){
 				Minecraft.getMinecraft().thePlayer.startRiding(e);
-				LogHelper.info("Successfully placed player on mount after "+(500 - remountTicksRemaining)+" ticks");
+				BCLogHelper.info("Successfully placed player on mount after "+(500 - remountTicksRemaining)+" ticks");
 				remountTicksRemaining = 0;
 				return;
 			}
 			remountTicksRemaining--;
 			if (remountTicksRemaining == 0){
-				LogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
+				BCLogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
                 BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
 			}
 		}
@@ -100,7 +100,7 @@ public class BCClientEventHandler {
         if (remountTicksRemaining == 500) return;
         remountTicksRemaining = 500;
         remountEntityID = id;
-        LogHelper.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
+        BCLogHelper.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
     }
 
     @SubscribeEvent

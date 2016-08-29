@@ -175,7 +175,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
         World destinationWorld = BrandonsCore.proxy.getMCServer().worldServerForDimension(destination.dimension);
 
         if (destinationWorld == null) {
-            LogHelper.error("Destination world dose not exist!");
+            BCLogHelper.error("Destination world dose not exist!");
             return entity;
         }
 
@@ -223,7 +223,7 @@ public class Teleporter //todo give this class a full test when the dislocator i
                 entity.isDead = true;
                 entity = EntityList.createEntityFromNBT(entityNBT, destinationWorld);
                 if (entity == null) {
-                    LogHelper.error("Failed to teleport entity to new location");
+                    BCLogHelper.error("Failed to teleport entity to new location");
                     return null;
                 }
                 entity.dimension = destinationWorld.provider.getDimension();

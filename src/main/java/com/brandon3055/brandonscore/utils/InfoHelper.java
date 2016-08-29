@@ -76,7 +76,7 @@ public class InfoHelper {
             lineCount = Integer.parseInt(lineCountS);
         }
         catch (NumberFormatException e) {
-            LogHelper.error("Invalid Lore Format! Lore myst start with the number of lines \"3Line 1\\nLine 2\\nLine 3\"");
+            BCLogHelper.error("Invalid Lore Format! Lore myst start with the number of lines \"3Line 1\\nLine 2\\nLine 3\"");
         }
 
         String[] loreLines = new String[lineCount];

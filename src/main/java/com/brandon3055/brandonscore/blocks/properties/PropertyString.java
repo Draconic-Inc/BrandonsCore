@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.blocks.properties;
 
 import com.brandon3055.brandonscore.utils.ArrayUtils;
-import com.brandon3055.brandonscore.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.properties.PropertyHelper;
@@ -48,7 +48,7 @@ public class PropertyString extends PropertyHelper<String> {
         if (meta >= 0 && meta < valuesSet.size()) {
             return valuesSet.get(meta);
         }
-        LogHelper.error("[PropertyString] Attempted to load property for invalid meta value");
+        BCLogHelper.error("[PropertyString] Attempted to load property for invalid meta value");
         return valuesSet.get(0);
     }
 }

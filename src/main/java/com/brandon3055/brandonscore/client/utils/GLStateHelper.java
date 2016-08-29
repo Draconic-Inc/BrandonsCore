@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.utils;
 
-import com.brandon3055.brandonscore.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 
@@ -12,7 +12,7 @@ public class GLStateHelper {
     private static int lastBlendState = -1;
     public static void pushBlend(boolean enable) {
         if (lastBlendState != -1){
-            LogHelper.bigError("[GLStateHelper] Attempt to push twice");
+            BCLogHelper.bigError("[GLStateHelper] Attempt to push twice");
         }
         else {
             lastBlendState = GlStateManager.glGetInteger(GL11.GL_BLEND);
@@ -27,7 +27,7 @@ public class GLStateHelper {
 
     public static void popBlend() {
         if (lastBlendState == -1){
-            LogHelper.bigError("[GLStateHelper] Attempt to pop before pushing");
+            BCLogHelper.bigError("[GLStateHelper] Attempt to pop before pushing");
         }
         else {
             if (lastBlendState == 1) {
@@ -43,7 +43,7 @@ public class GLStateHelper {
     private static int lastAlphaState = -1;
     public static void pushAlpha(boolean enable) {
         if (lastAlphaState != -1){
-            LogHelper.bigError("[GLStateHelper] Attempt to push twice");
+            BCLogHelper.bigError("[GLStateHelper] Attempt to push twice");
         }
         else {
             lastAlphaState = GlStateManager.glGetInteger(GL11.GL_ALPHA);
@@ -58,7 +58,7 @@ public class GLStateHelper {
 
     public static void popAlpha() {
         if (lastAlphaState == -1){
-            LogHelper.bigError("[GLStateHelper] Attempt to pop before pushing");
+            BCLogHelper.bigError("[GLStateHelper] Attempt to pop before pushing");
         }
         else {
             if (lastAlphaState == 1) {
@@ -74,7 +74,7 @@ public class GLStateHelper {
     private static int lastDepthState = -1;
     public static void pushDepth(boolean enable) {
         if (lastDepthState != -1){
-            LogHelper.bigError("[GLStateHelper] Attempt to push twice");
+            BCLogHelper.bigError("[GLStateHelper] Attempt to push twice");
         }
         else {
             lastDepthState = GlStateManager.glGetInteger(GL11.GL_DEPTH);
@@ -89,7 +89,7 @@ public class GLStateHelper {
 
     public static void popDepth() {
         if (lastDepthState == -1){
-            LogHelper.bigError("[GLStateHelper] Attempt to pop before pushing");
+            BCLogHelper.bigError("[GLStateHelper] Attempt to pop before pushing");
         }
         else {
             if (lastDepthState == 1) {

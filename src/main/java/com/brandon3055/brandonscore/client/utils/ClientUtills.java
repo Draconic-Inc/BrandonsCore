@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.utils;
 
-import com.brandon3055.brandonscore.utils.LogHelper;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 
 import java.net.URI;
 
@@ -17,7 +17,7 @@ public class ClientUtills {
             oclass.getMethod("browse", new Class[]{URI.class}).invoke(object, new Object[]{uri});
         }
         catch (Throwable throwable) {
-            LogHelper.error("Couldn\'t open link");
+            BCLogHelper.error("Couldn\'t open link");
             throwable.printStackTrace();
         }
     }

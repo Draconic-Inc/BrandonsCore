@@ -11,7 +11,7 @@ import java.util.Random;
  * Created by covers1624 on 3/21/2016.
  * Covers gave me permission to use this. In fact he FORCED me to use it!!!
  */
-public class LogHelper {
+public class BCLogHelper {
 
     private static Logger logger = LogManager.getLogger(BrandonsCore.MODID);
 
