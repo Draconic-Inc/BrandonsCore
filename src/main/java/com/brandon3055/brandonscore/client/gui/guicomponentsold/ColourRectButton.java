@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.guicomponents;
+package com.brandon3055.brandonscore.client.gui.guicomponentsold;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import net.minecraft.client.Minecraft;

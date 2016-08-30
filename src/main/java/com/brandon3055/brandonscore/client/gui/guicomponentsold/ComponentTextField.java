@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.guicomponents;
+package com.brandon3055.brandonscore.client.gui.guicomponentsold;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
