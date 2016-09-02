@@ -5,8 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by brandon3055 on 30/08/2016.
@@ -15,7 +13,8 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     protected int xSize;
     protected int ySize;
-    protected List<GuiElementBase> elements = new ArrayList<GuiElementBase>();
+    protected ModuleManager manager = new ModuleManager(this);
+    protected int zLevel = 0;
 
     public ModularGuiScreen() {
         this(0, 0);
@@ -24,12 +23,6 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     public ModularGuiScreen(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
-    }
-
-    public void initElements() {
-        for (GuiElementBase element : elements) {
-            element.initElement();
-        }
     }
 
     //region IModularGui
@@ -74,13 +67,22 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
         return mc;
     }
 
-    @Override
-    public List<GuiElementBase> getElements() {
-        return elements;
+    public ModuleManager getManager() {
+        return manager;
     }
 
     @Override
     public void elementButtonAction(ElementButton button) {
+    }
+
+    @Override
+    public void setZLevel(int zLevel) {
+        this.zLevel = zLevel;
+    }
+
+    @Override
+    public int getZLevel() {
+        return zLevel;
     }
 
     //endregion
@@ -89,10 +91,8 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
-                return;
-            }
+        if (manager.mouseClicked(mouseX, mouseY, mouseButton)) {
+            return;
         }
 
         super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -100,10 +100,8 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int state) {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                element.mouseReleased(mouseX, mouseY, state);
-            }
+        if (manager.mouseReleased(mouseX, mouseY, state)) {
+            return;
         }
 
         super.mouseReleased(mouseX, mouseY, state);
@@ -111,10 +109,8 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            }
+        if (manager.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+            return;
         }
 
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
@@ -122,10 +118,8 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
-                return;
-            }
+        if (manager.keyTyped(typedChar, keyCode)) {
+            return;
         }
 
         super.keyTyped(typedChar, keyCode);
@@ -133,10 +127,8 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     public void handleMouseInput() throws IOException {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                element.handleMouseInput();
-            }
+        if (manager.handleMouseInput()) {
+            return;
         }
 
         super.handleMouseInput();
@@ -154,28 +146,27 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
         renderOverlayLayer(mouseX, mouseY, partialTicks);
     }
 
+
     public void renderBackgroundLayer(int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                element.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
-            }
-        }
+        manager.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
     }
 
     public void renderForegroundLayer(int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                element.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
-            }
-        }
+        manager.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
     }
 
     public void renderOverlayLayer(int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
-            }
-        }
+        manager.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
+    }
+
+    //endregion
+
+    //region Update
+
+    @Override
+    public void updateScreen() {
+        super.updateScreen();
+        manager.onUpdate();
     }
 
     //endregion

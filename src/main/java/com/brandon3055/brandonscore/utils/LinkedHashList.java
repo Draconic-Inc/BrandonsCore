@@ -406,7 +406,7 @@ public class LinkedHashList<E extends Object> extends AbstractCollection<E> impl
         // Write out size as capacity for behavioural compatibility with clone()
         s.writeInt(size);
 
-        // Write out all elements in the proper order.
+        // Write out all allElements in the proper order.
         Entry n = head;
         for (int i = 0; i < size; i++) {
             s.writeObject(n.key);
@@ -433,7 +433,7 @@ public class LinkedHashList<E extends Object> extends AbstractCollection<E> impl
 
         if (size > 0) {
 
-            // Read in all elements in the proper order.
+            // Read in all allElements in the proper order.
             for (int i = 0; i < size; i++) {
                 add((E) s.readObject());
             }

@@ -21,12 +21,24 @@ public class ElementButton extends GuiElementBase {
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     public String displayString;
     public int buttonId;
+    public String buttonName;
     public boolean disabled = false;
 
-    public ElementButton(IModularGui parent, int buttonId, int xPos, int yPos, int xSize, int ySize, String buttonText) {
-        super(parent, xPos, yPos, xSize, ySize);
+    public ElementButton(IModularGui gui, int buttonId, int xPos, int yPos, int xSize, int ySize, String buttonText) {
+        super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonId = buttonId;
+    }
+
+    public ElementButton(IModularGui gui, String buttonName, int xPos, int yPos, int xSize, int ySize, String buttonText) {
+        super(gui, xPos, yPos, xSize, ySize);
+        this.displayString = buttonText;
+        this.buttonName = buttonName;
+    }
+
+    public ElementButton(IModularGui gui, int xPos, int yPos, int xSize, int ySize, String buttonText) {
+        super(gui, xPos, yPos, xSize, ySize);
+        this.displayString = buttonText;
     }
 
     protected int getRenderState(boolean hovered) {
@@ -69,14 +81,14 @@ public class ElementButton extends GuiElementBase {
         {
             l = 16777120;
         }
-        drawCenteredString(fontrenderer, displayString, xPos + xSize / 2, yPos + (ySize - 8) / 2, l);
+        drawCenteredString(fontrenderer, displayString, xPos + xSize / 2, yPos + (ySize - 8) / 2, l, true);
     }
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (isMouseOver(mouseX, mouseY)) {
-            parentGui.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            parentGui.elementButtonAction(this);
+            modularGui.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            modularGui.elementButtonAction(this);
             return true;
         }
         return false;

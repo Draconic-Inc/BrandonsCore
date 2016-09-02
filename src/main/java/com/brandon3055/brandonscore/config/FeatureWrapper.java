@@ -18,7 +18,7 @@ public class FeatureWrapper {
     public final Map<Integer, String> nameMap = new HashMap<Integer, String>();
 
     public FeatureWrapper(Feature feature) {
-        this.name = feature.name();
+        this.name = feature.registryName();
         this.isActive = feature.isActive();
         this.isConfigurable = feature.isConfigurable();
         this.variantMap = feature.variantMap();

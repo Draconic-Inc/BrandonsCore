@@ -38,7 +38,7 @@ public class ModFeatureParser {
     private static final List<FeatureEntry> featureEntries = new ArrayList<FeatureEntry>();
 
     /**
-     * @param modid modid of the mod implementing this instance of ModFeatureParser
+     * @param modid   modid of the mod implementing this instance of ModFeatureParser
      * @param modTabs list of creative tabs that belong to the mod
      */
     public ModFeatureParser(String modid, CreativeTabs[] modTabs) {
@@ -56,7 +56,7 @@ public class ModFeatureParser {
                     featureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
                 }
                 catch (IllegalAccessException e) {
-                    BCLogHelper.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).name() + "]");
+                    BCLogHelper.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
                     e.printStackTrace();
                 }
             }
@@ -66,6 +66,7 @@ public class ModFeatureParser {
     /**
      * Generates or reads the config setting for every loaded feature.
      * Must be called AFTER loadFeatures
+     *
      * @param configuration the mods configuration
      */
     public void loadFeatureConfig(Configuration configuration) {
@@ -78,7 +79,7 @@ public class ModFeatureParser {
 
                 String category = entry.featureObj instanceof Block ? CATEGORY_BLOCKS : CATEGORY_ITEMS;
 
-                entry.enabled = configuration.get(category, entry.feature.name(), entry.feature.isActive()).setRequiresMcRestart(true).getBoolean(entry.feature.isActive());
+                entry.enabled = configuration.get(category, entry.feature.registryName(), entry.feature.isActive()).setRequiresMcRestart(true).getBoolean(entry.feature.isActive());
                 featureStates.put(entry.featureObj, entry.enabled);
             }
         }
@@ -108,8 +109,8 @@ public class ModFeatureParser {
 
             if (entry.featureObj instanceof Block) {
                 Block block = (Block) entry.featureObj;
-                block.setRegistryName(entry.feature.name());
-                block.setUnlocalizedName(modid.toLowerCase() + ":" + entry.feature.name());
+                block.setRegistryName(entry.feature.registryName());
+                block.setUnlocalizedName(modid.toLowerCase() + ":" + entry.feature.registryName());
 
                 if (entry.feature.cTab() >= 0 && entry.feature.cTab() < modTabs.length) {
                     block.setCreativeTab(modTabs[entry.feature.cTab()]);
@@ -125,26 +126,29 @@ public class ModFeatureParser {
                         GameRegistry.register(itemBlock);
                     }
                     catch (Exception e) {
-                        BCLogHelper.error("NOOOOOOOO!!!!!!!!!!!...... It broke... [%s]", entry.feature.name());
+                        BCLogHelper.error("NOOOOOOOO!!!!!!!!!!!...... It broke... [%s]", entry.feature.registryName());
                         e.printStackTrace();
                     }
 
-                } else {
+                }
+                else {
                     GameRegistry.register(block);
                     GameRegistry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
                 }
 
                 if (block.hasTileEntity(block.getDefaultState())) {
                     if (block instanceof IRegisterMyOwnTiles) {
-                        ((IRegisterMyOwnTiles) block).registerTiles(modid.toLowerCase() + ":", entry.feature.name());
-                    } else {
-                        GameRegistry.registerTileEntity(entry.feature.tileEntity(), modid.toLowerCase() + ":" + entry.feature.name());
+                        ((IRegisterMyOwnTiles) block).registerTiles(modid.toLowerCase() + ":", entry.feature.registryName());
+                    }
+                    else {
+                        GameRegistry.registerTileEntity(entry.feature.tileEntity(), modid.toLowerCase() + ":" + entry.feature.registryName());
                     }
                 }
-            } else if (entry.featureObj instanceof Item) {
+            }
+            else if (entry.featureObj instanceof Item) {
                 Item item = (Item) entry.featureObj;
-                item.setRegistryName(entry.feature.name());
-                item.setUnlocalizedName(modid.toLowerCase() + ":" + entry.feature.name());
+                item.setRegistryName(entry.feature.registryName());
+                item.setUnlocalizedName(modid.toLowerCase() + ":" + entry.feature.registryName());
 
                 if (entry.feature.cTab() >= 0 && entry.feature.cTab() < modTabs.length) {
                     item.setCreativeTab(modTabs[entry.feature.cTab()]);
@@ -178,20 +182,24 @@ public class ModFeatureParser {
 
                 if (entry.feature.variantMap().length > 0) {
                     registerVariants(Item.getItemFromBlock(block), entry.feature);
-                } else {
-                    ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.name()));
                 }
-            } else if (entry.featureObj instanceof Item) {
+                else {
+                    ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.registryName()));
+                }
+            }
+            else if (entry.featureObj instanceof Item) {
                 Item item = (Item) entry.featureObj;
 
                 if (!entry.feature.stateOverride().isEmpty()) {
                     String s = entry.feature.stateOverride().substring(0, entry.feature.stateOverride().indexOf("#"));
                     s += entry.feature.stateOverride().substring(entry.feature.stateOverride().indexOf("#")).toLowerCase();
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + s));
-                } else if (entry.feature.variantMap().length > 0) {
+                }
+                else if (entry.feature.variantMap().length > 0) {
                     registerVariants(item, entry.feature);
-                } else {
-                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.name()));
+                }
+                else {
+                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.registryName()));
                 }
             }
         }
@@ -200,7 +208,7 @@ public class ModFeatureParser {
     private void registerVariants(Item item, Feature feature) {
         for (String s : feature.variantMap()) {
             int meta = Integer.parseInt(s.substring(0, s.indexOf(":")));
-            String fullName = modid.toLowerCase() + ":" + feature.name();
+            String fullName = modid.toLowerCase() + ":" + feature.registryName();
             String variant = s.substring(s.indexOf(":") + 1);
             ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(fullName, variant));
         }
@@ -208,14 +216,14 @@ public class ModFeatureParser {
 
     /**
      * Returns true if this object has been registered with a ModFeatureParser
-     * */
+     */
     public static boolean isFeature(Object object) {
         return featureStates.containsKey(object);
     }
 
     /**
      * Returns true if feature is enabled. Applies to all mods using a ModFeatureParser instance
-     * */
+     */
     public static boolean isEnabled(Object feature) {
         if (!featureStates.containsKey(feature)) {
             return false;

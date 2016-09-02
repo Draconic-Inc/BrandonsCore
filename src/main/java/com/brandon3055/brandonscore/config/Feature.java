@@ -16,9 +16,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Feature {
     /**
-     * used For All
+     * used For All (Must be snake_case)
      */
-    String name();
+    String registryName();
 
     /**
      * used For All

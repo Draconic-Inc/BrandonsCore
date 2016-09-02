@@ -4,8 +4,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.Elemen
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
-import java.util.List;
-
 /**
  * Created by brandon3055 on 30/08/2016.
  */
@@ -27,7 +25,11 @@ public interface IModularGui<T extends GuiScreen> {
 
     Minecraft getMinecraft();
 
-    List<GuiElementBase> getElements();
+    ModuleManager getManager();
 
     void elementButtonAction(ElementButton button);
+
+    void setZLevel(int zLevel);
+
+    int getZLevel();
 }
