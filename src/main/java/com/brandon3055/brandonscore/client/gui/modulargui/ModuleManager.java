@@ -1,12 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
-import com.sun.javafx.collections.ObservableListWrapper;
-import com.sun.javafx.collections.transformation.SortedList;
 import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,16 +13,17 @@ import java.util.List;
 public class ModuleManager {
 
     //TODO Switch to a list ore linked list and use Collections.sort
-    protected SortedList<GuiElementBase> elements = new SortedList<GuiElementBase>(new ObservableListWrapper<GuiElementBase>(new ArrayList<GuiElementBase>()), new Comparator<GuiElementBase>() {
-        @Override
-        public int compare(GuiElementBase o1, GuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0; }
-    });
+//    protected SortedList<GuiElementBase> elements = new SortedList<GuiElementBase>(new ObservableListWrapper<GuiElementBase>(new ArrayList<GuiElementBase>()), new Comparator<GuiElementBase>() {
+//        @Override
+//        public int compare(GuiElementBase o1, GuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0; }
+//    });
+    protected List<GuiElementBase> elements = new ArrayList<GuiElementBase>();
+
     private IModularGui parentGui;
     private List<GuiElementBase> toRemove = new ArrayList<GuiElementBase>();
 
     public ModuleManager(IModularGui parentGui) {
         this.parentGui = parentGui;
-
     }
 
     public void initElements() {
