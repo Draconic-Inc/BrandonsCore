@@ -3,31 +3,24 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by brandon3055 on 31/08/2016.
  */
 public class ModuleManager {
 
-    //TODO Switch to a list ore linked list and use Collections.sort
-//    protected SortedList<GuiElementBase> elements = new SortedList<GuiElementBase>(new ObservableListWrapper<GuiElementBase>(new ArrayList<GuiElementBase>()), new Comparator<GuiElementBase>() {
-//        @Override
-//        public int compare(GuiElementBase o1, GuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0; }
-//    });
-    protected List<GuiElementBase> elements = new ArrayList<GuiElementBase>();
-
+    protected List<MGuiElementBase> elements = new ArrayList<MGuiElementBase>();
+    private boolean requiresReSort = false;
     private IModularGui parentGui;
-    private List<GuiElementBase> toRemove = new ArrayList<GuiElementBase>();
+    private List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
 
     public ModuleManager(IModularGui parentGui) {
         this.parentGui = parentGui;
     }
 
     public void initElements() {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             element.initElement();
         }
     }
@@ -42,9 +35,10 @@ public class ModuleManager {
      * This also applies to mouse and key events.
      * @return The Element.
      */
-    public GuiElementBase add(GuiElementBase element, int displayLevel) {
+    public MGuiElementBase add(MGuiElementBase element, int displayLevel) {
         element.displayLevel = displayLevel;
         elements.add(element);
+        requiresReSort = true;
         return element;
     }
 
@@ -53,41 +47,44 @@ public class ModuleManager {
      * @param element The element to add.
      * @return The Element.
      */
-    public GuiElementBase add(GuiElementBase element) {
+    public MGuiElementBase add(MGuiElementBase element) {
         return add(element, 0);
     }
 
-    public void remove(GuiElementBase element) {
+    public void remove(MGuiElementBase element) {
         if (elements.contains(element)) {
             toRemove.add(element);
+            requiresReSort = true;
         }
     }
 
     public void removeByID(String id) {
-        Iterator<GuiElementBase> i = elements.iterator();
+        Iterator<MGuiElementBase> i = elements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.id != null && element.id.equals(id)) {
                 toRemove.add(element);
+                requiresReSort = true;
                 return;
             }
         }
     }
 
     public void removeByGroup(String group) {
-        Iterator<GuiElementBase> i = elements.iterator();
+        Iterator<MGuiElementBase> i = elements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.isInGroup(group)) {
                 toRemove.add(element);
+                requiresReSort = true;
             }
         }
     }
 
     public void setIDEnabled(String id, boolean enabled) {
-        Iterator<GuiElementBase> i = elements.iterator();
+        Iterator<MGuiElementBase> i = elements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.id != null && element.id.equals(id)) {
                 element.setEnabled(enabled);
                 return;
@@ -96,16 +93,16 @@ public class ModuleManager {
     }
 
     public void setGroupEnabled(String group, boolean enabled) {
-        Iterator<GuiElementBase> i = elements.iterator();
+        Iterator<MGuiElementBase> i = elements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.isInGroup(group)) {
                 element.setEnabled(enabled);
             }
         }
     }
 
-    public List<GuiElementBase> getElements() {
+    public List<MGuiElementBase> getElements() {
         return elements;
     }
 
@@ -118,7 +115,7 @@ public class ModuleManager {
     //region Mouse & Key
 
     protected boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -127,7 +124,7 @@ public class ModuleManager {
     }
 
     protected boolean mouseReleased(int mouseX, int mouseY, int state) {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, state)) {
                 return true;
             }
@@ -136,7 +133,7 @@ public class ModuleManager {
     }
 
     protected boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
@@ -145,7 +142,7 @@ public class ModuleManager {
     }
 
     protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
                 return true;
             }
@@ -154,7 +151,7 @@ public class ModuleManager {
     }
 
     public boolean handleMouseInput() throws IOException {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled() && element.handleMouseInput()) {
                 return true;
             }
@@ -167,7 +164,7 @@ public class ModuleManager {
     //region Render
 
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayLevel * 100);
                 element.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
@@ -176,7 +173,7 @@ public class ModuleManager {
     }
 
     public void renderForegroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayLevel * 100);
                 element.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
@@ -185,7 +182,7 @@ public class ModuleManager {
     }
 
     public void renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayLevel * 100);
                 element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
@@ -202,9 +199,26 @@ public class ModuleManager {
             elements.removeAll(toRemove);
         }
 
-        for (GuiElementBase element : elements) {
+        for (MGuiElementBase element : elements) {
             element.onUpdate();
         }
+
+        if (requiresReSort) {
+            sort();
+        }
+    }
+
+    //endregion
+
+    //region Sorting
+
+    private static Comparator<MGuiElementBase> sorter = new Comparator<MGuiElementBase>() {
+        @Override
+        public int compare(MGuiElementBase o1, MGuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0; }
+    };
+
+    private void sort() {
+        Collections.sort(elements, sorter);
     }
 
     //endregion

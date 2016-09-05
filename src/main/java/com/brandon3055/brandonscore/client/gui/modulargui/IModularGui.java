@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.ElementButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -26,8 +25,6 @@ public interface IModularGui<T extends GuiScreen> {
     Minecraft getMinecraft();
 
     ModuleManager getManager();
-
-    void elementButtonAction(ElementButton button);
 
     void setZLevel(int zLevel);
 

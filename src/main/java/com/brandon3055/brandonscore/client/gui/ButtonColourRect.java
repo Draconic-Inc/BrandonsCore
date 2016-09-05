@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.guicomponentsold;
+package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import net.minecraft.client.Minecraft;
@@ -9,12 +9,12 @@ import net.minecraft.client.renderer.GlStateManager;
 /**
  * Created by brandon3055 on 4/07/2016.
  */
-public class ColourRectButton extends GuiButton{
+public class ButtonColourRect extends GuiButton{
     private final int backColour;
     private final int borderColourInactive;
     private final int borderColourActive;
 
-    public ColourRectButton(int buttonId, String text, int x, int y, int width, int height, int backColour, int borderColourInactive, int borderColourActive) {
+    public ButtonColourRect(int buttonId, String text, int x, int y, int width, int height, int backColour, int borderColourInactive, int borderColourActive) {
         super(buttonId, x, y, width, height, text);
         this.backColour = backColour;
         this.borderColourInactive = borderColourInactive;

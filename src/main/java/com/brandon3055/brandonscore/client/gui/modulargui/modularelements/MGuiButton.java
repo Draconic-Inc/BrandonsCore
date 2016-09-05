@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -16,29 +16,51 @@ import java.io.IOException;
  * This is button based on GuiButton with similar appearance and functionality.
  * Extend this if you want to create a custom button element that calls elementButtonAction in your IModularGui
  */
-public class ElementButton extends GuiElementBase {
+public class MGuiButton extends MGuiElementBase {
 
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
-    public String displayString;
-    public int buttonId;
-    public String buttonName;
+    public String displayString = "";
+    public int buttonId = -1;
+    public String buttonName = "";
     public boolean disabled = false;
+    protected IButtonListener listener = null;
 
-    public ElementButton(IModularGui gui, int buttonId, int xPos, int yPos, int xSize, int ySize, String buttonText) {
+    public MGuiButton(IModularGui modularGui) {
+        super(modularGui);
+        if (modularGui instanceof IButtonListener) {
+            listener = (IButtonListener) modularGui;
+        }
+    }
+
+    public MGuiButton(IModularGui gui, int buttonId, int xPos, int yPos, int xSize, int ySize, String buttonText) {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonId = buttonId;
+        if (modularGui instanceof IButtonListener) {
+            listener = (IButtonListener) modularGui;
+        }
     }
 
-    public ElementButton(IModularGui gui, String buttonName, int xPos, int yPos, int xSize, int ySize, String buttonText) {
+    public MGuiButton(IModularGui gui, String buttonName, int xPos, int yPos, int xSize, int ySize, String buttonText) {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonName = buttonName;
+        if (modularGui instanceof IButtonListener) {
+            listener = (IButtonListener) modularGui;
+        }
     }
 
-    public ElementButton(IModularGui gui, int xPos, int yPos, int xSize, int ySize, String buttonText) {
+    public MGuiButton(IModularGui gui, int xPos, int yPos, int xSize, int ySize, String buttonText) {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
+        if (modularGui instanceof IButtonListener) {
+            listener = (IButtonListener) modularGui;
+        }
+    }
+
+    public MGuiButton setListener(IButtonListener listener) {
+        this.listener = listener;
+        return this;
     }
 
     protected int getRenderState(boolean hovered) {
@@ -88,9 +110,26 @@ public class ElementButton extends GuiElementBase {
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (isMouseOver(mouseX, mouseY)) {
             modularGui.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            modularGui.elementButtonAction(this);
+            if (listener != null) {
+                listener.buttonClick(this);
+            }
             return true;
         }
         return false;
+    }
+
+    public MGuiButton setButtonId(int buttonId) {
+        this.buttonId = buttonId;
+        return this;
+    }
+
+    public MGuiButton setButtonName(String buttonName) {
+        this.buttonName = buttonName;
+        return this;
+    }
+
+    public MGuiButton setDisplayString(String displayString) {
+        this.displayString = displayString;
+        return this;
     }
 }

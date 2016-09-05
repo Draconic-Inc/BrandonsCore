@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * Created by brandon3055 on 30/08/2016.
  */
-public class GuiElementBase {
+public class MGuiElementBase {
 
     public int xPos;
     public int yPos;
@@ -34,8 +35,8 @@ public class GuiElementBase {
      */
     public String id = null;
     private List<String> groups = new ArrayList<String>();
-    public List<GuiElementBase> childElements = new LinkedList<GuiElementBase>();
-    private List<GuiElementBase> toRemove = new ArrayList<GuiElementBase>();
+    public List<MGuiElementBase> childElements = new LinkedList<MGuiElementBase>();
+    protected List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
     /**
      * For use by ModuleManager ONLY
      */
@@ -45,46 +46,49 @@ public class GuiElementBase {
      */
     protected double zOffset = 0;
 
-    public GuiElementBase(IModularGui modularGui) {
+    public MGuiElementBase(IModularGui modularGui) {
         this.modularGui = modularGui;
     }
 
-    public GuiElementBase(IModularGui modularGui, int xPos, int yPos) {
+    public MGuiElementBase(IModularGui modularGui, int xPos, int yPos) {
         this(modularGui);
         this.xPos = xPos;
         this.yPos = yPos;
     }
 
-    public GuiElementBase(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize) {
+    public MGuiElementBase(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize) {
         this(modularGui, xPos, yPos);
         this.xSize = xSize;
         this.ySize = ySize;
     }
 
+    /**
+     * If adding child elements which require initialization call the super after adding them.
+     */
     public void initElement() {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             element.initElement();
         }
     }
 
     //region Child Elements
 
-    public GuiElementBase addChild(GuiElementBase element) {
+    public MGuiElementBase addChild(MGuiElementBase element) {
         childElements.add(element);
         return this;
     }
 
-    public GuiElementBase removeChild(GuiElementBase element) {
+    public MGuiElementBase removeChild(MGuiElementBase element) {
         if (childElements.contains(element)) {
             toRemove.add(element);
         }
         return this;
     }
 
-    public GuiElementBase removeChildByID(String id) {
-        Iterator<GuiElementBase> i = childElements.iterator();
+    public MGuiElementBase removeChildByID(String id) {
+        Iterator<MGuiElementBase> i = childElements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.id != null && element.id.equals(id)) {
                 toRemove.add(element);
                 return this;
@@ -93,10 +97,10 @@ public class GuiElementBase {
         return this;
     }
 
-    public GuiElementBase removeChildByGroup(String group) {
-        Iterator<GuiElementBase> i = childElements.iterator();
+    public MGuiElementBase removeChildByGroup(String group) {
+        Iterator<MGuiElementBase> i = childElements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.isInGroup(group)) {
                 toRemove.add(element);
             }
@@ -104,10 +108,10 @@ public class GuiElementBase {
         return this;
     }
 
-    public GuiElementBase setChildIDEnabled(String id, boolean enabled) {
-        Iterator<GuiElementBase> i = childElements.iterator();
+    public MGuiElementBase setChildIDEnabled(String id, boolean enabled) {
+        Iterator<MGuiElementBase> i = childElements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.id != null && element.id.equals(id)) {
                 element.enabled = enabled;
                 return this;
@@ -116,10 +120,10 @@ public class GuiElementBase {
         return this;
     }
 
-    public GuiElementBase setChildGroupEnabled(String group, boolean enabled) {
-        Iterator<GuiElementBase> i = childElements.iterator();
+    public MGuiElementBase setChildGroupEnabled(String group, boolean enabled) {
+        Iterator<MGuiElementBase> i = childElements.iterator();
         while (i.hasNext()) {
-            GuiElementBase element = i.next();
+            MGuiElementBase element = i.next();
             if (element.isInGroup(group)) {
                 element.enabled = enabled;
             }
@@ -131,19 +135,19 @@ public class GuiElementBase {
 
     //region Group & ID Stuff
 
-    public GuiElementBase addToGroup(String group) {
+    public MGuiElementBase addToGroup(String group) {
         groups.add(group);
         return this;
     }
 
-    public GuiElementBase removeFromGroup(String group) {
+    public MGuiElementBase removeFromGroup(String group) {
         if (groups.contains(group)) {
             groups.remove(group);
         }
         return this;
     }
 
-    public GuiElementBase removeFromAllGroups() {
+    public MGuiElementBase removeFromAllGroups() {
         groups.clear();
         return this;
     }
@@ -191,7 +195,7 @@ public class GuiElementBase {
      * @throws IOException
      */
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -208,7 +212,7 @@ public class GuiElementBase {
      * @return Return true to prevent any further processing for this mouse action.
      */
     public boolean mouseReleased(int mouseX, int mouseY, int state) {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, state)) {
                 return true;
             }
@@ -224,7 +228,7 @@ public class GuiElementBase {
      * @return Return true to prevent any further processing for this mouse action.
      */
     public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
@@ -243,14 +247,14 @@ public class GuiElementBase {
         int scrollDirection = Mouse.getEventDWheel();
 
         if (scrollDirection != 0) {
-            for (GuiElementBase element : childElements) {
+            for (MGuiElementBase element : childElements) {
                 if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                     return true;
                 }
             }
         }
 
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled() && element.handleMouseInput()) {
                 return true;
             }
@@ -263,11 +267,11 @@ public class GuiElementBase {
      *
      * @param mouseX          Mouse x position
      * @param mouseY          Mouse y position
-     * @param scrollDirection will ether be -1 or 1 depending on the scroll direction (May potentially be greater than 1 or less then -1)
+     * @param scrollDirection will ether be a positive or a negative number
      * @return true to prevent further processing on this mouse action.
      */
     public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
@@ -283,7 +287,7 @@ public class GuiElementBase {
      * Called whenever a key is typed. Return true to cancel further processing.
      */
     protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
                 return true;
             }
@@ -304,7 +308,7 @@ public class GuiElementBase {
             toRemove.clear();
         }
 
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             element.onUpdate();
         }
     }
@@ -314,7 +318,7 @@ public class GuiElementBase {
     //region Render
 
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled()) {
                 element.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -322,7 +326,7 @@ public class GuiElementBase {
     }
 
     public void renderForegroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled()) {
                 element.renderForegroundLayer(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -330,7 +334,7 @@ public class GuiElementBase {
     }
 
     public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElementBase element : childElements) {
+        for (MGuiElementBase element : childElements) {
             if (element.isEnabled()) {
                 element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -348,6 +352,10 @@ public class GuiElementBase {
     @Override
     public int hashCode() {
         return ("[" + id + "-" + xPos + "-" + yPos + "-" + xSize + "-" + ySize + "" + displayLevel + "]").hashCode();
+    }
+
+    public void bindTexture(ResourceLocation resourceLocation) {
+        modularGui.getMinecraft().getTextureManager().bindTexture(resourceLocation);
     }
 
     //endregion
@@ -462,17 +470,17 @@ public class GuiElementBase {
         tessellator.draw();
     }
 
-    public void drawScaledCustomSizeModalRect(double x, double y, double u, double v, double uWidth, double vHeight, double width, double height, double tileWidth, double tileHeight) {
+    public void drawScaledCustomSizeModalRect(double xPos, double yPos, double u, double v, double uWidth, double vHeight, double width, double height, double textureSheetWidth, double testureSheetHeight) {
         double zLevel = getRenderZLevel();
-        double f = 1.0F / tileWidth;
-        double f1 = 1.0F / tileHeight;
+        double f = 1.0F / textureSheetWidth;
+        double f1 = 1.0F / testureSheetHeight;
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        vertexbuffer.pos(x, (y + height), zLevel).tex((u * f), ((v + vHeight) * f1)).endVertex();
-        vertexbuffer.pos((x + width), (y + height), zLevel).tex(((u + uWidth) * f), ((v + vHeight) * f1)).endVertex();
-        vertexbuffer.pos((x + width), y, zLevel).tex(((u + uWidth) * f), (v * f1)).endVertex();
-        vertexbuffer.pos(x, y, zLevel).tex((u * f), (v * f1)).endVertex();
+        vertexbuffer.pos(xPos, (yPos + height), zLevel).tex((u * f), ((v + vHeight) * f1)).endVertex();
+        vertexbuffer.pos((xPos + width), (yPos + height), zLevel).tex(((u + uWidth) * f), ((v + vHeight) * f1)).endVertex();
+        vertexbuffer.pos((xPos + width), yPos, zLevel).tex(((u + uWidth) * f), (v * f1)).endVertex();
+        vertexbuffer.pos(xPos, yPos, zLevel).tex((u * f), (v * f1)).endVertex();
         tessellator.draw();
     }
 

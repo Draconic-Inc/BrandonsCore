@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.ElementButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -69,10 +68,6 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     public ModuleManager getManager() {
         return manager;
-    }
-
-    @Override
-    public void elementButtonAction(ElementButton button) {
     }
 
     @Override
