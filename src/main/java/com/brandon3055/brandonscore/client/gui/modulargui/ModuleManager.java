@@ -10,7 +10,8 @@ import java.util.*;
  */
 public class ModuleManager {
 
-    protected List<MGuiElementBase> elements = new ArrayList<MGuiElementBase>();
+    protected LinkedList<MGuiElementBase> elements = new LinkedList<MGuiElementBase>();
+    protected LinkedList<MGuiElementBase> actionList = new LinkedList<MGuiElementBase>();
     private boolean requiresReSort = false;
     private IModularGui parentGui;
     private List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
@@ -108,6 +109,7 @@ public class ModuleManager {
 
     public void clear() {
         elements.clear();
+        requiresReSort = true;
     }
 
     //endregion
@@ -115,7 +117,7 @@ public class ModuleManager {
     //region Mouse & Key
 
     protected boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        for (MGuiElementBase element : elements) {
+        for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -124,7 +126,7 @@ public class ModuleManager {
     }
 
     protected boolean mouseReleased(int mouseX, int mouseY, int state) {
-        for (MGuiElementBase element : elements) {
+        for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, state)) {
                 return true;
             }
@@ -133,7 +135,7 @@ public class ModuleManager {
     }
 
     protected boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (MGuiElementBase element : elements) {
+        for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
@@ -142,7 +144,7 @@ public class ModuleManager {
     }
 
     protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
-        for (MGuiElementBase element : elements) {
+        for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
                 return true;
             }
@@ -151,7 +153,7 @@ public class ModuleManager {
     }
 
     public boolean handleMouseInput() throws IOException {
-        for (MGuiElementBase element : elements) {
+        for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.handleMouseInput()) {
                 return true;
             }
@@ -200,7 +202,9 @@ public class ModuleManager {
         }
 
         for (MGuiElementBase element : elements) {
-            element.onUpdate();
+            if (element.onUpdate()) {
+                break;
+            }
         }
 
         if (requiresReSort) {
@@ -208,18 +212,34 @@ public class ModuleManager {
         }
     }
 
+    public void setWorldAndResolution(Minecraft mc, int width, int height) {
+        for (MGuiElementBase element : elements) {
+            element.setWorldAndResolution(mc, width, height);
+        }
+        initElements();
+    }
+
     //endregion
 
     //region Sorting
 
-    private static Comparator<MGuiElementBase> sorter = new Comparator<MGuiElementBase>() {
+    private static Comparator<MGuiElementBase> renderSorter = new Comparator<MGuiElementBase>() {
+        @Override
+        public int compare(MGuiElementBase o1, MGuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? -1 : o1.displayLevel > o2.displayLevel ? 1 : 0; }
+    };
+
+    private static Comparator<MGuiElementBase> actionSorter = new Comparator<MGuiElementBase>() {
         @Override
         public int compare(MGuiElementBase o1, MGuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0; }
     };
 
     private void sort() {
-        Collections.sort(elements, sorter);
+        Collections.sort(elements, renderSorter);
+        actionList.clear();
+        actionList.addAll(elements);
+        Collections.sort(actionList, actionSorter);
     }
 
     //endregion
+
 }

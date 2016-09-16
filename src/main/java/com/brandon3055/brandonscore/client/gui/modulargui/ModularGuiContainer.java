@@ -172,5 +172,11 @@ public abstract class ModularGuiContainer extends GuiContainer implements IModul
         manager.onUpdate();
     }
 
+    @Override
+    public void setWorldAndResolution(Minecraft mc, int width, int height) {
+        super.setWorldAndResolution(mc, width, height);
+        manager.setWorldAndResolution(mc, width, height);
+    }
+
     //endregion
 }

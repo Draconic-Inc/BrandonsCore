@@ -201,4 +201,26 @@ public class Utils {
     public static int toInt(double d) {
         return (int) d;
     }
+
+    public static int parseHex(String s) {
+        return parseHex(s, true);
+    }
+
+    public static int parseHex(String s, boolean catchException) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+
+        if (catchException) {
+            try {
+                return Integer.parseInt(s, 16);
+            }
+            catch (Exception e) {
+                return 0;
+            }
+        }
+        else {
+            return Integer.parseInt(s, 16);
+        }
+    }
 }

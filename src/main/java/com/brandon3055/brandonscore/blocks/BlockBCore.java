@@ -92,7 +92,8 @@ public class BlockBCore extends Block {
     @Override
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
         if (te instanceof IDataRetainerTile) {
-            ItemStack stack = new ItemStack(Item.getItemFromBlock(state.getBlock()));
+            ItemStack stack = new ItemStack(this);
+            stack.setItemDamage(damageDropped(state));
             NBTTagCompound customData = new NBTTagCompound();
             ((IDataRetainerTile) te).writeDataToNBT(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);

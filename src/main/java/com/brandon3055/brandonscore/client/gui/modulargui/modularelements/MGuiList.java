@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.IScrollListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -19,8 +20,12 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     protected boolean scrollBarEnabled = true;
     protected MGuiScrollBar scrollBar;
     public int leftPadding = 1, rightPadding = 1, topPadding = 1, bottomPadding = 1;
+    public boolean disableList = false;
+    protected boolean updateRequired = true;
+    public boolean allowOutsideClicks = false;
 
     public LinkedList<MGuiListEntry> listEntries = new LinkedList<MGuiListEntry>();
+    public LinkedList<MGuiElementBase> nonListEntries = new LinkedList<MGuiElementBase>();
 
     public MGuiList(IModularGui modularGui) {
         super(modularGui);
@@ -37,7 +42,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     @Override
     public void initElement() {
         initScrollBar();
-        updateEntryPositions();
+        updateEntriesAndScrollBar();
         super.initElement();
     }
 
@@ -51,8 +56,16 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     public MGuiList addEntry(MGuiListEntry entry) {
         listEntries.add(entry);
-        addChild(entry);
+        entry.setList(this);
+        super.addChild(entry);
+        updateRequired = true;
         return this;
+    }
+
+    @Override
+    public MGuiElementBase addChild(MGuiElementBase element) {
+        nonListEntries.add(element);
+        return super.addChild(element);
     }
 
     public void clear() {
@@ -66,28 +79,74 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     @Override
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        for (MGuiElementBase element : nonListEntries) {
+            if (element.isEnabled() && !listEntries.contains(element)) {
+                element.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
+            }
+        }
+
         cullList();
-        super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
+
+        if (disableList) {
+            return;
+        }
+
+        for (MGuiElementBase element : listEntries) {
+            if (element.isEnabled()) {
+                element.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 
     @Override
     public void renderForegroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        for (MGuiElementBase element : nonListEntries) {
+            if (element.isEnabled() && !listEntries.contains(element)) {
+                element.renderForegroundLayer(minecraft, mouseX, mouseY, partialTicks);
+            }
+        }
+
         cullList();
-        super.renderForegroundLayer(minecraft, mouseX, mouseY, partialTicks);
+
+        if (disableList) {
+            return;
+        }
+
+        for (MGuiElementBase element : listEntries) {
+            if (element.isEnabled()) {
+                element.renderForegroundLayer(minecraft, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 
     @Override
     public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        for (MGuiElementBase element : nonListEntries) {
+            if (element.isEnabled() && !listEntries.contains(element)) {
+                element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+            }
+        }
+
         cullList();
-        super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+
+        if (disableList) {
+            return;
+        }
+
+        for (MGuiElementBase element : listEntries) {
+            if (element.isEnabled()) {
+                element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 
     protected void cullList() {
-        zOffset = 90;
+        zOffset = 100;
 
-        GlStateManager.depthMask(true);
-        GlStateManager.enableDepth();
+//        GlStateManager.enableCull();
+        //GlStateManager.enableDepth();
         GlStateManager.disableAlpha();
+//        GlStateManager.disableDepth();
 
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
@@ -119,6 +178,8 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+//        GlStateManager.enableDepth();
         zOffset = 0;
     }
 
@@ -128,17 +189,24 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     @Override
     public void scrollBarMoved(double pos) {
-        updateEntryPositions();
+        int maxMove = getListHeight() - (ySize - 1);
+        scrollBar.setIncrements(10D / maxMove, 0.1D);
+        updateEntriesAndScrollBar();
     }
 
-    protected void updateEntryPositions() {
+//    add button tool tips
+//            make clicking a mod open thatmods content in the list. Dont forget to recalc the list
+//            Make the nav buttons update and work
+
+
+    protected void updateEntriesAndScrollBar() {
         double scrollPos = scrollBar == null ? 0 : scrollBar.getScrollPos();
         int yOffset = topPadding;
 
         int maxMove = getListHeight() - (ySize - 1);
 
         if (maxMove > 0 && scrollPos > 0) {
-            yOffset = 1 -(int) (scrollPos * maxMove);
+            yOffset = topPadding -(int) (scrollPos * maxMove);
         }
 
         for (MGuiListEntry entry : listEntries) {
@@ -150,6 +218,8 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
             yOffset += entry.getEntryHeight();
         }
+
+        scrollBar.setEnabled((scrollBarEnabled = maxMove > 0));
     }
 
     protected int getListHeight() {
@@ -163,7 +233,34 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             height += entry.getEntryHeight();
         }
 
-        return height;
+        return height + topPadding + bottomPadding;
+    }
+
+    @Override
+    public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
+        return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
+    }
+
+    @Override
+    public boolean onUpdate() {
+        if (!toRemove.isEmpty()) {
+            nonListEntries.removeAll(toRemove);
+        }
+
+        if (updateRequired) {
+            updateRequired = false;
+            updateEntriesAndScrollBar();
+        }
+
+        return super.onUpdate();
+    }
+
+    /**
+     * Schedules an update to occur next tick that will recalculate the positions of all
+     * entries and enable/disable the scroll bar as needed.
+     */
+    public void schedualUpdate() {
+        updateRequired = true;
     }
 
     //endregion
@@ -177,10 +274,26 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (!isMouseOver(mouseX, mouseY)) {
+        if (!isMouseOver(mouseX, mouseY) && !allowOutsideClicks) {
             return false;
         }
-        return super.mouseClicked(mouseX, mouseY, mouseButton);
+
+        for (MGuiElementBase element : nonListEntries) {
+            if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
+                return true;
+            }
+        }
+
+        if (disableList) {
+            return false;
+        }
+
+        for (MGuiElementBase element : listEntries) {
+            if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //endregion

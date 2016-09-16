@@ -2,30 +2,39 @@ package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.lib.StackReference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * Created by brandon3055 on 3/09/2016.
  */
 public class MGuiStackIcon extends MGuiElementBase {
-    private ItemStack stack;
-    public boolean drawSlot = false;
+    public static WeakHashMap<Integer, ItemStack> stackCache = new WeakHashMap<Integer, ItemStack>();
+
+    public boolean drawCount = true;
     public boolean drawToolTip = true;
     private MGuiElementBase background = null;
+    protected List<String> toolTipOverride = null;
+    private StackReference stackReference;
+    public int xOffset = 0;
+    public int yOffset = 0;
 
-    public MGuiStackIcon(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize, ItemStack stack) {
+    public MGuiStackIcon(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize, StackReference stackReference) {
         super(modularGui, xPos, yPos, xSize, ySize);
-        this.stack = stack;
+        this.stackReference = stackReference;
     }
 
-    public MGuiStackIcon(IModularGui modularGui, int xPos, int yPos, ItemStack stack) {
+    public MGuiStackIcon(IModularGui modularGui, int xPos, int yPos, String stackRegName, int metadata, StackReference stackReference) {
         super(modularGui, xPos, yPos);
-        this.stack = stack;
+        this.stackReference = stackReference;
         this.xSize = this.ySize = 18;
     }
 
@@ -38,26 +47,34 @@ public class MGuiStackIcon extends MGuiElementBase {
         double scaledWidth = xSize / 18D;
         double scaledHeight = ySize / 18D;
 
-        GlStateManager.translate(xPos + scaledWidth, yPos + scaledHeight, getRenderZLevel() + 50);
+        GlStateManager.translate(xPos + scaledWidth + xOffset, yPos + scaledHeight + yOffset, getRenderZLevel() - 80);
         GlStateManager.scale(scaledWidth, scaledHeight, 1);
 
-        Minecraft.getMinecraft().getRenderItem().renderItemIntoGUI(stack, 0, 0);
-        Minecraft.getMinecraft().getRenderItem().renderItemOverlays(minecraft.fontRendererObj, stack, 0, 0);
+        Minecraft.getMinecraft().getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
+
+        if (drawCount && getStack().stackSize > 1) {
+            String s = getStack().stackSize + "";
+            GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
+            zOffset = 50;
+            drawString(minecraft.fontRendererObj, s, xSize - (minecraft.fontRendererObj.getStringWidth(s) + 1), ySize - minecraft.fontRendererObj.FONT_HEIGHT, 0xFFFFFF, true);
+            zOffset = 0;
+        }
 
         RenderHelper.disableStandardItemLighting();
         GlStateManager.popMatrix();
+
     }
 
     @Override
     public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (isMouseOver(mouseX, mouseY) && drawToolTip) {
-            List<String> list = stack.getTooltip(minecraft.thePlayer, minecraft.gameSettings.advancedItemTooltips);
+        if (isMouseOver(mouseX - xOffset, mouseY - yOffset) && (drawToolTip || toolTipOverride != null)) {
+            List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.thePlayer, minecraft.gameSettings.advancedItemTooltips);
             drawHoveringText(list, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
         }
     }
 
-    public MGuiStackIcon setStack(ItemStack stack) {
-        this.stack = stack;
+    public MGuiStackIcon setStack(StackReference stackReference) {
+        this.stackReference = stackReference;
         return this;
     }
 
@@ -98,5 +115,28 @@ public class MGuiStackIcon extends MGuiElementBase {
     public MGuiStackIcon setToolTip(boolean drawToolTip) {
         this.drawToolTip = drawToolTip;
         return this;
+    }
+
+    public ItemStack getStack() {
+        int hash = stackReference.hashCode();
+        if (!stackCache.containsKey(hash)) {
+            ItemStack stack = stackReference.createStack();
+            if (stack == null) {
+                stack = new ItemStack(Blocks.BARRIER);
+                toolTipOverride = new ArrayList<String>();
+                toolTipOverride.add("Failed to load Item Stack");
+                toolTipOverride.add("This may mean the mod the stack belongs to is not installed");
+                toolTipOverride.add("Or its just broken...");
+            }
+            stackCache.put(hash, stack);
+        }
+        ItemStack stack = stackCache.get(hash);
+
+        if (stack == null) {
+            stack = new ItemStack(Blocks.BARRIER);
+            stackCache.remove(hash);
+        }
+
+        return stack;
     }
 }

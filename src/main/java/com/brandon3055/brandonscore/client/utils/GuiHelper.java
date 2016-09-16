@@ -302,13 +302,14 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
     }
 
     public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale) {
+        if (stack == null || stack.getItem() == null) {
+            return;
+        }
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.translate(0.0F, 0.0F, 32.0F);
         //this.zLevel = 200.0F;
         mc.getRenderItem().zLevel = 200.0F;
-        net.minecraft.client.gui.FontRenderer font = null;
-        if (stack != null) font = stack.getItem().getFontRenderer(stack);
-        if (font == null) font = mc.fontRendererObj;
+        FontRenderer font = mc.fontRendererObj;
         mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
         String count = stack.stackSize > 1 ? String.valueOf(stack.stackSize) : "";
         mc.getRenderItem().renderItemOverlayIntoGUI(font, stack, x, y, count);

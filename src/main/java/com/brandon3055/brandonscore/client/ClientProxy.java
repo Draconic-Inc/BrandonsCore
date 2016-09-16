@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
+import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -22,6 +23,7 @@ public class ClientProxy extends CommonProxy {
         BCEffectHandler.iniEffectRenderer();
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelUtils());
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
+        DLRSCache.initialize();
     }
 
     @Override

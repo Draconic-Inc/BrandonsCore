@@ -38,8 +38,8 @@ public class BrandonsCore {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        proxy.preInit(event);
         FileHandler.init(event);
+        proxy.preInit(event);
         ProcessHandler.init();
         registerNetwork();
     }

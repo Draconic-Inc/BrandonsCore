@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -33,9 +34,11 @@ public class MGuiElementBase {
     /**
      * An id that is unique to this element
      */
-    public String id = null;
+    public String id = "";
     private List<String> groups = new ArrayList<String>();
     public List<MGuiElementBase> childElements = new LinkedList<MGuiElementBase>();
+    public FontRenderer fontRenderer;
+    public Minecraft mc;
     protected List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
     /**
      * For use by ModuleManager ONLY
@@ -79,7 +82,7 @@ public class MGuiElementBase {
     }
 
     public MGuiElementBase removeChild(MGuiElementBase element) {
-        if (childElements.contains(element)) {
+        if (element != null && childElements.contains(element)) {
             toRemove.add(element);
         }
         return this;
@@ -164,8 +167,9 @@ public class MGuiElementBase {
 
     //region Enable
 
-    public void setEnabled(boolean enabled) {
+    public MGuiElementBase setEnabled(boolean enabled) {
         this.enabled = enabled;
+        return this;
     }
 
     public boolean isEnabled() {
@@ -301,16 +305,20 @@ public class MGuiElementBase {
 
     /**
      * Called every tick to update the element. Note this is called regardless of weather or not the element is actually enabled.
+     * Return true to cancel the remainder of this update call. Used primarily to avoid concurrent modification exceptions.
      */
-    public void onUpdate() {
+    public boolean onUpdate() {
         if (!toRemove.isEmpty()) {
             childElements.removeAll(toRemove);
             toRemove.clear();
         }
 
         for (MGuiElementBase element : childElements) {
-            element.onUpdate();
+            if (element.onUpdate()) {
+                return true;
+            }
         }
+        return false;
     }
 
     //endregion
@@ -356,6 +364,20 @@ public class MGuiElementBase {
 
     public void bindTexture(ResourceLocation resourceLocation) {
         modularGui.getMinecraft().getTextureManager().bindTexture(resourceLocation);
+    }
+
+    public MGuiElementBase setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public void setWorldAndResolution(Minecraft mc, int width, int height)
+    {
+        this.mc = mc;
+        this.fontRenderer = mc.fontRendererObj;
+        for (MGuiElementBase element : childElements) {
+            element.setWorldAndResolution(mc, width, height);
+        }
     }
 
     //endregion
@@ -488,21 +510,33 @@ public class MGuiElementBase {
 
     //region Custom Render Helpers
 
-    public void drawString(FontRenderer fontRendererIn, String text, int x, int y, int color) {
+    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int color) {
+        return drawString(fontRenderer, text, x, y, color, false);
+    }
+
+    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int color, boolean dropShadow) {
         GlStateManager.pushMatrix();
-        GlStateManager.translate(0, 0, getRenderZLevel());
-        fontRendererIn.drawStringWithShadow(text, (float) x, (float) y, color);
+        GlStateManager.translate(0, 0, getRenderZLevel() + 1);
+        int i = fontRenderer.drawString(text, x, y, color, dropShadow);
+        GlStateManager.popMatrix();
+        return i;
+    }
+
+    public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int color, boolean dropShadow) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0, 0, getRenderZLevel() + 1);
+        fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2, y, color, dropShadow);
         GlStateManager.popMatrix();
     }
 
-    public void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0, 0, getRenderZLevel());
-        fontRenderer.drawString(text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color, dropShadow);
-        GlStateManager.popMatrix();
+    public void drawSplitString(FontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int color, boolean dropShadow) {
+        for (String s : fontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
+            drawString(fontRenderer, s, x, y, color, dropShadow);
+            y += fontRenderer.FONT_HEIGHT;
+        }
     }
 
-    public void drawCenteredSplitString(FontRenderer fontRenderer, String str, int x, int y, int wrapWidth, int color, boolean dropShadow) {
+    public void drawCenteredSplitString(FontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int color, boolean dropShadow) {
         for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
             drawCenteredString(fontRenderer, s, x, y, color, dropShadow);
             y += fontRenderer.FONT_HEIGHT;
@@ -555,6 +589,28 @@ public class MGuiElementBase {
         drawColouredRect(posX, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
         drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
         drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), fillColour);
+    }
+
+    public static int mixColours(int colour1, int colour2) {
+        return mixColours(colour1, colour2, false);
+    }
+
+    public static int mixColours(int colour1, int colour2, boolean subtract) {
+        int alpha1 = colour1 >> 24 & 255;
+        int alpha2 = colour2 >> 24 & 255;
+        int red1 = colour1 >> 16 & 255;
+        int red2 = colour2 >> 16 & 255;
+        int green1 = colour1 >> 8 & 255;
+        int green2 = colour2 >> 8 & 255;
+        int blue1 = colour1 & 255;
+        int blue2 = colour2 & 255;
+
+        int alpha = MathHelper.clamp_int(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
+        int red = MathHelper.clamp_int(red1 + (subtract ? -red2 : red2), 0, 255);
+        int green = MathHelper.clamp_int(green1 + (subtract ? -green2 : green2), 0, 255);
+        int blue = MathHelper.clamp_int(blue1 + (subtract ? -blue2 : blue2), 0, 255);
+
+        return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | (blue & 0xFF);
     }
 
     //endregion

@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
+import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.EnumAlignment;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMGuiListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
@@ -10,6 +12,8 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by brandon3055 on 30/08/2016.
@@ -20,15 +24,21 @@ public class MGuiButton extends MGuiElementBase {
 
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     public String displayString = "";
+    public List<String> toolTip = null;
     public int buttonId = -1;
     public String buttonName = "";
     public boolean disabled = false;
-    protected IButtonListener listener = null;
+    protected IMGuiListener listener = null;
+    public EnumAlignment alignment = EnumAlignment.CENTER;
+    public boolean dropShadow = true;
+    public int toolTipDelay = 10;
+    public int hoverTime;
+    public boolean mouseOver = false;
 
     public MGuiButton(IModularGui modularGui) {
         super(modularGui);
-        if (modularGui instanceof IButtonListener) {
-            listener = (IButtonListener) modularGui;
+        if (modularGui instanceof IMGuiListener) {
+            listener = (IMGuiListener) modularGui;
         }
     }
 
@@ -36,8 +46,8 @@ public class MGuiButton extends MGuiElementBase {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonId = buttonId;
-        if (modularGui instanceof IButtonListener) {
-            listener = (IButtonListener) modularGui;
+        if (modularGui instanceof IMGuiListener) {
+            listener = (IMGuiListener) modularGui;
         }
     }
 
@@ -45,20 +55,20 @@ public class MGuiButton extends MGuiElementBase {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonName = buttonName;
-        if (modularGui instanceof IButtonListener) {
-            listener = (IButtonListener) modularGui;
+        if (modularGui instanceof IMGuiListener) {
+            listener = (IMGuiListener) modularGui;
         }
     }
 
     public MGuiButton(IModularGui gui, int xPos, int yPos, int xSize, int ySize, String buttonText) {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
-        if (modularGui instanceof IButtonListener) {
-            listener = (IButtonListener) modularGui;
+        if (modularGui instanceof IMGuiListener) {
+            listener = (IMGuiListener) modularGui;
         }
     }
 
-    public MGuiButton setListener(IButtonListener listener) {
+    public MGuiButton setListener(IMGuiListener listener) {
         this.listener = listener;
         return this;
     }
@@ -88,30 +98,43 @@ public class MGuiButton extends MGuiElementBase {
         drawTexturedModalRect(xPos, yPos, 0, 46 + k * 20, xSize % 2 + xSize / 2, ySize);
         drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, 46 + k * 20, xSize / 2, ySize);
 
-        if (ySize < 20){
-            drawTexturedModalRect(xPos, yPos+3, 0, (46 + k * 20)+20-ySize+3, xSize % 2 + xSize / 2, ySize-3);
-            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos+3, 200 - xSize / 2, (46 + k * 20)+20-ySize+3, xSize / 2, ySize-3);
+        if (ySize < 20) {
+            drawTexturedModalRect(xPos, yPos + 3, 0, (46 + k * 20) + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
+            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, (46 + k * 20) + 20 - ySize + 3, xSize / 2, ySize - 3);
         }
 
-        int l = 14737632;
+        int l = getTextColour(hovered, disabled);
 
-        if (disabled)
-        {
-            l = 10526880;
+        if (alignment == EnumAlignment.CENTER) {
+            drawCenteredString(fontrenderer, displayString, xPos + xSize / 2, yPos + (ySize - 8) / 2, l, dropShadow);
         }
-        else if (hovered)
-        {
-            l = 16777120;
+        else {
+            int buffer = 1 + ((ySize - fontrenderer.FONT_HEIGHT) / 2);
+            if (alignment == EnumAlignment.LEFT) {
+                drawString(fontrenderer, displayString, xPos + buffer, yPos + (ySize - 8) / 2, l, dropShadow);
+            }
+            else {
+                drawString(fontrenderer, displayString, ((xPos + xSize) - buffer) - fontrenderer.getStringWidth(displayString), yPos + (ySize - 8) / 2, l, dropShadow);
+            }
         }
-        drawCenteredString(fontrenderer, displayString, xPos + xSize / 2, yPos + (ySize - 8) / 2, l, true);
+    }
+
+    @Override
+    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        mouseOver = isMouseOver(mouseX, mouseY);
+        if (mouseOver && hoverTime >= toolTipDelay && toolTip != null && !toolTip.isEmpty()) {
+            drawHoveringText(toolTip, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+        }
+
+        super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (isMouseOver(mouseX, mouseY)) {
+        if (isMouseOver(mouseX, mouseY) && !disabled) {
             modularGui.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             if (listener != null) {
-                listener.buttonClick(this);
+                listener.onMGuiEvent("BUTTON_PRESS", this);
             }
             return true;
         }
@@ -131,5 +154,48 @@ public class MGuiButton extends MGuiElementBase {
     public MGuiButton setDisplayString(String displayString) {
         this.displayString = displayString;
         return this;
+    }
+
+    public MGuiButton setAlignment(EnumAlignment alignment) {
+        this.alignment = alignment;
+        return this;
+    }
+
+    public MGuiButton setShadow(boolean dropShadow) {
+        this.dropShadow = dropShadow;
+        return this;
+    }
+
+    public MGuiButton setToolTip(String[] toolTip) {
+        this.toolTip = Arrays.asList(toolTip);
+        return this;
+    }
+
+    public MGuiButton setToolTip(List<String> toolTip) {
+        this.toolTip = toolTip;
+        return this;
+    }
+
+    public List<String> getToolTip() {
+        return toolTip;
+    }
+
+    public int getTextColour(boolean hovered, boolean disabled) {
+        if (disabled) {
+            return 10526880;
+        }
+        return hovered ? 16777120 : 14737632;
+    }
+
+    @Override
+    public boolean onUpdate() {
+        if (mouseOver) {
+            hoverTime++;
+        }
+        else {
+            hoverTime = 0;
+        }
+
+        return super.onUpdate();
     }
 }

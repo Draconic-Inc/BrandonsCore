@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.EnumAlignment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -31,17 +33,31 @@ public class MGuiButtonSolid extends MGuiButton {
 
     @Override
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        FontRenderer fontrenderer = mc.fontRendererObj;
         boolean hovered = isMouseOver(mouseX, mouseY);
-        drawBorderedRect(xPos, yPos, xSize, ySize, 1, getFillColour(hovered), getBorderColour(hovered));
+        drawBorderedRect(xPos, yPos, xSize, ySize, 1, getFillColour(hovered, disabled), getBorderColour(hovered, disabled));
 
-        drawCenteredString(mc.fontRendererObj, displayString, xPos + xSize / 2, yPos + (ySize / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), 0xFFFFFF, false);
+        int l = getTextColour(hovered, disabled);
+
+        if (alignment == EnumAlignment.CENTER) {
+            drawCenteredString(fontrenderer, displayString, xPos + xSize / 2, yPos + (ySize - 8) / 2, l, dropShadow);
+        }
+        else {
+            int buffer = 1 + ((ySize - fontrenderer.FONT_HEIGHT) / 2);
+            if (alignment == EnumAlignment.LEFT) {
+                drawString(fontrenderer, displayString, xPos + buffer, yPos + (ySize - 8) / 2, l, dropShadow);
+            }
+            else {
+                drawString(fontrenderer, displayString, ((xPos + xSize) - buffer) - fontrenderer.getStringWidth(displayString), yPos + (ySize - 8) / 2, l, dropShadow);
+            }
+        }
     }
     
-    protected int getFillColour(boolean hovering) {
+    protected int getFillColour(boolean hovering, boolean disabled) {
         return fillColour;
     }
 
-    protected int getBorderColour(boolean hovering) {
+    protected int getBorderColour(boolean hovering, boolean disabled) {
         return hovering ? borderColourHover : borderColour;
     }
 
