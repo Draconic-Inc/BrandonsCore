@@ -232,7 +232,6 @@ public class ThreadedImageDownloader extends SimpleTexture{
                             bufferedimage = ThreadedImageDownloader.this.imageBuffer.parseUserSkin(bufferedimage);
                         }
 
-                        ThreadedImageDownloader.this.setBufferedImage(bufferedimage);
                         if (dlLocation != null) {
                             dlLocation.width = bufferedimage.getWidth();
                             dlLocation.height = bufferedimage.getHeight();
@@ -240,6 +239,9 @@ public class ThreadedImageDownloader extends SimpleTexture{
                             dlLocation.dlFailed = false;
                             dlLocation.dlFinished = true;
                         }
+
+                        ThreadedImageDownloader.this.setBufferedImage(bufferedimage);
+
                         return;
                     }
                     else {

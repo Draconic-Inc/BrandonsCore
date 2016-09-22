@@ -7,7 +7,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -94,7 +93,7 @@ public class MGuiTextField extends MGuiElementBase {
 
     public void writeText(String textToWrite) {
         String s = "";
-        String s1 = ChatAllowedCharacters.filterAllowedCharacters(textToWrite);
+        String s1 = textToWrite;//ChatAllowedCharacters.filterAllowedCharacters(textToWrite);
         int i = this.cursorPosition < this.selectionEnd ? this.cursorPosition : this.selectionEnd;
         int j = this.cursorPosition < this.selectionEnd ? this.selectionEnd : this.cursorPosition;
         int k = this.maxStringLength - this.text.length() - (i - j);
@@ -384,6 +383,9 @@ public class MGuiTextField extends MGuiElementBase {
             String s = this.fontRendererInstance.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
             this.setCursorPosition(this.fontRendererInstance.trimStringToWidth(s, i).length() + this.lineScrollOffset);
         }
+        else if (this.isFocused && mouseOver && mouseButton == 1) {
+            setText("");
+        }
 
         return mouseOver;
     }
@@ -437,7 +439,7 @@ public class MGuiTextField extends MGuiElementBase {
 
         if (flag1) {
             if (flag2) {
-                Gui.drawRect(k1, i1 - 1, k1 + 1, i1 + 1 + this.fontRendererInstance.FONT_HEIGHT, -3092272);
+                drawRect(k1, i1 - 1, k1 + 1, i1 + 1 + this.fontRendererInstance.FONT_HEIGHT, -3092272);
             }
             else {
                 drawString(fontRendererInstance, "_", (float) k1, (float) i1, i, true);

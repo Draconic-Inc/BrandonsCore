@@ -5,7 +5,9 @@ import java.util.LinkedList;
 /**
  * Created by brandon3055 on 26/4/2016.
  * This is just a helper interface to make multiblocks a little easier.
+ * This never really worked that well so it will probably get removed or replaced at some point.
  */
+@Deprecated
 public interface IMultiBlock {
 
     /**
@@ -41,9 +43,5 @@ public interface IMultiBlock {
      * @return a list containing the controller for each of the satellite structures.
      */
     LinkedList<IMultiBlock> getSatelliteControllers();
-
-
-    //TODO Add more useful stuff to this
-    //TODO Fully implement this in the energy core
 
 }

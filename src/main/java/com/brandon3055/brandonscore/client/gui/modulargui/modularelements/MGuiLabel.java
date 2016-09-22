@@ -48,24 +48,24 @@ public class MGuiLabel extends MGuiElementBase {
             if (alignment == EnumAlignment.CENTER) {
                 if (wrap) {
                     float wrapCount = fontrenderer.listFormattedStringToWidth(text, xSize - (buffer * 2)).size();
-                    drawCenteredSplitString(fontrenderer, text, xPos + xSize / 2, yPos - (fh / 2) + (ySize / 2F) - ((fh * (wrapCount - 1)) / 2), xSize - (buffer * 2), colour, dropShadow);
+                    drawCenteredSplitString(fontrenderer, text, xPos + xSize / 2, yPos - (fh / 2) + (ySize / 2F) - ((fh * (wrapCount - 1)) / 2), xSize - (buffer * 2), colour, getDropShadow());
                 }
                 else {
-                    drawCenteredString(fontrenderer, text, xPos + xSize / 2, yPos + (ySize - 8) / 2, colour, dropShadow);
+                    drawCenteredString(fontrenderer, text, xPos + xSize / 2, yPos + (ySize - 8) / 2, colour, getDropShadow());
                 }
             }
             else {
                 if (alignment == EnumAlignment.LEFT) {
                     if (wrap) {
                         float wrapCount = fontrenderer.listFormattedStringToWidth(text, xSize - (buffer * 2)).size();
-                        drawSplitString(fontrenderer, text, xPos + buffer, yPos - (fh / 2) + (ySize / 2F) - ((fh * (wrapCount - 1)) / 2), xSize - (buffer * 2), colour, dropShadow);
+                        drawSplitString(fontrenderer, text, xPos + buffer, yPos - (fh / 2) + (ySize / 2F) - ((fh * (wrapCount - 1)) / 2), xSize - (buffer * 2), colour, getDropShadow());
                     }
                     else {
-                        drawString(fontrenderer, text, xPos + buffer, yPos + (ySize - 8) / 2, colour, dropShadow);
+                        drawString(fontrenderer, text, xPos + buffer, yPos + (ySize - 8) / 2, colour, getDropShadow());
                     }
                 }
                 else {
-                    drawString(fontrenderer, text, ((xPos + xSize) - buffer) - fontrenderer.getStringWidth(text), yPos + (ySize - 8) / 2, colour, dropShadow);
+                    drawString(fontrenderer, text, ((xPos + xSize) - buffer) - fontrenderer.getStringWidth(text), yPos + (ySize - 8) / 2, colour, getDropShadow());
                 }
             }
         }
@@ -85,15 +85,15 @@ public class MGuiLabel extends MGuiElementBase {
             GlStateManager.translate(rotateBottomToTop ? -translation : translation, -translation, 0);
 
             if (alignment == EnumAlignment.CENTER) {
-                drawCenteredString(mc.fontRendererObj, text, xPos + xSize / 2, yPos + (ySize / 2) - (fh / 2), colour, dropShadow);
+                drawCenteredString(mc.fontRendererObj, text, xPos + xSize / 2, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
             }
             else {
                 int buffer = 1 + ((xSize - fh) / 2);
                 if (alignment == EnumAlignment.LEFT) {
-                    drawString(mc.fontRendererObj, text, xPos + xSize / 2 - ySize / 2 + buffer, yPos + (ySize / 2) - (fh / 2), colour, dropShadow);
+                    drawString(mc.fontRendererObj, text, xPos + xSize / 2 - ySize / 2 + buffer, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
                 }
                 else {
-                    drawString(mc.fontRendererObj, text, xPos + xSize / 2 + ySize / 2 - fontrenderer.getStringWidth(text) - buffer, yPos + (ySize / 2) - (fh / 2), colour, dropShadow);
+                    drawString(mc.fontRendererObj, text, xPos + xSize / 2 + ySize / 2 - fontrenderer.getStringWidth(text) - buffer, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
                 }
             }
 
@@ -123,6 +123,10 @@ public class MGuiLabel extends MGuiElementBase {
     public MGuiLabel setShadow(boolean dropShadow) {
         this.dropShadow = dropShadow;
         return this;
+    }
+
+    public boolean getDropShadow() {
+        return dropShadow;
     }
 
     public MGuiLabel setRotation(int rotation) {

@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.lib;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ImageBufferDownload;
 import net.minecraft.client.renderer.texture.TextureManager;
 
 import java.io.File;
@@ -39,7 +38,7 @@ public class DLRSCache {
 
             File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");
 
-            ThreadedImageDownloader downloader = new ThreadedImageDownloader(cache, url, DOWNLOADING_TEXTURE, new ImageBufferDownload());
+            ThreadedImageDownloader downloader = new ThreadedImageDownloader(cache, url, DOWNLOADING_TEXTURE, null);
             downloader.setDlLocation(resourceLocation);
             texturemanager.loadTexture(resourceLocation, downloader);
 

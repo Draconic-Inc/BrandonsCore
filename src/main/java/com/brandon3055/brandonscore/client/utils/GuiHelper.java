@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * Created by Brandon on 28/06/2014.
  */
-public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Note to self: GuiUtils is a thing.
+public class GuiHelper {
     public static final double PXL128 = 0.0078125;
     public static final double PXL256 = 0.00390625;
 
@@ -45,72 +45,6 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
 
     public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
         net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
-//        if (false && !list.isEmpty()) {
-//            GL11.glPushMatrix();
-//            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-//            GL11.glDisable(GL11.GL_LIGHTING);
-//            GL11.glDisable(GL11.GL_DEPTH_TEST);
-////            GL11.glScaled(scale, scale, 1);
-////            x = (int) (x / scale);
-////            y = (int) (y / scale);
-//
-//            int k = 0;
-//            Iterator iterator = list.iterator();
-//
-//            while (iterator.hasNext()) {
-//                String s = (String) iterator.next();
-//                int l = font.getStringWidth(s);
-//
-//                if (l > k) {
-//                    k = l;
-//                }
-//            }
-//
-//            int adjX = x + 12;
-//            int adjY = y - 12;
-//            int i1 = 6;
-//
-//            if (list.size() > 1) {
-//                i1 += 2 + (list.size() - 1) * 10;
-//            }
-//
-//            if (adjX + k > (int) (guiWidth / scale)) {
-//                adjX -= 28 + k;
-//            }
-//
-//            if (adjY + i1 + 6 > (int) (guiHeight / scale)) {
-//                adjY = (int) (guiHeight / scale) - i1 - 6;
-//            }
-//
-//            int j1 = -267386864;
-//            drawGradientRect(adjX - 3, adjY - 4, adjX + k + 3, adjY - 3, j1, j1, fade, scale);
-//            drawGradientRect(adjX - 3, adjY + i1 + 3, adjX + k + 3, adjY + i1 + 4, j1, j1, fade, scale);
-//            drawGradientRect(adjX - 3, adjY - 3, adjX + k + 3, adjY + i1 + 3, j1, j1, fade, scale);
-//            drawGradientRect(adjX - 4, adjY - 3, adjX - 3, adjY + i1 + 3, j1, j1, fade, scale);
-//            drawGradientRect(adjX + k + 3, adjY - 3, adjX + k + 4, adjY + i1 + 3, j1, j1, fade, scale);
-//            int k1 = 1347420415;
-//            int l1 = (k1 & 16711422) >> 1 | k1 & -16777216;
-//            drawGradientRect(adjX - 3, adjY - 3 + 1, adjX - 3 + 1, adjY + i1 + 3 - 1, k1, l1, fade, scale);
-//            drawGradientRect(adjX + k + 2, adjY - 3 + 1, adjX + k + 3, adjY + i1 + 3 - 1, k1, l1, fade, scale);
-//            drawGradientRect(adjX - 3, adjY - 3, adjX + k + 3, adjY - 3 + 1, k1, k1, fade, scale);
-//            drawGradientRect(adjX - 3, adjY + i1 + 2, adjX + k + 3, adjY + i1 + 3, l1, l1, fade, scale);
-//
-//            for (int i2 = 0; i2 < list.size(); ++i2) {
-//                String s1 = (String) list.get(i2);
-//
-//                GL11.glEnable(GL11.GL_BLEND);
-//                GL11.glDisable(GL11.GL_ALPHA_TEST);
-//                OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-//                font.drawStringWithShadow(s1, adjX, adjY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
-//
-//                adjY += 10;
-//            }
-//
-//            GL11.glEnable(GL11.GL_LIGHTING);
-//            GL11.glEnable(GL11.GL_DEPTH_TEST);
-//            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-//            GL11.glPopMatrix();
-//        }
     }
 
     public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
@@ -120,7 +54,7 @@ public class GuiHelper { //TODO replace all GL11 calls with GLStateManager //Not
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
-            GL11.glScaled(scale, scale, 1);
+            GlStateManager.scale(scale, scale, 1);
             mouseX = (int) (mouseX / scale);
             mouseY = (int) (mouseY / scale);
 

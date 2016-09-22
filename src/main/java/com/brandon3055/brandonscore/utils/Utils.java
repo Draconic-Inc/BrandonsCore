@@ -16,20 +16,6 @@ public class Utils {
 
     private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
 
-//	public static IEntitySelector selectLivingBase = new IEntitySelector() {todo Update
-//		@Override
-//		public boolean isEntityApplicable(Entity entity) {
-//			return entity instanceof EntityLivingBase;
-//		}
-//	};
-//
-//	public static IEntitySelector selectPlayer = new IEntitySelector() {
-//		@Override
-//		public boolean isEntityApplicable(Entity entity) {
-//			return entity instanceof EntityPlayer;
-//		}
-//	};
-
     public static String formatNumber(double value) {
         if (value < 1000D) return String.valueOf(value);
         else if (value < 1000000D) return String.valueOf(Math.round(value) / 1000D) + "K";
@@ -122,24 +108,6 @@ public class Utils {
     }
 
     /**
-     * Get itemstack from name of item or blocks name.
-     */
-//	public static ItemStack getStackFromName(String name, int meta)todo Update
-//	{
-//		if (name.contains("tile."))
-//		{
-//			name = name.replace("draconicevolution", "DraconicEvolution").replace("tile.", "");
-//			if (GameData.getBlockRegistry().getObject(name) != null) return new ItemStack(GameData.getBlockRegistry().getObject(name), 1, meta);
-//		}
-//		if (name.contains("item."))
-//		{
-//			name = name.replace("draconicevolution", "DraconicEvolution").replace("item.", "");
-//			if (GameData.getItemRegistry().getObject(name) != null) return new ItemStack(GameData.getItemRegistry().getObject(name), 1, meta);
-//		}
-//		return null;
-//	}
-
-    /**
      * Update the blocks an all 6 sides of a blocks.
      */
     public static void updateNeabourBlocks(World world, BlockPos pos) {
@@ -202,6 +170,28 @@ public class Utils {
         return (int) d;
     }
 
+    public static int parseInt(String s) {
+        return parseInt(s, true);
+    }
+
+    public static int parseInt(String s, boolean catchException) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+
+        if (catchException) {
+            try {
+                return Integer.parseInt(s);
+            }
+            catch (Exception e) {
+                return 0;
+            }
+        }
+        else {
+            return Integer.parseInt(s);
+        }
+    }
+
     public static int parseHex(String s) {
         return parseHex(s, true);
     }
@@ -213,14 +203,14 @@ public class Utils {
 
         if (catchException) {
             try {
-                return Integer.parseInt(s, 16);
+                return (int)Long.parseLong(s, 16);
             }
             catch (Exception e) {
                 return 0;
             }
         }
         else {
-            return Integer.parseInt(s, 16);
+            return (int)Long.parseLong(s, 16);
         }
     }
 }

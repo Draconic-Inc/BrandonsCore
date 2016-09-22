@@ -6,5 +6,11 @@ package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 public enum EnumAlignment {
     LEFT,
     CENTER,
-    RIGHT
+    RIGHT;
+
+    public enum Vertical {
+        TOP,
+        MIDDLE,
+        BOTTOM;
+    }
 }

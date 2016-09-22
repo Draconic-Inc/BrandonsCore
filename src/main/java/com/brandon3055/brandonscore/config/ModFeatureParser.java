@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.config;
 
 import com.brandon3055.brandonscore.blocks.ItemBlockBCore;
+import com.brandon3055.brandonscore.blocks.NoItemBlock;
 import com.brandon3055.brandonscore.utils.BCLogHelper;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -130,6 +131,9 @@ public class ModFeatureParser {
                         e.printStackTrace();
                     }
 
+                }
+                else if (NoItemBlock.class.isAssignableFrom(entry.feature.itemBlock())) {
+                    //Do not register an item block
                 }
                 else {
                     GameRegistry.register(block);

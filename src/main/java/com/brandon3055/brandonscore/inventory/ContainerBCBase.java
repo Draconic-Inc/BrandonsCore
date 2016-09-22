@@ -56,7 +56,7 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
         }
     }
 
-    @Override//TODO is this the new OnCraftGuiOpened?
+    @Override
     public void addListener(IContainerListener listener) {
         super.addListener(listener);
         if (listener instanceof EntityPlayerMP && tile != null) {

@@ -141,7 +141,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     }
 
     protected void cullList() {
-        zOffset = 100;
+        zOffset = 160;
 
 //        GlStateManager.enableCull();
         //GlStateManager.enableDepth();

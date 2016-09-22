@@ -49,14 +49,13 @@ public class MGuiStackIcon extends MGuiElementBase {
 
         GlStateManager.translate(xPos + scaledWidth + xOffset, yPos + scaledHeight + yOffset, getRenderZLevel() - 80);
         GlStateManager.scale(scaledWidth, scaledHeight, 1);
-
-        Minecraft.getMinecraft().getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
+        minecraft.getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
 
         if (drawCount && getStack().stackSize > 1) {
             String s = getStack().stackSize + "";
             GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
-            zOffset = 50;
-            drawString(minecraft.fontRendererObj, s, xSize - (minecraft.fontRendererObj.getStringWidth(s) + 1), ySize - minecraft.fontRendererObj.FONT_HEIGHT, 0xFFFFFF, true);
+            zOffset = 45;
+            drawString(minecraft.fontRendererObj, s, xSize - (minecraft.fontRendererObj.getStringWidth(s)) - 1, minecraft.fontRendererObj.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset = 0;
         }
 

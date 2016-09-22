@@ -26,7 +26,7 @@ public abstract class MessageHandlerWrapper<REQ extends IMessage, REPLY extends 
             syncObject.addPacketServer();
         }
 
-        //TODO I dont think this will work because reply will be null until the run method is actually called...
+        //TODO Find a way to handle replies (when needed) because this dose not actually work
         return syncObject.reply;
     }
 

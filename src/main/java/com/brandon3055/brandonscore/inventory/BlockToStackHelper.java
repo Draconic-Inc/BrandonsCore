@@ -27,6 +27,10 @@ public class BlockToStackHelper {
     public static List<ItemStack> itemCollection = null;
 
     public static List<ItemStack> breakAndCollect(World world, BlockPos pos) {
+        return breakAndCollectWithPlayer(world, pos, null);
+    }
+
+    public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, EntityPlayer player) {
         List<ItemStack> stacks = new ArrayList<ItemStack>();
 
         if (!(world instanceof WorldServer)) {
@@ -35,7 +39,9 @@ public class BlockToStackHelper {
 
         IBlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
-        EntityPlayer player = getHarvester((WorldServer) world);
+        if (player == null) {
+            player = getHarvester((WorldServer) world);
+        }
         itemCollection = new ArrayList<ItemStack>();
 
         block.harvestBlock(world, player, pos, state, world.getTileEntity(pos), player.getHeldItemMainhand());
@@ -47,7 +53,11 @@ public class BlockToStackHelper {
     }
 
     public static void breakAndCollect(World world, BlockPos pos, InventoryDynamic inventoryDynamic) {
-        List<ItemStack> stacks = breakAndCollect(world, pos);
+        breakAndCollectWithPlayer(world, pos, inventoryDynamic, null);
+    }
+
+        public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, EntityPlayer player) {
+        List<ItemStack> stacks = breakAndCollectWithPlayer(world, pos, player);
         for (ItemStack stack : stacks) {
 //            if (stack.getItem() == Item.getItemFromBlock(Blocks.STONE)) {
 //                BCLogHelper.bigInfo("Detected Stone");

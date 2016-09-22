@@ -50,9 +50,6 @@ public class BlockBCore extends Block {
 
         if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)) {
             ((IDataRetainerTile) tile).readDataFromNBT(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
-//            if (tile instanceof TileBCBase){
-//                //((TileBCBase) tile).updateBlock(); ToDo Needed?
-//            }
         }
     }
     //endregion

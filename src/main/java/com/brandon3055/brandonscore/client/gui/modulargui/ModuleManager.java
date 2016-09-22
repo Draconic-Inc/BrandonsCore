@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
@@ -37,6 +38,12 @@ public class ModuleManager {
      * @return The Element.
      */
     public MGuiElementBase add(MGuiElementBase element, int displayLevel) {
+        if (displayLevel > 4) {
+            BCLogHelper.error("ModularGui Display Level Out Of Bounds! Max is 4, someone is using " + displayLevel);
+        }
+        if (element.mc == null || element.fontRenderer == null) {
+            element.setWorldAndResolution(parentGui.getMinecraft(), parentGui.screenWidth(), parentGui.screenHeight());
+        }
         element.displayLevel = displayLevel;
         elements.add(element);
         requiresReSort = true;
@@ -117,7 +124,16 @@ public class ModuleManager {
     //region Mouse & Key
 
     protected boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        int clickedDisplay = -100;
         for (MGuiElementBase element : actionList) {
+            if (clickedDisplay > -100 && element.displayLevel < clickedDisplay) {
+                return true;
+            }
+
+            if (element.isMouseOver(mouseX, mouseY)) {
+                clickedDisplay = element.displayLevel;
+            }
+
             if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -168,7 +184,7 @@ public class ModuleManager {
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
-                parentGui.setZLevel(element.displayLevel * 100);
+                parentGui.setZLevel(element.displayLevel * 200);
                 element.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
             }
         }
@@ -177,7 +193,7 @@ public class ModuleManager {
     public void renderForegroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
-                parentGui.setZLevel(element.displayLevel * 100);
+                parentGui.setZLevel(element.displayLevel * 200);
                 element.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
             }
         }
@@ -186,7 +202,7 @@ public class ModuleManager {
     public void renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
-                parentGui.setZLevel(element.displayLevel * 100);
+                parentGui.setZLevel(element.displayLevel * 200);
                 element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
             }
         }
