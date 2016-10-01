@@ -24,17 +24,23 @@ public class MGuiListEntryWrapper extends MGuiListEntry {
 
     @Override
     public void moveEntry(int newXPos, int newYPos) {
-        if (!lockXPos) {
-            element.xPos = newXPos;
+        if (lockXPos) {
+            newXPos = element.xPos;
         }
-        element.yPos = newYPos;
 
-        for (MGuiElementBase elementBase : element.childElements) {
-            if (!lockXPos) {
-                elementBase.xPos = newXPos;
-            }
-            elementBase.yPos = newYPos;
-        }
+        element.moveBy(newXPos - element.xPos, newYPos - element.yPos);
+
+//        if (!lockXPos) {
+//            element.xPos = newXPos;
+//        }
+//        element.yPos = newYPos;
+//
+//        for (MGuiElementBase elementBase : element.childElements) {
+//            if (!lockXPos) {
+//                elementBase.xPos = newXPos;
+//            }
+//            elementBase.yPos = newYPos;
+//        }
     }
 
     /**

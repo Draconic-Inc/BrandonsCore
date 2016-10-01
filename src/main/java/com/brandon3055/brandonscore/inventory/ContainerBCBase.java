@@ -17,7 +17,7 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     /**
      * A reference to the attached tile. This may be null if the container is not attached to a tile
      */
-    protected T tile;
+    public T tile;
     protected EntityPlayer player;
 
     public ContainerBCBase() {
@@ -33,8 +33,12 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     }
 
     public ContainerBCBase addPlayerSlots(int posX, int posY) {
+        return addPlayerSlots(posX, posY, 4);
+    }
+
+    public ContainerBCBase addPlayerSlots(int posX, int posY, int hotbarSpacing) {
         for (int x = 0; x < 9; x++) {
-            addSlotToContainer(new Slot(player.inventory, x, posX + 18 * x, posY + 58));
+            addSlotToContainer(new Slot(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
         }
 
         for (int y = 0; y < 3; y++) {

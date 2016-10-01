@@ -59,17 +59,19 @@ public class ModelUtils implements IResourceManagerReloadListener {
         Tessellator tessellator = Tessellator.getInstance();
         VertexBuffer vertexbuffer = tessellator.getBuffer();
         int i = 0;
+        vertexbuffer.begin(7, DefaultVertexFormats.ITEM);
         for (int j = listQuads.size(); i < j; ++i) {
-            BakedQuad bakedquad = (BakedQuad) listQuads.get(i);
-            vertexbuffer.begin(7, DefaultVertexFormats.ITEM);
+            BakedQuad bakedquad = listQuads.get(i);
+
             vertexbuffer.addVertexData(bakedquad.getVertexData());
 
             vertexbuffer.putColorRGB_F4(1, 1, 1);
 
             Vec3i vec3i = bakedquad.getFace().getDirectionVec();
             vertexbuffer.putNormal((float) vec3i.getX(), (float) vec3i.getY(), (float) vec3i.getZ());
-            tessellator.draw();
+
         }
+        tessellator.draw();
     }
 
     public static void renderQuadsRGB(List<BakedQuad> listQuads, float r, float g, float b) {

@@ -47,6 +47,9 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     }
 
     protected void initScrollBar() {
+        if (scrollBar != null) {
+            removeChild(scrollBar);
+        }
         scrollBar = new MGuiScrollBar(modularGui, xPos + xSize - 10, yPos + 1, 10, ySize - 2);
         addChild(scrollBar);
         scrollBar.setListener(this);

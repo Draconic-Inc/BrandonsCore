@@ -67,8 +67,8 @@ public class MGuiSelectDialog extends MGuiList {
         xSize = 10;
 
         for (MGuiElementBase option : options) {
-            if (option.xSize > xSize - 10) {
-                xSize = option.xSize + 10;
+            if (option.xSize > xSize - 11) {
+                xSize = option.xSize + 11;
             }
             MGuiListEntryWrapper wrapper = new MGuiListEntryWrapper(modularGui, option);
             addEntry(wrapper);

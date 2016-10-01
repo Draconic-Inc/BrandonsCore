@@ -10,13 +10,15 @@ import java.io.IOException;
 /**
  * Created by brandon3055 on 30/08/2016.
  */
-public abstract class ModularGuiContainer extends GuiContainer implements IModularGui<ModularGuiContainer> {
+public abstract class ModularGuiContainer<T extends Container> extends GuiContainer implements IModularGui<ModularGuiContainer> {
 
     protected ModuleManager manager = new ModuleManager(this);
     protected int zLevel = 0;
+    protected T container;
 
-    public ModularGuiContainer(Container container) {
+    public ModularGuiContainer(T container) {
         super(container);
+        this.container = container;
     }
 
     //region IModularGui
