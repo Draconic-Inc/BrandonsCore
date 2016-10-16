@@ -165,10 +165,18 @@ public class TileBCBase extends TileEntity {
         BrandonsCore.network.sendToServer(packet);
     }
 
+    public void sendPacketToClients(PacketTileMessage packet, NetworkRegistry.TargetPoint targetPoint) {
+        BrandonsCore.network.sendToAllAround(packet, targetPoint);
+    }
+
     /**
      * Receive a message from the client side tile. Override this to receive messages.
      */
     public void receivePacketFromClient(PacketTileMessage packet, EntityPlayerMP client) {
+
+    }
+
+    public void receivePacketFromServer(PacketTileMessage packet) {
 
     }
 

@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.network;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
@@ -194,17 +195,16 @@ public class PacketTileMessage implements IMessage {
         @Override
         public IMessage handleMessage(PacketTileMessage message, MessageContext ctx) {
             if (ctx.side == Side.SERVER) {
-                PacketSyncObject syncPacket = new PacketSyncObject<PacketTileMessage, IMessage>(message, ctx) {
-                    @Override
-                    public void run() {
-                        TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(message.tilePos);
-                        if (tile instanceof TileBCBase) {
-                            ((TileBCBase) tile).receivePacketFromClient(message, ctx.getServerHandler().playerEntity);
-                        }
-                    }
-                };
-
-                syncPacket.addPacketServer();
+                TileEntity tile = ctx.getServerHandler().playerEntity.worldObj.getTileEntity(message.tilePos);
+                if (tile instanceof TileBCBase) {
+                    ((TileBCBase) tile).receivePacketFromClient(message, ctx.getServerHandler().playerEntity);
+                }
+            }
+            else if (ctx.side == Side.CLIENT) {
+                TileEntity tile = BrandonsCore.proxy.getClientWorld().getTileEntity(message.tilePos);
+                if (tile instanceof TileBCBase) {
+                    ((TileBCBase) tile).receivePacketFromServer(message);
+                }
             }
             return null;
         }
