@@ -161,7 +161,7 @@ public class GuiHelper {
      */
     @SuppressWarnings("all")
     public static void drawEnergyBar(Gui gui, int posX, int posY, int size, boolean horizontal, long energy, long maxEnergy, boolean toolTip, int mouseX, int mouseY) {
-        ResourceHelperBC.bindTexture("textures/gui/energyGui.png");
+        ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
         int draw = (int) ((double) energy / (double) maxEnergy * (size - 2));
 
         boolean inRect = isInRect(posX, posY, size, 14, mouseX, mouseY);
@@ -194,7 +194,7 @@ public class GuiHelper {
     }
 
     public static void drawGuiBaseBackground(Gui gui, int posX, int posY, int xSize, int ySize) {
-        ResourceHelperBC.bindTexture("textures/gui/baseGui.png");
+        ResourceHelperBC.bindTexture("textures/gui/base_gui.png");
         GlStateManager.color(1F, 1F, 1F);
         gui.drawTexturedModalRect(posX, posY, 0, 0, xSize - 3, ySize - 3);
         gui.drawTexturedModalRect(posX + xSize - 3, posY, 253, 0, 3, ySize - 3);
@@ -207,7 +207,7 @@ public class GuiHelper {
      * note. X-Size is 162
      */
     public static void drawPlayerSlots(Gui gui, int posX, int posY, boolean center) {
-        ResourceHelperBC.bindTexture("textures/gui/bcWidgets.png");
+        ResourceHelperBC.bindTexture("textures/gui/bc_widgets.png");
 
         if (center) {
             posX -= 81;

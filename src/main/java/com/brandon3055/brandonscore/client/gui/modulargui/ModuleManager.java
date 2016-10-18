@@ -215,6 +215,7 @@ public class ModuleManager {
     public void onUpdate() {
         if (!toRemove.isEmpty()) {
             elements.removeAll(toRemove);
+            toRemove.clear();
         }
 
         for (MGuiElementBase element : elements) {

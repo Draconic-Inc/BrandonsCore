@@ -99,6 +99,7 @@ public class MGuiLabel extends MGuiElementBase {
 
             GlStateManager.popMatrix();
         }
+        GlStateManager.color(1, 1, 1, 1);
     }
 
     public MGuiLabel setDisplayString(String displayString) {

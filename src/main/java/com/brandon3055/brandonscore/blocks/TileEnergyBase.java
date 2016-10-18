@@ -16,10 +16,9 @@ import net.minecraft.world.IBlockAccess;
 /**
  * Created by brandon3055 on 28/3/2016.
  * The base tile for energy providers and receivers that do not have inventories. When extending ether implement implement IEnergyReceiver,
- * IEnergyProvider or both. //Untested...
+ * IEnergyProvider or both.
  */
 public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
-    //to-do add additional functionality as needed
 
     public final SyncableInt energyStored = new SyncableInt(0, false, true);
     protected EnergyStorage energyStorage = new EnergyStorage(0, 0, 0);
@@ -38,10 +37,10 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
         super.detectAndSendChangesToPlayer(forceSync, playerMP);
     }
 
-    protected void setCapacityAndTransfer(int capacity, int receive, int transfer) {
+    protected void setCapacityAndTransfer(int capacity, int receive, int extract) {
         energyStorage.setCapacity(capacity);
         energyStorage.setMaxReceive(receive);
-        energyStorage.setMaxExtract(transfer);
+        energyStorage.setMaxExtract(extract);
     }
 
     public int getEnergyStored(EnumFacing from) {

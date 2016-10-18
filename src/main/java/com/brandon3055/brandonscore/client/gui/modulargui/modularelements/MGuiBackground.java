@@ -26,4 +26,20 @@ public class MGuiBackground extends MGuiElementBase {
         drawTexturedModalRect(xPos, yPos, textureX, textureY, xSize, ySize);
         super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
     }
+
+    public static MGuiBackground newGenericBackground(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize) {
+        return new MGuiBackground(modularGui, xPos, yPos, 0, 0, xSize, ySize, ""){
+            @Override
+            public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+                ResourceHelperBC.bindTexture(ResourceHelperBC.getResourceRAW("brandonscore:textures/gui/base_gui.png"));
+                drawTexturedModalRect(xPos, yPos, 0, 0, xSize / 2, ySize / 2);
+                drawTexturedModalRect(xPos + (xSize / 2), yPos, 255 - (xSize / 2), 0, xSize / 2, ySize / 2);
+
+                drawTexturedModalRect(xPos, yPos + (ySize / 2), 0, 255 - (ySize / 2), xSize / 2, ySize / 2);
+                drawTexturedModalRect(xPos + (xSize / 2), yPos + (ySize / 2), 255 - (xSize / 2), 255 - (ySize / 2), xSize / 2, ySize / 2);
+
+            }
+        };
+    }
+
 }

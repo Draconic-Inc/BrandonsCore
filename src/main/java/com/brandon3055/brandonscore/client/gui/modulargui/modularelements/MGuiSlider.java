@@ -25,18 +25,21 @@ public class MGuiSlider extends MGuiElementBase {
     public double backBorderWidth = 1;
     protected double increment = 0.01;
     protected double shiftIncrement = 0.1;
+    protected double barSize = 1;
     
     public MGuiSlider(IModularGui modularGui) {
         super(modularGui);
+        barSize = horizontal ? xSize / 15D : ySize / 15D;
     }
 
     public MGuiSlider(IModularGui modularGui, int xPos, int yPos) {
         super(modularGui, xPos, yPos);
+        barSize = horizontal ? xSize / 15D : ySize / 15D;
     }
 
     public MGuiSlider(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize) {
         super(modularGui, xPos, yPos, xSize, ySize);
-
+        barSize = horizontal ? xSize / 15D : ySize / 15D;
     }
 
     @Override
@@ -61,14 +64,13 @@ public class MGuiSlider extends MGuiElementBase {
             drawColouredRect(xPos, yPos + ySize - 1, xSize, 1, barColour);
         }
 
-        double barWidth = horizontal ? xSize / 15 : xSize;
-        double barHeight = horizontal ? ySize : ySize / 15;
+        double barWidth = horizontal ? barSize : xSize;
+        double barHeight = horizontal ? ySize : barSize;
         double barXPos = horizontal ? xPos + 1 + position * (xSize - 2 - barWidth) : xPos;
         double barYPos = horizontal ? yPos : yPos + 1 + position * (ySize - 2 - barHeight);
 
         drawBorderedRect(barXPos, barYPos, barWidth, barHeight, 0.5, sliderColour, mixColours(sliderColour, 0x00404040, true));
     }
-
 
     //region Interact & Setters
 
@@ -85,8 +87,8 @@ public class MGuiSlider extends MGuiElementBase {
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (isMouseOver(mouseX, mouseY)) {
-            double barWidth = horizontal ? xSize / 20 : xSize - 2;
-            double barHeight = horizontal ? ySize - 2 : ySize / 20;
+            double barWidth = horizontal ? barSize : xSize - 2;
+            double barHeight = horizontal ? ySize - 2 : barSize;
             double barXPos = horizontal ? xPos + 1 + position * (xSize - 2 - barWidth) : xPos + 1;
             double barYPos = horizontal ? yPos + 1 : yPos + 1 + position * (ySize - 2 - barHeight);
             if (GuiHelper.isInRect((int)barXPos, (int)barYPos, (int)barWidth, (int)barHeight, mouseX, mouseY)) {
@@ -112,8 +114,8 @@ public class MGuiSlider extends MGuiElementBase {
     @Override
     public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if (isDragging) {
-            double barWidth = horizontal ? xSize / 20 : xSize - 2;
-            double barHeight = horizontal ? ySize - 2 : ySize / 20;
+            double barWidth = horizontal ? barSize : xSize - 2;
+            double barHeight = horizontal ? ySize - 2 : barSize;
             if (horizontal) {
                 double pos = mouseX - xPos - (barWidth / 2);
                 setPos(pos / (xSize - barWidth));
@@ -150,9 +152,21 @@ public class MGuiSlider extends MGuiElementBase {
         return this;
     }
     
-    public void setIncrements(double increment, double shiftIncrement) {
+    public MGuiSlider setIncrements(double increment, double shiftIncrement) {
         this.increment = increment;
         this.shiftIncrement = shiftIncrement;
+        return this;
+    }
+
+    public MGuiSlider setHorizontal(boolean horizontal) {
+        this.horizontal = horizontal;
+        barSize = horizontal ? xSize / 15D : ySize / 15D;
+        return this;
+    }
+
+    public MGuiSlider setBarSize(double barSize) {
+        this.barSize = barSize;
+        return this;
     }
 
     /**

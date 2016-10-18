@@ -1,7 +1,11 @@
 package com.brandon3055.brandonscore.client.gui.effects;
 
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
@@ -30,6 +34,7 @@ public class GuiEffect {
     public static double interpPosX;
     public static double interpPosY;
     private World world;
+    public double zLevel = 0;
 
     protected GuiEffect(World world, double posX, double posY)
     {
@@ -39,7 +44,6 @@ public class GuiEffect {
         this.setPosition(posX, posY);
         this.prevPosX = posX;
         this.prevPosY = posY;
-//        this.prevPosZ = posZIn;
         this.particleRed = this.particleGreen = this.particleBlue = 1.0F;
         this.particleScale = (this.rand.nextFloat() * 0.5F + 0.5F) * 2.0F;
         this.particleMaxAge = (int)(4.0F / (this.rand.nextFloat() * 0.9F + 0.1F));
@@ -94,8 +98,8 @@ public class GuiEffect {
 
     public void onUpdate()
     {
-//        this.prevPosX = this.posX;
-//        this.prevPosY = this.posY;
+        this.prevPosX = this.posX;
+        this.prevPosY = this.posY;
 
         if (this.particleAge++ >= this.particleMaxAge)
         {
@@ -108,22 +112,26 @@ public class GuiEffect {
         this.motionY *= 0.9800000190734863D;
     }
 
-    public void renderParticle(float partialTicks)
-    {
-        float f = (float)this.particleTextureIndexX / 16.0F;
-        float f1 = f + 0.0624375F;
-        float f2 = (float)this.particleTextureIndexY / 16.0F;
-        float f3 = f2 + 0.0624375F;
-        float f4 = 0.1F * this.particleScale;
+    public void renderParticle(float partialTicks) {
+        float minU = (float) this.particleTextureIndexX / 8.0F;
+        float maxU = minU + 0.125F;
+        float minV = (float) this.particleTextureIndexY / 8.0F;
+        float maxV = minV + 0.125F;
+        float scale = 8F * this.particleScale;
 
+        Tessellator tessellator = Tessellator.getInstance();
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        vertexbuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
-        float f5 = (float)(this.prevPosX + (this.posX - this.prevPosX) * (double)partialTicks - interpPosX);
-        float f6 = (float)(this.prevPosY + (this.posY - this.prevPosY) * (double)partialTicks - interpPosY);
-        float f7 = 0;//(float)(this.prevPosZ + (this.posZ - this.prevPosZ) * (double)partialTicks - interpPosZ);
-        //worldRendererIn.pos((double)(f5 - rotationX * f4 - rotationXY * f4), (double)(f6 - rotationZ * f4), (double)(f7 - rotationYZ * f4 - rotationXZ * f4)).tex((double)f1, (double)f3).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-        //worldRendererIn.pos((double)(f5 - rotationX * f4 + rotationXY * f4), (double)(f6 + rotationZ * f4), (double)(f7 - rotationYZ * f4 + rotationXZ * f4)).tex((double)f1, (double)f2).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-        //worldRendererIn.pos((double)(f5 + rotationX * f4 + rotationXY * f4), (double)(f6 + rotationZ * f4), (double)(f7 + rotationYZ * f4 + rotationXZ * f4)).tex((double)f, (double)f2).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-        //worldRendererIn.pos((double)(f5 + rotationX * f4 - rotationXY * f4), (double)(f6 - rotationZ * f4), (double)(f7 + rotationYZ * f4 - rotationXZ * f4)).tex((double)f, (double)f3).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
+        float renderX = (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) partialTicks);
+        float renderY = (float) (this.prevPosY + (this.posY - this.prevPosY) * (double) partialTicks);
+
+        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY - 1 * scale), zLevel).tex((double) maxU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY + 1 * scale), zLevel).tex((double) maxU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY + 1 * scale), zLevel).tex((double) minU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY - 1 * scale), zLevel).tex((double) minU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+
+        tessellator.draw();
     }
 
     public int getFXLayer()
