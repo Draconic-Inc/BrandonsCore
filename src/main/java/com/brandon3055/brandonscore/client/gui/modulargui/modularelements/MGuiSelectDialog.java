@@ -34,7 +34,9 @@ public class MGuiSelectDialog extends MGuiList {
     @Override
     public void initElement() {
         super.initElement();
-        scrollBar.parentScrollable = this;
+        if (scrollBar != null) {
+            scrollBar.parentScrollable = this;
+        }
     }
 
     @Override
@@ -45,12 +47,14 @@ public class MGuiSelectDialog extends MGuiList {
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        for (MGuiElementBase option : options) {
-            if (option.isMouseOver(mouseX, mouseY)) {
-                if (listener != null) {
-                    listener.onMGuiEvent("SELECTOR_PICK", option);
+        if (isMouseOver(mouseX, mouseY)) {
+            for (MGuiElementBase option : options) {
+                if (option.isMouseOver(mouseX, mouseY)) {
+                    if (listener != null) {
+                        listener.onMGuiEvent("SELECTOR_PICK", option);
+                    }
+                    return true;
                 }
-                return true;
             }
         }
         return super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -62,15 +66,21 @@ public class MGuiSelectDialog extends MGuiList {
     }
 
     public MGuiSelectDialog setOptions(List<MGuiElementBase> options) {
+        return setOptions(options, false);
+    }
+
+    public MGuiSelectDialog setOptions(List<MGuiElementBase> options, boolean lockXPos) {
         this.options = options;
         childElements.clear();
         xSize = 10;
 
         for (MGuiElementBase option : options) {
-            if (option.xSize > xSize - 11) {
-                xSize = option.xSize + 11;
+            int offset = option.xPos - xPos;
+            if (option.xSize + offset > xSize - 11) {
+                xSize = option.xSize + 11 + offset;
             }
             MGuiListEntryWrapper wrapper = new MGuiListEntryWrapper(modularGui, option);
+            wrapper.setLockXPos(lockXPos);
             addEntry(wrapper);
         }
 

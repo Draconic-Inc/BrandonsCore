@@ -25,7 +25,6 @@ import java.util.List;
  * Created by brandon3055 on 30/08/2016.
  */
 public class MGuiElementBase {
-
     public int xPos;
     public int yPos;
     public int xSize;
@@ -83,6 +82,11 @@ public class MGuiElementBase {
 
     public MGuiElementBase addChild(MGuiElementBase element) {
         childElements.add(element);
+        return this;
+    }
+
+    public MGuiElementBase addChildren(List<MGuiElementBase> elements) {
+        childElements.addAll(elements);
         return this;
     }
 
@@ -402,6 +406,11 @@ public class MGuiElementBase {
 
     public void setYPos(int y) {
         moveBy(0, y - yPos);
+    }
+
+    public MGuiElementBase setLinkedObject(Object linkedObject) {
+        this.linkedObject = linkedObject;
+        return this;
     }
 
     //endregion

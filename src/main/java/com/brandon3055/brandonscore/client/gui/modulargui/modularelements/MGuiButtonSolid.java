@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.EnumAlignment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -34,6 +35,11 @@ public class MGuiButtonSolid extends MGuiButton {
     @Override
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         FontRenderer fontrenderer = mc.fontRendererObj;
+        String displayString = getDisplayString();
+        if (trim && fontrenderer.getStringWidth(displayString) > xSize - 4) {
+            displayString = fontrenderer.trimStringToWidth(displayString, xSize - 8) + "..";
+        }
+
         boolean hovered = isMouseOver(mouseX, mouseY);
         drawBorderedRect(xPos, yPos, xSize, ySize, 1, getFillColour(hovered, disabled), getBorderColour(hovered, disabled));
 
@@ -51,13 +57,14 @@ public class MGuiButtonSolid extends MGuiButton {
                 drawString(fontrenderer, displayString, ((xPos + xSize) - buffer) - fontrenderer.getStringWidth(displayString), yPos + (ySize - 8) / 2, l, dropShadow);
             }
         }
+        GlStateManager.color(1, 1, 1, 1);
     }
-    
-    protected int getFillColour(boolean hovering, boolean disabled) {
+
+    public int getFillColour(boolean hovering, boolean disabled) {
         return fillColour;
     }
 
-    protected int getBorderColour(boolean hovering, boolean disabled) {
+    public int getBorderColour(boolean hovering, boolean disabled) {
         return hovering ? borderColourHover : borderColour;
     }
 

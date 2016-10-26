@@ -22,9 +22,9 @@ public class MGuiBackground extends MGuiElementBase {
 
     @Override
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
         ResourceHelperBC.bindTexture(ResourceHelperBC.getResourceRAW(texture));
         drawTexturedModalRect(xPos, yPos, textureX, textureY, xSize, ySize);
-        super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     public static MGuiBackground newGenericBackground(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize) {

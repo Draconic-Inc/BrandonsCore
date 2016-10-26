@@ -126,11 +126,11 @@ public class ModuleManager {
     protected boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         int clickedDisplay = -100;
         for (MGuiElementBase element : actionList) {
-            if (clickedDisplay > -100 && element.displayLevel < clickedDisplay) {
+            if (element.isEnabled() && clickedDisplay > -100 && element.displayLevel < clickedDisplay) {
                 return true;
             }
 
-            if (element.isMouseOver(mouseX, mouseY)) {
+            if (element.isEnabled() && element.isMouseOver(mouseX, mouseY)) {
                 clickedDisplay = element.displayLevel;
             }
 
@@ -200,9 +200,24 @@ public class ModuleManager {
     }
 
     public void renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MGuiElementBase element : elements) {
+//        for (MGuiElementBase element : elements) {
+//            if (element.isEnabled()) {
+//                parentGui.setZLevel(element.displayLevel * 200);
+//                element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
+//            }
+//        }
+
+        int clickedDisplay = -100;
+        for (MGuiElementBase element : actionList) {
+            if (element.isEnabled() && clickedDisplay > -100 && element.displayLevel < clickedDisplay) {
+                return;
+            }
+
+            if (element.isEnabled() && element.isMouseOver(mouseX, mouseY)) {
+                clickedDisplay = element.displayLevel;
+            }
+
             if (element.isEnabled()) {
-                parentGui.setZLevel(element.displayLevel * 200);
                 element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
             }
         }

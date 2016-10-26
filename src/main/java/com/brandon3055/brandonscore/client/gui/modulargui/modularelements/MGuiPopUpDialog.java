@@ -84,7 +84,6 @@ public class MGuiPopUpDialog extends MGuiElementBase {
 
     public void show() {
         modularGui.getManager().add(this, parent.displayLevel + 1);
-//        parent.childElements.addFirst(this);
     }
 
     public void close() {

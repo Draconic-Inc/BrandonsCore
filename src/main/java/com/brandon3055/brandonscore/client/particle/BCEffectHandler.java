@@ -129,6 +129,29 @@ public class BCEffectHandler {
         }
     }
 
+
+    public static void spawnFXDirect(ResourceLocation texture, BCParticle particle) {
+        spawnFXDirect(texture, particle, 32, true);
+    }
+
+    /**
+     * A client side only method that allows you to add effects directly to the effect renderer.
+     */
+    public static void spawnFXDirect(ResourceLocation texture, BCParticle particle, double viewRange, boolean respectParticleSetting) {
+        Vec3D pos = particle.getPos();
+        if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
+
+            Minecraft mc = Minecraft.getMinecraft();
+            int particleSetting = mc.gameSettings.particleSetting;
+
+            if (respectParticleSetting && (particleSetting == 2 || (particleSetting == 1 && particle.getWorld().rand.nextInt(3) != 0))) {
+                return;
+            }
+
+            effectRenderer.addEffect(texture, particle);
+        }
+    }
+
     //endregion
 
     //region Events

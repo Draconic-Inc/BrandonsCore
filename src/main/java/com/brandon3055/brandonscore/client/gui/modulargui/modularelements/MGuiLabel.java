@@ -37,7 +37,7 @@ public class MGuiLabel extends MGuiElementBase {
         FontRenderer fontrenderer = mc.fontRendererObj;
         int colour = getTextColour();
         int fh = mc.fontRendererObj.FONT_HEIGHT;
-        String text = displayString;
+        String text = getDisplayString();
 
         if (rotation == 0) {
             int buffer = 5;
@@ -107,6 +107,10 @@ public class MGuiLabel extends MGuiElementBase {
         return this;
     }
 
+    public String getDisplayString() {
+        return displayString;
+    }
+
     public MGuiLabel setAlignment(EnumAlignment alignment) {
         this.alignment = alignment;
         return this;
@@ -146,6 +150,11 @@ public class MGuiLabel extends MGuiElementBase {
      */
     public MGuiLabel setWrap(boolean wrap) {
         this.wrap = wrap;
+        return this;
+    }
+
+    public MGuiLabel setTrim(boolean trim) {
+        this.trim = trim;
         return this;
     }
 }

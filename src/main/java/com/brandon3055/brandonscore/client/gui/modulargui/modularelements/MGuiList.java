@@ -53,6 +53,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         scrollBar = new MGuiScrollBar(modularGui, xPos + xSize - 10, yPos + 1, 10, ySize - 2);
         addChild(scrollBar);
         scrollBar.setListener(this);
+        scrollBar.parentScrollable = this;
     }
 
     //region List
@@ -196,11 +197,6 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         scrollBar.setIncrements(10D / maxMove, 0.1D);
         updateEntriesAndScrollBar();
     }
-
-//    add button tool tips
-//            make clicking a mod open thatmods content in the list. Dont forget to recalc the list
-//            Make the nav buttons update and work
-
 
     protected void updateEntriesAndScrollBar() {
         double scrollPos = scrollBar == null ? 0 : scrollBar.getScrollPos();

@@ -1,8 +1,12 @@
 package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.api.IDataRetainerTile;
+import com.brandon3055.brandonscore.lib.IActivatableTile;
+import com.brandon3055.brandonscore.lib.IChangeListener;
+import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -12,10 +16,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -25,6 +33,7 @@ import java.util.List;
 public class BlockBCore extends Block {
     public static final String TILE_DATA_TAG = "DETileData";
     protected boolean isFullCube = true;
+    protected boolean canProvidePower = false;
 
     public BlockBCore() {
         this(Material.ROCK);
@@ -44,8 +53,6 @@ public class BlockBCore extends Block {
 
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
-
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)) {
@@ -64,7 +71,7 @@ public class BlockBCore extends Block {
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
 
-        if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()){
+        if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()) {
             stack.setItemDamage(getMetaFromState(state));
         }
 
@@ -79,10 +86,88 @@ public class BlockBCore extends Block {
         return stack;
     }
 
-    public BlockBCore setIsFullCube(boolean value){
+    public BlockBCore setIsFullCube(boolean value) {
         isFullCube = value;
         return this;
     }
+
+    //endregion
+
+    //region Interfaces
+
+    //IRedstoneEmitter
+    @Override
+    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+        if (this instanceof ITileEntityProvider) {
+            TileEntity tile = world.getTileEntity(pos);
+            return tile instanceof IRedstoneEmitter || tile instanceof IChangeListener;
+        }
+
+        return super.canConnectRedstone(state, world, pos, side);
+    }
+
+    @Override
+    public boolean canProvidePower(IBlockState state) {
+        return canProvidePower;
+    }
+
+    @Override
+    public boolean shouldCheckWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+        if (this instanceof ITileEntityProvider) {
+            TileEntity tile = world.getTileEntity(pos);
+            return tile instanceof IChangeListener;
+        }
+
+        return super.shouldCheckWeakPower(state, world, pos, side);
+    }
+
+    @Override
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+        if (this instanceof ITileEntityProvider) {
+            TileEntity tile = blockAccess.getTileEntity(pos);
+            if (tile instanceof IRedstoneEmitter) {
+                return ((IRedstoneEmitter) tile).getWeakPower(blockState, side);
+            }
+        }
+        return super.getWeakPower(blockState, blockAccess, pos, side);
+    }
+
+    @Override
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+        if (this instanceof ITileEntityProvider) {
+            TileEntity tile = blockAccess.getTileEntity(pos);
+            if (tile instanceof IRedstoneEmitter) {
+                return ((IRedstoneEmitter) tile).getStrongPower(blockState, side);
+            }
+        }
+        return super.getStrongPower(blockState, blockAccess, pos, side);
+    }
+
+    @Override
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn) {
+        if (this instanceof ITileEntityProvider) {
+            TileEntity tile = world.getTileEntity(pos);
+            if (tile instanceof IChangeListener) {
+                ((IChangeListener) tile).onNeighborChange();
+            }
+        }
+        super.neighborChanged(state, world, pos, blockIn);
+    }
+
+    //IActivatableTile
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+        if (this instanceof ITileEntityProvider) {
+            TileEntity tile = worldIn.getTileEntity(pos);
+            if (tile instanceof IActivatableTile) {
+                return ((IActivatableTile) tile).onBlockActivated(state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+            }
+        }
+
+        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+    }
+
 
     //endregion
 
@@ -96,7 +181,8 @@ public class BlockBCore extends Block {
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
             spawnAsEntity(world, pos, stack);
             world.removeTileEntity(pos);
-        } else {
+        }
+        else {
             super.harvestBlock(world, player, pos, state, te, heldStack);
         }
     }

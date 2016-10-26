@@ -34,6 +34,7 @@ public class MGuiButton extends MGuiElementBase {
     public int toolTipDelay = 10;
     public int hoverTime;
     public boolean mouseOver = false;
+    public boolean trim = false;
 
     public MGuiButton(IModularGui modularGui) {
         super(modularGui);
@@ -87,6 +88,7 @@ public class MGuiButton extends MGuiElementBase {
 
     @Override
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        String displayString = getDisplayString();
         FontRenderer fontrenderer = mc.fontRendererObj;
         mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -101,6 +103,10 @@ public class MGuiButton extends MGuiElementBase {
         if (ySize < 20) {
             drawTexturedModalRect(xPos, yPos + 3, 0, (46 + k * 20) + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
             drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, (46 + k * 20) + 20 - ySize + 3, xSize / 2, ySize - 3);
+        }
+
+        if (trim && fontrenderer.getStringWidth(displayString) > xSize - 4) {
+            displayString = fontrenderer.trimStringToWidth(displayString, xSize - 8) + "..";
         }
 
         int l = getTextColour(hovered, disabled);
@@ -122,6 +128,8 @@ public class MGuiButton extends MGuiElementBase {
     @Override
     public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         mouseOver = isMouseOver(mouseX, mouseY);
+
+        List<String> toolTip = getToolTip();
         if (mouseOver && hoverTime >= toolTipDelay && toolTip != null && !toolTip.isEmpty()) {
             drawHoveringText(toolTip, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
         }
@@ -132,7 +140,7 @@ public class MGuiButton extends MGuiElementBase {
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (isMouseOver(mouseX, mouseY) && !disabled) {
-            modularGui.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            modularGui.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1F));
             if (listener != null) {
                 listener.onMGuiEvent("BUTTON_PRESS", this);
             }
@@ -154,6 +162,10 @@ public class MGuiButton extends MGuiElementBase {
     public MGuiButton setDisplayString(String displayString) {
         this.displayString = displayString;
         return this;
+    }
+
+    public String getDisplayString() {
+        return displayString;
     }
 
     public MGuiButton setAlignment(EnumAlignment alignment) {
@@ -187,6 +199,11 @@ public class MGuiButton extends MGuiElementBase {
         return hovered ? 16777120 : 14737632;
     }
 
+    public MGuiButton setToolTipDelay(int toolTipDelay) {
+        this.toolTipDelay = toolTipDelay;
+        return this;
+    }
+
     @Override
     public boolean onUpdate() {
         if (mouseOver) {
@@ -197,5 +214,10 @@ public class MGuiButton extends MGuiElementBase {
         }
 
         return super.onUpdate();
+    }
+
+    public MGuiButton setTrim(boolean trim) {
+        this.trim = trim;
+        return this;
     }
 }

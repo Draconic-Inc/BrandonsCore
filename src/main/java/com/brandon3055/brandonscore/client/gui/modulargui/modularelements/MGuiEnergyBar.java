@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
 import cofh.api.energy.IEnergyHandler;
+import com.brandon3055.brandonscore.blocks.TileEnergyBase;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
@@ -67,8 +68,6 @@ public class MGuiEnergyBar extends MGuiElementBase {
     @Override
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
-//        GuiHelper.drawEnergyBar((Gui) modularGui, xPos, yPos, horizontal ? xSize : ySize, horizontal, energy, maxEnergy, drawHoveringText, mouseX, mouseY);
-
         ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
         int size = horizontal ? xSize : ySize;
         int draw = (int) ((double) energy / (double) maxEnergy * (size - 2));
@@ -113,6 +112,9 @@ public class MGuiEnergyBar extends MGuiElementBase {
         if (energyHandler != null) {
             maxEnergy = energyHandler.getMaxEnergyStored(EnumFacing.UP);
             energy = energyHandler.getEnergyStored(EnumFacing.UP);
+        }
+        if (energyHandler instanceof TileEnergyBase) {
+            energy = ((TileEnergyBase) energyHandler).energyStored.value;
         }
         return super.onUpdate();
     }

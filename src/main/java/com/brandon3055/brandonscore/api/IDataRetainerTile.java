@@ -5,6 +5,12 @@ import net.minecraft.nbt.NBTTagCompound;
 /**
  * Created by brandon3055 on 26/3/2016.
  * Implemented by the TileEntity of blocks that need to retain custom data when harvested.
+ *
+ * Note: If you want to save SyncableObjects to the item set the objects to NOT save when you register them.
+ * Then save them manually vial this interface. See TileEntityDetector in Draconic Evolution form an example
+ *
+ * //TODO Possible make this function via the block break event so it can be implemented on any tile entity for better mod support.
+ * //Or add the event on top of the current logic. So if block broken is not instance of BlockBCore then save via event?
  */
 public interface IDataRetainerTile {
 

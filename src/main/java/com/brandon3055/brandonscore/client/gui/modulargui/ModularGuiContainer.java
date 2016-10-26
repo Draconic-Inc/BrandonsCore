@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 
 import java.io.IOException;
 
@@ -15,6 +16,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     protected ModuleManager manager = new ModuleManager(this);
     protected int zLevel = 0;
     protected T container;
+    protected boolean slotsHidden = false;
 
     public ModularGuiContainer(T container) {
         super(container);
@@ -181,4 +183,21 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     }
 
     //endregion
+
+    public void hideInventorySlots(boolean hide) {
+        if (hide && !slotsHidden) {
+            slotsHidden = true;
+            for (Slot slot : container.inventorySlots) {
+                slot.xDisplayPosition += 1000;
+                slot.yDisplayPosition += 1000;
+            }
+        }
+        else if (!hide && slotsHidden) {
+            slotsHidden = false;
+            for (Slot slot : container.inventorySlots) {
+                slot.xDisplayPosition -= 1000;
+                slot.yDisplayPosition -= 1000;
+            }
+        }
+    }
 }

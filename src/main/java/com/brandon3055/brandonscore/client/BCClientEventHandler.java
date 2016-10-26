@@ -1,21 +1,27 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
-import com.brandon3055.brandonscore.utils.LinkedHashList;
 import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LinkedHashList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DimensionType;
+import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -35,6 +41,8 @@ public class BCClientEventHandler {
     private static LinkedList<Integer> sortingOrder = new LinkedList<Integer>();
     public static int elapsedTicks = 0;
 
+    //region This is ugly! Make it got away region!
+
     private static Comparator<Integer> sorter = new Comparator<Integer>() {
         @Override
         public int compare(Integer value, Integer compare) {
@@ -53,6 +61,10 @@ public class BCClientEventHandler {
             return totalValue > totalCompare ? -1 : totalValue < totalCompare ? 1 : 0;
         }
     };
+
+    //endregion
+
+    //region Event Hooks
 
     @SubscribeEvent
     public void tickEnd(TickEvent.ClientTickEvent event) {
@@ -79,30 +91,6 @@ public class BCClientEventHandler {
         }
     }
 
-    private void searchForPlayerMount() {
-		if (remountTicksRemaining > 0){
-			Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
-			if (e != null){
-				Minecraft.getMinecraft().thePlayer.startRiding(e);
-				BCLogHelper.info("Successfully placed player on mount after "+(500 - remountTicksRemaining)+" ticks");
-				remountTicksRemaining = 0;
-				return;
-			}
-			remountTicksRemaining--;
-			if (remountTicksRemaining == 0){
-				BCLogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
-                BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
-			}
-		}
-    }
-
-    public static void tryRepositionPlayerOnMount(int id) {
-        if (remountTicksRemaining == 500) return;
-        remountTicksRemaining = 500;
-        remountEntityID = id;
-        BCLogHelper.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
-    }
-
     @SubscribeEvent
     public void renderScreen(RenderGameOverlayEvent.Post event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0) {
@@ -127,6 +115,62 @@ public class BCClientEventHandler {
 
 
         GlStateManager.popMatrix();
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void fovUpdate(FOVUpdateEvent event) {
+        EntityPlayer player = event.getEntity();
+        float originalFOV = event.getFov();
+        float newFOV = originalFOV;
+
+        int slotIndex = 2;
+        for (ItemStack stack : player.inventory.armorInventory) {
+            if (stack != null && stack.getItem() instanceof IFOVModifierItem) {
+                newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.values()[slotIndex]);
+            }
+            slotIndex++;
+        }
+
+        ItemStack stack = player.getHeldItemOffhand();
+        if (stack != null && stack.getItem() instanceof IFOVModifierItem) {
+            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.OFFHAND);
+        }
+        stack = player.getHeldItemMainhand();
+        if (stack != null && stack.getItem() instanceof IFOVModifierItem) {
+            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.MAINHAND);
+        }
+
+        if (newFOV != originalFOV) {
+            event.setNewfov(newFOV);
+        }
+    }
+
+    //endregion
+
+    //region misc methods
+
+    private void searchForPlayerMount() {
+		if (remountTicksRemaining > 0){
+			Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
+			if (e != null){
+				Minecraft.getMinecraft().thePlayer.startRiding(e);
+				BCLogHelper.info("Successfully placed player on mount after "+(500 - remountTicksRemaining)+" ticks");
+				remountTicksRemaining = 0;
+				return;
+			}
+			remountTicksRemaining--;
+			if (remountTicksRemaining == 0){
+				BCLogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
+                BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
+			}
+		}
+    }
+
+    public static void tryRepositionPlayerOnMount(int id) {
+        if (remountTicksRemaining == 500) return;
+        remountTicksRemaining = 500;
+        remountEntityID = id;
+        BCLogHelper.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
     }
 
     private void renderGraph(int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {
@@ -210,4 +254,6 @@ public class BCClientEventHandler {
         int l2 = MathHelper.clamp_int((int)((float)l + (float)(l1 - l) * p_181553_3_), 0, 255);
         return i2 << 24 | j2 << 16 | k2 << 8 | l2;
     }
+
+    //endregion
 }

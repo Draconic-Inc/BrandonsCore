@@ -13,6 +13,8 @@ import net.minecraft.world.World;
  */
 public class BCParticle extends Particle {
     protected float texturesPerRow = 16F;
+    protected float airResistance = 0;
+    protected float baseScale = 1;
 
     protected BCParticle(World worldIn, Vec3D pos) {
         super(worldIn, pos.x, pos.y, pos.z);
@@ -22,8 +24,49 @@ public class BCParticle extends Particle {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 
-    public void setScale(float scale) {
+    public BCParticle setScale(float scale) {
         this.particleScale = scale;
+        baseScale = scale;
+        return this;
+    }
+
+    public BCParticle setColour(float red, float green, float blue) {
+        super.setRBGColorF(red, green, blue);
+        return this;
+    }
+
+    public BCParticle setMaxAge(int age, int randAdditive) {
+        super.setMaxAge(age + rand.nextInt(randAdditive));
+        return this;
+    }
+
+    public BCParticle setGravity(double gravity) {
+        this.particleGravity = (float) gravity;
+        return this;
+    }
+
+    public BCParticle setAirResistance(float airResistance) {
+        this.airResistance = airResistance;
+        return this;
+    }
+
+    public BCParticle setSizeAndRandMotion(double scale, double xMotion, double yMotion, double zMotion) {
+        this.particleScale = (float) scale;
+        baseScale = (float) scale;
+
+        this.motionX = (-0.5 + rand.nextDouble()) * xMotion;
+        this.motionY = (-0.5 + rand.nextDouble()) * yMotion;
+        this.motionZ = (-0.5 + rand.nextDouble()) * zMotion;
+
+        return this;
+    }
+
+    public Vec3D getPos() {
+        return new Vec3D(posX, posY, posZ);
+    }
+
+    public World getWorld() {
+        return worldObj;
     }
 
     public void moveEntityNoClip(double x, double y, double z) {
@@ -60,27 +103,3 @@ public class BCParticle extends Particle {
         vertexbuffer.pos((double) (renderX + rotationX * scale - rotationXY * scale), (double) (renderY - rotationZ * scale), (double) (renderZ + rotationYZ * scale - rotationXZ * scale)).tex((double) minU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
     }
 }
-//this.prevPosX = this.posX;
-//        this.prevPosY = this.posY;
-//        this.prevPosZ = this.posZ;
-//
-//        if (particleAge++ > particleMaxAge || Utils.getDistanceAtoB(posX, posY, posZ, targetPos.x, targetPos.y, targetPos.z) < 0.1) {
-//        setExpired();
-//        }
-//
-//        Vec3D targetPos = this.targetPos;
-//
-//        if (toCore){
-//        double rand = worldObj.rand.nextInt() / 12D;
-//        double randOffset = rand * (Math.PI * 2D);
-//        double offsetX = Math.sin((ClientEventHandler.elapsedTicks / 180D * Math.PI) + randOffset);
-//        double offsetY = Math.cos((ClientEventHandler.elapsedTicks / 180D * Math.PI) + randOffset);
-//        targetPos.add(offsetX * 1.2, offsetY * 1.2, worldObj.rand.nextBoolean() ? -0.38 : 0.38);
-//        }
-//
-//        Vec3D dir = Vec3D.getDirectionVec(new Vec3D(posX, posY, posZ), targetPos);
-//        double speed = toCore ? 0.1D : 0.2D;
-//        xSpeed = dir.x * speed;
-//        ySpeed = dir.y * speed;
-//        zSpeed = dir.z * speed;
-//        moveEntityNoClip(xSpeed, ySpeed, zSpeed);

@@ -32,10 +32,10 @@ import java.util.Map;
  */
 public class TileBCBase extends TileEntity {
 
-    private Map<Byte, SyncableObject> syncableObjectMap = new HashMap<Byte, SyncableObject>();
-    private int objIndexCount = 0;
-    private int viewRange = -1;
-    private boolean shouldRefreshOnState = true;
+    protected Map<Byte, SyncableObject> syncableObjectMap = new HashMap<Byte, SyncableObject>();
+    protected int objIndexCount = 0;
+    protected int viewRange = -1;
+    protected boolean shouldRefreshOnState = true;
 
     //region Sync
     public void detectAndSendChanges() {
@@ -99,6 +99,7 @@ public class TileBCBase extends TileEntity {
         return new NetworkRegistry.TargetPoint(worldObj.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), viewRange * 16);
     }
 
+    //Used to sync data to the client
     @Nullable
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
@@ -117,6 +118,7 @@ public class TileBCBase extends TileEntity {
         return new SPacketUpdateTileEntity(this.pos, 0, nbttagcompound);
     }
 
+    //Used when initially sending chunks to the client... I think
     @Override
     public NBTTagCompound getUpdateTag() {
         NBTTagCompound compound = super.getUpdateTag();
@@ -189,7 +191,6 @@ public class TileBCBase extends TileEntity {
         worldObj.notifyBlockUpdate(getPos(), state, state, 3);
     }
 
-
     public void dirtyBlock() {
         Chunk chunk = worldObj.getChunkFromBlockCoords(getPos());
         chunk.setChunkModified();
@@ -249,10 +250,17 @@ public class TileBCBase extends TileEntity {
         }
 
         readExtraNBT(compound);
+
+        onTileLoaded();
     }
 
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
         return shouldRefreshOnState ? oldState != newSate : (oldState.getBlock() != newSate.getBlock());
     }
+
+    /**
+     * Called immediately after all NBT is loaded. World may be null at this point
+     */
+    public void onTileLoaded() {}
 }

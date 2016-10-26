@@ -213,4 +213,8 @@ public class Utils {
             return (int)Long.parseLong(s, 16);
         }
     }
+
+    public static double scale(double valueIn, double inMin, double inMax, double outMin, double outMax) {
+        return (valueIn - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    }
 }

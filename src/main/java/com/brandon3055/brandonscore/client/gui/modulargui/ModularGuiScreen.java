@@ -117,7 +117,16 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
             return;
         }
 
-        super.keyTyped(typedChar, keyCode);
+        if (keyCode == 1)
+        {
+            this.mc.thePlayer.closeScreen();
+            this.mc.displayGuiScreen((GuiScreen)null);
+
+            if (this.mc.currentScreen == null)
+            {
+                this.mc.setIngameFocus();
+            }
+        }
     }
 
     @Override
@@ -171,4 +180,9 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     }
 
     //endregion
+
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
+    }
 }
