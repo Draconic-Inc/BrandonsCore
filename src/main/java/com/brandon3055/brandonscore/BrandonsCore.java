@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore;
 
+import codechicken.lib.CodeChickenLib;
 import com.brandon3055.brandonscore.command.CommandTickTime;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
@@ -13,8 +14,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
-// + CodeChickenLib.version + //TODO Find out why this did not work... #BlameCovers!
-@Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME, dependencies = "required-after:CodeChickenLib@[2.4.2.121,)")
+@Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME, dependencies = "required-after:CodeChickenLib@[" + CodeChickenLib.version + ",)")
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
