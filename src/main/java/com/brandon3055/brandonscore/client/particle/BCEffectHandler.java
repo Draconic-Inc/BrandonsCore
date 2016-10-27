@@ -130,6 +130,7 @@ public class BCEffectHandler {
     }
 
 
+    @SideOnly(Side.CLIENT)
     public static void spawnFXDirect(ResourceLocation texture, BCParticle particle) {
         spawnFXDirect(texture, particle, 32, true);
     }
@@ -137,6 +138,7 @@ public class BCEffectHandler {
     /**
      * A client side only method that allows you to add effects directly to the effect renderer.
      */
+    @SideOnly(Side.CLIENT)
     public static void spawnFXDirect(ResourceLocation texture, BCParticle particle, double viewRange, boolean respectParticleSetting) {
         Vec3D pos = particle.getPos();
         if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
