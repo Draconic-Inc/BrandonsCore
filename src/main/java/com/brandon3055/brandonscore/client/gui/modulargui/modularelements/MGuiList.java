@@ -219,6 +219,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         }
 
         scrollBar.setEnabled((scrollBarEnabled = maxMove > 0));
+        scrollBar.setBarSizeRatio((double) (maxMove + ySize) / (double) ySize);
     }
 
     protected int getListHeight() {

@@ -75,10 +75,18 @@ public class MGuiSelectDialog extends MGuiList {
         xSize = 10;
 
         for (MGuiElementBase option : options) {
-            int offset = option.xPos - xPos;
-            if (option.xSize + offset > xSize - 11) {
-                xSize = option.xSize + 11 + offset;
+            if (lockXPos) {
+                int offset = option.xPos - xPos;
+                if (option.xSize + offset > xSize - 11) {
+                    xSize = option.xSize + 11 + offset;
+                }
             }
+            else {
+                if (option.xSize > xSize - 12) {
+                    xSize = option.xSize + 12;
+                }
+            }
+
             MGuiListEntryWrapper wrapper = new MGuiListEntryWrapper(modularGui, option);
             wrapper.setLockXPos(lockXPos);
             addEntry(wrapper);
@@ -86,6 +94,7 @@ public class MGuiSelectDialog extends MGuiList {
 
         initScrollBar();
         scrollBar.parentScrollable = this;
+        scrollBar.xPos -= 1;
         return this;
     }
 

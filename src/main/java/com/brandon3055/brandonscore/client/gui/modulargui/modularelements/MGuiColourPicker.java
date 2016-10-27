@@ -59,20 +59,20 @@ public class MGuiColourPicker extends MGuiPopUpDialog implements IMGuiListener {
             }
         });
 
-        addChild(redSlider = new MGuiSlider(modularGui, xPos + 4, hexField.yPos + 14, xSize - 8, 8).setListener(this));
+        addChild(redSlider = new MGuiSlider(modularGui, xPos + 4, hexField.yPos + 14, xSize - 8, 8).setListener(this).setBarSize(3));
         redSlider.horizontal = true;
         redSlider.setPos((colour.r & 0xFF) / 255D);
         redSlider.sliderColour = 0xFFFF0000;
-        addChild(greenSlider = new MGuiSlider(modularGui, xPos + 4, redSlider.yPos + 10, xSize - 8, 8).setListener(this));
+        addChild(greenSlider = new MGuiSlider(modularGui, xPos + 4, redSlider.yPos + 10, xSize - 8, 8).setListener(this).setBarSize(3));
         greenSlider.horizontal = true;
         greenSlider.setPos((colour.g & 0xFF) / 255D);
         greenSlider.sliderColour = 0xFF00FF00;
-        addChild(blueSlider = new MGuiSlider(modularGui, xPos + 4, greenSlider.yPos + 10, xSize - 8, 8).setListener(this));
+        addChild(blueSlider = new MGuiSlider(modularGui, xPos + 4, greenSlider.yPos + 10, xSize - 8, 8).setListener(this).setBarSize(3));
         blueSlider.horizontal = true;
         blueSlider.setPos((colour.b & 0xFF) / 255D);
         blueSlider.sliderColour = 0xFF0000FF;
         if (includeAlpha) {
-            addChild(alphaSlider = new MGuiSlider(modularGui, xPos + 4,blueSlider.yPos + 10, xSize - 8, 8).setListener(this));
+            addChild(alphaSlider = new MGuiSlider(modularGui, xPos + 4,blueSlider.yPos + 10, xSize - 8, 8).setListener(this).setBarSize(3));
             alphaSlider.horizontal = true;
             alphaSlider.setPos((colour.a & 0xFF) / 255D);
             alphaSlider.sliderColour = 0xFFFFFFFF;

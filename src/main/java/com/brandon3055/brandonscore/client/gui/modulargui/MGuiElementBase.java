@@ -669,6 +669,7 @@ public class MGuiElementBase {
             }
 
             int tooltipY = mouseY - 12;
+
             int tooltipHeight = 8;
 
             if (textLines.size() > 1)
@@ -682,6 +683,10 @@ public class MGuiElementBase {
             if (tooltipY + tooltipHeight + 6 > screenHeight)
             {
                 tooltipY = screenHeight - tooltipHeight - 6;
+            }
+
+            if (tooltipY < 4) {
+                tooltipY = 4;
             }
 
             zOffset += 1;

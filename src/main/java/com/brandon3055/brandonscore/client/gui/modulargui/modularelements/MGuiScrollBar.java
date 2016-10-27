@@ -24,6 +24,9 @@ public class MGuiScrollBar extends MGuiElementBase {
     public IScrollListener listener = null;
     protected double increment = 0.01;
     protected double shiftIncrement = 0.1;
+    public double barSizeRatio = 20;
+    public int clickOffset = 0;
+    public double clickPos = 0;
 
     public MGuiScrollBar(IModularGui modularGui) {
         super(modularGui);
@@ -41,8 +44,8 @@ public class MGuiScrollBar extends MGuiElementBase {
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         drawBorderedRect(xPos, yPos, xSize, ySize, 1, getBackColour(), getBorderColour());
 
-        double barWidth = horizontal ? xSize / 20 : xSize - 2;
-        double barHeight = horizontal ? ySize - 2 : ySize / 20;
+        double barWidth = horizontal ? xSize / barSizeRatio : xSize - 2;
+        double barHeight = horizontal ? ySize - 2 : ySize / barSizeRatio;
         double barXPos = horizontal ? xPos + 1 + scrollPos * (xSize - 2 - barWidth) : xPos + 1;
         double barYPos = horizontal ? yPos + 1 : yPos + 1 + scrollPos * (ySize - 2 - barHeight);
 
@@ -63,23 +66,27 @@ public class MGuiScrollBar extends MGuiElementBase {
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (isMouseOver(mouseX, mouseY)) {
-            double barWidth = horizontal ? xSize / 20 : xSize - 2;
-            double barHeight = horizontal ? ySize - 2 : ySize / 20;
+            double barWidth = horizontal ? xSize / barSizeRatio : xSize - 2;
+            double barHeight = horizontal ? ySize - 2 : ySize / barSizeRatio;
             double barXPos = horizontal ? xPos + 1 + scrollPos * (xSize - 2 - barWidth) : xPos + 1;
             double barYPos = horizontal ? yPos + 1 : yPos + 1 + scrollPos * (ySize - 2 - barHeight);
             if (GuiHelper.isInRect((int)barXPos, (int)barYPos, (int)barWidth, (int)barHeight, mouseX, mouseY)) {
                 isDragging = true;
+                clickOffset = horizontal ? mouseX : mouseY;
+                clickPos = scrollPos;
             }
             else {
                 if (horizontal) {
-                    double pos = mouseX - xPos - (barWidth / 2);
+                    double pos = mouseX - xPos;
                     setScrollPos(pos / xSize);
                 }
                 else {
-                    double pos = mouseY - yPos - (barHeight / 2);
+                    double pos = mouseY - yPos;
                     setScrollPos(pos / ySize);
                 }
                 isDragging = true;
+                clickOffset = horizontal ? mouseX : mouseY;
+                clickPos = scrollPos;
             }
         }
 
@@ -89,15 +96,22 @@ public class MGuiScrollBar extends MGuiElementBase {
     @Override
     public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if (isDragging) {
-            double barWidth = horizontal ? xSize / 20 : xSize - 2;
-            double barHeight = horizontal ? ySize - 2 : ySize / 20;
+            double barWidth = horizontal ? xSize / barSizeRatio : xSize - 2;
+            double barHeight = horizontal ? ySize - 2 : ySize / barSizeRatio;
             if (horizontal) {
-                double pos = mouseX - xPos - (barWidth / 2);
-                setScrollPos(pos / (xSize - barWidth));
+                int movement = mouseX - clickOffset;
+
+                double pos = clickPos + ((double) movement / (xSize - barWidth));
+//                double pos = mouseX - xPos - (barWidth / 2);
+                setScrollPos(pos);// / (xSize - barWidth));
             }
             else {
-                double pos = mouseY - yPos - (barHeight / 2);
-                setScrollPos(pos / (ySize - barHeight));
+                int movement = mouseY - clickOffset;
+
+                double pos = clickPos + ((double) movement / (ySize - barHeight));
+
+                //double pos = (mouseY + clickOffset) - yPos - (barHeight / 2);
+                setScrollPos(pos);// / (ySize - barHeight));
             }
         }
         return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
@@ -120,7 +134,7 @@ public class MGuiScrollBar extends MGuiElementBase {
      * Sets the position of the scroll bar.
      * @param scrollPos position between 0 and 1
      */
-    public void setScrollPos(double scrollPos) {
+    public MGuiScrollBar setScrollPos(double scrollPos) {
         if (scrollPos > 1) {
             scrollPos = 1;
         }
@@ -133,10 +147,12 @@ public class MGuiScrollBar extends MGuiElementBase {
         if (listener != null) {
             listener.scrollBarMoved(this.scrollPos);
         }
+        return this;
     }
 
-    public void setListener(IScrollListener listener) {
+    public MGuiScrollBar setListener(IScrollListener listener) {
         this.listener = listener;
+        return this;
     }
 
     public void setIncrements(double increment, double shiftIncrement) {
@@ -154,5 +170,17 @@ public class MGuiScrollBar extends MGuiElementBase {
 
     public int getScrollColour() {
         return scrollColour;
+    }
+
+    /**
+     * This sets how large the scroll bar is.
+     * To calculate this value simply divide the maximum ySize of your window bu the actual ySize of your window.
+     * Replace ySize with xSize if your window scrolls sideways.
+     *
+     * By maximum ySize the total ySize of all of the MGuiListElements.
+     */
+    public MGuiScrollBar setBarSizeRatio(double barSizeRatio) {
+        this.barSizeRatio = barSizeRatio;
+        return this;
     }
 }
