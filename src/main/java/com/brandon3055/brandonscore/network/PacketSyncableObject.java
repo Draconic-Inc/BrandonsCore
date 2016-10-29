@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.network;
 
 import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.lib.Vec3D;
 import com.brandon3055.brandonscore.lib.Vec3I;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,6 +28,7 @@ public class PacketSyncableObject implements IMessage {
     public static final byte VEC3I_INDEX = 7;
     public static final byte LONG_INDEX = 8;
     public static final byte SHORT_INDEX = 9;
+    public static final byte VEC3D_INDEX = 10;
 
 
     public BlockPos tilePos;
@@ -40,6 +42,7 @@ public class PacketSyncableObject implements IMessage {
     public boolean booleanValue = false;
     public NBTTagCompound compound;
     public Vec3I vec3I;
+    public Vec3D vec3D;
     public long longValue;
     public boolean updateOnReceived;
     public byte dataType;
@@ -117,6 +120,13 @@ public class PacketSyncableObject implements IMessage {
         this.dataType = LONG_INDEX;
     }
 
+    public PacketSyncableObject(TileBCBase tile, byte syncableIndex, Vec3D vec3D, boolean updateOnReceived) {
+        this.tilePos = tile.getPos();
+        this.index = syncableIndex;
+        this.vec3D = vec3D;
+        this.dataType = VEC3D_INDEX;
+    }
+
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeByte(dataType);
@@ -153,6 +163,11 @@ public class PacketSyncableObject implements IMessage {
                 buf.writeInt(vec3I.x);
                 buf.writeInt(vec3I.y);
                 buf.writeInt(vec3I.z);
+                break;
+            case VEC3D_INDEX:
+                buf.writeDouble(vec3D.x);
+                buf.writeDouble(vec3D.y);
+                buf.writeDouble(vec3D.z);
                 break;
             case LONG_INDEX:
                 buf.writeLong(longValue);
@@ -201,6 +216,12 @@ public class PacketSyncableObject implements IMessage {
                 vec3I.x = buf.readInt();
                 vec3I.y = buf.readInt();
                 vec3I.z = buf.readInt();
+                break;
+            case VEC3D_INDEX:
+                vec3D = new Vec3D(0, 0, 0);
+                vec3D.x = buf.readDouble();
+                vec3D.y = buf.readDouble();
+                vec3D.z = buf.readDouble();
                 break;
             case LONG_INDEX:
                 longValue = buf.readLong();

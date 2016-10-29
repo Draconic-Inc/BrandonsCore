@@ -16,7 +16,7 @@ public class BCParticle extends Particle {
     protected float airResistance = 0;
     protected float baseScale = 1;
 
-    protected BCParticle(World worldIn, Vec3D pos) {
+    public BCParticle(World worldIn, Vec3D pos) {
         super(worldIn, pos.x, pos.y, pos.z);
     }
 

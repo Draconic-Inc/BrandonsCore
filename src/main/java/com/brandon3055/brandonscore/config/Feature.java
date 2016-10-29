@@ -36,7 +36,9 @@ public @interface Feature {
     String[] variantMap() default {};
 
     /**
-     * used For Items with a single variant
+     * used For Items with a single variant (Kinda works with variantMap)
+     * Used to load an items variant from an alternate location.
+     * Usefull if you want to load multiple items from a single blockstate.
      */
     String stateOverride() default "";
 

@@ -35,8 +35,9 @@ public class ModFeatureParser {
     private static final String CATEGORY_BLOCKS = "Blocks";
     private static final String CATEGORY_ITEMS = "Items";
 
-    private static final Map<Object, Boolean> featureStates = new HashMap<Object, Boolean>();
-    private static final List<FeatureEntry> featureEntries = new ArrayList<FeatureEntry>();
+    private static final Map<Object, Boolean> featureStates = new HashMap<>();
+    private static final List<FeatureEntry> allFeatureEntries = new ArrayList<>();
+    private final List<FeatureEntry> modFeatureEntries = new ArrayList<>();
 
     /**
      * @param modid   modid of the mod implementing this instance of ModFeatureParser
@@ -47,6 +48,11 @@ public class ModFeatureParser {
         this.modTabs = modTabs;
     }
 
+    public ModFeatureParser(String modid) {
+        this.modid = modid;
+        this.modTabs = new CreativeTabs[0];
+    }
+
     /**
      * @param collection A class containing all of the mods "Features" Look at Draconic Evolution for an example implementation
      */
@@ -54,7 +60,8 @@ public class ModFeatureParser {
         for (Field field : collection.getFields()) {
             if (field.isAnnotationPresent(Feature.class)) {
                 try {
-                    featureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
+                    allFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
+                    modFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
                 }
                 catch (IllegalAccessException e) {
                     BCLogHelper.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
@@ -72,7 +79,7 @@ public class ModFeatureParser {
      */
     public void loadFeatureConfig(Configuration configuration) {
         try {
-            for (FeatureEntry entry : featureEntries) {
+            for (FeatureEntry entry : modFeatureEntries) {
                 if (!entry.feature.isConfigurable()) {
                     featureStates.put(entry.featureObj, true);
                     continue;
@@ -100,7 +107,7 @@ public class ModFeatureParser {
      * Must be called AFTER loadFeatureConfig
      */
     public void registerFeatures() {
-        for (FeatureEntry entry : featureEntries) {
+        for (FeatureEntry entry : modFeatureEntries) {
             if (!entry.enabled) continue;
 
             if (entry.featureObj instanceof ICustomRegistry) {
@@ -169,7 +176,7 @@ public class ModFeatureParser {
      */
     @SideOnly(Side.CLIENT)
     public void registerRendering() {
-        for (FeatureEntry entry : featureEntries) {
+        for (FeatureEntry entry : modFeatureEntries) {
             if (!entry.enabled) continue;
 
             if (entry.featureObj instanceof ICustomRender) {
@@ -196,8 +203,13 @@ public class ModFeatureParser {
 
                 if (!entry.feature.stateOverride().isEmpty()) {
                     String s = entry.feature.stateOverride().substring(0, entry.feature.stateOverride().indexOf("#"));
-                    s += entry.feature.stateOverride().substring(entry.feature.stateOverride().indexOf("#")).toLowerCase();
-                    ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + s));
+                    if (entry.feature.variantMap().length > 0) {
+                        registerOverrideVariants(item, entry.feature, s);
+                    }
+                    else {
+                        s += entry.feature.stateOverride().substring(entry.feature.stateOverride().indexOf("#")).toLowerCase();
+                        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + s));
+                    }
                 }
                 else if (entry.feature.variantMap().length > 0) {
                     registerVariants(item, entry.feature);
@@ -206,6 +218,15 @@ public class ModFeatureParser {
                     ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(modid.toLowerCase() + ":" + entry.feature.registryName()));
                 }
             }
+        }
+    }
+
+    private void registerOverrideVariants(Item item, Feature feature, String override) {
+        for (String s : feature.variantMap()) {
+            int meta = Integer.parseInt(s.substring(0, s.indexOf(":")));
+            String fullName = modid.toLowerCase() + ":" + override;
+            String variant = s.substring(s.indexOf(":") + 1);
+            ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(fullName, variant));
         }
     }
 
