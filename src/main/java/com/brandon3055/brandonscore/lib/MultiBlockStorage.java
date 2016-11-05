@@ -15,6 +15,7 @@ public class MultiBlockStorage {
     private int xPos = 0;
     private int yPos = 0;
 
+
     public MultiBlockStorage(int size, MultiBlockHelper helper) {
         blockStorage = new String[size][size][size];
         this.helper = helper;

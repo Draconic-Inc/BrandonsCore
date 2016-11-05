@@ -88,7 +88,7 @@ public class GuiEffect {
 
     public boolean isTransparent()
     {
-        return false;
+        return true;
     }
 
     public void setMaxAge(int p_187114_1_)

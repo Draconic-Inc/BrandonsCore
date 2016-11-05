@@ -42,6 +42,9 @@ public class GuiEffectRenderer {
 
             effect.renderParticle(partialTick);
 
+            if (effect.isTransparent()){
+                GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
+            }
         }
     }
 

@@ -16,9 +16,6 @@ public class BCEventHandler {
         if (event.getEntity() instanceof EntityItem && BlockToStackHelper.itemCollection != null && !event.isCanceled()) {
             BlockToStackHelper.itemCollection.add(((EntityItem)event.getEntity()).getEntityItem());
             event.setCanceled(true);
-//            if (((EntityItem)event.getEntity()).getEntityItem().getItem() == Item.getItemFromBlock(Blocks.STONE)) {
-//                BCLogHelper.bigInfo("Detected Stone");
-//            }
         }
     }
 }
