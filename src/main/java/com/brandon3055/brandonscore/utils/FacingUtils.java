@@ -114,4 +114,80 @@ public class FacingUtils {
             return FACES_AROUND_Z;
         }
     }
+
+    public static EnumFacing rotateAround(EnumFacing facing, EnumFacing.Axis axis, boolean reverse) {
+        switch (axis) {
+            case X:
+
+                if (facing != EnumFacing.WEST && facing != EnumFacing.EAST) {
+                    return rotateX(facing, reverse);
+                }
+
+                return facing;
+            case Y:
+
+                if (facing != EnumFacing.UP && facing != EnumFacing.DOWN) {
+                    return rotateY(facing, reverse);
+                }
+
+                return facing;
+            case Z:
+
+                if (facing != EnumFacing.NORTH && facing != EnumFacing.SOUTH) {
+                    return rotateZ(facing, reverse);
+                }
+
+                return facing;
+            default:
+                throw new IllegalStateException("Unable to get CW facing for axis " + axis);
+        }
+    }
+
+    private static EnumFacing rotateY(EnumFacing facing, boolean reverse) {
+        switch (facing) {
+            case NORTH:
+                return reverse ? EnumFacing.WEST : EnumFacing.EAST;
+            case EAST:
+                return reverse ? EnumFacing.NORTH : EnumFacing.SOUTH;
+            case SOUTH:
+                return reverse ? EnumFacing.EAST : EnumFacing.WEST;
+            case WEST:
+                return reverse ? EnumFacing.SOUTH : EnumFacing.NORTH;
+            default:
+                throw new IllegalStateException("Unable to get Y-rotated facing of " + facing);
+        }
+    }
+
+    private static EnumFacing rotateX(EnumFacing facing, boolean reverse) {
+        switch (facing) {
+            case NORTH:
+                return reverse ? EnumFacing.UP : EnumFacing.DOWN;
+            case EAST:
+            case WEST:
+            default:
+                throw new IllegalStateException("Unable to get X-rotated facing of " + facing);
+            case SOUTH:
+                return reverse ? EnumFacing.DOWN : EnumFacing.UP;
+            case UP:
+                return reverse ? EnumFacing.SOUTH : EnumFacing.NORTH;
+            case DOWN:
+                return reverse ? EnumFacing.NORTH : EnumFacing.SOUTH;
+        }
+    }
+
+    private static EnumFacing rotateZ(EnumFacing facing, boolean reverse) {
+        switch (facing) {
+            case EAST:
+                return reverse ? EnumFacing.UP : EnumFacing.DOWN;
+            case SOUTH:
+            default:
+                throw new IllegalStateException("Unable to get Z-rotated facing of " + facing);
+            case WEST:
+                return reverse ? EnumFacing.DOWN : EnumFacing.UP;
+            case UP:
+                return reverse ? EnumFacing.WEST : EnumFacing.EAST;
+            case DOWN:
+                return reverse ? EnumFacing.EAST : EnumFacing.WEST;
+        }
+    }
 }

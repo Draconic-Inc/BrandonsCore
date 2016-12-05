@@ -167,12 +167,12 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
 
 
     @Override
-    public void writeDataToNBT(NBTTagCompound dataCompound) {
+    public void writeRetainedData(NBTTagCompound dataCompound) {
         writeInventoryToNBT(dataCompound);
     }
 
     @Override
-    public void readDataFromNBT(NBTTagCompound dataCompound) {
+    public void readRetainedData(NBTTagCompound dataCompound) {
         readInventoryFromNBT(dataCompound);
     }
 }

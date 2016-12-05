@@ -189,7 +189,10 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
 
             if (eventElement == addEntity) {
                 for (Entity entity : getEntityList()) {
-                    String name = entity.getDisplayName().getFormattedText();
+                    if (entity == null) {
+                        continue;
+                    }
+                    String name = entity.getDisplayName() == null ? "[unknown]" : entity.getDisplayName().getFormattedText();
                     MGuiLabel label = new MGuiLabel(modularGui, xPos + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
                     if (fontRenderer.getStringWidth(name) > xSize - 40) {
                         label.addChild(new MGuiHoverPopup(modularGui, new String[] {name}, label));

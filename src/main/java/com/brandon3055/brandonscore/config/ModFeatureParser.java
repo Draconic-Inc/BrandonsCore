@@ -124,6 +124,7 @@ public class ModFeatureParser {
                     block.setCreativeTab(modTabs[entry.feature.cTab()]);
                 }
 
+                //Note to self: this is the same as object instance of ItemBlockBCore (Its reversed)
                 if (ItemBlockBCore.class.isAssignableFrom(entry.feature.itemBlock())) {
                     GameRegistry.register(block);
 

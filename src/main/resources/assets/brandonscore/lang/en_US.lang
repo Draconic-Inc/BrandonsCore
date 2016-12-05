@@ -25,3 +25,4 @@ gui.de.button.toggleOff=Toggle Off
 gui.de.button.toggleOn=Toggle On
 gui.de.button.toggle=Toggle
 gui.de.button.close=Close
+gui.button.save=Save

@@ -20,10 +20,10 @@ public interface IDataRetainerTile {
      * Data saved in this method will also be saved to the ItemBlock when the tile is harvested so it can be restored
      * when the tile is placed.
      */
-    void writeDataToNBT(NBTTagCompound dataCompound);
+    void writeRetainedData(NBTTagCompound dataCompound);
 
     /**
-     * This is where any data saved in writeDataToNBT should be loaded from NBT.
+     * This is where any data saved in writeRetainedData should be loaded from NBT.
      */
-    void readDataFromNBT(NBTTagCompound dataCompound);
+    void readRetainedData(NBTTagCompound dataCompound);
 }

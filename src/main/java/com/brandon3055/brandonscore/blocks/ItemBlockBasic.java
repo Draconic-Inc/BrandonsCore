@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
  * Created by brandon3055 on 21/3/2016.
  * Used for simple blocks that require some minor additional features such as blocks that have subtypes.
  */
+@Deprecated //Moving functionality to ItemBlockBCore
 public class ItemBlockBasic extends ItemBlockBCore {
 
     private FeatureWrapper feature;

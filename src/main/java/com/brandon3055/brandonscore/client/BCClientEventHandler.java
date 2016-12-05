@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
 import com.brandon3055.brandonscore.utils.BCLogHelper;
 import com.brandon3055.brandonscore.utils.LinkedHashList;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -47,13 +48,13 @@ public class BCClientEventHandler {
         @Override
         public int compare(Integer value, Integer compare) {
             long totalValue = 0;
-            for (Integer time : dimTickTimes.get(value)){
+            for (Integer time : dimTickTimes.get(value)) {
                 totalValue += time;
             }
             totalValue /= 200;
 
             long totalCompare = 0;
-            for (Integer time : dimTickTimes.get(compare)){
+            for (Integer time : dimTickTimes.get(compare)) {
                 totalCompare += time;
             }
             totalCompare /= 200;
@@ -68,20 +69,23 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void tickEnd(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            searchForPlayerMount();
-            if (debugTimeout > 0) {
-                debugTimeout--;
-            }
-        }
-
-        if (elapsedTicks % 100 == 0 && debugTimeout > 0) {
-            sortingOrder.clear();
-            sortingOrder.addAll(dimTickTimes.keySet());
-            Collections.sort(sortingOrder, sorter);
-        }
-
-        elapsedTicks++;
+//        elapsedTicks++;
+//        if (Minecraft.getMinecraft().isGamePaused()) {
+//            return;
+//        }
+//
+//        if (event.phase == TickEvent.Phase.END) {
+//            searchForPlayerMount();
+//            if (debugTimeout > 0) {
+//                debugTimeout--;
+//            }
+//        }
+//
+//        if (elapsedTicks % 100 == 0 && debugTimeout > 0) {
+//            sortingOrder.clear();
+//            sortingOrder.addAll(dimTickTimes.keySet());
+//            Collections.sort(sortingOrder, sorter);
+//        }
     }
 
     @SubscribeEvent
@@ -113,6 +117,11 @@ public class BCClientEventHandler {
             i++;
         }
 
+        if (debugTimeout < 190) {
+            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+            fontRenderer.drawString("Server Stopped Sending Updates!", 0, event.getResolution().getScaledHeight() - 21, 0xFF0000, true);
+            fontRenderer.drawString("Display will time out in " + Utils.round((debugTimeout / 20D), 10), 0, event.getResolution().getScaledHeight() - 11, 0xFF0000, true);
+        }
 
         GlStateManager.popMatrix();
     }
@@ -145,25 +154,40 @@ public class BCClientEventHandler {
         }
     }
 
+//    @SubscribeEvent
+//    public void mouseClickEvent(GuiScreenEvent.MouseInputEvent.Pre event) {
+////        GuiScreen screen = event.getGui();
+////        int button = Mouse.getEventButton();
+////
+////        if (screen instanceof GuiChat && button == 0) {
+////
+////            ITextComponent itextcomponent = Minecraft.getMinecraft().ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
+////            BCLogHelper.info(itextcomponent);
+////            if (itextcomponent != null) {
+////                BCLogHelper.info(itextcomponent.getStyle().getClickEvent());
+////                event.setCanceled(true);
+////            }
+////        }
+//    }
     //endregion
 
     //region misc methods
 
     private void searchForPlayerMount() {
-		if (remountTicksRemaining > 0){
-			Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
-			if (e != null){
-				Minecraft.getMinecraft().thePlayer.startRiding(e);
-				BCLogHelper.info("Successfully placed player on mount after "+(500 - remountTicksRemaining)+" ticks");
-				remountTicksRemaining = 0;
-				return;
-			}
-			remountTicksRemaining--;
-			if (remountTicksRemaining == 0){
-				BCLogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
+        if (remountTicksRemaining > 0) {
+            Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
+            if (e != null) {
+                Minecraft.getMinecraft().thePlayer.startRiding(e);
+                BCLogHelper.info("Successfully placed player on mount after " + (500 - remountTicksRemaining) + " ticks");
+                remountTicksRemaining = 0;
+                return;
+            }
+            remountTicksRemaining--;
+            if (remountTicksRemaining == 0) {
+                BCLogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
                 BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
-			}
-		}
+            }
+        }
     }
 
     public static void tryRepositionPlayerOnMount(int id) {
@@ -178,7 +202,7 @@ public class BCClientEventHandler {
 
         GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
         FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
-        fontRenderer.drawString(name, x + 2, yHeight -43, 0xFFFFFF, true);
+        fontRenderer.drawString(name, x + 2, yHeight - 43, 0xFFFFFF, true);
         GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
         GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
         fontRenderer.drawString("50ms", x + 2, yHeight - 16, 0xFFFFFF);
@@ -188,12 +212,12 @@ public class BCClientEventHandler {
             int time = times[i] == null ? 0 : times[i];
             int height = (int) (((time / 100D) / 100D) * 30D);
             int j1 = getFrameColor(MathHelper.clamp_int(height, 0, 30), 0, 15, 30);
-            GuiHelper.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 -height, 1, height, j1);
+            GuiHelper.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 - height, 1, height, j1);
         }
     }
 
     public static void handleTickPacket(PacketTickTime packet) {
-        debugTimeout = 500;
+        debugTimeout = 200;
         renderIndex++;
 
         overallTickTime[renderIndex % 200] = packet.overall;
@@ -233,13 +257,11 @@ public class BCClientEventHandler {
         }
     }
 
-    public static int getFrameColor(int input, int min, int mid, int max)
-    {
-        return input < mid ? blendColors(-16711936, -256, (float)input / (float)mid) : blendColors(-256, -65536, (float)(input - mid) / (float)(max - mid));
+    public static int getFrameColor(int input, int min, int mid, int max) {
+        return input < mid ? blendColors(-16711936, -256, (float) input / (float) mid) : blendColors(-256, -65536, (float) (input - mid) / (float) (max - mid));
     }
 
-    public static int blendColors(int p_181553_1_, int p_181553_2_, float p_181553_3_)
-    {
+    public static int blendColors(int p_181553_1_, int p_181553_2_, float p_181553_3_) {
         int i = p_181553_1_ >> 24 & 255;
         int j = p_181553_1_ >> 16 & 255;
         int k = p_181553_1_ >> 8 & 255;
@@ -249,9 +271,9 @@ public class BCClientEventHandler {
         int k1 = p_181553_2_ >> 8 & 255;
         int l1 = p_181553_2_ & 255;
         int i2 = MathHelper.clamp_int((int) ((float) i + (float) (i1 - i) * p_181553_3_), 0, 255);
-        int j2 = MathHelper.clamp_int((int)((float)j + (float)(j1 - j) * p_181553_3_), 0, 255);
-        int k2 = MathHelper.clamp_int((int)((float)k + (float)(k1 - k) * p_181553_3_), 0, 255);
-        int l2 = MathHelper.clamp_int((int)((float)l + (float)(l1 - l) * p_181553_3_), 0, 255);
+        int j2 = MathHelper.clamp_int((int) ((float) j + (float) (j1 - j) * p_181553_3_), 0, 255);
+        int k2 = MathHelper.clamp_int((int) ((float) k + (float) (k1 - k) * p_181553_3_), 0, 255);
+        int l2 = MathHelper.clamp_int((int) ((float) l + (float) (l1 - l) * p_181553_3_), 0, 255);
         return i2 << 24 | j2 << 16 | k2 << 8 | l2;
     }
 

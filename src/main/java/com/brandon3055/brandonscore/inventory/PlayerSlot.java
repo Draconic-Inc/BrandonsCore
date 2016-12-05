@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
  * The field for the inventory which the item is located in should be set to the slot index.
  * The other two fields should be set to -1.
  */
-public class PlayerSlot {//todo Maby move to API? Depends if this gets used in anything API related
+public class PlayerSlot {
 
     private int slot;
     private EnumInvCategory category;
@@ -30,6 +30,47 @@ public class PlayerSlot {//todo Maby move to API? Depends if this gets used in a
         EnumInvCategory category = EnumInvCategory.fromIndex(buf.readByte());
         int slot = buf.readByte();
         return new PlayerSlot(slot, category);
+    }
+
+    @Override
+    public String toString() {
+        return category.getIndex() + ":" + slot;
+    }
+
+    public static PlayerSlot fromString(String slot) {
+        try {
+            return new PlayerSlot(Integer.parseInt(slot.substring(slot.indexOf(":") + 1)), EnumInvCategory.fromIndex(Integer.parseInt(slot.substring(0, slot.indexOf(":")))));
+        }
+        catch (Exception e) {
+            BCLogHelper.error("Error loading slot reference from string! - " + slot);
+            BCLogHelper.error("Required format \"inventory:slot\" Where inventory ether 0 (main), 1 (Armor) or 2 (Off Hand) and slot is the index in that inventory.");
+            e.printStackTrace();
+            return new PlayerSlot(0, EnumInvCategory.MAIN);
+        }
+    }
+
+    public void setStackInSlot(EntityPlayer player, ItemStack stack) {
+        if (category == EnumInvCategory.ARMOR){
+            if (slot < 0 || slot >= player.inventory.armorInventory.length) {
+                BCLogHelper.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                return;
+            }
+            player.inventory.armorInventory[slot] = stack;
+        }
+        else if (category == EnumInvCategory.MAIN){
+            if (slot < 0 || slot >= player.inventory.mainInventory.length) {
+                BCLogHelper.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                return;
+            }
+            player.inventory.mainInventory[slot] = stack;
+        }
+        else if (category == EnumInvCategory.OFF_HAND){
+            if (slot < 0 || slot >= player.inventory.offHandInventory.length) {
+                BCLogHelper.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                return;
+            }
+            player.inventory.offHandInventory[slot] = stack;
+        }
     }
 
     public ItemStack getStackInSlot(EntityPlayer player) {

@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
+import com.google.common.collect.Queues;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GlStateManager;
@@ -25,40 +26,43 @@ import java.util.concurrent.Callable;
  */
 public class BCEffectRenderer {
     public World worldObj;
-    private final Random rand = new Random();
 
     //Textured Particle Queue
     @SuppressWarnings("unchecked")
-//        private final ArrayDeque<Particle>[][] renderQueue = new ArrayDeque[4][];
-    private final Map<ResourceLocation, ArrayDeque<Particle>[][]> texturedRenderQueue = new HashMap<ResourceLocation, ArrayDeque<Particle>[][]>();
-
-    //Particles that need to be injected into the render queues next tick;
-//        private final Queue<Particle> queueParticle = new ArrayDeque<Particle>();
-    private final Queue<PairKV<ResourceLocation, Particle>> queueTexturedParticle = new ArrayDeque<PairKV<ResourceLocation, Particle>>();
+    private final Map<ResourceLocation, ArrayDeque<Particle>[][]> renderQueue = new HashMap<>();
+    private final Queue<PairKV<ResourceLocation, Particle>> newParticleQueue = new ArrayDeque<>();
+    @SuppressWarnings("unchecked")
+    private final Map<IGLFXHandler, ArrayDeque<Particle>[]> glRenderQueue = new HashMap<>();
+    private final Queue<PairKV<IGLFXHandler, Particle>> newGlParticleQueue = Queues.newArrayDeque();
 
     @SuppressWarnings("unchecked")
     public BCEffectRenderer(World worldObj) {
         this.worldObj = worldObj;
-
-//            for (int i = 0; i < 4; ++i) {
-//                this.renderQueue[i] = new ArrayDeque[2];
-//
-//                for (int j = 0; j < 2; ++j) {
-//                    this.renderQueue[i][j] = new ArrayDeque<Particle>();
-//                }
-//            }
     }
 
     //region Adders
 
-//        public void addEffect(Particle Particle) {
-//            if (Particle == null) return;
-//            queueParticle.add(Particle);
-//        }
+    public void addRawGLEffect(IGLFXHandler handler, BCParticle particle) {
+        if (particle == null) {
+            return;
+        }
 
-    public void addEffect(ResourceLocation resourceLocation, Particle Particle) {
-        if (resourceLocation == null || Particle == null) return;
-        queueTexturedParticle.add(new PairKV<ResourceLocation, Particle>(resourceLocation, Particle));
+        if (!particle.isRawGLParticle()) {
+            throw new RuntimeException("Attempted to spawn a regular particle as a Raw GL particle! This is not allowed!");
+        }
+        newGlParticleQueue.add(new PairKV<IGLFXHandler, Particle>(handler, particle));
+    }
+
+    public void addEffect(ResourceLocation resourceLocation, Particle particle) {
+        if (resourceLocation == null || particle == null) {
+            return;
+        }
+
+        if (particle instanceof BCParticle && ((BCParticle) particle).isRawGLParticle()) {
+            throw new RuntimeException("Attempted to spawn a Raw GL particle using the default spawn call! This is not allowed!");
+        }
+
+        newParticleQueue.add(new PairKV<>(resourceLocation, particle));
     }
 
     //endregion
@@ -74,43 +78,42 @@ public class BCEffectRenderer {
 
         //region Add Queued Effects
 
-//            if (!queueParticle.isEmpty()) {
-//                for (Particle Particle = this.queueParticle.poll(); Particle != null; Particle = this.queueParticle.poll()) {
-//                    int layer = Particle.getFXLayer();
-//                    int mask = Particle.func_187111_c() ? 0 : 1;
-//
-//                    if (this.renderQueue[layer][mask].size() >= 16384) {
-//                        this.renderQueue[layer][mask].removeFirst();
-//                    }
-//
-//                    this.renderQueue[layer][mask].add(Particle);
-//                }
-//            }
+        if (!newGlParticleQueue.isEmpty()) {
+            for (PairKV<IGLFXHandler, Particle> handlerParticle = newGlParticleQueue.poll(); handlerParticle != null; handlerParticle = newGlParticleQueue.poll()) {
+                if (!glRenderQueue.containsKey(handlerParticle.getKey())) {
+                    glRenderQueue.put(handlerParticle.getKey(), new ArrayDeque[] {new ArrayDeque(), new ArrayDeque(), new ArrayDeque(), new ArrayDeque()});
+                }
+                int layer = handlerParticle.getValue().getFXLayer();
 
-        if (!queueTexturedParticle.isEmpty()) {
-            for (PairKV<ResourceLocation, Particle> entry = queueTexturedParticle.poll(); entry != null; entry = queueTexturedParticle.poll()) {
-                if (!texturedRenderQueue.containsKey(entry.getKey())) {
+                if (glRenderQueue.get(handlerParticle.getKey())[layer].size() > 6000) {
+                    glRenderQueue.get(handlerParticle.getKey())[layer].removeFirst().setExpired();
+                }
+
+                glRenderQueue.get(handlerParticle.getKey())[layer].add(handlerParticle.getValue());
+            }
+        }
+
+        if (!newParticleQueue.isEmpty()) {
+            for (PairKV<ResourceLocation, Particle> entry = newParticleQueue.poll(); entry != null; entry = newParticleQueue.poll()) {
+                if (!renderQueue.containsKey(entry.getKey())) {
                     ArrayDeque[][] array = new ArrayDeque[4][];
                     for (int i = 0; i < 4; i++) {
                         array[i] = new ArrayDeque[2];
                         for (int j = 0; j < 2; ++j) {
-                            array[i][j] = new ArrayDeque<Particle>();
+                            array[i][j] = new ArrayDeque<>();
                         }
                     }
-                    texturedRenderQueue.put(entry.getKey(), array);
+                    renderQueue.put(entry.getKey(), array);
                 }
 
-                ArrayDeque[][] array = texturedRenderQueue.get(entry.getKey());
+                ArrayDeque<Particle>[][] array = renderQueue.get(entry.getKey());
                 Particle Particle = entry.getValue();
 
                 int layer = Particle.getFXLayer();
                 int mask = Particle.isTransparent() ? 0 : 1;
 
                 if (array[layer][mask].size() >= 6000) {
-                    Object o = array[layer][mask].removeFirst();
-                    if (o instanceof Particle) {
-                        ((Particle) o).setExpired();
-                    }
+                    array[layer][mask].removeFirst().setExpired();
                 }
 
                 array[layer][mask].add(Particle);
@@ -121,19 +124,17 @@ public class BCEffectRenderer {
     }
 
     private void updateEffectLayer(int layer) {
-        //    this.worldObj.theProfiler.startSection(layer + "");
-
         for (int i = 0; i < 2; ++i) {
-            //        this.worldObj.theProfiler.startSection(i + "");
-            //this.tickAndRemoveDead(renderQueue[layer][i]);
-            for (ArrayDeque<Particle>[][] queue : texturedRenderQueue.values()) {
-                this.tickAndRemoveDead(queue[layer][i]);
+            for (ArrayDeque<Particle>[][] queue : renderQueue.values()) {
+                tickAndRemoveDead(queue[layer][i]);
             }
-
-            //        this.worldObj.theProfiler.endSection();
         }
 
-        //    this.worldObj.theProfiler.endSection();
+        for (ArrayDeque<Particle>[] array : glRenderQueue.values()) {
+            for (ArrayDeque<Particle> queue : array) {
+                tickAndRemoveDead(queue);
+            }
+        }
     }
 
     private void tickAndRemoveDead(Queue<Particle> queue) {
@@ -151,16 +152,13 @@ public class BCEffectRenderer {
         }
     }
 
-    public void clearEffects(World worldIn) {
+    /**
+     * This should never be fired manually!
+     * */
+    protected void clearEffects(World worldIn) {
         this.worldObj = worldIn;
 
-//            for (int layer = 0; layer < 4; ++layer) {
-//                for (int mask = 0; mask < 2; ++mask) {
-//                    renderQueue[layer][mask].clear();
-//                }
-//            }
-
-        for (ArrayDeque<Particle>[][] array : texturedRenderQueue.values()) {
+        for (ArrayDeque<Particle>[][] array : renderQueue.values()) {
             for (int layer = 0; layer < 4; ++layer) {
                 for (int mask = 0; mask < 2; ++mask) {
                     array[layer][mask].clear();
@@ -168,6 +166,12 @@ public class BCEffectRenderer {
             }
         }
 
+
+        for (ArrayDeque<Particle>[] array : glRenderQueue.values()) {
+            for (ArrayDeque<Particle> queue : array) {
+                queue.clear();
+            }
+        }
     }
 
     private void tickParticle(final Particle particle) {
@@ -211,7 +215,7 @@ public class BCEffectRenderer {
         Tessellator tessellator = Tessellator.getInstance();
 
         for (int layer = 0; layer < 4; layer++) {
-            //    renderParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
+            renderGlParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
             renderTexturedParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
         }
 
@@ -220,56 +224,38 @@ public class BCEffectRenderer {
         GlStateManager.alphaFunc(516, 0.1F);
     }
 
-    private void renderParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float f, float f1, float f2, float f3, float f4) {
-        //ResourceHelperBC.bindTexture(particleSheet);
+    private void renderGlParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
 
-//            for (int j = 0; j < 2; ++j) {
-//                final int i_f = layer;
-//
-//                if (!renderQueue[layer][j].isEmpty()) {
-//                    switch (j) {
-//                        case 0:
-//                            GlStateManager.depthMask(false);
-//                            break;
-//                        case 1:
-//                            GlStateManager.depthMask(true);
-//                    }
-//
-//                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-//                    VertexBuffer vertexbuffer = tessellator.getBuffer();
-//                    vertexbuffer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
-//
-//                    for (final Particle Particle : renderQueue[layer][j]) {
-//                        try {
-//                            Particle.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
-//                        }
-//                        catch (Throwable throwable) {
-//                            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
-//                            CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
-//                            crashreportcategory.addCrashSectionCallable("Particle", new Callable<String>() {
-//                                public String call() throws Exception {
-//                                    return Particle.toString();
-//                                }
-//                            });
-//                            crashreportcategory.addCrashSectionCallable("Particle Type", new Callable<String>() {
-//                                public String call() throws Exception {
-//                                    return i_f == 0 ? "MISC_TEXTURE" : (i_f == 1 ? "TERRAIN_TEXTURE" : (i_f == 3 ? "ENTITY_PARTICLE_TEXTURE" : "Unknown - " + i_f));
-//                                }
-//                            });
-//                            throw new ReportedException(crashreport);
-//                        }
-//                    }
-//
-//                    tessellator.draw();
-//                }
-//            }
+        for (IGLFXHandler handler : glRenderQueue.keySet()) {
+
+            handler.preDraw(layer, vertexbuffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+
+            for (final Particle particle : glRenderQueue.get(handler)[layer]) {
+                try {
+                    particle.renderParticle(vertexbuffer, entityIn, partialTicks, rotationX, rotationXZ, rotationZ, rotationYZ, rotationXY);
+                }
+                catch (Throwable throwable) {
+                    CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
+                    CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
+                    crashreportcategory.addCrashSection("Particle", new Callable<String>() {
+                        public String call() throws Exception {
+                            return particle.toString();
+                        }
+                    });
+                    throw new ReportedException(crashreport);
+                }
+            }
+
+            handler.postDraw(layer, vertexbuffer, tessellator);
+        }
     }
 
     private void renderTexturedParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float f, float f1, float f2, float f3, float f4) {
-        for (ResourceLocation resourceLocation : texturedRenderQueue.keySet()) {
+        for (ResourceLocation resourceLocation : renderQueue.keySet()) {
             ResourceHelperBC.bindTexture(resourceLocation);
 
-            ArrayDeque<Particle>[][] texRenderQueue = texturedRenderQueue.get(resourceLocation);
+            ArrayDeque<Particle>[][] texRenderQueue = renderQueue.get(resourceLocation);
 
             for (int j = 0; j < 2; ++j) {
                 final int i_f = layer;
@@ -288,16 +274,16 @@ public class BCEffectRenderer {
                     VertexBuffer vertexbuffer = tessellator.getBuffer();
                     vertexbuffer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
 
-                    for (final Particle Particle : texRenderQueue[layer][j]) {
+                    for (final Particle particle : texRenderQueue[layer][j]) {
                         try {
-                            Particle.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
+                            particle.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
                         }
                         catch (Throwable throwable) {
                             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
                             CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
                             crashreportcategory.addCrashSection("Particle", new Callable<String>() {
                                 public String call() throws Exception {
-                                    return Particle.toString();
+                                    return particle.toString();
                                 }
                             });
                             crashreportcategory.addCrashSection("Particle Type", new Callable<String>() {
@@ -322,12 +308,33 @@ public class BCEffectRenderer {
 
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 2; ++k) {
-                for (ArrayDeque<Particle>[][] list : texturedRenderQueue.values()) {
+                for (ArrayDeque<Particle>[][] list : renderQueue.values()) {
                     i += list[j][k].size();
                 }
             }
         }
 
-        return "" + i;
+        int g = 0;
+        for (ArrayDeque<Particle>[] array : glRenderQueue.values()) {
+            for (ArrayDeque<Particle> queue : array) {
+                g += queue.size();
+            }
+        }
+
+        return "" + i + " GLFX: " + g;
     }
+
+    public static final IGLFXHandler DEFAULT_IGLFX_HANDLER = new IGLFXHandler() {
+        @Override
+        public void preDraw(int layer, VertexBuffer vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.depthMask(false);
+            GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
+        }
+
+        @Override
+        public void postDraw(int layer, VertexBuffer vertexbuffer, Tessellator tessellator) {
+
+        }
+    };
 }

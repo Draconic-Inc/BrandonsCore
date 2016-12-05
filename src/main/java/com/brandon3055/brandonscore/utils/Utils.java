@@ -30,8 +30,7 @@ public class Utils {
         else if (value < 1000000000L) return String.valueOf(Math.round(value / 1000L) / 1000D) + "M";
         else if (value < 1000000000000L) return String.valueOf(Math.round(value / 1000000L) / 1000D) + "B";
         else if (value < 1000000000000000L) return String.valueOf(Math.round(value / 1000000000L) / 1000D) + "T";
-        else if (value < 1000000000000000000L)
-            return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "Quad";
+        else if (value < 1000000000000000000L) return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "Quad";
         else if (value <= Long.MAX_VALUE) return String.valueOf(Math.round(value / 1000000000000000L) / 1000D) + "Quin";
         else return "Something is very broken!!!!";
     }
@@ -70,6 +69,14 @@ public class Utils {
 
     public static double getDistanceAtoB(Vec3D pos1, Vec3D pos2) {
         return getDistanceAtoB(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
+    }
+
+    public static boolean inRangeSphere(BlockPos posA, BlockPos posB, int range) {
+        if (Math.abs(posA.getX() - posB.getX()) > range || Math.abs(posA.getY() - posB.getY()) > range || Math.abs(posA.getZ() - posB.getZ()) > range) {
+            return false;
+        }
+
+        else return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
     }
 
     /**
@@ -203,14 +210,14 @@ public class Utils {
 
         if (catchException) {
             try {
-                return (int)Long.parseLong(s, 16);
+                return (int) Long.parseLong(s, 16);
             }
             catch (Exception e) {
                 return 0;
             }
         }
         else {
-            return (int)Long.parseLong(s, 16);
+            return (int) Long.parseLong(s, 16);
         }
     }
 

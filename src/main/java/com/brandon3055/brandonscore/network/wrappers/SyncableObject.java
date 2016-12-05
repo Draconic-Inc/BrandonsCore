@@ -12,7 +12,8 @@ import net.minecraft.nbt.NBTTagCompound;
 public abstract class SyncableObject {
     public final boolean syncInTile;
     public final boolean syncInContainer;
-    public boolean shouldSave = false;
+    public boolean shouldSaveToNBT = false;
+    public boolean shouldSaveToItem = false;
     public boolean updateOnReceived;
     protected byte index = -1;
 
@@ -39,8 +40,9 @@ public abstract class SyncableObject {
 
     public abstract void fromNBT(NBTTagCompound compound);
 
-    public SyncableObject setSaved() {
-        shouldSave = true;
+    public SyncableObject setSaveMode(boolean nbt, boolean item) {
+        shouldSaveToNBT = nbt;
+        shouldSaveToItem = item;
         return this;
     }
 }

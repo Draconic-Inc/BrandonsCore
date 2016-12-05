@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.handlers;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -29,7 +28,6 @@ public class ProcessHandler {
     @SubscribeEvent
     public void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
-
             Iterator<IProcess> i = processes.iterator();
 
             while (i.hasNext()) {
@@ -49,8 +47,17 @@ public class ProcessHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onWorldClose(WorldEvent.Unload event) {
+//    @SubscribeEvent
+//    public void onWorldClose(WorldEvent.Unload event) {
+//        if (event.getWorld().isRemote) {
+//            return;
+//        }
+//        processes.clear();
+//        newProcesses.clear();
+//        BCLogHelper.info("Clear Handler " + event.getWorld());
+//    }
+
+    public static void clearHandler() {
         processes.clear();
         newProcesses.clear();
     }

@@ -1,9 +1,9 @@
 package com.brandon3055.brandonscore.blocks;
 
 import cofh.api.energy.EnergyStorage;
-import cofh.api.energy.IEnergyContainerItem;
-import cofh.api.energy.IEnergyReceiver;
 import com.brandon3055.brandonscore.api.IDataRetainerTile;
+import com.brandon3055.brandonscore.lib.EnergyHandlerWrapper;
+import com.brandon3055.brandonscore.lib.EnergyHelper;
 import com.brandon3055.brandonscore.network.wrappers.SyncableInt;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -12,6 +12,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
 
 /**
  * Created by brandon3055 on 28/3/2016.
@@ -64,12 +66,12 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
     }
 
     @Override
-    public void writeDataToNBT(NBTTagCompound compound) {
+    public void writeRetainedData(NBTTagCompound compound) {
         energyStorage.writeToNBT(compound);
     }
 
     @Override
-    public void readDataFromNBT(NBTTagCompound compound) {
+    public void readRetainedData(NBTTagCompound compound) {
         energyStorage.readFromNBT(compound);
     }
 
@@ -81,17 +83,21 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
         return energyStorage.getMaxEnergyStored();
     }
 
-    public int sendEnergyTo(EnumFacing direction) {
-        if (getEnergyStored() == 0) return 0;
-        TileEntity tile = worldObj.getTileEntity(pos.add(direction.getFrontOffsetX(), direction.getFrontOffsetY(), direction.getFrontOffsetZ()));
-        if (tile instanceof IEnergyReceiver) {
-            return energyStorage.extractEnergy(((IEnergyReceiver) tile).receiveEnergy(direction.getOpposite(), energyStorage.extractEnergy(energyStorage.getMaxExtract(), true), false), false);
+    public int sendEnergyTo(EnumFacing side) {
+        if (getEnergyStored() == 0) {
+            return 0;
+        }
+        TileEntity tile = worldObj.getTileEntity(pos.add(side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ()));
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
+            return EnergyHelper.insertEnergy(tile, getEnergyStored(), false);
         }
         return 0;
     }
 
     public int sendEnergyToAll() {
-        if (getEnergyStored() == 0) return 0;
+        if (getEnergyStored() == 0) {
+            return 0;
+        }
         int i = 0;
         for (EnumFacing direction : EnumFacing.VALUES) {
             i += sendEnergyTo(direction);
@@ -99,10 +105,10 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
         return i;
     }
 
-    public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing direction) {
-        TileEntity tile = world.getTileEntity(pos.add(direction.getFrontOffsetX(), direction.getFrontOffsetY(), direction.getFrontOffsetZ()));
-        if (tile instanceof IEnergyReceiver) {
-            return ((IEnergyReceiver) tile).receiveEnergy(direction.getOpposite(), maxSend, false);
+    public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {
+        TileEntity tile = world.getTileEntity(pos.add(side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ()));
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
+            return EnergyHelper.insertEnergy(tile, maxSend, side, false);
         }
         return 0;
     }
@@ -116,10 +122,27 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
     }
 
     public int extractEnergyFromItem(ItemStack stack, int maxExtract, boolean simulate) {
-        if (stack != null && stack.getItem() instanceof IEnergyContainerItem) {
-            IEnergyContainerItem item = (IEnergyContainerItem) stack.getItem();
-            return item.extractEnergy(stack, maxExtract, simulate);
+        if (EnergyHelper.isEnergyStack(stack)) {
+            return EnergyHelper.extractEnergy(stack, maxExtract, simulate);
         }
         return 0;
     }
+
+    //region Capability
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        return capability == CapabilityEnergy.ENERGY || super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityEnergy.ENERGY) {
+            return CapabilityEnergy.ENERGY.cast(new EnergyHandlerWrapper(this, facing));
+        }
+
+        return super.getCapability(capability, facing);
+    }
+
+    //endregion
 }

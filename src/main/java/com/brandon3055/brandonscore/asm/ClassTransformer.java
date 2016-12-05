@@ -1,12 +1,11 @@
 package com.brandon3055.brandonscore.asm;
 
-import codechicken.lib.asm.ASMHelper;
-import codechicken.lib.asm.ModularASMTransformer;
-import codechicken.lib.asm.ObfMapping;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import codechicken.lib.asm.*;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
+
+import java.util.Map;
 
 /**
  * Created by Brandon on 27/5/2015.
@@ -16,13 +15,13 @@ public class ClassTransformer implements IClassTransformer {
     private ModularASMTransformer transformer = new ModularASMTransformer();
 
     public ClassTransformer() {
-    //    Map<String, ASMBlock> blocks = ASMReader.loadResource("/assets/brandonscore/asm/hooks.asm");
-    //    transformer.add(new ModularASMTransformer.MethodInjector(new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "func_77557_a", "(Lnet/minecraft/item/Item;)Z"), blocks.get("i_EnchantmetTypeCheck"), true));
+        Map<String, ASMBlock> blocks = ASMReader.loadResource("/assets/brandonscore/asm/hooks.asm");
+        transformer.add(new ModularASMTransformer.MethodInjector(new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "func_77557_a", "(Lnet/minecraft/item/Item;)Z"), blocks.get("i_EnchantmetTypeCheck"), true));
     }
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] bytes) {
-        return bytes;//transformer.transform(name, bytes);
+        return transformer.transform(name, bytes);
 
         //if (transformedName.equals("net.minecraft.enchantment.EnumEnchantmentType")) {
             //return transformer.transform(name, bytes);
@@ -87,21 +86,21 @@ public class ClassTransformer implements IClassTransformer {
 
     private static void debug(byte[] bytes) {
         ObfMapping mapping = new ObfMapping("net/minecraft/enchantment/EnumEnchantmentType", "canEnchantItem", "(Lnet/minecraft/item/Item;)Z");
-        BCLogHelper.info("\n");
+        System.out.println("\n");
         ClassNode classNode = new ClassNode();
         ClassReader reader = new ClassReader(bytes);
         reader.accept(classNode, 8);
         for (MethodNode node : classNode.methods) {
-            BCLogHelper.info(String.format("Name: [%s], Desc: [%s].", node.name, node.desc));
+            System.out.println(String.format("Name: [%s], Desc: [%s].", node.name, node.desc));
         }
         MethodNode methodNode = ASMHelper.findMethod(mapping, classNode);
         if (methodNode == null) {
-            BCLogHelper.info("Unable to find method!");
+            System.out.println("Unable to find method!");
         } else {
-            BCLogHelper.info("\n Instructions: \n");
-            BCLogHelper.info(ASMHelper.toString(methodNode.instructions));
+            System.out.println("\n Instructions: \n");
+            System.out.println(ASMHelper.toString(methodNode.instructions));
         }
-        BCLogHelper.info("\n");
+        System.out.println("\n");
 
     }
 }

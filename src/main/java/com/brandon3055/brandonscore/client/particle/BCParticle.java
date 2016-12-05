@@ -24,6 +24,30 @@ public class BCParticle extends Particle {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 
+    /**
+     * Valid Range range 0-3
+     */
+    @Override
+    public int getFXLayer() {
+        return super.getFXLayer();
+    }
+
+    /**
+     * This is to ensure particles are spawned using the correct methods because raw gl particles are handled very differently<br>
+     * and attempting to render them with the default pipeline will break things.<br><br>
+     *
+     * Raw gl particles are pretty much what they sound like. The renderer wont bind a texture or start a draw call before rendering them.<br>
+     * So you can do whatever you like!<br><br>
+     *
+     * Raw gl particles are rendered with blend enabled. depthMask disabled and GL_GREATER set to 0.<br>
+     * Be sure to leave the render call in this state when you are done!
+     *
+     * @return true if this particle needs raw gl access.
+     */
+    public boolean isRawGLParticle() {
+        return false;
+    }
+
     public BCParticle setScale(float scale) {
         this.particleScale = scale;
         baseScale = scale;

@@ -60,14 +60,28 @@ public class TileBCBase extends TileEntity {
         }
     }
 
+    public void registerSyncableObject(SyncableObject object) {
+        registerSyncableObject(object, true);
+    }
+
     public void registerSyncableObject(SyncableObject object, boolean saveToNBT) {
+        registerSyncableObject(object, saveToNBT, false);
+    }
+
+    /**
+     * Registers a syncable object. These objects will automatically be synchronized with the client.
+     * Note: you are required to call detectAndSendChanges server side in order for objects to detect and send changes to the client.
+     * @param object The object.
+     * @param saveToNBT If true the object will ba saved and loaded from NBT.
+     * @param saveToItem If true and the tile is an instance of {@link IDataRetainerTile} the object will be saved and loaded from the item when the tile is broken.
+     */
+    public void registerSyncableObject(SyncableObject object, boolean saveToNBT, boolean saveToItem) {
         if (objIndexCount > Byte.MAX_VALUE) {
             throw new RuntimeException("TileBCBase#registerSyncableObject To many objects registered!");
         }
         syncableObjectMap.put((byte) objIndexCount, object.setIndex(objIndexCount));
-        if (saveToNBT) {
-            object.setSaved();
-        }
+        object.setSaveMode(saveToNBT, saveToItem);
+
         objIndexCount++;
     }
 
@@ -106,7 +120,7 @@ public class TileBCBase extends TileEntity {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
 
         if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).writeDataToNBT(nbttagcompound);
+            ((IDataRetainerTile) this).writeRetainedData(nbttagcompound);
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
@@ -124,11 +138,11 @@ public class TileBCBase extends TileEntity {
         NBTTagCompound compound = super.getUpdateTag();
 
         if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).writeDataToNBT(compound);
+            ((IDataRetainerTile) this).writeRetainedData(compound);
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSave) {
+            if (syncableObject.shouldSaveToNBT) {
                 syncableObject.toNBT(compound);
             }
         }
@@ -146,7 +160,7 @@ public class TileBCBase extends TileEntity {
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
         if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).readDataFromNBT(pkt.getNbtCompound());
+            ((IDataRetainerTile) this).readRetainedData(pkt.getNbtCompound());
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
@@ -211,8 +225,31 @@ public class TileBCBase extends TileEntity {
 
     //endregion
 
+    //region Save/Load
+
     /**
-     * Write any extra data that needs to be saved to NBT that is not saved via a syncable field
+     * Part of the new method of saving Syncable Objects to item.
+     * When implementing IDataRetainerTile
+     */
+    public void writeRetainedData(NBTTagCompound dataCompound) {
+        for (SyncableObject syncableObject : syncableObjectMap.values()) {
+            if (syncableObject.shouldSaveToItem) {
+                syncableObject.toNBT(dataCompound);
+            }
+        }
+    }
+
+    public void readRetainedData(NBTTagCompound dataCompound) {
+        for (SyncableObject syncableObject : syncableObjectMap.values()) {
+            if (syncableObject.shouldSaveToItem) {
+                syncableObject.fromNBT(dataCompound);
+            }
+        }
+    }
+
+    /**
+     * Write any extra data that needs to be saved to NBT that is not saved via a syncable field.
+     * This data is also synced to the client!.
      * */
     public void writeExtraNBT(NBTTagCompound compound){}
 
@@ -222,11 +259,11 @@ public class TileBCBase extends TileEntity {
     public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
         if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).writeDataToNBT(compound);
+            ((IDataRetainerTile) this).writeRetainedData(compound);
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSave) {
+            if (syncableObject.shouldSaveToNBT && (!syncableObject.shouldSaveToItem || !(this instanceof IDataRetainerTile))) {
                 syncableObject.toNBT(compound);
             }
         }
@@ -240,11 +277,11 @@ public class TileBCBase extends TileEntity {
     public final void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).readDataFromNBT(compound);
+            ((IDataRetainerTile) this).readRetainedData(compound);
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSave) {
+            if (syncableObject.shouldSaveToNBT) {
                 syncableObject.fromNBT(compound);
             }
         }
@@ -263,4 +300,6 @@ public class TileBCBase extends TileEntity {
      * Called immediately after all NBT is loaded. World may be null at this point
      */
     public void onTileLoaded() {}
+
+    //endregion
 }

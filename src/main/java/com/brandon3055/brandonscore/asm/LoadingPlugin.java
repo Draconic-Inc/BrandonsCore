@@ -9,7 +9,7 @@ import java.util.Map;
  * Created by brandon3055 on 27/5/2015.
  */
 @IFMLLoadingPlugin.Name(value = BrandonsCore.MODNAME)
-@IFMLLoadingPlugin.MCVersion(value = "1.9.4")
+@IFMLLoadingPlugin.MCVersion(value = "1.10.2")
 @IFMLLoadingPlugin.TransformerExclusions(value = "com.brandon3055.brandonscore.asm.")
 @IFMLLoadingPlugin.SortingIndex(value = 1001)
 public class LoadingPlugin implements IFMLLoadingPlugin {

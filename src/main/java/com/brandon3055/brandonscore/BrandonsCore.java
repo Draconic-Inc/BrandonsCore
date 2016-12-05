@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -35,6 +36,11 @@ public class BrandonsCore {
     @Mod.EventHandler
     public void serverStart(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandTickTime());
+    }
+
+    @Mod.EventHandler
+    public void serverStop(FMLServerStoppingEvent event) {
+        ProcessHandler.clearHandler();
     }
 
     @Mod.EventHandler

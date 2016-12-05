@@ -6,7 +6,6 @@ import com.brandon3055.brandonscore.lib.IChangeListener;
 import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -25,7 +24,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 18/3/2016.
@@ -35,6 +36,7 @@ public class BlockBCore extends Block {
     public static final String TILE_DATA_TAG = "DETileData";
     protected boolean isFullCube = true;
     protected boolean canProvidePower = false;
+    public Map<Integer, String> nameOverrides = new HashMap<>();
 
     public BlockBCore() {
         this(Material.ROCK);
@@ -57,7 +59,7 @@ public class BlockBCore extends Block {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)) {
-            ((IDataRetainerTile) tile).readDataFromNBT(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
+            ((IDataRetainerTile) tile).readRetainedData(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
         }
     }
     //endregion
@@ -80,7 +82,7 @@ public class BlockBCore extends Block {
 
         if (tileEntity instanceof IDataRetainerTile) {
             NBTTagCompound customData = new NBTTagCompound();
-            ((IDataRetainerTile) tileEntity).writeDataToNBT(customData);
+            ((IDataRetainerTile) tileEntity).writeRetainedData(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
         }
 
@@ -92,6 +94,11 @@ public class BlockBCore extends Block {
         return this;
     }
 
+    public BlockBCore addName(int meta, String name) {
+        nameOverrides.put(meta, name);
+        return this;
+    }
+
     //endregion
 
     //region Interfaces
@@ -99,9 +106,9 @@ public class BlockBCore extends Block {
     //IRedstoneEmitter
     @Override
     public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
-        if (this instanceof ITileEntityProvider) {
+        if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
-            return tile instanceof IRedstoneEmitter || tile instanceof IChangeListener;
+            return tile instanceof IRedstoneEmitter || canProvidePower;
         }
 
         return super.canConnectRedstone(state, world, pos, side);
@@ -114,7 +121,7 @@ public class BlockBCore extends Block {
 
     @Override
     public boolean shouldCheckWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
-        if (this instanceof ITileEntityProvider) {
+        if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             return tile instanceof IChangeListener;
         }
@@ -124,7 +131,7 @@ public class BlockBCore extends Block {
 
     @Override
     public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-        if (this instanceof ITileEntityProvider) {
+        if (hasTileEntity(blockState)) {
             TileEntity tile = blockAccess.getTileEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
                 return ((IRedstoneEmitter) tile).getWeakPower(blockState, side);
@@ -135,7 +142,7 @@ public class BlockBCore extends Block {
 
     @Override
     public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-        if (this instanceof ITileEntityProvider) {
+        if (hasTileEntity(blockState)) {
             TileEntity tile = blockAccess.getTileEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
                 return ((IRedstoneEmitter) tile).getStrongPower(blockState, side);
@@ -146,7 +153,7 @@ public class BlockBCore extends Block {
 
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn) {
-        if (this instanceof ITileEntityProvider) {
+        if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if (tile instanceof IChangeListener) {
                 ((IChangeListener) tile).onNeighborChange();
@@ -159,7 +166,7 @@ public class BlockBCore extends Block {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-        if (this instanceof ITileEntityProvider) {
+        if (hasTileEntity(state)) {
             TileEntity tile = worldIn.getTileEntity(pos);
             if (tile instanceof IActivatableTile) {
                 return ((IActivatableTile) tile).onBlockActivated(state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
@@ -169,7 +176,6 @@ public class BlockBCore extends Block {
         return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
     }
 
-
     //endregion
 
     @Override
@@ -178,7 +184,7 @@ public class BlockBCore extends Block {
             ItemStack stack = new ItemStack(this);
             stack.setItemDamage(damageDropped(state));
             NBTTagCompound customData = new NBTTagCompound();
-            ((IDataRetainerTile) te).writeDataToNBT(customData);
+            ((IDataRetainerTile) te).writeRetainedData(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
             spawnAsEntity(world, pos, stack);
             world.removeTileEntity(pos);

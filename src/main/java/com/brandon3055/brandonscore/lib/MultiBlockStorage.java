@@ -51,12 +51,15 @@ public class MultiBlockStorage {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (!helper.checkBlock(blockStorage[x][y][z], world, pos.add(startPos))) {
+                        helper.invalidBlock = startPos.add(pos);
+                        helper.expectedBlock = blockStorage[x][y][z];
                         return false;
                     }
                 }
             }
         }
 
+        helper.invalidBlock = null;
         return true;
     }
 

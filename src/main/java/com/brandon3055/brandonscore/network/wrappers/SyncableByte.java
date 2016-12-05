@@ -31,7 +31,7 @@ public class SyncableByte extends SyncableObject {
         if (lastTickValue != value || forceSync) {
             lastTickValue = value;
 
-            if (shouldSave) {
+            if (shouldSaveToNBT) {
                 tile.dirtyBlock();
             }
 

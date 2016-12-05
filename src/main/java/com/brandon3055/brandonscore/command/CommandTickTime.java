@@ -78,7 +78,6 @@ public class CommandTickTime extends CommandBase {
         @Override
         public void updateProcess() {
             EntityPlayerMP player = playerList.getPlayerByUsername(username);
-
             if (player == null) {
                 timeout++;
                 if (timeout > 100) {

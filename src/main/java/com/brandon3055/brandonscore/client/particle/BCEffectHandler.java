@@ -129,7 +129,9 @@ public class BCEffectHandler {
         }
     }
 
-
+    /**
+     * A client side only method that allows you to add effects directly to the effect renderer.
+     */
     @SideOnly(Side.CLIENT)
     public static void spawnFXDirect(ResourceLocation texture, BCParticle particle) {
         spawnFXDirect(texture, particle, 32, true);
@@ -154,6 +156,36 @@ public class BCEffectHandler {
         }
     }
 
+    /**
+     * Spawns a particle with direct GL access.
+     * WARNING! Only use this with compatible particles!
+     * Attempting to spawn any old particle with this will break things.
+     *
+     * */
+    @SideOnly(Side.CLIENT)
+    public static void spawnGLParticle(IGLFXHandler handler, BCParticle particle, double viewRange, boolean respectParticleSetting) {
+        Vec3D pos = particle.getPos();
+        if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
+
+            Minecraft mc = Minecraft.getMinecraft();
+            int particleSetting = mc.gameSettings.particleSetting;
+
+            if (respectParticleSetting && (particleSetting == 2 || (particleSetting == 1 && particle.getWorld().rand.nextInt(3) != 0))) {
+                return;
+            }
+
+            effectRenderer.addRawGLEffect(handler, particle);
+        }
+    }
+
+    /**
+     * Strait pass-through method that dose thats adds the affect directly to the renderer without doing any checks.
+     */
+    @SideOnly(Side.CLIENT)
+    public static void spawnGLParticle(IGLFXHandler handler, BCParticle particle) {
+        effectRenderer.addRawGLEffect(handler, particle);
+    }
+
     //endregion
 
     //region Events
@@ -161,7 +193,7 @@ public class BCEffectHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
+        if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
             return;
         }
         if (effectRenderer.worldObj != null) {

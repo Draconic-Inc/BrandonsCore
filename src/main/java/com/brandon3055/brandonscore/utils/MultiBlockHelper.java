@@ -11,6 +11,8 @@ import net.minecraft.world.World;
  * Base class for custom multi block structures.
  */
 public class MultiBlockHelper {
+    public BlockPos invalidBlock = null;
+    public String expectedBlock = null;
 
     public boolean checkBlock(String name, World world, BlockPos pos) {
         IBlockState state = world.getBlockState(pos);

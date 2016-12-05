@@ -1,12 +1,15 @@
 package com.brandon3055.brandonscore.items;
 
 import cofh.api.energy.IEnergyContainerItem;
+import com.brandon3055.brandonscore.lib.EnergyContainerWrapper;
 import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import java.util.List;
 
@@ -146,6 +149,15 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
         InfoHelper.addEnergyInfo(stack, tooltip);
+    }
+
+    //endregion
+
+    //region Capabilities
+
+    @Override
+    public ICapabilityProvider initCapabilities(final ItemStack stack, NBTTagCompound nbt) {
+        return new EnergyContainerWrapper(stack);
     }
 
     //endregion
