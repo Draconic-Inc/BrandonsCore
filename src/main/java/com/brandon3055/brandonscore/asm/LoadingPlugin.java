@@ -11,7 +11,7 @@ import java.util.Map;
 @IFMLLoadingPlugin.Name(value = BrandonsCore.MODNAME)
 @IFMLLoadingPlugin.MCVersion(value = "1.10.2")
 @IFMLLoadingPlugin.TransformerExclusions(value = "com.brandon3055.brandonscore.asm.")
-@IFMLLoadingPlugin.SortingIndex(value = 1)
+//@IFMLLoadingPlugin.SortingIndex(value = 1)
 public class LoadingPlugin implements IFMLLoadingPlugin {
 
 	@Override
