@@ -22,6 +22,7 @@ public class ClassTransformer implements IClassTransformer {
     @Override
     public byte[] transform(String name, String transformedName, byte[] bytes) {
         return transformer.transform(name, bytes);
+    }
 
         //if (transformedName.equals("net.minecraft.enchantment.EnumEnchantmentType")) {
             //return transformer.transform(name, bytes);
@@ -72,7 +73,7 @@ public class ClassTransformer implements IClassTransformer {
 //        }
 //
   //      return bytes;
-    }
+//    }
 
     public static LabelNode getFirstLabel(InsnList instructions){
         boolean flag = false;
