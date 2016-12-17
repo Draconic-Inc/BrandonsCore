@@ -1,0 +1,12 @@
+{
+  "archivesBase" : "com.brandon3055.brandonscore.BrandonsCore",
+  "displayName" : "Brandon's Core",
+  "projectId" : "231382",
+  "uploadSRC" : false,
+  "relations" : [
+    {
+      "slug" : "codechicken-lib-1-8",
+      "type" : "requiredLibrary"
+    }
+  ]
+}
