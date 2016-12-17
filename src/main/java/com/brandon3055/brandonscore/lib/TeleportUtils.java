@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,10 +13,13 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeHooks;
+
+import java.util.LinkedList;
 
 /**
  * Created by brandon3055 on 6/12/2016.
- *
+ * <p>
  * This is a universal class for handling teleportation. Simply tell it where to send an entity and it just works!
  * Also has support for teleporting mounts.
  */
@@ -24,51 +28,140 @@ public class TeleportUtils {
     /**
      * Universal method for teleporting entities of all shapes and sizes!
      * This method will teleport an entity and any entity it is riding recursively. If riding the riding entity will be re mounted on the other side.
-     *
+     * <p>
      * Note: When teleporting riding entities it is the rider that must be teleported and the mount will follow automatically.
      * As long as you teleport the rider you should not need wo worry about the mount.
      *
      * @return the entity. This may be a new instance so be sure to keep that in mind.
      */
     public static Entity teleportEntity(Entity entity, int dimension, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
-        if (entity == null || entity.worldObj.isRemote || entity.isBeingRidden()) {
+        if (entity == null || entity.worldObj.isRemote) {
             return entity;
         }
 
         MinecraftServer server = entity.getServer();
         int sourceDim = entity.worldObj.provider.getDimension();
 
-        Entity mount = null;
-
-        if (entity.isRiding()) {
-            mount = entity.getRidingEntity();
-            double mountXOffset = entity.posX - mount.posX;
-            double mountYOffset = entity.posY - mount.posY;
-            double mountZOffset = entity.posZ - mount.posZ;
-            entity.dismountRidingEntity();
-            mount = teleportEntity(mount, dimension, xCoord, yCoord, zCoord, yaw, pitch);
-            xCoord += mountXOffset;
-            yCoord += mountYOffset;
-            zCoord += mountZOffset;
+        if (!entity.isBeingRidden() && !entity.isRiding()) {
+            return handleEntityTeleport(entity, server, sourceDim, dimension, xCoord, yCoord, zCoord, yaw, pitch);
         }
 
-        entity = handleEntityTeleport(entity, server, sourceDim, dimension, xCoord, yCoord, zCoord, yaw, pitch);
-        entity.fallDistance = 0;
+        Entity rootEntity = entity.getLowestRidingEntity();
+        PassengerHelper passengerHelper = new PassengerHelper(rootEntity);
+        PassengerHelper rider = passengerHelper.getPassenger(entity);
+        if (rider == null) {
+            BCLogHelper.error("RiddenEntity: This error should not be possible");
+            return entity;
+        }
+        passengerHelper.teleport(server, sourceDim, dimension, xCoord, yCoord, zCoord, yaw, pitch);
+        passengerHelper.remountRiders();
+        passengerHelper.updateClients();
 
-        if (mount != null) {
-            entity.startRiding(mount);
-            if (entity instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) entity).connection.sendPacket(new SPacketSetPassengers(mount));
+        return rider.entity;
+    }
+
+    private static class PassengerHelper {
+        public Entity entity;
+        public LinkedList<PassengerHelper> passengers = new LinkedList<>();
+        public double offsetX, offsetY, offsetZ;
+
+        /**
+         * Creates a new passenger helper for the given entity and recursively adds all of the entities passengers.
+         *
+         * @param entity The root entity. If you have multiple stacked entities this would be the one at the bottom of the stack.
+         */
+        public PassengerHelper(Entity entity) {
+            this.entity = entity;
+            if (entity.isRiding()) {
+                offsetX = entity.posX - entity.getRidingEntity().posX;
+                offsetY = entity.posY - entity.getRidingEntity().posY;
+                offsetZ = entity.posZ - entity.getRidingEntity().posZ;
             }
-            entity.startRiding(mount);
-            mount.setPosition(mount.posX, mount.posY, mount.posZ);
+            for (Entity passenger : entity.getPassengers()) {
+                passengers.add(new PassengerHelper(passenger));
+            }
         }
 
-        return entity;
+        /**
+         * Recursively teleports the entity and all of its passengers after dismounting them.
+         * @param server The minecraft server.
+         * @param sourceDim The source dimension.
+         * @param targetDim The target dimension.
+         * @param xCoord The target x position.
+         * @param yCoord The target y position.
+         * @param zCoord The target z position.
+         * @param yaw The target yaw.
+         * @param pitch The target pitch.
+         */
+        public void teleport(MinecraftServer server, int sourceDim, int targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
+            entity.removePassengers();
+            entity = handleEntityTeleport(entity, server, sourceDim, targetDim, xCoord, yCoord, zCoord, yaw, pitch);
+            for (PassengerHelper passenger : passengers) {
+                passenger.teleport(server, sourceDim, targetDim, xCoord, yCoord, zCoord, yaw, pitch);
+            }
+        }
+
+        /**
+         * Recursively remounts all of this entities riders and offsets their position relative to their position before teleporting.
+         */
+        public void remountRiders() {
+            if (entity.isRiding()) {
+                entity.setLocationAndAngles(entity.posX + offsetX, entity.posY + offsetY, entity.posZ + offsetZ, entity.rotationYaw, entity.rotationPitch);
+            }
+            for (PassengerHelper passenger : passengers) {
+                passenger.entity.startRiding(entity, true);
+                passenger.remountRiders();
+            }
+        }
+
+        /**
+         * This method sends update packets to any players that were teleported with the entity stack.
+         */
+        public void updateClients() {
+            if (entity instanceof EntityPlayerMP) {
+                updateClient((EntityPlayerMP) entity);
+            }
+            for (PassengerHelper passenger : passengers) {
+                passenger.updateClients();
+            }
+        }
+
+        /**
+         * This is the method that is responsible for actually sending the update to each client.
+         * @param playerMP The Player.
+         */
+        private void updateClient(EntityPlayerMP playerMP) {
+            if (entity.isBeingRidden()) {
+                playerMP.connection.sendPacket(new SPacketSetPassengers(entity));
+            }
+            for (PassengerHelper passenger : passengers) {
+                passenger.updateClients();
+            }
+        }
+
+        /**
+         * This method returns the helper for a specific entity in the stack.
+         * @param passenger The passenger you are looking for.
+         * @return The passenger helper for the specified passenger.
+         */
+        public PassengerHelper getPassenger(Entity passenger) {
+            if (this.entity == passenger) {
+                return this;
+            }
+
+            for (PassengerHelper rider : passengers) {
+                PassengerHelper re = rider.getPassenger(passenger);
+                if (re != null) {
+                    return re;
+                }
+            }
+
+            return null;
+        }
     }
 
     /**
-     * Convenience method that dose not require pitch and yaw.
+     * Convenience method that does not require pitch and yaw.
      */
     public static Entity teleportEntity(Entity entity, int dimension, double xCoord, double yCoord, double zCoord) {
         return teleportEntity(entity, dimension, xCoord, yCoord, zCoord, entity.rotationYaw, entity.rotationPitch);
@@ -84,7 +177,7 @@ public class TeleportUtils {
 
         boolean interDimensional = sourceDim != targetDim;
 
-        if (interDimensional && !net.minecraftforge.common.ForgeHooks.onTravelToDimension(entity, targetDim)) {
+        if (interDimensional && !ForgeHooks.onTravelToDimension(entity, targetDim)) {
             return entity;
         }
 
@@ -182,5 +275,13 @@ public class TeleportUtils {
         player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
 
         return player;
+    }
+
+    public static Entity getHighestRidingEntity(Entity mount) {
+        Entity entity;
+
+        for (entity = mount; entity.getPassengers().size() > 0; entity = entity.getPassengers().get(0)) ;
+
+        return entity;
     }
 }

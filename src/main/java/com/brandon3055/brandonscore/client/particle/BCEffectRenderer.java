@@ -158,20 +158,38 @@ public class BCEffectRenderer {
     protected void clearEffects(World worldIn) {
         this.worldObj = worldIn;
 
-        for (ArrayDeque<Particle>[][] array : renderQueue.values()) {
-            for (int layer = 0; layer < 4; ++layer) {
-                for (int mask = 0; mask < 2; ++mask) {
-                    array[layer][mask].clear();
+        for (int j = 0; j < 4; ++j) {
+            for (int k = 0; k < 2; ++k) {
+                for (ArrayDeque<Particle>[][] list : renderQueue.values()) {
+                    for (Particle particle : list[j][k]) {
+                        particle.setExpired();
+                    }
                 }
             }
         }
 
-
         for (ArrayDeque<Particle>[] array : glRenderQueue.values()) {
             for (ArrayDeque<Particle> queue : array) {
-                queue.clear();
+                for (Particle particle : queue) {
+                    particle.setExpired();
+                }
             }
         }
+
+//        for (ArrayDeque<Particle>[][] array : renderQueue.values()) {
+//            for (int layer = 0; layer < 4; ++layer) {
+//                for (int mask = 0; mask < 2; ++mask) {
+//                    array[layer][mask].clear();
+//                }
+//            }
+//        }
+//
+//
+//        for (ArrayDeque<Particle>[] array : glRenderQueue.values()) {
+//            for (ArrayDeque<Particle> queue : array) {
+//                queue.clear();
+//            }
+//        }
     }
 
     private void tickParticle(final Particle particle) {

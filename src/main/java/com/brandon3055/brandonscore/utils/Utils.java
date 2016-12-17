@@ -221,7 +221,7 @@ public class Utils {
         }
     }
 
-    public static double scale(double valueIn, double inMin, double inMax, double outMin, double outMax) {
+    public static double map(double valueIn, double inMin, double inMax, double outMin, double outMax) {
         return (valueIn - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 }
