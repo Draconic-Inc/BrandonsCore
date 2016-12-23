@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -62,6 +63,33 @@ public class ChatHelper {
         player.addChatComponentMessage(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style));
     }
 
+    /**
+     * Client side use only!
+     */
+    public static void indexedTrans(EntityPlayer player, String unlocalizedMessage, int index, Object... args) {
+        if (player.worldObj.isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args), index);
+        }
+    }
+
+    /**
+     * Client side use only!
+     */
+    public static void indexedTrans(EntityPlayer player, String unlocalizedMessage, TextFormatting colour, int index, Object... args) {
+        if (player.worldObj.isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)), index);
+        }
+    }
+
+    /**
+     * Client side use only!
+     */
+    public static void indexedTrans(EntityPlayer player, String unlocalizedMessage, Style style, int index, Object... args) {
+        if (player.worldObj.isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style), index);
+        }
+    }
+
     //endregion
 
     //region nonTranslation
@@ -112,6 +140,33 @@ public class ChatHelper {
 
     public static void message(EntityPlayer player, String message, Style style) {
         player.addChatComponentMessage(new TextComponentString(message).setStyle(style));
+    }
+
+    /**
+     * Client side use only!
+     */
+    public static void indexedMsg(EntityPlayer player, String message, int index) {
+        if (player.worldObj.isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), index);
+        }
+    }
+
+    /**
+     * Client side use only!
+     */
+    public static void indexedMsg(EntityPlayer player, String message, TextFormatting colour, int index) {
+        if (player.worldObj.isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(new Style().setColor(colour)), index);
+        }
+    }
+
+    /**
+     * Client side use only!
+     */
+    public static void indexedMsg(EntityPlayer player, String message, Style style, int index) {
+        if (player.worldObj.isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(style), index);
+        }
     }
 
     //endregion

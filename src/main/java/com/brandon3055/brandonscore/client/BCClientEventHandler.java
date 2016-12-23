@@ -69,7 +69,11 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void tickEnd(TickEvent.ClientTickEvent event) {
-//        elapsedTicks++;
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+
+        elapsedTicks++;
 //        if (Minecraft.getMinecraft().isGamePaused()) {
 //            return;
 //        }

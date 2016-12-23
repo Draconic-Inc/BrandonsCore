@@ -175,4 +175,8 @@ public class Vec3D {
     public static Vec3D getCenter(BlockPos pos) {
         return new Vec3D(pos).add(0.5, 0.5, 0.5);
     }
+
+    public double distXZ(Vec3D vec3D) {
+        return Utils.getDistanceAtoB(x, z, vec3D.x, vec3D.z);
+    }
 }

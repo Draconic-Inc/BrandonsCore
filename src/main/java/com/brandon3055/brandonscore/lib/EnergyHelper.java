@@ -65,7 +65,7 @@ public class EnergyHelper {
     }
 
     public static boolean canReceiveEnergy(TileEntity tile, EnumFacing side) {
-        return tile instanceof IEnergyReceiver || (tile.hasCapability(CapabilityEnergy.ENERGY, side) && tile.getCapability(CapabilityEnergy.ENERGY, side).canReceive());
+        return (tile instanceof IEnergyReceiver && (side == null || ((IEnergyReceiver) tile).canConnectEnergy(side))) || (tile.hasCapability(CapabilityEnergy.ENERGY, side) && tile.getCapability(CapabilityEnergy.ENERGY, side).canReceive());
     }
 
     public static int insertEnergy(TileEntity tile, int energy, boolean simulate) {

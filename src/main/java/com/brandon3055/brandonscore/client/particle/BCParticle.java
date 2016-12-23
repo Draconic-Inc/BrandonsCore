@@ -93,6 +93,11 @@ public class BCParticle extends Particle {
         return worldObj;
     }
 
+    public BCParticle setPosition(Vec3D pos) {
+        setPosition(pos.x, pos.y, pos.z);
+        return this;
+    }
+
     public void moveEntityNoClip(double x, double y, double z) {
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
         this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, 0.0D, 0.0D));

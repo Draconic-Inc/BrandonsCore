@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -54,5 +55,9 @@ public class CommonProxy {
 
     public EntityPlayer getClientPlayer() {
         return null;
+    }
+
+    public void setChatAtIndex(ITextComponent chat, int index) {
+
     }
 }

@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
+import com.brandon3055.brandonscore.utils.BCLogHelper;
 import com.google.common.collect.Queues;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -71,17 +72,18 @@ public class BCEffectRenderer {
 
     @SuppressWarnings("unchecked")
     public void updateEffects() {
-
         for (int i = 0; i < 4; ++i) {
             updateEffectLayer(i);
         }
 
         //region Add Queued Effects
+//        clearEffects(worldObj);
+//        glRenderQueue.clear();
 
         if (!newGlParticleQueue.isEmpty()) {
             for (PairKV<IGLFXHandler, Particle> handlerParticle = newGlParticleQueue.poll(); handlerParticle != null; handlerParticle = newGlParticleQueue.poll()) {
                 if (!glRenderQueue.containsKey(handlerParticle.getKey())) {
-                    glRenderQueue.put(handlerParticle.getKey(), new ArrayDeque[] {new ArrayDeque(), new ArrayDeque(), new ArrayDeque(), new ArrayDeque()});
+                    glRenderQueue.put(handlerParticle.getKey(), new ArrayDeque[]{new ArrayDeque(), new ArrayDeque(), new ArrayDeque(), new ArrayDeque()});
                 }
                 int layer = handlerParticle.getValue().getFXLayer();
 
@@ -131,9 +133,7 @@ public class BCEffectRenderer {
         }
 
         for (ArrayDeque<Particle>[] array : glRenderQueue.values()) {
-            for (ArrayDeque<Particle> queue : array) {
-                tickAndRemoveDead(queue);
-            }
+            tickAndRemoveDead(array[layer]);
         }
     }
 
@@ -142,10 +142,10 @@ public class BCEffectRenderer {
             Iterator<Particle> iterator = queue.iterator();
 
             while (iterator.hasNext()) {
-                Particle Particle = iterator.next();
-                tickParticle(Particle);
+                Particle particle = iterator.next();
+                tickParticle(particle);
 
-                if (!Particle.isAlive()) {
+                if (!particle.isAlive()) {
                     iterator.remove();
                 }
             }
@@ -154,7 +154,7 @@ public class BCEffectRenderer {
 
     /**
      * This should never be fired manually!
-     * */
+     */
     protected void clearEffects(World worldIn) {
         this.worldObj = worldIn;
 
