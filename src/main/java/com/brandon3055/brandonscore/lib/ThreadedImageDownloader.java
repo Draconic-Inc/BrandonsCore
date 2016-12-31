@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -80,7 +80,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
         {
             if (this.cacheFile != null && this.cacheFile.isFile())
             {
-                BCLogHelper.debug("Loading texture from local cache (%s)", this.cacheFile);
+                LogHelperBC.debug("Loading texture from local cache (%s)", this.cacheFile);
                 try
                 {
                     this.bufferedImage = ImageIO.read(this.cacheFile);
@@ -99,7 +99,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
                 }
                 catch (IOException ioexception)
                 {
-                    BCLogHelper.error("Couldn\'t load texture %s %s", this.cacheFile, ioexception);
+                    LogHelperBC.error("Couldn\'t load texture %s %s", this.cacheFile, ioexception);
                     this.downloadTextureFromURL();
                 }
             }
@@ -138,12 +138,12 @@ public class ThreadedImageDownloader extends SimpleTexture{
                 }
                 catch (RuntimeException runtimeexception)
                 {
-                    BCLogHelper.warn("Failed reading metadata of: %s %a", RESOURCE_BROKEN_DOWNLOAD, runtimeexception);
+                    LogHelperBC.warn("Failed reading metadata of: %s %a", RESOURCE_BROKEN_DOWNLOAD, runtimeexception);
                 }
             }
 
             TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedimage, flag, flag1);
-            BCLogHelper.info(dlLocation);
+            LogHelperBC.info(dlLocation);
             if (dlLocation != null) {
                 dlLocation.width = bufferedimage.getWidth();
                 dlLocation.height = bufferedimage.getHeight();
@@ -151,7 +151,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
             }
         }
         catch (Exception e) {
-            BCLogHelper.error("Failed to load broken texture");
+            LogHelperBC.error("Failed to load broken texture");
             e.printStackTrace();
         }
         finally
@@ -204,7 +204,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
             public void run()
             {
                 HttpURLConnection httpurlconnection = null;
-                BCLogHelper.debug("Downloading http texture from %s to %s", ThreadedImageDownloader.this.resourceUrl, ThreadedImageDownloader.this.cacheFile);
+                LogHelperBC.debug("Downloading http texture from %s to %s", ThreadedImageDownloader.this.resourceUrl, ThreadedImageDownloader.this.cacheFile);
 
                 try
                 {
@@ -245,7 +245,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
                         return;
                     }
                     else {
-                        BCLogHelper.error("Could not download resource. Server returned response code " + httpurlconnection.getResponseCode());
+                        LogHelperBC.error("Could not download resource. Server returned response code " + httpurlconnection.getResponseCode());
                         ThreadedImageDownloader.this.downloadFailed = true;
                         if (ThreadedImageDownloader.this.dlLocation != null) {
                             ThreadedImageDownloader.this.dlLocation.dlFailed =  ThreadedImageDownloader.this.dlLocation.dlFinished = true;
@@ -254,7 +254,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
                 }
                 catch (Exception exception)
                 {
-                    BCLogHelper.error("Couldn\'t download http texture " + exception);
+                    LogHelperBC.error("Couldn\'t download http texture " + exception);
                     ThreadedImageDownloader.this.downloadFailed = true;
                     if (ThreadedImageDownloader.this.dlLocation != null) {
                         ThreadedImageDownloader.this.dlLocation.dlFailed =  ThreadedImageDownloader.this.dlLocation.dlFinished = true;

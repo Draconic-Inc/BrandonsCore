@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.command.CommandTickTime;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.network.*;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -30,7 +30,7 @@ public class BrandonsCore {
     public static SimpleNetworkWrapper network;
 
     public BrandonsCore() {
-        BCLogHelper.info("Hello Minecraft!!!");
+        LogHelperBC.info("Hello Minecraft!!!");
     }
 
     @Mod.EventHandler

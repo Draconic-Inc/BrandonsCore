@@ -107,8 +107,8 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
 
     public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {
         TileEntity tile = world.getTileEntity(pos.add(side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ()));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
-            return EnergyHelper.insertEnergy(tile, maxSend, side, false);
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
+            return EnergyHelper.insertEnergy(tile, maxSend, side.getOpposite(), false);
         }
         return 0;
     }

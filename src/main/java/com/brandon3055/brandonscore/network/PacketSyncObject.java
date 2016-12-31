@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.network;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -27,7 +27,7 @@ public abstract class PacketSyncObject<REQ extends IMessage, REPLY extends IMess
 
     public void addPacketServer() {
         if (ctx.side == Side.CLIENT) {
-            BCLogHelper.error("[SyncPacket#addPacketServer] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
+            LogHelperBC.error("[SyncPacket#addPacketServer] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
             return;
         }
         ctx.getServerHandler().playerEntity.getServer().addScheduledTask(this);
@@ -35,7 +35,7 @@ public abstract class PacketSyncObject<REQ extends IMessage, REPLY extends IMess
 
     public void addPacketClient() {
         if (ctx.side == Side.SERVER) {
-            BCLogHelper.error("[SyncPacket#addPacketClient] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
+            LogHelperBC.error("[SyncPacket#addPacketClient] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
             return;
         }
         Minecraft.getMinecraft().addScheduledTask(this);

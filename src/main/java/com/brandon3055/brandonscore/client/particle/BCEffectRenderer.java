@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
 import com.google.common.collect.Queues;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;

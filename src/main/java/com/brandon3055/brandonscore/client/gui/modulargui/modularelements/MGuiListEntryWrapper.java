@@ -28,7 +28,8 @@ public class MGuiListEntryWrapper extends MGuiListEntry {
             newXPos = element.xPos;
         }
 
-        element.moveBy(newXPos - element.xPos, newYPos - element.yPos);
+        this.moveBy(newXPos - xPos, newYPos - yPos);
+//        element.moveBy(newXPos - element.xPos, newYPos - element.yPos);
 
 //        if (!lockXPos) {
 //            element.xPos = newXPos;

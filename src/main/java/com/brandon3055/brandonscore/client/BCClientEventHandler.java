@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.LinkedHashList;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
@@ -182,13 +182,13 @@ public class BCClientEventHandler {
             Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
             if (e != null) {
                 Minecraft.getMinecraft().thePlayer.startRiding(e);
-                BCLogHelper.info("Successfully placed player on mount after " + (500 - remountTicksRemaining) + " ticks");
+                LogHelperBC.info("Successfully placed player on mount after " + (500 - remountTicksRemaining) + " ticks");
                 remountTicksRemaining = 0;
                 return;
             }
             remountTicksRemaining--;
             if (remountTicksRemaining == 0) {
-                BCLogHelper.error("Unable to locate player mount after 500 ticks! Aborting");
+                LogHelperBC.error("Unable to locate player mount after 500 ticks! Aborting");
                 BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
             }
         }
@@ -198,7 +198,7 @@ public class BCClientEventHandler {
         if (remountTicksRemaining == 500) return;
         remountTicksRemaining = 500;
         remountEntityID = id;
-        BCLogHelper.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
+        LogHelperBC.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
     }
 
     private void renderGraph(int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {

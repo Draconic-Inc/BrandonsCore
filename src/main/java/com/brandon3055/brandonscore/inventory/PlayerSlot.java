@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -42,8 +42,8 @@ public class PlayerSlot {
             return new PlayerSlot(Integer.parseInt(slot.substring(slot.indexOf(":") + 1)), EnumInvCategory.fromIndex(Integer.parseInt(slot.substring(0, slot.indexOf(":")))));
         }
         catch (Exception e) {
-            BCLogHelper.error("Error loading slot reference from string! - " + slot);
-            BCLogHelper.error("Required format \"inventory:slot\" Where inventory ether 0 (main), 1 (Armor) or 2 (Off Hand) and slot is the index in that inventory.");
+            LogHelperBC.error("Error loading slot reference from string! - " + slot);
+            LogHelperBC.error("Required format \"inventory:slot\" Where inventory ether 0 (main), 1 (Armor) or 2 (Off Hand) and slot is the index in that inventory.");
             e.printStackTrace();
             return new PlayerSlot(0, EnumInvCategory.MAIN);
         }
@@ -52,21 +52,21 @@ public class PlayerSlot {
     public void setStackInSlot(EntityPlayer player, ItemStack stack) {
         if (category == EnumInvCategory.ARMOR){
             if (slot < 0 || slot >= player.inventory.armorInventory.length) {
-                BCLogHelper.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
             player.inventory.armorInventory[slot] = stack;
         }
         else if (category == EnumInvCategory.MAIN){
             if (slot < 0 || slot >= player.inventory.mainInventory.length) {
-                BCLogHelper.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
             player.inventory.mainInventory[slot] = stack;
         }
         else if (category == EnumInvCategory.OFF_HAND){
             if (slot < 0 || slot >= player.inventory.offHandInventory.length) {
-                BCLogHelper.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
             player.inventory.offHandInventory[slot] = stack;
@@ -86,12 +86,12 @@ public class PlayerSlot {
             stacks = player.inventory.offHandInventory;
         }
         else {
-            BCLogHelper.bigError("PlayerSlot#getStackInSlot Invalid or null category! This should not be possible! [%s]... Fix your Shit!", category);
+            LogHelperBC.bigError("PlayerSlot#getStackInSlot Invalid or null category! This should not be possible! [%s]... Fix your Shit!", category);
             return null;
         }
 
         if (slot < 0 || slot >= stacks.length){
-            BCLogHelper.bigError("PlayerSlot#getStackInSlot Hay! I just saved you an index out of bounds! Be grateful and fix your shit!");
+            LogHelperBC.bigError("PlayerSlot#getStackInSlot Hay! I just saved you an index out of bounds! Be grateful and fix your shit!");
             return null;
         }
 
@@ -115,7 +115,7 @@ public class PlayerSlot {
 
         public static EnumInvCategory fromIndex(int index){
             if (index > 2 || index < 0){
-                BCLogHelper.bigError("PlayerSlot.EnumInvCategory#fromIndex Attempt to read invalid index! [%s]", index);
+                LogHelperBC.bigError("PlayerSlot.EnumInvCategory#fromIndex Attempt to read invalid index! [%s]", index);
                 return indexMap[0];
             }
             return indexMap[index];

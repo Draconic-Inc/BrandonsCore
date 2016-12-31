@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.network.wrappers;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,7 +35,7 @@ public class SyncableLong extends SyncableObject {
                 BrandonsCore.network.sendToAllAround(new PacketSyncableObject(tile, index, value, updateOnReceived), tile.syncRange());
             } else if (player instanceof EntityPlayerMP) {
                 BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, value, updateOnReceived), (EntityPlayerMP) player);
-            } else BCLogHelper.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
+            } else LogHelperBC.error("SyncableInt#detectAndSendChanges No valid destination for sync packet!");
         }
     }
 

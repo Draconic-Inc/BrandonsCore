@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.handlers;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class FileHandler {
         brandon3055Folder = new File(rootConfigFolder, "brandon3055");
 
         if (!brandon3055Folder.exists() && brandon3055Folder.mkdirs()) {
-            BCLogHelper.error("Could not create config directory! Things are probably going to break!");
+            LogHelperBC.error("Could not create config directory! Things are probably going to break!");
         }
 
         mcDirectory = rootConfigFolder.getParentFile();

@@ -22,8 +22,8 @@ public class MGuiScrollBar extends MGuiElementBase {
     private boolean isDragging = false;
     public MGuiElementBase parentScrollable = null;
     public IScrollListener listener = null;
-    protected double increment = 0.01;
-    protected double shiftIncrement = 0.1;
+    protected double increment = 0.1;
+    protected double shiftIncrement = 0.2;
     public double barSizeRatio = 20;
     public int clickOffset = 0;
     public double clickPos = 0;

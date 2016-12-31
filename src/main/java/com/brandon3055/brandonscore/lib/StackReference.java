@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Objects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -123,7 +123,7 @@ public class StackReference {
         }
 
         if (!stackString.contains(":")) {
-            BCLogHelper.warn("StackReference: Was given an invalid stack string. String did not contain \":\" - " + string);
+            LogHelperBC.warn("StackReference: Was given an invalid stack string. String did not contain \":\" - " + string);
             return null;
         }
 
@@ -163,7 +163,7 @@ public class StackReference {
                 count = Integer.parseInt(countString);
             }
             catch (Exception e) {
-                BCLogHelper.warn("StackReference: Failed to parse stack size from string - " + countString + " error: " + e.getMessage());
+                LogHelperBC.warn("StackReference: Failed to parse stack size from string - " + countString + " error: " + e.getMessage());
             }
         }
         if (metaString.length() > 0) {
@@ -171,7 +171,7 @@ public class StackReference {
                 meta = Integer.parseInt(metaString);
             }
             catch (Exception e) {
-                BCLogHelper.warn("StackReference: Failed to parse stack meta from string - " + metaString + " error: " + e.getMessage());
+                LogHelperBC.warn("StackReference: Failed to parse stack meta from string - " + metaString + " error: " + e.getMessage());
             }
         }
         if (nbt.length() > 0) {
@@ -179,7 +179,7 @@ public class StackReference {
                 compound = JsonToNBT.getTagFromJson(nbt);
             }
             catch (Exception e) {
-                BCLogHelper.warn("StackReference: Failed to parse stack nbt from string - " + nbt + " error: " + e.getMessage());
+                LogHelperBC.warn("StackReference: Failed to parse stack nbt from string - " + nbt + " error: " + e.getMessage());
             }
         }
 
@@ -200,7 +200,7 @@ public class StackReference {
             return new StackReference(name, size, meta, compound.hasNoTags() ? null : compound);
         }
         catch (Exception e) {
-            BCLogHelper.error("An error occurred while generating a StackReference from a string");
+            LogHelperBC.error("An error occurred while generating a StackReference from a string");
             e.printStackTrace();
             return null;
         }

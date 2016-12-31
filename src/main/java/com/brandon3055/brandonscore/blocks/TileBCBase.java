@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.api.IDataRetainerTile;
 import com.brandon3055.brandonscore.network.PacketSyncableObject;
 import com.brandon3055.brandonscore.network.PacketTileMessage;
 import com.brandon3055.brandonscore.network.wrappers.SyncableObject;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -104,11 +104,11 @@ public class TileBCBase extends TileEntity {
                 viewRange = f.getInt(((WorldServer) worldObj).getPlayerChunkMap());
             }
             catch (IllegalAccessException e) {
-                BCLogHelper.error("A THING BROKE!!!!!!!");
+                LogHelperBC.error("A THING BROKE!!!!!!!");
                 e.printStackTrace();
             }
         } else if (worldObj.isRemote) {
-            BCLogHelper.error("Hay! Someone is doing a bad thing!!! Check your side!!!!!!!");
+            LogHelperBC.error("Hay! Someone is doing a bad thing!!! Check your side!!!!!!!");
         }
         return new NetworkRegistry.TargetPoint(worldObj.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), viewRange * 16);
     }

@@ -7,6 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -26,11 +27,11 @@ public class BlockToStackHelper {
     public static FakePlayer harvester = null;
     public static List<ItemStack> itemCollection = null;
 
-    public static List<ItemStack> breakAndCollect(World world, BlockPos pos) {
-        return breakAndCollectWithPlayer(world, pos, null);
+    public static List<ItemStack> breakAndCollect(World world, BlockPos pos, int xp) {
+        return breakAndCollectWithPlayer(world, pos, null, xp);
     }
 
-    public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, EntityPlayer player) {
+    public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, EntityPlayer player, int xp) {
         List<ItemStack> stacks = new ArrayList<ItemStack>();
 
         if (!(world instanceof WorldServer)) {
@@ -44,26 +45,28 @@ public class BlockToStackHelper {
         }
         itemCollection = new ArrayList<ItemStack>();
 
-        block.harvestBlock(world, player, pos, state, world.getTileEntity(pos), player.getHeldItemMainhand());
-        world.setBlockToAir(pos);
+        TileEntity tile = world.getTileEntity(pos);
+        if (block.removedByPlayer(state, world, pos, player, true)) {
+            block.onBlockDestroyedByPlayer(world, pos, state);
+            block.harvestBlock(world, player, pos, state, tile, player.getHeldItemMainhand());
+//            block.dropXpOnBlockBreak(world, pos, xp);
+        }
 
         stacks.addAll(itemCollection);
         itemCollection = null;
         return stacks;
     }
 
-    public static void breakAndCollect(World world, BlockPos pos, InventoryDynamic inventoryDynamic) {
-        breakAndCollectWithPlayer(world, pos, inventoryDynamic, null);
+    public static void breakAndCollect(World world, BlockPos pos, InventoryDynamic inventoryDynamic, int xp) {
+        breakAndCollectWithPlayer(world, pos, inventoryDynamic, null, xp);
     }
 
-        public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, EntityPlayer player) {
-        List<ItemStack> stacks = breakAndCollectWithPlayer(world, pos, player);
+    public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, EntityPlayer player, int xp) {
+        List<ItemStack> stacks = breakAndCollectWithPlayer(world, pos, player, xp);
         for (ItemStack stack : stacks) {
-//            if (stack.getItem() == Item.getItemFromBlock(Blocks.STONE)) {
-//                BCLogHelper.bigInfo("Detected Stone");
-//            }
             InventoryUtils.insertItem(inventoryDynamic, stack, false);
         }
+        inventoryDynamic.xp += xp;
     }
 
     public static FakePlayer getHarvester(WorldServer world) {

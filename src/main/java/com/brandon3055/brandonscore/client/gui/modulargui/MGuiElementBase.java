@@ -43,6 +43,7 @@ public class MGuiElementBase {
      * Can simply be used to store an object reference on this element. Use for whatever you like.
      */
     public Object linkedObject = null;
+    public MGuiElementBase parent = null;
     protected List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
     /**
      * For use by ModuleManager ONLY
@@ -82,11 +83,15 @@ public class MGuiElementBase {
 
     public MGuiElementBase addChild(MGuiElementBase element) {
         childElements.add(element);
+        element.parent = this;
         return this;
     }
 
     public MGuiElementBase addChildren(List<MGuiElementBase> elements) {
         childElements.addAll(elements);
+        for (MGuiElementBase element : elements) {
+            element.parent = this;
+        }
         return this;
     }
 

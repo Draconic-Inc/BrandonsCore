@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class ModuleManager {
      */
     public MGuiElementBase add(MGuiElementBase element, int displayLevel) {
         if (displayLevel > 4) {
-            BCLogHelper.error("ModularGui Display Level Out Of Bounds! Max is 4, someone is using " + displayLevel);
+            LogHelperBC.error("ModularGui Display Level Out Of Bounds! Max is 4, someone is using " + displayLevel);
         }
         if (element.mc == null || element.fontRenderer == null) {
             element.setWorldAndResolution(parentGui.getMinecraft(), parentGui.screenWidth(), parentGui.screenHeight());

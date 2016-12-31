@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +50,7 @@ public class TeleportUtils {
         PassengerHelper passengerHelper = new PassengerHelper(rootEntity);
         PassengerHelper rider = passengerHelper.getPassenger(entity);
         if (rider == null) {
-            BCLogHelper.error("RiddenEntity: This error should not be possible");
+            LogHelperBC.error("RiddenEntity: This error should not be possible");
             return entity;
         }
         passengerHelper.teleport(server, sourceDim, dimension, xCoord, yCoord, zCoord, yaw, pitch);

@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.config;
 
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
@@ -46,7 +46,7 @@ public class ModConfigProcessor {
                         field.set(null, newValue);
                     }
                     catch (Exception e) {
-                        BCLogHelper.error("Something when wrong while loading config value [" + property.name() + "]");
+                        LogHelperBC.error("Something when wrong while loading config value [" + property.name() + "]");
                         e.printStackTrace();
                     }
                 }

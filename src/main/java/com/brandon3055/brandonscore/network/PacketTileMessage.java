@@ -183,7 +183,7 @@ public class PacketTileMessage implements IMessage {
     }
 
     public boolean isNBT() {
-        return dataType == TAG_INDEX;
+        return dataType == TAG_INDEX && compound != null;
     }
 
     public byte getIndex() {

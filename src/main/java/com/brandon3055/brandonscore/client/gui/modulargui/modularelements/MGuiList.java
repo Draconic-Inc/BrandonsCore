@@ -23,6 +23,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     public boolean disableList = false;
     protected boolean updateRequired = true;
     public boolean allowOutsideClicks = false;
+    public boolean lockScrollBar = false;
 
     public LinkedList<MGuiListEntry> listEntries = new LinkedList<MGuiListEntry>();
     public LinkedList<MGuiElementBase> nonListEntries = new LinkedList<MGuiElementBase>();
@@ -194,7 +195,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     @Override
     public void scrollBarMoved(double pos) {
         int maxMove = getListHeight() - (ySize - 1);
-        scrollBar.setIncrements(10D / maxMove, 0.1D);
+        scrollBar.setIncrements(50D / maxMove, 0.1D);
         updateEntriesAndScrollBar();
     }
 
@@ -218,8 +219,16 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             yOffset += entry.getEntryHeight();
         }
 
-        scrollBar.setEnabled((scrollBarEnabled = maxMove > 0));
-        scrollBar.setBarSizeRatio((double) (maxMove + ySize) / (double) ySize);
+        boolean canScroll = maxMove > 0;
+
+        if (!canScroll && lockScrollBar) {
+            scrollBar.setEnabled((scrollBarEnabled = true));
+            scrollBar.setBarSizeRatio(0);
+        }
+        else {
+            scrollBar.setEnabled((scrollBarEnabled = canScroll));
+            scrollBar.setBarSizeRatio((double) (maxMove + ySize) / (double) ySize);
+        }
     }
 
     protected int getListHeight() {

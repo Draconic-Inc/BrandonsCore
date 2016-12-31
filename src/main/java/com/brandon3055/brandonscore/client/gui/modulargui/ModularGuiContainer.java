@@ -5,6 +5,7 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
+import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
 
@@ -126,6 +127,14 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         }
 
         super.handleMouseInput();
+    }
+
+    public int getMouseX() {
+        return Mouse.getEventX() * this.width / this.mc.displayWidth;
+    }
+
+    public int getMouseY() {
+        return this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
     }
 
     //endregion

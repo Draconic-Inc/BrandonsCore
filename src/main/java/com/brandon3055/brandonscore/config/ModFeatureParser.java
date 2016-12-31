@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.config;
 
 import com.brandon3055.brandonscore.blocks.ItemBlockBCore;
 import com.brandon3055.brandonscore.blocks.NoItemBlock;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
@@ -64,7 +64,7 @@ public class ModFeatureParser {
                     modFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
                 }
                 catch (IllegalAccessException e) {
-                    BCLogHelper.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
+                    LogHelperBC.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
                     e.printStackTrace();
                 }
             }
@@ -92,7 +92,7 @@ public class ModFeatureParser {
             }
         }
         catch (Exception var4) {
-            BCLogHelper.error("Error Loading Block/Item Config");
+            LogHelperBC.error("Error Loading Block/Item Config");
             var4.printStackTrace();
         }
         finally {
@@ -135,7 +135,7 @@ public class ModFeatureParser {
                         GameRegistry.register(itemBlock);
                     }
                     catch (Exception e) {
-                        BCLogHelper.error("NOOOOOOOO!!!!!!!!!!!...... It broke... [%s]", entry.feature.registryName());
+                        LogHelperBC.error("NOOOOOOOO!!!!!!!!!!!...... It broke... [%s]", entry.feature.registryName());
                         e.printStackTrace();
                     }
 

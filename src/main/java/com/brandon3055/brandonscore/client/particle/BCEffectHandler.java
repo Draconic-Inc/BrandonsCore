@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import com.brandon3055.brandonscore.network.PacketSpawnParticle;
-import com.brandon3055.brandonscore.utils.BCLogHelper;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -112,7 +112,7 @@ public class BCEffectHandler {
             if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
 
                 if (!particleRegistry.containsKey(particleID)) {
-                    BCLogHelper.error("Attempted to spawn an unregistered particle ID (%s)", particleID);
+                    LogHelperBC.error("Attempted to spawn an unregistered particle ID (%s)", particleID);
                     return;
                 }
 
