@@ -116,4 +116,6 @@ public class Vec3I {
     public int hashCode() {
         return (y + z * 31) * 31 + x;
     }
+
+    public int sum() {return Math.abs(x) + Math.abs(y) + Math.abs(z); }
 }

@@ -74,22 +74,19 @@ public class BCClientEventHandler {
         }
 
         elapsedTicks++;
-//        if (Minecraft.getMinecraft().isGamePaused()) {
-//            return;
-//        }
-//
-//        if (event.phase == TickEvent.Phase.END) {
-//            searchForPlayerMount();
-//            if (debugTimeout > 0) {
-//                debugTimeout--;
-//            }
-//        }
-//
-//        if (elapsedTicks % 100 == 0 && debugTimeout > 0) {
-//            sortingOrder.clear();
-//            sortingOrder.addAll(dimTickTimes.keySet());
-//            Collections.sort(sortingOrder, sorter);
-//        }
+        if (Minecraft.getMinecraft().isGamePaused()) {
+            return;
+        }
+
+        if (debugTimeout > 0) {
+            debugTimeout--;
+        }
+        
+        if (elapsedTicks % 100 == 0 && debugTimeout > 0) {
+            sortingOrder.clear();
+            sortingOrder.addAll(dimTickTimes.keySet());
+            Collections.sort(sortingOrder, sorter);
+        }
     }
 
     @SubscribeEvent
