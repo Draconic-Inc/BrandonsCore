@@ -7,6 +7,9 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by brandon3055 on 28/3/2016.
@@ -72,5 +75,11 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     public boolean canInteractWith(EntityPlayer playerIn) {
         if (tile instanceof IInventory) return ((IInventory) tile).isUseableByPlayer(playerIn);
         return tile != null;
+    }
+
+    @Nullable
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+        return null;
     }
 }

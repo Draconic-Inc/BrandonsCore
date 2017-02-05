@@ -81,7 +81,7 @@ public class BCClientEventHandler {
         if (debugTimeout > 0) {
             debugTimeout--;
         }
-        
+
         if (elapsedTicks % 100 == 0 && debugTimeout > 0) {
             sortingOrder.clear();
             sortingOrder.addAll(dimTickTimes.keySet());
