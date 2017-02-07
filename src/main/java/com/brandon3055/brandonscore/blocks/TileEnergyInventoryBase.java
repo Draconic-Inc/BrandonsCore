@@ -89,9 +89,9 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         if (getEnergyStored() == 0) {
             return 0;
         }
-        TileEntity tile = worldObj.getTileEntity(pos.add(side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ()));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
-            return EnergyHelper.insertEnergy(tile, getEnergyStored(), side, false);
+        TileEntity tile = worldObj.getTileEntity(pos.offset(side));
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
+            return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
         }
         return 0;
     }
@@ -108,7 +108,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
     }
 
     public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {
-        TileEntity tile = world.getTileEntity(pos.add(side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ()));
+        TileEntity tile = world.getTileEntity(pos.offset(side));
         if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
             return EnergyHelper.insertEnergy(tile, maxSend, side, false);
         }

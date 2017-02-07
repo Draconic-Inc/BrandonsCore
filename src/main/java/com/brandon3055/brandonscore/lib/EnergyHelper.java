@@ -4,6 +4,7 @@ import cofh.api.energy.IEnergyContainerItem;
 import cofh.api.energy.IEnergyHandler;
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -73,10 +74,15 @@ public class EnergyHelper {
     }
 
     public static int insertEnergy(TileEntity tile, int energy, EnumFacing side, boolean simulate) {
+        if (tile.getWorld().isRemote) {
+            LogHelperBC.bigDev("Attempt to do energy operation client side!");
+            return 0;
+        }
         if (tile instanceof IEnergyReceiver) {
             return ((IEnergyReceiver) tile).receiveEnergy(side, energy, simulate);
         }
-        else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
+        else
+            if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
             net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
             if (cap.canReceive()) {
                 return cap.receiveEnergy(energy, simulate);
@@ -102,6 +108,10 @@ public class EnergyHelper {
     }
 
     public static int extractEnergy(TileEntity tile, int energy, EnumFacing side, boolean simulate) {
+        if (tile.getWorld().isRemote) {
+            LogHelperBC.bigDev("Attempt to do energy operation client side!");
+            return 0;
+        }
         if (tile instanceof IEnergyProvider) {
             return ((IEnergyProvider) tile).extractEnergy(side, energy, simulate);
         }

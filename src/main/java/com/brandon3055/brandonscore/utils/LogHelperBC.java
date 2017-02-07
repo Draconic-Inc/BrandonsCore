@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
+import codechicken.lib.asm.ObfMapping;
 import com.brandon3055.brandonscore.BrandonsCore;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +28,12 @@ public class LogHelperBC {
     }
 
     //Standard log entries.
+
+    public static void dev(Object object) {
+        if (!ObfMapping.obfuscated) {
+            log(Level.INFO, "[DEV]: " + object);
+        }
+    }
 
     public static void all(Object object) {
         log(Level.ALL, object);
@@ -61,6 +68,12 @@ public class LogHelperBC {
     }
 
     //log with format.
+
+    public static void dev(String object, Object... format) {
+        if (!ObfMapping.obfuscated) {
+            log(Level.INFO, "[DEV]: " + String.format(object, format));
+        }
+    }
 
     public static void all(String object, Object... format) {
         log(Level.ALL, String.format(object, format));
@@ -162,6 +175,19 @@ public class LogHelperBC {
     }
 
     //Log with trace element.
+
+    public static void bigDev(String format, Object... data) {
+        if (!ObfMapping.obfuscated) {
+            StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            dev("****************************************");
+            dev("* " + format, data);
+            for (int i = 2; i < 8 && i < trace.length; i++) {
+                dev("*  at %s%s", trace[i].toString(), i == 7 ? "..." : "");
+            }
+            dev("****************************************");
+        }
+    }
+
     public static void bigAll(String format, Object... data) {
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
         all("****************************************");
