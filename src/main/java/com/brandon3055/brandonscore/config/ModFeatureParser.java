@@ -149,8 +149,8 @@ public class ModFeatureParser {
                 }
 
                 if (block.hasTileEntity(block.getDefaultState())) {
-                    if (block instanceof IRegisterMyOwnTiles) {
-                        ((IRegisterMyOwnTiles) block).registerTiles(modid.toLowerCase() + ":", entry.feature.registryName());
+                    if (block instanceof ITileRegisterer) {
+                        ((ITileRegisterer) block).registerTiles(modid.toLowerCase() + ":", entry.feature.registryName());
                     }
                     else {
                         GameRegistry.registerTileEntity(entry.feature.tileEntity(), modid.toLowerCase() + ":" + entry.feature.registryName());
