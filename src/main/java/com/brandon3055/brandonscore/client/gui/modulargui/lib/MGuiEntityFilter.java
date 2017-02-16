@@ -193,13 +193,20 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                         continue;
                     }
                     String name = entity.getDisplayName() == null ? "[unknown]" : entity.getDisplayName().getFormattedText();
-                    MGuiLabel label = new MGuiLabel(modularGui, xPos + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
+                    MGuiElementBase container = new MGuiElementBase(modularGui, 0, 0, xSize - 13, 20);
+                    container.setLinkedObject(EntityList.getEntityString(entity));
+
+                    MGuiEntityRenderer renderer = new MGuiEntityRenderer(modularGui, 10, 5, 12, 10).setEntity(entity);
+                    container.addChild(renderer);
+
+                    MGuiLabel label = new MGuiLabel(modularGui, 0 + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
                     if (fontRenderer.getStringWidth(name) > xSize - 40) {
-                        label.addChild(new MGuiHoverPopup(modularGui, new String[] {name}, label));
+                        label.addChild(new MGuiHoverPopup(modularGui, new String[]{name}, label));
                     }
-                    label.setLinkedObject(EntityList.getEntityString(entity));
-                    MGuiEntityRenderer renderer = new MGuiEntityRenderer(modularGui, xPos + 10, 5, 12, 10).setEntity(entity);
-                    MGuiButtonSolid back = new MGuiButtonSolid(modularGui, xPos + 30, 0, xSize - 42, 20, ""){
+
+                    container.addChild(label);
+
+                    MGuiButtonSolid back = new MGuiButtonSolid(modularGui, 0 + 30, 0, xSize - 42, 20, "") {
                         @Override
                         public int getFillColour(boolean hovering, boolean disabled) {
                             return hovering ? 0x80FFFFFF : 0;
@@ -210,20 +217,19 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                             return false;
                         }
                     }.setColours(0, 0, 0xFFFFFFFF);
-                    label.addChild(back);
-                    label.addChild(renderer);
-                    elementBases.add(label);
+                    container.addChild(back);
+                    elementBases.add(container);
                 }
             }
             else if (eventElement == addPlayer) {
                 for (String name : playerNames) {
                     name = "[player]:"+name;
-                    MGuiLabel label = new MGuiLabel(modularGui, xPos, 0, xSize - 12, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
+                    MGuiLabel label = new MGuiLabel(modularGui, 0, 0, xSize - 12, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
                     if (fontRenderer.getStringWidth(name) > xSize - 40) {
                         label.addChild(new MGuiHoverPopup(modularGui, new String[] {name}, label));
                     }
                     label.setLinkedObject(name);
-                    MGuiButtonSolid back = new MGuiButtonSolid(modularGui, xPos + 1, 0, xSize - 12, 20, ""){
+                    MGuiButtonSolid button = new MGuiButtonSolid(modularGui, 0, 0, xSize - 12, 20, ""){
                         @Override
                         public int getFillColour(boolean hovering, boolean disabled) {
                             return hovering ? 0x80FFFFFF : 0;
@@ -234,13 +240,13 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                             return false;
                         }
                     }.setColours(0, 0, 0xFFFFFFFF);
-                    label.addChild(back);
+                    label.addChild(button);
                     elementBases.add(label);
                 }
             }
 
 
-            selector.setOptions(elementBases, true);
+            selector.setOptions(elementBases);
             selector.initElement();
             modularGui.getManager().add(selector, displayLevel + 1);
             return;

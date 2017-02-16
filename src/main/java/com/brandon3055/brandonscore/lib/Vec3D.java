@@ -3,7 +3,12 @@ package com.brandon3055.brandonscore.lib;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+
+import static net.minecraft.util.EnumFacing.Axis.X;
+import static net.minecraft.util.EnumFacing.Axis.Y;
 
 /**
  * Created by brandon3055 on 9/4/2016.
@@ -157,6 +162,27 @@ public class Vec3D {
         return ((int) y + (int) z * 31) * 31 + (int) x;
     }
 
+    public Vec3D offset(EnumFacing direction, double offsetDistance) {
+        this.x += direction.getFrontOffsetX() * offsetDistance;
+        this.y += direction.getFrontOffsetY() * offsetDistance;
+        this.z += direction.getFrontOffsetZ() * offsetDistance;
+        return this;
+    }
+
+    public Vec3D offset(Vec3D direction, double offsetDistance) {
+        this.x += direction.x * offsetDistance;
+        this.y += direction.y * offsetDistance;
+        this.z += direction.z * offsetDistance;
+        return this;
+    }
+
+    public Vec3D radialOffset(EnumFacing.Axis axis, double sin, double cos, double offsetAmount) {
+        x += ((axis == X ? 0 : axis == Y ? sin : sin) * offsetAmount);
+        y += ((axis == X ? sin : axis == Y ? 0 : cos) * offsetAmount);
+        z += ((axis == X ? cos : axis == Y ? cos : 0) * offsetAmount);
+        return this;
+    }
+
     /**
      * Calculates a directional vector between the two given points
      * This can be used for example if you have an entity at pos1 and you want to
@@ -176,7 +202,15 @@ public class Vec3D {
         return new Vec3D(pos).add(0.5, 0.5, 0.5);
     }
 
+    public static Vec3D getCenter(TileEntity tile) {
+        return getCenter(tile.getPos());
+    }
+
     public double distXZ(Vec3D vec3D) {
         return Utils.getDistanceAtoB(x, z, vec3D.x, vec3D.z);
+    }
+
+    public double distance(Vec3D vec3D) {
+        return Utils.getDistanceAtoB(this, vec3D);
     }
 }

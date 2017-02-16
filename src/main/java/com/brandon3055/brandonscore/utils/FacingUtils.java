@@ -72,14 +72,14 @@ public class FacingUtils {
         List<EnumFacing> y = new ArrayList<EnumFacing>();
         List<EnumFacing> z = new ArrayList<EnumFacing>();
 
-        for (EnumFacing facing : EnumFacing.VALUES){
-            if (facing.getAxis() != EnumFacing.Axis.X){
+        for (EnumFacing facing : EnumFacing.VALUES) {
+            if (facing.getAxis() != EnumFacing.Axis.X) {
                 x.add(facing);
             }
-            if (facing.getAxis() != EnumFacing.Axis.Y){
+            if (facing.getAxis() != EnumFacing.Axis.Y) {
                 y.add(facing);
             }
-            if (facing.getAxis() != EnumFacing.Axis.Z){
+            if (facing.getAxis() != EnumFacing.Axis.Z) {
                 z.add(facing);
             }
         }
@@ -98,19 +98,32 @@ public class FacingUtils {
     public static BlockPos[] getAroundAxis(EnumFacing.Axis axis) {
         if (axis == EnumFacing.Axis.X) {
             return AROUND_X;
-        } else if (axis == EnumFacing.Axis.Y) {
+        }
+        else if (axis == EnumFacing.Axis.Y) {
             return AROUND_Y;
-        } else {
+        }
+        else {
             return AROUND_Z;
+        }
+    }
+
+    public static EnumFacing[] getAxisFaces(EnumFacing.Axis axis) {
+        switch (axis) {
+            case X: return new EnumFacing[]{EnumFacing.EAST, EnumFacing.WEST};
+            case Y: return new EnumFacing[]{EnumFacing.UP, EnumFacing.DOWN};
+            case Z: return new EnumFacing[]{EnumFacing.NORTH, EnumFacing.SOUTH};
+            default: return new EnumFacing[0];
         }
     }
 
     public static EnumFacing[] getFacingsAroundAxis(EnumFacing.Axis axis) {
         if (axis == EnumFacing.Axis.X) {
             return FACES_AROUND_X;
-        } else if (axis == EnumFacing.Axis.Y) {
+        }
+        else if (axis == EnumFacing.Axis.Y) {
             return FACES_AROUND_Y;
-        } else {
+        }
+        else {
             return FACES_AROUND_Z;
         }
     }
