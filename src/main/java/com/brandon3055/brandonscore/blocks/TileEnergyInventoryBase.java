@@ -85,17 +85,6 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         return energyStorage.getMaxEnergyStored();
     }
 
-    public int sendEnergyTo(EnumFacing side) {
-        if (getEnergyStored() == 0) {
-            return 0;
-        }
-        TileEntity tile = worldObj.getTileEntity(pos.offset(side));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
-            return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
-        }
-        return 0;
-    }
-
     public int sendEnergyToAll() {
         if (getEnergyStored() == 0) {
             return 0;
@@ -107,10 +96,21 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         return i;
     }
 
+    public int sendEnergyTo(EnumFacing side) {
+        if (getEnergyStored() == 0) {
+            return 0;
+        }
+        TileEntity tile = worldObj.getTileEntity(pos.offset(side));
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile)) {
+            return EnergyHelper.insertEnergy(tile, getEnergyStored(), false);
+        }
+        return 0;
+    }
+
     public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {
         TileEntity tile = world.getTileEntity(pos.offset(side));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
-            return EnergyHelper.insertEnergy(tile, maxSend, side, false);
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
+            return EnergyHelper.insertEnergy(tile, maxSend, side.getOpposite(), false);
         }
         return 0;
     }

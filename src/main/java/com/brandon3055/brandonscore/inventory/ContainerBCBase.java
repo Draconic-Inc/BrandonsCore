@@ -41,12 +41,12 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
 
     public ContainerBCBase addPlayerSlots(int posX, int posY, int hotbarSpacing) {
         for (int x = 0; x < 9; x++) {
-            addSlotToContainer(new Slot(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
+            addSlotToContainer(new SlotCheckValid(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                addSlotToContainer(new Slot(player.inventory, x + y * 9 + 9, posX + 18 * x, posY + y * 18));
+                addSlotToContainer(new SlotCheckValid(player.inventory, x + y * 9 + 9, posX + 18 * x, posY + y * 18));
             }
         }
         return this;
@@ -80,6 +80,25 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     @Nullable
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+        return null;
+    }
+
+    //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
+
+    @Override
+    public void putStackInSlot(int slotID, ItemStack stack) {
+        Slot slot = this.getSlot(slotID);
+        if (slot != null) {
+            slot.putStack(stack);
+        }
+    }
+
+    @Override
+    public Slot getSlot(int slotId) {
+        if (slotId < inventorySlots.size() && slotId >= 0) {
+            return inventorySlots.get(slotId);
+        }
+
         return null;
     }
 }

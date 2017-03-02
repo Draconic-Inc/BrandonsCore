@@ -79,7 +79,7 @@ public class EnergyHelper {
             return 0;
         }
         if (tile instanceof IEnergyReceiver) {
-            return ((IEnergyReceiver) tile).receiveEnergy(side, energy, simulate);
+            return  ((IEnergyReceiver) tile).receiveEnergy(side, energy, simulate);
         }
         else
             if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {

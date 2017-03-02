@@ -83,17 +83,6 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
         return energyStorage.getMaxEnergyStored();
     }
 
-    public int sendEnergyTo(EnumFacing side) {
-        if (getEnergyStored() == 0) {
-            return 0;
-        }
-        TileEntity tile = worldObj.getTileEntity(pos.add(side.getFrontOffsetX(), side.getFrontOffsetY(), side.getFrontOffsetZ()));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side)) {
-            return EnergyHelper.insertEnergy(tile, getEnergyStored(), false);
-        }
-        return 0;
-    }
-
     public int sendEnergyToAll() {
         if (getEnergyStored() == 0) {
             return 0;
@@ -103,6 +92,17 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
             i += sendEnergyTo(direction);
         }
         return i;
+    }
+
+    public int sendEnergyTo(EnumFacing side) {
+        if (getEnergyStored() == 0) {
+            return 0;
+        }
+        TileEntity tile = worldObj.getTileEntity(pos.offset(side));
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile)) {
+            return EnergyHelper.insertEnergy(tile, getEnergyStored(), false);
+        }
+        return 0;
     }
 
     public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {

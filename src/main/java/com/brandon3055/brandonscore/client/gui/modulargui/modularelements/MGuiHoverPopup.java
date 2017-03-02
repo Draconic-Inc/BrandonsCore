@@ -17,7 +17,11 @@ public class MGuiHoverPopup extends MGuiElementBase {
     public int hoverDelay = 10;
     public int hoverTime;
     public boolean mouseOver = false;
-    public MGuiElementBase parent;
+//    public MGuiElementBase parent;
+
+    public MGuiHoverPopup(IModularGui modularGui) {
+        super(modularGui);
+    }
 
     public MGuiHoverPopup(IModularGui modularGui, MGuiElementBase parent) {
         super(modularGui);
