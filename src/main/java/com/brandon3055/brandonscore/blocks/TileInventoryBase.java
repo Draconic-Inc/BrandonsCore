@@ -5,13 +5,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.wrapper.InvWrapper;
 
 /**
  * Created by brandon3055 on 26/3/2016.
  * The base class for all inventory tiles
  */
 public class TileInventoryBase extends TileBCBase implements IInventory, IDataRetainerTile {
+    InvWrapper wrapper = new InvWrapper(this);
 
     private ItemStack[] inventoryStacks = new ItemStack[0];
     protected int stackLimit = 64;
@@ -165,7 +170,6 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
         }
     }
 
-
     @Override
     public void writeRetainedData(NBTTagCompound dataCompound) {
         writeInventoryToNBT(dataCompound);
@@ -174,5 +178,18 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
     @Override
     public void readRetainedData(NBTTagCompound dataCompound) {
         readInventoryFromNBT(dataCompound);
+    }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY){
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(wrapper);
+        }
+        return super.getCapability(capability, facing);
     }
 }
