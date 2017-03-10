@@ -5,7 +5,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.wrapper.InvWrapper;
 
 /**
  * Created by brandon3055 on 26/3/2016.
@@ -15,6 +20,11 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
 
     private ItemStack[] inventoryStacks = new ItemStack[0];
     protected int stackLimit = 64;
+
+    protected IItemHandler itemHandler;
+    {
+        itemHandler = new InvWrapper(this);
+    }
 
     public TileInventoryBase() {
 
@@ -165,7 +175,6 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
         }
     }
 
-
     @Override
     public void writeRetainedData(NBTTagCompound dataCompound) {
         writeInventoryToNBT(dataCompound);
@@ -174,5 +183,25 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
     @Override
     public void readRetainedData(NBTTagCompound dataCompound) {
         readInventoryFromNBT(dataCompound);
+    }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return true;
+        }
+        return super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return getItemHandler(capability, facing);
+        }
+        return super.getCapability(capability, facing);
+    }
+
+    protected <T> T getItemHandler(Capability<T> capability, EnumFacing facing) {
+        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemHandler);
     }
 }
