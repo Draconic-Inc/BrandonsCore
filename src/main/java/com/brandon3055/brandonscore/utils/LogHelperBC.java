@@ -278,4 +278,45 @@ public class LogHelperBC {
         error("You can also try the #DraconicEvolution IRC channel on espernet");
         error("*************************************************************************************");
     }
+
+    private static long startTime = 0;
+    private static String timerName = "";
+    private static boolean timerRunning = false;
+
+    public static void startTimer(String name) {
+        if (timerRunning) {
+            error("The timer is already running!");
+            return;
+        }
+
+        timerName = name;
+        timerRunning = true;
+        startTime = System.nanoTime();
+    }
+
+    public static void stopTimer() {
+        if (!timerRunning) {
+            error("The timer was not running!!!");
+            return;
+        }
+
+        long ns = System.nanoTime() - startTime;
+
+        String value;
+        long ms = 1000000;
+        long s = ms * 1000;
+
+        if (ns > s) {
+            value = Utils.round(ns / (double)s, 1000) + "s";
+        }
+        else if (ns > 1000){
+            value = Utils.round(ns / (double)ms, 10000) + "ms";
+        }
+        else {
+            value = ns + "ns";
+        }
+
+        dev("[Timer]: " + timerName + " Took " + value);
+        timerRunning = false;
+    }
 }

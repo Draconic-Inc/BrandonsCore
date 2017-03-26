@@ -144,10 +144,13 @@ public class MGuiButton extends MGuiElementBase {
             if (listener != null) {
                 listener.onMGuiEvent("BUTTON_PRESS", this);
             }
+            onPressed(mouseX, mouseY, mouseButton);
             return true;
         }
         return false;
     }
+
+    public void onPressed(int mouseX, int mouseY, int mouseButton) {}
 
     public MGuiButton setButtonId(int buttonId) {
         this.buttonId = buttonId;

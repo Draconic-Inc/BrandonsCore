@@ -11,6 +11,7 @@ import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,7 +43,7 @@ public class BCClientEventHandler {
     private static LinkedList<Integer> sortingOrder = new LinkedList<Integer>();
     public static int elapsedTicks = 0;
 
-    //region This is ugly! Make it got away region!
+    //region sorter
 
     private static Comparator<Integer> sorter = new Comparator<Integer>() {
         @Override
@@ -98,7 +99,7 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void renderScreen(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
             return;
         }
 

@@ -198,6 +198,21 @@ public class Vec3D {
         return new Vec3D(offset.x / distance, offset.y / distance, offset.z / distance);
     }
 
+    /**
+     * Calculates a directional vector between the two given points
+     * This can be used for example if you have an entity at pos1 and you want to
+     * apply motion so hat is moves towards pos2
+     */
+    public static Vector3 getDirectionVec(Vector3 vecFrom, Vector3 vecTo) {
+        double distance = Utils.getDistanceAtoB(vecFrom.x, vecFrom.y, vecFrom.z, vecTo.x, vecTo.y, vecTo.z);
+        if (distance == 0) {
+            distance = 0.1;
+        }
+        Vector3 offset = vecTo.copy();
+        offset.subtract(vecFrom);
+        return new Vector3(offset.x / distance, offset.y / distance, offset.z / distance);
+    }
+
     public static Vec3D getCenter(BlockPos pos) {
         return new Vec3D(pos).add(0.5, 0.5, 0.5);
     }
