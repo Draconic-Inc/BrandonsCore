@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
  * This entire class is borrowed from CoFH lib.
  */
 @SuppressWarnings("unchecked")
+@Deprecated //Just to remind me that this is not a native java class. I kinda forgot on a couple occasions.
 public class LinkedHashList<E extends Object> extends AbstractCollection<E> implements List<E>, Cloneable, java.io.Serializable {
 
     private static final long serialVersionUID = -642033533165934945L;

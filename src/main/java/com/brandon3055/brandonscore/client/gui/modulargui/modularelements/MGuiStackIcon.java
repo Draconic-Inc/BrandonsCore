@@ -21,6 +21,7 @@ public class MGuiStackIcon extends MGuiElementBase {
 
     public boolean drawCount = true;
     public boolean drawToolTip = true;
+    public boolean drawHoverHighlight = false;
     private MGuiElementBase background = null;
     protected List<String> toolTipOverride = null;
     private StackReference stackReference;
@@ -41,6 +42,9 @@ public class MGuiStackIcon extends MGuiElementBase {
     @Override
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
+        if (drawHoverHighlight && isMouseOver(mouseX, mouseY)) {
+            drawColouredRect(xPos, yPos, xSize, ySize, -2130706433);
+        }
         GlStateManager.pushMatrix();
         RenderHelper.enableGUIStandardItemLighting();
 
@@ -65,11 +69,13 @@ public class MGuiStackIcon extends MGuiElementBase {
     }
 
     @Override
-    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOver(mouseX - xOffset, mouseY - yOffset) && (drawToolTip || toolTipOverride != null)) {
             List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.thePlayer, minecraft.gameSettings.advancedItemTooltips);
             drawHoveringText(list, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+            return true;
         }
+        return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     public MGuiStackIcon setStack(StackReference stackReference) {
@@ -137,5 +143,10 @@ public class MGuiStackIcon extends MGuiElementBase {
         }
 
         return stack;
+    }
+
+    public MGuiStackIcon setDrawHoverHighlight(boolean drawHoverHighlight) {
+        this.drawHoverHighlight = drawHoverHighlight;
+        return this;
     }
 }

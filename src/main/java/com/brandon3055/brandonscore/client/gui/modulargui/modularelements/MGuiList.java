@@ -27,6 +27,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     public LinkedList<MGuiListEntry> listEntries = new LinkedList<MGuiListEntry>();
     public LinkedList<MGuiElementBase> nonListEntries = new LinkedList<MGuiElementBase>();
+    private boolean scrollingEnabled;
 
     public MGuiList(IModularGui modularGui) {
         super(modularGui);
@@ -51,6 +52,9 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         if (scrollBar != null) {
             removeChild(scrollBar);
         }
+        if (!scrollingEnabled) {
+            return;
+        }
         scrollBar = new MGuiScrollBar(modularGui, xPos + xSize - 10, yPos + 1, 10, ySize - 2);
         addChild(scrollBar);
         scrollBar.setListener(this);
@@ -59,6 +63,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     //region List
 
+    //TODO on re write. Do away with the hole "ListEntry" idea and find a way for this to work with MGuiElementBase
     public MGuiList addEntry(MGuiListEntry entry) {
         listEntries.add(entry);
         entry.setList(this);
@@ -125,24 +130,25 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     }
 
     @Override
-    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         for (MGuiElementBase element : nonListEntries) {
-            if (element.isEnabled() && !listEntries.contains(element)) {
-                element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+            if (element.isEnabled() && !listEntries.contains(element) && element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks)) {
+                return true;
             }
         }
 
         cullList();
 
         if (disableList) {
-            return;
+            return false;
         }
 
         for (MGuiElementBase element : listEntries) {
-            if (element.isEnabled()) {
-                element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+            if (element.isEnabled() && element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks)) {
+                return true;
             }
         }
+        return false;
     }
 
     protected void cullList() {
@@ -194,19 +200,33 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     @Override
     public void scrollBarMoved(double pos) {
+        if (!scrollingEnabled) {
+            return;
+        }
+        if (scrollBar == null) {
+            initScrollBar();
+        }
+
         int maxMove = getListHeight() - (ySize - 1);
         scrollBar.setIncrements(50D / maxMove, 0.1D);
         updateEntriesAndScrollBar();
     }
 
     protected void updateEntriesAndScrollBar() {
+        if (!scrollingEnabled) {
+            return;
+        }
+        if (scrollBar == null) {
+            initScrollBar();
+        }
+
         double scrollPos = scrollBar == null ? 0 : scrollBar.getScrollPos();
         int yOffset = topPadding;
 
         int maxMove = getListHeight() - (ySize - 1);
 
         if (maxMove > 0 && scrollPos > 0) {
-            yOffset = topPadding -(int) (scrollPos * maxMove);
+            yOffset = topPadding - (int) (scrollPos * maxMove);
         }
 
         for (MGuiListEntry entry : listEntries) {
@@ -231,6 +251,9 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         }
     }
 
+    /**
+     * @return the total height of all enabled list elements inclining top and bottom padding.
+     */
     protected int getListHeight() {
         int height = 0;
 
@@ -243,6 +266,23 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         }
 
         return height + topPadding + bottomPadding;
+    }
+
+    /**
+     * @return the total height of all enabled list elements NOT inclining top and bottom padding.
+     */
+    protected int getRawListHeight() {
+        int height = 0;
+
+        for (MGuiListEntry entry : listEntries) {
+            if (!entry.isEnabled()) {
+                continue;
+            }
+
+            height += entry.getEntryHeight();
+        }
+
+        return height;
     }
 
     @Override
@@ -303,6 +343,71 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             }
         }
         return false;
+    }
+
+    /**
+     * If set to false scrolling will be completely disabled.
+     * List sorting will also be disabled meaning you will need to ether manually arrange the component positions or use one of the built in sorting methods
+     *
+     * @param scrollingEnabled
+     * @return
+     */
+    public MGuiList setScrollingEnabled(boolean scrollingEnabled) {
+        this.scrollingEnabled = scrollingEnabled;
+        return this;
+    }
+
+    //endregion
+
+    //region Manual list sorting
+    //TODO add new sorting methods as needed
+
+    /**
+     * This method will sort the list and arrange the elements so they are evenly spaces within the list as to use all available vertical space.
+     * This should only be used with list entries of equal height.
+     *
+     * @param compress If true the entries will be compressed (if needed) to make them all fit within the list. Meaning elements will be allowed to overlap.
+     * @return the list.
+     */
+    public MGuiList sortEvenSpacing(boolean compress) {
+        int totalEntryHeight = getRawListHeight();
+        int remainingSpace = ySize - totalEntryHeight;
+
+        double y = yPos;
+        if (remainingSpace >= 0) {
+            //Initial element alignment.
+            for (MGuiListEntry entry : listEntries) {
+                entry.setXPos(xPos + ((xSize - entry.xSize) / 2));
+                entry.setYPos((int) y);
+                y += entry.ySize;
+            }
+
+            //Center Elements
+            y = 0;
+            for (MGuiListEntry entry : listEntries) {
+                double eHeight = entry.getEntryHeight();
+                double scale = eHeight / (double) totalEntryHeight;
+                double offsetShare = (scale * remainingSpace) / 2;
+                entry.moveBy(0, (int) (y + offsetShare));
+                y += offsetShare * 2;
+            }
+        }
+        else {
+            int ySize = compress ? this.ySize : totalEntryHeight;
+            int i = 0;
+            for (MGuiListEntry entry : listEntries) {
+                double eHeight = entry.getEntryHeight();
+                double yAllocation = (double)(ySize) / (double)(listEntries.size());
+                double overlap = eHeight - yAllocation;
+                yAllocation = (ySize - overlap) / (double)(listEntries.size());
+
+                entry.setXPos(xPos + ((xSize - entry.xSize) / 2));
+                entry.setYPos(yPos + (int) (i * yAllocation));
+                i++;
+            }
+        }
+
+        return this;
     }
 
     //endregion

@@ -36,6 +36,10 @@ public class ShortPos {
         return getIntPos(pos, relativeTo);
     }
 
+    public int getIntPos(Vec3D pos) {
+        return getIntPos(pos, relativeTo);
+    }
+
     public BlockPos getActualPos(int intPos) {
         return getBlockPos(intPos, relativeTo);
     }
@@ -68,6 +72,19 @@ public class ShortPos {
         return (yp << 24) | (xp << 12) | zp;
     }
 
+    public static int getIntPos(Vec3D position, BlockPos relativeTo) {
+        if (position.y > 255) {
+            position.y = 255;
+        }
+        else if (position.y < 0) {
+            position.y = 0;
+        }
+        int xp = (position.floorX() - relativeTo.getX()) + 2048;
+        int yp = position.floorY();
+        int zp = (position.floorZ() - relativeTo.getZ()) + 2048;
+
+        return (yp << 24) | (xp << 12) | zp;
+    }
 
     /**
      * This is the main method for converting from a relative integer position back to an actual block position.

@@ -199,16 +199,14 @@ public class Utils {
             return 0;
         }
 
-        if (catchException) {
-            try {
-                return Integer.parseInt(s);
-            }
-            catch (Exception e) {
+        try {
+            return Integer.parseInt(s);
+        }
+        catch (Exception e) {
+            if (catchException) {
                 return 0;
             }
-        }
-        else {
-            return Integer.parseInt(s);
+            throw e;
         }
     }
 

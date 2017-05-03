@@ -355,12 +355,18 @@ public class MGuiElementBase {
         }
     }
 
-    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+    /**
+     * This should only be used to render things like toolTips.
+     * If you return true no further renderOverlayLayer calls will occur.
+     * This is useful for preventing overlapping tool tips in the event of more than 1 overlapping element rendering a tooltip.
+     */
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         for (MGuiElementBase element : childElements) {
-            if (element.isEnabled()) {
-                element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+            if (element.isEnabled() && element.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks)) {
+                return true;
             }
         }
+        return false;
     }
 
     //endregion
@@ -405,10 +411,18 @@ public class MGuiElementBase {
         }
     }
 
+    /**
+     * Sets the x position of this element and also moves all of this elements children along with it.
+     * @param x the new x position.
+     */
     public void setXPos(int x) {
         moveBy(x - xPos, 0);
     }
 
+    /**
+     * Sets the y position of this element and also moves all of this elements children along with it.
+     * @param y the new y position.
+     */
     public void setYPos(int y) {
         moveBy(0, y - yPos);
     }
@@ -597,7 +611,7 @@ public class MGuiElementBase {
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableLighting();
-//            GlStateManager.disableDepth();
+            GlStateManager.disableDepth();
             int tooltipTextWidth = 0;
 
             for (String textLine : textLines)
@@ -794,4 +808,6 @@ public class MGuiElementBase {
     }
 
     //endregion
+
+
 }

@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -33,6 +34,8 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
     protected void setInventorySize(int size) {
         inventoryStacks = new ItemStack[size];
     }
+
+    //region IInventory
 
     @Override
     public int getSizeInventory() {
@@ -139,7 +142,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
 
     @Override
     public String getName() {
-        return null;
+        return "";
     }
 
     @Override
@@ -147,9 +150,11 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
         return false;
     }
 
+    //endregion
+
     @Override
     public ITextComponent getDisplayName() {
-        return null;
+        return new TextComponentTranslation(getName());
     }
 
     protected void writeInventoryToNBT(NBTTagCompound compound) {

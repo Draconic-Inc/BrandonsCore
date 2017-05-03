@@ -126,15 +126,16 @@ public class MGuiButton extends MGuiElementBase {
     }
 
     @Override
-    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         mouseOver = isMouseOver(mouseX, mouseY);
 
         List<String> toolTip = getToolTip();
         if (mouseOver && hoverTime >= toolTipDelay && toolTip != null && !toolTip.isEmpty()) {
             drawHoveringText(toolTip, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+            return true;
         }
 
-        super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+        return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     @Override

@@ -56,15 +56,16 @@ public class MGuiHoverPopup extends MGuiElementBase {
     }
 
     @Override
-    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         mouseOver = parent != null && parent.isMouseOver(mouseX, mouseY);
 
         List<String> hoverText = getToolTip();
         if (hoverTime >= hoverDelay && hoverText != null && !hoverText.isEmpty()) {
             drawHoveringText(hoverText, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+            return true;
         }
 
-        super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+        return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     public MGuiHoverPopup setHoverText(String[] toolTip) {

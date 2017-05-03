@@ -95,16 +95,17 @@ public class MGuiEnergyBar extends MGuiElementBase {
     }
 
     @Override
-    public void renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
-
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (drawHoveringText && isMouseOver(mouseX, mouseY)) {
             List<String> list = new ArrayList<>();
             list.add(InfoHelper.ITC() + I18n.format("gui.de.energyStorage.txt"));
             list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
             list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
             drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            return true;
         }
+
+        return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     @Override

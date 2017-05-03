@@ -217,8 +217,8 @@ public class ModuleManager {
                 clickedDisplay = element.displayLevel;
             }
 
-            if (element.isEnabled()) {
-                element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
+            if (element.isEnabled() && element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks)) {
+                return;
             }
         }
     }

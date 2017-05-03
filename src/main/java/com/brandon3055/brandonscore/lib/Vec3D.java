@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 import static net.minecraft.util.EnumFacing.Axis.X;
 import static net.minecraft.util.EnumFacing.Axis.Y;
@@ -227,5 +228,17 @@ public class Vec3D {
 
     public double distance(Vec3D vec3D) {
         return Utils.getDistanceAtoB(this, vec3D);
+    }
+
+    public int floorX() {
+        return MathHelper.floor_double(x);
+    }
+
+    public int floorY() {
+        return MathHelper.floor_double(y);
+    }
+
+    public int floorZ() {
+        return MathHelper.floor_double(z);
     }
 }

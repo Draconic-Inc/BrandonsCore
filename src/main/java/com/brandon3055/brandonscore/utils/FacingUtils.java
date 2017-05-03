@@ -203,4 +203,22 @@ public class FacingUtils {
                 return reverse ? EnumFacing.EAST : EnumFacing.WEST;
         }
     }
+
+    public static int destanceInDirection(BlockPos fromPos, BlockPos toPos, EnumFacing direction) {
+        switch (direction) {
+            case DOWN:
+                return fromPos.getY() - toPos.getY();
+            case UP:
+                return toPos.getY() - fromPos.getY();
+            case NORTH:
+                return fromPos.getZ() - toPos.getZ();
+            case SOUTH:
+                return toPos.getZ() - fromPos.getZ();
+            case WEST:
+                return fromPos.getX() - toPos.getX();
+            case EAST:
+                return toPos.getX() - fromPos.getX();
+        }
+        return 0;
+    }
 }

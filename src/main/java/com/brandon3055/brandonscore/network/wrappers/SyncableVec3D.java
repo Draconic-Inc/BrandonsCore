@@ -65,7 +65,7 @@ public class SyncableVec3D extends SyncableObject {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         if (compound.hasKey("SyncableVec3D" + index)) {
-            NBTTagList list = compound.getTagList("SyncableVec3D" + index, 3);
+            NBTTagList list = compound.getTagList("SyncableVec3D" + index, 6);
             if (list.tagCount() == 3) {
                 vec.set(list.getDoubleAt(0), list.getDoubleAt(1), list.getDoubleAt(2));
             }

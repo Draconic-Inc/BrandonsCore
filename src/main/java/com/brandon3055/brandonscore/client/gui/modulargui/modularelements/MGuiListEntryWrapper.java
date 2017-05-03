@@ -15,6 +15,8 @@ public class MGuiListEntryWrapper extends MGuiListEntry {
         super(modularGui);
         this.element = element;
         addChild(element);
+        this.xSize = element.xSize;
+        this.ySize = element.ySize;
     }
 
     @Override
