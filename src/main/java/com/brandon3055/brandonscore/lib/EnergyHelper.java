@@ -79,10 +79,9 @@ public class EnergyHelper {
             return 0;
         }
         if (tile instanceof IEnergyReceiver) {
-            return  ((IEnergyReceiver) tile).receiveEnergy(side, energy, simulate);
+            return ((IEnergyReceiver) tile).receiveEnergy(side, energy, simulate);
         }
-        else
-            if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
+        else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
             net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
             if (cap.canReceive()) {
                 return cap.receiveEnergy(energy, simulate);

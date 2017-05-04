@@ -223,6 +223,20 @@ public class TileBCBase extends TileEntity {
         return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
     }
 
+
+    /**
+     * Is minecraft seriously so screwed up that i have to resort to things like this?
+     */
+    public Block getBlockTypeSafe(Block defaultBlock)
+    {
+        if (getBlockType() != null) {
+            return getBlockType();
+        }
+        else {
+            return defaultBlock;
+        }
+    }
+
     //endregion
 
     //region Save/Load
