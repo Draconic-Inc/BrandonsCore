@@ -2,11 +2,13 @@ package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
+import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 
 /**
@@ -235,4 +237,42 @@ public class Utils {
     public static double map(double valueIn, double inMin, double inMax, double outMin, double outMax) {
         return (valueIn - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
+
+
+    @Nullable
+    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance) {
+        return getClosestPlayer(world, posX, posY, posZ, distance, true);
+    }
+
+    @Nullable
+    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative) {
+        return getClosestPlayer(world, posX, posY, posZ, distance, includeCreative, false);
+    }
+
+
+    @Nullable
+    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators)
+    {
+        double d0 = -1.0D;
+        EntityPlayer closestPlayer = null;
+
+        for (int i = 0; i < world.playerEntities.size(); ++i)
+        {
+            EntityPlayer player = world.playerEntities.get(i);
+
+            if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators))
+            {
+                double d1 = player.getDistanceSq(posX, posY, posZ);
+
+                if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0))
+                {
+                    d0 = d1;
+                    closestPlayer = player;
+                }
+            }
+        }
+
+        return closestPlayer;
+    }
+
 }
