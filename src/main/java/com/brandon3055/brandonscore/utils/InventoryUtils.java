@@ -86,4 +86,8 @@ public class InventoryUtils {
         }
     }
 
+    public static void consumeHeldItem(EntityPlayer player, ItemStack stack, EnumHand hand) {
+        stack.stackSize--;
+        player.setHeldItem(hand, stack.stackSize > 0 ? stack.copy() : null);
+    }
 }

@@ -218,11 +218,11 @@ public class BCEffectRenderer {
     //region Render
 
     public void renderParticles(Entity entityIn, float partialTicks) {
-        float f = ActiveRenderInfo.getRotationX();
-        float f1 = ActiveRenderInfo.getRotationZ();
-        float f2 = ActiveRenderInfo.getRotationYZ();
-        float f3 = ActiveRenderInfo.getRotationXY();
-        float f4 = ActiveRenderInfo.getRotationXZ();
+        float rotationX = ActiveRenderInfo.getRotationX();
+        float rotationZ = ActiveRenderInfo.getRotationZ();
+        float rotationYZ = ActiveRenderInfo.getRotationYZ();
+        float rotationXY = ActiveRenderInfo.getRotationXY();
+        float rotationXZ = ActiveRenderInfo.getRotationXZ();
         Particle.interpPosX = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double) partialTicks;
         Particle.interpPosY = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double) partialTicks;
         Particle.interpPosZ = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double) partialTicks;
@@ -232,8 +232,8 @@ public class BCEffectRenderer {
         Tessellator tessellator = Tessellator.getInstance();
 
         for (int layer = 0; layer < 4; layer++) {
-            renderGlParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
-            renderTexturedParticlesInLayer(layer, tessellator, entityIn, partialTicks, f, f1, f2, f3, f4);
+            renderGlParticlesInLayer(layer, tessellator, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+            renderTexturedParticlesInLayer(layer, tessellator, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
         }
 
         GlStateManager.depthMask(true);
@@ -268,7 +268,7 @@ public class BCEffectRenderer {
         }
     }
 
-    private void renderTexturedParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float f, float f1, float f2, float f3, float f4) {
+    private void renderTexturedParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
         for (ResourceLocation resourceLocation : renderQueue.keySet()) {
             ResourceHelperBC.bindTexture(resourceLocation);
 
@@ -293,7 +293,7 @@ public class BCEffectRenderer {
 
                     for (final Particle particle : texRenderQueue[layer][j]) {
                         try {
-                            particle.renderParticle(vertexbuffer, entityIn, partialTicks, f, f4, f1, f2, f3);
+                            particle.renderParticle(vertexbuffer, entityIn, partialTicks, rotationX, rotationXZ, rotationZ, rotationYZ, rotationXY);
                         }
                         catch (Throwable throwable) {
                             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");

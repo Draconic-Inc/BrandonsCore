@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
-    public static final String VERSION = "${mod_version}";
+    public static final String VERSION = "9.9.9";//${mod_version}";
 
     @Mod.Instance(BrandonsCore.MODID)
     public static BrandonsCore instance;

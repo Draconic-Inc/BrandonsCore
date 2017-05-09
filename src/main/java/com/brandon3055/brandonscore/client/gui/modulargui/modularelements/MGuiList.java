@@ -27,7 +27,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
     public LinkedList<MGuiListEntry> listEntries = new LinkedList<MGuiListEntry>();
     public LinkedList<MGuiElementBase> nonListEntries = new LinkedList<MGuiElementBase>();
-    private boolean scrollingEnabled;
+    private boolean scrollingEnabled = true;
 
     public MGuiList(IModularGui modularGui) {
         super(modularGui);
