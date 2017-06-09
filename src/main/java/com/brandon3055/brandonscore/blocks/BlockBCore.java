@@ -84,6 +84,7 @@ public class BlockBCore extends Block {
 
         if (tileEntity instanceof IDataRetainerTile) {
             NBTTagCompound customData = new NBTTagCompound();
+            ((IDataRetainerTile) tileEntity).onHarvested(stack);
             ((IDataRetainerTile) tileEntity).writeRetainedData(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
         }
@@ -185,6 +186,7 @@ public class BlockBCore extends Block {
         if (te instanceof IDataRetainerTile) {
             ItemStack stack = new ItemStack(this);
             stack.setItemDamage(damageDropped(state));
+            ((IDataRetainerTile) te).onHarvested(stack);
             NBTTagCompound customData = new NBTTagCompound();
             ((IDataRetainerTile) te).writeRetainedData(customData);
             ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
@@ -213,6 +215,14 @@ public class BlockBCore extends Block {
         if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BlockBCore.TILE_DATA_TAG)) {
             tooltip.add(I18n.format("info.de.hasSavedData.txt"));
         }
+    }
+
+    public boolean overrideShareTag() {
+        return false;
+    }
+
+    public NBTTagCompound getNBTShareTag(ItemStack stack) {
+        return stack.getTagCompound();
     }
 }
 

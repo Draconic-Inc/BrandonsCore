@@ -7,6 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -81,5 +82,18 @@ public class ItemBlockBCore extends ItemBlock {
         }
 
         return placed;
+    }
+
+    @Override
+    public boolean getShareTag() {
+        return super.getShareTag();
+    }
+
+    @Override
+    public NBTTagCompound getNBTShareTag(ItemStack stack) {
+        if (block instanceof BlockBCore && ((BlockBCore) block).overrideShareTag()) {
+            return ((BlockBCore) block).getNBTShareTag(stack);
+        }
+        return super.getNBTShareTag(stack);
     }
 }

@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.blocks.TileBCBase;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import com.brandon3055.brandonscore.lib.Vec3I;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -29,6 +30,8 @@ public class PacketSyncableObject implements IMessage {
     public static final byte LONG_INDEX = 8;
     public static final byte SHORT_INDEX = 9;
     public static final byte VEC3D_INDEX = 10;
+    public static final byte STACK_INDEX = 11;
+    public static final byte BOOL_ARRAY_INDEX = 12;
 
 
     public BlockPos tilePos;
@@ -46,6 +49,9 @@ public class PacketSyncableObject implements IMessage {
     public long longValue;
     public boolean updateOnReceived;
     public byte dataType;
+    public ItemStack stack;
+    public byte boolArrayPartIndex;
+    public byte boolArrayPart;
 
     public PacketSyncableObject() {
     }
@@ -127,6 +133,22 @@ public class PacketSyncableObject implements IMessage {
         this.dataType = VEC3D_INDEX;
     }
 
+    public PacketSyncableObject(TileBCBase tile, byte syncableIndex, ItemStack stack, boolean updateOnReceived) {
+        this.tilePos = tile.getPos();
+        this.index = syncableIndex;
+        this.stack = stack;
+        this.dataType = STACK_INDEX;
+    }
+
+    public PacketSyncableObject(TileBCBase tile, byte syncableIndex, byte boolArrayPart, byte index, boolean updateOnReceived) {
+        this.tilePos = tile.getPos();
+        this.index = syncableIndex;
+        this.boolArrayPart = boolArrayPart;
+        this.boolArrayPartIndex = index;
+        this.dataType = BOOL_ARRAY_INDEX;
+    }
+
+
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeByte(dataType);
@@ -174,6 +196,16 @@ public class PacketSyncableObject implements IMessage {
                 break;
             case SHORT_INDEX:
                 buf.writeShort(shortValue);
+                break;
+            case STACK_INDEX:
+                buf.writeBoolean(stack != null);
+                if (stack != null) {
+                    ByteBufUtils.writeItemStack(buf, stack);
+                }
+                break;
+            case BOOL_ARRAY_INDEX:
+                buf.writeByte(boolArrayPartIndex);
+                buf.writeByte(boolArrayPart);
                 break;
         }
     }
@@ -228,6 +260,18 @@ public class PacketSyncableObject implements IMessage {
                 break;
             case SHORT_INDEX:
                 shortValue = buf.readShort();
+                break;
+            case STACK_INDEX:
+                if (buf.readBoolean()) {
+                    stack = ByteBufUtils.readItemStack(buf);
+                }
+                else {
+                    stack = null;
+                }
+                break;
+            case BOOL_ARRAY_INDEX:
+                boolArrayPartIndex = buf.readByte();
+                boolArrayPart = buf.readByte();
                 break;
         }
     }

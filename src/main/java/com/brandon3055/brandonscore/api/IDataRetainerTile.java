@@ -1,13 +1,11 @@
 package com.brandon3055.brandonscore.api;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Created by brandon3055 on 26/3/2016.
  * Implemented by the TileEntity of blocks that need to retain custom data when harvested.
- *
- * Note: If you want to save SyncableObjects to the item set the objects to NOT save when you register them.
- * Then save them manually vial this interface. See TileEntityDetector in Draconic Evolution form an example
  *
  * //TODO Possible make this function via the block break event so it can be implemented on any tile entity for better mod support.
  * //Or add the event on top of the current logic. So if block broken is not instance of BlockBCore then save via event?
@@ -26,4 +24,11 @@ public interface IDataRetainerTile {
      * This is where any data saved in writeRetainedData should be loaded from NBT.
      */
     void readRetainedData(NBTTagCompound dataCompound);
+
+    /**
+     * Called before data is saved to the item stack.
+     *
+     * @param stack The item stack that will be dropped (Before any data has been saved to it).
+     */
+    default void onHarvested(ItemStack stack) {}
 }

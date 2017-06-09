@@ -22,6 +22,9 @@ import net.minecraftforge.energy.CapabilityEnergy;
 public class TileEnergyInventoryBase extends TileInventoryBase {
     //to-do add additional functionality as needed
 
+    /**
+     * If you need the energy storage to be synced with the client for use in containers then just register this object.
+     */
     public final SyncableInt energyStored = new SyncableInt(0, false, true);
     public EnergyStorage energyStorage = new EnergyStorage(0, 0, 0);
 
@@ -102,7 +105,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         }
         TileEntity tile = worldObj.getTileEntity(pos.offset(side));
         if (tile != null && EnergyHelper.canReceiveEnergy(tile)) {
-            return EnergyHelper.insertEnergy(tile, getEnergyStored(), false);
+            return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
         }
         return 0;
     }

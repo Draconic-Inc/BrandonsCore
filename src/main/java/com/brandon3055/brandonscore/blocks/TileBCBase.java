@@ -8,16 +8,21 @@ import com.brandon3055.brandonscore.network.wrappers.SyncableObject;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -237,6 +242,12 @@ public class TileBCBase extends TileEntity {
         }
     }
 
+    public boolean verifyPlayerPermission(EntityPlayer player) {
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, null, pos, EnumFacing.UP, player.getLookVec());
+        MinecraftForge.EVENT_BUS.post(event);
+        return !event.isCanceled();
+    }
+
     //endregion
 
     //region Save/Load
@@ -277,6 +288,7 @@ public class TileBCBase extends TileEntity {
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
+            //If the object is already saved via IDataRetainerTile we dont want to save it again here.
             if (syncableObject.shouldSaveToNBT && (!syncableObject.shouldSaveToItem || !(this instanceof IDataRetainerTile))) {
                 syncableObject.toNBT(compound);
             }
@@ -295,7 +307,7 @@ public class TileBCBase extends TileEntity {
         }
 
         for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSaveToNBT) {
+            if (syncableObject.shouldSaveToNBT && (!syncableObject.shouldSaveToItem || !(this instanceof IDataRetainerTile))) {
                 syncableObject.fromNBT(compound);
             }
         }

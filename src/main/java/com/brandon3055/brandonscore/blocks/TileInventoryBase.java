@@ -158,35 +158,33 @@ public class TileInventoryBase extends TileBCBase implements IInventory, IDataRe
     }
 
     protected void writeInventoryToNBT(NBTTagCompound compound) {
-        NBTTagCompound[] tag = new NBTTagCompound[inventoryStacks.length];
-
         for (int i = 0; i < inventoryStacks.length; i++) {
-            tag[i] = new NBTTagCompound();
+            NBTTagCompound tag = new NBTTagCompound();
 
             if (inventoryStacks[i] != null) {
-                tag[i] = inventoryStacks[i].writeToNBT(tag[i]);
+                tag = inventoryStacks[i].writeToNBT(tag);
             }
 
-            compound.setTag("Item" + i, tag[i]);
+            compound.setTag("Item" + i, tag);
         }
     }
 
     protected void readInventoryFromNBT(NBTTagCompound compound) {
-        NBTTagCompound[] tag = new NBTTagCompound[inventoryStacks.length];
-
         for (int i = 0; i < inventoryStacks.length; i++) {
-            tag[i] = compound.getCompoundTag("Item" + i);
-            inventoryStacks[i] = ItemStack.loadItemStackFromNBT(tag[i]);
+            NBTTagCompound tag = compound.getCompoundTag("Item" + i);
+            inventoryStacks[i] = ItemStack.loadItemStackFromNBT(tag);
         }
     }
 
     @Override
     public void writeRetainedData(NBTTagCompound dataCompound) {
+        super.writeRetainedData(dataCompound);
         writeInventoryToNBT(dataCompound);
     }
 
     @Override
     public void readRetainedData(NBTTagCompound dataCompound) {
+        super.readRetainedData(dataCompound);
         readInventoryFromNBT(dataCompound);
     }
 

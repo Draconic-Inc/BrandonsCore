@@ -3,15 +3,21 @@ package com.brandon3055.brandonscore.client.render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by brandon3055 on 6/5/2016.
  */
 public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T> {
+
+    protected static Map<ItemStack, IBakedModel> itemModelCache = new HashMap<>();
 
     @Override
     public void renderTileEntityAt(T te, double x, double y, double z, float partialTicks, int destroyStage) {
@@ -22,6 +28,14 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
         if (stack != null) {
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
         }
+    }
+
+    public static IBakedModel getStackModel(ItemStack stack) {
+        if (stack == null) {
+            throw new IllegalArgumentException("BrandonsCore:TESRBase#getStackModel Someone attempted to get the model from a null itemstack! ");
+        }
+
+        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null));
     }
 
     private boolean isLightSet = false;

@@ -100,7 +100,7 @@ public class TileEnergyBase extends TileBCBase implements IDataRetainerTile {
         }
         TileEntity tile = worldObj.getTileEntity(pos.offset(side));
         if (tile != null && EnergyHelper.canReceiveEnergy(tile)) {
-            return EnergyHelper.insertEnergy(tile, getEnergyStored(), false);
+            return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
         }
         return 0;
     }

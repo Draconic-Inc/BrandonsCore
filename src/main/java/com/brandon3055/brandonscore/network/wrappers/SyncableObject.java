@@ -9,6 +9,8 @@ import net.minecraft.nbt.NBTTagCompound;
  * Created by brandon3055 on 26/3/2016.
  * The base class for syncable objects
  */
+//TODO In 1.10 this will Be "ManagedObject" and it will be extended by ManagedInt, ManagedBoolean etc...
+//Also move the bytebuff encoding/decoding to the object. That will simplify the packets... A LOT! WTF didnt i think if that when i wrote this system?
 public abstract class SyncableObject {
     public final boolean syncInTile;
     public final boolean syncInContainer;
