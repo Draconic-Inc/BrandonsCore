@@ -275,4 +275,15 @@ public class Utils {
         return closestPlayer;
     }
 
+    /**
+     * This is mostly just here as a reminder to myself.<br>
+     * This check is the reverse of the usual object instance of TargetClass check so i always get it backwards.<br>
+     * This is more like TargetClass instanceof ObjectClass.
+     */
+    public static boolean checkClassInstanceOf(Class clazz, Class instanceOfThis) {
+        if (clazz == null || instanceOfThis == null) {
+            return clazz == null && instanceOfThis == null;
+        }
+        return instanceOfThis.isAssignableFrom(clazz);
+    }
 }

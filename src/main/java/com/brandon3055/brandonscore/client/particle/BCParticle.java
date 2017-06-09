@@ -32,6 +32,10 @@ public class BCParticle extends Particle {
         return super.getFXLayer();
     }
 
+    public IGLFXHandler getFXHandler(){
+        return null;
+    }
+
     /**
      * This is to ensure particles are spawned using the correct methods because raw gl particles are handled very differently<br>
      * and attempting to render them with the default pipeline will break things.<br><br>

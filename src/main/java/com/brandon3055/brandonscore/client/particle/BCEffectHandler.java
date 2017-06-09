@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.lib.Vec3D;
 import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -124,7 +125,19 @@ public class BCEffectHandler {
                 }
 
                 PairKV<IBCParticleFactory, ResourceLocation> pair = particleRegistry.get(particleID);
-                effectRenderer.addEffect(pair.getValue(), pair.getKey().getEntityFX(particleID, world, pos, speed, args));
+                Particle particle = pair.getKey().getEntityFX(particleID, world, pos, speed, args);
+
+                if (particle instanceof BCParticle && ((BCParticle) particle).isRawGLParticle()) {
+                    IGLFXHandler iglfxHandler = ((BCParticle) particle).getFXHandler();
+                    if (iglfxHandler == null) {
+                        LogHelperBC.bigError("Attempted to spawn a raw GL particle with a null glfx handler! " + particle);
+                        return;
+                    }
+                    effectRenderer.addRawGLEffect(iglfxHandler, (BCParticle) particle);
+                }
+                else {
+                    effectRenderer.addEffect(pair.getValue(), particle);
+                }
             }
         }
     }

@@ -90,4 +90,14 @@ public class InventoryUtils {
         stack.stackSize--;
         player.setHeldItem(hand, stack.stackSize > 0 ? stack.copy() : null);
     }
+
+    public static void givePlayerStack(EntityPlayer player, ItemStack stack) {
+        if (player.worldObj.isRemote) {
+            return;
+        }
+        player.inventory.addItemStackToInventory(stack);
+        if (stack.stackSize > 0) {
+            player.worldObj.spawnEntityInWorld(new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, stack));
+        }
+    }
 }

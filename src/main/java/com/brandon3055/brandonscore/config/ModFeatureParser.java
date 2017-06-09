@@ -58,15 +58,21 @@ public class ModFeatureParser {
      */
     public void loadFeatures(Class collection) {
         for (Field field : collection.getFields()) {
-            if (field.isAnnotationPresent(Feature.class)) {
-                try {
-                    allFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
-                    modFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
+            try {
+                if (field.isAnnotationPresent(Feature.class)) {
+                    try {
+                        allFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
+                        modFeatureEntries.add(new FeatureEntry(field.get(null), field.getAnnotation(Feature.class)));
+                    }
+                    catch (IllegalAccessException e) {
+                        LogHelperBC.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
+                        e.printStackTrace();
+                    }
                 }
-                catch (IllegalAccessException e) {
-                    LogHelperBC.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
-                    e.printStackTrace();
-                }
+            }
+            catch (Throwable e) {
+                LogHelperBC.error("Error Loading Feature!!! [" + field.getAnnotation(Feature.class).registryName() + "]");
+                throw new RuntimeException(e);
             }
         }
     }

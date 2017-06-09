@@ -1,14 +1,11 @@
 package com.brandon3055.brandonscore.utils;
 
-import com.google.common.base.Function;
-import jline.internal.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
@@ -112,14 +109,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
         if (!bakedModelCache.containsKey(modelLocation)) {
             try {
                 IModel model = ModelLoaderRegistry.getModel(modelLocation);
-                IBakedModel bakedModel = model.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, new Function<ResourceLocation, TextureAtlasSprite>() {
-                    @Nullable
-                    @Override
-                    public TextureAtlasSprite apply(ResourceLocation input) {
-                        return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(input.toString());
-                    }
-                });
-
+                IBakedModel bakedModel = model.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, input -> Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(input.toString()));
                 bakedModelCache.put(modelLocation, bakedModel);
             }
             catch (Exception e) {
