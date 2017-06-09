@@ -38,6 +38,7 @@ public class MGuiButton extends MGuiElementBase {
 
     public MGuiButton(IModularGui modularGui) {
         super(modularGui);
+        //TODO Find a way to assign the parent byt default?
         if (modularGui instanceof IMGuiListener) {
             listener = (IMGuiListener) modularGui;
         }
@@ -47,6 +48,7 @@ public class MGuiButton extends MGuiElementBase {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonId = buttonId;
+        //TODO Find a way to assign the parent byt default?
         if (modularGui instanceof IMGuiListener) {
             listener = (IMGuiListener) modularGui;
         }
@@ -56,6 +58,7 @@ public class MGuiButton extends MGuiElementBase {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
         this.buttonName = buttonName;
+        //TODO Find a way to assign the parent byt default?
         if (modularGui instanceof IMGuiListener) {
             listener = (IMGuiListener) modularGui;
         }
@@ -64,6 +67,7 @@ public class MGuiButton extends MGuiElementBase {
     public MGuiButton(IModularGui gui, int xPos, int yPos, int xSize, int ySize, String buttonText) {
         super(gui, xPos, yPos, xSize, ySize);
         this.displayString = buttonText;
+        //TODO Find a way to assign the parent byt default?
         if (modularGui instanceof IMGuiListener) {
             listener = (IMGuiListener) modularGui;
         }

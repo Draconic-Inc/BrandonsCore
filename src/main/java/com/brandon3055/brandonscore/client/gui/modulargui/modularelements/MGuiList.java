@@ -4,10 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IScrollListener;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -95,17 +92,32 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             }
         }
 
-        cullList();
-
         if (disableList) {
             return;
         }
+
+//        cullList();
+//        zOffset = 160;
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        int xPos = this.xPos + leftPadding;
+        int yPos = this.yPos + topPadding;
+        int xSize = (this.xSize - leftPadding) - rightPadding;
+        int ySize = (this.ySize - topPadding) - bottomPadding;
+
+        double hs = (double) minecraft.displayHeight / modularGui.screenHeight();
+        double ws = (double) minecraft.displayWidth / modularGui.screenWidth();
+        int sx = (int) (xSize * ws);
+        int sy = (int) (ySize * hs);
+        GL11.glScissor((int) (xPos * ws), minecraft.displayHeight - (int) (yPos * hs) - sy, sx, sy);
 
         for (MGuiElementBase element : listEntries) {
             if (element.isEnabled()) {
                 element.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
             }
         }
+
+        GL11.glScissor(0, 0, minecraft.displayWidth, minecraft.displayHeight);
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
     @Override
@@ -116,17 +128,32 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             }
         }
 
-        cullList();
-
         if (disableList) {
             return;
         }
+
+//        cullList();
+
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        int xPos = this.xPos + leftPadding;
+        int yPos = this.yPos + topPadding;
+        int xSize = (this.xSize - leftPadding) - rightPadding;
+        int ySize = (this.ySize - topPadding) - bottomPadding;
+
+        double hs = (double) minecraft.displayHeight / modularGui.screenHeight();
+        double ws = (double) minecraft.displayWidth / modularGui.screenWidth();
+        int sx = (int) (xSize * ws);
+        int sy = (int) (ySize * hs);
+        GL11.glScissor((int) (xPos * ws), minecraft.displayHeight - (int) (yPos * hs) - sy, sx, sy);
 
         for (MGuiElementBase element : listEntries) {
             if (element.isEnabled()) {
                 element.renderForegroundLayer(minecraft, mouseX, mouseY, partialTicks);
             }
         }
+
+        GL11.glScissor(0, 0, minecraft.displayWidth, minecraft.displayHeight);
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
     @Override
@@ -137,7 +164,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             }
         }
 
-        cullList();
+//        cullList();
 
         if (disableList) {
             return false;
@@ -152,46 +179,44 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
     }
 
     protected void cullList() {
-        zOffset = 160;
-
-//        GlStateManager.enableCull();
-        //GlStateManager.enableDepth();
-        GlStateManager.disableAlpha();
-//        GlStateManager.disableDepth();
-
-        Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
-        GlStateManager.enableBlend();
-        GlStateManager.disableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-
-        double left = xPos;
-        double top = 0;
-        double right = xPos + xSize;
-        double bottom = yPos + topPadding;
-        double zLevel = getRenderZLevel();
-
-        vertexbuffer.pos(left, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-        vertexbuffer.pos(right, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-        vertexbuffer.pos(right, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-        vertexbuffer.pos(left, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-
-        top = yPos + ySize - bottomPadding;
-        bottom = modularGui.screenHeight();
-
-        vertexbuffer.pos(left, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-        vertexbuffer.pos(right, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-        vertexbuffer.pos(right, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-        vertexbuffer.pos(left, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
-
-        tessellator.draw();
-
-        GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlpha();
-//        GlStateManager.enableDepth();
-        zOffset = 0;
+//        zOffset = 160;
+//
+//
+//        GlStateManager.disableAlpha();
+//
+//        Tessellator tessellator = Tessellator.getInstance();
+//        VertexBuffer vertexbuffer = tessellator.getBuffer();
+//        GlStateManager.enableBlend();
+//        GlStateManager.disableTexture2D();
+//        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+//
+//        double left = xPos;
+//        double top = 0;
+//        double right = xPos + xSize;
+//        double bottom = yPos + topPadding;
+//        double zLevel = getRenderZLevel();
+//
+//        vertexbuffer.pos(left, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//        vertexbuffer.pos(right, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//        vertexbuffer.pos(right, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//        vertexbuffer.pos(left, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//
+//        top = yPos + ySize - bottomPadding;
+//        bottom = modularGui.screenHeight();
+//
+//        vertexbuffer.pos(left, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//        vertexbuffer.pos(right, bottom, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//        vertexbuffer.pos(right, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//        vertexbuffer.pos(left, top, zLevel).color(1F, 1F, 1F, 0F).endVertex();
+//
+//        tessellator.draw();
+//
+//        GlStateManager.enableTexture2D();
+//        GlStateManager.disableBlend();
+//        GlStateManager.enableAlpha();
+////        GlStateManager.enableDepth();
+//        zOffset = 0;
     }
 
     //endregion

@@ -33,5 +33,6 @@ public class MGuiSlotRender extends MGuiElementBase {
         bindTexture(BCTextures.MODULAR_GUI);
         GlStateManager.color(1F, 1F, 1F, 1F);
         drawScaledCustomSizeModalRect(xPos + xOffset, yPos + yOffset, 0, 0, 18, 18, xSize, ySize, 255, 255);
+        super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 }

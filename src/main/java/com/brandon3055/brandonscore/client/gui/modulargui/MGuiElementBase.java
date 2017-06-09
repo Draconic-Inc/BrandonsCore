@@ -15,11 +15,19 @@ import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+/*
+* Some general thinks to think about/implement when i update and improve this system.
+* 1. getters and setters for pos and size that should be used everywhere to allow for much more dynamic control over elements. 1 use case is the next item in this list.
+* 2. Binding, The ability to bind the position and or the size of the element to another element. Possibly with optional offsets and alignment options
+* 3. Some changes to ModularGuiContainer for rendering over item stacks perhaps change the default z layer to 1 or 2
+* */
 
 /**
  * Created by brandon3055 on 30/08/2016.
@@ -53,6 +61,7 @@ public class MGuiElementBase {
      * Offsets the zLevel when rendering
      */
     protected double zOffset = 0;
+    private Rectangle rectangle = new Rectangle();
 
     public MGuiElementBase(IModularGui modularGui) {
         this.modularGui = modularGui;
@@ -432,6 +441,11 @@ public class MGuiElementBase {
         return this;
     }
 
+    public Rectangle getRectangle() {
+        rectangle.setBounds(xPos, yPos, xSize, ySize);
+        return rectangle;
+    }
+
     //endregion
 
     //region GUI Render Helper ports
@@ -602,6 +616,7 @@ public class MGuiElementBase {
         zOffset = oldOffset;
     }
 
+    //TODO update this method to include events
     /**
      * This is almost an exact copy of forges code except it respects zLevel.
      */

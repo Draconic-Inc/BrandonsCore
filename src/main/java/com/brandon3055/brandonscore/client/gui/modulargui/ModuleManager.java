@@ -199,7 +199,7 @@ public class ModuleManager {
         }
     }
 
-    public void renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public boolean renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 //        for (MGuiElementBase element : elements) {
 //            if (element.isEnabled()) {
 //                parentGui.setZLevel(element.displayLevel * 200);
@@ -207,20 +207,34 @@ public class ModuleManager {
 //            }
 //        }
 
-        int clickedDisplay = -100;
+        int renderDisplay = -100;
         for (MGuiElementBase element : actionList) {
-            if (element.isEnabled() && clickedDisplay > -100 && element.displayLevel < clickedDisplay) {
-                return;
+            if (element.isEnabled() && renderDisplay > -100 && element.displayLevel < renderDisplay) {
+                return true;
             }
 
             if (element.isEnabled() && element.isMouseOver(mouseX, mouseY)) {
-                clickedDisplay = element.displayLevel;
+                renderDisplay = element.displayLevel;
             }
 
             if (element.isEnabled() && element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks)) {
-                return;
+                return true;
             }
         }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the specified area is partially or fully obstructed by another element on a higher zLevel.
+     */
+    public boolean isAreaUnderElement(int posX, int posY, int xSize, int ySize, int zLevel) {
+        for (MGuiElementBase element : elements) {
+            if (element.isEnabled() && element.displayLevel * 200 >= zLevel && element.getRectangle().intersects(posX, posY, xSize, ySize)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //endregion

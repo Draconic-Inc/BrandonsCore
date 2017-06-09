@@ -12,6 +12,8 @@ import java.util.List;
 /**
  * Created by brandon3055 on 10/09/2016.
  */
+//TODO make this more dynamic. Currently there is no way to remove or modify the background
+//Also the extra width assigned for the scroll bar is added even if there is no scroll bar
 public class MGuiSelectDialog extends MGuiList {
 
     public IMGuiListener listener;

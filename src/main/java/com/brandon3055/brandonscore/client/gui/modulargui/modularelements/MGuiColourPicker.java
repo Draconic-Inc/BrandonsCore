@@ -26,7 +26,7 @@ public class MGuiColourPicker extends MGuiPopUpDialog implements IMGuiListener {
     public MGuiSlider alphaSlider;
     private boolean includeAlpha = true;
     public IMGuiListener listener;
-    public Colour colour;
+    public Colour colour = new ColourARGB(0xFFFFFFFF);
 
     public MGuiColourPicker(IModularGui modularGui, int xPos, int yPos, MGuiElementBase parent) {
         super(modularGui, xPos, yPos, parent);
@@ -137,7 +137,6 @@ public class MGuiColourPicker extends MGuiPopUpDialog implements IMGuiListener {
             }
             close();
         }
-
     }
 
     public MGuiColourPicker setListener(IMGuiListener listener) {

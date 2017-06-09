@@ -33,7 +33,7 @@ public class MGuiStackIcon extends MGuiElementBase {
         this.stackReference = stackReference;
     }
 
-    public MGuiStackIcon(IModularGui modularGui, int xPos, int yPos, String stackRegName, int metadata, StackReference stackReference) {
+    public MGuiStackIcon(IModularGui modularGui, int xPos, int yPos, StackReference stackReference) {
         super(modularGui, xPos, yPos);
         this.stackReference = stackReference;
         this.xSize = this.ySize = 18;

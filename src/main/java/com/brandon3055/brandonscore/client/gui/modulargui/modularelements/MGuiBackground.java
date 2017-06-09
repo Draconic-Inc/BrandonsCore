@@ -9,9 +9,11 @@ import net.minecraft.client.Minecraft;
  * Created by brandon3055 on 1/10/2016.
  */
 public class MGuiBackground extends MGuiElementBase {
-    private final int textureX;
-    private final int textureY;
-    private final String texture;
+    public int textureX;
+    public int textureY;
+    public int textureSizeX = 256;
+    public int textureSizeY = 256;
+    public String texture;
 
     public MGuiBackground(IModularGui modularGui, int xPos, int yPos, int textureX, int textureY, int xSize, int ySize, String texture) {
         super(modularGui, xPos, yPos, xSize, ySize);
@@ -24,7 +26,28 @@ public class MGuiBackground extends MGuiElementBase {
     public void renderBackgroundLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
         ResourceHelperBC.bindTexture(ResourceHelperBC.getResourceRAW(texture));
-        drawTexturedModalRect(xPos, yPos, textureX, textureY, xSize, ySize);
+        drawModalRectWithCustomSizedTexture(xPos, yPos, textureX, textureY, xSize, ySize, textureSizeX, textureSizeY);
+    }
+
+    public MGuiBackground setTexturePos(int textureX, int textureY) {
+        this.textureX = textureX;
+        this.textureY = textureY;
+        return this;
+    }
+
+    public MGuiBackground setTextureSize(int textureSize) {
+        return setTextureSize(textureSize, textureSize);
+    }
+
+    public MGuiBackground setTexture(String texture) {
+        this.texture = texture;
+        return this;
+    }
+
+    public MGuiBackground setTextureSize(int textureSizeX, int textureSizeY) {
+        this.textureSizeX = textureSizeX;
+        this.textureSizeY = textureSizeY;
+        return this;
     }
 
     public static MGuiBackground newGenericBackground(IModularGui modularGui, int xPos, int yPos, int xSize, int ySize) {
@@ -41,5 +64,6 @@ public class MGuiBackground extends MGuiElementBase {
             }
         };
     }
+
 
 }
