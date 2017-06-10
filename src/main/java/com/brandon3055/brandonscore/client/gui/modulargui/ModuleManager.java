@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 
 import java.io.IOException;
 import java.util.*;
@@ -182,6 +183,7 @@ public class ModuleManager {
     //region Render
 
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        GlStateManager.color(1F, 1F, 1F, 1F);
         for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayLevel * 200);
