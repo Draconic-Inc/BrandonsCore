@@ -1,38 +1,53 @@
 package com.brandon3055.brandonscore.lib;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.FileHandler;
+import com.brandon3055.brandonscore.network.PacketContributor;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Charsets;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 /**
  * Created by brandon3055 on 11/06/2017.
- *
+ * <p>
  * This is a universal contributor handler that can be implemented by any mod.
  * The mod implementing this need only supply a direct link to their contributor json file.
  * This system allows you to add any valid json data to a contributor in the json and retrieve that data.
  * See the mod methods in this class to get a better idea of how to use this.
- *
+ * <p>
  * TODO Add some sort of config save that allows you to save flags for each contribute. e.g. if you want to give the player an option to disable
- * their perk that flag should be saved to disc server side and synced with all other clients.
+ * their perk that flag should be saved to disk server side and synced with all other clients.
  */
 public class ModContributorHandler {
+
+    public static final Map<String, ModContributorHandler> MOD_CONTRIBUTOR_HANDLERS = new HashMap<>();
 
     private final String modid;
     private final String url;
@@ -51,9 +66,9 @@ public class ModContributorHandler {
 
     /**
      * This map contains the data for all contributors once downloaded.
-     * Object can be ether username or UUID depending on whether or not a uuid is specified in the contributors file.
      */
-    private Map<Object, ContributorData> contributorData = new HashMap<>();
+    private Map<String, ContributorData> nameContributorDataMap = new HashMap<>();
+    private Map<UUID, ContributorData> uuidContributorDataMap = new HashMap<>();
 
     /**
      * Caches user UUID -> data once the user has been validated.
@@ -65,31 +80,33 @@ public class ModContributorHandler {
      * To use this handler simply create an instance of it in a continent location,<br>
      * call initialize during mod initialization and it will do the rest.
      *
-     * @param modid This is used in the name of the contributor settings file and to correctly tag log errors in the event something breaks.
-     * @param url The url of your contributors file. See the bottom of this class for an example file format. (https not supported)
+     * @param modid Supply your mods mod id.
+     * @param url   The url of your contributors file. See the bottom of this class for an example file format. (https not supported)
      */
     public ModContributorHandler(String modid, String url) {
         this.modid = modid;
         this.url = url;
-        this.fileDirectory = FileHandler.brandon3055Folder;
+        this.fileDirectory = new File(FileHandler.brandon3055Folder, "ContributorFiles");
+        MOD_CONTRIBUTOR_HANDLERS.put(modid, this);
     }
 
 
     //==========================================================================================================//
     //Handler Methods, These are methods that a mod implementing this may use.
     //==========================================================================================================//
+    //region Handler Methods
 
     /**
      * This can be called during initialization or post initialization.<br><br>
-     *
+     * <p>
      * This method downloads and reads the contributors file. It does the download in a separate thread so it will not have any effect on load time
      * or performance unless the system is already low on resources.
      * <br><br>
-     *
+     * <p>
      * If the world loads before the download finishes nothing bad will happen isPlayerContributor will just
      * return false for all players until the contributor file is downloaded and read.
      *
-     * @param fileDirectory Allows you to specify a directory where you want to save the contributor and settings files. If null will default to config/brandon3055/ContributorFiles
+     * @param fileDirectory        Allows you to specify a directory where you want to save the contributor and settings files. If null will default to config/brandon3055/ContributorFiles
      * @param registerEventHandler This handler will be registered to the forge event bus. If you would like to use your own handler you can return false and manually call onPlayerLoggedIn and onPlayerLoggedOut from your event handler.
      */
     public void initialize(File fileDirectory, boolean registerEventHandler) {
@@ -99,7 +116,7 @@ public class ModContributorHandler {
         if (registerEventHandler) {
             MinecraftForge.EVENT_BUS.register(this);
         }
-        contributorFile = new File(this.fileDirectory, "ContributorFiles/" + modid + "-Contributors.json");
+        contributorFile = new File(this.fileDirectory, modid + "-Contributors.json");
         startContributorDownload();
     }
 
@@ -125,28 +142,29 @@ public class ModContributorHandler {
             String username = player.getName();
 
             //If we are allowing offline users for whatever reason the first just check for their name in the map.
-            if (allowOfflineMode && contributorData.containsKey(username)) {
-                return contributorData.get(username);
+            if (allowOfflineMode && nameContributorDataMap.containsKey(username)) {
+                return nameContributorDataMap.get(username);
             }
             else {
-                //Figure out what the players uuid would be if running in offline mode.
-                UUID offlineID = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(Charsets.UTF_8));
-
-                //If this player has been specified by UUID directly there is no need for validation.
-                if (contributorData.containsKey(uuid)) {
-                    return contributorData.get(uuid);
+                if (uuidContributorDataMap.containsKey(id)) {
+                    return uuidContributorDataMap.get(id);
                 }
-                else {
+                else if (nameContributorDataMap.containsKey(username)) {
+                    ContributorData data = nameContributorDataMap.get(username);
+                    //Figure out what the players uuid would be if running in offline mode.
+                    UUID offlineID = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(Charsets.UTF_8));
+
                     //If there uuid is not the same as their offline uuid then they are probably running in online mode.
                     //This validation is not idea because if another mod tampers with uuids... Someone needs to kill it with fire!
                     //But also it would break this validation.
-                    if (!offlineID.equals(uuid) && contributorData.containsKey(username)) {
-                        return contributorData.get(uuid);
+                    if (data.uuid == null && !offlineID.equals(uuid)) {
+                        return nameContributorDataMap.get(username);
                     }
                     else {
                         return null;
                     }
                 }
+                return null;
             }
         });
     }
@@ -165,6 +183,7 @@ public class ModContributorHandler {
         return downloadComplete;
     }
 
+    //endregion
     //==========================================================================================================//
     //Non-Handler Methods, These are internal methods used by the handler. A mod should not need to access these
     //==========================================================================================================//
@@ -174,12 +193,12 @@ public class ModContributorHandler {
      * If the download failed or you need to redownload the file it is ok to run this again. But only if you have good reason
      * if it failed the first time it will probably fail the second time aswell.
      * This may be useful if you want to implement some sort of reload/retry button or something that can be used in the event the download fails.
-     *
+     * <p>
      * Do not call this before initialization!
      */
     public void startContributorDownload() {
         if (downloader != null && (!downloader.isFinished() && !downloader.downloadFailed())) {
-            LogHelperBC.warn("The mod "+modid+" attempted to re-download their contributors file while the previous download was still in progress!");
+            LogHelperBC.warn("The mod " + modid + " attempted to re-download their contributors file while the previous download was still in progress!");
             return;
         }
 
@@ -216,35 +235,39 @@ public class ModContributorHandler {
         JsonParser parser = new JsonParser();
         JsonReader reader = new JsonReader(new FileReader(file));
         reader.setLenient(true);
-        JsonArray array = parser.parse(reader).getAsJsonArray();
-        contributorData.clear();
+        JsonObject objectList = parser.parse(reader).getAsJsonObject();
+        nameContributorDataMap.clear();
 
-        array.forEach(jsonElement -> {
-            if (jsonElement.isJsonObject()) {
-                JsonObject object = jsonElement.getAsJsonObject();
-                Object key = null;
+        for (Map.Entry<String, JsonElement> entry : objectList.entrySet()) {
+            if (entry.getValue().isJsonObject()) {
+                JsonObject object = entry.getValue().getAsJsonObject();
+                String key = entry.getKey();
+                UUID uuid = null;
+
                 if (object.has("uuid")) {
-                    key = UUID.fromString(object.get("uuid").getAsString());
-                }
-                else if (object.has("username")) {
-                    key = UUID.fromString(object.get("username").getAsString());
+                    uuid = UUID.fromString(object.get("uuid").getAsString());
                 }
 
-                if (key != null) {
-                    contributorData.put(key, new ContributorData(object));
-                }
-                else {
-                    LogHelperBC.warn("Error loading a contributor for " + modid + " No player username or uuid found");
+                ContributorData data = new ContributorData(object, entry.getKey(), uuid);
+                nameContributorDataMap.put(key, data);
+                if (uuid != null) {
+                    uuidContributorDataMap.put(uuid, data);
                 }
             }
-        });
+        }
 
+        IOUtils.closeQuietly(reader);
         downloadComplete = true;
+        loadConfig();
     }
 
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-
+        if (!event.player.worldObj.isRemote && event.player instanceof EntityPlayerMP) {
+            for (ContributorData data : nameContributorDataMap.values()) {
+                BrandonsCore.network.sendTo(new PacketContributor(modid, data.name, data.config), (EntityPlayerMP) event.player);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -255,12 +278,98 @@ public class ModContributorHandler {
         }
     }
 
+    //region Config
+
+    public void handleConfigChange(ContributorData contributor, NBTTagCompound config) {
+        contributor.config = config;
+        BrandonsCore.network.sendToAll(new PacketContributor(modid, contributor.name, config));
+        saveConfig();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void configReceivedClient(NBTTagCompound config, String contributor) {
+        if (nameContributorDataMap.containsKey(contributor)) {
+            nameContributorDataMap.get(contributor).config = config;
+        }
+    }
+
+    public void configReceivedServer(NBTTagCompound config, String contributor, EntityPlayerMP sender) {
+        ContributorData data = nameContributorDataMap.get(contributor);
+        ContributorData seder = getContributorData(sender);
+        if (data != null && data == seder) {
+            handleConfigChange(data, config);
+        }
+    }
+
+    private void saveConfig() {
+        try {
+            File configFile = new File(this.fileDirectory, modid + "-ContributorConfig.json");
+            JsonWriter writer = new JsonWriter(new FileWriter(configFile));
+            writer.setLenient(true);
+            JsonObject jsonObject = new JsonObject();
+
+            for (ContributorData data : nameContributorDataMap.values()) {
+                jsonObject.addProperty(data.name, data.config.toString());
+            }
+
+            Streams.write(jsonObject, writer);
+            IOUtils.closeQuietly(writer);
+        }
+        catch (Exception e) {
+            LogHelperBC.error("Something went wrong while saving the contributor config file!");
+            e.printStackTrace();
+        }
+    }
+
+    private void loadConfig() {
+        try {
+            File configFile = new File(this.fileDirectory, modid + "-ContributorConfig.json");
+            JsonParser parser = new JsonParser();
+            JsonReader reader = new JsonReader(new FileReader(configFile));
+            reader.setLenient(true);
+            JsonObject objectList = parser.parse(reader).getAsJsonObject();
+
+            for (Map.Entry<String, JsonElement> entry : objectList.entrySet()) {
+                if (entry.getValue().isJsonPrimitive() && entry.getValue().getAsJsonPrimitive().isString()) {
+                    String data = entry.getValue().getAsJsonPrimitive().getAsString();
+                    if (data == null) {
+                        continue;
+                    }
+
+                    try {
+                        if (nameContributorDataMap.containsKey(entry.getKey())) {
+                            nameContributorDataMap.get(entry.getKey()).config = JsonToNBT.getTagFromJson(data);;
+                        }
+                    }
+                    catch (NBTException nbte) {
+                        LogHelperBC.error("Something went wrong while reading the config for a contributor - " + entry.getKey());
+                        nbte.printStackTrace();
+                    }
+                }
+            }
+            IOUtils.closeQuietly(reader);
+        }
+        catch (Exception e) {
+            LogHelperBC.error("Something went wrong while loading the contributor config file!");
+            e.printStackTrace();
+        }
+    }
+
+    //endregion
+
     public class ContributorData {
         private JsonObject jsonObject;
+        private NBTTagCompound config = new NBTTagCompound();
+        public final String name;
+        public final UUID uuid;
 
-        public ContributorData(JsonObject jsonObject) {
+        public ContributorData(JsonObject jsonObject, String name, UUID uuid) {
             this.jsonObject = jsonObject;
+            this.name = name;
+            this.uuid = uuid;
         }
+
+        //region Data Getters
 
         public JsonObject getRawData() {
             return jsonObject;
@@ -306,7 +415,6 @@ public class ModContributorHandler {
          *
          * @param key the json field name to retrieve.
          * @return the boolean value of the specified field.
-         *
          * @throws IllegalStateException or ClassCastException if this field does not exist or is of an inconvertible type.
          */
         public boolean getBoolean(String key) {
@@ -318,7 +426,6 @@ public class ModContributorHandler {
          *
          * @param key the json field name to retrieve.
          * @return the int value of the specified field.
-         *
          * @throws IllegalStateException or ClassCastException if this field does not exist or is of an inconvertible type.
          */
         public int getInt(String key) {
@@ -330,7 +437,6 @@ public class ModContributorHandler {
          *
          * @param key the json field name to retrieve.
          * @return the double value of the specified field.
-         *
          * @throws IllegalStateException or ClassCastException if this field does not exist or is of an inconvertible type.
          */
         public double getDouble(String key) {
@@ -342,13 +448,73 @@ public class ModContributorHandler {
          *
          * @param key the json field name to retrieve.
          * @return the String value of the specified field.
-         *
          * @throws IllegalStateException or ClassCastException if this field does not exist or is of an inconvertible type.
          */
         public String getString(String key) {
             return getPrimitive(key).getAsString();
         }
+
+        //endregion
+
+        //region Config
+
+        /**
+         * This config compound allow you to save local data for each contributor.
+         * This can be any data you want. e.g. say for example you put a chest on
+         * contributors heads and you want to give them the option to turn it off,
+         * You could save the on off state to this tag and the data will be saved
+         * to disk and loaded next startup.<br><br>
+         * <p>
+         * This data can be set from the server but more importantly it can be set
+         * from the client (but only by the contributor this data belongs to) and
+         * will be synchronized across all other clients on the server.<br><br>
+         * <p>
+         * Make sure you call saveAndSyncConfig() after modifying this tag to save it
+         * and sync it to all other clients.
+         *
+         * @return the config compound.
+         */
+        public NBTTagCompound getConfigNBT() {
+            return config;
+        }
+
+        public void saveAndSyncConfig() {
+            if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
+                BrandonsCore.network.sendToServer(new PacketContributor(modid, name, config));
+            }
+            else {
+                handleConfigChange(this, config);
+            }
+        }
+
+        //endregion
     }
 
     //endregion
+
+
+    /*
+    *
+    * {
+    *   "username": {
+    *       "uuid":"uuid", //Optional
+    *       //Whatever
+    *       //Data
+    *       //you
+    *       //want
+    *       //goes
+    *       //here
+    *   },
+    *   "username": {
+    *       "uuid":"uuid", //Optional
+    *       //Whatever
+    *       //Data
+    *       //you
+    *       //want
+    *       //goes
+    *       //here
+    *   }
+    * }
+    *
+    * */
 }

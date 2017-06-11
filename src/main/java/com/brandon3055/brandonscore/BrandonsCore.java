@@ -60,6 +60,8 @@ public class BrandonsCore {
         network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 4, Side.SERVER);
         network.registerMessage(PacketTickTime.Handler.class, PacketTickTime.class, 5, Side.CLIENT);
         network.registerMessage(PacketTileMessage.Handler.class, PacketTileMessage.class, 6, Side.CLIENT);
+        network.registerMessage(PacketContributor.Handler.class, PacketContributor.class, 7, Side.CLIENT);
+        network.registerMessage(PacketContributor.Handler.class, PacketContributor.class, 8, Side.SERVER);
     }
 }
 
