@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.lib;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityEffect;
@@ -211,6 +212,14 @@ public class TeleportUtils {
 
         WorldServer sourceWorld = server.worldServerForDimension(sourceDim);
         WorldServer targetWorld = server.worldServerForDimension(targetDim);
+
+        //Set the entity dead before calling changeDimension. Still need to call changeDimension for things like minecarts which will drop their contents otherwise.
+        if (!entity.isDead && entity instanceof EntityMinecart) {
+            entity.isDead = true;
+            entity.changeDimension(targetDim);
+            entity.isDead = false;
+        }
+
         entity.dimension = targetDim;
 
         sourceWorld.removeEntity(entity);

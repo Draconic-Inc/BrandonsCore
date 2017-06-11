@@ -1,6 +1,8 @@
 package com.brandon3055.brandonscore;
 
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
+import com.brandon3055.brandonscore.handlers.IProcess;
+import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
@@ -59,5 +61,9 @@ public class CommonProxy {
 
     public void setChatAtIndex(ITextComponent chat, int index) {
 
+    }
+
+    public void addProcess(IProcess iProcess) {
+        ProcessHandler.addProcess(iProcess);
     }
 }

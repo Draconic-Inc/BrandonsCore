@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
+import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
@@ -70,5 +71,10 @@ public class ClientProxy extends CommonProxy {
         } else {
             Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(chat, index);
         }
+    }
+
+    @Override
+    public void addProcess(IProcess iProcess) {
+        ProcessHandlerClient.addProcess(iProcess);
     }
 }
