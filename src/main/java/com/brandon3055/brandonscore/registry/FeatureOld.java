@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.config;
+package com.brandon3055.brandonscore.registry;
 
 import net.minecraft.item.ItemBlock;
 import net.minecraft.tileentity.TileEntity;
@@ -14,7 +14,8 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Feature {
+@Deprecated
+public @interface FeatureOld {
     /**
      * used For All (Must be snake_case)
      */

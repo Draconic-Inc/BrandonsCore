@@ -36,6 +36,7 @@ import java.util.function.Consumer;
  */
 public class TileBCBase extends TileEntity implements IDataManagerProvider, IDataRetainingTile {
 
+    public static final String TILE_DATA_TAG = "BCTileData";
     protected boolean shouldRefreshOnState = true;
     protected TileDataManager<TileBCBase> dataManager = new TileDataManager<>(this);
 
@@ -188,7 +189,7 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     public NBTTagCompound writeToItemStack(ItemStack stack) {
         NBTTagCompound dataTag = new NBTTagCompound();
         dataManager.writeToStackNBT(dataTag);
-        ItemNBTHelper.getCompound(stack).setTag("BCTileData", dataTag);
+        ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, dataTag);
         return dataTag;
     }
 
@@ -198,7 +199,7 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     @Nullable
     @Override
     public NBTTagCompound readFromItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = stack.getSubCompound("BCTileData");
+        NBTTagCompound dataTag = stack.getSubCompound(TILE_DATA_TAG);
         if (dataTag != null) {
             dataManager.readFromStackNBT(dataTag);
         }

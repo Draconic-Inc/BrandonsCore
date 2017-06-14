@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.config;
+package com.brandon3055.brandonscore.registry;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.config.Configuration;

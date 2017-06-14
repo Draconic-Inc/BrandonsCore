@@ -26,23 +26,18 @@ public class ItemBlockBCore extends ItemBlock {
     private Feature feature;
     private String registryDomain = null;
 
-    public ItemBlockBCore(Block block, Feature feature) {
-        super(block);
-        this.feature = feature;
-        this.setHasSubtypes(feature.variantMap().length > 0 || (block instanceof BlockBCore && ((BlockBCore) block).nameOverrides.size() > 1));
-    }
-
     public ItemBlockBCore(Block block) {
         super(block);
+        this.feature = feature;
+        if (block instanceof BlockBCore) {
+            setHasSubtypes(((BlockBCore) block).hasSubItemTypes());
+        }
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
         super.addInformation(stack, playerIn, tooltip, advanced);
-//        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BlockBCore.TILE_DATA_TAG)) {
-//            //tooltip.add(I18n.format("info.de.hasSavedData.txt"));
-//        }
     }
 
     @Override

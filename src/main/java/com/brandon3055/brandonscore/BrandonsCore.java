@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.network.PacketContributor;
 import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
-import com.brandon3055.brandonscore.registry.ModFeatureParser2;
+import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -64,7 +64,7 @@ public class BrandonsCore {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        ModFeatureParser2.parseASMData(event.getAsmData());
+        ModFeatureParser.parseASMData(event.getAsmData());
 
         FileHandler.init(event);
         proxy.preInit(event);

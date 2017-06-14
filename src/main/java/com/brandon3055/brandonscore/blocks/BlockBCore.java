@@ -34,9 +34,9 @@ import java.util.Map;
  * This is the base block class form all blocks.
  */
 public class BlockBCore extends Block {
-    public static final String TILE_DATA_TAG = "DETileData";
     protected boolean isFullCube = true;
     protected boolean canProvidePower = false;
+    protected boolean hasSubItemTypes = false;
     public Map<Integer, String> nameOverrides = new HashMap<>();
 
     public BlockBCore() {
@@ -49,20 +49,14 @@ public class BlockBCore extends Block {
         this.setResistance(10F);
     }
 
-    //region Rename field names
+    //region Sub Types and Names
+
     @Override
     public void getSubBlocks(Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
         super.getSubBlocks(item, tab, list);
     }
 
-    @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        TileEntity tile = world.getTileEntity(pos);
 
-        if (tile instanceof IDataRetainingTile) {
-            ((IDataRetainingTile) tile).readFromItemStack(stack);
-        }
-    }
     //endregion
 
     //region Setters & Getters
@@ -96,6 +90,15 @@ public class BlockBCore extends Block {
     public BlockBCore addName(int meta, String name) {
         nameOverrides.put(meta, name);
         return this;
+    }
+
+    public BlockBCore setHasSubItemTypes(boolean hasSubItemTypes) {
+        this.hasSubItemTypes = hasSubItemTypes;
+        return this;
+    }
+
+    public boolean hasSubItemTypes() {
+        return hasSubItemTypes;
     }
 
     //endregion
@@ -162,7 +165,6 @@ public class BlockBCore extends Block {
     }
 
     //IActivatableTile
-
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (hasTileEntity(state)) {
@@ -175,7 +177,15 @@ public class BlockBCore extends Block {
         return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
     }
 
-    //endregion
+    //IDataRetainingTile
+    @Override
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        TileEntity tile = world.getTileEntity(pos);
+
+        if (tile instanceof IDataRetainingTile) {
+            ((IDataRetainingTile) tile).readFromItemStack(stack);
+        }
+    }
 
     @Override
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
@@ -191,6 +201,8 @@ public class BlockBCore extends Block {
         }
     }
 
+    //endregion
+
     @Override
     public boolean isFullCube(IBlockState state) {
         return isFullCube;
@@ -205,7 +217,7 @@ public class BlockBCore extends Block {
     @Override
     public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
         super.addInformation(stack, player, tooltip, advanced);
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BlockBCore.TILE_DATA_TAG)) {
+        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(TileBCBase.TILE_DATA_TAG)) {
             tooltip.add(I18n.format("info.de.hasSavedData.txt"));
         }
     }
