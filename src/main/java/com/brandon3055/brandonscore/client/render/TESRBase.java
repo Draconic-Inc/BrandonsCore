@@ -25,13 +25,13 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
     }
 
     public void renderItem(ItemStack stack) {
-        if (stack != null) {
+        if (!stack.isEmpty()) {
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
         }
     }
 
     public static IBakedModel getStackModel(ItemStack stack) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             throw new IllegalArgumentException("BrandonsCore:TESRBase#getStackModel Someone attempted to get the model from a null itemstack! ");
         }
 

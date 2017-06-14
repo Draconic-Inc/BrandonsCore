@@ -129,11 +129,11 @@ public class EnergyHelper {
     //region Energy ItemStack
 
     public static boolean isEnergyStack(ItemStack stack) {
-        return stack != null && (stack.getItem() instanceof IEnergyContainerItem || stack.hasCapability(CapabilityEnergy.ENERGY, null));
+        return !stack.isEmpty() && (stack.getItem() instanceof IEnergyContainerItem || stack.hasCapability(CapabilityEnergy.ENERGY, null));
     }
 
     public static int getEnergyStored(ItemStack stack) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return 0;
         }
         else if (stack.getItem() instanceof IEnergyContainerItem) {
@@ -148,7 +148,7 @@ public class EnergyHelper {
     }
 
     public static int getMaxEnergyStored(ItemStack stack) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return 0;
         }
         else if (stack.getItem() instanceof IEnergyContainerItem) {
@@ -167,11 +167,11 @@ public class EnergyHelper {
     //region Receive ItemStack
 
     public static boolean canReceiveEnergy(ItemStack stack) {
-        return stack != null && (stack.getItem() instanceof IEnergyContainerItem || (stack.hasCapability(CapabilityEnergy.ENERGY, null) && stack.getCapability(CapabilityEnergy.ENERGY, null).canReceive()));
+        return !stack.isEmpty() && (stack.getItem() instanceof IEnergyContainerItem || (stack.hasCapability(CapabilityEnergy.ENERGY, null) && stack.getCapability(CapabilityEnergy.ENERGY, null).canReceive()));
     }
 
     public static int insertEnergy(ItemStack stack, int energy, boolean simulate) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return 0;
         }
         else if (stack.getItem() instanceof IEnergyReceiver) {
@@ -191,11 +191,11 @@ public class EnergyHelper {
     //region Extract ItemStack
 
     public static boolean canExtractEnergy(ItemStack stack) {
-        return stack != null && (stack.getItem() instanceof IEnergyContainerItem || (stack.hasCapability(CapabilityEnergy.ENERGY, null) && stack.getCapability(CapabilityEnergy.ENERGY, null).canExtract()));
+        return !stack.isEmpty() && (stack.getItem() instanceof IEnergyContainerItem || (stack.hasCapability(CapabilityEnergy.ENERGY, null) && stack.getCapability(CapabilityEnergy.ENERGY, null).canExtract()));
     }
 
     public static int extractEnergy(ItemStack stack, int energy, boolean simulate) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return 0;
         }
         else if (stack.getItem() instanceof IEnergyContainerItem) {

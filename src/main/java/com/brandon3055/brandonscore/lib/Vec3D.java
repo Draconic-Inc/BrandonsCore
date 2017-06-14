@@ -231,14 +231,14 @@ public class Vec3D {
     }
 
     public int floorX() {
-        return MathHelper.floor_double(x);
+        return MathHelper.floor(x);
     }
 
     public int floorY() {
-        return MathHelper.floor_double(y);
+        return MathHelper.floor(y);
     }
 
     public int floorZ() {
-        return MathHelper.floor_double(z);
+        return MathHelper.floor(z);
     }
 }

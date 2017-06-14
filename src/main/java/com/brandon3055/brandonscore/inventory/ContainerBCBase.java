@@ -55,25 +55,26 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-        for (int i = 0; i < this.listeners.size(); ++i) {
-            IContainerListener icrafting = this.listeners.get(i);
-            if (icrafting instanceof EntityPlayerMP && tile != null) {
-                tile.detectAndSendChangesToPlayer(false, (EntityPlayerMP) icrafting);
-            }
-        }
+        tile.getDataManager().detectAndSendChangesToListeners(listeners);
+//        for (int i = 0; i < this.listeners.size(); ++i) {
+//            IContainerListener icrafting = this.listeners.get(i);
+//            if (icrafting instanceof EntityPlayerMP && tile != null) {
+//                tile.detectAndSendChangesToPlayer(false, (EntityPlayerMP) icrafting);
+//            }
+//        }
     }
 
     @Override
     public void addListener(IContainerListener listener) {
         super.addListener(listener);
         if (listener instanceof EntityPlayerMP && tile != null) {
-            tile.detectAndSendChangesToPlayer(true, (EntityPlayerMP) listener);
+            tile.getDataManager().forcePlayerSync((EntityPlayerMP) listener);
         }
     }
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        if (tile instanceof IInventory) return ((IInventory) tile).isUseableByPlayer(playerIn);
+        if (tile instanceof IInventory) return ((IInventory) tile).isUsableByPlayer(playerIn);
         return tile != null;
     }
 

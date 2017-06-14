@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.blocks.properties;
 
-import com.brandon3055.brandonscore.utils.ArrayUtils;
+import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -19,7 +19,7 @@ public class PropertyString extends PropertyHelper<String> {
     public PropertyString(String name, String... values) {
         super(name, String.class);
         valuesSet = new ArrayList<String>();
-        Collections.addAll(valuesSet, ArrayUtils.arrayToLowercase(values));
+        Collections.addAll(valuesSet, DataUtils.arrayToLowercase(values));
     }
 
     @Override

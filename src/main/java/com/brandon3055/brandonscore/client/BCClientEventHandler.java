@@ -136,18 +136,18 @@ public class BCClientEventHandler {
 
         int slotIndex = 2;
         for (ItemStack stack : player.inventory.armorInventory) {
-            if (stack != null && stack.getItem() instanceof IFOVModifierItem) {
+            if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
                 newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.values()[slotIndex]);
             }
             slotIndex++;
         }
 
         ItemStack stack = player.getHeldItemOffhand();
-        if (stack != null && stack.getItem() instanceof IFOVModifierItem) {
+        if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
             newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.OFFHAND);
         }
         stack = player.getHeldItemMainhand();
-        if (stack != null && stack.getItem() instanceof IFOVModifierItem) {
+        if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
             newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.MAINHAND);
         }
 
@@ -177,9 +177,9 @@ public class BCClientEventHandler {
 
     private void searchForPlayerMount() {
         if (remountTicksRemaining > 0) {
-            Entity e = Minecraft.getMinecraft().theWorld.getEntityByID(remountEntityID);
+            Entity e = Minecraft.getMinecraft().world.getEntityByID(remountEntityID);
             if (e != null) {
-                Minecraft.getMinecraft().thePlayer.startRiding(e);
+                Minecraft.getMinecraft().player.startRiding(e);
                 LogHelperBC.info("Successfully placed player on mount after " + (500 - remountTicksRemaining) + " ticks");
                 remountTicksRemaining = 0;
                 return;
@@ -213,7 +213,7 @@ public class BCClientEventHandler {
         for (int i = 0; i < 200; i++) {
             int time = times[i] == null ? 0 : times[i];
             int height = (int) (((time / 100D) / 100D) * 30D);
-            int j1 = getFrameColor(MathHelper.clamp_int(height, 0, 30), 0, 15, 30);
+            int j1 = getFrameColor(MathHelper.clamp(height, 0, 30), 0, 15, 30);
             GuiHelper.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 - height, 1, height, j1);
         }
     }
@@ -272,10 +272,10 @@ public class BCClientEventHandler {
         int j1 = p_181553_2_ >> 16 & 255;
         int k1 = p_181553_2_ >> 8 & 255;
         int l1 = p_181553_2_ & 255;
-        int i2 = MathHelper.clamp_int((int) ((float) i + (float) (i1 - i) * p_181553_3_), 0, 255);
-        int j2 = MathHelper.clamp_int((int) ((float) j + (float) (j1 - j) * p_181553_3_), 0, 255);
-        int k2 = MathHelper.clamp_int((int) ((float) k + (float) (k1 - k) * p_181553_3_), 0, 255);
-        int l2 = MathHelper.clamp_int((int) ((float) l + (float) (l1 - l) * p_181553_3_), 0, 255);
+        int i2 = MathHelper.clamp((int) ((float) i + (float) (i1 - i) * p_181553_3_), 0, 255);
+        int j2 = MathHelper.clamp((int) ((float) j + (float) (j1 - j) * p_181553_3_), 0, 255);
+        int k2 = MathHelper.clamp((int) ((float) k + (float) (k1 - k) * p_181553_3_), 0, 255);
+        int l2 = MathHelper.clamp((int) ((float) l + (float) (l1 - l) * p_181553_3_), 0, 255);
         return i2 << 24 | j2 << 16 | k2 << 8 | l2;
     }
 

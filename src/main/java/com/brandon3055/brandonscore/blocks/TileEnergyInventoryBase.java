@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.blocks;
 import cofh.api.energy.EnergyStorage;
 import com.brandon3055.brandonscore.lib.EnergyHandlerWrapper;
 import com.brandon3055.brandonscore.lib.EnergyHelper;
-import com.brandon3055.brandonscore.network.wrappers.SyncableInt;
-import net.minecraft.entity.player.EntityPlayerMP;
+import com.brandon3055.brandonscore.lib.datamanager.ManagedInt;
+import com.brandon3055.brandonscore.lib.datamanager.TileDataOptions;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -20,26 +20,26 @@ import net.minecraftforge.energy.CapabilityEnergy;
  * IEnergyProvider or both.
  */
 public class TileEnergyInventoryBase extends TileInventoryBase {
-    //to-do add additional functionality as needed
 
-    /**
-     * If you need the energy storage to be synced with the client for use in containers then just register this object.
-     */
-    public final SyncableInt energyStored = new SyncableInt(0, false, true);
+    public ManagedInt energySync = null;
     public EnergyStorage energyStorage = new EnergyStorage(0, 0, 0);
 
     @Override
-    public void detectAndSendChanges(boolean forceSync) {
-        if (worldObj.isRemote) return;
-        energyStored.value = energyStorage.getEnergyStored();
-        super.detectAndSendChanges(forceSync);
+    public void update() {
+        super.update();
+        if (energySync != null) {
+            if (world.isRemote) {
+                energyStorage.setEnergyStored(energySync.value);
+            } else {
+                energySync.value = energyStorage.getEnergyStored();
+            }
+        }
     }
 
-    @Override
-    public void detectAndSendChangesToPlayer(boolean forceSync, EntityPlayerMP playerMP) {
-        if (worldObj.isRemote) return;
-        energyStored.value = energyStorage.getEnergyStored();
-        super.detectAndSendChangesToPlayer(forceSync, playerMP);
+    public TileDataOptions<ManagedInt> setEnergySyncMode() {
+        TileDataOptions<ManagedInt> options = dataManager.register("anInt", new ManagedInt(0));
+        energySync = options.finish();
+        return options;
     }
 
     protected void setCapacityAndTransfer(int capacity, int receive, int extract) {
@@ -69,14 +69,28 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
     }
 
     @Override
-    public void writeRetainedData(NBTTagCompound compound) {
-        super.writeRetainedData(compound);
+    public NBTTagCompound writeToItemStack(ItemStack stack) {
+        NBTTagCompound dataTag = super.writeToItemStack(stack);
+        energyStorage.writeToNBT(dataTag);
+        return dataTag;
+    }
+
+    @Override
+    public NBTTagCompound readFromItemStack(ItemStack stack) {
+        NBTTagCompound dataTag = super.readFromItemStack(stack);
+        energyStorage.readFromNBT(dataTag);
+        return dataTag;
+    }
+
+    @Override
+    public void writeExtraNBT(NBTTagCompound compound) {
+        super.writeExtraNBT(compound);
         energyStorage.writeToNBT(compound);
     }
 
     @Override
-    public void readRetainedData(NBTTagCompound compound) {
-        super.readRetainedData(compound);
+    public void readExtraNBT(NBTTagCompound compound) {
+        super.readExtraNBT(compound);
         energyStorage.readFromNBT(compound);
     }
 
@@ -103,7 +117,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         if (getEnergyStored() == 0) {
             return 0;
         }
-        TileEntity tile = worldObj.getTileEntity(pos.offset(side));
+        TileEntity tile = world.getTileEntity(pos.offset(side));
         if (tile != null && EnergyHelper.canReceiveEnergy(tile)) {
             return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
         }

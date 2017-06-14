@@ -56,7 +56,7 @@ public class GuiEffect {
         this.motionX = xSpeed + (Math.random() * 2.0D - 1.0D) * 0.4000000059604645D;
         this.motionY = ySpeed + (Math.random() * 2.0D - 1.0D) * 0.4000000059604645D;
         float f = (float)(Math.random() + Math.random() + 1.0D) * 0.15F;
-        float f1 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY);
+        float f1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY);
         this.motionX = this.motionX / (double)f1 * (double)f * 0.4000000059604645D;
         this.motionY = this.motionY / (double)f1 * (double)f * 0.4000000059604645D + 0.10000000149011612D;
     }

@@ -51,51 +51,42 @@ public class PlayerSlot {
 
     public void setStackInSlot(EntityPlayer player, ItemStack stack) {
         if (category == EnumInvCategory.ARMOR){
-            if (slot < 0 || slot >= player.inventory.armorInventory.length) {
+            if (slot < 0 || slot >= player.inventory.armorInventory.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
-            player.inventory.armorInventory[slot] = stack;
+            player.inventory.armorInventory.set(slot, stack);
         }
         else if (category == EnumInvCategory.MAIN){
-            if (slot < 0 || slot >= player.inventory.mainInventory.length) {
+            if (slot < 0 || slot >= player.inventory.mainInventory.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
-            player.inventory.mainInventory[slot] = stack;
+            player.inventory.mainInventory.set(slot, stack);
         }
         else if (category == EnumInvCategory.OFF_HAND){
-            if (slot < 0 || slot >= player.inventory.offHandInventory.length) {
+            if (slot < 0 || slot >= player.inventory.offHandInventory.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
-            player.inventory.offHandInventory[slot] = stack;
+            player.inventory.offHandInventory.set(slot, stack);
         }
     }
 
     public ItemStack getStackInSlot(EntityPlayer player) {
-        ItemStack[] stacks;
-
         if (category == EnumInvCategory.ARMOR){
-            stacks = player.inventory.armorInventory;
+            return player.inventory.armorInventory.get(slot);
         }
         else if (category == EnumInvCategory.MAIN){
-            stacks = player.inventory.mainInventory;
+            return player.inventory.mainInventory.get(slot);
         }
         else if (category == EnumInvCategory.OFF_HAND){
-            stacks = player.inventory.offHandInventory;
+            return player.inventory.offHandInventory.get(slot);
         }
         else {
             LogHelperBC.bigError("PlayerSlot#getStackInSlot Invalid or null category! This should not be possible! [%s]... Fix your Shit!", category);
-            return null;
+            return ItemStack.EMPTY;
         }
-
-        if (slot < 0 || slot >= stacks.length){
-            LogHelperBC.bigError("PlayerSlot#getStackInSlot Hay! I just saved you an index out of bounds! Be grateful and fix your shit!");
-            return null;
-        }
-
-        return stacks[slot];
     }
 
     public enum EnumInvCategory {

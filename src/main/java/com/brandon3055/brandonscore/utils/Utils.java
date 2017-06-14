@@ -116,27 +116,12 @@ public class Utils {
         return FMLCommonHandler.instance().getMinecraftServerInstance() == null;
     }
 
-    /**
-     * Update the blocks an all 6 sides of a blocks.
-     */
-    public static void updateNeabourBlocks(World world, BlockPos pos) {
-        world.notifyBlockOfStateChange(pos, world.getBlockState(pos).getBlock());
-        world.notifyBlockOfStateChange(pos.add(-1, 0, 0), world.getBlockState(pos).getBlock());
-        world.notifyBlockOfStateChange(pos.add(1, 0, 0), world.getBlockState(pos).getBlock());
-        world.notifyBlockOfStateChange(pos.add(0, -1, 0), world.getBlockState(pos).getBlock());
-        world.notifyBlockOfStateChange(pos.add(0, 1, 0), world.getBlockState(pos).getBlock());
-        world.notifyBlockOfStateChange(pos.add(0, 0, -1), world.getBlockState(pos).getBlock());
-        world.notifyBlockOfStateChange(pos.add(0, 0, 1), world.getBlockState(pos).getBlock());
-
-
-//		world.notifyBlocksOfNeighborChange(x, y, z, world.getBlock(x, y, z));
-//		world.notifyBlocksOfNeighborChange(x - 1, y, z, world.getBlock(x, y, z));
-//		world.notifyBlocksOfNeighborChange(x + 1, y, z, world.getBlock(x, y, z));
-//		world.notifyBlocksOfNeighborChange(x, y - 1, z, world.getBlock(x, y, z));
-//		world.notifyBlocksOfNeighborChange(x, y + 1, z, world.getBlock(x, y, z));
-//		world.notifyBlocksOfNeighborChange(x, y, z - 1, world.getBlock(x, y, z));
-//		world.notifyBlocksOfNeighborChange(x, y, z + 1, world.getBlock(x, y, z));
-    }
+//    /**
+//     * Update the blocks an all 6 sides of a blocks.
+//     */
+//    public static void updateNeabourBlocks(World world, BlockPos pos) {
+//        world.notifyNeighborsOfStateChange(pos, world.getBlockState(pos).getBlock(), true);
+//    }//Just use the method in world directly
 
     /**
      * Determine the orientation of a blocks based on the position of the entity that placed it.
@@ -150,7 +135,7 @@ public class Utils {
             if ((double) y - d0 > 0.0D) return 1;
         }
 
-        int l = MathHelper.floor_double((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int l = MathHelper.floor((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         return l == 0 ? 3 : (l == 1 ? 4 : (l == 2 ? 2 : (l == 3 ? 5 : 0)));
     }
 

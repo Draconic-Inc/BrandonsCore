@@ -236,7 +236,7 @@ public class GuiHelper {
     }
 
     public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale) {
-        if (stack == null || stack.getItem() == null) {
+        if (stack.isEmpty()) {
             return;
         }
         RenderHelper.enableGUIStandardItemLighting();
@@ -245,14 +245,14 @@ public class GuiHelper {
         mc.getRenderItem().zLevel = 200.0F;
         FontRenderer font = mc.fontRendererObj;
         mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
-        String count = stack.stackSize > 1 ? String.valueOf(stack.stackSize) : "";
+        String count = stack.getCount() > 1 ? String.valueOf(stack.getCount()) : "";
         mc.getRenderItem().renderItemOverlayIntoGUI(font, stack, x, y, count);
         //this.zLevel = 0.0F;
         mc.getRenderItem().zLevel = 0.0F;
     }
 
     public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return;
         }
         GlStateManager.pushMatrix();

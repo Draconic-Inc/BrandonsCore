@@ -209,7 +209,7 @@ public class BCEffectHandler {
         if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
             return;
         }
-        if (effectRenderer.worldObj != null) {
+        if (effectRenderer.world != null) {
             Minecraft.getMinecraft().mcProfiler.startSection("DEParticlesUpdate");
             effectRenderer.updateEffects();
             Minecraft.getMinecraft().mcProfiler.endSection();
@@ -225,7 +225,7 @@ public class BCEffectHandler {
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
         Minecraft.getMinecraft().mcProfiler.startSection("DEParticles");
-        effectRenderer.renderParticles(Minecraft.getMinecraft().thePlayer, event.getPartialTicks());
+        effectRenderer.renderParticles(Minecraft.getMinecraft().player, event.getPartialTicks());
         Minecraft.getMinecraft().mcProfiler.endSection();
     }
 

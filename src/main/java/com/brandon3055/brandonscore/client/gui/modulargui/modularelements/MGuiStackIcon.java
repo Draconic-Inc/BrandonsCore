@@ -55,8 +55,8 @@ public class MGuiStackIcon extends MGuiElementBase {
         GlStateManager.scale(scaledWidth, scaledHeight, 1);
         minecraft.getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
 
-        if (drawCount && getStack().stackSize > 1) {
-            String s = getStack().stackSize + "";
+        if (drawCount && getStack().getCount() > 1) {
+            String s = getStack().getCount() + "";
             GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
             zOffset = 45;
             drawString(minecraft.fontRendererObj, s, xSize - (minecraft.fontRendererObj.getStringWidth(s)) - 1, minecraft.fontRendererObj.FONT_HEIGHT, 0xFFFFFF, true);
@@ -71,7 +71,7 @@ public class MGuiStackIcon extends MGuiElementBase {
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOver(mouseX - xOffset, mouseY - yOffset) && (drawToolTip || toolTipOverride != null)) {
-            List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.thePlayer, minecraft.gameSettings.advancedItemTooltips);
+            List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.player, minecraft.gameSettings.advancedItemTooltips);
             drawHoveringText(list, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
             return true;
         }
@@ -126,7 +126,7 @@ public class MGuiStackIcon extends MGuiElementBase {
         int hash = stackReference.hashCode();
         if (!stackCache.containsKey(hash)) {
             ItemStack stack = stackReference.createStack();
-            if (stack == null) {
+            if (stack.isEmpty()) {
                 stack = new ItemStack(Blocks.BARRIER);
                 toolTipOverride = new ArrayList<String>();
                 toolTipOverride.add("Failed to load Item Stack");
@@ -137,7 +137,7 @@ public class MGuiStackIcon extends MGuiElementBase {
         }
         ItemStack stack = stackCache.get(hash);
 
-        if (stack == null) {
+        if (stack.isEmpty()) {
             stack = new ItemStack(Blocks.BARRIER);
             stackCache.remove(hash);
         }

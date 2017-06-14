@@ -1,10 +1,9 @@
 package com.brandon3055.brandonscore.blocks;
 
-import com.brandon3055.brandonscore.api.IDataRetainerTile;
+import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.lib.IActivatableTile;
 import com.brandon3055.brandonscore.lib.IChangeListener;
 import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
-import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -18,6 +17,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
@@ -25,7 +25,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,7 @@ public class BlockBCore extends Block {
 
     //region Rename field names
     @Override
-    public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
+    public void getSubBlocks(Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
         super.getSubBlocks(item, tab, list);
     }
 
@@ -60,8 +59,8 @@ public class BlockBCore extends Block {
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         TileEntity tile = world.getTileEntity(pos);
 
-        if (tile instanceof IDataRetainerTile && ItemNBTHelper.getCompound(stack).hasKey(BlockBCore.TILE_DATA_TAG)) {
-            ((IDataRetainerTile) tile).readRetainedData(ItemNBTHelper.getCompound(stack).getCompoundTag(BlockBCore.TILE_DATA_TAG));
+        if (tile instanceof IDataRetainingTile) {
+            ((IDataRetainingTile) tile).readFromItemStack(stack);
         }
     }
     //endregion
@@ -80,13 +79,10 @@ public class BlockBCore extends Block {
             stack.setItemDamage(getMetaFromState(state));
         }
 
-        TileEntity tileEntity = world.getTileEntity(pos);
+        TileEntity tile = world.getTileEntity(pos);
 
-        if (tileEntity instanceof IDataRetainerTile) {
-            NBTTagCompound customData = new NBTTagCompound();
-            ((IDataRetainerTile) tileEntity).onHarvested(stack);
-            ((IDataRetainerTile) tileEntity).writeRetainedData(customData);
-            ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
+        if (tile instanceof IDataRetainingTile) {
+            ((IDataRetainingTile) tile).writeToItemStack(stack);
         }
 
         return stack;
@@ -155,42 +151,39 @@ public class BlockBCore extends Block {
     }
 
     @Override
-    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn) {
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if (tile instanceof IChangeListener) {
-                ((IChangeListener) tile).onNeighborChange();
+                ((IChangeListener) tile).onNeighborChange(fromPos);
             }
         }
-        super.neighborChanged(state, world, pos, blockIn);
+        super.neighborChanged(state, world, pos, blockIn, fromPos);
     }
 
     //IActivatableTile
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (hasTileEntity(state)) {
             TileEntity tile = worldIn.getTileEntity(pos);
             if (tile instanceof IActivatableTile) {
-                return ((IActivatableTile) tile).onBlockActivated(state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+                return ((IActivatableTile) tile).onBlockActivated(state, playerIn, hand, facing, hitX, hitY, hitZ);
             }
         }
 
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
     }
 
     //endregion
 
     @Override
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
-        if (te instanceof IDataRetainerTile) {
+        if (te instanceof IDataRetainingTile) {
             ItemStack stack = new ItemStack(this);
-            stack.setItemDamage(damageDropped(state));
-            ((IDataRetainerTile) te).onHarvested(stack);
-            NBTTagCompound customData = new NBTTagCompound();
-            ((IDataRetainerTile) te).writeRetainedData(customData);
-            ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, customData);
+            ((IDataRetainingTile) te).writeToItemStack(stack);
             spawnAsEntity(world, pos, stack);
+            //Remove tile to make sure no one else can mess with it and dupe its contents.
             world.removeTileEntity(pos);
         }
         else {

@@ -1,9 +1,11 @@
 package com.brandon3055.brandonscore.client;
 
+import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
+import com.brandon3055.brandonscore.network.ClientPacketHandler;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -30,6 +32,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void registerPacketHandlers() {
+        PacketCustom.assignHandler("BCPCChannel", new ClientPacketHandler());
+    }
+
+    @Override
     public boolean isDedicatedServer() {
         return false;
     }
@@ -41,7 +48,7 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public World getClientWorld() {
-        return Minecraft.getMinecraft().theWorld;
+        return Minecraft.getMinecraft().world;
     }
 
     @Override
@@ -61,7 +68,7 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public EntityPlayer getClientPlayer() {
-        return Minecraft.getMinecraft().thePlayer;
+        return Minecraft.getMinecraft().player;
     }
 
     @Override

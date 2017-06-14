@@ -14,6 +14,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextFormatting;
 
@@ -315,8 +316,8 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
             ArrayList<Entity> listCanRender = new ArrayList<>();
             ArrayList<Entity> listCantRender = new ArrayList<>();
 
-            for (String name : EntityList.getEntityNameList()) {
-                Entity entity = EntityList.createEntityByName(name, modularGui.getMinecraft().theWorld);
+            for (ResourceLocation name : EntityList.getEntityNameList()) {
+                Entity entity = EntityList.createEntityByIDFromName(name, modularGui.getMinecraft().world);
                 if (entity == null) {
                     continue;
                 }

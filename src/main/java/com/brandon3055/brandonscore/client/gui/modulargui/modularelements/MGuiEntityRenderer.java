@@ -13,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,12 +24,12 @@ import java.util.Map;
  * Created by brandon3055 on 23/10/2016.
  */
 public class MGuiEntityRenderer extends MGuiElementBase {
-    private static Map<String, Entity> entityCache = new HashMap<>();
-    private static List<String> invalidEntities = new ArrayList<>();
+    private static Map<ResourceLocation, Entity> entityCache = new HashMap<>();
+    private static List<ResourceLocation> invalidEntities = new ArrayList<>();
 
     private Entity entity;
-    private String eString;
-    private boolean invalidEntitie = false;
+    private ResourceLocation entityName;
+    private boolean invalidEntity = false;
 
     public MGuiEntityRenderer(IModularGui modularGui) {
         super(modularGui);
@@ -44,24 +45,21 @@ public class MGuiEntityRenderer extends MGuiElementBase {
 
     public MGuiEntityRenderer setEntity(Entity entity) {
         this.entity = entity;
-        this.eString = EntityList.getEntityString(entity);
+        this.entityName = EntityList.getKey(entity);
 
-        if (invalidEntities.contains(eString)) {
-            invalidEntitie = true;
+        if (invalidEntities.contains(entityName)) {
+            invalidEntity = true;
         }
 
         return this;
     }
 
-    public MGuiEntityRenderer setEntity(String entity) {
-        if (!entityCache.containsKey(entity)) {
-            entityCache.put(entity, EntityList.createEntityByName(entity, modularGui.getMinecraft().theWorld));
-        }
-        this.eString = entity;
-        this.entity = entityCache.get(entity);
+    public MGuiEntityRenderer setEntity(ResourceLocation entity) {
+        this.entityName = entity;
+        this.entity = entityCache.computeIfAbsent(entity, resourceLocation -> EntityList.createEntityByIDFromName(entity, modularGui.getMinecraft().world));
 
-        if (invalidEntities.contains(eString)) {
-            invalidEntitie = true;
+        if (invalidEntities.contains(entityName)) {
+            invalidEntity = true;
         }
 
         return this;
@@ -72,7 +70,7 @@ public class MGuiEntityRenderer extends MGuiElementBase {
         mouseX = mouseY = 0;
         super.renderBackgroundLayer(minecraft, mouseX, mouseY, partialTicks);
 
-        if (invalidEntitie) {
+        if (invalidEntity) {
             return;
         }
 
@@ -112,8 +110,8 @@ public class MGuiEntityRenderer extends MGuiElementBase {
 
         }
         catch (Throwable e) {
-            invalidEntitie = true;
-            invalidEntities.add(eString);
+            invalidEntity = true;
+            invalidEntities.add(entityName);
             LogHelperBC.error("Failed to render entity in GUI. This is not a bug there are just some entities that can not be rendered like this.");
             LogHelperBC.error("Entity: " + entity);
             e.printStackTrace();

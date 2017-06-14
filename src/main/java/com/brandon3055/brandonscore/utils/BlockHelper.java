@@ -33,7 +33,7 @@ public class BlockHelper {
 
         try {
             RayTraceResult result = new RayTraceResult(RayTraceResult.Type.BLOCK, Vec3d.ZERO, EnumFacing.UP, pos);
-            stack = state.getBlock().getPickBlock(state, result, world, pos, Minecraft.getMinecraft().thePlayer);
+            stack = state.getBlock().getPickBlock(state, result, world, pos, Minecraft.getMinecraft().player);
         }
         catch (Throwable ignored) {
             stack = state.getBlock().getItem(world, pos, state);
@@ -41,7 +41,7 @@ public class BlockHelper {
 
         String name = "Unknown";
 
-        if (stack != null) {
+        if (!stack.isEmpty()) {
             return I18n.format(stack.getUnlocalizedName() + ".name");
         }
 

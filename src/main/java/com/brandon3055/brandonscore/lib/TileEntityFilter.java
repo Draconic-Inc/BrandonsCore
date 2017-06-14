@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.blocks.TileBCBase;
-import com.brandon3055.brandonscore.network.PacketTileMessage;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -24,7 +23,10 @@ public class TileEntityFilter extends EntityFilter {
 
     @Override
     public void sendConfigToServer(NBTTagCompound compound) {
-        tile.sendPacketToServer(new PacketTileMessage(tile, packetID, compound, false));
+        tile.sendPacketToServer(output -> {
+            output.writeByte(packetID);
+            output.writeNBTTagCompound(compound);
+        });
     }
 
     @Override

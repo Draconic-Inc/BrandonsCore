@@ -23,12 +23,12 @@ public class CommandTickTime extends CommandBase {
     private Map<String, TickSenderProcess> listeners = new HashMap<String, TickSenderProcess>();
 
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "bcore_ticktime";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return "/bcore_ticktime";
     }
 
@@ -40,7 +40,7 @@ public class CommandTickTime extends CommandBase {
             if (!listeners.get(name).isDead()){
                 listeners.get(name).setDead();
                 listeners.remove(name);
-                sender.addChatMessage(new TextComponentString("Stopped sending tick time to client. (Display will go away after a few seconds)"));
+                sender.sendMessage(new TextComponentString("Stopped sending tick time to client. (Display will go away after a few seconds)"));
                 return;
             }
             else {
@@ -53,7 +53,7 @@ public class CommandTickTime extends CommandBase {
         TickSenderProcess process = new TickSenderProcess(sender.getName(), list);
         listeners.put(sender.getName(), process);
         ProcessHandler.addProcess(process);
-        sender.addChatMessage(new TextComponentString("Started sending tick time to client."));
+        sender.sendMessage(new TextComponentString("Started sending tick time to client."));
     }
 
     @Override

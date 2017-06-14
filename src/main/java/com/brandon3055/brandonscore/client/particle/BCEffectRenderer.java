@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
  * Custom effect renderer used by all of my mods
  */
 public class BCEffectRenderer {
-    public World worldObj;
+    public World world;
 
     //Textured Particle Queue
     @SuppressWarnings("unchecked")
@@ -36,8 +36,8 @@ public class BCEffectRenderer {
     private final Queue<PairKV<IGLFXHandler, Particle>> newGlParticleQueue = Queues.newArrayDeque();
 
     @SuppressWarnings("unchecked")
-    public BCEffectRenderer(World worldObj) {
-        this.worldObj = worldObj;
+    public BCEffectRenderer(World world) {
+        this.world = world;
     }
 
     //region Adders
@@ -76,7 +76,7 @@ public class BCEffectRenderer {
         }
 
         //region Add Queued Effects
-//        clearEffects(worldObj);
+//        clearEffects(world);
 //        glRenderQueue.clear();
 
         if (!newGlParticleQueue.isEmpty()) {
@@ -155,7 +155,7 @@ public class BCEffectRenderer {
      * This should never be fired manually!
      */
     protected void clearEffects(World worldIn) {
-        this.worldObj = worldIn;
+        this.world = worldIn;
 
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 2; ++k) {

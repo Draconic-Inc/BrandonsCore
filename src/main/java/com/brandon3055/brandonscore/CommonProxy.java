@@ -1,8 +1,10 @@
 package com.brandon3055.brandonscore;
 
+import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.network.ServerPacketHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
@@ -18,6 +20,11 @@ public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new BCEventHandler());
+
+    }
+
+    public void registerPacketHandlers() {
+        PacketCustom.assignHandler("BCPCChannel", new ServerPacketHandler());
     }
 
     public boolean isDedicatedServer() {

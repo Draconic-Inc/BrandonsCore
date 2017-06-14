@@ -220,7 +220,6 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
-//        super.drawScreen(mouseX, mouseY, partialTicks);
 
         //Just in case someone for some crasy reason actually uses these in a modular gui... But no one ever should!
         for (int bi = 0; bi < this.buttonList.size(); ++bi) {
@@ -233,7 +232,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float) i, (float) j, 0.0F);
+        GlStateManager.translate((float)i, (float)j, 0.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableRescaleNormal();
         this.theSlot = null;
@@ -242,13 +241,19 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        for (int i1 = 0; i1 < this.inventorySlots.inventorySlots.size(); ++i1) {
-            Slot slot = (Slot) this.inventorySlots.inventorySlots.get(i1);
-            this.drawSlot(slot);
+        for (int i1 = 0; i1 < this.inventorySlots.inventorySlots.size(); ++i1)
+        {
+            Slot slot = (Slot)this.inventorySlots.inventorySlots.get(i1);
 
-            int slotXPos = slot.xDisplayPosition;
-            int slotYPos = slot.yDisplayPosition;
-            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.canBeHovered() && !manager.isAreaUnderElement(slotXPos + guiLeft(), slotYPos + guiTop(), 16, 16, 100)) {
+            if (slot.canBeHovered())
+            {
+                this.drawSlot(slot);
+            }
+
+            int slotXPos = slot.xPos;
+            int slotYPos = slot.yPos;
+            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.canBeHovered() && !manager.isAreaUnderElement(slotXPos + guiLeft(), slotYPos + guiTop(), 16, 16, 100))
+            {
                 this.theSlot = slot;
                 GlStateManager.disableLighting();
                 GlStateManager.disableDepth();
@@ -263,23 +268,27 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         RenderHelper.disableStandardItemLighting();
         this.drawGuiContainerForegroundLayer(mouseX, mouseY);
         RenderHelper.enableGUIStandardItemLighting();
-        InventoryPlayer inventoryplayer = this.mc.thePlayer.inventory;
-        ItemStack itemstack = this.draggedStack == null ? inventoryplayer.getItemStack() : this.draggedStack;
+        InventoryPlayer inventoryplayer = this.mc.player.inventory;
+        ItemStack itemstack = this.draggedStack.isEmpty() ? inventoryplayer.getItemStack() : this.draggedStack;
 
-        if (itemstack != null) {
+        if (!itemstack.isEmpty())
+        {
             int j2 = 8;
-            int k2 = this.draggedStack == null ? 8 : 16;
+            int k2 = this.draggedStack.isEmpty() ? 8 : 16;
             String s = null;
 
-            if (this.draggedStack != null && this.isRightMouseClick) {
+            if (!this.draggedStack.isEmpty() && this.isRightMouseClick)
+            {
                 itemstack = itemstack.copy();
-                itemstack.stackSize = MathHelper.ceiling_float_int((float) itemstack.stackSize / 2.0F);
+                itemstack.setCount(MathHelper.ceil((float)itemstack.getCount() / 2.0F));
             }
-            else if (this.dragSplitting && this.dragSplittingSlots.size() > 1) {
+            else if (this.dragSplitting && this.dragSplittingSlots.size() > 1)
+            {
                 itemstack = itemstack.copy();
-                itemstack.stackSize = this.dragSplittingRemnant;
+                itemstack.setCount(this.dragSplittingRemnant);
 
-                if (itemstack.stackSize == 0) {
+                if (itemstack.isEmpty())
+                {
                     s = "" + TextFormatting.YELLOW + "0";
                 }
             }
@@ -287,24 +296,27 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
             this.drawItemStack(itemstack, mouseX - i - 8, mouseY - j - k2, s);
         }
 
-        if (this.returningStack != null) {
-            float f = (float) (Minecraft.getSystemTime() - this.returningStackTime) / 100.0F;
+        if (!this.returningStack.isEmpty())
+        {
+            float f = (float)(Minecraft.getSystemTime() - this.returningStackTime) / 100.0F;
 
-            if (f >= 1.0F) {
+            if (f >= 1.0F)
+            {
                 f = 1.0F;
-                this.returningStack = null;
+                this.returningStack = ItemStack.EMPTY;
             }
 
-            int l2 = this.returningStackDestSlot.xDisplayPosition - this.touchUpX;
-            int i3 = this.returningStackDestSlot.yDisplayPosition - this.touchUpY;
-            int l1 = this.touchUpX + (int) ((float) l2 * f);
-            int i2 = this.touchUpY + (int) ((float) i3 * f);
-            this.drawItemStack(this.returningStack, l1, i2, (String) null);
+            int l2 = this.returningStackDestSlot.xPos - this.touchUpX;
+            int i3 = this.returningStackDestSlot.yPos - this.touchUpY;
+            int l1 = this.touchUpX + (int)((float)l2 * f);
+            int i2 = this.touchUpY + (int)((float)i3 * f);
+            this.drawItemStack(this.returningStack, l1, i2, (String)null);
         }
 
         GlStateManager.popMatrix();
 
-        if (inventoryplayer.getItemStack() == null && this.theSlot != null && this.theSlot.getHasStack()) {
+        if (inventoryplayer.getItemStack().isEmpty() && this.theSlot != null && this.theSlot.getHasStack())
+        {
             ItemStack itemstack1 = this.theSlot.getStack();
             this.renderToolTip(itemstack1, mouseX, mouseY);
         }
@@ -317,39 +329,41 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     //Turns out i didnt actually need to override anything in this but who knows maby i will in the future.
     @Override
     public void drawSlot(Slot slotIn) {
-        int xDisplayPosition = slotIn.xDisplayPosition;
-        int yDisplayPosition = slotIn.yDisplayPosition;
+        int xPos = slotIn.xPos;
+        int yPos = slotIn.yPos;
         ItemStack itemstack = slotIn.getStack();
         boolean flag = false;
-        boolean flag1 = slotIn == this.clickedSlot && this.draggedStack != null && !this.isRightMouseClick;
-        ItemStack itemstack1 = this.mc.thePlayer.inventory.getItemStack();
+        boolean flag1 = slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && !this.isRightMouseClick;
+        ItemStack itemstack1 = this.mc.player.inventory.getItemStack();
         String s = null;
 
-        if (slotIn == this.clickedSlot && this.draggedStack != null && this.isRightMouseClick && itemstack != null) {
+        if (slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && this.isRightMouseClick && !itemstack.isEmpty())
+        {
             itemstack = itemstack.copy();
-            itemstack.stackSize /= 2;
+            itemstack.setCount(itemstack.getCount() / 2);
         }
-        else if (this.dragSplitting && this.dragSplittingSlots.contains(slotIn) && itemstack1 != null) {
-            if (this.dragSplittingSlots.size() == 1) {
+        else if (this.dragSplitting && this.dragSplittingSlots.contains(slotIn) && !itemstack1.isEmpty())
+        {
+            if (this.dragSplittingSlots.size() == 1)
+            {
                 return;
             }
 
-            if (Container.canAddItemToSlot(slotIn, itemstack1, true) && this.inventorySlots.canDragIntoSlot(slotIn)) {
+            if (Container.canAddItemToSlot(slotIn, itemstack1, true) && this.inventorySlots.canDragIntoSlot(slotIn))
+            {
                 itemstack = itemstack1.copy();
                 flag = true;
-                Container.computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack, slotIn.getStack() == null ? 0 : slotIn.getStack().stackSize);
+                Container.computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack, slotIn.getStack().isEmpty() ? 0 : slotIn.getStack().getCount());
+                int k = Math.min(itemstack.getMaxStackSize(), slotIn.getItemStackLimit(itemstack));
 
-                if (itemstack.stackSize > itemstack.getMaxStackSize()) {
-                    s = TextFormatting.YELLOW + "" + itemstack.getMaxStackSize();
-                    itemstack.stackSize = itemstack.getMaxStackSize();
-                }
-
-                if (itemstack.stackSize > slotIn.getItemStackLimit(itemstack)) {
-                    s = TextFormatting.YELLOW + "" + slotIn.getItemStackLimit(itemstack);
-                    itemstack.stackSize = slotIn.getItemStackLimit(itemstack);
+                if (itemstack.getCount() > k)
+                {
+                    s = TextFormatting.YELLOW.toString() + k;
+                    itemstack.setCount(k);
                 }
             }
-            else {
+            else
+            {
                 this.dragSplittingSlots.remove(slotIn);
                 this.updateDragSplitting();
             }
@@ -358,28 +372,33 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         super.zLevel = 100.0F;
         this.itemRender.zLevel = 100.0F;
 
-
-        if (itemstack == null && slotIn.canBeHovered()) {
+        if (itemstack.isEmpty() && slotIn.canBeHovered())
+        {
             TextureAtlasSprite textureatlassprite = slotIn.getBackgroundSprite();
 
-            if (textureatlassprite != null) {
+            if (textureatlassprite != null)
+            {
                 GlStateManager.disableLighting();
                 this.mc.getTextureManager().bindTexture(slotIn.getBackgroundLocation());
-                this.drawTexturedModalRect(xDisplayPosition, yDisplayPosition, textureatlassprite, 16, 16);
+                this.drawTexturedModalRect(xPos, yPos, textureatlassprite, 16, 16);
                 GlStateManager.enableLighting();
                 flag1 = true;
             }
         }
 
-        if (!flag1) {
-            if (flag) {
-                drawRect(xDisplayPosition, yDisplayPosition, xDisplayPosition + 16, yDisplayPosition + 16, -2130706433);
+        if (!flag1)
+        {
+            if (flag)
+            {
+                drawRect(xPos, yPos, xPos + 16, yPos + 16, -2130706433);
             }
 
             GlStateManager.enableDepth();
-            if (!manager.isAreaUnderElement(xDisplayPosition + guiLeft, yDisplayPosition + guiTop, 18, 18, 100)) {
-                this.itemRender.renderItemAndEffectIntoGUI(this.mc.thePlayer, itemstack, xDisplayPosition, yDisplayPosition);
-                this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, xDisplayPosition, yDisplayPosition, s);
+            this.itemRender.renderItemAndEffectIntoGUI(this.mc.player, itemstack, xPos, yPos);
+            this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, xPos, yPos, s);
+            if (!manager.isAreaUnderElement(xPos + guiLeft, yPos + guiTop, 18, 18, 100)) {
+                this.itemRender.renderItemAndEffectIntoGUI(this.mc.player, itemstack, xPos, yPos);
+                this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, xPos, yPos, s);
             }
         }
 
@@ -388,21 +407,4 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     }
 
     //endregion
-
-    public void hideInventorySlots(boolean hide) {
-        if (hide && !slotsHidden) {
-            slotsHidden = true;
-            for (Slot slot : container.inventorySlots) {
-                slot.xDisplayPosition += 1000;
-                slot.yDisplayPosition += 1000;
-            }
-        }
-        else if (!hide && slotsHidden) {
-            slotsHidden = false;
-            for (Slot slot : container.inventorySlots) {
-                slot.xDisplayPosition -= 1000;
-                slot.yDisplayPosition -= 1000;
-            }
-        }
-    }
 }

@@ -119,7 +119,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
         if (keyCode == 1)
         {
-            this.mc.thePlayer.closeScreen();
+            this.mc.player.closeScreen();
             this.mc.displayGuiScreen((GuiScreen)null);
 
             if (this.mc.currentScreen == null)

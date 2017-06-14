@@ -22,7 +22,7 @@ public class EnergyContainerWrapper implements IEnergyStorage, ICapabilityProvid
     }
 
     private boolean isStackValid() {
-        return stack != null && stack.getItem() instanceof IEnergyContainerItem;
+        return !stack.isEmpty() && stack.getItem() instanceof IEnergyContainerItem;
     }
 
     private IEnergyContainerItem getContainer() {

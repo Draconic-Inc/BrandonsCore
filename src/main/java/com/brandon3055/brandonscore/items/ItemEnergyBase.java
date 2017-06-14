@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     //region Item
 
     @Override
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+    public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
         subItems.add(new ItemStack(itemIn));
         ItemStack stack = new ItemStack(itemIn);
         setEnergy(stack, getCapacity(stack));

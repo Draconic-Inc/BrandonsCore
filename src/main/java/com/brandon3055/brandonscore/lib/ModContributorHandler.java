@@ -263,7 +263,7 @@ public class ModContributorHandler {
 
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.player.worldObj.isRemote && event.player instanceof EntityPlayerMP) {
+        if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) {
             for (ContributorData data : nameContributorDataMap.values()) {
                 BrandonsCore.network.sendTo(new PacketContributor(modid, data.name, data.config), (EntityPlayerMP) event.player);
             }

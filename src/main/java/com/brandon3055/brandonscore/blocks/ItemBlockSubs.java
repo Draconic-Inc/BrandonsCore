@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.blocks;
 
-import com.brandon3055.brandonscore.config.FeatureWrapper;
+import com.brandon3055.brandonscore.registry.Feature;
 import net.minecraft.block.Block;
 
 /**
@@ -8,7 +8,7 @@ import net.minecraft.block.Block;
  */
 @Deprecated //Moving functionality to ItemBlockBCore
 public class ItemBlockSubs extends ItemBlockBasic {
-    public ItemBlockSubs(Block block, FeatureWrapper feature) {
+    public ItemBlockSubs(Block block, Feature feature) {
         super(block, feature);
         this.setHasSubtypes(true);
     }

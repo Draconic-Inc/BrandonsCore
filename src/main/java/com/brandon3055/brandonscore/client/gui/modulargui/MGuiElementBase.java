@@ -814,10 +814,10 @@ public class MGuiElementBase {
         int blue1 = colour1 & 255;
         int blue2 = colour2 & 255;
 
-        int alpha = MathHelper.clamp_int(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
-        int red = MathHelper.clamp_int(red1 + (subtract ? -red2 : red2), 0, 255);
-        int green = MathHelper.clamp_int(green1 + (subtract ? -green2 : green2), 0, 255);
-        int blue = MathHelper.clamp_int(blue1 + (subtract ? -blue2 : blue2), 0, 255);
+        int alpha = MathHelper.clamp(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
+        int red = MathHelper.clamp(red1 + (subtract ? -red2 : red2), 0, 255);
+        int green = MathHelper.clamp(green1 + (subtract ? -green2 : green2), 0, 255);
+        int blue = MathHelper.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
 
         return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | (blue & 0xFF);
     }

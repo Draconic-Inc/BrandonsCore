@@ -220,7 +220,7 @@ public class MGuiTextField extends MGuiElementBase {
     public void setCursorPosition(int pos) {
         this.cursorPosition = pos;
         int i = this.text.length();
-        this.cursorPosition = MathHelper.clamp_int(this.cursorPosition, 0, i);
+        this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, i);
         this.setSelectionPos(this.cursorPosition);
     }
 
@@ -584,7 +584,7 @@ public class MGuiTextField extends MGuiElementBase {
                 this.lineScrollOffset -= this.lineScrollOffset - position;
             }
 
-            this.lineScrollOffset = MathHelper.clamp_int(this.lineScrollOffset, 0, i);
+            this.lineScrollOffset = MathHelper.clamp(this.lineScrollOffset, 0, i);
         }
     }
 

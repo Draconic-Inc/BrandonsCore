@@ -39,7 +39,7 @@ public class StackReference {
     }
 
     public StackReference(ItemStack stack) {
-        this(stack.getItem().getRegistryName().toString(), stack.stackSize, stack.getItemDamage(), stack.getTagCompound());
+        this(stack.getItem().getRegistryName().toString(), stack.getCount(), stack.getItemDamage(), stack.getTagCompound());
     }
 
     private StackReference() {

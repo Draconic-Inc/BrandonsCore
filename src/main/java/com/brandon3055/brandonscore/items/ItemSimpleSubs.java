@@ -3,9 +3,9 @@ package com.brandon3055.brandonscore.items;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,9 +27,13 @@ public class ItemSimpleSubs extends ItemBCore {
     }
 
     @Override
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
-        if (nameMap.size() > 0) for (Integer i : nameMap.keySet()) subItems.add(new ItemStack(itemIn, 1, i));
-        else super.getSubItems(itemIn, tab, subItems);
+    public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
+        if (nameMap.size() > 0) {
+            for (Integer i : nameMap.keySet()) subItems.add(new ItemStack(itemIn, 1, i));
+        }
+        else {
+            super.getSubItems(itemIn, tab, subItems);
+        }
     }
 
     @Override

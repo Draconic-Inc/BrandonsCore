@@ -1,217 +1,141 @@
 package com.brandon3055.brandonscore.blocks;
 
+import codechicken.lib.data.MCDataInput;
+import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.api.IDataRetainerTile;
-import com.brandon3055.brandonscore.network.PacketSyncableObject;
-import com.brandon3055.brandonscore.network.PacketTileMessage;
-import com.brandon3055.brandonscore.network.wrappers.SyncableObject;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.api.IDataRetainingTile;
+import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
+import com.brandon3055.brandonscore.lib.datamanager.TileDataManager;
+import com.brandon3055.brandonscore.network.PacketDispatcher;
+import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Created by brandon3055 on 26/3/2016.
  * Base tile entity class for all tile entities
  */
-public class TileBCBase extends TileEntity {
+public class TileBCBase extends TileEntity implements IDataManagerProvider, IDataRetainingTile {
 
-    protected Map<Byte, SyncableObject> syncableObjectMap = new HashMap<Byte, SyncableObject>();
-    protected int objIndexCount = 0;
-    protected int viewRange = -1;
     protected boolean shouldRefreshOnState = true;
+    protected TileDataManager<TileBCBase> dataManager = new TileDataManager<>(this);
 
-    //region Sync
-    public void detectAndSendChanges() {
-        detectAndSendChanges(false);
-    }
+    //region Data Manager
 
-    public void detectAndSendChanges(boolean forceSync) {
-        if (worldObj.isRemote) return;
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.syncInTile) {
-                syncableObject.detectAndSendChanges(this, null, forceSync);
-            }
-        }
-    }
-
-    public void detectAndSendChangesToPlayer(boolean forceSync, EntityPlayerMP playerMP) {
-        if (worldObj.isRemote) return;
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.syncInContainer) {
-                syncableObject.detectAndSendChanges(this, playerMP, forceSync);
-            }
-        }
-    }
-
-    public void registerSyncableObject(SyncableObject object) {
-        registerSyncableObject(object, true);
-    }
-
-    public void registerSyncableObject(SyncableObject object, boolean saveToNBT) {
-        registerSyncableObject(object, saveToNBT, false);
+    @Override
+    public TileDataManager getDataManager() {
+        return dataManager;
     }
 
     /**
-     * Registers a syncable object. These objects will automatically be synchronized with the client.
-     * Note: you are required to call detectAndSendChanges server side in order for objects to detect and send changes to the client.
-     * @param object The object.
-     * @param saveToNBT If true the object will ba saved and loaded from NBT.
-     * @param saveToItem If true and the tile is an instance of {@link IDataRetainerTile} the object will be saved and loaded from the item when the tile is broken.
+     * super.update() must be called from your update method in order for Data Manager synchronization to work..
      */
-    public void registerSyncableObject(SyncableObject object, boolean saveToNBT, boolean saveToItem) {
-        if (objIndexCount > Byte.MAX_VALUE) {
-            throw new RuntimeException("TileBCBase#registerSyncableObject To many objects registered!");
-        }
-        syncableObjectMap.put((byte) objIndexCount, object.setIndex(objIndexCount));
-        object.setSaveMode(saveToNBT, saveToItem);
-
-        objIndexCount++;
-    }
-
-    public void receiveSyncPacketFromServer(PacketSyncableObject packet) {
-        if (syncableObjectMap.containsKey(packet.index)) {
-            SyncableObject object = syncableObjectMap.get(packet.index);
-            object.updateReceived(packet);
-
-            if (object.updateOnReceived) {
-                updateBlock();
-            }
+    public void update() {
+        if (!world.isRemote) {
+            dataManager.detectAndSendChanges();
         }
     }
 
-    public NetworkRegistry.TargetPoint syncRange() {
-        if (viewRange == -1 && !worldObj.isRemote) {
-            Field f = ReflectionHelper.findField(PlayerChunkMap.class, "playerViewRadius", "field_72698_e");
-            f.setAccessible(true);
-            try {
-                viewRange = f.getInt(((WorldServer) worldObj).getPlayerChunkMap());
-            }
-            catch (IllegalAccessException e) {
-                LogHelperBC.error("A THING BROKE!!!!!!!");
-                e.printStackTrace();
-            }
-        } else if (worldObj.isRemote) {
-            LogHelperBC.error("Hay! Someone is doing a bad thing!!! Check your side!!!!!!!");
-        }
-        return new NetworkRegistry.TargetPoint(worldObj.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), viewRange * 16);
-    }
+    //vanilla
 
     //Used to sync data to the client
     @Nullable
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-        if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).writeRetainedData(nbttagcompound);
-        }
-
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            syncableObject.toNBT(nbttagcompound);
-        }
-
-        writeExtraNBT(nbttagcompound);
-
-        return new SPacketUpdateTileEntity(this.pos, 0, nbttagcompound);
+        NBTTagCompound compound = new NBTTagCompound();
+        dataManager.writeSyncNBT(compound);
+        writeExtraNBT(compound);
+        return new SPacketUpdateTileEntity(this.pos, 0, compound);
     }
 
     //Used when initially sending chunks to the client... I think
     @Override
     public NBTTagCompound getUpdateTag() {
         NBTTagCompound compound = super.getUpdateTag();
-
-        if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).writeRetainedData(compound);
-        }
-
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSaveToNBT) {
-                syncableObject.toNBT(compound);
-            }
-        }
-
+        dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
         return compound;
     }
 
     @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        super.handleUpdateTag(tag);//todo?
-        readExtraNBT(tag);
-    }
-
-    @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).readRetainedData(pkt.getNbtCompound());
-        }
-
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            syncableObject.fromNBT(pkt.getNbtCompound());
-        }
-
+        dataManager.readSyncNBT(pkt.getNbtCompound());
         readExtraNBT(pkt.getNbtCompound());
     }
 
-    //endregion
+//    //endregion
 
     //region Packets
 
     /**
-     * Send a message to the server side tile
+     * Send a data packet to the server, Supply a consumer to write the data you want to send
      */
-    public void sendPacketToServer(PacketTileMessage packet) {
-        BrandonsCore.network.sendToServer(packet);
-    }
-
-    public void sendPacketToClients(PacketTileMessage packet, NetworkRegistry.TargetPoint targetPoint) {
-        BrandonsCore.network.sendToAllAround(packet, targetPoint);
+    public void sendPacketToServer(Consumer<MCDataOutput> writer) {
+        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.S_TILE_MESSAGE);
+        packet.writePos(pos);
+        writer.accept(packet);
+        packet.sendToServer();
     }
 
     /**
-     * Receive a message from the client side tile. Override this to receive messages.
+     * Override this method to receive data from the server via sendPacketToServer
      */
-    public void receivePacketFromClient(PacketTileMessage packet, EntityPlayerMP client) {
+    public void receivePacketFromClient(MCDataInput data, EntityPlayerMP client) {}
 
+
+    /**
+     * Create a packet to send to the client
+     */
+    public PacketCustom sendPacketToClient(Consumer<MCDataOutput> writer) {
+        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.C_TILE_MESSAGE);
+        packet.writePos(pos);
+        writer.accept(packet);
+        return packet;
     }
 
-    public void receivePacketFromServer(PacketTileMessage packet) {
-
+    public void sendPacketToClient(EntityPlayerMP player, Consumer<MCDataOutput> writer) {
+        sendPacketToClient(writer).sendToPlayer(player);
     }
+
+    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer) {
+        sendPacketToClient(writer).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
+    }
+
+    /**
+     * Override this method to receive data from the client via sendPacketToClient
+     */
+    public void receivePacketFromServer(MCDataInput data) {}
 
     //endregion
 
     //region Helper Functions.
 
     public void updateBlock() {
-        IBlockState state = worldObj.getBlockState(getPos());
-        worldObj.notifyBlockUpdate(getPos(), state, state, 3);
+        IBlockState state = world.getBlockState(getPos());
+        world.notifyBlockUpdate(getPos(), state, state, 3);
     }
 
     public void dirtyBlock() {
-        Chunk chunk = worldObj.getChunkFromBlockCoords(getPos());
+        Chunk chunk = world.getChunkFromBlockCoords(getPos());
         chunk.setChunkModified();
     }
 
@@ -224,7 +148,7 @@ public class TileBCBase extends TileEntity {
     }
 
     public IBlockState getState(Block expectedBlock) {
-        IBlockState state = worldObj.getBlockState(pos);
+        IBlockState state = world.getBlockState(pos);
         return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
     }
 
@@ -243,7 +167,7 @@ public class TileBCBase extends TileEntity {
     }
 
     public boolean verifyPlayerPermission(EntityPlayer player) {
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, null, pos, EnumFacing.UP, player.getLookVec());
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, EnumFacing.UP, player.getLookVec());
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }
@@ -253,28 +177,39 @@ public class TileBCBase extends TileEntity {
     //region Save/Load
 
     /**
-     * Part of the new method of saving Syncable Objects to item.
-     * When implementing IDataRetainerTile
+     * These methods replace the methods from IDataRetainerTile but they are
+     * now ONLY used to read and write data to and from an itemstack<br>
+     * Note: if you wish to add additional data to the item then override this, Call super to get a data tag,
+     * Write your data to said tag and finally return said tag.
+     *
+     * @return the tile data compound so that tiles that override this method can easily write extra data to it.
      */
-    public void writeRetainedData(NBTTagCompound dataCompound) {
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSaveToItem) {
-                syncableObject.toNBT(dataCompound);
-            }
-        }
+    @Override
+    public NBTTagCompound writeToItemStack(ItemStack stack) {
+        NBTTagCompound dataTag = new NBTTagCompound();
+        dataManager.writeToStackNBT(dataTag);
+        ItemNBTHelper.getCompound(stack).setTag("BCTileData", dataTag);
+        return dataTag;
     }
 
-    public void readRetainedData(NBTTagCompound dataCompound) {
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSaveToItem) {
-                syncableObject.fromNBT(dataCompound);
-            }
+    /**
+     * @return the tile data compound so that tiles that override this method can easily read extra data from it.
+     */
+    @Nullable
+    @Override
+    public NBTTagCompound readFromItemStack(ItemStack stack) {
+        NBTTagCompound dataTag = stack.getSubCompound("BCTileData");
+        if (dataTag != null) {
+            dataManager.readFromStackNBT(dataTag);
         }
+        return dataTag;
     }
 
     /**
      * Write any extra data that needs to be saved to NBT that is not saved via a syncable field.
-     * This data is also synced to the client!.
+     * This data is also synced to the client via getUpdateTag and getUpdatePacket.
+     * Note: This will not save data to the item when the block is harvested.<br>
+     * For that you need to override read and writeToStack just be sure to pay attention to the doc for those.
      * */
     public void writeExtraNBT(NBTTagCompound compound){}
 
@@ -283,17 +218,8 @@ public class TileBCBase extends TileEntity {
     @Override
     public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
-        if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).writeRetainedData(compound);
-        }
 
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            //If the object is already saved via IDataRetainerTile we dont want to save it again here.
-            if (syncableObject.shouldSaveToNBT && (!syncableObject.shouldSaveToItem || !(this instanceof IDataRetainerTile))) {
-                syncableObject.toNBT(compound);
-            }
-        }
-
+        dataManager.writeToNBT(compound);
         writeExtraNBT(compound);
 
         return compound;
@@ -302,16 +228,8 @@ public class TileBCBase extends TileEntity {
     @Override
     public final void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (this instanceof IDataRetainerTile) {
-            ((IDataRetainerTile) this).readRetainedData(compound);
-        }
 
-        for (SyncableObject syncableObject : syncableObjectMap.values()) {
-            if (syncableObject.shouldSaveToNBT && (!syncableObject.shouldSaveToItem || !(this instanceof IDataRetainerTile))) {
-                syncableObject.fromNBT(compound);
-            }
-        }
-
+        dataManager.readFromNBT(compound);
         readExtraNBT(compound);
 
         onTileLoaded();

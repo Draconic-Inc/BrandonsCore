@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
-import codechicken.lib.inventory.InventoryUtils;
 import codechicken.lib.vec.Vector3;
-import com.brandon3055.brandonscore.config.ModFeatureParser;
+import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -23,7 +22,7 @@ public class FeatureUtils {
      * @param dropLocation The location
      */
     public static void dropItem(ItemStack stack, World world, Vector3 dropLocation) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return;
         }
 
@@ -38,7 +37,7 @@ public class FeatureUtils {
     }
 
     public static void dropItemNoDellay(ItemStack stack, World world, Vector3 dropLocation) {
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return;
         }
 
@@ -54,7 +53,7 @@ public class FeatureUtils {
         entityItem.motionY = world.rand.nextGaussian() * 0.05 + 0.2F;
         entityItem.motionZ = world.rand.nextGaussian() * 0.05;
         entityItem.setNoPickupDelay();
-        world.spawnEntityInWorld(entityItem);
+        world.spawnEntity(entityItem);
     }
 
 }

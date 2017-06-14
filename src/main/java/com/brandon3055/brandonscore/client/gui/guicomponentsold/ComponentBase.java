@@ -169,7 +169,7 @@ public abstract class ComponentBase extends Gui {
     }
 
     public void drawItemStack(ItemStack stack, int x, int y, String count) {
-        if (stack == null) return;
+        if (stack.isEmpty()) return;
         GL11.glPushMatrix();
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glDisable(GL11.GL_LIGHTING);
@@ -195,7 +195,7 @@ public abstract class ComponentBase extends Gui {
     }
 
     protected void renderToolTip(ItemStack stack, int x, int y) {
-        List list = stack.getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips);
+        List list = stack.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips);
 
         for (int k = 0; k < list.size(); ++k) {
             if (k == 0) {
