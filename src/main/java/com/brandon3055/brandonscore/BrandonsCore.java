@@ -4,8 +4,13 @@ import codechicken.lib.CodeChickenLib;
 import com.brandon3055.brandonscore.command.CommandTickTime;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
-import com.brandon3055.brandonscore.network.*;
+import com.brandon3055.brandonscore.network.PacketContributor;
+import com.brandon3055.brandonscore.network.PacketSpawnParticle;
+import com.brandon3055.brandonscore.network.PacketTickTime;
+import com.brandon3055.brandonscore.network.PacketUpdateMount;
+import com.brandon3055.brandonscore.registry.ModFeatureParser2;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -14,12 +19,16 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME, dependencies = "required-after:CodeChickenLib@[" + CodeChickenLib.version + ",)")
+@Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME, dependencies = "required-after:codechickenlib@[" + CodeChickenLib.MOD_VERSION + ",)")
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
     public static final String VERSION = "${mod_version}";
+    public static final String NET_CHANNEL = "BCPCChannel";
 
     @Mod.Instance(BrandonsCore.MODID)
     public static BrandonsCore instance;
@@ -30,7 +39,17 @@ public class BrandonsCore {
     public static SimpleNetworkWrapper network;
 
     public BrandonsCore() {
-        LogHelperBC.info("Hello Minecraft!!!");
+        Logger deLog = LogManager.getLogger("draconicevolution");
+        LogHelperBC.info("Brandon's Core online! Waiting for Draconic Evolution to join the party....");
+        if (Loader.isModLoaded("draconicelolution")) {
+            deLog.log(Level.INFO, "Draconic Evolution online!");
+            LogHelperBC.info("Hay! There you are! Now lets destroy some worlds!!");
+            deLog.log(Level.INFO, "Sounds like fun! Lets get to it!");
+        }
+        else {
+            deLog.log(Level.INFO, "...");
+            LogHelperBC.info("Aww... Im sad now...");
+        }
     }
 
     @Mod.EventHandler
@@ -45,23 +64,23 @@ public class BrandonsCore {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        ModFeatureParser2.parseASMData(event.getAsmData());
+
         FileHandler.init(event);
         proxy.preInit(event);
         ProcessHandler.init();
         registerNetwork();
+        proxy.registerPacketHandlers();
     }
 
     public void registerNetwork() {
-        network = NetworkRegistry.INSTANCE.newSimpleChannel("BrCoreNet");
-        network.registerMessage(PacketSyncableObject.Handler.class, PacketSyncableObject.class, 0, Side.CLIENT);
-        network.registerMessage(PacketTileMessage.Handler.class, PacketTileMessage.class, 1, Side.SERVER);
-        network.registerMessage(PacketSpawnParticle.Handler.class, PacketSpawnParticle.class, 2, Side.CLIENT);
-        network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 3, Side.CLIENT);
-        network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 4, Side.SERVER);
-        network.registerMessage(PacketTickTime.Handler.class, PacketTickTime.class, 5, Side.CLIENT);
-        network.registerMessage(PacketTileMessage.Handler.class, PacketTileMessage.class, 6, Side.CLIENT);
-        network.registerMessage(PacketContributor.Handler.class, PacketContributor.class, 7, Side.CLIENT);
-        network.registerMessage(PacketContributor.Handler.class, PacketContributor.class, 8, Side.SERVER);
+        network = NetworkRegistry.INSTANCE.newSimpleChannel("BCoreNet");
+        network.registerMessage(PacketSpawnParticle.Handler.class, PacketSpawnParticle.class, 0, Side.CLIENT);
+        network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 1, Side.CLIENT);
+        network.registerMessage(PacketUpdateMount.Handler.class, PacketUpdateMount.class, 2, Side.SERVER);
+        network.registerMessage(PacketTickTime.Handler.class, PacketTickTime.class, 3, Side.CLIENT);
+        network.registerMessage(PacketContributor.Handler.class, PacketContributor.class, 4, Side.CLIENT);
+        network.registerMessage(PacketContributor.Handler.class, PacketContributor.class, 5, Side.SERVER);
     }
 }
 
