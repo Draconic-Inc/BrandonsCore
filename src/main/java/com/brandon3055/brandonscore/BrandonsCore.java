@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.network.PacketContributor;
 import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
+import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.fml.common.Loader;
@@ -23,7 +24,11 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = BrandonsCore.MODID, version = BrandonsCore.VERSION, name = BrandonsCore.MODNAME, dependencies = "required-after:codechickenlib@[" + CodeChickenLib.MOD_VERSION + ",)")
+@Mod(modid = BrandonsCore.MODID,
+        version = BrandonsCore.VERSION,
+        name = BrandonsCore.MODNAME,
+        guiFactory = "com.brandon3055.brandonscore.client.gui.config.BCModGuiFactory",
+        dependencies = "required-after:codechickenlib@[" + CodeChickenLib.MOD_VERSION + ",)")
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
@@ -65,6 +70,9 @@ public class BrandonsCore {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         ModFeatureParser.parseASMData(event.getAsmData());
+        ModConfigParser.parseASMData(event.getAsmData());
+        ModConfigParser.loadConfigs(event);
+        ModFeatureParser.registerFeatures();
 
         FileHandler.init(event);
         proxy.preInit(event);

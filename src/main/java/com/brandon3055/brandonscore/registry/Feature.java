@@ -104,7 +104,7 @@ public class Feature {
      * Example variant map:<br>
      * {"0:type=normal", "1:type=nether", "2:type=end"}
      */
-    public Map<Integer, String> varientMap() {
+    public Map<Integer, String> variantMap() {
         return variantMap;
     }
 

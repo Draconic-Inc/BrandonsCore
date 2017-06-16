@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.registry;
 
+import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Throwables;
 import net.minecraft.block.Block;
@@ -7,9 +8,11 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Created by brandon3055 on 18/3/2016. <br><br>
@@ -30,8 +34,8 @@ import java.util.Map;
  */
 public class ModFeatureParser {
 
-    private static final String CATEGORY_BLOCKS = "Blocks";
-    private static final String CATEGORY_ITEMS = "Items";
+    public static final String CATEGORY_BLOCKS = "Blocks";
+    public static final String CATEGORY_ITEMS = "Items";
 
     /**
      * Stores a boolean value for each feature thats indicates whether or not the feature is enabled.
@@ -56,7 +60,7 @@ public class ModFeatureParser {
      * Stores the {@link IModFeatures} instance for every mod that has one.
      */
     private static final Map<String, Boolean> hardDisableModeMap = new HashMap<>();
-    
+
     //region Pars & Config
 
     /**
@@ -67,10 +71,9 @@ public class ModFeatureParser {
         for (ASMDataTable.ASMData data : table.getAll(ModFeatures.class.getName())) {
             try {
                 Class clazz = Class.forName(data.getClassName());
-                ModFeatures features = clazz.<ModFeatures>getAnnotation(ModFeatures.class);
+                ModFeatures features = (ModFeatures) clazz.getAnnotation(ModFeatures.class);
                 modid = features.modid();
-                List<Feature> modFeatures = new ArrayList<>();
-                modFeatureMap.put(modid, modFeatures);
+                List<Feature> modFeatures = modFeatureMap.computeIfAbsent(modid, s -> new ArrayList<>());
 
                 if (IModFeatures.class.isAssignableFrom(clazz)) {
                     if (iModFeaturesMap.containsKey(modid)) {
@@ -130,8 +133,10 @@ public class ModFeatureParser {
                     }
                     else {
                         String category = featureObj instanceof Block ? CATEGORY_BLOCKS : CATEGORY_ITEMS;
-                        feature.setActive(configuration.get(category, feature.getName(), feature.isActive()).setRequiresMcRestart(true).getBoolean(feature.isActive()));
+                        Property prop = configuration.get(category, feature.getName(), feature.isActive()).setRequiresMcRestart(true);
+                        feature.setActive(prop.getBoolean(feature.isActive()));
                         featureStates.put(featureObj, feature.isActive());
+                        ModConfigParser.addFeatureProperty(modid, prop, category);
                     }
                 }
                 catch (Exception e) {
@@ -291,7 +296,7 @@ public class ModFeatureParser {
     @SideOnly(Side.CLIENT)
     private static void registerBlockRendering(Feature feature, Block block) {
         //Register itemBlock rendering
-        if (feature.varientMap().size() > 0) {
+        if (feature.variantMap().size() > 0) {
             registerItemVariants(feature, Item.getItemFromBlock(block));
         }
         else {
@@ -305,17 +310,17 @@ public class ModFeatureParser {
     @SideOnly(Side.CLIENT)
     private static void registerItemVariants(Feature feature, Item item) {
         //Register Default ModelResourceLocation
-        if (feature.varientMap().isEmpty() && feature.stateOverride().isEmpty()) {
+        if (feature.variantMap().isEmpty() && feature.stateOverride().isEmpty()) {
             ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(feature.getRegistryName().toString()));
         }
         //Register ModelResourceLocation with overridden BlockState.
-        else if (feature.varientMap().isEmpty() && !feature.stateOverride().isEmpty()) {
+        else if (feature.variantMap().isEmpty() && !feature.stateOverride().isEmpty()) {
             ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(feature.getModid() + ":" + feature.stateOverride()));
         }
         //Register variants with optional state override.
-        else if (!feature.varientMap().isEmpty()) {
+        else if (!feature.variantMap().isEmpty()) {
             String location = feature.stateOverride().isEmpty() ? feature.getName() : feature.stateOverride();
-            feature.varientMap().keySet().forEach(meta -> ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(feature.getModid() + ":" + location, feature.varientMap().get(meta))));
+            feature.variantMap().keySet().forEach(meta -> ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(feature.getModid() + ":" + location, feature.variantMap().get(meta))));
         }
     }
 
@@ -335,6 +340,29 @@ public class ModFeatureParser {
      */
     public static boolean isEnabled(Object feature) {
         return featureStates.getOrDefault(feature, true);
+    }
+
+    /**
+     * Iterates over every loaded feature and applies the given consumer
+     * to all disabled features that are not disabled via hardDisableMode.
+     */
+    public static void getFeaturesToHide(Consumer<ItemStack> consumer) {
+        DataUtils.forEachMatch(allModFeatures.keySet(), fe -> (!fe.isActive() && !hardDisableModeMap.containsKey(fe.getModid())), fe -> {
+            ItemStack stack;
+            Object feature = allModFeatures.get(fe);
+
+            if (feature instanceof Item) {
+                stack = new ItemStack((Item) feature);
+            }
+            else if (feature instanceof Block) {
+                stack = new ItemStack((Block) feature);
+            }
+            else {
+                throw new RuntimeException("WTF is this? " + feature + " Only Items and Blocks are valid features m8");
+            }
+
+            consumer.accept(stack);
+        });
     }
 
     //endregion

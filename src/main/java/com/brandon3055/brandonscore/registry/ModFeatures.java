@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * This annotations allows BrandonsCore to find this class and register the features defined within it.
  * You are allowed to have more than one of these per mod if for example you want separate classes for items and blocks.<br><br>
  *
- * Classes using this annotation can also optionally implement implement {@link IModFeatures} which allows
+ * Classes using this annotation can also optionally implement {@link IModFeatures} which allows
  * you to specify creative tabs to have your features added to.<br>
  * Note: although your mod is allowed to have more than 1 class annotated with @ModFeatures only one if those classes can implement {@link IModFeatures}
  */

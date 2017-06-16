@@ -12,7 +12,7 @@ import net.minecraft.util.math.BlockPos;
 public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHandler {
     @Override
     public void handlePacket(PacketCustom packetCustom, EntityPlayerMP sender, INetHandlerPlayServer handler) {
-        if (packetCustom.readerIndex() == PacketDispatcher.S_TILE_MESSAGE) {
+        if (packetCustom.getType() == PacketDispatcher.S_TILE_MESSAGE) {
             BlockPos pos = packetCustom.readPos();
             TileEntity tile = Minecraft.getMinecraft().world.getTileEntity(pos);
             if (tile instanceof TileBCBase) {

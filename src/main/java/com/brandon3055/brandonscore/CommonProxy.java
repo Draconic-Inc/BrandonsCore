@@ -20,7 +20,6 @@ public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new BCEventHandler());
-
     }
 
     public void registerPacketHandlers() {
