@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.config;
 
 import com.brandon3055.brandonscore.registry.ModConfigParser;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import mezz.jei.config.JEIModConfigGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -25,6 +26,7 @@ public class BCModGuiFactory implements IModGuiFactory {
 	@Override
 	public GuiScreen createConfigGui(GuiScreen parentScreen) {
 		ModContainer mod = Loader.instance().activeModContainer();
+		LogHelperBC.dev(mod);
 		if (mod != null && ModConfigParser.hasConfig(mod.getModId())) {
 			return new BCModConfigGui(parentScreen, mod);
 		}
