@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.blocks;
 
-import com.brandon3055.brandonscore.registry.Feature;
 import com.brandon3055.brandonscore.lib.ITilePlaceListener;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -23,12 +22,10 @@ import java.util.List;
  */
 public class ItemBlockBCore extends ItemBlock {
 
-    private Feature feature;
     private String registryDomain = null;
 
     public ItemBlockBCore(Block block) {
         super(block);
-        this.feature = feature;
         if (block instanceof BlockBCore) {
             setHasSubtypes(((BlockBCore) block).hasSubItemTypes());
         }

@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.config;
 
 import com.brandon3055.brandonscore.registry.ModConfigParser;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-import mezz.jei.config.JEIModConfigGui;
+import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
@@ -12,8 +11,14 @@ import net.minecraftforge.fml.common.ModContainer;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-public class BCModGuiFactory implements IModGuiFactory {
-    @Override
+/**
+ * To use the ingame config gui with the BrandonsCore config system simply extend this class, return your mod id in getModID and set that class as your mods gui factory.
+ */
+public abstract class AbstractModGuiFactory implements IModGuiFactory {
+
+	public abstract String getModID();
+
+	@Override
 	public void initialize(Minecraft minecraftInstance) {
 
 	}
@@ -25,17 +30,16 @@ public class BCModGuiFactory implements IModGuiFactory {
 
 	@Override
 	public GuiScreen createConfigGui(GuiScreen parentScreen) {
-		ModContainer mod = Loader.instance().activeModContainer();
-		LogHelperBC.dev(mod);
-		if (mod != null && ModConfigParser.hasConfig(mod.getModId())) {
-			return new BCModConfigGui(parentScreen, mod);
+		ModContainer container = DataUtils.firstMatch(Loader.instance().getActiveModList(), mod -> mod.getModId().equals(getModID()));
+		if (container != null && ModConfigParser.hasConfig(getModID())) {
+			return new BCModConfigGui(parentScreen, container);
 		}
 		return null;
 	}
 
 	@Override
 	public Class<? extends GuiScreen> mainConfigGuiClass() {
-		return JEIModConfigGui.class;
+		return BCModConfigGui.class;
 	}
 
 	@Nullable

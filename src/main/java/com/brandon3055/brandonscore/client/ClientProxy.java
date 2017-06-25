@@ -30,11 +30,11 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
         DLRSCache.initialize();
         ProcessHandlerClient.init();
-        ModFeatureParser.registerFeatureRendering();
     }
 
     @Override
     public void registerPacketHandlers() {
+        super.registerPacketHandlers();
         PacketCustom.assignHandler("BCPCChannel", new ClientPacketHandler());
     }
 
@@ -85,5 +85,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void addProcess(IProcess iProcess) {
         ProcessHandlerClient.addProcess(iProcess);
+    }
+
+    @Override
+    public void registerModFeatures(String modid) {
+        super.registerModFeatures(modid);
+        ModFeatureParser.registerModRendering(modid);
     }
 }

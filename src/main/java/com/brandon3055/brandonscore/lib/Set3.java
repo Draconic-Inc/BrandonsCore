@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.lib;
 
 /**
  * Created by brandon3055 on 19/4/2016.
- *
  */
 public class Set3<A, B, C> {
     private A a;
@@ -37,6 +36,10 @@ public class Set3<A, B, C> {
 
     public void setC(C z) {
         this.c = z;
+    }
+
+    public static <A, B, C> Set3<A, B, C> of(A a, B b, C c) {
+        return new Set3<>(a, b, c);
     }
 
     @Override
@@ -77,5 +80,10 @@ public class Set3<A, B, C> {
 
             return true;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Set3: [" + String.valueOf(a) + ", " + String.valueOf(b) + ", " + String.valueOf(c) + "]";
     }
 }

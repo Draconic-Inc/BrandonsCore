@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.utils.DataUtils;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
@@ -186,7 +187,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
             if (!itemstack.isEmpty()) {
                 NBTTagCompound nbttagcompound = new NBTTagCompound();
                 if (inventoryStacks.size() > 255) {
-                    nbttagcompound.setShort("Slot", (byte) i);
+                    nbttagcompound.setShort("Slot", (short) i);
                 }
                 else {
                     nbttagcompound.setByte("Slot", (byte) i);
@@ -202,6 +203,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     protected void readInventoryFromNBT(NBTTagCompound compound) {
+        inventoryStacks.clear();
         NBTTagList nbttaglist = compound.getTagList("Items", 10);
 
         for (int i = 0; i < nbttaglist.tagCount(); ++i) {
@@ -233,8 +235,8 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public NBTTagCompound writeToItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = super.writeToItemStack(stack);
+    public NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest) {
+        NBTTagCompound dataTag = super.writeToItemStack(stack, willHarvest);
         writeInventoryToNBT(dataTag);
         return dataTag;
     }

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -15,59 +15,59 @@ public class ChatHelper {
 
     //region Translation
 
-    public static void tranServer(EntityPlayer player, String unlocalizedMessage, Object... args) {
-        if (!player.world.isRemote) {
+    public static void tranServer(ICommandSender player, String unlocalizedMessage, Object... args) {
+        if (!player.getEntityWorld().isRemote) {
             translate(player, unlocalizedMessage, args);
         }
     }
 
-    public static void tranServer(EntityPlayer player, String unlocalizedMessage, TextFormatting colour, Object... args) {
-        if (!player.world.isRemote) {
+    public static void tranServer(ICommandSender player, String unlocalizedMessage, TextFormatting colour, Object... args) {
+        if (!player.getEntityWorld().isRemote) {
             translate(player, unlocalizedMessage, colour, args);
         }
     }
 
-    public static void tranServer(EntityPlayer player, String unlocalizedMessage, Style style, Object... args) {
-        if (!player.world.isRemote) {
+    public static void tranServer(ICommandSender player, String unlocalizedMessage, Style style, Object... args) {
+        if (!player.getEntityWorld().isRemote) {
             translate(player, unlocalizedMessage, style, args);
         }
     }
 
-    public static void tranClient(EntityPlayer player, String unlocalizedMessage, Object... args) {
-        if (player.world.isRemote) {
+    public static void tranClient(ICommandSender player, String unlocalizedMessage, Object... args) {
+        if (player.getEntityWorld().isRemote) {
             translate(player, unlocalizedMessage, args);
         }
     }
 
-    public static void tranClient(EntityPlayer player, String unlocalizedMessage, TextFormatting colour, Object... args) {
-        if (player.world.isRemote) {
+    public static void tranClient(ICommandSender player, String unlocalizedMessage, TextFormatting colour, Object... args) {
+        if (player.getEntityWorld().isRemote) {
             translate(player, unlocalizedMessage, colour, args);
         }
     }
 
-    public static void tranClient(EntityPlayer player, String unlocalizedMessage, Style style, Object... args) {
-        if (player.world.isRemote) {
+    public static void tranClient(ICommandSender player, String unlocalizedMessage, Style style, Object... args) {
+        if (player.getEntityWorld().isRemote) {
             translate(player, unlocalizedMessage, style, args);
         }
     }
 
-    public static void translate(EntityPlayer player, String unlocalizedMessage, Object... args) {
+    public static void translate(ICommandSender player, String unlocalizedMessage, Object... args) {
         player.sendMessage(new TextComponentTranslation(unlocalizedMessage, args));
     }
 
-    public static void translate(EntityPlayer player, String unlocalizedMessage, TextFormatting colour, Object... args) {
+    public static void translate(ICommandSender player, String unlocalizedMessage, TextFormatting colour, Object... args) {
         player.sendMessage(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)));
     }
 
-    public static void translate(EntityPlayer player, String unlocalizedMessage, Style style, Object... args) {
+    public static void translate(ICommandSender player, String unlocalizedMessage, Style style, Object... args) {
         player.sendMessage(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style));
     }
 
     /**
      * Client side use only!
      */
-    public static void indexedTrans(EntityPlayer player, String unlocalizedMessage, int index, Object... args) {
-        if (player.world.isRemote) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, int index, Object... args) {
+        if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args), index);
         }
     }
@@ -75,8 +75,8 @@ public class ChatHelper {
     /**
      * Client side use only!
      */
-    public static void indexedTrans(EntityPlayer player, String unlocalizedMessage, TextFormatting colour, int index, Object... args) {
-        if (player.world.isRemote) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, TextFormatting colour, int index, Object... args) {
+        if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)), index);
         }
     }
@@ -84,8 +84,8 @@ public class ChatHelper {
     /**
      * Client side use only!
      */
-    public static void indexedTrans(EntityPlayer player, String unlocalizedMessage, Style style, int index, Object... args) {
-        if (player.world.isRemote) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, Style style, int index, Object... args) {
+        if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style), index);
         }
     }
@@ -94,59 +94,59 @@ public class ChatHelper {
 
     //region nonTranslation
 
-    public static void msgServer(EntityPlayer player, String message) {
-        if (!player.world.isRemote) {
+    public static void msgServer(ICommandSender player, String message) {
+        if (!player.getEntityWorld().isRemote) {
             message(player, message);
         }
     }
 
-    public static void msgServer(EntityPlayer player, String message, TextFormatting colour) {
-        if (!player.world.isRemote) {
+    public static void msgServer(ICommandSender player, String message, TextFormatting colour) {
+        if (!player.getEntityWorld().isRemote) {
             message(player, message, colour);
         }
     }
 
-    public static void msgServer(EntityPlayer player, String message, Style style) {
-        if (!player.world.isRemote) {
+    public static void msgServer(ICommandSender player, String message, Style style) {
+        if (!player.getEntityWorld().isRemote) {
             message(player, message, style);
         }
     }
 
-    public static void msgClient(EntityPlayer player, String message) {
-        if (player.world.isRemote) {
+    public static void msgClient(ICommandSender player, String message) {
+        if (player.getEntityWorld().isRemote) {
             message(player, message);
         }
     }
 
-    public static void msgClient(EntityPlayer player, String message, TextFormatting colour) {
-        if (player.world.isRemote) {
+    public static void msgClient(ICommandSender player, String message, TextFormatting colour) {
+        if (player.getEntityWorld().isRemote) {
             message(player, message, colour);
         }
     }
 
-    public static void msgClient(EntityPlayer player, String message, Style style) {
-        if (player.world.isRemote) {
+    public static void msgClient(ICommandSender player, String message, Style style) {
+        if (player.getEntityWorld().isRemote) {
             message(player, message, style);
         }
     }
 
-    public static void message(EntityPlayer player, String message) {
+    public static void message(ICommandSender player, String message) {
         player.sendMessage(new TextComponentString(message));
     }
 
-    public static void message(EntityPlayer player, String message, TextFormatting colour) {
+    public static void message(ICommandSender player, String message, TextFormatting colour) {
         player.sendMessage(new TextComponentString(message).setStyle(new Style().setColor(colour)));
     }
 
-    public static void message(EntityPlayer player, String message, Style style) {
+    public static void message(ICommandSender player, String message, Style style) {
         player.sendMessage(new TextComponentString(message).setStyle(style));
     }
 
     /**
      * Client side use only!
      */
-    public static void indexedMsg(EntityPlayer player, String message, int index) {
-        if (player.world.isRemote) {
+    public static void indexedMsg(ICommandSender player, String message, int index) {
+        if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), index);
         }
     }
@@ -154,8 +154,8 @@ public class ChatHelper {
     /**
      * Client side use only!
      */
-    public static void indexedMsg(EntityPlayer player, String message, TextFormatting colour, int index) {
-        if (player.world.isRemote) {
+    public static void indexedMsg(ICommandSender player, String message, TextFormatting colour, int index) {
+        if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(new Style().setColor(colour)), index);
         }
     }
@@ -163,8 +163,8 @@ public class ChatHelper {
     /**
      * Client side use only!
      */
-    public static void indexedMsg(EntityPlayer player, String message, Style style, int index) {
-        if (player.world.isRemote) {
+    public static void indexedMsg(ICommandSender player, String message, Style style, int index) {
+        if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(style), index);
         }
     }

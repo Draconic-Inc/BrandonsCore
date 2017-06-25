@@ -183,6 +183,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
             }
 
             selector = new MGuiSelectDialog(modularGui, list.xPos, list.yPos, list.xSize, list.ySize).setListener(this);
+            selector.allowOutsideClicks = true;
             selector.addChild(new MGuiButton(modularGui, xPos, selector.yPos - 12, 40, 12, TextFormatting.DARK_RED + I18n.format("gui.cancel")).setListener(this).setId("SELECT_CANCEL"));
             selector.addChild(new MGuiBorderedRect(modularGui, list.xPos, list.yPos, list.xSize + 1, list.ySize).setFillColour(0xFF909090).setBorderColour(0xFF000000));
 

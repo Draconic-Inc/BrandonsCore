@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore;
 
 import codechicken.lib.CodeChickenLib;
+import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTickTime;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
@@ -27,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = BrandonsCore.MODID,
         version = BrandonsCore.VERSION,
         name = BrandonsCore.MODNAME,
-        guiFactory = "com.brandon3055.brandonscore.client.gui.config.BCModGuiFactory",
+        guiFactory = "com.brandon3055.brandonscore.BCGuiFactory",
         dependencies = "required-after:codechickenlib@[" + CodeChickenLib.MOD_VERSION + ",)")
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
@@ -46,7 +47,7 @@ public class BrandonsCore {
     public BrandonsCore() {
         Logger deLog = LogManager.getLogger("draconicevolution");
         LogHelperBC.info("Brandon's Core online! Waiting for Draconic Evolution to join the party....");
-        if (Loader.isModLoaded("draconicelolution")) {
+        if (Loader.isModLoaded("draconicevolution")) {
             deLog.log(Level.INFO, "Draconic Evolution online!");
             LogHelperBC.info("Hay! There you are! Now lets destroy some worlds!!");
             deLog.log(Level.INFO, "Sounds like fun! Lets get to it!");
@@ -60,6 +61,7 @@ public class BrandonsCore {
     @Mod.EventHandler
     public void serverStart(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandTickTime());
+        event.registerServerCommand(new BCUtilCommands());
     }
 
     @Mod.EventHandler
@@ -69,12 +71,10 @@ public class BrandonsCore {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        FileHandler.init(event);
         ModFeatureParser.parseASMData(event.getAsmData());
         ModConfigParser.parseASMData(event.getAsmData());
         ModConfigParser.loadConfigs(event);
-        ModFeatureParser.registerFeatures();
-
-        FileHandler.init(event);
         proxy.preInit(event);
         ProcessHandler.init();
         registerNetwork();

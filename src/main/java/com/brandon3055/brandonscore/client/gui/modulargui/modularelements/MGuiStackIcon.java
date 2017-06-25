@@ -124,11 +124,12 @@ public class MGuiStackIcon extends MGuiElementBase {
 
     public ItemStack getStack() {
         int hash = stackReference.hashCode();
+        stackCache.clear();
         if (!stackCache.containsKey(hash)) {
             ItemStack stack = stackReference.createStack();
             if (stack.isEmpty()) {
                 stack = new ItemStack(Blocks.BARRIER);
-                toolTipOverride = new ArrayList<String>();
+                toolTipOverride = new ArrayList<>();
                 toolTipOverride.add("Failed to load Item Stack");
                 toolTipOverride.add("This may mean the mod the stack belongs to is not installed");
                 toolTipOverride.add("Or its just broken...");

@@ -23,6 +23,10 @@ repositories {
         name 'CB Maven FS'
         url "http://chickenbones.net/maven/"
     }
+    maven {
+        name "JEI Maven."
+        url "http://dvs1.progwml6.com/files/maven"
+    }
 }
 
 // Define properties file
@@ -35,7 +39,7 @@ configFile.withReader {
     project.ext.config = new ConfigSlurper().parse prop
 }
 
-version = "${config.minecraft_version}-${config.mod_version}"
+version = "${config.mc_version}-${config.mod_version}"
 group = "com.brandon3055.brandonscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BrandonsCore"
 
@@ -43,7 +47,7 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 minecraft {
-    version = config.minecraft_version + "-" + config.forge_version
+    version = config.mc_version + "-" + config.forge_version
     runDir = "run"
     mappings = "${config.mappings}"
     replace '${mod_version}', project.config.mod_version
@@ -58,21 +62,22 @@ if (System.getenv("BUILD_NUMBER") != null) {
 version = version + ".${buildNo}"
 
 dependencies {
-    compile "codechicken:CodeChickenLib:${config.minecraft_version}-${config.ccl_version}:deobf"
+    compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
+    compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 }
 
 
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "mc_version", project.minecraft.version
     inputs.property "ccl_version", config.ccl_version
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include '*.info'
 
-        // replace version and mcversion
+        // replace version and mc_version
         expand 'version': project.version, 'mc_version': project.minecraft.version, 'ccl_version': config.ccl_version
     }
 

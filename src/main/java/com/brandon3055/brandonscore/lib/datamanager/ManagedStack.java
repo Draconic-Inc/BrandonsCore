@@ -5,16 +5,20 @@ import codechicken.lib.data.MCDataOutput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nonnull;
+
 /**
  * Created by brandon3055 on 12/06/2017.
  * Will finish this class if i ever find a use for it
  */
 public class ManagedStack extends AbstractManagedData {
 
+    @Nonnull
 	public ItemStack value;
-	private ItemStack lastTickValue;
+	@Nonnull
+    private ItemStack lastTickValue;
 
-    public ManagedStack(ItemStack value) {
+    public ManagedStack(@Nonnull ItemStack value) {
         this.value = value;
         this.lastTickValue = value.copy();
     }

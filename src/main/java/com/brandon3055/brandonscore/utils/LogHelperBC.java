@@ -2,11 +2,16 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.asm.ObfMapping;
 import com.brandon3055.brandonscore.BrandonsCore;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Created by covers1624 on 3/21/2016.
@@ -27,7 +32,7 @@ public class LogHelperBC {
         logger.log(logLevel, String.valueOf(object), throwable);
     }
 
-    //Standard log entries.
+    //region Standard log entries.
 
     public static void dev(Object object) {
         if (!ObfMapping.obfuscated) {
@@ -67,7 +72,9 @@ public class LogHelperBC {
         log(Level.WARN, object);
     }
 
-    //log with format.
+    //endregion
+
+    //region Log with format.
 
     public static void dev(String object, Object... format) {
         if (!ObfMapping.obfuscated) {
@@ -107,7 +114,9 @@ public class LogHelperBC {
         log(Level.WARN, String.format(object, format));
     }
 
-    //Log Throwable with format.
+    //endregion
+
+    //region Log Throwable with format.
 
     public static void allError(String object, Throwable throwable, Object... format) {
         log(Level.ALL, String.format(object, format), throwable);
@@ -141,7 +150,10 @@ public class LogHelperBC {
         log(Level.WARN, String.format(object, format), throwable);
     }
 
-    //Log throwable.
+    //endregion
+
+    //region Log throwable.
+
     public static void allError(String object, Throwable throwable) {
         log(Level.ALL, object, throwable);
     }
@@ -174,7 +186,9 @@ public class LogHelperBC {
         log(Level.WARN, object, throwable);
     }
 
-    //Log with trace element.
+    //endregion
+
+    //region Log with trace element.
 
     public static void bigDev(String format, Object... data) {
         if (!ObfMapping.obfuscated) {
@@ -268,6 +282,69 @@ public class LogHelperBC {
         warn("****************************************");
     }
 
+    //endregion
+
+    //region formatted NBT log output
+
+    public static void logNBTDev(NBTTagCompound compound) {
+        logNBT(compound, true);
+    }
+
+    public static void logNBT(NBTTagCompound compound) {
+        logNBT(compound, false);
+    }
+
+    public static void logNBTDev(ItemStack stack) {
+        logNBTDev(stack.getTagCompound());
+    }
+
+    public static void logNBT(ItemStack stack) {
+        logNBTDev(stack.getTagCompound());
+    }
+
+    public static void logNBT(NBTTagCompound compound, boolean debug) {
+        if (debug && ObfMapping.obfuscated) {
+            return;
+        }
+
+        if (compound == null || compound.hasNoTags()) {
+            info("[NBT]: " + compound);
+            return;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        buildNBT(builder, compound, "", "Tag", false);
+        info(builder.toString());
+    }
+
+    public static void buildNBT(StringBuilder builder, NBTBase nbt, String indent, String name, boolean comma) {
+        if (nbt instanceof NBTTagCompound) {
+            builder.append("\n[NBT]: ").append(indent).append(name).append(":{");
+            Set<String> keys = ((NBTTagCompound) nbt).getKeySet();
+            int index = 0;
+            for (String key : keys) {
+                index++;
+                buildNBT(builder, ((NBTTagCompound) nbt).getTag(key), indent + "|  ", key, index < keys.size());
+            }
+            builder.append("\n[NBT]: ").append(indent).append("}").append(comma ? "," : "");
+        }
+        else if (nbt instanceof NBTTagList) {
+            builder.append("\n[NBT]: ").append(indent).append(name).append(":[");
+            int tacCount = ((NBTTagList)nbt).tagCount();
+            for (int i = 0; i < tacCount; i++) {
+                NBTBase base = ((NBTTagList) nbt).get(i);
+                buildNBT(builder, base , indent + "|  ", i+"", (i + 1) < tacCount);
+            }
+            builder.append("\n[NBT]: ").append(indent).append("]").append(comma ? "," : "");
+        }
+        else {
+            builder.append("\n[NBT]: ").append(indent).append(name).append(":").append(nbt.toString()).append(comma ? "," : "");
+        }
+    }
+
+
+    //endregion
+
     public static String[] comment = {"Sorry I did not mean to do that... Please forgive me?", "KABOOM!!!! It Blew Up!!!!", "Oh Sh** what was it this time!?!?", "WHAT DID YOU DO!?!?!?!.. Oh never mind that was me...", "HA! You thought you were going to play minecraft today? NO! You get to play \"Decode the Crash Report\" ", "Hmm. That was unexpected..."};
 
     public static void fatalErrorMessage(String error) {
@@ -307,10 +384,10 @@ public class LogHelperBC {
         long s = ms * 1000;
 
         if (ns > s) {
-            value = Utils.round(ns / (double)s, 1000) + "s";
+            value = Utils.round(ns / (double) s, 1000) + "s";
         }
-        else if (ns > 1000){
-            value = Utils.round(ns / (double)ms, 10000) + "ms";
+        else if (ns > 1000) {
+            value = Utils.round(ns / (double) ms, 10000) + "ms";
         }
         else {
             value = ns + "ns";

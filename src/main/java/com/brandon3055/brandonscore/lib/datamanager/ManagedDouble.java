@@ -7,12 +7,12 @@ import net.minecraft.nbt.NBTTagCompound;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedeDouble extends AbstractManagedData {
+public class ManagedDouble extends AbstractManagedData {
 
     public double value;
     private double lastTickValue;
 
-    public ManagedeDouble(double value) {
+    public ManagedDouble(double value) {
         this.value = this.lastTickValue = value;
     }
 

@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.registry;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Throwables;
@@ -34,8 +35,9 @@ import java.util.function.Consumer;
  */
 public class ModFeatureParser {
 
-    public static final String CATEGORY_BLOCKS = "Blocks";
-    public static final String CATEGORY_ITEMS = "Items";
+    public static final String CATEGORY_BLOCKS = "|Mod Items/Blocks.Blocks";
+    public static final String CATEGORY_ITEMS = "|Mod Items/Blocks.Items";
+    public static final String CATEGORY_INFO = "These settings allow you to disable Blocks and Items added by this mod.\nBy default disabling a block or item will not remove it completely.\nBut its recipe will be removed and it will be hidden from JEI\nIf you want to completely remove items or blocks you can set hardDisableMode to true.\nThis is not recommended unless you know what you are doing.";
 
     /**
      * Stores a boolean value for each feature thats indicates whether or not the feature is enabled.
@@ -121,22 +123,29 @@ public class ModFeatureParser {
      */
     public static void loadModFeatureConfig(String modid, Configuration configuration) {
         if (modFeatureMap.containsKey(modid)) {
-            hardDisableModeMap.put(modid, configuration.get("Block/Item Config", "hardDisableMode", false, "If set to true blocks and items will be completely removed from the game when disabled.\n" +
-                    "When set to softDisableMode they will just have their recipes removed and will not show up in NEI/JEI or the Creative Inventory.\n" +
-                    "Soft mode is recommended. Only use hard mode if you know what you are doing.").setRequiresMcRestart(true).getBoolean(false));
+            configuration.setCategoryComment("|Mod Items/Blocks", CATEGORY_INFO);
 
+            LogHelperBC.dev("Loading Item/Block config for: " + modid);
+            boolean[] comments = {false, false};
             modFeatureMap.get(modid).forEach(feature -> {
                 Object featureObj = allModFeatures.get(feature);
                 try {
                     if (!feature.canBeDisabled()) {
                         featureStates.put(featureObj, true);
-                    }
-                    else {
+                    } else {
                         String category = featureObj instanceof Block ? CATEGORY_BLOCKS : CATEGORY_ITEMS;
                         Property prop = configuration.get(category, feature.getName(), feature.isActive()).setRequiresMcRestart(true);
                         feature.setActive(prop.getBoolean(feature.isActive()));
                         featureStates.put(featureObj, feature.isActive());
                         ModConfigParser.addFeatureProperty(modid, prop, category);
+
+                        if (!comments[0] && featureObj instanceof Item) {
+                            configuration.setCategoryComment(category, "This section allows you to disable/enable items from this mod.");
+                            comments[0] = true;
+                        } else if (!comments[1] && featureObj instanceof Block) {
+                            configuration.setCategoryComment(category, "This section allows you to disable/enable blocks from this mod.");
+                            comments[1] = true;
+                        }
                     }
                 }
                 catch (Exception e) {
@@ -144,8 +153,10 @@ public class ModFeatureParser {
                     Throwables.propagate(e);
                 }
             });
-        }
-        else {
+
+            hardDisableModeMap.put(modid, configuration.get("|Mod Items/Blocks.Loader Settings", "hardDisableMode", false, "If set to true blocks and items will be completely removed from the game when disabled.\n" + "When set to softDisableMode they will just have their recipes removed and will not show up in NEI/JEI or the Creative Inventory.\n" + "Soft mode is recommended. Only use hard mode if you know what you are doing.").setRequiresMcRestart(true).getBoolean(false));
+            configuration.setCategoryComment("|Mod Items/Blocks.Loader Settings", "These are settings which define what happens when you disable a block or item.");
+        } else {
             LogHelperBC.warn("No features were detected for mod: " + modid + ". This maybe an issue or maybe this mod just does not have any items or blocks.");
         }
 
@@ -159,39 +170,38 @@ public class ModFeatureParser {
     //region Registration
 
     /**
-     * Registers all features that are not disabled via the config.
-     * Must be called AFTER loadFeatureConfig
+     * Call this from your mods preInit and make sure your mod is set to load AFTER Brandon'sCore
      */
-    public static void registerFeatures() {
-        for (String modid : modFeatureMap.keySet()) {
-            LogHelperBC.info("Registering features for mod: " + modid);
+    public static void registerModFeatures(String modid) {
+        BrandonsCore.proxy.registerModFeatures(modid);
+    }
 
-            for (Feature feature : modFeatureMap.get(modid)) {
-                if (!feature.isActive() && hardDisableModeMap.get(modid)) {
-                    LogHelperBC.dev("Skipping registration of disabled feature: " + feature.getRegistryName());
+    public static void registerMod(String modid) {
+        LogHelperBC.info("Registering features for mod: " + modid);
+
+        for (Feature feature : modFeatureMap.get(modid)) {
+            if (!feature.isActive() && hardDisableModeMap.get(modid)) {
+                LogHelperBC.dev("Skipping registration of disabled feature: " + feature.getRegistryName());
+                continue;
+            }
+
+            LogHelperBC.dev("Registering feature: " + feature.getRegistryName());
+            Object featureObj = allModFeatures.get(feature);
+
+            //Handler Overridden feature registration
+            if (featureObj instanceof IRegistryOverride) {
+                ((IRegistryOverride) featureObj).handleCustomRegistration(feature);
+                if (!((IRegistryOverride) featureObj).enableDefaultRegistration(feature)) {
                     continue;
                 }
+            }
 
-                LogHelperBC.dev("Registering feature: " + feature.getRegistryName());
-                Object featureObj = allModFeatures.get(feature);
-
-                //Handler Overridden feature registration
-                if (featureObj instanceof IRegistryOverride) {
-                    ((IRegistryOverride) featureObj).handleCustomRegistration(feature);
-                    if (!((IRegistryOverride) featureObj).enableDefaultRegistration(feature)) {
-                        continue;
-                    }
-                }
-
-                if (featureObj instanceof Block) {
-                    registerFeatureBlock(feature, (Block) featureObj);
-                }
-                else if (featureObj instanceof Item) {
-                    registerFeatureItem(feature, (Item) featureObj);
-                }
-                else {
-                    LogHelperBC.error("Skipping registration of invalid/unsupported feature type: " + featureObj);
-                }
+            if (featureObj instanceof Block) {
+                registerFeatureBlock(feature, (Block) featureObj);
+            } else if (featureObj instanceof Item) {
+                registerFeatureItem(feature, (Item) featureObj);
+            } else {
+                LogHelperBC.error("Skipping registration of invalid/unsupported feature type: " + featureObj);
             }
         }
     }
@@ -253,39 +263,31 @@ public class ModFeatureParser {
 
     //region Client Registration
 
-    /**
-     * Registers the rendering for all loaded and enabled features.
-     * Must be called AFTER registerFeatures, during Pre Initialization and from your Client Proxy
-     */
     @SideOnly(Side.CLIENT)
-    public static void registerFeatureRendering() {
-        for (String modid : modFeatureMap.keySet()) {
-            LogHelperBC.info("Registering feature renderers for mod: " + modid);
+    public static void registerModRendering(String modid) {
+        LogHelperBC.info("Registering feature renderers for mod: " + modid);
 
-            for (Feature feature : modFeatureMap.get(modid)) {
-                if (!feature.isActive() && hardDisableModeMap.get(modid)) {
+        for (Feature feature : modFeatureMap.get(modid)) {
+            if (!feature.isActive() && hardDisableModeMap.get(modid)) {
+                continue;
+            }
+
+            Object featureObj = allModFeatures.get(feature);
+
+            //Handler Overridden renderer registration
+            if (featureObj instanceof IRenderOverride) {
+                ((IRenderOverride) featureObj).registerRenderer(feature);
+                if (!((IRenderOverride) featureObj).registerNormal(feature)) {
                     continue;
                 }
+            }
 
-                Object featureObj = allModFeatures.get(feature);
-
-                //Handler Overridden renderer registration
-                if (featureObj instanceof IRenderOverride) {
-                    ((IRenderOverride) featureObj).registerRenderer(feature);
-                    if (!((IRenderOverride) featureObj).registerNormal(feature)) {
-                        continue;
-                    }
-                }
-
-                if (featureObj instanceof Block) {
-                    registerBlockRendering(feature, (Block) featureObj);
-                }
-                else if (featureObj instanceof Item) {
-                    registerItemVariants(feature, (Item) featureObj);
-                }
-                else {
-                    LogHelperBC.error("Skipping registration of invalid/unsupported feature type: " + featureObj);
-                }
+            if (featureObj instanceof Block) {
+                registerBlockRendering(feature, (Block) featureObj);
+            } else if (featureObj instanceof Item) {
+                registerItemVariants(feature, (Item) featureObj);
+            } else {
+                LogHelperBC.error("Skipping registration of invalid/unsupported feature type: " + featureObj);
             }
         }
     }
@@ -298,8 +300,7 @@ public class ModFeatureParser {
         //Register itemBlock rendering
         if (feature.variantMap().size() > 0) {
             registerItemVariants(feature, Item.getItemFromBlock(block));
-        }
-        else {
+        } else {
             ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(feature.getRegistryName().toString()));
         }
     }
@@ -353,11 +354,9 @@ public class ModFeatureParser {
 
             if (feature instanceof Item) {
                 stack = new ItemStack((Item) feature);
-            }
-            else if (feature instanceof Block) {
+            } else if (feature instanceof Block) {
                 stack = new ItemStack((Block) feature);
-            }
-            else {
+            } else {
                 throw new RuntimeException("WTF is this? " + feature + " Only Items and Blocks are valid features m8");
             }
 

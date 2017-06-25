@@ -9,7 +9,7 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public interface IDataRetainingTile {
 
-    NBTTagCompound writeToItemStack(ItemStack stack);
+    NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest);
 
     NBTTagCompound readFromItemStack(ItemStack stack);
 }

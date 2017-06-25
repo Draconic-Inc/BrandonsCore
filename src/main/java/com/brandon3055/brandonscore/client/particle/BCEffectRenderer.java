@@ -50,7 +50,7 @@ public class BCEffectRenderer {
         if (!particle.isRawGLParticle()) {
             throw new RuntimeException("Attempted to spawn a regular particle as a Raw GL particle! This is not allowed!");
         }
-        newGlParticleQueue.add(new PairKV<IGLFXHandler, Particle>(handler, particle));
+        newGlParticleQueue.add(new PairKV<>(handler, particle));
     }
 
     public void addEffect(ResourceLocation resourceLocation, Particle particle) {

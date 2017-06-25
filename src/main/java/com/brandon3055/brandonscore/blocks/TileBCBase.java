@@ -6,7 +6,9 @@ import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
+import com.brandon3055.brandonscore.lib.datamanager.IManagedData;
 import com.brandon3055.brandonscore.lib.datamanager.TileDataManager;
+import com.brandon3055.brandonscore.lib.datamanager.TileDataOptions;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
@@ -48,6 +50,13 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     }
 
     /**
+     * Convenience method for dataManager.register();
+     */
+    public <M extends IManagedData> TileDataOptions<M> register(String name, M managedData) {
+        return dataManager.register(name, managedData);
+    }
+
+    /**
      * super.update() must be called from your update method in order for Data Manager synchronization to work..
      */
     public void update() {
@@ -83,16 +92,17 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
         readExtraNBT(pkt.getNbtCompound());
     }
 
-//    //endregion
+    //    //endregion
 
     //region Packets
 
     /**
      * Send a data packet to the server, Supply a consumer to write the data you want to send
      */
-    public void sendPacketToServer(Consumer<MCDataOutput> writer) {
+    public void sendPacketToServer(Consumer<MCDataOutput> writer, int id) {
         PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.S_TILE_MESSAGE);
         packet.writePos(pos);
+        packet.writeByte((byte) id);
         writer.accept(packet);
         packet.sendToServer();
     }
@@ -100,31 +110,32 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     /**
      * Override this method to receive data from the server via sendPacketToServer
      */
-    public void receivePacketFromClient(MCDataInput data, EntityPlayerMP client) {}
+    public void receivePacketFromClient(MCDataInput data, EntityPlayerMP client, int id) {}
 
 
     /**
      * Create a packet to send to the client
      */
-    public PacketCustom sendPacketToClient(Consumer<MCDataOutput> writer) {
+    public PacketCustom sendPacketToClient(Consumer<MCDataOutput> writer, int id) {
         PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.C_TILE_MESSAGE);
         packet.writePos(pos);
+        packet.writeByte((byte) id);
         writer.accept(packet);
         return packet;
     }
 
-    public void sendPacketToClient(EntityPlayerMP player, Consumer<MCDataOutput> writer) {
-        sendPacketToClient(writer).sendToPlayer(player);
+    public void sendPacketToClient(EntityPlayerMP player, Consumer<MCDataOutput> writer, int id) {
+        sendPacketToClient(writer, id).sendToPlayer(player);
     }
 
-    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer) {
-        sendPacketToClient(writer).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
+    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer, int id) {
+        sendPacketToClient(writer, id).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
     }
 
     /**
      * Override this method to receive data from the client via sendPacketToClient
      */
-    public void receivePacketFromServer(MCDataInput data) {}
+    public void receivePacketFromServer(MCDataInput data, int id) {}
 
     //endregion
 
@@ -167,6 +178,11 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
         }
     }
 
+    /**
+     * checks that the player is allowed to interact with this tile bu firing the RightClickBlock.
+     * If the event is canceled bu another mod such as a permissions mod this will return false.
+     */
+    @Deprecated //Just a reminder that i nolonger need to do this in the tile because its handled via the packet handler.
     public boolean verifyPlayerPermission(EntityPlayer player) {
         PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, EnumFacing.UP, player.getLookVec());
         MinecraftForge.EVENT_BUS.post(event);
@@ -186,7 +202,7 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      * @return the tile data compound so that tiles that override this method can easily write extra data to it.
      */
     @Override
-    public NBTTagCompound writeToItemStack(ItemStack stack) {
+    public NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest) {
         NBTTagCompound dataTag = new NBTTagCompound();
         dataManager.writeToStackNBT(dataTag);
         ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, dataTag);
@@ -199,10 +215,8 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     @Nullable
     @Override
     public NBTTagCompound readFromItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = stack.getSubCompound(TILE_DATA_TAG);
-        if (dataTag != null) {
-            dataManager.readFromStackNBT(dataTag);
-        }
+        NBTTagCompound dataTag = stack.getOrCreateSubCompound(TILE_DATA_TAG);
+        dataManager.readFromStackNBT(dataTag);
         return dataTag;
     }
 

@@ -67,6 +67,7 @@ public class ModConfigParser {
                         if (field.isAnnotationPresent(ModConfigProperty.class)) {
                             PropertyHelper container = new PropertyHelper(modid, field, field.getAnnotation(ModConfigProperty.class));
                             modProps.add(container);
+                            LogHelperBC.dev("Loaded Property, " + modid + ":" + container.name);
                         }
                     }
                     catch (Throwable e) {
@@ -90,6 +91,8 @@ public class ModConfigParser {
         modConfigHelpers.forEach((modid, configHelper) -> modConfigurations.put(modid, configHelper.createConfiguration(event)));
 
         for (String modid : modPropertyHelpers.keySet()) {
+            LogHelperBC.dev("Mod Config File: " + modConfigurations.get(modid).getConfigFile());
+            LogHelperBC.info("Loading mod config for: " + modid);
             Configuration config = modConfigurations.get(modid);
             List<ConfigCategory> cats = modConfigCategories.computeIfAbsent(modid, id -> new ArrayList<>());
             for (PropertyHelper helper : modPropertyHelpers.get(modid)) {
@@ -105,6 +108,8 @@ public class ModConfigParser {
                     Throwables.propagate(e);
                 }
             }
+            modConfigHelpers.get(modid).onConfigLoaded();
+            LogHelperBC.dev("Should save? " + config.hasChanged());
             if (config.hasChanged()) {
                 config.save();
             }
@@ -210,13 +215,6 @@ public class ModConfigParser {
         connectedToServer = false;
     }
 
-    public static PropertyHelper findProperty(String modid, String propName) {
-        if (modPropertyHelpers.containsKey(modid)) {
-            return DataUtils.firstMatch(modPropertyHelpers.get(modid), prop -> prop.name.equals(propName));
-        }
-        return null;
-    }
-
     public static boolean isPropLocked(String modid, Property property) {
         Configuration config = modConfigurations.get(modid);
         if (config == null) {
@@ -257,6 +255,39 @@ public class ModConfigParser {
 
     //endregion
 
+    //region Misc helpers
+
+    public static PropertyHelper findProperty(String modid, String propName) {
+        if (modPropertyHelpers.containsKey(modid)) {
+            return DataUtils.firstMatch(modPropertyHelpers.get(modid), prop -> prop.name.equals(propName));
+        }
+        return null;
+    }
+
+    public static Property findUnwrappedProperty(String modid, String propName, String category) {
+        if (modPropertyHelpers.containsKey(modid)) {
+            PropertyHelper helper = DataUtils.firstMatch(modPropertyHelpers.get(modid), prop -> prop.name.equals(propName) && prop.category.equals(category));
+            return helper != null ? helper.property : null;
+        }
+        return null;
+    }
+
+    public static Property findUnwrappedProperty(String modid, String propName) {
+        if (modPropertyHelpers.containsKey(modid)) {
+            PropertyHelper helper = DataUtils.firstMatch(modPropertyHelpers.get(modid), prop -> prop.name.equals(propName));
+            return helper != null ? helper.property : null;
+        }
+        return null;
+    }
+
+    public static void saveModConfig(String modid) {
+        if (modConfigurations.containsKey(modid)) {
+            modConfigurations.get(modid).save();
+        }
+    }
+
+    //endregion
+
     public static class PropertyHelper {
 
         public final String name;
@@ -290,6 +321,7 @@ public class ModConfigParser {
             this.requiresWorldRestart = true;
             this.requiresSync = true;
             this.autoSync = false;
+            this.property = prop;
         }
 
         public PropertyHelper(String modid, Field propField, ModConfigProperty modProperty) {
@@ -354,7 +386,6 @@ public class ModConfigParser {
 
             if (propField.isAnnotationPresent(ValidValues.class)) {
                 ValidValues vv = propField.getAnnotation(ValidValues.class);
-                LogHelperBC.dev("Value List Detected! " + vv.values().length + " for config " + name);
                 property.setValidValues(vv.values());
             }
 

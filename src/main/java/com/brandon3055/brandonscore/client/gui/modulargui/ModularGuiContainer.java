@@ -326,7 +326,6 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         RenderHelper.enableStandardItemLighting();
     }
 
-    //Turns out i didnt actually need to override anything in this but who knows maby i will in the future.
     @Override
     public void drawSlot(Slot slotIn) {
         int xPos = slotIn.xPos;
@@ -336,6 +335,10 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         boolean flag1 = slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && !this.isRightMouseClick;
         ItemStack itemstack1 = this.mc.player.inventory.getItemStack();
         String s = null;
+
+        if (manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100)) {
+            return;
+        }
 
         if (slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && this.isRightMouseClick && !itemstack.isEmpty())
         {

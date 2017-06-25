@@ -174,7 +174,7 @@ public class EnergyHelper {
         if (stack.isEmpty()) {
             return 0;
         }
-        else if (stack.getItem() instanceof IEnergyReceiver) {
+        else if (stack.getItem() instanceof IEnergyContainerItem) {
             return ((IEnergyContainerItem) stack.getItem()).receiveEnergy(stack, energy, simulate);
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {

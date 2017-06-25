@@ -12,8 +12,8 @@ public class ManagedShort extends AbstractManagedData {
     public short value;
     private short lastTickValue;
 
-    public ManagedShort(short value) {
-        this.value = this.lastTickValue = value;
+    public ManagedShort(int value) {
+        this.value = this.lastTickValue = (short) value;
     }
 
     @Override

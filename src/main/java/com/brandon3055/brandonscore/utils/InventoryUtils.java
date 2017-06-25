@@ -52,34 +52,39 @@ public class InventoryUtils {
         return false;
     }
 
-//    /**//TODO This is cancer... If i need this then make it better.
-//     * Inserts item held in the players hand or extract the item into the players hand or on the ground if there is already a stack in the slot.
-//     * @param slot The inventory slot to extract from or insert into.
-//     * @param inventory The inventory.
-//     * @param player The player.
-//     * @param validator An optional validator that allows you to specifu if an item is valid for the inventory
-//     */
-//    public static void handleAddOrTakeStack(int slot, IInventory inventory, EntityPlayer player, @Nullable Predicate<ItemStack> validator) {
-//        if (player.world.isRemote) {
-//            return;
-//        }
-//        if (!inventory.getStackInSlot(slot).isEmpty()) {
-//            if (player.getHeldItemMainhand().isEmpty()) {
-//                player.setHeldItem(EnumHand.MAIN_HAND, inventory.getStackInSlot(slot));
-//                inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
-//            } else {
-//                player.world.spawnEntity(new EntityItem(player.world, player.posX, player.posY, player.posZ, inventory.getStackInSlot(slot)));
-//                inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
-//            }
-//        }
-//        else {
-//            ItemStack stack = player.getHeldItemMainhand();
-//            if (!stack.isEmpty() && (validator == null || validator.test(stack))) {
-//                inventory.setInventorySlotContents(slot, player.getHeldItemMainhand());
-//                player.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
-//            }
-//        }
-//    }
+    /**
+     * Used to transfer an item between an inventory slot and the players hand. E.g. inserting or removing a dislocator from a receptacle.
+     * If the player is holding an item that is valid for the slot it will be transferred to the slot.
+     * If the slot is already occupied the stack in the slot will be transferred to the players main hand, failing that the players inventory
+     * or if the players inventory is full the stack will be dropped at the players feet.
+     * <p>
+     * When inserting will first try to insert the item in the main hand and if that fails it will try the off hand.
+     * Will not transfer partial stacks.
+     */
+    public static void handleHeldStackTransfer(int slot, IInventory inventory, EntityPlayer player) {
+        if (player.world.isRemote) {
+            return;
+        }
+
+        if (!inventory.getStackInSlot(slot).isEmpty()) {
+            if (player.getHeldItemMainhand().isEmpty()) {
+                player.setHeldItem(EnumHand.MAIN_HAND, inventory.getStackInSlot(slot));
+            }
+            else {
+                givePlayerStack(player, inventory.getStackInSlot(slot));
+            }
+            inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+        }
+        else {
+            DataUtils.forEach(EnumHand.values(), enumHand -> {
+                ItemStack stack = player.getHeldItem(enumHand);
+                if (!stack.isEmpty() && inventory.isItemValidForSlot(slot, stack) && inventory.getStackInSlot(slot).isEmpty()) {
+                    inventory.setInventorySlotContents(slot, stack);
+                    player.setHeldItem(enumHand, ItemStack.EMPTY);
+                }
+            });
+        }
+    }
 
     public static void consumeHeldItem(EntityPlayer player, ItemStack stack, EnumHand hand) {
         stack.shrink(1);
@@ -92,15 +97,16 @@ public class InventoryUtils {
         }
         player.inventory.addItemStackToInventory(stack);
         if (stack.getCount() > 0) {
-            player.world.spawnEntity(new EntityItem(player.world, player.posX, player.posY, player.posZ, stack));
+            dropItemNoDelay(stack, player.world, Vector3.fromEntity(player));
         }
     }
 
-    public static void dropItem(ItemStack stack, World world, Vector3 dropLocation) {
+    public static void dropItemNoDelay(ItemStack stack, World world, Vector3 dropLocation) {
         EntityItem item = new EntityItem(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
         item.motionX = world.rand.nextGaussian() * 0.05;
         item.motionY = world.rand.nextGaussian() * 0.05 + 0.2F;
         item.motionZ = world.rand.nextGaussian() * 0.05;
         world.spawnEntity(item);
+        item.setPickupDelay(0);
     }
 }

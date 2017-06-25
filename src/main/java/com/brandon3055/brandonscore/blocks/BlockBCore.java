@@ -56,7 +56,6 @@ public class BlockBCore extends Block {
         super.getSubBlocks(item, tab, list);
     }
 
-
     //endregion
 
     //region Setters & Getters
@@ -76,7 +75,7 @@ public class BlockBCore extends Block {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile) {
-            ((IDataRetainingTile) tile).writeToItemStack(stack);
+            ((IDataRetainingTile) tile).writeToItemStack(stack, false);
         }
 
         return stack;
@@ -87,8 +86,15 @@ public class BlockBCore extends Block {
         return this;
     }
 
+    /**
+     * Adds a name mapping for the given metadata.
+     * The overridden unlocalized name will be as follows.<br>
+     * tile.[modid]:[nameAddedByThisMethod].name<br>
+     * This also sets hasSubTypes to true.
+     */
     public BlockBCore addName(int meta, String name) {
         nameOverrides.put(meta, name);
+        this.setHasSubItemTypes(true);
         return this;
     }
 
@@ -191,7 +197,7 @@ public class BlockBCore extends Block {
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
         if (te instanceof IDataRetainingTile) {
             ItemStack stack = new ItemStack(this);
-            ((IDataRetainingTile) te).writeToItemStack(stack);
+            ((IDataRetainingTile) te).writeToItemStack(stack, true);
             spawnAsEntity(world, pos, stack);
             //Remove tile to make sure no one else can mess with it and dupe its contents.
             world.removeTileEntity(pos);

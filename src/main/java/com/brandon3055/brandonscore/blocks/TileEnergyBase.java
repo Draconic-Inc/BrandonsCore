@@ -69,8 +69,8 @@ public class TileEnergyBase extends TileBCBase {
     }
 
     @Override
-    public NBTTagCompound writeToItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = super.writeToItemStack(stack);
+    public NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest) {
+        NBTTagCompound dataTag = super.writeToItemStack(stack, willHarvest);
         energyStorage.writeToNBT(dataTag);
         return dataTag;
     }

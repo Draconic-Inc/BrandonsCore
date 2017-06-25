@@ -15,7 +15,7 @@ public class TileDataOptions<D> {
     /**
      * Call to have the data saved to the tile's nbt.
      */
-    public TileDataOptions<D> saveToNBT() {
+    public TileDataOptions<D> saveToTile() {
         saveToNBT = true;
         return this;
     }

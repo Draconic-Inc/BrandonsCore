@@ -12,8 +12,8 @@ public class ManagedByte extends AbstractManagedData {
     public byte value;
     private byte lastTickValue;
 
-    public ManagedByte(byte value) {
-        this.value = this.lastTickValue = value;
+    public ManagedByte(int value) {
+        this.value = this.lastTickValue = (byte) value;
     }
 
     @Override

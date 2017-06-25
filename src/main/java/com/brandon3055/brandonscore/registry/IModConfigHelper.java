@@ -26,4 +26,9 @@ public interface IModConfigHelper {
      * @param propertyName
      */
     default void onConfigChanged(String propertyName, String propertyCategory) {}
+
+    /**
+     * Called after the config is loaded but before the config saves (if a change occurred)
+     */
+    default void onConfigLoaded(){}
 }

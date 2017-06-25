@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.network.ServerPacketHandler;
+import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
@@ -20,6 +21,7 @@ public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new BCEventHandler());
+        MinecraftForge.EVENT_BUS.register(new ModFeatureParser());
     }
 
     public void registerPacketHandlers() {
@@ -71,5 +73,9 @@ public class CommonProxy {
 
     public void addProcess(IProcess iProcess) {
         ProcessHandler.addProcess(iProcess);
+    }
+
+    public void registerModFeatures(String modid) {
+        ModFeatureParser.registerMod(modid);
     }
 }

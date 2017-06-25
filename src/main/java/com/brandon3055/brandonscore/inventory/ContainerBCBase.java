@@ -8,8 +8,11 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Created by brandon3055 on 28/3/2016.
@@ -74,14 +77,16 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        if (tile instanceof IInventory) return ((IInventory) tile).isUsableByPlayer(playerIn);
+        if (tile instanceof IInventory) {
+            return ((IInventory) tile).isUsableByPlayer(playerIn);
+        }
         return tile != null;
     }
 
     @Nullable
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
@@ -99,7 +104,17 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
         if (slotId < inventorySlots.size() && slotId >= 0) {
             return inventorySlots.get(slotId);
         }
-
         return null;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setAll(List<ItemStack> stacks) {
+        for (int i = 0; i < stacks.size(); ++i) {
+            Slot slot = getSlot(i);
+            if (slot != null) {
+                slot.putStack(stacks.get(i));
+            }
+        }
     }
 }

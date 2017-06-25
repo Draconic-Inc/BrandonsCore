@@ -25,7 +25,8 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             BlockPos pos = packet.readPos();
             TileEntity tile = Minecraft.getMinecraft().world.getTileEntity(pos);
             if (tile instanceof TileBCBase) {
-                ((TileBCBase) tile).receivePacketFromServer(packet);
+                int id = packet.readByte() & 0xFF;
+                ((TileBCBase) tile).receivePacketFromServer(packet, id);
             }
         }
         else if (packet.getType() == PacketDispatcher.C_SERVER_CONFIG_SYNC) {

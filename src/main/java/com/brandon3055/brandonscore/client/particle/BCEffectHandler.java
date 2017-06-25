@@ -7,6 +7,9 @@ import com.brandon3055.brandonscore.network.PacketSpawnParticle;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -129,6 +132,17 @@ public class BCEffectHandler {
 
                 if (particle instanceof BCParticle && ((BCParticle) particle).isRawGLParticle()) {
                     IGLFXHandler iglfxHandler = ((BCParticle) particle).getFXHandler();
+                    iglfxHandler = new IGLFXHandler() {
+                        @Override
+                        public void preDraw(int layer, VertexBuffer vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+
+                        }
+
+                        @Override
+                        public void postDraw(int layer, VertexBuffer vertexbuffer, Tessellator tessellator) {
+
+                        }
+                    };
                     if (iglfxHandler == null) {
                         LogHelperBC.bigError("Attempted to spawn a raw GL particle with a null glfx handler! " + particle);
                         return;

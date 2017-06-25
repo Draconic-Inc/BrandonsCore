@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
+import codechicken.lib.util.ItemUtils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.entity.item.EntityItem;
@@ -33,7 +34,7 @@ public class FeatureUtils {
             return;
         }
 
-        InventoryUtils.dropItem(stack, world, dropLocation);
+        ItemUtils.dropItem(stack, world, dropLocation);
     }
 
     public static void dropItemNoDellay(ItemStack stack, World world, Vector3 dropLocation) {

@@ -24,6 +24,9 @@ public class StackReference {
         this.metadata = metadata;
         this.stackSize = stackSize;
         this.nbt = nbt;
+        if (stackSize <= 0) {
+            this.stackSize = 1;
+        }
     }
 
     public StackReference(String stackRegName, int stackSize, int metadata) {
@@ -35,7 +38,7 @@ public class StackReference {
     }
 
     public StackReference(String stackRegName) {
-        this(stackRegName, 0);
+        this(stackRegName, 1);
     }
 
     public StackReference(ItemStack stack) {
@@ -53,7 +56,7 @@ public class StackReference {
     public ItemStack createStack() {
         Item item = Item.REGISTRY.getObject(stack);
         if (item == null) {
-            return null;
+            return ItemStack.EMPTY;
         }
         else {
             ItemStack itemStack = new ItemStack(item, stackSize, metadata);
