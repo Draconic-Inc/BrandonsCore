@@ -85,9 +85,6 @@ processResources {
 }
 
 def commonManifest = {
-    attributes 'FMLCorePluginContainsFMLMod': 'true'
-//    attributes 'FMLCorePlugin': 'codechicken.core.launch.DepLoader'
-    attributes 'FMLCorePlugin': 'com.brandon3055.brandonscore.asm.LoadingPlugin'
     attributes 'FMLAT': 'BrandonsCore_at.cfg'
 }
 
