@@ -45,23 +45,20 @@ public class BCClientEventHandler {
 
     //region sorter
 
-    private static Comparator<Integer> sorter = new Comparator<Integer>() {
-        @Override
-        public int compare(Integer value, Integer compare) {
-            long totalValue = 0;
-            for (Integer time : dimTickTimes.get(value)) {
-                totalValue += time;
-            }
-            totalValue /= 200;
-
-            long totalCompare = 0;
-            for (Integer time : dimTickTimes.get(compare)) {
-                totalCompare += time;
-            }
-            totalCompare /= 200;
-
-            return totalValue > totalCompare ? -1 : totalValue < totalCompare ? 1 : 0;
+    private static Comparator<Integer> sorter = (value, compare) -> {
+        long totalValue = 0;
+        for (Integer time : dimTickTimes.get(value)) {
+            totalValue += time;
         }
+        totalValue /= 200;
+
+        long totalCompare = 0;
+        for (Integer time : dimTickTimes.get(compare)) {
+            totalCompare += time;
+        }
+        totalCompare /= 200;
+
+        return totalValue > totalCompare ? -1 : totalValue < totalCompare ? 1 : 0;
     };
 
     //endregion
@@ -86,7 +83,7 @@ public class BCClientEventHandler {
         if (elapsedTicks % 100 == 0 && debugTimeout > 0) {
             sortingOrder.clear();
             sortingOrder.addAll(dimTickTimes.keySet());
-            Collections.sort(sortingOrder, sorter);
+            sortingOrder.sort(sorter);
         }
     }
 
