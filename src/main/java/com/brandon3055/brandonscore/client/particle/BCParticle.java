@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -33,7 +34,7 @@ public class BCParticle extends Particle {
     }
 
     public IGLFXHandler getFXHandler(){
-        return null;
+        return DEFAULT_FX_HANDLER;
     }
 
     /**
@@ -135,4 +136,16 @@ public class BCParticle extends Particle {
         vertexbuffer.pos((double) (renderX + rotationX * scale + rotationXY * scale), (double) (renderY + rotationZ * scale), (double) (renderZ + rotationYZ * scale + rotationXZ * scale)).tex((double) minU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
         vertexbuffer.pos((double) (renderX + rotationX * scale - rotationXY * scale), (double) (renderY - rotationZ * scale), (double) (renderZ + rotationYZ * scale - rotationXZ * scale)).tex((double) minU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
     }
+
+    private static IGLFXHandler DEFAULT_FX_HANDLER = new IGLFXHandler() {
+        @Override
+        public void preDraw(int layer, VertexBuffer vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+
+        }
+
+        @Override
+        public void postDraw(int layer, VertexBuffer vertexbuffer, Tessellator tessellator) {
+
+        }
+    };
 }
