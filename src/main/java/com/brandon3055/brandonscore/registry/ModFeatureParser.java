@@ -179,6 +179,11 @@ public class ModFeatureParser {
     public static void registerMod(String modid) {
         LogHelperBC.info("Registering features for mod: " + modid);
 
+        if (!modFeatureMap.containsKey(modid)) {
+            LogHelperBC.error("Mod " + modid + " Attempted to register features but has not provided any features to register!");
+            return;
+        }
+
         for (Feature feature : modFeatureMap.get(modid)) {
             if (!feature.isActive() && hardDisableModeMap.get(modid)) {
                 LogHelperBC.dev("Skipping registration of disabled feature: " + feature.getRegistryName());
@@ -266,6 +271,11 @@ public class ModFeatureParser {
     @SideOnly(Side.CLIENT)
     public static void registerModRendering(String modid) {
         LogHelperBC.info("Registering feature renderers for mod: " + modid);
+
+        if (!modFeatureMap.containsKey(modid)) {
+            LogHelperBC.error("Mod " + modid + " Attempted to register feature renderers but has not provided any feature renderers to register!");
+            return;
+        }
 
         for (Feature feature : modFeatureMap.get(modid)) {
             if (!feature.isActive() && hardDisableModeMap.get(modid)) {

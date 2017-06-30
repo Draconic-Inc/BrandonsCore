@@ -45,9 +45,9 @@ public class BrandonsCore {
     public static SimpleNetworkWrapper network;
 
     public BrandonsCore() {
-        Logger deLog = LogManager.getLogger("draconicevolution");
+        Logger deLog = LogManager.getLogger("projectintelligence");
         LogHelperBC.info("Brandon's Core online! Waiting for Draconic Evolution to join the party....");
-        if (Loader.isModLoaded("draconicevolution")) {
+        if (Loader.isModLoaded("projectintelligence")) {
             deLog.log(Level.INFO, "Draconic Evolution online!");
             LogHelperBC.info("Hay! There you are! Now lets destroy some worlds!!");
             deLog.log(Level.INFO, "Sounds like fun! Lets get to it!");
