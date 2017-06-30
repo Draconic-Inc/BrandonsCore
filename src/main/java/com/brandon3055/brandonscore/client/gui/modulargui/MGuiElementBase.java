@@ -33,10 +33,10 @@ import java.util.List;
  * Created by brandon3055 on 30/08/2016.
  */
 public class MGuiElementBase {
-    public int xPos;
-    public int yPos;
-    public int xSize;
-    public int ySize;
+    private int xPos;
+    private int yPos;
+    private int xSize;
+    private int ySize;
     private boolean enabled = true;
     public IModularGui modularGui;
     /**
