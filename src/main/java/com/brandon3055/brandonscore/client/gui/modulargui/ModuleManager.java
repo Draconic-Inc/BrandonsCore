@@ -1,5 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
+import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -16,15 +19,25 @@ public class ModuleManager {
     protected LinkedList<MGuiElementBase> actionList = new LinkedList<MGuiElementBase>();
     private boolean requiresReSort = false;
     private IModularGui parentGui;
+    private Minecraft mc;
+    private int width;
+    private int height;
     private List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
 
     public ModuleManager(IModularGui parentGui) {
         this.parentGui = parentGui;
     }
 
-    public void initElements() {
+    //This will now be called by the parent when the element is added to its parent and after the parent calls applyGeneralElementData.
+//    public void addChildElements() {
+//        for (MGuiElementBase element : elements) {
+//            element.addChildElements();
+//        }
+//    }
+
+    public void reloadElements() {
         for (MGuiElementBase element : elements) {
-            element.initElement();
+            element.reloadElement();
         }
     }
 
@@ -39,15 +52,21 @@ public class ModuleManager {
      * @return The Element.
      */
     public MGuiElementBase add(MGuiElementBase element, int displayLevel) {
-        if (displayLevel > 4) {
-            LogHelperBC.error("ModularGui Display Level Out Of Bounds! Max is 4, someone is using " + displayLevel);
+        if (displayLevel >= 950) {
+            LogHelperBC.error("ModularGui Display Level Out Of Bounds! Can not be greater than 950 " + displayLevel);
         }
-        if (element.mc == null || element.fontRenderer == null) {
-            element.setWorldAndResolution(parentGui.getMinecraft(), parentGui.screenWidth(), parentGui.screenHeight());
-        }
+        element.applyGeneralElementData(parentGui, mc, width, height);
         element.displayLevel = displayLevel;
         elements.add(element);
+        if (!element.isElementInitialized()) {
+            element.addChildElements();
+        }
         requiresReSort = true;
+
+        if (element instanceof IGuiEventDispatcher && ((IGuiEventDispatcher) element).getListener() == null && parentGui instanceof IGuiEventListener) {
+            ((IGuiEventDispatcher) element).setListener((IGuiEventListener) parentGui);
+        }
+
         return element;
     }
 
@@ -178,37 +197,49 @@ public class ModuleManager {
         return false;
     }
 
+    /**
+     * Returns a list of all elements who's bounds contain the given position.
+     * This can for example be used to find all elements that are currently under the mouse cursor.
+     * @param posX The x position.
+     * @param posY The y position.
+     * @return a list of elements who's {@link MGuiElementBase#isMouseOver} method returns true with the given position.
+     */
+    public List<MGuiElementBase> getElementsAtPosition(int posX, int posY) {
+        List<MGuiElementBase> list = new LinkedList<>();
+
+        for (MGuiElementBase element : elements) {
+            element.getElementsAtPosition(posX, posY, list);
+        }
+
+        return list;
+    }
+
+    /**
+     * Similar to {@link #getElementsAtPosition(int, int)} except only returns elements that are an instance of the specified class.
+     * Note: This method is a little inefficient so probably not something you want to be doing say every render frame.
+     */
+    public <C extends MGuiElementBase> List<C> getElementsAtPosition(int posX, int posY, Class<C> clazz) {
+        List<MGuiElementBase> list = getElementsAtPosition(posX, posY);
+        List<C> matches = new LinkedList<>();
+        DataUtils.forEachMatch(list, element -> clazz.isAssignableFrom(element.getClass()), element -> matches.add(clazz.cast(element)));
+        return matches;
+    }
+
     //endregion
 
     //region Render
 
-    public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public void renderElements(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         GlStateManager.color(1F, 1F, 1F, 1F);
         for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
-                parentGui.setZLevel(element.displayLevel * 200);
-                element.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
-            }
-        }
-    }
-
-    public void renderForegroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        for (MGuiElementBase element : elements) {
-            if (element.isEnabled()) {
-                parentGui.setZLevel(element.displayLevel * 200);
-                element.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
+                parentGui.setZLevel(element.displayLevel);
+                element.renderElement(mc, mouseX, mouseY, partialTicks);
             }
         }
     }
 
     public boolean renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-//        for (MGuiElementBase element : elements) {
-//            if (element.isEnabled()) {
-//                parentGui.setZLevel(element.displayLevel * 200);
-//                element.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
-//            }
-//        }
-
         int renderDisplay = -100;
         for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && renderDisplay > -100 && element.displayLevel < renderDisplay) {
@@ -232,7 +263,19 @@ public class ModuleManager {
      */
     public boolean isAreaUnderElement(int posX, int posY, int xSize, int ySize, int zLevel) {
         for (MGuiElementBase element : elements) {
-            if (element.isEnabled() && element.displayLevel * 200 >= zLevel && element.getRectangle().intersects(posX, posY, xSize, ySize)) {
+            if (element.isEnabled() && element.displayLevel >= zLevel && element.getRect().intersects(posX, posY, xSize, ySize)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the specified point is under another element on a higher zLevel.
+     */
+    public boolean isPointUnderElement(int posX, int posY, int zLevel) {
+        for (MGuiElementBase element : elements) {
+            if (element.isEnabled() && element.displayLevel >= zLevel && element.getRect().contains(posX, posY)) {
                 return true;
             }
         }
@@ -261,25 +304,29 @@ public class ModuleManager {
     }
 
     public void setWorldAndResolution(Minecraft mc, int width, int height) {
+        this.mc = mc;
+        this.width = width;
+        this.height = height;
         for (MGuiElementBase element : elements) {
-            element.setWorldAndResolution(mc, width, height);
+            element.applyGeneralElementData(parentGui, mc, width, height);
         }
-        initElements();
+        reloadElements();
     }
 
     //endregion
 
     //region Sorting
 
-    private static Comparator<MGuiElementBase> renderSorter = new Comparator<MGuiElementBase>() {
-        @Override
-        public int compare(MGuiElementBase o1, MGuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? -1 : o1.displayLevel > o2.displayLevel ? 1 : 0; }
-    };
+    /**
+     * When rendering elements need to be rendered in order of lowest first so that elements on higher z levels actually render on top.
+     */
+    private static Comparator<MGuiElementBase> renderSorter = (o1, o2) -> o1.displayLevel < o2.displayLevel ? -1 : o1.displayLevel > o2.displayLevel ? 1 : 0;
 
-    private static Comparator<MGuiElementBase> actionSorter = new Comparator<MGuiElementBase>() {
-        @Override
-        public int compare(MGuiElementBase o1, MGuiElementBase o2) { return o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0; }
-    };
+    /**
+     * When checking for element clicks we need the reverse of the renderSorter because we want to first check the upper most elements for clicks before
+     * passing the click to lower potentially hidden elements.
+     */
+    private static Comparator<MGuiElementBase> actionSorter = (o1, o2) -> o1.displayLevel < o2.displayLevel ? 1 : o1.displayLevel > o2.displayLevel ? -1 : 0;
 
     private void sort() {
         Collections.sort(elements, renderSorter);
@@ -289,5 +336,4 @@ public class ModuleManager {
     }
 
     //endregion
-
 }

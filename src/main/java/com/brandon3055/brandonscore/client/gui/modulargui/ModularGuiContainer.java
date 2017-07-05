@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLabel;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -26,11 +27,31 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     protected ModuleManager manager = new ModuleManager(this);
     protected int zLevel = 0;
     protected T container;
-    protected boolean slotsHidden = false;
 
     public ModularGuiContainer(T container) {
         super(container);
         this.container = container;
+        this.mc = Minecraft.getMinecraft();
+        ScaledResolution scaledresolution = new ScaledResolution(mc);
+        this.itemRender = mc.getRenderItem();
+        this.fontRendererObj = mc.fontRendererObj;
+        this.width = scaledresolution.getScaledWidth();
+        this.height = scaledresolution.getScaledHeight();
+        manager.setWorldAndResolution(mc, width, height);
+        this.addElements(manager);
+    }
+
+    /**
+     * If you need to do anything in init use the reloadGui method, Remember you should no longer be adding elements during init as it may be called more than once.
+     */
+    @Override
+    public final void initGui() {
+        super.initGui();
+        reloadGui();
+    }
+
+    public void reloadGui() {
+        manager.reloadElements();
     }
 
     //region IModularGui
@@ -58,21 +79,6 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     @Override
     public int guiTop() {
         return guiTop;
-    }
-
-    @Override
-    public int screenWidth() {
-        return width;
-    }
-
-    @Override
-    public int screenHeight() {
-        return height;
-    }
-
-    @Override
-    public Minecraft getMinecraft() {
-        return mc;
     }
 
     public ModuleManager getManager() {
@@ -157,12 +163,12 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(-guiLeft(), -guiTop(), 0.0F);
-
-        renderForegroundLayer(mouseX, mouseY, mc.getRenderPartialTicks());
-
-        GlStateManager.popMatrix();
+//        GlStateManager.pushMatrix();
+//        GlStateManager.translate(-guiLeft(), -guiTop(), 0.0F);
+//
+//        renderForegroundLayer(mouseX, mouseY, mc.getRenderPartialTicks());
+//
+//        GlStateManager.popMatrix();
     }
 
     @Override
@@ -174,17 +180,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
 
     public void renderBackgroundLayer(int mouseX, int mouseY, float partialTicks) {
-        manager.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
-
-        for (int i1 = 0; i1 < this.inventorySlots.inventorySlots.size(); ++i1) {
-            Slot slot = (Slot) this.inventorySlots.inventorySlots.get(i1);
-
-
-        }
-    }
-
-    public void renderForegroundLayer(int mouseX, int mouseY, float partialTicks) {
-        manager.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
+        manager.renderElements(mc, mouseX, mouseY, partialTicks);
     }
 
     public void renderOverlayLayer(int mouseX, int mouseY, float partialTicks) {
