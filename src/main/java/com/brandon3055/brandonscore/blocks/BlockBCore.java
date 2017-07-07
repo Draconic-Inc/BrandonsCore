@@ -196,7 +196,7 @@ public class BlockBCore extends Block {
     @Override
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
         if (te instanceof IDataRetainingTile) {
-            ItemStack stack = new ItemStack(this);
+            ItemStack stack = new ItemStack(this, 1, damageDropped(state));
             ((IDataRetainingTile) te).writeToItemStack(stack, true);
             spawnAsEntity(world, pos, stack);
             //Remove tile to make sure no one else can mess with it and dupe its contents.
