@@ -1,9 +1,9 @@
 package com.brandon3055.brandonscore.lib;
 
-import cofh.api.energy.IEnergyContainerItem;
-import cofh.api.energy.IEnergyHandler;
-import cofh.api.energy.IEnergyProvider;
-import cofh.api.energy.IEnergyReceiver;
+import cofh.redstoneflux.api.IEnergyContainerItem;
+import cofh.redstoneflux.api.IEnergyHandler;
+import cofh.redstoneflux.api.IEnergyProvider;
+import cofh.redstoneflux.api.IEnergyReceiver;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;

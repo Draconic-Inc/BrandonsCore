@@ -1,8 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
-//import cofh.api.energy.IEnergyContainerItem;
-
-import cofh.api.energy.IEnergyContainerItem;
+import cofh.redstoneflux.api.IEnergyContainerItem;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;

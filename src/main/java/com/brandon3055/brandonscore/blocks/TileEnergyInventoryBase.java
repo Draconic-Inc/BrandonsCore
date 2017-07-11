@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.blocks;
 
-import cofh.api.energy.EnergyStorage;
+import cofh.redstoneflux.impl.EnergyStorage;
 import com.brandon3055.brandonscore.lib.EnergyHandlerWrapper;
 import com.brandon3055.brandonscore.lib.EnergyHelper;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedInt;

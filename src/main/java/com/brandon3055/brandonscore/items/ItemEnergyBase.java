@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.items;
 
-import cofh.api.energy.IEnergyContainerItem;
+
+import cofh.redstoneflux.api.IEnergyContainerItem;
 import com.brandon3055.brandonscore.lib.EnergyContainerWrapper;
 import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;

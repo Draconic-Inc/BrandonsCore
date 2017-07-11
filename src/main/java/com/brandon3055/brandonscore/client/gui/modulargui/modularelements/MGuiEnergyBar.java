@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.modularelements;
 
-import cofh.api.energy.IEnergyHandler;
+import cofh.redstoneflux.api.IEnergyHandler;
 import com.brandon3055.brandonscore.blocks.TileEnergyBase;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
