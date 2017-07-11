@@ -7,7 +7,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -111,7 +111,7 @@ public class BCEffectRenderer {
                 Particle Particle = entry.getValue();
 
                 int layer = Particle.getFXLayer();
-                int mask = Particle.isTransparent() ? 0 : 1;
+                int mask = Particle.shouldDisableDepth() ? 0 : 1;
 
                 if (array[layer][mask].size() >= 6000) {
                     array[layer][mask].removeFirst().setExpired();
@@ -242,7 +242,7 @@ public class BCEffectRenderer {
     }
 
     private void renderGlParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuffer();
 
         for (IGLFXHandler handler : glRenderQueue.keySet()) {
 
@@ -288,7 +288,7 @@ public class BCEffectRenderer {
                     }
 
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                    VertexBuffer vertexbuffer = tessellator.getBuffer();
+                    BufferBuilder vertexbuffer = tessellator.getBuffer();
                     vertexbuffer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
 
                     for (final Particle particle : texRenderQueue[layer][j]) {
@@ -343,14 +343,14 @@ public class BCEffectRenderer {
 
     public static final IGLFXHandler DEFAULT_IGLFX_HANDLER = new IGLFXHandler() {
         @Override
-        public void preDraw(int layer, VertexBuffer vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+        public void preDraw(int layer, BufferBuilder vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.depthMask(false);
             GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
         }
 
         @Override
-        public void postDraw(int layer, VertexBuffer vertexbuffer, Tessellator tessellator) {
+        public void postDraw(int layer, BufferBuilder vertexbuffer, Tessellator tessellator) {
 
         }
     };

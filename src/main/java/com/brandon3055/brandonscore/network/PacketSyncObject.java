@@ -30,7 +30,7 @@ public abstract class PacketSyncObject<REQ extends IMessage, REPLY extends IMess
             LogHelperBC.error("[SyncPacket#addPacketServer] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
             return;
         }
-        ctx.getServerHandler().playerEntity.getServer().addScheduledTask(this);
+        ctx.getServerHandler().player.getServer().addScheduledTask(this);
     }
 
     public void addPacketClient() {

@@ -37,10 +37,10 @@ public class PacketUpdateMount implements IMessage {
         public IMessage handleMessage(PacketUpdateMount message, MessageContext ctx) {
             if (ctx.side.equals(Side.SERVER)) {
                 if (message.entityID == -1) {
-                    ctx.getServerHandler().playerEntity.dismountRidingEntity();
+                    ctx.getServerHandler().player.dismountRidingEntity();
                     return null;
-                } else if (ctx.getServerHandler().playerEntity.getRidingEntity() != null) {
-                    BrandonsCore.network.sendTo(new PacketUpdateMount(ctx.getServerHandler().playerEntity.getRidingEntity().getEntityId()), ctx.getServerHandler().playerEntity);
+                } else if (ctx.getServerHandler().player.getRidingEntity() != null) {
+                    BrandonsCore.network.sendTo(new PacketUpdateMount(ctx.getServerHandler().player.getRidingEntity().getEntityId()), ctx.getServerHandler().player);
                     return null;
                 }
                 return null;

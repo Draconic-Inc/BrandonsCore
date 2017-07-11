@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.utils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -54,7 +54,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
 
     public static void renderQuads(List<BakedQuad> listQuads) {
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuffer();
         int i = 0;
         vertexbuffer.begin(7, DefaultVertexFormats.ITEM);
         for (int j = listQuads.size(); i < j; ++i) {
@@ -73,7 +73,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
 
     public static void renderQuadsRGB(List<BakedQuad> listQuads, float r, float g, float b) {
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuffer();
         int i = 0;
         for (int j = listQuads.size(); i < j; ++i) {
             BakedQuad bakedquad = (BakedQuad) listQuads.get(i);
@@ -90,7 +90,7 @@ public class ModelUtils implements IResourceManagerReloadListener {
 
     public static void renderQuadsARGB(List<BakedQuad> listQuads, int ARGB_Hex) {
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuffer();
         int i = 0;
         for (int j = listQuads.size(); i < j; ++i) {
             BakedQuad bakedquad = (BakedQuad) listQuads.get(i);

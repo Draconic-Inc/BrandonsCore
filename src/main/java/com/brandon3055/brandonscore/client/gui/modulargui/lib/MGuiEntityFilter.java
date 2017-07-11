@@ -324,7 +324,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                 }
 
                 if (entity instanceof EntityItem) {
-                    ((EntityItem) entity).setEntityItemStack(new ItemStack(Items.APPLE));
+                    ((EntityItem) entity).setItem(new ItemStack(Items.APPLE));
                     entity.setCustomNameTag("ItemStack");
                 }
 

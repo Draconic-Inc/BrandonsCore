@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client.particle;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
@@ -111,7 +111,7 @@ public class BCParticle extends Particle {
     }
 
     @Override
-    public void renderParticle(VertexBuffer vertexbuffer, Entity entity, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+    public void renderParticle(BufferBuilder vertexbuffer, Entity entity, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
         float minU = (float) this.particleTextureIndexX / texturesPerRow;
         float maxU = minU + 1F / texturesPerRow;//0.0624375F;
         float minV = (float) this.particleTextureIndexY / texturesPerRow;
@@ -139,12 +139,12 @@ public class BCParticle extends Particle {
 
     private static IGLFXHandler DEFAULT_FX_HANDLER = new IGLFXHandler() {
         @Override
-        public void preDraw(int layer, VertexBuffer vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+        public void preDraw(int layer, BufferBuilder vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
 
         }
 
         @Override
-        public void postDraw(int layer, VertexBuffer vertexbuffer, Tessellator tessellator) {
+        public void postDraw(int layer, BufferBuilder vertexbuffer, Tessellator tessellator) {
 
         }
     };

@@ -4,14 +4,15 @@ import cofh.api.energy.IEnergyContainerItem;
 import com.brandon3055.brandonscore.lib.EnergyContainerWrapper;
 import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -29,11 +30,13 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     //region Item
 
     @Override
-    public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
-        subItems.add(new ItemStack(itemIn));
-        ItemStack stack = new ItemStack(itemIn);
-        setEnergy(stack, getCapacity(stack));
-        subItems.add(stack);
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> subItems) {
+        if (isInCreativeTab(tab)) {
+            subItems.add(new ItemStack(this));
+            ItemStack stack = new ItemStack(this);
+            setEnergy(stack, getCapacity(stack));
+            subItems.add(stack);
+        }
     }
 
     //endregion
@@ -148,7 +151,7 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     }
 
     @Override
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced) {
         InfoHelper.addEnergyInfo(stack, tooltip);
     }
 

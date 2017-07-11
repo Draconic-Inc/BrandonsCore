@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
+import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
+
 /**
  * Created by brandon3055 on 3/09/2016.
  */
@@ -59,7 +62,7 @@ public class MGuiStackIcon extends MGuiElementBase {
             String s = getStack().getCount() + "";
             GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
             zOffset = 45;
-            drawString(minecraft.fontRendererObj, s, xSize - (minecraft.fontRendererObj.getStringWidth(s)) - 1, minecraft.fontRendererObj.FONT_HEIGHT, 0xFFFFFF, true);
+            drawString(minecraft.fontRenderer, s, xSize - (minecraft.fontRenderer.getStringWidth(s)) - 1, minecraft.fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset = 0;
         }
 
@@ -71,8 +74,8 @@ public class MGuiStackIcon extends MGuiElementBase {
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOver(mouseX - xOffset, mouseY - yOffset) && (drawToolTip || toolTipOverride != null)) {
-            List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.player, minecraft.gameSettings.advancedItemTooltips);
-            drawHoveringText(list, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+            List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.player, minecraft.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
+            drawHoveringText(list, mouseX, mouseY, minecraft.fontRenderer, modularGui.screenWidth(), modularGui.screenHeight());
             return true;
         }
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);

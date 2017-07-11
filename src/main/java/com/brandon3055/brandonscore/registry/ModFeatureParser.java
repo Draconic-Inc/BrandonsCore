@@ -15,6 +15,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -225,7 +226,7 @@ public class ModFeatureParser {
             }
         }
 
-        GameRegistry.register(block);
+        ForgeRegistries.BLOCKS.register(block);
 
         if (feature.hasItemBlock()) {
             try {
@@ -233,7 +234,7 @@ public class ModFeatureParser {
                 ItemBlock itemBlock = constructor.newInstance(block);
                 itemBlock.setRegistryName(feature.getRegistryName());
                 if (!(itemBlock instanceof IRegistryListener) || ((IRegistryListener) itemBlock).featureParsed(feature)) {
-                    GameRegistry.register(itemBlock);
+                    ForgeRegistries.ITEMS.register(itemBlock);
                 }
             }
             catch (Throwable e) {
@@ -261,7 +262,7 @@ public class ModFeatureParser {
             }
         }
 
-        GameRegistry.register(item);
+        ForgeRegistries.ITEMS.register(item);
     }
 
     //endregion

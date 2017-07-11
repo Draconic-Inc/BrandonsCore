@@ -11,10 +11,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 
 /**
  * Created by brandon3055 on 18/3/2016.
@@ -29,12 +25,6 @@ public class ItemBlockBCore extends ItemBlock {
         if (block instanceof BlockBCore) {
             setHasSubtypes(((BlockBCore) block).hasSubItemTypes());
         }
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
-        super.addInformation(stack, playerIn, tooltip, advanced);
     }
 
     @Override

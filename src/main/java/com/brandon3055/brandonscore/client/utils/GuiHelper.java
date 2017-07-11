@@ -34,7 +34,7 @@ public class GuiHelper {
 
     public static void drawTexturedRect(double x, double y, double width, double height, int u, int v, int uSize, int vSize, double zLevel, double pxl) {
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexBuffer = tessellator.getBuffer();
+        BufferBuilder vertexBuffer = tessellator.getBuffer();
         vertexBuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
         vertexBuffer.pos(x, y + height, zLevel).tex(u * pxl, (v + vSize) * pxl).endVertex();
         vertexBuffer.pos(x + width, y + height, zLevel).tex((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
@@ -133,7 +133,7 @@ public class GuiHelper {
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuffer();
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
         vertexbuffer.pos((double) right, (double) top, zLevel).color(f1, f2, f3, f).endVertex();
         vertexbuffer.pos((double) left, (double) top, zLevel).color(f1, f2, f3, f).endVertex();
@@ -189,7 +189,7 @@ public class GuiHelper {
             list.add(InfoHelper.ITC() + I18n.translateToLocal("gui.de.energyStorage.txt"));
             list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
             list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
-            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
         }
     }
 
@@ -243,7 +243,7 @@ public class GuiHelper {
         GlStateManager.translate(0.0F, 0.0F, 32.0F);
         //this.zLevel = 200.0F;
         mc.getRenderItem().zLevel = 200.0F;
-        FontRenderer font = mc.fontRendererObj;
+        FontRenderer font = mc.fontRenderer;
         mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
         String count = stack.getCount() > 1 ? String.valueOf(stack.getCount()) : "";
         mc.getRenderItem().renderItemOverlayIntoGUI(font, stack, x, y, count);

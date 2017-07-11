@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -134,12 +134,12 @@ public class BCEffectHandler {
                     IGLFXHandler iglfxHandler = ((BCParticle) particle).getFXHandler();
                     iglfxHandler = new IGLFXHandler() {
                         @Override
-                        public void preDraw(int layer, VertexBuffer vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+                        public void preDraw(int layer, BufferBuilder vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
 
                         }
 
                         @Override
-                        public void postDraw(int layer, VertexBuffer vertexbuffer, Tessellator tessellator) {
+                        public void postDraw(int layer, BufferBuilder vertexbuffer, Tessellator tessellator) {
 
                         }
                     };

@@ -20,7 +20,7 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
     protected static Map<ItemStack, IBakedModel> itemModelCache = new HashMap<>();
 
     @Override
-    public void renderTileEntityAt(T te, double x, double y, double z, float partialTicks, int destroyStage) {
+    public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 
     }
 

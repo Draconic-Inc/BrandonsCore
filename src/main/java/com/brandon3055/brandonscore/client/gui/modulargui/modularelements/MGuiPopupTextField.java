@@ -31,7 +31,7 @@ public class MGuiPopupTextField extends MGuiPopUpDialog implements IMGuiListener
 
     @Override
     public void initElement() {
-        addChild(textField = new MGuiTextField(modularGui, xPos, yPos, xSize - 20, ySize, modularGui.getMinecraft().fontRendererObj).setListener(this));
+        addChild(textField = new MGuiTextField(modularGui, xPos, yPos, xSize - 20, ySize, modularGui.getMinecraft().fontRenderer).setListener(this));
         addChild(okButton = new MGuiButton(modularGui, xPos + textField.xSize, yPos, 20, ySize, "OK").setListener(this));
         super.initElement();
     }

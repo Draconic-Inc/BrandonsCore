@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.effects;
 
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -120,7 +120,7 @@ public class GuiEffect {
         float scale = 8F * this.particleScale;
 
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuffer();
         vertexbuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
         float renderX = (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) partialTicks);

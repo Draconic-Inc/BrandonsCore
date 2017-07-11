@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +54,8 @@ public class BlockBCore extends Block {
     //region Sub Types and Names
 
     @Override
-    public void getSubBlocks(Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
-        super.getSubBlocks(item, tab, list);
+    public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+        super.getSubBlocks(tab, list);
     }
 
     //endregion
@@ -221,8 +223,8 @@ public class BlockBCore extends Block {
 
     @SideOnly(Side.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
-        super.addInformation(stack, player, tooltip, advanced);
+    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced) {
+        super.addInformation(stack, world, tooltip, advanced);
         if (stack.hasTagCompound() && stack.getTagCompound().hasKey(TileBCBase.TILE_DATA_TAG)) {
             tooltip.add(I18n.format("info.de.hasSavedData.txt"));
         }

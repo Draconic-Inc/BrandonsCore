@@ -54,7 +54,7 @@ public class PacketContributor implements IMessage {
                 handler.configReceivedClient(message.data, message.contributor);
             }
             else {
-                handler.configReceivedServer(message.data, message.contributor, ctx.getServerHandler().playerEntity);
+                handler.configReceivedServer(message.data, message.contributor, ctx.getServerHandler().player);
             }
 
             return null;

@@ -37,20 +37,14 @@ public abstract class AbstractModGuiFactory implements IModGuiFactory {
 		return null;
 	}
 
-	@Override
-	public Class<? extends GuiScreen> mainConfigGuiClass() {
-		return BCModConfigGui.class;
-	}
+//	@Override
+//	public Class<? extends GuiScreen> mainConfigGuiClass() {
+//		return BCModConfigGui.class;
+//	}
 
 	@Nullable
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
-		return null;
-	}
-
-	@Nullable
-	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
 		return null;
 	}
 }

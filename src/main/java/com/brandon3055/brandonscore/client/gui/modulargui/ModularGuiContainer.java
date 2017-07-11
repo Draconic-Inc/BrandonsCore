@@ -223,7 +223,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
         //Just in case someone for some crasy reason actually uses these in a modular gui... But no one ever should!
         for (int bi = 0; bi < this.buttonList.size(); ++bi) {
-            ((GuiButton) this.buttonList.get(bi)).drawButton(this.mc, mouseX, mouseY);
+            ((GuiButton) this.buttonList.get(bi)).drawButton(this.mc, mouseX, mouseY, partialTicks);
         }
 
         for (int lj = 0; lj < this.labelList.size(); ++lj) {
@@ -235,7 +235,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         GlStateManager.translate((float)i, (float)j, 0.0F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableRescaleNormal();
-        this.theSlot = null;
+        this.hoveredSlot = null;
         int k = 240;
         int l = 240;
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
@@ -245,16 +245,16 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         {
             Slot slot = (Slot)this.inventorySlots.inventorySlots.get(i1);
 
-            if (slot.canBeHovered())
+            if (slot.isEnabled())
             {
                 this.drawSlot(slot);
             }
 
             int slotXPos = slot.xPos;
             int slotYPos = slot.yPos;
-            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.canBeHovered() && !manager.isAreaUnderElement(slotXPos + guiLeft(), slotYPos + guiTop(), 16, 16, 100))
+            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.isEnabled() && !manager.isAreaUnderElement(slotXPos + guiLeft(), slotYPos + guiTop(), 16, 16, 100))
             {
-                this.theSlot = slot;
+                this.hoveredSlot = slot;
                 GlStateManager.disableLighting();
                 GlStateManager.disableDepth();
                 GlStateManager.colorMask(true, true, true, false);
@@ -315,9 +315,9 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
         GlStateManager.popMatrix();
 
-        if (inventoryplayer.getItemStack().isEmpty() && this.theSlot != null && this.theSlot.getHasStack())
+        if (inventoryplayer.getItemStack().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.getHasStack())
         {
-            ItemStack itemstack1 = this.theSlot.getStack();
+            ItemStack itemstack1 = this.hoveredSlot.getStack();
             this.renderToolTip(itemstack1, mouseX, mouseY);
         }
 
@@ -375,7 +375,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         super.zLevel = 100.0F;
         this.itemRender.zLevel = 100.0F;
 
-        if (itemstack.isEmpty() && slotIn.canBeHovered())
+        if (itemstack.isEmpty() && slotIn.isEnabled())
         {
             TextureAtlasSprite textureatlassprite = slotIn.getBackgroundSprite();
 
@@ -398,10 +398,10 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
             GlStateManager.enableDepth();
             this.itemRender.renderItemAndEffectIntoGUI(this.mc.player, itemstack, xPos, yPos);
-            this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, xPos, yPos, s);
+            this.itemRender.renderItemOverlayIntoGUI(this.fontRenderer, itemstack, xPos, yPos, s);
             if (!manager.isAreaUnderElement(xPos + guiLeft, yPos + guiTop, 18, 18, 100)) {
                 this.itemRender.renderItemAndEffectIntoGUI(this.mc.player, itemstack, xPos, yPos);
-                this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, xPos, yPos, s);
+                this.itemRender.renderItemOverlayIntoGUI(this.fontRenderer, itemstack, xPos, yPos, s);
             }
         }
 

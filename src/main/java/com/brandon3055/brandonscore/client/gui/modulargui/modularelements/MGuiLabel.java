@@ -34,9 +34,9 @@ public class MGuiLabel extends MGuiElementBase {
     @Override
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         super.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
-        FontRenderer fontrenderer = mc.fontRendererObj;
+        FontRenderer fontrenderer = mc.fontRenderer;
         int colour = getTextColour();
-        int fh = mc.fontRendererObj.FONT_HEIGHT;
+        int fh = mc.fontRenderer.FONT_HEIGHT;
         String text = getDisplayString();
 
         if (rotation == 0) {
@@ -85,15 +85,15 @@ public class MGuiLabel extends MGuiElementBase {
             GlStateManager.translate(rotateBottomToTop ? -translation : translation, -translation, 0);
 
             if (alignment == EnumAlignment.CENTER) {
-                drawCenteredString(mc.fontRendererObj, text, xPos + xSize / 2, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
+                drawCenteredString(mc.fontRenderer, text, xPos + xSize / 2, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
             }
             else {
                 int buffer = 1 + ((xSize - fh) / 2);
                 if (alignment == EnumAlignment.LEFT) {
-                    drawString(mc.fontRendererObj, text, xPos + xSize / 2 - ySize / 2 + buffer, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
+                    drawString(mc.fontRenderer, text, xPos + xSize / 2 - ySize / 2 + buffer, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
                 }
                 else {
-                    drawString(mc.fontRendererObj, text, xPos + xSize / 2 + ySize / 2 - fontrenderer.getStringWidth(text) - buffer, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
+                    drawString(mc.fontRenderer, text, xPos + xSize / 2 + ySize / 2 - fontrenderer.getStringWidth(text) - buffer, yPos + (ySize / 2) - (fh / 2), colour, getDropShadow());
                 }
             }
 

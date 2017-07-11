@@ -20,7 +20,7 @@ public class BCEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void entityJoinWorld(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof EntityItem && BlockToStackHelper.itemCollection != null && !event.isCanceled()) {
-            BlockToStackHelper.itemCollection.add(((EntityItem) event.getEntity()).getEntityItem());
+            BlockToStackHelper.itemCollection.add(((EntityItem) event.getEntity()).getItem());
             event.setCanceled(true);
         }
     }

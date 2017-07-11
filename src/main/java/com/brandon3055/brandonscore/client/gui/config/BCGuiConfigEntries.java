@@ -60,10 +60,10 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
 
                     // protects against language keys that are not defined in the .lang file
                     if (!I18n.format(configElement.getLanguageKey()).equals(configElement.getLanguageKey())) {
-                        length = mc.fontRendererObj.getStringWidth(I18n.format(configElement.getLanguageKey()));
+                        length = mc.fontRenderer.getStringWidth(I18n.format(configElement.getLanguageKey()));
                     }
                     else {
-                        length = mc.fontRendererObj.getStringWidth(configElement.getName());
+                        length = mc.fontRenderer.getStringWidth(configElement.getName());
                     }
 
                     if (length > this.maxLabelTextWidth) {
@@ -375,6 +375,11 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public Boolean[] getCurrentValues() {
             return new Boolean[]{getCurrentValue()};
         }
+
+        @Override
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
+
+        }
     }
 
     /**
@@ -464,6 +469,11 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public String[] getCurrentValues() {
             return new String[]{getCurrentValue()};
         }
+
+        @Override
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
+
+        }
     }
 
     /**
@@ -479,9 +489,9 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         }
 
         @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float pt) {
             this.btnValue.packedFGColour = GuiUtils.getColorCode(this.configElement.getValidValues()[currentIndex].charAt(0), true);
-            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected);
+            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected, pt);
         }
 
         @Override
@@ -572,6 +582,11 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         @Override
         public String[] getCurrentValues() {
             return new String[]{getCurrentValue()};
+        }
+
+        @Override
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
+
         }
     }
 
@@ -671,11 +686,11 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
                         }
                     };
 
-                    int undoGlyphWidth = mc.fontRendererObj.getStringWidth(UNDO_CHAR) * 2;
-                    int resetGlyphWidth = mc.fontRendererObj.getStringWidth(RESET_CHAR) * 2;
-                    int doneWidth = Math.max(mc.fontRendererObj.getStringWidth(I18n.format("gui.done")) + 20, 100);
-                    int undoWidth = mc.fontRendererObj.getStringWidth(" " + I18n.format("fml.configgui.tooltip.undoChanges")) + undoGlyphWidth + 20;
-                    int resetWidth = mc.fontRendererObj.getStringWidth(" " + I18n.format("fml.configgui.tooltip.resetToDefault")) + resetGlyphWidth + 20;
+                    int undoGlyphWidth = mc.fontRenderer.getStringWidth(UNDO_CHAR) * 2;
+                    int resetGlyphWidth = mc.fontRenderer.getStringWidth(RESET_CHAR) * 2;
+                    int doneWidth = Math.max(mc.fontRenderer.getStringWidth(I18n.format("gui.done")) + 20, 100);
+                    int undoWidth = mc.fontRenderer.getStringWidth(" " + I18n.format("fml.configgui.tooltip.undoChanges")) + undoGlyphWidth + 20;
+                    int resetWidth = mc.fontRenderer.getStringWidth(" " + I18n.format("fml.configgui.tooltip.resetToDefault")) + resetGlyphWidth + 20;
                     int buttonWidthHalf = (doneWidth + 5 + undoWidth + 5 + resetWidth) / 2;
                     this.buttonList.add(btnDone = new GuiButtonExt(2000, this.width / 2 - buttonWidthHalf, this.height - 29, doneWidth, 20, I18n.format("gui.done")));
                     this.buttonList.add(btnDefault = new GuiUnicodeGlyphButton(2001, this.width / 2 - buttonWidthHalf + doneWidth + 5 + undoWidth + 5,
@@ -736,6 +751,11 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         @Override
         public Object[] getCurrentValues() {
             return this.currentValues;
+        }
+
+        @Override
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
+
         }
     }
 
@@ -811,6 +831,11 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public Object[] getCurrentValues() {
             return new Object[]{getCurrentValue()};
         }
+
+        @Override
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
+
+        }
     }
 
     /**
@@ -841,13 +866,13 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public abstract void valueButtonPressed(int slotIndex);
 
         @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
-            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected);
+        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float pt) {
+            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected, pt);
             this.btnValue.width = this.owningEntryList.controlWidth;
-            this.btnValue.xPosition = this.owningScreen.entryList.controlX;
-            this.btnValue.yPosition = y;
+            this.btnValue.x = this.owningScreen.entryList.controlX;
+            this.btnValue.y = y;
             this.btnValue.enabled = enabled() && !locked;
-            this.btnValue.drawButton(this.mc, mouseX, mouseY);
+            this.btnValue.drawButton(this.mc, mouseX, mouseY, pt);
         }
 
         /**
@@ -1053,16 +1078,21 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public StringEntry(GuiConfig owningScreen, BCGuiConfigEntries owningEntryList, IConfigElement configElement, Property property) {
             super(owningScreen, owningEntryList, configElement, property);
             beforeValue = configElement.get().toString();
-            this.textFieldValue = new GuiTextField(10, this.mc.fontRendererObj, this.owningEntryList.controlX + 1, 0, this.owningEntryList.controlWidth - 3, 16);
+            this.textFieldValue = new GuiTextField(10, this.mc.fontRenderer, this.owningEntryList.controlX + 1, 0, this.owningEntryList.controlWidth - 3, 16);
             this.textFieldValue.setMaxStringLength(10000);
             this.textFieldValue.setText(configElement.get().toString());
         }
 
         @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
-            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected);
-            this.textFieldValue.xPosition = this.owningEntryList.controlX + 2;
-            this.textFieldValue.yPosition = y + 1;
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
+
+        }
+
+        @Override
+        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float pt) {
+            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected, pt);
+            this.textFieldValue.x = this.owningEntryList.controlX + 2;
+            this.textFieldValue.y = y + 1;
             this.textFieldValue.width = this.owningEntryList.controlWidth - 4;
             this.textFieldValue.setEnabled(enabled() && !locked);
             this.textFieldValue.drawTextBox();
@@ -1167,13 +1197,18 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         }
 
         @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
-            this.btnSelectCategory.xPosition = listWidth / 2 - 150;
-            this.btnSelectCategory.yPosition = y;
-            this.btnSelectCategory.enabled = enabled();
-            this.btnSelectCategory.drawButton(this.mc, mouseX, mouseY);
+        public void updatePosition(int p_192633_1_, int p_192633_2_, int p_192633_3_, float p_192633_4_) {
 
-            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected);
+        }
+
+        @Override
+        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float pt) {
+            this.btnSelectCategory.x = listWidth / 2 - 150;
+            this.btnSelectCategory.y = y;
+            this.btnSelectCategory.enabled = enabled();
+            this.btnSelectCategory.drawButton(this.mc, mouseX, mouseY, pt);
+
+            super.drawEntry(slotIndex, x, y, listWidth, slotHeight, mouseX, mouseY, isSelected, pt);
         }
 
         @Override
@@ -1335,23 +1370,23 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         }
 
         @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
             boolean isChanged = isChanged();
 
             if (drawLabel) {
                 String label = (!isValidValue ? TextFormatting.RED.toString() : (isChanged ? TextFormatting.WHITE.toString() : TextFormatting.GRAY.toString())) + (isChanged ? TextFormatting.ITALIC.toString() : "") + this.name;
-                this.mc.fontRendererObj.drawString(label, this.owningScreen.entryList.labelX, y + slotHeight / 2 - this.mc.fontRendererObj.FONT_HEIGHT / 2, 16777215);
+                this.mc.fontRenderer.drawString(label, this.owningScreen.entryList.labelX, y + slotHeight / 2 - this.mc.fontRenderer.FONT_HEIGHT / 2, 16777215);
             }
 
-            this.btnUndoChanges.xPosition = this.owningEntryList.scrollBarX - 44;
-            this.btnUndoChanges.yPosition = y;
+            this.btnUndoChanges.x = this.owningEntryList.scrollBarX - 44;
+            this.btnUndoChanges.y = y;
             this.btnUndoChanges.enabled = enabled() && isChanged;
-            this.btnUndoChanges.drawButton(this.mc, mouseX, mouseY);
+            this.btnUndoChanges.drawButton(this.mc, mouseX, mouseY, partialTicks);
 
-            this.btnDefault.xPosition = this.owningEntryList.scrollBarX - 22;
-            this.btnDefault.yPosition = y;
+            this.btnDefault.x = this.owningEntryList.scrollBarX - 22;
+            this.btnDefault.y = y;
             this.btnDefault.enabled = enabled() && !isDefault();
-            this.btnDefault.drawButton(this.mc, mouseX, mouseY);
+            this.btnDefault.drawButton(this.mc, mouseX, mouseY, partialTicks);
 
             if (this.tooltipHoverChecker == null) this.tooltipHoverChecker = new HoverChecker(y, y + slotHeight, x, this.owningScreen.entryList.controlX - 8, 800);
             else this.tooltipHoverChecker.updateBounds(y, y + slotHeight, x, this.owningScreen.entryList.controlX - 8);
@@ -1428,9 +1463,6 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         @Override
         public abstract boolean saveConfigElement();
 
-        @Override
-        public void setSelected(int p_178011_1_, int p_178011_2_, int p_178011_3_) {
-        }
 
         @Override
         public boolean enabled() {
@@ -1439,7 +1471,7 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
 
         @Override
         public int getLabelWidth() {
-            return this.mc.fontRendererObj.getStringWidth(this.name);
+            return this.mc.fontRenderer.getStringWidth(this.name);
         }
 
         @Override

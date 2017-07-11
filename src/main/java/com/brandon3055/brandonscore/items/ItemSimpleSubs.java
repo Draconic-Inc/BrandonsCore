@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.items;
 
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
@@ -27,12 +26,14 @@ public class ItemSimpleSubs extends ItemBCore {
     }
 
     @Override
-    public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
-        if (nameMap.size() > 0) {
-            for (Integer i : nameMap.keySet()) subItems.add(new ItemStack(itemIn, 1, i));
-        }
-        else {
-            super.getSubItems(itemIn, tab, subItems);
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> subItems) {
+        if (isInCreativeTab(tab)) {
+            if (nameMap.size() > 0) {
+                for (Integer i : nameMap.keySet()) subItems.add(new ItemStack(this, 1, i));
+            }
+            else {
+                super.getSubItems(tab, subItems);
+            }
         }
     }
 

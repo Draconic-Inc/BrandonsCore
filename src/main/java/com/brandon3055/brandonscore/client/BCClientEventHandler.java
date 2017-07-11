@@ -117,7 +117,7 @@ public class BCClientEventHandler {
         }
 
         if (debugTimeout < 190) {
-            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
             fontRenderer.drawString("Server Stopped Sending Updates!", 0, event.getResolution().getScaledHeight() - 21, 0xFF0000, true);
             fontRenderer.drawString("Display will time out in " + Utils.round((debugTimeout / 20D), 10), 0, event.getResolution().getScaledHeight() - 11, 0xFF0000, true);
         }
@@ -200,7 +200,7 @@ public class BCClientEventHandler {
         int yHeight = screenHeight - 23 - (y * 45);
 
         GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
         fontRenderer.drawString(name, x + 2, yHeight - 43, 0xFFFFFF, true);
         GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
         GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);

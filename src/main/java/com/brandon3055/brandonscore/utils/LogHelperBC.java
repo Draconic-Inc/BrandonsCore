@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
-import codechicken.lib.asm.ObfMapping;
+import codechicken.lib.reflect.ObfMapping;
 import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;

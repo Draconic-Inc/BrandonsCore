@@ -34,7 +34,7 @@ public class MGuiButtonSolid extends MGuiButton {
 
     @Override
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        FontRenderer fontrenderer = mc.fontRendererObj;
+        FontRenderer fontrenderer = mc.fontRenderer;
         String displayString = getDisplayString();
         if (trim && fontrenderer.getStringWidth(displayString) > xSize - 4) {
             displayString = fontrenderer.trimStringToWidth(displayString, xSize - 8) + "..";

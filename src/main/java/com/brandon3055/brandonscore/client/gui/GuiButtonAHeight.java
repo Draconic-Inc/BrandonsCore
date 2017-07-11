@@ -14,26 +14,27 @@ public class GuiButtonAHeight extends GuiButton {
 		super(id, xPos, yPos, width, hight, displayString);
 	}
 
+
 	@Override
-	public void drawButton(Minecraft minecraft, int mouseX, int mouseY) {
+	public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 		if (this.visible)
 		{
-			FontRenderer fontrenderer = minecraft.fontRendererObj;
-			minecraft.getTextureManager().bindTexture(BUTTON_TEXTURES);
+			FontRenderer fontrenderer = mc.fontRenderer;
+			mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+			this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
 			int k = this.getHoverState(this.hovered);
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + k * 20, width % 2 + this.width / 2, this.height);
-			this.drawTexturedModalRect(width % 2 + this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
+			this.drawTexturedModalRect(this.x, this.y, 0, 46 + k * 20, width % 2 + this.width / 2, this.height);
+			this.drawTexturedModalRect(width % 2 + this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
 			if (this.height < 20){
 
-				this.drawTexturedModalRect(xPosition, yPosition+3, 0, (46 + k * 20)+20-height+3, width % 2 + width / 2, height-3);
-				this.drawTexturedModalRect(width % 2 + xPosition + width / 2, yPosition+3, 200 - width / 2, (46 + k * 20)+20-height+3, width / 2, height-3);
+				this.drawTexturedModalRect(x, y+3, 0, (46 + k * 20)+20-height+3, width % 2 + width / 2, height-3);
+				this.drawTexturedModalRect(width % 2 + x + width / 2, y+3, 200 - width / 2, (46 + k * 20)+20-height+3, width / 2, height-3);
 			}
-			this.mouseDragged(minecraft, mouseX, mouseY);
+			this.mouseDragged(mc, mouseX, mouseY);
 			int l = 14737632;
 
 			if (packedFGColour != 0)
@@ -48,7 +49,7 @@ public class GuiButtonAHeight extends GuiButton {
 			{
 				l = 16777120;
 			}
-			this.drawCenteredString(fontrenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, l);
+			this.drawCenteredString(fontrenderer, this.displayString, this.x + this.width / 2, this.y + (this.height - 8) / 2, l);
 		}
 	}
 }

@@ -93,7 +93,7 @@ public class MGuiButton extends MGuiElementBase {
     @Override
     public void renderBackgroundLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         String displayString = getDisplayString();
-        FontRenderer fontrenderer = mc.fontRendererObj;
+        FontRenderer fontrenderer = mc.fontRenderer;
         mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         boolean hovered = isMouseOver(mouseX, mouseY);
@@ -135,7 +135,7 @@ public class MGuiButton extends MGuiElementBase {
 
         List<String> toolTip = getToolTip();
         if (mouseOver && hoverTime >= toolTipDelay && toolTip != null && !toolTip.isEmpty()) {
-            drawHoveringText(toolTip, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+            drawHoveringText(toolTip, mouseX, mouseY, minecraft.fontRenderer, modularGui.screenWidth(), modularGui.screenHeight());
             return true;
         }
 

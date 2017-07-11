@@ -22,22 +22,22 @@ public class ButtonColourRect extends GuiButton{
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float pt) {
         if (visible) {
-            this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
 
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
             GlStateManager.colorMask(true, true, true, false);
 
-            GuiHelper.drawColouredRect(xPosition + 1, yPosition + 1, width - 2, height - 2, backColour);
+            GuiHelper.drawColouredRect(x + 1, y + 1, width - 2, height - 2, backColour);
             int border = hovered ? borderColourActive : borderColourInactive;
-            GuiHelper.drawColouredRect(xPosition, yPosition, width, 1, border);
-            GuiHelper.drawColouredRect(xPosition, yPosition + height - 1, width, 1, border);
-            GuiHelper.drawColouredRect(xPosition, yPosition, 1, height, border);
-            GuiHelper.drawColouredRect(xPosition + width - 1, yPosition, 1, height, border);
+            GuiHelper.drawColouredRect(x, y, width, 1, border);
+            GuiHelper.drawColouredRect(x, y + height - 1, width, 1, border);
+            GuiHelper.drawColouredRect(x, y, 1, height, border);
+            GuiHelper.drawColouredRect(x + width - 1, y, 1, height, border);
 
-            GuiHelper.drawCenteredString(mc.fontRendererObj, displayString, xPosition + width / 2, yPosition + (height / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), 0xFFFFFF, false);
+            GuiHelper.drawCenteredString(mc.fontRenderer, displayString, x + width / 2, y + (height / 2) - (mc.fontRenderer.FONT_HEIGHT / 2), 0xFFFFFF, false);
 
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();

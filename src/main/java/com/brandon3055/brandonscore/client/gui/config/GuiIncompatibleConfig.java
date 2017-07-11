@@ -69,12 +69,12 @@ public class GuiIncompatibleConfig extends ModularGuiScreen {
         GlStateManager.pushMatrix();
         GlStateManager.translate(cx, cy - 140, 0);
         GlStateManager.scale(2, 2, 2);
-        GuiHelper.drawCenteredSplitString(fontRendererObj, "Incompatible client config detected!", 0, 0, 300, 0xFF0000, false);
+        GuiHelper.drawCenteredSplitString(fontRenderer, "Incompatible client config detected!", 0, 0, 300, 0xFF0000, false);
         GlStateManager.popMatrix();
 
-        GuiHelper.drawCenteredSplitString(fontRendererObj, "Brandon's Core has detected that some critical configs in your client do not match the server" + " and could not be synced automatically.\n Bellow is a list of the incompatible configs.", cx, cy - 120, 450, 0xFF0000, false);
-        GuiHelper.drawCenteredSplitString(fontRendererObj, "You have the following options. You can attempt to play with your current config but this is not recommended because things will probably break." + " You can disconnect from the server, or you can accept the server config which requires a client restart.\n If you accept the server config will be automatically saved to your client and your client will shutdown." + "You then simply need to restart your client and connect to this server again.", cx, cy + 20, 460, 0xFFFFFF, false);
-        GuiHelper.drawCenteredSplitString(fontRendererObj, error, cx, cy + 100, 460, 0xFF0000, false);
+        GuiHelper.drawCenteredSplitString(fontRenderer, "Brandon's Core has detected that some critical configs in your client do not match the server" + " and could not be synced automatically.\n Bellow is a list of the incompatible configs.", cx, cy - 120, 450, 0xFF0000, false);
+        GuiHelper.drawCenteredSplitString(fontRenderer, "You have the following options. You can attempt to play with your current config but this is not recommended because things will probably break." + " You can disconnect from the server, or you can accept the server config which requires a client restart.\n If you accept the server config will be automatically saved to your client and your client will shutdown." + "You then simply need to restart your client and connect to this server again.", cx, cy + 20, 460, 0xFFFFFF, false);
+        GuiHelper.drawCenteredSplitString(fontRenderer, error, cx, cy + 100, 460, 0xFF0000, false);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

@@ -61,7 +61,7 @@ public class MGuiHoverPopup extends MGuiElementBase {
 
         List<String> hoverText = getToolTip();
         if (mouseOver && hoverTime >= hoverDelay && hoverText != null && !hoverText.isEmpty()) {
-            drawHoveringText(hoverText, mouseX, mouseY, minecraft.fontRendererObj, modularGui.screenWidth(), modularGui.screenHeight());
+            drawHoveringText(hoverText, mouseX, mouseY, minecraft.fontRenderer, modularGui.screenWidth(), modularGui.screenHeight());
             return true;
         }
 

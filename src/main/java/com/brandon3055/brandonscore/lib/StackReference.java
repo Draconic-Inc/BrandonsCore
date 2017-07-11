@@ -2,6 +2,8 @@ package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Objects;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -55,11 +57,19 @@ public class StackReference {
 
     public ItemStack createStack() {
         Item item = Item.REGISTRY.getObject(stack);
-        if (item == null) {
+        Block block = Block.REGISTRY.getObject(stack);
+        if (item == null && block == Blocks.AIR) {
             return ItemStack.EMPTY;
         }
         else {
-            ItemStack itemStack = new ItemStack(item, stackSize, metadata);
+            ItemStack itemStack;
+            if (item != null) {
+                itemStack = new ItemStack(item, stackSize, metadata);
+            }
+            else {
+                itemStack = new ItemStack(block, stackSize, metadata);
+            }
+
             if (nbt != null) {
                 itemStack.setTagCompound(nbt.copy());
             }
