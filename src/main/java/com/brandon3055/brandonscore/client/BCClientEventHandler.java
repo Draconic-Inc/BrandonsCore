@@ -5,8 +5,8 @@ import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.LinkedHashList;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -152,6 +152,25 @@ public class BCClientEventHandler {
             event.setNewfov(newFOV);
         }
     }
+
+//    @SubscribeEvent
+//    public void guiInit(GuiScreenEvent.InitGuiEvent event) {
+//        for (int i = 0; i < event.getButtonList().size(); i++) {
+//            GuiButton button = event.getButtonList().get(i);
+//            String resource = button instanceof GuiButtonImage ? ((GuiButtonImage) button).resourceLocation.getResourcePath() : "";
+//            if (resource.equals("textures/gui/container/crafting_table.png") || resource.equals("textures/gui/container/inventory.png")) {
+//                event.getButtonList().set(i, new GuiButton(button.id, 0, 0, ""){
+//                    @Override
+//                    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {}
+//
+//                    @Override
+//                    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+//                        return false;
+//                    }
+//                });
+//            }
+//        }
+//    }
 
 //    @SubscribeEvent
 //    public void mouseClickEvent(GuiScreenEvent.MouseInputEvent.Pre event) {
