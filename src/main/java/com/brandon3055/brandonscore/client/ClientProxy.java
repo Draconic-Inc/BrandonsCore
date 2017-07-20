@@ -2,7 +2,10 @@ package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.CommonProxy;
+import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiExample;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
+import com.brandon3055.brandonscore.client.utils.SimpleClientCommand;
+import com.brandon3055.brandonscore.command.ISimpleClientCommand;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.network.ClientPacketHandler;
@@ -14,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
@@ -30,6 +34,12 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
         DLRSCache.initialize();
         ProcessHandlerClient.init();
+
+        registerSimpleCommand("bcore_open_example_ui", (sender, args) -> Minecraft.getMinecraft().displayGuiScreen(new ModularGuiExample()));
+    }
+
+    private void registerSimpleCommand(String name, ISimpleClientCommand command) {
+        ClientCommandHandler.instance.registerCommand(new SimpleClientCommand(name, command));
     }
 
     @Override

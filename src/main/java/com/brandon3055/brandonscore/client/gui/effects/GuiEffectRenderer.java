@@ -55,6 +55,10 @@ public class GuiEffectRenderer {
     public void clearEffects(){
         effects.clear();
     }
+
+    public List<GuiEffect> getActiveEffects() {
+        return effects;
+    }
 }
 
 

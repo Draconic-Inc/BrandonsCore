@@ -1,18 +1,19 @@
 package com.brandon3055.brandonscore.lib;
 
+import com.brandon3055.brandonscore.client.ProcessHandlerClient;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 
 /**
  * Created by brandon3055 on 7/12/2016.
  */
-public abstract class DelayedExecutor implements IProcess {
+public abstract class ScheduledTask implements IProcess {
 
     private int delay;
     private Object[] args;
     private boolean hasExecuted = false;
 
-    public DelayedExecutor(int delay, Object... args) {
+    public ScheduledTask(int delay, Object... args) {
         this.delay = delay;
         this.args = args;
     }
@@ -34,7 +35,11 @@ public abstract class DelayedExecutor implements IProcess {
         return hasExecuted;
     }
 
-    public void run() {
+    public void schedule() {
         ProcessHandler.addProcess(this);
+    }
+
+    public void scheduleClient() {
+        ProcessHandlerClient.addProcess(this);
     }
 }

@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
@@ -10,20 +10,20 @@ import net.minecraft.client.Minecraft;
  * The colour options are extremely flexible with the ability to add colour callbacks for the fill and boarder colours
  * and the ability to specify different colours depending on whether or not the cursor is over the element.
  */
-public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
+public class GuiBorderedRect extends MGuiElementBase<GuiBorderedRect> {
 
     private HoverColour<Integer> fillColour;
     private HoverColour<Integer> borderColour;
 
     public double borderWidth = 1;
 
-    public MGuiBorderedRect() {}
+    public GuiBorderedRect() {}
 
-    public MGuiBorderedRect(int xPos, int yPos) {
+    public GuiBorderedRect(int xPos, int yPos) {
         super(xPos, yPos);
     }
 
-    public MGuiBorderedRect(int xPos, int yPos, int xSize, int ySize) {
+    public GuiBorderedRect(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
     }
 
@@ -34,21 +34,15 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 
-
-    public MGuiBorderedRect setBorderWidth(int borderWidth) {
-        this.borderWidth = borderWidth;
-        return this;
-    }
-
     //region Colour setters and getters
 
-    public MGuiBorderedRect setColours(int fill, int fillHover, int border, int borderHover) {
+    public GuiBorderedRect setColours(int fill, int fillHover, int border, int borderHover) {
         setFillColours(fill, fillHover);
         setBorderColours(border, borderHover);
         return this;
     }
 
-    public MGuiBorderedRect setColours(int fill, int border) {
+    public GuiBorderedRect setColours(int fill, int border) {
         setFillColour(fill);
         setBorderColour(border);
         return this;
@@ -59,12 +53,12 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
     /**
      * Note: if you only set the border colour OR the fill colour that colour will be used for both the border AND the fill.
      */
-    public MGuiBorderedRect setBorderColourGetter(HoverColour<Integer> rectBorderColour) {
+    public GuiBorderedRect setBorderColourGetter(HoverColour<Integer> rectBorderColour) {
         this.borderColour = rectBorderColour;
         return this;
     }
 
-    public MGuiBorderedRect setBorderColours(int border, int borderHover) {
+    public GuiBorderedRect setBorderColours(int border, int borderHover) {
         setBorderColourGetter(hovering -> hovering ? borderHover : border);
         return this;
     }
@@ -72,7 +66,7 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
     /**
      * Note: if you only set the border colour OR the fill colour that colour will be used for both the border AND the fill.
      */
-    public MGuiBorderedRect setBorderColour(int border) {
+    public GuiBorderedRect setBorderColour(int border) {
         if (borderColour != null) {
             int hover = borderColour.getColour(true);
             setBorderColourGetter(hovering -> hovering ? hover : border);
@@ -87,7 +81,7 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
     /**
      * Note: if you only set the border colour OR the fill colour that colour will be used for both the border AND the fill.
      */
-    public MGuiBorderedRect setFillColourGetter(HoverColour<Integer> rectBackColour) {
+    public GuiBorderedRect setFillColourGetter(HoverColour<Integer> rectBackColour) {
         this.fillColour = rectBackColour;
         return this;
     }
@@ -95,7 +89,7 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
     /**
      * Note: if you only set the border colour OR the fill colour that colour will be used for both the border AND the fill.
      */
-    public MGuiBorderedRect setFillColours(int fill, int fillHover) {
+    public GuiBorderedRect setFillColours(int fill, int fillHover) {
         setFillColourGetter(hovering -> hovering ? fillHover : fill);
         return this;
     }
@@ -103,7 +97,7 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
     /**
      * Note: if you only set the border colour OR the fill colour that colour will be used for both the border AND the fill.
      */
-    public MGuiBorderedRect setFillColour(int fill) {
+    public GuiBorderedRect setFillColour(int fill) {
         if (fillColour != null) {
             int hover = fillColour.getColour(true);
             setFillColourGetter(hovering -> hovering ? hover : fill);
@@ -121,7 +115,7 @@ public class MGuiBorderedRect extends MGuiElementBase<MGuiBorderedRect> {
      * Values less then 1 are permitted but may not render correctly at certain GUI scales.
      * Default: 1
      */
-    public MGuiBorderedRect setBorderWidth(double borderWidth) {
+    public GuiBorderedRect setBorderWidth(double borderWidth) {
         this.borderWidth = borderWidth;
         return this;
     }

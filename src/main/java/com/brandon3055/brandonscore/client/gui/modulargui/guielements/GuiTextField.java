@@ -1,10 +1,8 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,11 +12,13 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.function.Predicate;
+
 /**
  * Created by brandon3055 on 10/09/2016.
  * A strait port of the vanilla text field
  */
-public class MGuiTextField extends MGuiElementBase {
+public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
     private String text = "";
     private int maxStringLength = 64;
@@ -33,21 +33,21 @@ public class MGuiTextField extends MGuiElementBase {
     private int enabledColor = 14737632;
     private int disabledColor = 7368816;
     private IGuiEventListener listener;
-    private Predicate<String> validator = Predicates.<String>alwaysTrue();
+    private Predicate<String> validator = s -> true;
     public int fillColour = 0xFF5f5f60;
     public int borderColour = 0xFF000000;
 
-    public MGuiTextField() {}
+    public GuiTextField() {}
 
-    public MGuiTextField(int xPos, int yPos) {
+    public GuiTextField(int xPos, int yPos) {
         super(xPos, yPos);
     }
 
-    public MGuiTextField(int xPos, int yPos, int xSize, int ySize) {
+    public GuiTextField(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
     }
 
-    public MGuiTextField setListener(IGuiEventListener listener) {
+    public GuiTextField setListener(IGuiEventListener listener) {
         this.listener = listener;
         return this;
     }
@@ -56,8 +56,8 @@ public class MGuiTextField extends MGuiElementBase {
         ++this.cursorCounter;
     }
 
-    public MGuiTextField setText(String textIn) {
-        if (this.validator.apply(textIn)) {
+    public GuiTextField setText(String textIn) {
+        if (this.validator.test(textIn)) {
             if (textIn.length() > this.maxStringLength) {
                 this.text = textIn.substring(0, this.maxStringLength);
             }
@@ -110,7 +110,7 @@ public class MGuiTextField extends MGuiElementBase {
             s = s + this.text.substring(j);
         }
 
-        if (this.validator.apply(s)) {
+        if (this.validator.test(s)) {
             this.text = s;
             this.moveCursorBy(i - this.selectionEnd + l);
 
@@ -150,7 +150,7 @@ public class MGuiTextField extends MGuiElementBase {
                     s = s + this.text.substring(j);
                 }
 
-                if (this.validator.apply(s)) {
+                if (this.validator.test(s)) {
                     this.text = s;
 
                     if (flag) {
@@ -483,7 +483,7 @@ public class MGuiTextField extends MGuiElementBase {
         GlStateManager.enableTexture2D();
     }
 
-    public MGuiTextField setMaxStringLength(int length) {
+    public GuiTextField setMaxStringLength(int length) {
         this.maxStringLength = length;
 
         if (this.text.length() > length) {
@@ -528,7 +528,7 @@ public class MGuiTextField extends MGuiElementBase {
         return this.isFocused;
     }
 
-    public MGuiTextField setEnabled(boolean enabled) {
+    public GuiTextField setEnabled(boolean enabled) {
         this.isEnabled = enabled;
         super.setEnabled(enabled);
         return this;

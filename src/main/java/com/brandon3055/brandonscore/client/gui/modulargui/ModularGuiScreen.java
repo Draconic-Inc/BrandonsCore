@@ -13,7 +13,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     protected int xSize;
     protected int ySize;
-    protected ModuleManager manager = new ModuleManager(this);
+    protected GuiElementManager manager = new GuiElementManager(this);
     protected int zLevel = 0;
 
     public ModularGuiScreen() {
@@ -30,7 +30,6 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
         this.width = scaledresolution.getScaledWidth();
         this.height = scaledresolution.getScaledHeight();
         manager.setWorldAndResolution(mc, width, height);
-        this.addElements(manager);
     }
 
     /**
@@ -39,7 +38,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     @Override
     public final void initGui() {
         super.initGui();
-        reloadGui();
+        manager.onGuiInit(mc, width, height);
     }
 
     public void reloadGui() {
@@ -73,7 +72,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
         return (this.height - this.ySize) / 2;
     }
 
-    public ModuleManager getManager() {
+    public GuiElementManager getManager() {
         return manager;
     }
 

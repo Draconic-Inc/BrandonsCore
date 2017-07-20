@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by brandon3055 on 13/09/2016.
  */
-public class ThreadedImageDownloader extends SimpleTexture{
+public class ThreadedImageDownloader extends SimpleTexture {
 
     private static final ResourceLocation RESOURCE_BROKEN_DOWNLOAD = new ResourceLocation(BrandonsCore.MODID.toLowerCase() + ":textures/loading_texture_failed.png");
     private static final AtomicInteger TEXTURE_DOWNLOADER_THREAD_ID = new AtomicInteger(0);
@@ -143,7 +143,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
             }
 
             TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedimage, flag, flag1);
-            LogHelperBC.info(dlLocation);
+            LogHelperBC.warn("Unable to load resource from URL: " + resourceUrl);
             if (dlLocation != null) {
                 dlLocation.width = bufferedimage.getWidth();
                 dlLocation.height = bufferedimage.getHeight();

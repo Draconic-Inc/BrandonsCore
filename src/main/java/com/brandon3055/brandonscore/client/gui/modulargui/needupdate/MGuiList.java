@@ -1,9 +1,9 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.needupdate;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IScrollListener;
+import com.brandon3055.brandonscore.lib.ScissorHelper;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -12,7 +12,8 @@ import java.util.LinkedList;
  * Created by brandon3055 on 3/09/2016.
  */
 @Deprecated //Replaced by com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement
-public class MGuiList extends MGuiElementBase implements IScrollListener {
+//I may consider reviving this in some form as a basic simple list implementation.
+public class MGuiList extends MGuiElementBase<MGuiList> implements IScrollListener {
 
     protected boolean scrollBarEnabled = true;
     protected MGuiScrollBar scrollBar;
@@ -96,7 +97,7 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
 
 //        cullList();
 //        zOffset = 160;
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+//        GL11.glEnable(GL11.GL_SCISSOR_TEST);
         int xPos = this.xPos() + leftPadding;
         int yPos = this.yPos() + topPadding;
         int xSize = (this.xSize() - leftPadding) - rightPadding;
@@ -106,7 +107,8 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
         double ws = (double) minecraft.displayWidth / screenWidth;
         int sx = (int) (xSize * ws);
         int sy = (int) (ySize * hs);
-        GL11.glScissor((int) (xPos * ws), minecraft.displayHeight - (int) (yPos * hs) - sy, sx, sy);
+//        GL11.glScissor((int) (xPos * ws), minecraft.displayHeight - (int) (yPos * hs) - sy, sx, sy);
+        ScissorHelper.pushScissor((int) (xPos * ws), minecraft.displayHeight - (int) (yPos * hs) - sy, sx, sy);
 
         for (MGuiElementBase element : listEntries) {
             if (element.isEnabled()) {
@@ -114,8 +116,10 @@ public class MGuiList extends MGuiElementBase implements IScrollListener {
             }
         }
 
-        GL11.glScissor(0, 0, minecraft.displayWidth, minecraft.displayHeight);
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        ScissorHelper.popScissor();
+
+//        GL11.glScissor(0, 0, minecraft.displayWidth, minecraft.displayHeight);
+//        GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 //
 //    @Override

@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.effects.GuiEffect;
@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft;
 /**
  * Created by brandon3055 on 18/10/2016.
  */
-public class MGuiEffectRenderer extends MGuiElementBase {
+public class MGuiEffectRenderer extends MGuiElementBase<MGuiEffectRenderer> {
 
     private final GuiEffectRenderer effectRenderer = new GuiEffectRenderer();
     private String particleTexture = null;
@@ -45,5 +45,11 @@ public class MGuiEffectRenderer extends MGuiElementBase {
 
     public void clearEffects(){
         effectRenderer.clearEffects();
+    }
+
+    @Override
+    public MGuiEffectRenderer translate(int xAmount, int yAmount) {
+        effectRenderer.getActiveEffects().forEach(guiEffect -> guiEffect.moveEntity(xAmount, yAmount));
+        return super.translate(xAmount, yAmount);
     }
 }

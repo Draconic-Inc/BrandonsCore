@@ -1,8 +1,7 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.needupdate;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 
 /**
@@ -29,7 +28,6 @@ public class MGuiVerticalButton extends MGuiButtonSolid {
 
     @Override
     public void renderElement(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        FontRenderer fontrenderer = mc.fontRendererObj;
         boolean hovered = isMouseOver(mouseX, mouseY);
         drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, getFillColour(hovered, disabled), getBorderColour(hovered, disabled));
 
@@ -46,15 +44,15 @@ public class MGuiVerticalButton extends MGuiButtonSolid {
         int l = getTextColour(hovered, disabled);
 
         if (alignment == GuiAlign.CENTER) {
-            drawCenteredString(mc.fontRendererObj, getDisplayString(), xPos() + xSize() / 2, yPos() + (ySize() / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), l, dropShadow);
+            drawCenteredString(fontRenderer, getDisplayString(), xPos() + xSize() / 2, yPos() + (ySize() / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), l, dropShadow);
         }
         else {
-            int buffer = 1 + ((xSize() - fontrenderer.FONT_HEIGHT) / 2);
+            int buffer = 1 + ((xSize() - fontRenderer.FONT_HEIGHT) / 2);
             if (alignment == GuiAlign.LEFT) {
-                drawString(mc.fontRendererObj, getDisplayString(), xPos() + xSize() / 2 - ySize() / 2 + buffer, yPos() + (ySize() / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), l, dropShadow);
+                drawString(fontRenderer, getDisplayString(), xPos() + xSize() / 2 - ySize() / 2 + buffer, yPos() + (ySize() / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), l, dropShadow);
             }
             else {
-                drawString(mc.fontRendererObj, getDisplayString(), xPos() + xSize() / 2 + ySize() / 2 - fontrenderer.getStringWidth(getDisplayString()) - buffer, yPos() + (ySize() / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), l, dropShadow);
+                drawString(fontRenderer, getDisplayString(), xPos() + xSize() / 2 + ySize() / 2 - fontRenderer.getStringWidth(getDisplayString()) - buffer, yPos() + (ySize() / 2) - (mc.fontRendererObj.FONT_HEIGHT / 2), l, dropShadow);
             }
         }
 

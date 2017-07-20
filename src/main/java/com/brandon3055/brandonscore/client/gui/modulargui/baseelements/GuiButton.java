@@ -23,7 +23,6 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDispatcher {
-
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     protected IGuiEventListener listener = null;
     protected boolean trim = true;
@@ -124,11 +123,6 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     }
 
     @Override
-    public GuiButton setParent(MGuiElementBase parent) {
-        return super.setParent(parent);
-    }
-
-    @Override
     public GuiButton setListener(IGuiEventListener listener) {
         this.listener = listener;
         return this;
@@ -211,9 +205,6 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         return this;
     }
 
-    /**
-     * Use to enable/disable the button click sound. Enabled by default.
-     */
     public GuiButton setRotation(TextRotation rotation) {
         this.rotation = rotation;
         return this;
@@ -249,7 +240,6 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
 
     public GuiButton setTextColour(int colour, int colourHover, int colourDisabled) {
         setTextColGetter((hovering, disabled1) -> disabled1 ? colourDisabled : hovering ? colourHover : colour);
-        setDrawBorderedRectBackground(true);
         return this;
     }
 
@@ -260,7 +250,6 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         }
 
         setTextColGetter((hovering, disabled1) -> hovering ? colourHover : colour);
-        setDrawBorderedRectBackground(true);
         return this;
     }
 
@@ -272,7 +261,6 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         }
 
         setTextColGetter((hovering, disabled1) -> colour);
-        setDrawBorderedRectBackground(true);
         return this;
     }
 
@@ -315,6 +303,13 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     public GuiButton setRectColours(int fill, int fillHover, int fillDisabled, int border, int borderHover, int borderDisabled) {
         setRectFillColourGetter((hovering, disabled1) -> disabled1 ? fillDisabled : hovering ? fillHover : fill);
         setRectBorderColourGetter((hovering, disabled1) -> disabled1 ? borderDisabled : hovering ? borderHover : border);
+        setDrawBorderedRectBackground(true);
+        return this;
+    }
+
+    public GuiButton setRectColours(int fill, int fillHover, int border, int borderHover) {
+        setRectFillColourGetter((hovering, disabled1) -> hovering ? fillHover : fill);
+        setRectBorderColourGetter((hovering, disabled1) -> hovering ? borderHover : border);
         setDrawBorderedRectBackground(true);
         return this;
     }
@@ -386,7 +381,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         return this;
     }
 
-    protected int getFillColour(boolean hover, boolean disabled) {
+    public int getFillColour(boolean hover, boolean disabled) {
         if (rectFillColour != null) {
             return rectFillColour.getColour(hover, disabled);
         }
@@ -396,7 +391,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         return 0;
     }
 
-    protected int getBorderColour(boolean hover, boolean disabled) {
+    public int getBorderColour(boolean hover, boolean disabled) {
         if (rectBorderColour != null) {
             return rectBorderColour.getColour(hover, disabled);
         }

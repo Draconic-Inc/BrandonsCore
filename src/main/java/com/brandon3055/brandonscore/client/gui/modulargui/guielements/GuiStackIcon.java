@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.lib.StackReference;
@@ -15,7 +15,7 @@ import java.util.WeakHashMap;
 /**
  * Created by brandon3055 on 3/09/2016.
  */
-public class MGuiStackIcon extends MGuiElementBase {
+public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
     public static WeakHashMap<Integer, ItemStack> stackCache = new WeakHashMap<Integer, ItemStack>();
 
     public boolean drawCount = true;
@@ -24,18 +24,21 @@ public class MGuiStackIcon extends MGuiElementBase {
     private MGuiElementBase background = null;
     protected List<String> toolTipOverride = null;
     private StackReference stackReference;
-    public int xOffset = 0;
-    public int yOffset = 0;
 
-    public MGuiStackIcon(int xPos, int yPos, int xSize, int ySize, StackReference stackReference) {
-        super(xPos, yPos, xSize, ySize);
+    public GuiStackIcon(StackReference stackReference) {
         this.stackReference = stackReference;
+        setSize(18, 18);
     }
 
-    public MGuiStackIcon(int xPos, int yPos, StackReference stackReference) {
+    public GuiStackIcon(int xPos, int yPos, StackReference stackReference) {
         super(xPos, yPos);
         this.stackReference = stackReference;
-        setSize(81, 18);
+        setSize(18, 18);
+    }
+
+    public GuiStackIcon(int xPos, int yPos, int xSize, int ySize, StackReference stackReference) {
+        super(xPos, yPos, xSize, ySize);
+        this.stackReference = stackReference;
     }
 
     @Override
@@ -50,7 +53,7 @@ public class MGuiStackIcon extends MGuiElementBase {
         double scaledWidth = xSize() / 18D;
         double scaledHeight = ySize() / 18D;
 
-        GlStateManager.translate(xPos() + scaledWidth + xOffset, yPos() + scaledHeight + yOffset, getRenderZLevel() - 80);
+        GlStateManager.translate(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
         GlStateManager.scale(scaledWidth, scaledHeight, 1);
         minecraft.getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
 
@@ -58,7 +61,7 @@ public class MGuiStackIcon extends MGuiElementBase {
             String s = getStack().getCount() + "";
             GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
             zOffset = 45;
-            drawString(minecraft.fontRendererObj, s, xSize() - (minecraft.fontRendererObj.getStringWidth(s)) - 1, minecraft.fontRendererObj.FONT_HEIGHT, 0xFFFFFF, true);
+            drawString(fontRenderer, s, xSize() - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset = 0;
         }
 
@@ -69,28 +72,28 @@ public class MGuiStackIcon extends MGuiElementBase {
 
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (isMouseOver(mouseX - xOffset, mouseY - yOffset) && (drawToolTip || toolTipOverride != null)) {
+        if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null)) {
             List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.player, minecraft.gameSettings.advancedItemTooltips);
-            drawHoveringText(list, mouseX, mouseY, minecraft.fontRendererObj, screenWidth, screenHeight);
+            drawHoveringText(list, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             return true;
         }
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
-    public MGuiStackIcon setStack(StackReference stackReference) {
+    public GuiStackIcon setStack(StackReference stackReference) {
         this.stackReference = stackReference;
         return this;
     }
 
     /**
      * Add an element to be used as the background for this stack.<br>
-     * Recommend {@link MGuiSlotRender} or {@link MGuiBorderedRect}<br>
+     * Recommend {@link GuiSlotRender} or {@link GuiBorderedRect}<br>
      * But really you can use any element base including buttons which will make the element function as a button.<br>
      * When you add a background element its size and position will automatically be adjusted to match the stack icon.
      * @param background a MGuiElementBase object.
      * @return the MGuiStackIcon
      */
-    public MGuiStackIcon setBackground(MGuiElementBase background) {
+    public GuiStackIcon setBackground(MGuiElementBase background) {
         if (background == null) {
             if (this.background != null) {
                 removeChild(this.background);
@@ -114,14 +117,13 @@ public class MGuiStackIcon extends MGuiElementBase {
      * Will render the normal item tool tip when you hover over the stack.
      * @return the MGuiStackIcon
      */
-    public MGuiStackIcon setToolTip(boolean drawToolTip) {
+    public GuiStackIcon setToolTip(boolean drawToolTip) {
         this.drawToolTip = drawToolTip;
         return this;
     }
 
     public ItemStack getStack() {
         int hash = stackReference.hashCode();
-        stackCache.clear();
         if (!stackCache.containsKey(hash)) {
             ItemStack stack = stackReference.createStack();
             if (stack.isEmpty()) {
@@ -143,8 +145,13 @@ public class MGuiStackIcon extends MGuiElementBase {
         return stack;
     }
 
-    public MGuiStackIcon setDrawHoverHighlight(boolean drawHoverHighlight) {
+    public GuiStackIcon setDrawHoverHighlight(boolean drawHoverHighlight) {
         this.drawHoverHighlight = drawHoverHighlight;
+        return this;
+    }
+
+    public GuiStackIcon addSlotBackground() {
+        addChild(new GuiSlotRender().setPos(this).setSizeModifiers((guiSlotRender, integer) -> GuiStackIcon.this.xSize(), (guiSlotRender, integer) -> GuiStackIcon.this.ySize()));
         return this;
     }
 }

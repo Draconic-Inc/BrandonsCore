@@ -2,11 +2,11 @@ package com.brandon3055.brandonscore.client.gui.config;
 
 import com.brandon3055.brandonscore.client.gui.ButtonColourRect;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiScreen;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModuleManager;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiLabel;
-import com.brandon3055.brandonscore.client.gui.modulargui.oldelements.MGuiList;
-import com.brandon3055.brandonscore.client.gui.modulargui.oldelements.MGuiListEntryWrapper;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
+import com.brandon3055.brandonscore.client.gui.modulargui.needupdate.MGuiList;
+import com.brandon3055.brandonscore.client.gui.modulargui.needupdate.MGuiListEntryWrapper;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import net.minecraft.client.gui.GuiButton;
@@ -31,7 +31,7 @@ public class GuiIncompatibleConfig extends ModularGuiScreen {
     }
 
     @Override
-    public void addElements(ModuleManager manager) {
+    public void addElements(GuiElementManager manager) {
         int cx = width / 2;
         int cy = height / 2;
 

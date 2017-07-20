@@ -25,8 +25,9 @@ public class GuiHelper {
     public static final double PXL256 = 0.00390625;
 
     public static boolean isInRect(int x, int y, int xSize, int ySize, int mouseX, int mouseY) {
-        return ((mouseX >= x && mouseX <= x + xSize) && (mouseY >= y && mouseY <= y + ySize));
+        return ((mouseX >= x && mouseX < x + xSize) && (mouseY >= y && mouseY < y + ySize));
     }
+
 
     public static void drawTexturedRect(int x, int y, int u, int v, int width, int height) {
         drawTexturedRect(x, y, width, height, u, v, width, height, 0, PXL256);

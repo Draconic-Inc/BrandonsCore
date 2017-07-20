@@ -3,7 +3,9 @@ package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
-import com.brandon3055.brandonscore.client.gui.modulargui.oldelements.*;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSelectDialog;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTextField;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiPickColourDialog;
 
 /**
  * Created by brandon3055 on 1/07/2017.
@@ -105,25 +107,31 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
     /**
      * Used by selector type elements such as the select dialog.
      */
-    public static class SelectEvent extends GuiEvent<MGuiSelectDialog, SelectEvent> {
-        private final MGuiElementBase selected;
+    public static class SelectEvent extends GuiEvent<GuiSelectDialog, SelectEvent> {
+        private final Object selected;
+        private final MGuiElementBase itemRenderer;
 
-        public SelectEvent(MGuiSelectDialog element, MGuiElementBase selected) {
+        public SelectEvent(GuiSelectDialog element, Object selected, MGuiElementBase itemRenderer) {
             super(element);
             this.selected = selected;
+            this.itemRenderer = itemRenderer;
         }
 
-        public MGuiElementBase getSelected() {
+        public Object getSelectedItem() {
             return selected;
+        }
+
+        public MGuiElementBase getSelectedItemRenderer() {
+            return itemRenderer;
         }
     }
 
-    public static class TextFieldEvent extends GuiEvent<MGuiTextField, TextFieldEvent> {
+    public static class TextFieldEvent extends GuiEvent<GuiTextField, TextFieldEvent> {
         private final String theText;
         private final boolean textChanged;
         private final boolean enterPressed;
 
-        public TextFieldEvent(MGuiTextField element, String theText, boolean textChanged, boolean enterPressed) {
+        public TextFieldEvent(GuiTextField element, String theText, boolean textChanged, boolean enterPressed) {
             super(element);
             this.theText = theText;
             this.textChanged = textChanged;
@@ -181,12 +189,12 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
     /**
      * Used by elements like the colour picker.
      */
-    public static class ColourEvent extends GuiEvent<MGuiColourPicker, ColourEvent> {
+    public static class ColourEvent extends GuiEvent<GuiPickColourDialog, ColourEvent> {
         private final int colour;
         private final boolean canceled;
         private final boolean selected;
 
-        public ColourEvent(MGuiColourPicker element, int colour, boolean canceled, boolean selected) {
+        public ColourEvent(GuiPickColourDialog element, int colour, boolean canceled, boolean selected) {
             super(element);
             this.colour = colour;
             this.canceled = canceled;

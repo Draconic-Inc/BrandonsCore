@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiScreen;
  */
 public interface IModularGui<T extends GuiScreen> extends IMouseOver {
 
-    void addElements(ModuleManager manager);
+    void addElements(GuiElementManager manager);
 
     /**
      * @return the ModularGui main gui screen
@@ -30,7 +30,7 @@ public interface IModularGui<T extends GuiScreen> extends IMouseOver {
 
     int guiTop();
 
-    ModuleManager getManager();
+    GuiElementManager getManager();
 
     void setZLevel(int zLevel);
 

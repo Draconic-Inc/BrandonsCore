@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.needupdate;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import net.minecraft.client.Minecraft;
@@ -53,7 +53,7 @@ public class MGuiHoverText extends MGuiElementBase<MGuiHoverText> {
 
         List<String> hoverText = getToolTip();
         if (mouseOver && hoverTime >= hoverDelay && hoverText != null && !hoverText.isEmpty()) {
-            drawHoveringText(hoverText, mouseX, mouseY, minecraft.fontRendererObj, screenWidth, screenHeight);
+            drawHoveringText(hoverText, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             return true;
         }
 

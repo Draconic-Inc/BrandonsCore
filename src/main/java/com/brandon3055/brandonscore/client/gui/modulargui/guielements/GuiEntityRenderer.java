@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
@@ -22,26 +22,29 @@ import java.util.Map;
 /**
  * Created by brandon3055 on 23/10/2016.
  */
-public class MGuiEntityRenderer extends MGuiElementBase {
+public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
     private static Map<ResourceLocation, Entity> entityCache = new HashMap<>();
     private static List<ResourceLocation> invalidEntities = new ArrayList<>();
 
+    private float rotationSpeed = 1;
+    private float lockedRotation = 0;
     private Entity entity;
     private ResourceLocation entityName;
     private boolean invalidEntity = false;
+    private boolean rotationLocked = false;
 
-    public MGuiEntityRenderer() {
+    public GuiEntityRenderer() {
     }
 
-    public MGuiEntityRenderer(int xPos, int yPos) {
+    public GuiEntityRenderer(int xPos, int yPos) {
         super(xPos, yPos);
     }
 
-    public MGuiEntityRenderer(int xPos, int yPos, int xSize, int ySize) {
+    public GuiEntityRenderer(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
     }
 
-    public MGuiEntityRenderer setEntity(Entity entity) {
+    public GuiEntityRenderer setEntity(Entity entity) {
         this.entity = entity;
         this.entityName = EntityList.getKey(entity);
 
@@ -52,7 +55,7 @@ public class MGuiEntityRenderer extends MGuiElementBase {
         return this;
     }
 
-    public MGuiEntityRenderer setEntity(ResourceLocation entity) {
+    public GuiEntityRenderer setEntity(ResourceLocation entity) {
         this.entityName = entity;
         this.entity = entityCache.computeIfAbsent(entity, resourceLocation -> EntityList.createEntityByIDFromName(entity, mc.world));
 
@@ -65,8 +68,8 @@ public class MGuiEntityRenderer extends MGuiElementBase {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        mouseX = mouseY = 0;
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+        mouseX = mouseY = 0;
 
         if (invalidEntity) {
             return;
@@ -84,10 +87,12 @@ public class MGuiEntityRenderer extends MGuiElementBase {
                     GlStateManager.enableColorMaterial();
                     GlStateManager.pushMatrix();
 
+                    float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
+
                     GlStateManager.translate((float) posX, (float) yPos() + (entity.height * scale), zLevel);
                     GlStateManager.scale(-scale, scale, scale);
                     GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
-                    GlStateManager.rotate(BCClientEventHandler.elapsedTicks, 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
                     RenderHelper.enableStandardItemLighting();
                     GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
                     GlStateManager.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
@@ -110,9 +115,37 @@ public class MGuiEntityRenderer extends MGuiElementBase {
         catch (Throwable e) {
             invalidEntity = true;
             invalidEntities.add(entityName);
-            LogHelperBC.error("Failed to render entity in GUI. This is not a bug there are just some entities that can not be rendered like this.");
+            LogHelperBC.error("Failed to build entity in GUI. This is not a bug there are just some entities that can not be rendered like this.");
             LogHelperBC.error("Entity: " + entity);
             e.printStackTrace();
         }
+    }
+
+    public boolean isRotationLocked() {
+        return rotationLocked;
+    }
+
+    public GuiEntityRenderer rotationLocked(boolean rotationLocked) {
+        this.rotationLocked = rotationLocked;
+        return this;
+    }
+
+    public GuiEntityRenderer setLockedRotation(float lockedRotation) {
+        this.lockedRotation = lockedRotation;
+        rotationLocked(true);
+        return this;
+    }
+
+    public float getLockedRotation() {
+        return lockedRotation;
+    }
+
+    public GuiEntityRenderer setRotationSpeedMultiplier(float rotationSpeed) {
+        this.rotationSpeed = rotationSpeed;
+        return this;
+    }
+
+    public float getRotationSpeedMultiplier() {
+        return rotationSpeed;
     }
 }

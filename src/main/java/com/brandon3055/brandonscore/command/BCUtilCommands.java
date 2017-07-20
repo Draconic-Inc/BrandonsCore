@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.command;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
+import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.command.CommandBase;
@@ -14,8 +16,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 /**
@@ -83,7 +88,6 @@ public class BCUtilCommands extends CommandBase {
 //        ChatHelper.message(sender, "-", TextFormatting.GRAY);
     }
 
-
     private void functionNBT(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         EntityPlayer player = getCommandSenderAsPlayer(sender);
         ItemStack stack = HandHelper.getMainFirst(player);
@@ -95,10 +99,28 @@ public class BCUtilCommands extends CommandBase {
 
         NBTTagCompound compound = stack.getTagCompound();
         LogHelperBC.logNBT(compound);
+
+        String s = compound+"";
+        if (args.length == 2) {
+            s = new StackReference(stack).toString();
+        }
+
+        LogHelperBC.info(s);
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.message(sender, s, TextFormatting.GOLD));
+        DataUtils.forEach(lines, st -> ChatHelper.message(sender, st, TextFormatting.GOLD));
+
+        if (!StringUtils.isEmpty(compound+"") && !BrandonsCore.proxy.isDedicatedServer())
+        {
+            try
+            {
+                StringSelection stringselection = new StringSelection(s);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
+                ChatHelper.message(sender, "NBT Copied to clipboard!", TextFormatting.GREEN);
+            }
+            catch (Exception ignored) {}
+        }
     }
 
 

@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import cofh.api.energy.IEnergyHandler;
 import com.brandon3055.brandonscore.blocks.TileEnergyBase;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by brandon3055 on 18/10/2016.
  */
-public class MGuiEnergyBar extends MGuiElementBase {
+public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
 
     private int energy = 0;
     private int maxEnergy = 0;
@@ -26,38 +26,38 @@ public class MGuiEnergyBar extends MGuiElementBase {
     private IEnergyHandler energyHandler;
     private boolean horizontal = false;
 
-    public MGuiEnergyBar() {}
+    public GuiEnergyBar() {}
 
-    public MGuiEnergyBar(int xPos, int yPos) {
+    public GuiEnergyBar(int xPos, int yPos) {
         super(xPos, yPos);
     }
 
-    public MGuiEnergyBar(int xPos, int yPos, int xSize, int ySize) {
+    public GuiEnergyBar(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
     }
 
-    public MGuiEnergyBar setEnergy(int energy, int maxEnergy) {
+    public GuiEnergyBar setEnergy(int energy, int maxEnergy) {
         this.energy = energy;
         this.maxEnergy = maxEnergy;
         return this;
     }
 
-    public MGuiEnergyBar setEnergy(int energy) {
+    public GuiEnergyBar setEnergy(int energy) {
         this.energy = energy;
         return this;
     }
 
-    public MGuiEnergyBar setDrawHoveringText(boolean drawHoveringText) {
+    public GuiEnergyBar setDrawHoveringText(boolean drawHoveringText) {
         this.drawHoveringText = drawHoveringText;
         return this;
     }
 
-    public MGuiEnergyBar setHorizontal(boolean horizontal) {
+    public GuiEnergyBar setHorizontal(boolean horizontal) {
         this.horizontal = horizontal;
         return this;
     }
 
-    public MGuiEnergyBar setEnergyHandler(IEnergyHandler energyHandler) {
+    public GuiEnergyBar setEnergyHandler(IEnergyHandler energyHandler) {
         this.energyHandler = energyHandler;
         return this;
     }
@@ -98,7 +98,7 @@ public class MGuiEnergyBar extends MGuiElementBase {
             list.add(InfoHelper.ITC() + I18n.format("gui.de.energyStorage.txt"));
             list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
             list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
-            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRendererObj, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            drawHoveringText(list, mouseX, mouseY, fontRenderer, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
             return true;
         }
 

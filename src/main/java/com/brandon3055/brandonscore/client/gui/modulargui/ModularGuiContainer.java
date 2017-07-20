@@ -24,7 +24,7 @@ import java.io.IOException;
  */
 public abstract class ModularGuiContainer<T extends Container> extends GuiContainer implements IModularGui<ModularGuiContainer> {
 
-    protected ModuleManager manager = new ModuleManager(this);
+    protected GuiElementManager manager = new GuiElementManager(this);
     protected int zLevel = 0;
     protected T container;
 
@@ -38,7 +38,6 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         this.width = scaledresolution.getScaledWidth();
         this.height = scaledresolution.getScaledHeight();
         manager.setWorldAndResolution(mc, width, height);
-        this.addElements(manager);
     }
 
     /**
@@ -47,7 +46,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     @Override
     public final void initGui() {
         super.initGui();
-        reloadGui();
+        manager.onGuiInit(mc, width, height);
     }
 
     public void reloadGui() {
@@ -81,7 +80,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
         return guiTop;
     }
 
-    public ModuleManager getManager() {
+    public GuiElementManager getManager() {
         return manager;
     }
 

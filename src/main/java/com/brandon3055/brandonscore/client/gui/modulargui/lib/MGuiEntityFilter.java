@@ -2,9 +2,13 @@ package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
-import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiLabel;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEntityRenderer;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSelectDialog;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTextFieldDialog;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.ModuleBuilder.EqualColumns;
-import com.brandon3055.brandonscore.client.gui.modulargui.oldelements.*;
+import com.brandon3055.brandonscore.client.gui.modulargui.needupdate.*;
 import com.brandon3055.brandonscore.lib.EntityFilter;
 import com.brandon3055.brandonscore.utils.LinkedHashList;
 import net.minecraft.client.resources.I18n;
@@ -40,7 +44,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
     private GuiButton addCustom;
     private GuiLabel listLabel;
     private MGuiList list;
-    private MGuiSelectDialog selector = null;
+    private GuiSelectDialog selector = null;
     private LinkedHashList<String> lastTickList = new LinkedHashList<>();
 
     private static List<Entity> entityList;
@@ -138,7 +142,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
 
             addChild(listLabel = new GuiLabel(xPos(), builder.builderEndY + 4, xSize(), 14, "") {
                 @Override
-                public String getDisplayString() {
+                public String getLabelText() {
                     return filter.isWhiteList ? I18n.format("gui.entityFilter.button.whiteList") : I18n.format("gui.entityFilter.button.blackList");
                 }
             });
@@ -149,7 +153,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
                 }
             }.setListener(this));
             addChild(list = new MGuiList(xPos(), listLabel.yPos() + listLabel.ySize(), xSize() - 1, ySize() - (listLabel.yPos() - yPos() + listLabel.ySize()) - 13));
-            listLabel.addChild(new MGuiBorderedRect(list.xPos(), list.yPos(), list.xSize() + 1, list.ySize()).setBorderColour(0xFF000000).setFillColour(0x30000000));
+            listLabel.addChild(new GuiBorderedRect(list.xPos(), list.yPos(), list.xSize() + 1, list.ySize()).setBorderColour(0xFF000000).setFillColour(0x30000000));
         }
 
         super.addChildElements();
@@ -182,10 +186,10 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
                 return;
             }
 
-            selector = new MGuiSelectDialog(list.xPos(), list.yPos(), list.xSize(), list.ySize()).setListener(this);
-            selector.allowOutsideClicks = true;
+            selector = new GuiSelectDialog(list.xPos(), list.yPos(), list.xSize(), list.ySize(), this).setListener(this);
+//            selector.allowOutsideClicks = true;
             selector.addChild(new GuiButton(xPos(), selector.yPos() - 12, 40, 12, TextFormatting.DARK_RED + I18n.format("gui.cancel")).setListener(this).setId("SELECT_CANCEL"));
-            selector.addChild(new MGuiBorderedRect(list.xPos(), list.yPos(), list.xSize() + 1, list.ySize()).setFillColour(0xFF909090).setBorderColour(0xFF000000));
+            selector.addChild(new GuiBorderedRect(list.xPos(), list.yPos(), list.xSize() + 1, list.ySize()).setFillColour(0xFF909090).setBorderColour(0xFF000000));
 
             List<MGuiElementBase> elementBases = new ArrayList<>();
 
@@ -198,7 +202,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
                     MGuiElementBase container = new MGuiElementBase(0, 0, xSize() - 13, 20);
                     container.setLinkedObject(EntityList.getEntityString(entity));
 
-                    MGuiEntityRenderer renderer = new MGuiEntityRenderer(10, 5, 12, 10).setEntity(entity);
+                    GuiEntityRenderer renderer = new GuiEntityRenderer(10, 5, 12, 10).setEntity(entity);
                     container.addChild(renderer);
 
                     GuiLabel label = new GuiLabel(30, 0, xSize() - 42, 20, name).setAlignment(GuiAlign.LEFT).setTrim(true);
@@ -248,9 +252,9 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
             }
 
 
-            selector.setOptions(elementBases);
+//            selector.setOptions(elementBases);
             selector.addChildElements();
-            modularGui.getManager().add(selector, displayLevel + 1);
+            modularGui.getManager().add(selector, displayZLevel + 1);
             return;
         }
         //endregion
@@ -260,7 +264,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
                 selector = null;
             }
 
-            MGuiPopupTextField textField = (MGuiPopupTextField) new MGuiPopupTextField(xPos() + (xSize() / 2) - 50, yPos() + (ySize() / 2) - 6, 100, 12, this).setId("ADD_CUSTOM");
+            GuiTextFieldDialog textField = (GuiTextFieldDialog) new GuiTextFieldDialog(xPos() + (xSize() / 2) - 50, yPos() + (ySize() / 2) - 6, 100, 12, this).setId("ADD_CUSTOM");
             textField.addChild(new MGuiHoverText(new String[] {I18n.format("gui.entityFilter.customTip.txt")}, textField));
             textField.show();
         }
@@ -291,7 +295,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IGuiEventListen
         else if (eventElement instanceof GuiButton && ((GuiButton) eventElement).buttonName.equals("EDIT_ENTRY")) {
             if (eventElement.linkedObject instanceof String) {
                 String name = (String) eventElement.linkedObject;
-                MGuiPopupTextField textField = (MGuiPopupTextField) new MGuiPopupTextField(xPos() + (xSize() / 2) - 50, yPos() + (ySize() / 2) - 6, 100, 12, this).setId("EDIT_RESULT");
+                GuiTextFieldDialog textField = (GuiTextFieldDialog) new GuiTextFieldDialog(xPos() + (xSize() / 2) - 50, yPos() + (ySize() / 2) - 6, 100, 12, this).setId("EDIT_RESULT");
                 textField.textField.setText(name);
                 textField.setLinkedObject(name);
                 textField.addChild(new MGuiHoverText(new String[] {I18n.format("gui.entityFilter.customTip.txt")}, textField));

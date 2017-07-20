@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
@@ -10,7 +10,7 @@ import net.minecraft.util.ResourceLocation;
  * See the Draconic Reactor gui for an example of this in use.
  * Simply allows you to define a texture for a "pointer" that moves between min pos and max pos.
  */
-public class MGuiTexturedPointer extends MGuiElementBase {
+public class GuiTexturedPointer extends MGuiElementBase<GuiTexturedPointer> {
 
     private int texPosX;
     private int texPosY;
@@ -19,20 +19,16 @@ public class MGuiTexturedPointer extends MGuiElementBase {
     public IGuiEventListener listener;
     public double position = 0;
     public boolean horizontal = false;
-    private boolean isDragging = false;
     public int barColour = 0xFF000000;
     public int sliderColour = 0xFFFFFFFF;
-    public int backFillColour = 0x00000000;
-    public int backBorderColour = 0x00000000;
 
-    protected MGuiTexturedPointer() {
-    }
+    protected GuiTexturedPointer() {}
 
-    protected MGuiTexturedPointer(int xPos, int yPos) {
+    protected GuiTexturedPointer(int xPos, int yPos) {
         super(xPos, yPos);
     }
 
-    public MGuiTexturedPointer(int xPos, int yPos, int xSize, int ySize, int texPosX, int texPosY, int sliderWidth, ResourceLocation texture) {
+    public GuiTexturedPointer(int xPos, int yPos, int xSize, int ySize, int texPosX, int texPosY, int sliderWidth, ResourceLocation texture) {
         super(xPos, yPos, xSize, ySize);
         this.texPosX = texPosX;
         this.texPosY = texPosY;
@@ -70,20 +66,14 @@ public class MGuiTexturedPointer extends MGuiElementBase {
     //region Interact & Setters
 
 
-    public MGuiTexturedPointer setColours(int barColour, int sliderColour) {
+    public GuiTexturedPointer setColours(int barColour, int sliderColour) {
         this.barColour = barColour;
         this.sliderColour = sliderColour;
         return this;
     }
 
-//    public MGuiTexturedPointer setBackground(int backFillColour, int backBorderColour) {
-//        this.backFillColour = backFillColour;
-//        this.backBorderColour = backBorderColour;
-//        this.backBorderWidth = backBourderWidth;
-//        return this;
-//    }
 
-    public MGuiTexturedPointer setHorizontal(boolean horizontal) {
+    public GuiTexturedPointer setHorizontal(boolean horizontal) {
         this.horizontal = horizontal;
         return this;
     }

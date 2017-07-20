@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -55,6 +55,8 @@ import java.util.function.Consumer;
  * just to name a few.
  */
 public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver {
+    protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
+
     private int xPos;
     private int yPos;
     private int xSize;
@@ -79,9 +81,11 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Offsets the zLevel when rendering
      */
-    protected double zOffset = 0;
     protected boolean drawHoverText = false;
+    protected boolean capturesClicks = false;
     protected List<MGuiElementBase> toRemove = new ArrayList<>();
+    protected List<MGuiElementBase> boundSizeElements = new ArrayList<>();
+    protected List<MGuiElementBase> boundInsetSizeElements = new ArrayList<>();
     protected LinkedList<MGuiElementBase> childElements = new LinkedList<>();
 
     public int screenWidth;
@@ -89,14 +93,17 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * For use by ModuleManager ONLY
      */
-    public int displayLevel = 0;
+    public int displayZLevel = 0;
+    public double zOffset = 0;
     /**
      * Can simply be used to store an object reference on this element. Use for whatever you like.
      */
     public Object linkedObject = null;
+    public boolean reportXSizeChange = false;
+    public boolean reportYSizeChange = false;
     public Minecraft mc = Minecraft.getMinecraft();
     public IModularGui modularGui;
-    public FontRenderer fontRenderer;
+    public FixedFontRenderer fontRenderer = FixedFontRenderer.convert(mc.fontRendererObj);
 
     //Lambdas!
     protected Consumer<E> onReload = null;
@@ -200,6 +207,18 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     }
 
     /**
+     * Adds a new child element to this element at index 0 so it will render behind all other elements previously added.
+     *
+     * @return The child element that was added.
+     */
+    public <C extends MGuiElementBase> C addChildFirst(C child) {
+        childElements.addFirst(child);
+        onChildAdded(child);
+        return child;
+    }
+
+
+    /**
      * Adds a Collection of child elements to this element.
      */
     @SuppressWarnings("unchecked")
@@ -219,7 +238,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * and its also save to remove an element from its parent and re add it or add it to another parent.
      */
     protected void onChildAdded(MGuiElementBase childElement) {
-        childElement.applyGeneralElementData(modularGui, mc, screenWidth, screenHeight);
+        childElement.applyGeneralElementData(modularGui, mc, screenWidth, screenHeight, fontRenderer);
         childElement.setParent(this);
         if (!childElement.elementInitialized) {
             childElement.addChildElements();
@@ -501,7 +520,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      */
     @Override
     public boolean isMouseOver(int mouseX, int mouseY) {
-        return GuiHelper.isInRect(xPos(), yPos(), xSize(), ySize(), mouseX, mouseY);
+        return GuiHelper.isInRect(xPos(), yPos(), xSize(), ySize(), mouseX, mouseY) && allowMouseOver(this, mouseX, mouseY);
     }
 
     /**
@@ -519,7 +538,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
                 return true;
             }
         }
-        return false;
+        return isMouseOver(mouseX, mouseY) && capturesClicks;
     }
 
     /**
@@ -596,6 +615,28 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
             }
         }
         return false;
+    }
+
+    /**
+     * This is used primarily by GuiScrollElement to disable {@link #isMouseOver(int, int)} for areas of elements
+     * that are outside the view bounds.
+     */
+    public boolean allowMouseOver(MGuiElementBase elementRequesting, int mouseX, int mouseY) {
+        return getParent() == null || getParent().allowMouseOver(this, mouseX, mouseY);
+    }
+
+    /**
+     * Setting this to true will cause this element to capture all mouse clicks within its bounds regardless of whether or
+     * not an action was performed due to the click.
+     * This can be useful in cases where you have multiple child elements overlapping and you do not want a click to pass though
+     * the an element on to and be captured by an element bellow.<br>
+     * Note: For elements added directly to the module manager on different display levels this is not required because
+     * the module manager will not pass a click to an element if the click occurred within the bounds of an element on a higher
+     * display levelZLevel.
+     */
+    public E setCapturesClicks(boolean capturesClicks) {
+        this.capturesClicks = capturesClicks;
+        return (E) this;
     }
 
     //endregion
@@ -839,13 +880,49 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * If parent has not yet been assigned this will be applied when the parent is assigned.
      */
     @SuppressWarnings("unchecked")
-    public E setRelPos(int xPos, int yPos) {
+    public E setRelPos(int xOffset, int yOffset) {
         if (getParent() == null) {
-            parentRelPos = new Point(xPos, yPos);
+            parentRelPos = new Point(xOffset, yOffset);
         }
         else {
-            setPos(getParent().xPos() + xPos, getParent().yPos() + yPos);
+            setPos(getParent().xPos() + xOffset, getParent().yPos() + yOffset);
         }
+        return (E) this;
+    }
+
+    /**
+     * Set the position of this element relative to another element.
+     */
+    @SuppressWarnings("unchecked")
+    public E setRelPos(@Nonnull MGuiElementBase relativeTo, int xOffset, int yOffset) {
+        setPos(relativeTo.xPos() + xOffset, relativeTo.yPos() + yOffset);
+        return (E) this;
+    }
+
+    /**
+     * Set the position of this element relative to the top right corner of another element.
+     */
+    @SuppressWarnings("unchecked")
+    public E setRelPosRight(@Nonnull MGuiElementBase relativeTo, int xOffset, int yOffset) {
+        setPos(relativeTo.maxXPos() + xOffset, relativeTo.yPos() + yOffset);
+        return (E) this;
+    }
+
+    /**
+     * Set the position of this element relative to the bottom left corner of another element.
+     */
+    @SuppressWarnings("unchecked")
+    public E setRelPosBottom(@Nonnull MGuiElementBase relativeTo, int xOffset, int yOffset) {
+        setPos(relativeTo.xPos() + xOffset, relativeTo.maxYPos() + yOffset);
+        return (E) this;
+    }
+
+    /**
+     * Set the position of this element relative to the bottom right corner of another element.
+     */
+    @SuppressWarnings("unchecked")
+    public E setRelPosBottomRight(@Nonnull MGuiElementBase relativeTo, int xOffset, int yOffset) {
+        setPos(relativeTo.maxXPos() + xOffset, relativeTo.maxYPos() + yOffset);
         return (E) this;
     }
 
@@ -854,12 +931,12 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * If parent has not yet been assigned this will be applied when the parent is assigned.
      */
     @SuppressWarnings("unchecked")
-    public E setInsetRelPos(int xPos, int yPos) {
+    public E setInsetRelPos(int xOffset, int yOffset) {
         if (getParent() == null) {
-            parentInsetRelPos = new Point(xPos, yPos);
+            parentInsetRelPos = new Point(xOffset, yOffset);
         }
         else {
-            setPos(getParent().getInsetRect().x + xPos, getParent().getInsetRect().y + yPos);
+            setPos(getParent().getInsetRect().x + xOffset, getParent().getInsetRect().y + yOffset);
         }
         return (E) this;
     }
@@ -889,12 +966,18 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     @SuppressWarnings("unchecked")
     public E setXSize(int xSize) {
         this.xSize = xSize;
+        boundSizeElements.forEach(elementBase -> elementBase.setXSize(xSize()));
+        boundInsetSizeElements.forEach(elementBase -> elementBase.setXSize(getInsetRect().width));
+        xSizeChanged(this);
         return (E) this;
     }
 
     @SuppressWarnings("unchecked")
     public E setYSize(int ySize) {
         this.ySize = ySize;
+        boundSizeElements.forEach(elementBase -> elementBase.setYSize(ySize()));
+        boundInsetSizeElements.forEach(elementBase -> elementBase.setYSize(getInsetRect().height));
+        ySizeChanged(this);
         return (E) this;
     }
 
@@ -936,6 +1019,38 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         return (E) this;
     }
 
+    /**
+     * Bind the size of this element to the specified element.
+     * @param element The element to bind to.
+     * @param insetSize Bind to inset rect size @see {@link #setInsets(Insets)}
+     */
+    @SuppressWarnings("unchecked")
+    public E bindSize(MGuiElementBase element, boolean insetSize) {
+        if (insetSize) {
+            element.boundInsetSizeElements.add(this);
+        }
+        else {
+            element.boundSizeElements.add(this);
+        }
+        return (E) this;
+    }
+
+    /**
+     * Bind the size of the specified element to the size of this element.
+     * @param element The element.
+     * @param insetSize Bind to inset rect size @see {@link #setInsets(Insets)}
+     */
+    @SuppressWarnings("unchecked")
+    public E imposeSize(MGuiElementBase element, boolean insetSize) {
+        if (insetSize) {
+            boundInsetSizeElements.add(element);
+        }
+        else {
+            boundSizeElements.add(element);
+        }
+        return (E) this;
+    }
+
     //lambda Callbacks
 
     /**
@@ -962,6 +1077,24 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     public E setYSizeMod(BiFunction<E, Integer, Integer> yMod) {
         this.ySizeModifier = yMod;
         return (E) this;
+    }
+
+    /**
+     * Informs the parent when the xSize of this element changes. Used by things like GuiScrollElement
+     */
+    public void xSizeChanged(MGuiElementBase elementChanged) {
+        if (getParent() != null) {
+            getParent().xSizeChanged(this);
+        }
+    }
+
+    /**
+     * Informs the parent when the ySize of this element changes. Used by things like GuiScrollElement
+     */
+    public void ySizeChanged(MGuiElementBase elementChanged) {
+        if (getParent() != null) {
+            getParent().ySizeChanged(this);
+        }
     }
 
     //endregion
@@ -1084,7 +1217,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     @Override
     public int hashCode() {
-        return ("[" + id + "-" + xPos() + "-" + yPos() + "-" + xSize() + "-" + ySize() + "" + displayLevel + "]").hashCode();
+        return ("[" + id + "-" + xPos() + "-" + yPos() + "-" + xSize() + "-" + ySize() + "" + displayZLevel + "]").hashCode();
     }
 
     /**
@@ -1098,14 +1231,14 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         }
     }
 
-    public void applyGeneralElementData(IModularGui modularGui, Minecraft mc, int width, int height) {
+    public void applyGeneralElementData(IModularGui modularGui, Minecraft mc, int width, int height, FixedFontRenderer fontRenderer) {
         this.mc = mc;
-        this.fontRenderer = mc.fontRendererObj;
+        this.fontRenderer = fontRenderer;
         this.screenWidth = width;
         this.screenHeight = height;
         this.modularGui = modularGui;
         for (MGuiElementBase element : childElements) {
-            element.applyGeneralElementData(modularGui, mc, width, height);
+            element.applyGeneralElementData(modularGui, mc, width, height, fontRenderer);
         }
     }
 
@@ -1143,7 +1276,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     }
 
     /**
-     * Used by {@link ModuleManager} to generate a list of all elements who's bounds contain the given position.
+     * Used by {@link GuiElementManager} to generate a list of all elements who's bounds contain the given position.
      * This can for example be used to find all elements that are currently under the mouse cursor.
      *
      * @param posX The x position.
@@ -1311,7 +1444,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * My only concern with implementing forge events in the modular gui system is that other mods may try to replace this call with their own renderer
      * which in the context of a modular gui would probably break.
      */
-    public void drawHoveringText(@Nonnull final ItemStack stack, List<String> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FontRenderer font) {
+    public void drawHoveringText(@Nonnull final ItemStack stack, List<String> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FixedFontRenderer font) {
         if (!textLines.isEmpty()) {
             RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
             if (MinecraftForge.EVENT_BUS.post(event)) {
@@ -1322,7 +1455,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
             screenWidth = event.getScreenWidth();
             screenHeight = event.getScreenHeight();
             maxTextWidth = event.getMaxWidth();
-            font = event.getFontRenderer();
+            font = event.getFontRenderer() == font ? font : FixedFontRenderer.convert(event.getFontRenderer());
 
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
@@ -1454,14 +1587,14 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Simply draws a string with the given colour and no shadow.
      */
-    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour) {
+    public int drawString(FixedFontRenderer fontRenderer, String text, float x, float y, int colour) {
         return drawString(fontRenderer, text, x, y, colour, false);
     }
 
     /**
      * Draws a string with the given colour and optional shadow.
      */
-    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+    public int drawString(FixedFontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
         GlStateManager.pushMatrix();
         GlStateManager.translate(0, 0, getRenderZLevel() + 1);
         int i = fontRenderer.drawString(text, x, y, colour, dropShadow);
@@ -1472,7 +1605,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Draws a centered string
      */
-    public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+    public void drawCenteredString(FixedFontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
         GlStateManager.pushMatrix();
         GlStateManager.translate(0, 0, getRenderZLevel() + 1);
         fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2, y, colour, dropShadow);
@@ -1482,7 +1615,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Draws a split string (multi line string)
      */
-    public void drawSplitString(FontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
+    public void drawSplitString(FixedFontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
         for (String s : fontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
             drawString(fontRenderer, s, x, y, colour, dropShadow);
             y += fontRenderer.FONT_HEIGHT;
@@ -1492,7 +1625,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Draws a centered split string
      */
-    public void drawCenteredSplitString(FontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
+    public void drawCenteredSplitString(FixedFontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
         for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
             drawCenteredString(fontRenderer, s, x, y, colour, dropShadow);
             y += fontRenderer.FONT_HEIGHT;
@@ -1508,12 +1641,11 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @param wrap      if true the text will wrap (milty line text) if the text is longer than xSize. (Not compatible with trim)
      * @param trim      if true the text will be trimmed to xSize if it is too long. When trimmed "..." will be appended to the end of the string.
      */
-    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
+    public void drawCustomString(FixedFontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
         if (trim && fr.getStringWidth(text) > width - 4) {
             text = fr.trimStringToWidth(text, width - 8) + "..";
         }
 
-//        drawColouredRect(x, y, width, 10, 0xFF00FF00);
         if (rotation == TextRotation.NORMAL) {
             if (wrap) {
                 drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
@@ -1551,7 +1683,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Allows you to draw a split string aligned to the left, middle or right of the specified area.
      */
-    public void drawAlignedSplitString(FontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
+    public void drawAlignedSplitString(FixedFontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
         for (String s : fontRenderer.listFormattedStringToWidth(text, width)) {
             drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
             y += fontRenderer.FONT_HEIGHT;
@@ -1561,7 +1693,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * Allows you to draw a string aligned to the left, middle or right of the specified area.
      */
-    public void drawAlignedString(FontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
+    public void drawAlignedString(FixedFontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
         if (trim && fr.getStringWidth(text) > width - 4) {
             text = fr.trimStringToWidth(text, width - 8) + "..";
         }
@@ -1581,17 +1713,17 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 //        drawString(fontRenderer, s, x, y, colour, dropShadow);
     }
 
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight) {
-        double oldOffset = zOffset;
-        zOffset = 190;
+    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FixedFontRenderer font, int screenWidth, int screenHeight) {
+//        double oldOffset = zOffset;
+//        zOffset = 190;
         drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
-        zOffset = oldOffset;
+//        zOffset = oldOffset;
     }
 
     /**
      * This is almost an exact copy of forges code except it respects zLevel.
      */
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
+    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FixedFontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
         if (!textLines.isEmpty()) {
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
@@ -1772,6 +1904,43 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         int blue = MathHelper.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
 
         return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | (blue & 0xFF);
+    }
+
+    public void renderVanillaButtonTexture(int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
+        ResourceHelperBC.bindTexture(WIDGETS_TEXTURES);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        int k = 1;
+        if (disabled) {
+            k = 0;
+        }
+        else if (hovered) {
+            k = 2;
+        }
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
+        int texHeight = Math.min(20, ySize);
+        int texPos = 46 + k * 20;
+
+        drawTexturedModalRect(xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight);
+        drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight);
+
+        if (ySize < 20) {
+            drawTexturedModalRect(xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
+            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3);
+        }
+        else if (ySize > 20) {
+            for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
+                drawTexturedModalRect(xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15);
+                drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15);
+            }
+
+            drawTexturedModalRect(xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15);
+            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15);
+        }
     }
 
     //endregion

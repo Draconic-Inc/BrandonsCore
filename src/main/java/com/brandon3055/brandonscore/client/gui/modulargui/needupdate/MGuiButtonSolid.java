@@ -1,9 +1,8 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.oldelements;
+package com.brandon3055.brandonscore.client.gui.modulargui.needupdate;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 
 /**
@@ -23,7 +22,8 @@ public class MGuiButtonSolid extends GuiButton {
     }
 
     public MGuiButtonSolid(String buttonName, int xPos, int yPos, int xSize, int ySize, String buttonText) {
-        super(buttonName, xPos, yPos, xSize, ySize, buttonText);
+        super(xPos, yPos, xSize, ySize, buttonText);
+        setButtonName(buttonName);
     }
 
     public MGuiButtonSolid(int xPos, int yPos, int xSize, int ySize, String buttonText) {
@@ -33,10 +33,9 @@ public class MGuiButtonSolid extends GuiButton {
 
     @Override
     public void renderElement(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        FontRenderer fontrenderer = mc.fontRendererObj;
         String displayString = getDisplayString();
-        if (trim && fontrenderer.getStringWidth(displayString) > xSize() - 4) {
-            displayString = fontrenderer.trimStringToWidth(displayString, xSize() - 8) + "..";
+        if (trim && fontRenderer.getStringWidth(displayString) > xSize() - 4) {
+            displayString = fontRenderer.trimStringToWidth(displayString, xSize() - 8) + "..";
         }
 
         boolean hovered = isMouseOver(mouseX, mouseY);
@@ -45,15 +44,15 @@ public class MGuiButtonSolid extends GuiButton {
         int l = getTextColour(hovered, disabled);
 
         if (alignment == GuiAlign.CENTER) {
-            drawCenteredString(fontrenderer, displayString, xPos() + xSize() / 2, yPos() + (ySize() - 8) / 2, l, dropShadow);
+            drawCenteredString(fontRenderer, displayString, xPos() + xSize() / 2, yPos() + (ySize() - 8) / 2, l, dropShadow);
         }
         else {
-            int buffer = 1 + ((ySize() - fontrenderer.FONT_HEIGHT) / 2);
+            int buffer = 1 + ((ySize() - fontRenderer.FONT_HEIGHT) / 2);
             if (alignment == GuiAlign.LEFT) {
-                drawString(fontrenderer, displayString, xPos() + buffer, yPos() + (ySize() - 8) / 2, l, dropShadow);
+                drawString(fontRenderer, displayString, xPos() + buffer, yPos() + (ySize() - 8) / 2, l, dropShadow);
             }
             else {
-                drawString(fontrenderer, displayString, ((xPos() + xSize()) - buffer) - fontrenderer.getStringWidth(displayString), yPos() + (ySize() - 8) / 2, l, dropShadow);
+                drawString(fontRenderer, displayString, ((xPos() + xSize()) - buffer) - fontRenderer.getStringWidth(displayString), yPos() + (ySize() - 8) / 2, l, dropShadow);
             }
         }
         GlStateManager.color(1, 1, 1, 1);

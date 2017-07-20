@@ -3,11 +3,11 @@ package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent.SliderMoveEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
-import com.brandon3055.brandonscore.client.gui.modulargui.oldelements.MGuiBorderedRect;
 import com.brandon3055.brandonscore.lib.functions.TriPredicate;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.client.Minecraft;
@@ -145,7 +145,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         if (((isMouseOver(mouseX, mouseY) && !isHidden()) || (mouseButton == 2 && allowMiddleClickDrag && getParentScrollable() != null && getParentScrollable().isMouseOver(mouseX, mouseY))) && sliderElement != null && !isDragging && !isMiddleClickDragging) {
             if (mouseButton == 2 && getParent() != null) {
                 List<GuiSlideControl> list = getParent().findChildElementsByClass(GuiSlideControl.class, new ArrayList());
-                if (DataUtils.firstMatch(list, e -> e != this && e.isMiddleClickDragging && e.getParentScrollable() != getParentScrollable()) != null){
+                if (DataUtils.firstMatch(list, e -> e != this && e.isMiddleClickDragging && e.getParentScrollable() != getParentScrollable()) != null) {
                     return false;
                 }
             }
@@ -167,7 +167,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
                     return false;
                 }
             }
-            else if (mouseButton == 0){
+            else if (mouseButton == 0) {
                 mouseDragOffset = sliderSize / 2;
                 if (rotation == HORIZONTAL) {
                     sliderElement.setXPos(mouseX - (sliderElement.xSize() / 2));
@@ -203,7 +203,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
 
             if (rotation == HORIZONTAL) {
                 if (isMiddleClickDragging) {
-                    sliderElement.setXPos(dragStartElementX - (int)((mouseX - dragStartX) * scrollSpeed * 2));
+                    sliderElement.setXPos(dragStartElementX - (int) ((mouseX - dragStartX) * scrollSpeed * 2));
                 }
                 else {
                     sliderElement.setXPos(mouseX - mouseDragOffset);
@@ -214,7 +214,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
             }
             else {
                 if (isMiddleClickDragging) {
-                    sliderElement.setYPos(dragStartElementY - (int)((mouseY - dragStartY) * scrollSpeed * 2));
+                    sliderElement.setYPos(dragStartElementY - (int) ((mouseY - dragStartY) * scrollSpeed * 2));
                 }
                 else {
                     sliderElement.setYPos(mouseY - mouseDragOffset);
@@ -269,7 +269,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     /**
      * Updates the raw position of the slider and sends an update to the listener.
      *
-     * @param position a value between 0 and 1
+     * @param position  a value between 0 and 1
      * @param fireEvent Sets whether or not the listener should be notified on this update
      */
     public GuiSlideControl updateRawPos(double position, boolean fireEvent) {
@@ -290,7 +290,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     /**
      * Updates the raw position of the slider and sends an update to the listener.
      *
-     * @param position a value between posRangeMin and posRangeMax
+     * @param position  a value between posRangeMin and posRangeMax
      * @param fireEvent Sets whether or not the listener should be notified on this update
      */
     public GuiSlideControl updatePos(double position, boolean fireEvent) {
@@ -428,7 +428,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      */
     public GuiSlideControl setDefaultBackground(int fillColour, int borderColour) {
         lockBackgroundWidthPos(true);
-        setBackgroundElement(new MGuiBorderedRect().setColours(fillColour, borderColour));
+        setBackgroundElement(new GuiBorderedRect().setColours(fillColour, borderColour));
         return this;
     }
 
@@ -448,7 +448,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      */
     public GuiSlideControl setDefaultSlider(int fillColour, int hoverFillColour, int borderColour, int hoverBorderColour) {
         lockSliderWidthPos(true);
-        setSliderElement(new MGuiBorderedRect().setColours(fillColour, hoverFillColour, borderColour, hoverBorderColour));
+        setSliderElement(new GuiBorderedRect().setColours(fillColour, hoverFillColour, borderColour, hoverBorderColour));
         return this;
     }
 
@@ -460,7 +460,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      */
     public GuiSlideControl setDefaultSlider(int fillColour, int borderColour) {
         lockSliderWidthPos(true);
-        setSliderElement(new MGuiBorderedRect().setColours(fillColour, borderColour));
+        setSliderElement(new GuiBorderedRect().setColours(fillColour, borderColour));
         return this;
     }
 
@@ -563,6 +563,31 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         return isHidden;
     }
 
+    /**
+     * Applies a bar style background. This is a generic slider background that looks something like this<br>
+     * |------------|
+     */
+    public GuiSlideControl setBarStyleBackground(int colour) {
+        setBackgroundElement(new MGuiElementBase() {
+            @Override
+            public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+                if (rotation == HORIZONTAL) {
+                    drawColouredRect(xPos(), yPos() + ySize() / 2, xSize(), 1, colour);
+                    drawColouredRect(xPos(), yPos(), 1, ySize(), colour);
+                    drawColouredRect(xPos() + xSize() - 1, yPos(), 1, ySize(), colour);
+                }
+                else {
+                    drawColouredRect(xPos() + xSize() / 2, yPos(), 1, ySize(), colour);
+                    drawColouredRect(xPos(), yPos(), xSize(), 1, colour);
+                    drawColouredRect(xPos(), yPos() + ySize() - 1, xSize(), 1, colour);
+                }
+            }
+        });
+        lockSliderWidthPos(true);
+        updateElements();
+        return this;
+    }
+
     //endregion
 
     //region Logic
@@ -614,8 +639,11 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (isHidden()) return;
+        if (backgroundElement != null && backgroundElement.isEnabled()) {
+            backgroundElement.renderElement(minecraft, mouseX, mouseY, partialTicks);
+        }
         for (MGuiElementBase element : childElements) {
-            if (element.isEnabled()) {
+            if (element.isEnabled() && element != backgroundElement) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }

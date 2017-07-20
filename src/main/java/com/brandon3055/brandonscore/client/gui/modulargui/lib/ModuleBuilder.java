@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModuleManager;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class ModuleBuilder {
             return elements;
         }
 
-        public void finish(ModuleManager manager, int level) {
+        public void finish(GuiElementManager manager, int level) {
             for (MGuiElementBase elementBase : elements) {
                 manager.add(elementBase, level);
             }
@@ -118,7 +118,7 @@ public class ModuleBuilder {
             return elements;
         }
 
-        public void finish(ModuleManager manager, int level) {
+        public void finish(GuiElementManager manager, int level) {
             for (MGuiElementBase elementBase : elements) {
                 manager.add(elementBase, level);
             }
