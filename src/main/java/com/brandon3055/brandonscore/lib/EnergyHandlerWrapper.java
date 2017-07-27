@@ -48,11 +48,11 @@ public class EnergyHandlerWrapper implements IEnergyStorage {
 
     @Override
     public boolean canExtract() {
-        return tile instanceof IEnergyProvider;
+        return tile instanceof IEnergyProvider && ((IEnergyProvider) tile).canConnectEnergy(side);
     }
 
     @Override
     public boolean canReceive() {
-        return tile instanceof IEnergyReceiver;
+        return tile instanceof IEnergyReceiver && ((IEnergyReceiver) tile).canConnectEnergy(side);
     }
 }

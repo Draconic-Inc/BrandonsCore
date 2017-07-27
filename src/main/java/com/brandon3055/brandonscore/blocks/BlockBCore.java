@@ -195,7 +195,7 @@ public class BlockBCore extends Block {
 
     @Override
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
-        if (te instanceof IDataRetainingTile) {
+        if (te instanceof IDataRetainingTile && ((IDataRetainingTile) te).saveToItem()) {
             ItemStack stack = new ItemStack(this, 1, damageDropped(state));
             ((IDataRetainingTile) te).writeToItemStack(stack, true);
             spawnAsEntity(world, pos, stack);

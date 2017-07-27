@@ -34,7 +34,12 @@ public class EnergyHelper {
             return ((IEnergyHandler) tile).getEnergyStored(side);
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
-            return tile.getCapability(CapabilityEnergy.ENERGY, side).getEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on tile: " + tile.getClass() + " Please report to the author(s) of the mod this tile belongs to!");
+                return 0;
+            }
+            return cap.getEnergyStored();
         }
         else {
             return 0;
@@ -50,7 +55,12 @@ public class EnergyHelper {
             return ((IEnergyHandler) tile).getMaxEnergyStored(side);
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
-            return tile.getCapability(CapabilityEnergy.ENERGY, side).getMaxEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on tile: " + tile.getClass() + " Please report to the author(s) of the mod this tile belongs to!");
+                return 0;
+            }
+            return cap.getMaxEnergyStored();
         }
         else {
             return 0;
@@ -83,6 +93,10 @@ public class EnergyHelper {
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
             net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on tile: " + tile.getClass() + " Please report to the author(s) of the mod this tile belongs to!");
+                return 0;
+            }
             if (cap.canReceive()) {
                 return cap.receiveEnergy(energy, simulate);
             }
@@ -116,6 +130,10 @@ public class EnergyHelper {
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
             net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on tile: " + tile.getClass() + " Please report to the author(s) of the mod this tile belongs to!");
+                return 0;
+            }
             if (cap.canExtract()) {
                 return cap.extractEnergy(energy, simulate);
             }
@@ -140,7 +158,12 @@ public class EnergyHelper {
             return ((IEnergyContainerItem) stack.getItem()).getEnergyStored(stack);
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
-            return stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on item: " + stack.getItem().getRegistryName() + " Please report to the author(s) of the mod this item belongs to!");
+                return 0;
+            }
+            return cap.getEnergyStored();
         }
         else {
             return 0;
@@ -155,7 +178,12 @@ public class EnergyHelper {
             return ((IEnergyContainerItem) stack.getItem()).getMaxEnergyStored(stack);
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
-            return stack.getCapability(CapabilityEnergy.ENERGY, null).getMaxEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on item: " + stack.getItem().getRegistryName() + " Please report to the author(s) of the mod this item belongs to!");
+                return 0;
+            }
+            return cap.getMaxEnergyStored();
         }
         else {
             return 0;
@@ -179,6 +207,10 @@ public class EnergyHelper {
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
             net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on item: " + stack.getItem().getRegistryName() + " Please report to the author(s) of the mod this item belongs to!");
+                return 0;
+            }
             if (cap.canReceive()) {
                 return cap.receiveEnergy(energy, simulate);
             }
@@ -203,6 +235,10 @@ public class EnergyHelper {
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
             net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap == null) {
+                LogHelperBC.error("Detected broken energy capability on item: " + stack.getItem().getRegistryName() + " Please report to the author(s) of the mod this item belongs to!");
+                return 0;
+            }
             if (cap.canExtract()) {
                 return cap.extractEnergy(energy, simulate);
             }

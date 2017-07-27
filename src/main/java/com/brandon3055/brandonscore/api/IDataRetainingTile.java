@@ -12,4 +12,9 @@ public interface IDataRetainingTile {
     NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest);
 
     NBTTagCompound readFromItemStack(ItemStack stack);
+
+    /**
+     * @return false to completely disable tile data saving and restore default harvest logic. Deeded because IDataRetainingTile is now implemented on {@link com.brandon3055.brandonscore.blocks.TileBCBase}
+     */
+    default boolean saveToItem() { return true; }
 }
