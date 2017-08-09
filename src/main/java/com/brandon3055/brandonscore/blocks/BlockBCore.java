@@ -37,6 +37,7 @@ import java.util.Map;
  */
 public class BlockBCore extends Block {
     protected boolean isFullCube = true;
+    private boolean ifcSet = false;
     protected boolean canProvidePower = false;
     protected boolean hasSubItemTypes = false;
     public Map<Integer, String> nameOverrides = new HashMap<>();
@@ -83,9 +84,15 @@ public class BlockBCore extends Block {
         return stack;
     }
 
+    @Deprecated //override uberIsBlockFullCube
     public BlockBCore setIsFullCube(boolean value) {
         isFullCube = value;
+        ifcSet = true;
         return this;
+    }
+
+    public boolean uberIsBlockFullCube() {
+        return !ifcSet || isFullCube;
     }
 
     /**
@@ -213,12 +220,12 @@ public class BlockBCore extends Block {
 
     @Override
     public boolean isFullCube(IBlockState state) {
-        return isFullCube;
+        return uberIsBlockFullCube();
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
-        return isFullCube;
+        return uberIsBlockFullCube();
     }
 
     @SideOnly(Side.CLIENT)
