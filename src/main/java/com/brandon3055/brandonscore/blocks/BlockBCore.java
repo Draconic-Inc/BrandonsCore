@@ -37,6 +37,7 @@ import java.util.Map;
 public class BlockBCore extends Block {
     public static final String TILE_DATA_TAG = "DETileData";
     protected boolean isFullCube = true;
+    private boolean ifcSet = false;
     protected boolean canProvidePower = false;
     public Map<Integer, String> nameOverrides = new HashMap<>();
 
@@ -92,9 +93,15 @@ public class BlockBCore extends Block {
         return stack;
     }
 
+    @Deprecated //override uberIsBlockFullCube
     public BlockBCore setIsFullCube(boolean value) {
+        ifcSet = true;
         isFullCube = value;
         return this;
+    }
+
+    public boolean uberIsBlockFullCube() {
+        return !ifcSet || isFullCube;
     }
 
     public BlockBCore addName(int meta, String name) {
@@ -200,12 +207,12 @@ public class BlockBCore extends Block {
 
     @Override
     public boolean isFullCube(IBlockState state) {
-        return isFullCube;
+        return uberIsBlockFullCube();
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
-        return isFullCube;
+        return uberIsBlockFullCube();
     }
 
     @SideOnly(Side.CLIENT)
