@@ -9,9 +9,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
@@ -20,7 +18,7 @@ import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
  * Created by brandon3055 on 3/09/2016.
  */
 public class MGuiStackIcon extends MGuiElementBase {
-    public static WeakHashMap<Integer, ItemStack> stackCache = new WeakHashMap<Integer, ItemStack>();
+    public static Map<Integer, ItemStack> stackCache = new HashMap<>();
 
     public boolean drawCount = true;
     public boolean drawToolTip = true;
@@ -127,7 +125,7 @@ public class MGuiStackIcon extends MGuiElementBase {
 
     public ItemStack getStack() {
         int hash = stackReference.hashCode();
-        stackCache.clear();
+//        stackCache.clear();
         if (!stackCache.containsKey(hash)) {
             ItemStack stack = stackReference.createStack();
             if (stack.isEmpty()) {

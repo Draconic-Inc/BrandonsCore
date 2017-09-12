@@ -119,6 +119,12 @@ public class ModConfigParser {
     }
 
     public static void addFeatureProperty(String modid, Property prop, String category) {
+        Configuration config = modConfigurations.get(modid);
+
+        if (config != null && modConfigCategories.containsKey(modid) && config.hasCategory("|Mod Items/Blocks") && !modConfigCategories.get(modid).contains(config.getCategory("|Mod Items/Blocks"))) {
+            modConfigCategories.get(modid).add(config.getCategory("|Mod Items/Blocks"));
+        }
+
         modPropertyHelpers.computeIfAbsent(modid, s -> new ArrayList<>()).add(new PropertyHelper(modid, prop, category));
     }
 
@@ -132,6 +138,17 @@ public class ModConfigParser {
 
     public static List<ConfigCategory> getModCategories(String modid) {
         return modConfigCategories.getOrDefault(modid, new ArrayList<>());
+//        List<ConfigCategory> cats = modConfigCategories.getOrDefault(modid, new ArrayList<>());
+//
+//        if ()
+//
+////        LogHelperBC.dev(modConfigurations.get(modid).hasCategory("|Mod Items/Blocks"));//|Mod Items/Blocks
+////        List<ConfigCategory> cats = new ArrayList<>();
+////        for (String category : modConfigurations.get(modid).getCategoryNames()) {
+////            cats.add(modConfigurations.get(modid).getCategory(category));
+////        }
+//        return cats;
+////        return
     }
 
     public static List<Property> getModProperties(String modid) {
