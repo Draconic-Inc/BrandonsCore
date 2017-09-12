@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.items;
 
+import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -24,5 +25,12 @@ public class ItemBCore extends Item {
             return super.getUnlocalizedName(stack) + "." + nameMap.get(stack.getItemDamage());
         }
         else return super.getUnlocalizedName(stack);
+    }
+
+    /**
+     * @return false if this item has been disabled via the mod config.
+     */
+    public boolean isItemEnabled() {
+        return ModFeatureParser.isEnabled(this);
     }
 }

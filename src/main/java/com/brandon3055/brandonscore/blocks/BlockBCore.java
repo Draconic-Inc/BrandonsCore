@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.lib.IActivatableTile;
 import com.brandon3055.brandonscore.lib.IChangeListener;
 import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
+import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -112,6 +113,13 @@ public class BlockBCore extends Block {
 
     public boolean hasSubItemTypes() {
         return hasSubItemTypes;
+    }
+
+    /**
+     * @return false if this block has been disabled via the mod config.
+     */
+    public boolean isBlockEnabled() {
+        return ModFeatureParser.isEnabled(this);
     }
 
     //endregion

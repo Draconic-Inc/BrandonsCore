@@ -119,6 +119,12 @@ public class ModConfigParser {
     }
 
     public static void addFeatureProperty(String modid, Property prop, String category) {
+        Configuration config = modConfigurations.get(modid);
+
+        if (config != null && modConfigCategories.containsKey(modid) && config.hasCategory("|Mod Items/Blocks") && !modConfigCategories.get(modid).contains(config.getCategory("|Mod Items/Blocks"))) {
+            modConfigCategories.get(modid).add(config.getCategory("|Mod Items/Blocks"));
+        }
+
         modPropertyHelpers.computeIfAbsent(modid, s -> new ArrayList<>()).add(new PropertyHelper(modid, prop, category));
     }
 
