@@ -9,15 +9,13 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  * Created by brandon3055 on 3/09/2016.
  */
 public class MGuiStackIcon extends MGuiElementBase {
-    public static WeakHashMap<Integer, ItemStack> stackCache = new WeakHashMap<Integer, ItemStack>();
+    public static Map<Integer, ItemStack> stackCache = new HashMap<>();
 
     public boolean drawCount = true;
     public boolean drawToolTip = true;
