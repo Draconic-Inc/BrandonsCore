@@ -5,7 +5,6 @@ import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
-import com.brandon3055.brandonscore.utils.LinkedHashList;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
@@ -240,7 +239,7 @@ public class BCClientEventHandler {
 
         overallTickTime[renderIndex % 200] = packet.overall;
 
-        LinkedHashList<Integer> dims = new LinkedHashList<Integer>();
+        LinkedList<Integer> dims = new LinkedList<>();
         dims.addAll(dimTickTimes.keySet());
 
         for (Integer dim : packet.tickTimes.keySet()) {

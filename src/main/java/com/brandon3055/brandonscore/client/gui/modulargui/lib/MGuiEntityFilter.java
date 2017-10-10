@@ -5,7 +5,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.ModuleBuilder.EqualColumns;
 import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.*;
 import com.brandon3055.brandonscore.lib.EntityFilter;
-import com.brandon3055.brandonscore.utils.LinkedHashList;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -40,7 +39,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
     private MGuiLabel listLabel;
     private MGuiList list;
     private MGuiSelectDialog selector = null;
-    private LinkedHashList<String> lastTickList = new LinkedHashList<>();
+    private LinkedList<String> lastTickList = new LinkedList<>();
 
     private static List<Entity> entityList;
 

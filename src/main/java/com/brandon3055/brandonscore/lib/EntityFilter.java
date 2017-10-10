@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.utils.LinkedHashList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.monster.EntityMob;
@@ -13,6 +12,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,7 +25,7 @@ public abstract class EntityFilter {
     public boolean detectPlayer = true;
     public boolean detectOther = true;
     public boolean isWhiteList = false;
-    public LinkedHashList<String> entityList = new LinkedHashList<>();
+    public LinkedList<String> entityList = new LinkedList<>();
 
     public EntityFilter() {}
 
