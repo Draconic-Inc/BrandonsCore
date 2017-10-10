@@ -19,22 +19,26 @@ public class Utils {
     private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
 
     public static String formatNumber(double value) {
-        if (value < 1000D) return String.valueOf(value);
-        else if (value < 1000000D) return String.valueOf(Math.round(value) / 1000D) + "K";
-        else if (value < 1000000000D) return String.valueOf(Math.round(value / 1000D) / 1000D) + "M";
-        else if (value < 1000000000000D) return String.valueOf(Math.round(value / 1000000D) / 1000D) + "B";
-        else return String.valueOf(Math.round(value / 1000000000D) / 1000D) + "T";
+        if (value < 1000D) { return String.valueOf(value); }
+        else if (value < 1000000D) { return String.valueOf(Math.round(value) / 1000D) + "K"; }
+        else if (value < 1000000000D) { return String.valueOf(Math.round(value / 1000D) / 1000D) + "M"; }
+        else if (value < 1000000000000D) { return String.valueOf(Math.round(value / 1000000D) / 1000D) + "B"; }
+        else { return String.valueOf(Math.round(value / 1000000000D) / 1000D) + "T"; }
     }
 
     public static String formatNumber(long value) {
-        if (value < 1000L) return String.valueOf(value);
-        else if (value < 1000000L) return String.valueOf(Math.round(value) / 1000D) + "K";
-        else if (value < 1000000000L) return String.valueOf(Math.round(value / 1000L) / 1000D) + "M";
-        else if (value < 1000000000000L) return String.valueOf(Math.round(value / 1000000L) / 1000D) + "B";
-        else if (value < 1000000000000000L) return String.valueOf(Math.round(value / 1000000000L) / 1000D) + "T";
-        else if (value < 1000000000000000000L) return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "Quad";
-        else if (value <= Long.MAX_VALUE) return String.valueOf(Math.round(value / 1000000000000000L) / 1000D) + "Quin";
-        else return "Something is very broken!!!!";
+        if (value < 1000L) { return String.valueOf(value); }
+        else if (value < 1000000L) { return String.valueOf(Math.round(value) / 1000D) + "K"; }
+        else if (value < 1000000000L) { return String.valueOf(Math.round(value / 1000L) / 1000D) + "M"; }
+        else if (value < 1000000000000L) { return String.valueOf(Math.round(value / 1000000L) / 1000D) + "B"; }
+        else if (value < 1000000000000000L) { return String.valueOf(Math.round(value / 1000000000L) / 1000D) + "T"; }
+        else if (value < 1000000000000000000L) {
+            return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "Quad";
+        }
+        else if (value <= Long.MAX_VALUE) {
+            return String.valueOf(Math.round(value / 1000000000000000L) / 1000D) + "Quin";
+        }
+        else { return "Something is very broken!!!!"; }
     }
 
     /**
@@ -78,7 +82,9 @@ public class Utils {
             return false;
         }
 
-        else return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
+        else {
+            return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
+        }
     }
 
     /**
@@ -148,7 +154,7 @@ public class Utils {
      * multiplier: 10<br>
      * Output 17.5<br><br>
      *
-     * @param number The input value.
+     * @param number     The input value.
      * @param multiplier The multiplier.
      * @return The input rounded to a number of decimal places based on the multiplier.
      */
@@ -161,9 +167,9 @@ public class Utils {
 
         if (number < 0) result *= -1;
 
-        if (result % multiple == 0) return number;
-        else if (result % multiple < multiple / 2) result = result - result % multiple;
-        else result = result + (multiple - result % multiple);
+        if (result % multiple == 0) { return number; }
+        else if (result % multiple < multiple / 2) { result = result - result % multiple; }
+        else { result = result + (multiple - result % multiple); }
 
         if (number < 0) result *= -1;
 
@@ -173,6 +179,7 @@ public class Utils {
     /**
      * Simple method to convert a Double object to a primitive int
      */
+    @Deprecated //Durp just use (int) (double) value; OR value.intValue();
     public static int toInt(double d) {
         return (int) d;
     }
@@ -223,6 +230,25 @@ public class Utils {
         return (valueIn - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
+    public static boolean validInteger(String value) {
+        try {
+            Long.parseLong(value);
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validDouble(String value) {
+        try {
+            Double.parseDouble(value);
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
 
     @Nullable
     public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance) {
@@ -236,21 +262,17 @@ public class Utils {
 
 
     @Nullable
-    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators)
-    {
+    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
         double d0 = -1.0D;
         EntityPlayer closestPlayer = null;
 
-        for (int i = 0; i < world.playerEntities.size(); ++i)
-        {
+        for (int i = 0; i < world.playerEntities.size(); ++i) {
             EntityPlayer player = world.playerEntities.get(i);
 
-            if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators))
-            {
+            if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators)) {
                 double d1 = player.getDistanceSq(posX, posY, posZ);
 
-                if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0))
-                {
+                if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0)) {
                     d0 = d1;
                     closestPlayer = player;
                 }

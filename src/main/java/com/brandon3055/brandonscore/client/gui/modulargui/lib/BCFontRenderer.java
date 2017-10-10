@@ -12,13 +12,13 @@ import java.util.Locale;
 /**
  * Created by brandon3055 on 10/07/2017.
  */
-public class FixedFontRenderer extends FontRenderer {
+public class BCFontRenderer extends FontRenderer {
     private static boolean styleToggleMode = false;
     private static boolean colourSet = false;
     private static int prevFormat = -1;
     private static boolean colourFormatSet = false;
 
-    public FixedFontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
+    public BCFontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
         super(gameSettingsIn, location, textureManagerIn, unicode);
     }
 
@@ -171,8 +171,8 @@ public class FixedFontRenderer extends FontRenderer {
         }
     }
 
-    public static FixedFontRenderer convert(FontRenderer fontRenderer) {
-        FixedFontRenderer fr = new FixedFontRenderer(Minecraft.getMinecraft().gameSettings, fontRenderer.locationFontTexture, fontRenderer.renderEngine, fontRenderer.getUnicodeFlag());
+    public static BCFontRenderer convert(FontRenderer fontRenderer) {
+        BCFontRenderer fr = new BCFontRenderer(Minecraft.getMinecraft().gameSettings, fontRenderer.locationFontTexture, fontRenderer.renderEngine, fontRenderer.getUnicodeFlag());
         fr.onResourceManagerReload(null);
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(fr);
         return fr;
@@ -367,7 +367,7 @@ public class FixedFontRenderer extends FontRenderer {
         public boolean underlineStyle;
         public boolean strikethroughStyle;
 
-        protected FontState(FixedFontRenderer font) {
+        protected FontState(BCFontRenderer font) {
             unicodeFlag = font.unicodeFlag;
             bidiFlag = font.bidiFlag;
             red = font.red;
@@ -381,7 +381,7 @@ public class FixedFontRenderer extends FontRenderer {
             strikethroughStyle = font.strikethroughStyle;
         }
 
-        private void apply(FixedFontRenderer font) {
+        private void apply(BCFontRenderer font) {
             font.unicodeFlag = unicodeFlag;
             font.bidiFlag = bidiFlag;
             font.red = red;

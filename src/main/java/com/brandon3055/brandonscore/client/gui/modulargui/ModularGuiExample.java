@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.effects.GuiEffect;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
@@ -9,9 +10,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.brandon3055.projectintelligence.client.ClientEventHandler;
-import com.brandon3055.projectintelligence.client.gui.guielements.markdown.GuiMarkdownElement;
-import com.brandon3055.projectintelligence.utils.LogHelper;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
@@ -39,8 +38,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement.ListMode.VERT_LOCK_POS_WIDTH;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CENTER;
@@ -74,12 +71,19 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
 //        String[] ops = test.split("(?!\\B\"[^\"]*),(?![^\"]*\"\\B)");
 //        for (String s : ops) LogHelper.dev(s);
 
-        Pattern test = Pattern.compile("(?<=.:\")(.*)(\"=\")(.*)(?=\")");
-        Matcher testMatch = test.matcher("S:\"invalid=\"Data == t be in quotes. Things \"CAN\" be escaped \\n to allow for stuff like this \\t.\"");
-        if (testMatch.find()) {
-            LogHelper.dev("Group1: " + testMatch.group(1) + ", Group2: " + testMatch.group(2) + ", Group3: " + testMatch.group(3));
-        }
-        else { LogHelper.dev("No Match"); }
+//        Pattern test = Pattern.compile("(?<=.:\")(.*)(\"=\")(.*)(?=\")");
+//        Matcher testMatch = test.matcher("S:\"invalid=\"Data == t be in quotes. Things \"CAN\" be escaped \\n to allow for stuff like this \\t.\"");
+//        if (testMatch.find()) {
+//            LogHelper.dev("Group1: " + testMatch.group(1) + ", Group2: " + testMatch.group(2) + ", Group3: " + testMatch.group(3));
+//        }
+//        else { LogHelper.dev("No Match"); }
+
+
+//        String test1 = " :------: | -----: | ------- |";
+//        String test2 = " :------: | -----: | ------- ";
+//
+//        LogHelper.dev(Arrays.asList(test1.split("\\|")));
+//        LogHelper.dev(Arrays.asList(test2.split("(?<=[^\\n])(\\|)")));
 
 //        LogHelper.dev((testMatch.find() ? testMatch.group(2) : "No Match") + " " + testMatch.matches());
 
@@ -261,7 +265,7 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
                     GlStateManager.enableColorMaterial();
                     GlStateManager.pushMatrix();
 
-                    player.ticksExisted = ClientEventHandler.elapsedTicks;
+                    player.ticksExisted = BCClientEventHandler.elapsedTicks;
 
 
                     float rotation = 130;//(BCClientEventHandler.elapsedTicks + partialTicks) * -1.2F;

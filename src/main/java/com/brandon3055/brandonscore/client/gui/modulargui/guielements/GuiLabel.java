@@ -116,6 +116,10 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
         return this;
     }
 
+    public boolean hasShadow() {
+        return dropShadow;
+    }
+
     public int getTextColour(boolean hovered) {
         if (texColGetter != null) {
             return texColGetter.getColour(hovered);
@@ -175,20 +179,20 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
 
             switch (rotation) {
                 case NORMAL:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
                     break;
                 case ROT_CC:
                     xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
                     yPos = getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
                     break;
                 case ROT_C:
                     xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
                     yPos = getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
                     break;
                 case ROT_180:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
                     break;
             }
             GlStateManager.color(1, 1, 1, 1);
@@ -221,7 +225,7 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
      */
     public GuiLabel setHeightForText() {
         int textHeight = fontRenderer.getWordWrappedHeight(getLabelText(), getInsetRect().width);
-        setYPos(textHeight + getInsets().top + getInsets().bottom);
+        setYSize(textHeight + getInsets().top + getInsets().bottom);
         return this;
     }
 

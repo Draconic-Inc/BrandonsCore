@@ -23,6 +23,9 @@ public class ProcessHandlerClient {
     private static List<IProcess> processes = new ArrayList<IProcess>();
     private static List<IProcess> newProcesses = new ArrayList<IProcess>();
 
+    private static List<IProcess> persistentProcesses = new ArrayList<IProcess>();
+    private static List<IProcess> newPersistentProcesses = new ArrayList<IProcess>();
+
     public static void init() {
         MinecraftForge.EVENT_BUS.register(new ProcessHandlerClient());
     }
@@ -32,7 +35,6 @@ public class ProcessHandlerClient {
         if (event.phase == TickEvent.Phase.START) {
 
             Iterator<IProcess> i = processes.iterator();
-
             while (i.hasNext()) {
                 IProcess process = i.next();
                 if (process.isDead()) {
@@ -47,6 +49,23 @@ public class ProcessHandlerClient {
                 processes.addAll(newProcesses);
                 newProcesses.clear();
             }
+
+
+            i = persistentProcesses.iterator();
+            while (i.hasNext()) {
+                IProcess process = i.next();
+                if (process.isDead()) {
+                    i.remove();
+                }
+                else {
+                    process.updateProcess();
+                }
+            }
+
+            if (!newPersistentProcesses.isEmpty()) {
+                persistentProcesses.addAll(newPersistentProcesses);
+                newPersistentProcesses.clear();
+            }
         }
     }
 
@@ -60,4 +79,10 @@ public class ProcessHandlerClient {
         newProcesses.add(process);
     }
 
+    /**
+     * Adds a new process that will not be removed when the world is closed.
+     */
+    public static void addPersistentProcess(IProcess process) {
+        newPersistentProcesses.add(process);
+    }
 }

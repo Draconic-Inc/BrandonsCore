@@ -407,6 +407,10 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+            return true;
+        }
+
         if (isMouseOver(mouseX, mouseY) && !disabled && mouseButton == 0) {
             onPressed(mouseX, mouseY, mouseButton);
             return true;
@@ -423,12 +427,16 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         }
 
         if (playClick) {
-            mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, !toggleMode || toggleActiveState ? 1.0F : 0.9F));
+            playClickSound();
         }
 
         if (listener != null) {
             listener.onMGuiEvent(new GuiEvent.ButtonEvent(this), this);
         }
+    }
+
+    public void playClickSound() {
+        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, !toggleMode || toggleActiveState ? 1.0F : 0.9F));
     }
 
     /**
@@ -491,11 +499,11 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
             drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && toggleActiveState), disabled), getBorderColour(mouseOver || (toggleMode && toggleActiveState), disabled));
         }
 
-        super.renderElement(mc, mouseX, mouseY, partialTicks);
-
         if (vanillaButtonRender) {
             renderVanillaButton(mc, mouseX, mouseY);
         }
+
+        super.renderElement(mc, mouseX, mouseY, partialTicks);
 
         String displayString = getDisplayString();
         if (!displayString.isEmpty()) {
@@ -530,6 +538,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
             }
+            GlStateManager.color(1, 1, 1, 1);
         }
     }
 
@@ -537,13 +546,13 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         bindTexture(BUTTON_TEXTURES);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && toggleActiveState);
-        int k = getRenderState(hovered);
+        int texVIndex = getRenderState(hovered);
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         int texHeight = Math.min(20, ySize());
-        int texPos = 46 + k * 20;
+        int texPos = 46 + texVIndex * 20;
 
         drawTexturedModalRect(xPos(), yPos(), 0, texPos, xSize() % 2 + xSize() / 2, texHeight);
         drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, yPos(), 200 - xSize() / 2, texPos, xSize() / 2, texHeight);

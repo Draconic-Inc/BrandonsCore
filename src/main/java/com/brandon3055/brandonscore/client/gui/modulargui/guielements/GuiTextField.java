@@ -70,6 +70,19 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
         return this;
     }
 
+    public GuiTextField forceSetText(String textIn) {
+        if (textIn.length() > this.maxStringLength) {
+            this.text = textIn.substring(0, this.maxStringLength);
+        }
+        else {
+            this.text = textIn;
+        }
+
+        this.setCursorPositionEnd();
+
+        return this;
+    }
+
     public String getText() {
         return this.text;
     }

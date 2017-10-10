@@ -8,6 +8,14 @@ public enum GuiAlign {
     CENTER,
     RIGHT;
 
+    public static GuiAlign fromBindings(boolean leftBind, boolean rightBind) {
+        if (leftBind) {
+            return rightBind ? CENTER : LEFT;
+        }
+
+        return rightBind ? RIGHT : CENTER;
+    }
+
     public enum Vertical {
         TOP,
         MIDDLE,

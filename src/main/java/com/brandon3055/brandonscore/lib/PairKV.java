@@ -34,6 +34,11 @@ public class PairKV<K, V> {
         return this.key.hashCode() * 13 + (this.value == null ? 0 : this.value.hashCode());
     }
 
+    @Override
+    public String toString() {
+        return String.format("Pair:[%s, %s]", String.valueOf(key), String.valueOf(value));
+    }
+
     public boolean equals(Object var1) {
         if (this == var1) {
             return true;

@@ -47,6 +47,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     public final void initGui() {
         super.initGui();
         manager.onGuiInit(mc, width, height);
+        reloadGui();
     }
 
     public void reloadGui() {

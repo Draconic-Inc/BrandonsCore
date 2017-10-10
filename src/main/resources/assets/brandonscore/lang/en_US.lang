@@ -17,6 +17,10 @@ generic.ok.txt=OK
 generic.remove.txt=Remove
 generic.edit.txt=Edit
 generic.configureRedstone.txt=Configure Redstone Control
+generic.yes.txt=Yes
+generic.no.txt=No
+generic.cancel.txt=Cancel
+generic.confirm.txt=Confirm
 
 //---- Generic Gui Buttons ----//
 gui.de.button.start=Start

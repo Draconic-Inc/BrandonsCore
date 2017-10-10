@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.FixedFontRenderer;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.utils.DataUtils;
@@ -43,7 +43,7 @@ public class GuiElementManager {
             parentGui.addElements(this);
             initialized = true;
         }
-        reloadElements();
+//        reloadElements();
     }
 
     public void reloadElements() {
@@ -66,7 +66,7 @@ public class GuiElementManager {
         if (displayZLevel >= 950) {
             LogHelperBC.error("ModularGui Display Level Out Of Bounds! Can not be greater than 950 " + displayZLevel);
         }
-        element.applyGeneralElementData(parentGui, mc, width, height, FixedFontRenderer.convert(mc.fontRendererObj));
+        element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRendererObj));
         element.displayZLevel = displayZLevel;
         elements.add(element);
         if (!element.isElementInitialized()) {
@@ -157,7 +157,7 @@ public class GuiElementManager {
 
     //region Mouse & Key
 
-    protected boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         int clickedDisplay = -100;
         for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && clickedDisplay > -100 && element.displayZLevel < clickedDisplay) {
@@ -175,7 +175,7 @@ public class GuiElementManager {
         return false;
     }
 
-    protected boolean mouseReleased(int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(int mouseX, int mouseY, int state) {
         for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, state)) {
                 return true;
@@ -184,7 +184,7 @@ public class GuiElementManager {
         return false;
     }
 
-    protected boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
@@ -193,7 +193,7 @@ public class GuiElementManager {
         return false;
     }
 
-    protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+    public boolean keyTyped(char typedChar, int keyCode) throws IOException {
         for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
                 return true;
@@ -248,7 +248,9 @@ public class GuiElementManager {
         for (MGuiElementBase element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayZLevel);
+                element.preDraw(mc, mouseX, mouseY, partialTicks);
                 element.renderElement(mc, mouseX, mouseY, partialTicks);
+                element.postDraw(mc, mouseX, mouseY, partialTicks);
             }
         }
     }
@@ -322,7 +324,7 @@ public class GuiElementManager {
         this.width = width;
         this.height = height;
         for (MGuiElementBase element : elements) {
-            element.applyGeneralElementData(parentGui, mc, width, height, FixedFontRenderer.convert(mc.fontRendererObj));
+            element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRendererObj));
         }
         reloadElements();
     }

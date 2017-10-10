@@ -33,7 +33,9 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
      */
     protected int horizontalScrollPos = 0;
 
+    protected int animSpeed = 1;
     protected Insets defaultInsets = new Insets(0, 0, 0, 0);
+    protected boolean smoothScroll = false;
     protected boolean enableVerticalScroll = true;
     protected boolean enableHorizontalScroll = true;
     protected boolean scrollBarExclusionMode = true;
@@ -122,6 +124,12 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
      */
     public GuiScrollElement setScrollBarExclusionMode(boolean scrollBarExclusionMode) {
         this.scrollBarExclusionMode = scrollBarExclusionMode;
+        return this;
+    }
+
+    public GuiScrollElement setSmoothScroll(boolean smoothScroll, int speed) {
+        this.smoothScroll = smoothScroll;
+        animSpeed = speed;
         return this;
     }
 
@@ -492,7 +500,13 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         }
 
         for (MGuiElementBase scrollableElement : scrollingElements) {
-            scrollableElement.translate(xAdjustment, yAdjustment);
+//            scrollableElement.animateMoveFrames();
+            if (smoothScroll) {
+                scrollableElement.translateAnim(xAdjustment, yAdjustment, animSpeed);
+            }
+            else {
+                scrollableElement.translate(xAdjustment, yAdjustment);
+            }
         }
     }
 
@@ -561,22 +575,25 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             }
         }
 
-        int xPos = getInsetRect().x;
-        int yPos = getInsetRect().y;
-        int xSize = getInsetRect().width;
-        int ySize = getInsetRect().height;
+        double xPos = getInsetRect().x;
+        double yPos = getInsetRect().y;
+        double xSize = getInsetRect().width;
+        double ySize = getInsetRect().height;
 
-        double yResScale = (double) minecraft.displayHeight / screenHeight;
-        double xResScale = (double) minecraft.displayWidth / screenWidth;
-        int scaledWidth = (int) (xSize * xResScale);
-        int scaledHeight = (int) (ySize * yResScale);
+//        LogHelperBC.dev(minecraft.displayHeight +" "+ screenHeight);
+        double yResScale = (double) minecraft.displayHeight / (screenHeight);
+        double xResScale = (double) minecraft.displayWidth / (screenWidth);
+        double scaledWidth = xSize * xResScale;
+        double scaledHeight = ySize * yResScale;
+        int x = (int) (xPos * xResScale);
+        int y = (int) (minecraft.displayHeight - (yPos * yResScale) - scaledHeight);
 
 //        GlStateManager.pushMatrix();
 //        double scale = 0.5;
 //        GlStateManager.translate(xPos(), yPos(), 0);
 //        GlStateManager.scale(scale, scale, 1);
 //        GlStateManager.translate(-xPos(), -yPos(), 0);
-        ScissorHelper.pushScissor((int) (xPos * xResScale), minecraft.displayHeight - (int) (yPos * yResScale) - scaledHeight, scaledWidth, scaledHeight);
+        ScissorHelper.pushScissor(x, y, (int) scaledWidth, (int) scaledHeight);
 
         if (backgroundElement != null) {
             backgroundElement.renderElement(minecraft, mouseX, mouseY, partialTicks);

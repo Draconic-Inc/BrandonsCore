@@ -105,6 +105,17 @@ public class DataUtils {
         return null;
     }
 
+    /**
+     * @return the element at the specified index or null if the index is out of bounds.
+     */
+    public static <E> E getIndex(Iterable<E> elements, int index) {
+        int i = 0;
+        for (E element : elements) {
+            if (i++ == index) return element;
+        }
+        return null;
+    }
+
     //region Converters
 
     public static long[] toPrimitive(final Long[] array) {

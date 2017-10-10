@@ -20,9 +20,10 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
 
     protected int dragXOffset = 0;
     protected int dragYOffset = 0;
-    protected int dragZoneSize = 10;
     protected boolean dragging = false;
     protected boolean closeOnOutsideClick = true;
+    protected boolean closeOnScroll = false;
+    protected boolean isVisible = false;
     /**
      * Will close the dialog if one of its child elements capture a mouse click.
      * e.g. if a child button or button in a child list is pressed the dialog will close.
@@ -33,6 +34,9 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
 
     public GuiPopUpDialogBase(MGuiElementBase parent) {
         this.setParent(parent);
+        if (parent.modularGui == null) {
+            throw new RuntimeException("GuiPopUpDialogBase parent has must be initialized!");
+        }
         applyGeneralElementData(parent.modularGui, parent.mc, parent.screenWidth, parent.screenHeight, parent.fontRenderer);
     }
 
@@ -81,6 +85,11 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     }
 
     @Override
+    public boolean allowMouseOver(MGuiElementBase elementRequesting, int mouseX, int mouseY) {
+        return true;
+    }
+
+    @Override
     public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if (dragging) {
             int xMove = (mouseX - dragXOffset) - xPos();
@@ -98,12 +107,30 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
         return super.mouseReleased(mouseX, mouseY, state);
     }
 
+    @Override
+    public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
+        if (closeOnScroll) {
+            close();
+        }
+        return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
+    }
+
+
     /**
      * When set to true the this popup will close if the user clicks outside of its bounds.
      * Enabled by default.
      */
     public E setCloseOnOutsideClick(boolean closeOnOutsideClick) {
         this.closeOnOutsideClick = closeOnOutsideClick;
+        return (E) this;
+    }
+
+    /**
+     * When set to true the this popup will close if the user scrolls
+     * Disabled by default.
+     */
+    public E setCloseOnScroll(boolean closeOnScroll) {
+        this.closeOnScroll = closeOnScroll;
         return (E) this;
     }
 
@@ -149,13 +176,15 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
      */
     public void show(int displayZLevel) {
         modularGui.getManager().add(this, displayZLevel);
+        isVisible = true;
     }
 
     /**
      * Display this popup with a zOffset of 500.
      */
     public void show() {
-        show(500);
+        int pz = getParent() == null ? 100 : getParent().displayZLevel;
+        show(pz >= 500 ? pz + 50 : 500);
     }
 
     /**
@@ -168,7 +197,8 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     }
 
     public void showCenter() {
-        showCenter(500);
+        int pz = getParent() == null ? 100 : getParent().displayZLevel;
+        showCenter(pz >= 500 ? pz + 50 : 500);
     }
 
     /**
@@ -176,5 +206,26 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
      */
     public void close() {
         modularGui.getManager().remove(this);
+        isVisible = false;
+    }
+
+    public void toggleShown(boolean centre, int displayZLevel) {
+        if (isVisible) close();
+        else if (centre) {
+            showCenter(displayZLevel);
+        }
+        else show(displayZLevel);
+    }
+
+    public void toggleShown(boolean centre) {
+        toggleShown(centre, 500);
+    }
+
+    public void toggleShown() {
+        toggleShown(true);
+    }
+
+    public boolean isVisible() {
+        return isVisible;
     }
 }

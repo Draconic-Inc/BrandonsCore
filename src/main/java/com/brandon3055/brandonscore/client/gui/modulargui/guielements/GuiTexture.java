@@ -5,6 +5,8 @@ import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.function.Supplier;
+
 /**
  * Created by brandon3055 on 1/10/2016.
  */
@@ -16,8 +18,12 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
     private int texUSize = 0;
     private int texVSize = 0;
     private boolean texSizeOverride = false;
+    private Supplier<Integer> texXGetter = null;
+    private Supplier<Integer> texYGetter = null;
 
     public ResourceLocation texture;
+
+
 
     public GuiTexture(int xPos, int yPos, int textureX, int textureY, int xSize, int ySize, ResourceLocation texture) {
         super(xPos, yPos, xSize, ySize);
@@ -33,14 +39,20 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
         this.texture = texture;
     }
 
+    public GuiTexture(int xSize, int ySize, ResourceLocation texture) {
+        super(0, 0, xSize, ySize);
+        this.texture = texture;
+    }
+
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         bindTexture(texture);
+
         if (texSizeOverride) {
-            drawScaledCustomSizeModalRect(xPos(), yPos(), texU, texV, texUSize, texVSize, xSize(), ySize(), textSheetSizeX, textSheetSizeY);
+            drawScaledCustomSizeModalRect(xPos(), yPos(), getTexU(), getTexV(), texUSize, texVSize, xSize(), ySize(), textSheetSizeX, textSheetSizeY);
         }
         else {
-            drawModalRectWithCustomSizedTexture(xPos(), yPos(), texU, texV, xSize(), ySize(), textSheetSizeX, textSheetSizeY);
+            drawModalRectWithCustomSizedTexture(xPos(), yPos(), getTexU(), getTexV(), xSize(), ySize(), textSheetSizeX, textSheetSizeY);
         }
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
@@ -93,6 +105,23 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
         return setTexSheetSize(textureSize, textureSize);
     }
 
+    public GuiTexture setTexXGetter(Supplier<Integer> texXGetter) {
+        this.texXGetter = texXGetter;
+        return this;
+    }
+
+    public GuiTexture setTexYGetter(Supplier<Integer> texYGetter) {
+        this.texYGetter = texYGetter;
+        return this;
+    }
+
+    public int getTexU() {
+        return texXGetter == null ? texU : texXGetter.get();
+    }
+
+    public int getTexV() {
+        return texYGetter == null ? texV : texYGetter.get();
+    }
 
     /**
      * Creates a new GuiTexture with the specified size and the BrandonsCore default gui background texture.

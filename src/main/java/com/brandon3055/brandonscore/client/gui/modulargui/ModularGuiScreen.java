@@ -39,6 +39,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     public final void initGui() {
         super.initGui();
         manager.onGuiInit(mc, width, height);
+        reloadGui();
     }
 
     public void reloadGui() {
