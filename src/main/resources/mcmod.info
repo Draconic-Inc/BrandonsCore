@@ -2,7 +2,7 @@
 {
   "modid": "brandonscore",
   "name": "Brandon's Core",
-  "description": "",
+  "description": "Core mod used by most of my mods.",
   "version": "${version}",
   "mcversion": "${mc_version}",
   "url": "http://minecraft.curseforge.com/projects/brandons-core",
