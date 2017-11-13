@@ -2,7 +2,7 @@
 {
   "modid": "brandonscore",
   "name": "Brandon's Core",
-  "description": "",
+  "description": "Brandon's Core is a library mod used by most of my mods. It is no longer a core mod as the name would suggest but it does still contain a lot of the core code used by my mods including but not limited to base classes for various tiles, blocks and items, A powerful modular gui system and a lot of other miscellaneous utilities.",
   "version": "${version}",
   "mcversion": "${mc_version}",
   "url": "http://minecraft.curseforge.com/projects/brandons-core",
