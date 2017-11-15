@@ -5,7 +5,6 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
 
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -69,8 +68,8 @@ public abstract class Part {
         }
     }
 
-    public static List<String> splitOnSpace(String input) {
-        List<String> subs = new LinkedList<>();
+    public static LinkedList<String> splitOnSpace(String input) {
+        LinkedList<String> subs = new LinkedList<>();
 
         if (input.length() == 0) {
             return subs;

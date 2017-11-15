@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.command;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
+import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -54,8 +55,9 @@ public class BCUtilCommands extends CommandBase {
 
         if (function.toLowerCase().equals("nbt")) {
             functionNBT(server, sender, args);
-        } else if (function.equals("")) {
-
+        } else if (function.equals("clearcache")) {
+            DLRSCache.clearFileCache();
+            DLRSCache.clearResourceCache();
         } else if (function.equals("")) {
 
         } else if (function.equals("")) {

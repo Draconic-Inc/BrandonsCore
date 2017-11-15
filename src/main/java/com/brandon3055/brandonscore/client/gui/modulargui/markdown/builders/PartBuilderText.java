@@ -6,7 +6,8 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
 
 import java.util.LinkedList;
-import java.util.List;
+
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -24,13 +25,42 @@ public class PartBuilderText extends IPartBuilder {
 
     @Override
     public String build(BCFontRenderer font, String markdown, int nextPart, BCFontRenderer fr, PartContainer container, LinkedList<Part> parts, int elementLeft, int elementRight, int xPos, int yPos, int nextYLevel) {
+        profiler.startSection("Build Text");
         String text = Part.applyTextFormatting(markdown.substring(0, nextPart));
 
         font.resetStyles();
         BCFontRenderer.setStileToggleMode(true);
 
         if (text.length() > 0) {
-            List<String> words = Part.splitOnSpace(text);
+            LinkedList<String> rawWords = Part.splitOnSpace(text);
+            LinkedList<String> words = new LinkedList<>();
+
+            //This splits up any massive single words that are too long to fit on the page
+            for (String word : rawWords) {
+                if (word.length() < 32) {
+                    words.add(word);
+                }
+                else if (font.getStringWidth(word) < elementRight - elementLeft) {
+                    words.add(word);
+                }
+                else {
+                    int startI = 0;
+                    int endI = 31;
+                    while (endI <= word.length()) {
+                        String part = word.substring(startI, endI);
+                        if (endI == word.length() - 1) {
+                            words.add(part);
+                            break;
+                        }
+                        else if (font.getStringWidth(part) > (elementRight - elementLeft) - 10){
+                            words.add(part);
+                            startI = endI;
+                        }
+                        endI++;
+                    }
+                }
+            }
+
             for (int i = 0; i < words.size(); i++) {
                 String word = words.get(i);
                 if (word.length() == 0) continue;

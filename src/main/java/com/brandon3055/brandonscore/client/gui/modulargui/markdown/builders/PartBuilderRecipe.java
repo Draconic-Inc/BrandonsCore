@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CENTER;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.RIGHT;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -44,6 +45,7 @@ public class PartBuilderRecipe extends IPartBuilder {
 
     @Override
     public String build(BCFontRenderer font, String markdown, int nextPart, BCFontRenderer fr, PartContainer container, LinkedList<Part> parts, int elementLeft, int elementRight, int xPos, int yPos, int nextYLevel) {
+        profiler.startSection("Build Recipe");
         builtHeight = font.FONT_HEIGHT;
         //region Extract Recipe Data
 

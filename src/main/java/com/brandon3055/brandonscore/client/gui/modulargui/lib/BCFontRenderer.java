@@ -7,7 +7,9 @@ import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 10/07/2017.
@@ -17,6 +19,7 @@ public class BCFontRenderer extends FontRenderer {
     private static boolean colourSet = false;
     private static int prevFormat = -1;
     private static boolean colourFormatSet = false;
+    private static Map<FontRenderer, BCFontRenderer> cashedRenderers = new HashMap<>();
 
     public BCFontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
         super(gameSettingsIn, location, textureManagerIn, unicode);
@@ -172,10 +175,14 @@ public class BCFontRenderer extends FontRenderer {
     }
 
     public static BCFontRenderer convert(FontRenderer fontRenderer) {
-        BCFontRenderer fr = new BCFontRenderer(Minecraft.getMinecraft().gameSettings, fontRenderer.locationFontTexture, fontRenderer.renderEngine, fontRenderer.getUnicodeFlag());
-        fr.onResourceManagerReload(null);
-        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(fr);
-        return fr;
+        if (!cashedRenderers.containsKey(fontRenderer)) {
+            BCFontRenderer fr = new BCFontRenderer(Minecraft.getMinecraft().gameSettings, fontRenderer.locationFontTexture, fontRenderer.renderEngine, fontRenderer.getUnicodeFlag());
+            fr.onResourceManagerReload(null);
+            ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(fr);
+            cashedRenderers.put(fontRenderer, fr);
+        }
+
+        return cashedRenderers.get(fontRenderer);
     }
 
     @Override

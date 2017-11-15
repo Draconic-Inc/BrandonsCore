@@ -56,8 +56,8 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     protected boolean lockBackgroundWidthAndPos = true;
     protected SliderRotation rotation = HORIZONTAL;
 
-    protected MGuiElementBase sliderElement;
-    protected MGuiElementBase backgroundElement;
+    protected MGuiElementBase<? extends MGuiElementBase> sliderElement;
+    protected MGuiElementBase<? extends MGuiElementBase> backgroundElement;
 
     public GuiSlideControl() {
         setInsets(1, 1, 1, 1);
@@ -327,7 +327,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     /**
      * @see #setSliderElement(MGuiElementBase)
      */
-    public MGuiElementBase getSliderElement() {
+    public MGuiElementBase<? extends MGuiElementBase> getSliderElement() {
         return sliderElement;
     }
 
@@ -349,7 +349,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     /**
      * @see #setBackgroundElement(MGuiElementBase)
      */
-    public MGuiElementBase getBackgroundElement() {
+    public MGuiElementBase<? extends MGuiElementBase> getBackgroundElement() {
         return backgroundElement;
     }
 
@@ -586,6 +586,10 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         lockSliderWidthPos(true);
         updateElements();
         return this;
+    }
+
+    public boolean isDragging() {
+        return isDragging;
     }
 
     //endregion

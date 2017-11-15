@@ -4,6 +4,7 @@ import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CENTER;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LEFT;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
 
 /**
  * Each line of markdown is given to an item container. This container creates and
@@ -30,12 +32,13 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LE
  * An "part" refers to a line of text, a link, an image, an entity renderer or a stack renderer.
  */
 public class PartContainer extends MGuiElementBase<PartContainer> {
-    private static Pattern leftPat = Pattern.compile("(?<=[^\\\\]|^)(§align:left)");
-    private static Pattern centrePat = Pattern.compile("(?<=[^\\\\]|^)(§align:center)");
-    private static Pattern rightPat = Pattern.compile("(?<=[^\\\\]|^)(§align:right)");
-    private static Pattern shadowPat = Pattern.compile("(?<=[^\\\\]|^)(§shadow)");
+    private static final Pattern leftPat = Pattern.compile("(?<=[^\\\\]|^)(§align:left)");
+    private static final Pattern centrePat = Pattern.compile("(?<=[^\\\\]|^)(§align:center)");
+    private static final Pattern rightPat = Pattern.compile("(?<=[^\\\\]|^)(§align:right)");
+    private static final Pattern shadowPat = Pattern.compile("(?<=[^\\\\]|^)(§shadow)");
 
-    public int colour = 0xFF3c3f41;
+//    public int colour = 0xFF3c3f41;
+    public GuiColourProvider<Integer> collatorProvider;
     public boolean shadow = false;
     public List<MouseIntractable> mouseIntractables = new ArrayList<>();
     public GuiAlign align;
@@ -47,6 +50,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
     public PartContainer(GuiMarkdownElement element) {
         this.element = element;
         this.align = element.currentAlign;
+        this.collatorProvider = element.colourProvider;
     }
 
     /**
@@ -55,15 +59,21 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
      * 1 line.
      */
     public void parseMarkdown(LinkedList<String> markdownLines) {
+        profiler.startSection("Read Paragraph Formatting");
         readParagraphFormatting(markdownLines);
+        profiler.endSection();
 
         if (markdownLines.isEmpty()) return;
 
+        profiler.startSection("Check Heading | Rule");
         if (checkHeading(markdownLines) || checkRule(markdownLines)) {
+            profiler.endSection();
             return;
         }
 
+        profiler.endStartSection("Apply Builders");
         applyBuilders(markdownLines);
+        profiler.endSection();
     }
 
     //region Pre Builder Part Checks
@@ -176,7 +186,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
 
             if (options.contains("colour:")) {
                 try {
-                    colour = Part.readColour(Part.readOption(options, "colour", "#606060"));
+                    collatorProvider = () -> Part.readColour(Part.readOption(options, "colour", "#606060"));
                 }
                 catch (NumberFormatException e) {
                     Part.addError(markdownLines, "Invalid Colour Value! Valid formats are 0xRRGGBB or #RRGGBB (hex) or Red,Green,Blue (RGB)", line);
@@ -277,23 +287,27 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
         int maxYPos = yPos;
         while (next.length() > 0) {
             for (IPartBuilder builder : GuiMarkdownElement.partBuilders) {
+//                profiler.startSection("Check Builder");
                 int i = builder.matches(next);
                 if (i == 0) {
                     builder.finalXPos = xPos;
                     builder.finalYPos = yPos;
                     int builderStartY = yPos;
                     next = builder.build(fontRenderer, next, nextPart, fontRenderer, this, containerParts, getInsetRect().x, getInsetRect().x + getInsetRect().width, xPos, yPos, maxYPos);
+                    profiler.endSection();
                     nextPart = next.length();
                     xPos = builder.finalXPos;
                     yPos = builder.finalYPos;
                     if (builderStartY + builder.builtHeight > maxYPos) {
                         maxYPos = builderStartY + builder.builtHeight;
                     }
+//                    profiler.endSection();
                     break;
                 }
                 else if (i > 0 && i < nextPart) {
                     nextPart = i;
                 }
+//                profiler.endSection();
             }
         }
         if (empty) {
@@ -344,7 +358,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
             if (c.find() && cx.find()) {
                 formatLine = true;
                 String raw = cx.group();
-                colour = Part.readColour(raw);
+                collatorProvider = () -> Part.readColour(raw);
                 line = c.replaceAll("");
             }
         }
@@ -435,7 +449,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
 
             part.lastXPos = xPos + alignOffset;
             part.lastYPos = yPos;
-            part.render(fontRenderer, xPos + alignOffset, yPos, mouseX, mouseY, colour, shadow, partialTicks);
+            part.render(fontRenderer, xPos + alignOffset, yPos, mouseX, mouseY, collatorProvider.getColour(), shadow, partialTicks);
             prevHeight = Math.max(part.height, prevHeight);
             xPos += part.width;
         }

@@ -338,8 +338,8 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         horizontalMaxScroll = Math.max(0, scrollBounds.getMaxX() - getInsetRect().getMaxX());
         boolean hozExc = Math.abs(horizontalMinScroll) + Math.abs(horizontalMaxScroll) <= 0;
 
-        boolean canDisVert = vertExc; //If true then will be disabled regardless
-        boolean canDisHoz = hozExc;   //If true then will be disabled regardless
+        boolean canDisVert = vertExc || !enableVerticalScroll; //If true then will be disabled regardless
+        boolean canDisHoz = hozExc || !enableHorizontalScroll;   //If true then will be disabled regardless
 
         if (!canDisVert && vertNoExc) {
             canDisVert = canDisHoz || hozNoExc;
@@ -350,22 +350,22 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         }
 
         verticalScrollBar.setEnabled(!canDisVert);
-        horizontalScrollBar.setEnabled(!canDisHoz);
+        horizontalScrollBar.setEnabled(!canDisHoz && enableHorizontalScroll);
         setInsets(defaultInsets.top, defaultInsets.left, defaultInsets.bottom, defaultInsets.right);
         updateScrollbarExclusion();
 
         if (!verticalScrollBar.isEnabled() && horizontalScrollBar.isEnabled() && horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            horizontalScrollBar.setXSize(xSize()).updateElements();
+            horizontalScrollBar.setXSize(xSize()).setYPos(maxYPos() - horizontalScrollBar.ySize()).updateElements();
         }
         else if (horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            horizontalScrollBar.setXSize(xSize() - 10).updateElements();
+            horizontalScrollBar.setXSize(xSize() - verticalScrollBar.xSize()).setYPos(maxYPos() - horizontalScrollBar.ySize()).updateElements();
         }
 
         if (!horizontalScrollBar.isEnabled() && verticalScrollBar.isEnabled() && verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            verticalScrollBar.setYSize(ySize()).updateElements();
+            verticalScrollBar.setYSize(ySize()).setXPos(maxXPos() - verticalScrollBar.xSize()).updateElements();
         }
         else if (verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            verticalScrollBar.setYSize(ySize() - 10).updateElements();
+            verticalScrollBar.setYSize(ySize() - horizontalScrollBar.ySize()).setXPos(maxXPos() - verticalScrollBar.xSize()).updateElements();
         }
 
         double contentHeight = Math.abs(verticalMinScroll) + getInsetRect().height + Math.abs(verticalMaxScroll);
@@ -534,7 +534,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public GuiScrollElement setListMode(ListMode listMode) {
         this.listMode = listMode;
         if (listMode != DISABLED) {
-            setAllowedScrollAxes(listMode.horizontal(), !listMode.horizontal());
+            setAllowedScrollAxes(!listMode.horizontal(), listMode.horizontal());
         }
         return this;
     }
@@ -679,6 +679,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             int hsp = horizontalScrollPos;
             resetScrollPositions();
             updateListElementsScrollBoundsAndScrollBars();
+            resetScrollPositions();
             verticalScrollBar.updatePos(vsp);
             horizontalScrollBar.updatePos(hsp);
         }
@@ -691,6 +692,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             int hsp = horizontalScrollPos;
             resetScrollPositions();
             updateListElementsScrollBoundsAndScrollBars();
+            resetScrollPositions();
             verticalScrollBar.updatePos(vsp);
             horizontalScrollBar.updatePos(hsp);
         }

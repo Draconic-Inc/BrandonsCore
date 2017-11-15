@@ -2,13 +2,12 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders.*;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Profiler;
 import net.minecraft.item.ItemStack;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -30,6 +29,7 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
 
     public static Pattern colourPat = Pattern.compile("(?<=[^\\\\]|^)(§colour\\[[^]]*])");
     public static Pattern colourExtractPat = Pattern.compile("(?<=§colour\\[)([^]]*)(?=])");
+    public static Profiler profiler = new Profiler();
 
     protected static LinkedList<IPartBuilder> partBuilders = new LinkedList<>();
 
@@ -52,33 +52,35 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
     protected BiConsumer<String, Integer> imageListener = null;
     protected BiConsumer<ItemStack, Integer> recipeListener = null;
     protected GuiAlign currentAlign = GuiAlign.LEFT;
+    protected GuiColourProvider<Integer> colourProvider = () -> 0;
 
     public GuiMarkdownElement() {
         reportYSizeChange = true;
-
-        setLinkListener((link, integer) -> {
-            File file = new File("C:\\Users\\brand\\Desktop\\MarkdownDemo.txt");
-
-            toRemove.addAll(containers);
-            containers.clear();
-
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                LinkedList<String> s = new LinkedList<>();
-
-                String str;
-                while ((str = reader.readLine()) != null) {
-                    s.add(str);
-                }
-
-//                LogHelper.startTimer("Markdown Read");
-                parseMarkdown(s);
-//                LogHelper.stopTimer();
-            }
-            catch (Throwable e) {
-                e.printStackTrace();
-            }
-        });
+        profiler.enabled = false;
+//
+//        setLinkListener((link, integer) -> {
+//            File file = new File("C:\\Users\\brand\\Desktop\\MarkdownDemo.txt");
+//
+//            toRemove.addAll(containers);
+//            containers.clear();
+//
+//            try {
+//                BufferedReader reader = new BufferedReader(new FileReader(file));
+//                LinkedList<String> s = new LinkedList<>();
+//
+//                String str;
+//                while ((str = reader.readLine()) != null) {
+//                    s.add(str);
+//                }
+//
+////                LogHelper.startTimer("Markdown Read");
+//                parseMarkdown(s);
+////                LogHelper.stopTimer();
+//            }
+//            catch (Throwable e) {
+//                e.printStackTrace();
+//            }
+//        });
     }
 
     /**
@@ -161,59 +163,61 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
     }
 
     public GuiMarkdownElement parseMarkdown(LinkedList<String> markdownLines) {
+        profiler.startSection("Parsing Markdown");
         LogHelperBC.startTimer("Parsing Markdown " + markdownLines.size() + " Lines");
         this.mlCache = new LinkedList<>(markdownLines);
+        markdownLines = new LinkedList<>(markdownLines);
         int yPos = getInsetRect().y;
         while (markdownLines.size() > 0) {
+            profiler.startSection("Create Container");
             PartContainer container = createContainer(markdownLines);
+            profiler.endStartSection("Populate Container");
             container.setPos(getInsetRect().x, yPos).setXSize(getInsetRect().width);
             container.parseMarkdown(markdownLines);
             yPos = container.maxYPos();
             addChild(container);
 
             containers.add(container);
+            profiler.endSection();
         }
 
         setYSize(yPos - yPos());
         LogHelperBC.stopTimer();
+        profiler.endSection();
+        profiler.finish();
 
         return this;
     }
 
     private PartContainer createContainer(LinkedList<String> markdownLines) {
+        PartContainer container;
+
+        profiler.startSection("Get Line");
         String line = markdownLines.getFirst();
+        profiler.endSection();
+
         if (tablePat.matcher(line).find()) {
-            return new PartContainerTable(this);
+            profiler.startSection("Create Table Container");
+            container = new PartContainerTable(this);
+        }
+        else {
+            profiler.startSection("Create Normal Container");
+            container = new PartContainer(this);
         }
 
-        return new PartContainer(this);
+        profiler.endSection();
+
+        return container;
     }
-
-    /*
-
-    You have a conversion modifier for every energy type.
-    This modifier will be a value between 0 and 1.
-    All conversion modifiers will start at 0.
-
-    When energy is fed into the system from energy type X this will increase that energy type's conversion modifier.
-    The rate at which the conversion modifier increases involves a bit of math...
-    First of all there will be a base increment value that is calculated using the transfer rate and the total capacity of the network.
-    The exact calculation is TBD.
-
-    That is then multiplied by the (1 - the current conversion modifier) and added to the conversion modifier.
-    So what this means is the higher the conversion modifier the more energy it takes to push it even higher.
-    This is a similar mechanic to the DE reactor shield. You can pump infinite power into it but it will never actually hit 100%.
-
-    Finally the conversion modifier for all other energy types is decremented via a calculation that is TBD
-
-    The result of all this is you now have a list of conversion modifiers that represent the ratio of power input from each energy type.
-    To calculate the efficiency for a specific energy type you would add all of the conversion ratios and divide that number by the conversion modifier for the target energy type.
-    The result will be a value between 0 and 1 where 1 is 100% efficient.
-
-    */
 
     public void reload() {
         reloadRequired = true;
+    }
+
+    @Override
+    public void reloadElement() {
+        super.reloadElement();
+        reload();
     }
 
     @Override
@@ -252,5 +256,18 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
     public GuiMarkdownElement setRecipeListener(BiConsumer<ItemStack, Integer> recipeListener) {
         this.recipeListener = recipeListener;
         return this;
+    }
+
+    public int getBaseTextColour() {
+        return colourProvider.getColour();
+    }
+
+    public void setColourProvider(GuiColourProvider<Integer> colourProvider) {
+        this.colourProvider = colourProvider;
+    }
+
+    public void clear() {
+        toRemove.addAll(containers);
+        containers.clear();
     }
 }

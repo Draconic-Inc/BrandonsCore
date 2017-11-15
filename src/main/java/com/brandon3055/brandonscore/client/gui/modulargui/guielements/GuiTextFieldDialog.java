@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 
 import java.util.function.Consumer;
@@ -16,6 +17,8 @@ import java.util.function.Predicate;
  */
 public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> implements IGuiEventListener {
 
+    private String title = "";
+    public int titleColour = 0xFFFFFF;
     public GuiTextField textField;
     public GuiButton okButton;
     protected int maxLength = 64;
@@ -30,6 +33,14 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
         setSize(200, 20);
     }
 
+    public GuiTextFieldDialog(MGuiElementBase parent, String title) {
+        super(parent);
+        this.title = title;
+        setSize(200, 40);
+        setDragBar(15);
+        setInsets(18, 3, 3, 3);
+    }
+
     public GuiTextFieldDialog(int xPos, int yPos, MGuiElementBase parent) {
         super(xPos, yPos, parent);
         setSize(200, 20);
@@ -42,7 +53,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
 
     @Override
     public void addChildElements() {
-        addChild(textField = new GuiTextField(xPos(), yPos(), xSize() - 20, ySize()).setListener(this));
+        addChild(textField = new GuiTextField().setPosAndSize(getInsetRect()).setXSize(getInsetRect().width - 20).setListener(this));
         textField.setMaxStringLength(maxLength);
         textField.setText(defaultText);
 
@@ -50,7 +61,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
             textField.setValidator(validator);
         }
 
-        addChild(okButton = new GuiButton(xPos() + textField.xSize(), yPos(), 20, ySize(), I18n.format("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777).setListener(this));
+        addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.format("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777).setListener(this));
         super.addChildElements();
     }
 
@@ -133,5 +144,23 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
             textField.setMaxStringLength(maxLength);
         }
         return this;
+    }
+
+    public GuiTextFieldDialog setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public GuiTextFieldDialog setTitleColour(int titleColour) {
+        this.titleColour = titleColour;
+        return this;
+    }
+
+    @Override
+    public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+        if (!title.isEmpty()) {
+            drawString(fontRenderer, title, xPos() + 4, yPos() + 6, titleColour);
+        }
     }
 }

@@ -411,7 +411,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
             return true;
         }
 
-        if (isMouseOver(mouseX, mouseY) && !disabled && mouseButton == 0) {
+        if (isMouseOver(mouseX, mouseY) && !disabled) {
             onPressed(mouseX, mouseY, mouseButton);
             return true;
         }
@@ -439,6 +439,10 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, !toggleMode || toggleActiveState ? 1.0F : 0.9F));
     }
 
+    public static void playGenericClick(Minecraft mc) {
+        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    }
+
     /**
      * Use to enable/disable the button click sound. Enabled by default.
      */
@@ -452,6 +456,11 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
      */
     public GuiButton setToggleMode(boolean toggleMode) {
         this.toggleMode = toggleMode;
+        return this;
+    }
+
+    public GuiButton setToggleState(boolean toggleState) {
+        this.toggleActiveState = toggleState;
         return this;
     }
 

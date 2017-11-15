@@ -293,4 +293,13 @@ public class Utils {
         }
         return instanceOfThis.isAssignableFrom(clazz);
     }
+
+    public static String trimString(String input, int length, String trimExtension) {
+        if (input.length() <= length) {
+            return input;
+        }
+        else {
+            return input.substring(0, length) + trimExtension;
+        }
+    }
 }

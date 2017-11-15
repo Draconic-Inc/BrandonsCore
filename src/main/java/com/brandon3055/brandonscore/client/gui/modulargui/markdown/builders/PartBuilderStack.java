@@ -17,6 +17,8 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+
 /**
  * Created by brandon3055 on 20/07/2017.
  */
@@ -40,6 +42,7 @@ public class PartBuilderStack extends IPartBuilder {
 
     @Override
     public String build(BCFontRenderer font, String markdown, int nextPart, BCFontRenderer fr, PartContainer container, LinkedList<Part> parts, int elementLeft, int elementRight, int xPos, int yPos, int nextYLevel) {
+        profiler.startSection("Build Stack");
         builtHeight = font.FONT_HEIGHT;
         //region Extract Recipe Data
 

@@ -16,6 +16,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CE
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.RIGHT;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Vertical.BOTTOM;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Vertical.MIDDLE;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -350,6 +351,7 @@ public class PartContainerTable extends PartContainer {
                         builder.finalYPos = builderYPos;
                         int builderStartY = builderYPos;
                         col = builder.build(fontRenderer, col, nextPart, fontRenderer, this, cellParts, colLeft, colLeft + data.colWidth, xPos, builderYPos, maxYPos);
+                        profiler.endSection();
                         nextPart = col.length();
                         xPos = builder.finalXPos;
                         builderYPos = builder.finalYPos;
@@ -468,7 +470,7 @@ public class PartContainerTable extends PartContainer {
 
                     part.lastXPos = xPos + alignOffset;
                     part.lastYPos = renderYPos;
-                    part.render(fontRenderer, xPos + alignOffset, renderYPos + yOffset, mouseX, mouseY, colour, shadow, partialTicks);
+                    part.render(fontRenderer, xPos + alignOffset, renderYPos + yOffset, mouseX, mouseY, collatorProvider.getColour(), shadow, partialTicks);
 //                    drawBorderedRect(xPos + alignOffset, renderYPos, part.width, part.height, 1, 0, 0xFF00FFFF);
                     prevHeight = Math.max(part.height, prevHeight);
                     xPos += part.width;
