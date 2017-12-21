@@ -192,33 +192,36 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                     if (entity == null) {
                         continue;
                     }
-                    String name = entity.getDisplayName() == null ? "[unknown]" : entity.getDisplayName().getFormattedText();
-                    MGuiElementBase container = new MGuiElementBase(modularGui, 0, 0, xSize - 13, 20);
-                    container.setLinkedObject(EntityList.getEntityString(entity));
+                    try {
+                        String name = entity.getDisplayName() == null ? "[unknown]" : entity.getDisplayName().getFormattedText();
+                        MGuiElementBase container = new MGuiElementBase(modularGui, 0, 0, xSize - 13, 20);
+                        container.setLinkedObject(EntityList.getEntityString(entity));
 
-                    MGuiEntityRenderer renderer = new MGuiEntityRenderer(modularGui, 10, 5, 12, 10).setEntity(entity);
-                    container.addChild(renderer);
+                        MGuiEntityRenderer renderer = new MGuiEntityRenderer(modularGui, 10, 5, 12, 10).setEntity(entity);
+                        container.addChild(renderer);
 
-                    MGuiLabel label = new MGuiLabel(modularGui, 0 + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
-                    if (fontRenderer.getStringWidth(name) > xSize - 40) {
-                        label.addChild(new MGuiHoverPopup(modularGui, new String[]{name}, label));
+                        MGuiLabel label = new MGuiLabel(modularGui, 0 + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
+                        if (fontRenderer.getStringWidth(name) > xSize - 40) {
+                            label.addChild(new MGuiHoverPopup(modularGui, new String[]{name}, label));
+                        }
+
+                        container.addChild(label);
+
+                        MGuiButtonSolid back = new MGuiButtonSolid(modularGui, 0 + 30, 0, xSize - 42, 20, "") {
+                            @Override
+                            public int getFillColour(boolean hovering, boolean disabled) {
+                                return hovering ? 0x80FFFFFF : 0;
+                            }
+
+                            @Override
+                            public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+                                return false;
+                            }
+                        }.setColours(0, 0, 0xFFFFFFFF);
+                        container.addChild(back);
+                        elementBases.add(container);
                     }
-
-                    container.addChild(label);
-
-                    MGuiButtonSolid back = new MGuiButtonSolid(modularGui, 0 + 30, 0, xSize - 42, 20, "") {
-                        @Override
-                        public int getFillColour(boolean hovering, boolean disabled) {
-                            return hovering ? 0x80FFFFFF : 0;
-                        }
-
-                        @Override
-                        public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-                            return false;
-                        }
-                    }.setColours(0, 0, 0xFFFFFFFF);
-                    container.addChild(back);
-                    elementBases.add(container);
+                    catch (Throwable ignored) {}
                 }
             }
             else if (eventElement == addPlayer) {
