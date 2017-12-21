@@ -12,6 +12,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import java.io.IOException;
@@ -47,9 +49,6 @@ public class GuiIncompatibleConfig extends ModularGuiScreen {
 
         });
 
-        for (int i = 0; i < 20; i++) {
-            list.addEntry(new MGuiListEntryWrapper(this, new MGuiLabel(this, 0, 0, 460, 15, "Test")));
-        }
         manager.initElements();
 
         addButton(new ButtonColourRect(0, TextFormatting.RED + "Ignore conflict", cx - 230, cy + 80, 100, 15, 0xFF000000, 0xFF909090, 0xFFFFFFFF));
@@ -72,8 +71,14 @@ public class GuiIncompatibleConfig extends ModularGuiScreen {
         GuiHelper.drawCenteredSplitString(fontRenderer, "Incompatible client config detected!", 0, 0, 300, 0xFF0000, false);
         GlStateManager.popMatrix();
 
-        GuiHelper.drawCenteredSplitString(fontRenderer, "Brandon's Core has detected that some critical configs in your client do not match the server" + " and could not be synced automatically.\n Bellow is a list of the incompatible configs.", cx, cy - 120, 450, 0xFF0000, false);
-        GuiHelper.drawCenteredSplitString(fontRenderer, "You have the following options. You can attempt to play with your current config but this is not recommended because things will probably break." + " You can disconnect from the server, or you can accept the server config which requires a client restart.\n If you accept the server config will be automatically saved to your client and your client will shutdown." + "You then simply need to restart your client and connect to this server again.", cx, cy + 20, 460, 0xFFFFFF, false);
+        GuiHelper.drawCenteredSplitString(fontRenderer,
+                "Brandon's Core has detected that some critical configs in your client do not match the server" + //
+                " and could not be synced automatically.\n Bellow is a list of the incompatible configs." //
+                , cx, cy - 120, 450, 0xFF0000, false);
+        GuiHelper.drawCenteredSplitString(fontRenderer, //
+                "You have the following options. You can attempt to play with your current config but this is not recommended because things will probably break." + //
+                        " You can disconnect from the server, or you can accept the server config which requires a client restart.\n If you accept the server config properties that do not match your client will be saved to your client config." + //
+                        "You then simply need to restart your client to apply the changes and connect to this server again.", cx, cy + 22, 460, 0xFFFFFF, false);
         GuiHelper.drawCenteredSplitString(fontRenderer, error, cx, cy + 100, 460, 0xFF0000, false);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -95,7 +100,11 @@ public class GuiIncompatibleConfig extends ModularGuiScreen {
         else if (button.id == 2) {
             try {
                 ModConfigParser.acceptServerConfig(incompatibleProps);
-                mc.shutdown();
+                this.mc.displayGuiScreen(null);
+                if (this.mc.currentScreen == null) {
+                    this.mc.setIngameFocus();
+                }
+                mc.player.sendMessage(new TextComponentString("Config saved! The changes will be applied when you restart your client. You may continue playing but mods may break or not function correctly.").setStyle(new Style().setColor(TextFormatting.GREEN)));
             }
             catch (Throwable e) {
                 e.printStackTrace();

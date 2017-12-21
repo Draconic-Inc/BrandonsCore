@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.registry;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.client.gui.config.GuiIncompatibleConfig;
 import com.brandon3055.brandonscore.registry.ModConfigProperty.ListRestrictions;
 import com.brandon3055.brandonscore.registry.ModConfigProperty.MinMax;
@@ -10,6 +11,12 @@ import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Throwables;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -39,6 +46,8 @@ public class ModConfigParser {
     private static Map<String, List<PropertyHelper>> modPropertyHelpers = new HashMap<>();
     private static Map<String, List<ConfigCategory>> modConfigCategories = new HashMap<>();
     private static boolean connectedToServer = false;
+
+    public static Map<PropertyHelper, Object> propsRequireRestart = new HashMap<>();
 
     //region Pars & Config
 
@@ -175,6 +184,8 @@ public class ModConfigParser {
     //region Config client Sync
 
     public static void writeConfigForSync(MCDataOutput output) {
+        output.writeBoolean(BCConfig.disableInvasiveGui);
+
         int propCount = 0;
         for (List<PropertyHelper> modProps : modPropertyHelpers.values()) {
             propCount += DataUtils.count(modProps, prop -> prop.requiresSync || prop.autoSync);
@@ -186,9 +197,11 @@ public class ModConfigParser {
 
     @SideOnly(Side.CLIENT)
     public static void readConfigForSync(MCDataInput input) {
+        boolean disableGui = input.readBoolean();
+
         int propCount = input.readVarInt();
 
-        Map<PropertyHelper, Object> propsRequireRestart = new HashMap<>();
+        propsRequireRestart = new HashMap<>();
 
         for (int i = 0; i < propCount; i++) {
             String propStr = input.readString();
@@ -222,7 +235,19 @@ public class ModConfigParser {
         }
 
         if (propsRequireRestart.size() > 0) {
-            Minecraft.getMinecraft().displayGuiScreen(new GuiIncompatibleConfig(propsRequireRestart));
+            if (disableGui){
+                ITextComponent message = new TextComponentString(TextFormatting.RED + "[Warning] " + TextFormatting.GOLD + "" + //
+                        "Brandon's core has detected a config mismatch between your client and this server!");
+                ITextComponent button = new TextComponentString(TextFormatting.BLUE + "[Click here to lean more]");
+                ITextComponent buttonHover = new TextComponentString("Click here to open the config conflict gui that better explains this issue and gives you options to easily resolve this issue.");
+                button.setStyle(new Style().setColor(TextFormatting.BLUE).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bcore_client config_sync_gui")).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, buttonHover)));
+
+                Minecraft.getMinecraft().player.sendMessage(message);
+                Minecraft.getMinecraft().player.sendMessage(button);
+            }
+            else {
+                Minecraft.getMinecraft().displayGuiScreen(new GuiIncompatibleConfig(propsRequireRestart));
+            }
         }
         connectedToServer = true;
     }
@@ -230,6 +255,7 @@ public class ModConfigParser {
     public static void disconnectFromServer() {
         modPropertyHelpers.forEach((s, props) -> DataUtils.forEachMatch(props, prop -> prop.serverLock, PropertyHelper::unlockServerValue));
         connectedToServer = false;
+        propsRequireRestart.clear();
     }
 
     public static boolean isPropLocked(String modid, Property property) {

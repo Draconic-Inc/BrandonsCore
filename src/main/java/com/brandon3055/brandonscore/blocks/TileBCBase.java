@@ -15,6 +15,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -170,7 +171,7 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      */
     public Block getBlockTypeSafe(Block defaultBlock)
     {
-        if (getBlockType() != null) {
+        if (getBlockType() != Blocks.AIR) {
             return getBlockType();
         }
         else {

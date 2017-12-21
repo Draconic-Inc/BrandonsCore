@@ -160,7 +160,7 @@ public class ModuleManager {
         return false;
     }
 
-    protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+    public boolean keyTyped(char typedChar, int keyCode) throws IOException {
         for (MGuiElementBase element : actionList) {
             if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
                 return true;

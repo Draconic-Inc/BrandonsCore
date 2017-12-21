@@ -32,6 +32,19 @@ public class PlayerSlot {
         return new PlayerSlot(slot, category);
     }
 
+    public int getSlotIndex() {
+        return slot;
+    }
+
+    public int getCatIndex() {
+        return category.getIndex();
+    }
+
+    public static PlayerSlot fromIndexes(int slotIndex, int catIndex) {
+        EnumInvCategory category = EnumInvCategory.fromIndex(catIndex);
+        return new PlayerSlot(slotIndex, category);
+    }
+
     @Override
     public String toString() {
         return category.getIndex() + ":" + slot;

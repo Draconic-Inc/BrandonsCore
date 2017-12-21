@@ -71,7 +71,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
         EqualColumns builder = new EqualColumns(xPos + offset, yPos + 12, 2, xSize / 2 - 1, 12, 1);
 
         if (filter.isTypeSelectionEnabled()) {
-            builder.add(detectHostile = (MGuiButtonToggle) new MGuiButtonToggle(modularGui){
+            builder.add(detectHostile = (MGuiButtonToggle) new MGuiButtonToggle(modularGui) {
                 @Override
                 public List<String> getToolTip() {
                     return Collections.singletonList(detectHostile.isPressed() ? I18n.format("gui.de.button.toggleOff") : I18n.format("gui.de.button.toggleOn"));
@@ -85,7 +85,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
             detectHostile.toolTipDelay = 5;
         }
         if (filter.isTypeSelectionEnabled()) {
-            builder.add(detectPassive = (MGuiButtonToggle) new MGuiButtonToggle(modularGui){
+            builder.add(detectPassive = (MGuiButtonToggle) new MGuiButtonToggle(modularGui) {
                 @Override
                 public List<String> getToolTip() {
                     return Collections.singletonList(detectPassive.isPressed() ? I18n.format("gui.de.button.toggleOff") : I18n.format("gui.de.button.toggleOn"));
@@ -99,7 +99,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
             detectPassive.toolTipDelay = 5;
         }
         if (filter.isTypeSelectionEnabled()) {
-            builder.add(detectPlayer = (MGuiButtonToggle) new MGuiButtonToggle(modularGui){
+            builder.add(detectPlayer = (MGuiButtonToggle) new MGuiButtonToggle(modularGui) {
                 @Override
                 public List<String> getToolTip() {
                     return Collections.singletonList(detectPlayer.isPressed() ? I18n.format("gui.de.button.toggleOff") : I18n.format("gui.de.button.toggleOn"));
@@ -113,7 +113,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
             detectPlayer.toolTipDelay = 5;
         }
         if (filter.isOtherSelectorEnabled()) {
-            builder.add(detectOther = (MGuiButtonToggle) new MGuiButtonToggle(modularGui){
+            builder.add(detectOther = (MGuiButtonToggle) new MGuiButtonToggle(modularGui) {
                 @Override
                 public List<String> getToolTip() {
                     return Collections.singletonList(detectOther.isPressed() ? I18n.format("gui.de.button.toggleOff") : I18n.format("gui.de.button.toggleOn"));
@@ -141,7 +141,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                     return filter.isWhiteList ? I18n.format("gui.entityFilter.button.whiteList") : I18n.format("gui.entityFilter.button.blackList");
                 }
             });
-            addChild(toggleList = new MGuiButton(modularGui, xPos + xSize - 45, listLabel.yPos + 1, 45, listLabel.ySize - 2, I18n.format("gui.de.button.toggle")){
+            addChild(toggleList = new MGuiButton(modularGui, xPos + xSize - 45, listLabel.yPos + 1, 45, listLabel.ySize - 2, I18n.format("gui.de.button.toggle")) {
                 @Override
                 public List<String> getToolTip() {
                     return Collections.singletonList(filter.isWhiteList ? I18n.format("gui.entityFilter.button.blackList") : I18n.format("gui.entityFilter.button.whiteList"));
@@ -193,44 +193,47 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                     if (entity == null) {
                         continue;
                     }
-                    String name = entity.getDisplayName() == null ? "[unknown]" : entity.getDisplayName().getFormattedText();
-                    MGuiElementBase container = new MGuiElementBase(modularGui, 0, 0, xSize - 13, 20);
-                    container.setLinkedObject(EntityList.getEntityString(entity));
+                    try {
+                        String name = entity.getDisplayName() == null ? "[unknown]" : entity.getDisplayName().getFormattedText();
+                        MGuiElementBase container = new MGuiElementBase(modularGui, 0, 0, xSize - 13, 20);
+                        container.setLinkedObject(EntityList.getEntityString(entity));
 
-                    MGuiEntityRenderer renderer = new MGuiEntityRenderer(modularGui, 10, 5, 12, 10).setEntity(entity);
-                    container.addChild(renderer);
+                        MGuiEntityRenderer renderer = new MGuiEntityRenderer(modularGui, 10, 5, 12, 10).setEntity(entity);
+                        container.addChild(renderer);
 
-                    MGuiLabel label = new MGuiLabel(modularGui, 0 + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
-                    if (fontRenderer.getStringWidth(name) > xSize - 40) {
-                        label.addChild(new MGuiHoverPopup(modularGui, new String[]{name}, label));
+                        MGuiLabel label = new MGuiLabel(modularGui, 0 + 30, 0, xSize - 42, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
+                        if (fontRenderer.getStringWidth(name) > xSize - 40) {
+                            label.addChild(new MGuiHoverPopup(modularGui, new String[]{name}, label));
+                        }
+
+                        container.addChild(label);
+
+                        MGuiButtonSolid back = new MGuiButtonSolid(modularGui, 0 + 30, 0, xSize - 42, 20, "") {
+                            @Override
+                            public int getFillColour(boolean hovering, boolean disabled) {
+                                return hovering ? 0x80FFFFFF : 0;
+                            }
+
+                            @Override
+                            public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+                                return false;
+                            }
+                        }.setColours(0, 0, 0xFFFFFFFF);
+                        container.addChild(back);
+                        elementBases.add(container);
                     }
-
-                    container.addChild(label);
-
-                    MGuiButtonSolid back = new MGuiButtonSolid(modularGui, 0 + 30, 0, xSize - 42, 20, "") {
-                        @Override
-                        public int getFillColour(boolean hovering, boolean disabled) {
-                            return hovering ? 0x80FFFFFF : 0;
-                        }
-
-                        @Override
-                        public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-                            return false;
-                        }
-                    }.setColours(0, 0, 0xFFFFFFFF);
-                    container.addChild(back);
-                    elementBases.add(container);
+                    catch (Throwable ignored) {}
                 }
             }
             else if (eventElement == addPlayer) {
                 for (String name : playerNames) {
-                    name = "[player]:"+name;
+                    name = "[player]:" + name;
                     MGuiLabel label = new MGuiLabel(modularGui, 0, 0, xSize - 12, 20, name).setAlignment(EnumAlignment.LEFT).setTrim(true);
                     if (fontRenderer.getStringWidth(name) > xSize - 40) {
-                        label.addChild(new MGuiHoverPopup(modularGui, new String[] {name}, label));
+                        label.addChild(new MGuiHoverPopup(modularGui, new String[]{name}, label));
                     }
                     label.setLinkedObject(name);
-                    MGuiButtonSolid button = new MGuiButtonSolid(modularGui, 0, 0, xSize - 12, 20, ""){
+                    MGuiButtonSolid button = new MGuiButtonSolid(modularGui, 0, 0, xSize - 12, 20, "") {
                         @Override
                         public int getFillColour(boolean hovering, boolean disabled) {
                             return hovering ? 0x80FFFFFF : 0;
@@ -260,7 +263,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
             }
 
             MGuiPopupTextField textField = (MGuiPopupTextField) new MGuiPopupTextField(modularGui, xPos + (xSize / 2) - 50, yPos + (ySize / 2) - 6, 100, 12, this).setId("ADD_CUSTOM");
-            textField.addChild(new MGuiHoverPopup(modularGui, new String[] {I18n.format("gui.entityFilter.customTip.txt")}, textField));
+            textField.addChild(new MGuiHoverPopup(modularGui, new String[]{I18n.format("gui.entityFilter.customTip.txt")}, textField));
             textField.show();
         }
         else if (eventString.equals("SELECTOR_PICK")) {
@@ -293,7 +296,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
                 MGuiPopupTextField textField = (MGuiPopupTextField) new MGuiPopupTextField(modularGui, xPos + (xSize / 2) - 50, yPos + (ySize / 2) - 6, 100, 12, this).setId("EDIT_RESULT");
                 textField.textField.setText(name);
                 textField.setLinkedObject(name);
-                textField.addChild(new MGuiHoverPopup(modularGui, new String[] {I18n.format("gui.entityFilter.customTip.txt")}, textField));
+                textField.addChild(new MGuiHoverPopup(modularGui, new String[]{I18n.format("gui.entityFilter.customTip.txt")}, textField));
                 textField.show();
             }
         }
@@ -318,7 +321,7 @@ public class MGuiEntityFilter extends MGuiElementBase implements IMGuiListener {
 
             for (ResourceLocation name : EntityList.getEntityNameList()) {
                 Entity entity = EntityList.createEntityByIDFromName(name, modularGui.getMinecraft().world);
-                if (entity == null) {
+                if (entity == null || (entity instanceof EntityItem && entity.getClass() != EntityItem.class)) {
                     continue;
                 }
 

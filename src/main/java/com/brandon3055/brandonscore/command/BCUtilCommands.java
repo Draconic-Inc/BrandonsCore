@@ -74,9 +74,6 @@ public class BCUtilCommands extends CommandBase {
             else if (function.equals("")) {
 
             }
-            else if (function.equals("")) {
-
-            }
             else {
                 help(sender);
             }
@@ -184,9 +181,6 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
-    private void randomFunction2(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-    }
-
     private void randomFunction3(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
     }
 
@@ -195,5 +189,4 @@ public class BCUtilCommands extends CommandBase {
 
     private void randomFunction5(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
     }
-
 }

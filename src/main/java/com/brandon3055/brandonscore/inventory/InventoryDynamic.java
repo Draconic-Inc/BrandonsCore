@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.LinkedList;
+import java.util.function.Predicate;
 
 /**
  * Created by brandon3055 on 26/08/2016.
@@ -165,5 +166,9 @@ public class InventoryDynamic implements IInventory {
         for (int i = 0; i < list.tagCount(); i++) {
             stacks.add(new ItemStack(list.getCompoundTagAt(i)));
         }
+    }
+
+    public void removeIf(Predicate<ItemStack> filter) {
+        stacks.removeIf(filter);
     }
 }

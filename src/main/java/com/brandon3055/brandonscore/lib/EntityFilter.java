@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.lib;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -89,7 +90,7 @@ public abstract class EntityFilter {
             return isWhiteList;
         }
 
-        if (entityList.contains(EntityList.getEntityString(entity))) {
+        if (entityList.contains(EntityList.getEntityString(entity)) || (entity instanceof EntityItem && entityList.contains("Item"))) {
             return isWhiteList;
         }
 
