@@ -1,0 +1,28 @@
+//---- Entity Filter ----//
+gui.entityFilter.filter.txt=Фильтр
+gui.entityFilter.button.passive=Пассивная
+gui.entityFilter.button.hostile=Вражеская
+gui.entityFilter.button.players=Игроки
+gui.entityFilter.button.other=Другие
+gui.entityFilter.button.whiteList=Вайтлист
+gui.entityFilter.button.blackList=Блэклист
+gui.entityFilter.button.editList=Редактировать список
+gui.entityFilter.customTip.txt=Ник игрока должен быть в формате [player]:username
+
+//---- Generic ----//
+generic.de.Mode.txt=Режим
+generic.de.energyCost.txt=Стоимость энергии
+generic.options.txt=Опции
+generic.ok.txt=OK
+generic.remove.txt=Удалить
+generic.edit.txt=Изменить
+generic.configureRedstone.txt=Настроить контроль редстоуном
+
+//---- Generic Gui Buttons ----//
+gui.de.button.start=Старт
+gui.de.button.extract=Извлечь
+gui.de.button.toggleOff=Выключить
+gui.de.button.toggleOn=Включить
+gui.de.button.toggle=Переключить
+gui.de.button.close=Закрыть
+gui.button.save=Сохранить
