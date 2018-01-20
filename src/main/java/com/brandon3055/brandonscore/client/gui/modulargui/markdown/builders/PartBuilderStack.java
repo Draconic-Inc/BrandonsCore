@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
@@ -23,8 +24,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  * Created by brandon3055 on 20/07/2017.
  */
 public class PartBuilderStack extends IPartBuilder {
-    private static Pattern stackPat = Pattern.compile("(?<=[^\\\\]|^)(§stack\\[[^§]*]\\{[^§]*})|(?<=[^\\\\]|^)(§stack\\[[^§ ]*])");      //"(?<=[^\\\\]|^)(§stack\\[[^]]*]\\{[^§]*})|(?<=[^\\\\]|^)(§stack\\[[^]]*])");
-    private static Pattern stackString = Pattern.compile("(?<=§stack\\[)(.*)(?=][{])|(?<=§stack\\[)(.*)(?=])");                          //"(?<=§stack\\[)([^]]*)(?=])");
+    private static Pattern stackPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "stack\\[[^" + Utils.SELECT + "]*]\\{[^" + Utils.SELECT + "]*})|(?<=[^\\\\]|^)(" + Utils.SELECT + "stack\\[[^" + Utils.SELECT + " ]*])");      //"(?<=[^\\\\]|^)(" + Utils.SELECT + "stack\\[[^]]*]\\{[^" + Utils.SELECT + "]*})|(?<=[^\\\\]|^)(" + Utils.SELECT + "stack\\[[^]]*])");
+    private static Pattern stackString = Pattern.compile("(?<=" + Utils.SELECT + "stack\\[)(.*)(?=][{])|(?<=" + Utils.SELECT + "stack\\[)(.*)(?=])");                          //"(?<=" + Utils.SELECT + "stack\\[)([^]]*)(?=])");
     private static Pattern stackOPS = Pattern.compile("(?<=]\\{)(.*)(?=})");
 
     /**
@@ -130,7 +131,7 @@ public class PartBuilderStack extends IPartBuilder {
                 container.mc.getRenderItem().renderItemIntoGUI(stack, 0, 0);
 
                 if (stack.getCount() > 1) {
-                    String s = "§f" + stack.getCount() + "§f";
+                    String s = "" + Utils.SELECT + "f" + stack.getCount() + "" + Utils.SELECT + "f";
                     GlStateManager.translate(0, 0, -(container.getRenderZLevel() - 80));
                     container.zOffset += 45;
                     container.drawString(font, s, 18 - (font.getStringWidth(s)) - 1, font.FONT_HEIGHT, 0xFFFFFF, true);

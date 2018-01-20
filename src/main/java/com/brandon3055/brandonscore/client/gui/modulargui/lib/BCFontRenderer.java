@@ -258,7 +258,7 @@ public class BCFontRenderer extends FontRenderer {
                     continue;
                 }
 
-                //If char is §
+                //If char is " + Utils.SELECT + "
                 if (charWidth < 0 && index < text.length() - 1) {
                     ++index;
                     charAtIndex = text.charAt(index);

@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MouseIntracta
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.SoundEvents;
@@ -23,8 +24,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  * Created by brandon3055 on 20/07/2017.
  */
 public class PartBuilderLink extends IPartBuilder {
-    private static Pattern linkPat = Pattern.compile("(?<=[^\\\\]|^)(§link\\[[^]]*]\\{[^§]*})|(?<=[^\\\\]|^)(§link\\[[^]]*])");
-    private static Pattern linkURL = Pattern.compile("(?<=§link\\[)([^]]*)(?=])");
+    private static Pattern linkPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "link\\[[^]]*]\\{[^" + Utils.SELECT + "]*})|(?<=[^\\\\]|^)(" + Utils.SELECT + "link\\[[^]]*])");
+    private static Pattern linkURL = Pattern.compile("(?<=" + Utils.SELECT + "link\\[)([^]]*)(?=])");
     private static Pattern linkOPS = Pattern.compile("(?<=]\\{)(.*)(?=})");
 
     /**
@@ -51,7 +52,7 @@ public class PartBuilderLink extends IPartBuilder {
      * //rightPad:
      * //topPad:
      * //bottomPad:
-     * §link[http://www.google.com]{hover:"Link Hover Text",altText:"Alternate Link Text",render:}
+     * " + Utils.SELECT + "link[http://www.google.com]{hover:"Link Hover Text",altText:"Alternate Link Text",render:}
      */
     @Override
     public String build(BCFontRenderer font, String markdown, int nextPart, BCFontRenderer fr, PartContainer container, LinkedList<Part> parts, int elementLeft, int elementRight, int xPos, int yPos, int nextYLevel) {

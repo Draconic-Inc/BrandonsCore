@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Vertical;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 
@@ -20,7 +21,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
 
 /**
  * Created by brandon3055 on 20/07/2017.
- * §table[]
+ * " + Utils.SELECT + "table[]
  * Parameters:
  * width                    - Total width of the table
  * render:true/false        - Enable/disable the table renderer to just display the content
@@ -28,7 +29,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  * cell_colour              - The colour of the cells when render is enabled
  * <p>
  * <p>
- * §table[width:100%]
+ * " + Utils.SELECT + "table[width:100%]
  * | Heading 1 | Heading 2 | Heading 3 |       //Heading line is optional
  * | :n64 | :---------: | ---------: |         //Sets the relative width of each column
  * | Content | Content | Content |             //First and last pipe are going to be enforced
@@ -37,7 +38,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  * | Content | Content | Content |
  */
 public class PartContainerTable extends PartContainer {
-    private static Pattern optionExtract = Pattern.compile("(?<=§table\\[)([^]]*)(?=])");
+    private static Pattern optionExtract = Pattern.compile("(?<=" + Utils.SELECT + "table\\[)([^]]*)(?=])");
 
     //List of Row<Column<Part>>
     public LinkedList<LinkedList<LinkedList<Part>>> partsRows = new LinkedList<>();

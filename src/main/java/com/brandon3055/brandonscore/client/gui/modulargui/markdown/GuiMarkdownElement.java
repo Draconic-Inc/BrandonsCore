@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders.*;
 import com.brandon3055.brandonscore.utils.Profiler;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -23,11 +24,11 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
     public static Pattern bold = Pattern.compile("(?<=[^\\\\]|^)(\\*\\*.*\\*\\*)");
     public static Pattern italic = Pattern.compile("(?<=[^\\\\]|^)(\\*.*\\*)");
     public static Pattern strike = Pattern.compile("(?<=[^\\\\]|^)(~~.*~~)");
-    public static Pattern tablePat = Pattern.compile("(?<=[^\\\\]|^)(§table\\[[^]]*])");
+    public static Pattern tablePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "table\\[[^]]*])");
     public static Pattern underline = Pattern.compile("(?<=[^\\\\]|^)(__.*__)");
 
-    public static Pattern colourPat = Pattern.compile("(?<=[^\\\\]|^)(§colour\\[[^]]*])");
-    public static Pattern colourExtractPat = Pattern.compile("(?<=§colour\\[)([^]]*)(?=])");
+    public static Pattern colourPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "colour\\[[^]]*])");
+    public static Pattern colourExtractPat = Pattern.compile("(?<=" + Utils.SELECT + "colour\\[)([^]]*)(?=])");
     public static Profiler profiler = new Profiler();
 
     protected static LinkedList<IPartBuilder> partBuilders = new LinkedList<>();
@@ -104,14 +105,14 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
      * Todo
      *
      * Links:
-     * §link[http://www.google.com]
-     * §link[http://www.google.com](Alternate Link Text)
-     * §link[http://www.google.com "Hover text for the link"](Alternate Link Text)
+     * " + Utils.SELECT + "link[http://www.google.com]
+     * " + Utils.SELECT + "link[http://www.google.com](Alternate Link Text)
+     * " + Utils.SELECT + "link[http://www.google.com "Hover text for the link"](Alternate Link Text)
      * Also supports branch:branchId in place of link
      *
      * Images:
-     * §img[http://url.png]
-     * §img[http://url.png "Hover text for the image"]
+     * " + Utils.SELECT + "img[http://url.png]
+     * " + Utils.SELECT + "img[http://url.png "Hover text for the image"]
      *
      * Code:
      * Todo is this needed?
@@ -122,33 +123,33 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
      * #### Custom markdown ####
      *
      * Text Colour: (Changes the colour of all following text)
-     * §colour[RGB]               Takes an integer RGB colour value
-     * §colour[red,green,blue]  Takes separate red, green and blue values (0-255)
+     * " + Utils.SELECT + "colour[RGB]               Takes an integer RGB colour value
+     * " + Utils.SELECT + "colour[red,green,blue]  Takes separate red, green and blue values (0-255)
      *
-     * §shadow
+     * " + Utils.SELECT + "shadow
      *
      * Recipe: (Uses StackReference string format)
-     * §recipe[minecraft:furnace,0,1,{}]
+     * " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}]
      *
      * ItemStack: (Uses StackReference string format)
-     * §stack[minecraft:furnace,0,1,{}]
-     * §stack[minecraft:furnace,0,1,{}]{renderSize:32,toolTip:false,renderSlot:true,hoverText:"Custom hover text"}
+     * " + Utils.SELECT + "stack[minecraft:furnace,0,1,{}]
+     * " + Utils.SELECT + "stack[minecraft:furnace,0,1,{}]{renderSize:32,toolTip:false,renderSlot:true,hoverText:"Custom hover text"}
      * Parameters can be specified in any order and all parameters are optional.
      *
      * Entity: (Rendered an entity on the screen)
-     * §entity[entity:registryName]
-     * §entity[entity:registryName]{renderSize:32,hoverText:"Hover text",rotate:false,rotateSpeed:1,rotation:180}
+     * " + Utils.SELECT + "entity[entity:registryName]
+     * " + Utils.SELECT + "entity[entity:registryName]{renderSize:32,hoverText:"Hover text",rotate:false,rotateSpeed:1,rotation:180}
      *
      * Text align flag can be placed above a block of text or at the start of a block of text.
-     * §align:center
-     * §align:right
+     * " + Utils.SELECT + "align:center
+     * " + Utils.SELECT + "align:right
      *
      * Horizontal Rule:
      * //Rule can be used to draw a horizontal line across the page or as a precise spacer bu setting height to 0.
      * //Parameters can be specified in any order and all parameters are optional.
      * //Width parameter accepts both a % value and a px value where percent is the percent of the page width and px is a precise
      * //number of pixels. Defaults to 100%
-     * §rule[colour:#700090,height:5,topPadding:20,bottomPadding:20,width:70%,align:center]
+     * " + Utils.SELECT + "rule[colour:#700090,height:5,topPadding:20,bottomPadding:20,width:70%,align:center]
      *
      * ###################################
      */

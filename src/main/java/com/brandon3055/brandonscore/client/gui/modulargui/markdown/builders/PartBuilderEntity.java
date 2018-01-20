@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
@@ -40,8 +41,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  */
 public class PartBuilderEntity extends IPartBuilder {
     public static Map<String, Entity> renderEntityCache = new HashMap<>();
-    private static Pattern entityPat = Pattern.compile("(?<=[^\\\\]|^)(§entity\\[[^§]*]\\{[^§]*})|(?<=[^\\\\]|^)(§entity\\[[^§ ]*])");
-    private static Pattern entityString = Pattern.compile("(?<=§entity\\[)(.*)(?=][{])|(?<=§entity\\[)(.*)(?=])");
+    private static Pattern entityPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "entity\\[[^" + Utils.SELECT + "]*]\\{[^" + Utils.SELECT + "]*})|(?<=[^\\\\]|^)(" + Utils.SELECT + "entity\\[[^" + Utils.SELECT + " ]*])");
+    private static Pattern entityString = Pattern.compile("(?<=" + Utils.SELECT + "entity\\[)(.*)(?=][{])|(?<=" + Utils.SELECT + "entity\\[)(.*)(?=])");
     private static Pattern entityOPS = Pattern.compile("(?<=]\\{)(.*)(?=})");
 
     /**

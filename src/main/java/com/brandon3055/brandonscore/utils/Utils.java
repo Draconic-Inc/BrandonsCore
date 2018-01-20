@@ -16,6 +16,8 @@ import java.text.DecimalFormat;
  */
 public class Utils {
 
+    public static final String SELECT = "\u00A7";
+
     private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
 
     public static String formatNumber(double value) {

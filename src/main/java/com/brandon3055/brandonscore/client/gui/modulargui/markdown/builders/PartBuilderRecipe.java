@@ -10,6 +10,7 @@ import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 
@@ -26,8 +27,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  * Created by brandon3055 on 20/07/2017.
  */
 public class PartBuilderRecipe extends IPartBuilder {
-    private static Pattern recipePat = Pattern.compile("(?<=[^\\\\]|^)(§recipe\\[[^§]*]\\{[^§]*})|(?<=[^\\\\]|^)(§recipe\\[[^§ ]*])");
-    private static Pattern recipeStack = Pattern.compile("(?<=§recipe\\[)(.*)(?=][{])|(?<=§recipe\\[)(.*)(?=])");
+    private static Pattern recipePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "recipe\\[[^" + Utils.SELECT + "]*]\\{[^" + Utils.SELECT + "]*})|(?<=[^\\\\]|^)(" + Utils.SELECT + "recipe\\[[^" + Utils.SELECT + " ]*])");
+    private static Pattern recipeStack = Pattern.compile("(?<=" + Utils.SELECT + "recipe\\[)(.*)(?=][{])|(?<=" + Utils.SELECT + "recipe\\[)(.*)(?=])");
     private static Pattern recipeOPS = Pattern.compile("(?<=]\\{)(.*)(?=})");
 
     /**

@@ -11,6 +11,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
@@ -110,42 +111,42 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
         element.setRelPos(scrollElement, 0, 0).setXSize(scrollElement.xSize() - 10);
 
         String markdown = "This is test string to test the functionality of the Markdown element.\n\n" + //
-                "Random Text §link[http://www.google.com] Random Text\n" + //
-                "Random Text §link[http://www.google.com]{altText:\"Alternate Link Text!\"} Random Text\n" + //
-                "Random Text §link[http://www.google.com]{altText:\"Alternate Link Text!\",hover:\"This link has hover text!\"} Random Text\n" + //
-                "Random Text §link[http://www.google.com]{altText:\"Alternate Link Text!\",hover:\"This link has\\nMulti-Line\\nhover text!\"} Random Text\n\n" + //
-                "Random Text: §stack[minecraft:gold_block]§stack[minecraft:beacon,10]{drawSlot:true,size:64}§stack[minecraft:gold_block] §stack[minecraft:gold_block]Text\n" + //
-                "§stack[minecraft:iron_sword,1,0,{ench:[0:{lvl:3s,id:21s},1:{lvl:1s,id:6s},2:{lvl:3s,id:22s},3:{lvl:5s,id:48s},4:{lvl:5s,id:16s}],RepairCost:63}]{drawSlot:true}\n" + //
-                "§stack[minecraft:stone]\n\n" + //
-                "§entity[player:brandon3055]{size:128,track_mouse:true,hover:\"This is the creator of this mod!\",main_hand:\"minecraft:diamond_sword,1,0,{ench:[0:{lvl:1s,id:18s}]}\",off_hand:\"minecraft:shield,1,0,{ench:[0:{lvl:1s,id:70s}]}\",chest:\"minecraft:diamond_chestplate,1,0,{ench:[0:{lvl:1s,id:3s}]}\"}" + "§entity[minecraft:ender_crystal]\n" + //
-                "§entity[player:brandon3055] §entity[player:covers1624] §entity[minecraft:ender_dragon] §entity[minecraft:Pig] §entity[player:brandon3055]{size:128} §entity[player:brandon3055]{size:200} §entity[player:brandon3055]{size:256,track_mouse:true}\n" + //
-                "§recipe[minecraft:gold_ingot]\n\n" + //
-                "\\§align:centre \\§recipe[minecraft:iron_ingot]{padding:2,borderColour:#00ff00,spacing:10}\n" + //
-                "§align:centre §recipe[minecraft:iron_ingot]{padding:2,borderColour:#00ff00,spacing:10}\n\n" + //
-                "§link[http://www.google.com]{altText:\"This is a button style link!\",render:vanilla,padding:5}\n\n" +//
-                "§colour[#00ff00]§link[http://www.google.com]{altText:\"This is a solid button style link!\",render:solid,borderColourHover:#00FFFF,padding:5}\n\n" + //
-                "§img[http://ss.brandon3055.com/nr36p5s.png]{width:50%}§img[http://ss.brandon3055.com/wq6lvf9.png]{width:50%,borderColour:#FF0000,hover:\"Yay! Hover Text!\"}\n" +//
+                "Random Text " + Utils.SELECT + "link[http://www.google.com] Random Text\n" + //
+                "Random Text " + Utils.SELECT + "link[http://www.google.com]{altText:\"Alternate Link Text!\"} Random Text\n" + //
+                "Random Text " + Utils.SELECT + "link[http://www.google.com]{altText:\"Alternate Link Text!\",hover:\"This link has hover text!\"} Random Text\n" + //
+                "Random Text " + Utils.SELECT + "link[http://www.google.com]{altText:\"Alternate Link Text!\",hover:\"This link has\\nMulti-Line\\nhover text!\"} Random Text\n\n" + //
+                "Random Text: " + Utils.SELECT + "stack[minecraft:gold_block]" + Utils.SELECT + "stack[minecraft:beacon,10]{drawSlot:true,size:64}" + Utils.SELECT + "stack[minecraft:gold_block] " + Utils.SELECT + "stack[minecraft:gold_block]Text\n" + //
+                "" + Utils.SELECT + "stack[minecraft:iron_sword,1,0,{ench:[0:{lvl:3s,id:21s},1:{lvl:1s,id:6s},2:{lvl:3s,id:22s},3:{lvl:5s,id:48s},4:{lvl:5s,id:16s}],RepairCost:63}]{drawSlot:true}\n" + //
+                "" + Utils.SELECT + "stack[minecraft:stone]\n\n" + //
+                "" + Utils.SELECT + "entity[player:brandon3055]{size:128,track_mouse:true,hover:\"This is the creator of this mod!\",main_hand:\"minecraft:diamond_sword,1,0,{ench:[0:{lvl:1s,id:18s}]}\",off_hand:\"minecraft:shield,1,0,{ench:[0:{lvl:1s,id:70s}]}\",chest:\"minecraft:diamond_chestplate,1,0,{ench:[0:{lvl:1s,id:3s}]}\"}" + "" + Utils.SELECT + "entity[minecraft:ender_crystal]\n" + //
+                "" + Utils.SELECT + "entity[player:brandon3055] " + Utils.SELECT + "entity[player:covers1624] " + Utils.SELECT + "entity[minecraft:ender_dragon] " + Utils.SELECT + "entity[minecraft:Pig] " + Utils.SELECT + "entity[player:brandon3055]{size:128} " + Utils.SELECT + "entity[player:brandon3055]{size:200} " + Utils.SELECT + "entity[player:brandon3055]{size:256,track_mouse:true}\n" + //
+                "" + Utils.SELECT + "recipe[minecraft:gold_ingot]\n\n" + //
+                "\\" + Utils.SELECT + "align:centre \\" + Utils.SELECT + "recipe[minecraft:iron_ingot]{padding:2,borderColour:#00ff00,spacing:10}\n" + //
+                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "recipe[minecraft:iron_ingot]{padding:2,borderColour:#00ff00,spacing:10}\n\n" + //
+                "" + Utils.SELECT + "link[http://www.google.com]{altText:\"This is a button style link!\",render:vanilla,padding:5}\n\n" +//
+                "" + Utils.SELECT + "colour[#00ff00]" + Utils.SELECT + "link[http://www.google.com]{altText:\"This is a solid button style link!\",render:solid,borderColourHover:#00FFFF,padding:5}\n\n" + //
+                "" + Utils.SELECT + "img[http://ss.brandon3055.com/nr36p5s.png]{width:50%}" + Utils.SELECT + "img[http://ss.brandon3055.com/wq6lvf9.png]{width:50%,borderColour:#FF0000,hover:\"Yay! Hover Text!\"}\n" +//
                 "This is a new paragraph\n" + //
                 "This is a new line\n\n" + //
                 "This is a new paragraph.\n\n" +//
-                "This is a very long single line of text. This §3line§3 is so \\§2ling\\§2 that it \\§4will not be able §7to fit §lwithin the §4screen width §8however this should§8 not be a problem because it should be automatically wrapped to the next line. The purpose of this string is to test this functionality.\n\n" + //
-                "§align:centre§colour[0xff0000]\n" +//
+                "This is a very long single line of text. This " + Utils.SELECT + "3line" + Utils.SELECT + "3 is so \\" + Utils.SELECT + "2ling\\" + Utils.SELECT + "2 that it \\" + Utils.SELECT + "4will not be able " + Utils.SELECT + "7to fit " + Utils.SELECT + "lwithin the " + Utils.SELECT + "4screen width " + Utils.SELECT + "8however this should" + Utils.SELECT + "8 not be a problem because it should be automatically wrapped to the next line. The purpose of this string is to test this functionality.\n\n" + //
+                "" + Utils.SELECT + "align:centre" + Utils.SELECT + "colour[0xff0000]\n" +//
                 "Headings:\n" +//
-                "§align:centre §colour[#00ff00] # Heading 1\n" + //
-                "§shadow\n" + //
-                "§align:centre ## Heading 2\n" + //
-                "§align:centre§colour[#00ff00]### Heading 3\n" +//
-                "§align:centre §colour[0.0,1.0,0.5] #### Heading 4\n" +//
-                "§align:centre §colour[255,255,0] ##### Heading 5\n" +//
-                "§align:centre §colour[10,2,0.5] ###### Heading 6\n" + //
-                "§align:centre Plain Text\n" +//
+                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[#00ff00] # Heading 1\n" + //
+                "" + Utils.SELECT + "shadow\n" + //
+                "" + Utils.SELECT + "align:centre ## Heading 2\n" + //
+                "" + Utils.SELECT + "align:centre" + Utils.SELECT + "colour[#00ff00]### Heading 3\n" +//
+                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[0.0,1.0,0.5] #### Heading 4\n" +//
+                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[255,255,0] ##### Heading 5\n" +//
+                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[10,2,0.5] ###### Heading 6\n" + //
+                "" + Utils.SELECT + "align:centre Plain Text\n" +//
                 "Rules\n" + //
-                "§rule[]\n" +//
-                "§rule[colour:#700090,height:3,topPadding:2,bottomPadding:2]\n" + //
-                "§rule[colour:#ff0000,height:3,topPadding:2,bottomPadding:2,width:70%,align:left]\n" +//
-                "§rule[colour:#00ff00,height:3,topPadding:2,bottomPadding:2,width:100px,align:center]\n" + //
-                "§rule[colour:#0000ff,height:3,topPadding:2,bottomPadding:2,width:100px,align:right]\n" + //
-                "§rule[colour:#FFFFFF,height:3,topPadding:2,bottomPadding:2,width:20px,align:left]\n" + //
+                "" + Utils.SELECT + "rule[]\n" +//
+                "" + Utils.SELECT + "rule[colour:#700090,height:3,topPadding:2,bottomPadding:2]\n" + //
+                "" + Utils.SELECT + "rule[colour:#ff0000,height:3,topPadding:2,bottomPadding:2,width:70%,align:left]\n" +//
+                "" + Utils.SELECT + "rule[colour:#00ff00,height:3,topPadding:2,bottomPadding:2,width:100px,align:center]\n" + //
+                "" + Utils.SELECT + "rule[colour:#0000ff,height:3,topPadding:2,bottomPadding:2,width:100px,align:right]\n" + //
+                "" + Utils.SELECT + "rule[colour:#FFFFFF,height:3,topPadding:2,bottomPadding:2,width:20px,align:left]\n" + //
                 "Text Formatting:\n" + //
                 "*Italic*\n" + //
                 "**Bold**\n" +//
@@ -157,14 +158,14 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
                 "__Underline **Bold *Italic***__\n" + //
                 "__Underline ~~*Italic*~~__\n" + //
                 "This **is** __*a* ~~test__ string **containing *a* combination~~ *of** various* different format flags\n\n" +//
-                "§link[http://www.google.com] A link\n" + //
-                "§link[http://www.google.com](Alternate Link Text) A link with alt text\n" +//
-                "§img[http://url.png] An image\n" + //
-                "§img[http://url.png] An image with options\n" + //
-                "§recipe[minecraft:furnace,0,1,{}] A Recipe\n" +//
-                "§entity[entity:registryName] An entity\n" +//
-                "§entity[entity:registryName]{renderSize:32,hoverText:\"Hover text\",rotate:false,rotateSpeed:1,rotation:180} An entity with options\n" +//
-                "§link[http://www.google.com] A link §img[http://url.png] An image §recipe[minecraft:furnace,0,1,{}] And a Recipe §link[http://www.google.com] t §recipe[minecraft:furnace,0,1,{}] §link[http://www.googlee.com] t §recipe[minecraft:furnace,0,1,{}] §link[http://www.google.com] t §link[http://www.google.com] t §entity[http://www.google.com]";
+                "" + Utils.SELECT + "link[http://www.google.com] A link\n" + //
+                "" + Utils.SELECT + "link[http://www.google.com](Alternate Link Text) A link with alt text\n" +//
+                "" + Utils.SELECT + "img[http://url.png] An image\n" + //
+                "" + Utils.SELECT + "img[http://url.png] An image with options\n" + //
+                "" + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] A Recipe\n" +//
+                "" + Utils.SELECT + "entity[entity:registryName] An entity\n" +//
+                "" + Utils.SELECT + "entity[entity:registryName]{renderSize:32,hoverText:\"Hover text\",rotate:false,rotateSpeed:1,rotation:180} An entity with options\n" +//
+                "" + Utils.SELECT + "link[http://www.google.com] A link " + Utils.SELECT + "img[http://url.png] An image " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] And a Recipe " + Utils.SELECT + "link[http://www.google.com] t " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] " + Utils.SELECT + "link[http://www.googlee.com] t " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] " + Utils.SELECT + "link[http://www.google.com] t " + Utils.SELECT + "link[http://www.google.com] t " + Utils.SELECT + "entity[http://www.google.com]";
 
 
         File file = new File("C:\\Users\\brand\\Desktop\\MarkdownDemo.txt");

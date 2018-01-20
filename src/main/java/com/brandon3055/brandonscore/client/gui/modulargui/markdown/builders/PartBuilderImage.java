@@ -10,6 +10,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.renderer.GlStateManager;
 
 import java.util.Arrays;
@@ -23,8 +24,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMar
  * Created by brandon3055 on 20/07/2017.
  */
 public class PartBuilderImage extends IPartBuilder {
-    private static Pattern imgPat = Pattern.compile("(?<=[^\\\\]|^)(§img\\[[^]]*]\\{[^§]*})|(?<=[^\\\\]|^)(§img\\[[^]]*])");
-    private static Pattern imgURL = Pattern.compile("(?<=§img\\[)([^]]*)(?=])");
+    private static Pattern imgPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "img\\[[^]]*]\\{[^" + Utils.SELECT + "]*})|(?<=[^\\\\]|^)(" + Utils.SELECT + "img\\[[^]]*])");
+    private static Pattern imgURL = Pattern.compile("(?<=" + Utils.SELECT + "img\\[)([^]]*)(?=])");
     private static Pattern imgOPS = Pattern.compile("(?<=]\\{)(.*)(?=})");
 
     /**
@@ -41,8 +42,8 @@ public class PartBuilderImage extends IPartBuilder {
     }
 
     /**
-     * §img[http://url.png]
-     * §img[http://url.png]{hover:"Hover text for the image"}
+     * " + Utils.SELECT + "img[http://url.png]
+     * " + Utils.SELECT + "img[http://url.png]{hover:"Hover text for the image"}
      * <p>
      * //width and height parameters accepts both a % value and a px value where percent is the percent of the page width and px is a precise
      * //Note you only need to set width or height. Setting both to values that do not match the image aspect ratio will distort the image

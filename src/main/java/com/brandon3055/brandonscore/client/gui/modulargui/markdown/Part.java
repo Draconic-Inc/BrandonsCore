@@ -96,23 +96,23 @@ public abstract class Part {
     public static String applyTextFormatting(String input) {
         int escape = 0;
         while (GuiMarkdownElement.bold.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(\\*\\*)", "§l").replaceFirst("(\\*\\*)", "§l");
+            input = input.replaceFirst("(\\*\\*)", "" + Utils.SELECT + "l").replaceFirst("(\\*\\*)", "" + Utils.SELECT + "l");
         }
 
         while (GuiMarkdownElement.italic.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(\\*)", "§o").replaceFirst("(\\*)", "§o");
+            input = input.replaceFirst("(\\*)", "" + Utils.SELECT + "o").replaceFirst("(\\*)", "" + Utils.SELECT + "o");
         }
 
         while (GuiMarkdownElement.underline.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(__)", "§n").replaceFirst("(__)", "§n");
+            input = input.replaceFirst("(__)", "" + Utils.SELECT + "n").replaceFirst("(__)", "" + Utils.SELECT + "n");
         }
 
         while (GuiMarkdownElement.strike.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(~~)", "§m").replaceFirst("(~~)", "§m");
+            input = input.replaceFirst("(~~)", "" + Utils.SELECT + "m").replaceFirst("(~~)", "" + Utils.SELECT + "m");
         }
 
         while (GuiMarkdownElement.obf.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(~\\?~)", "§k").replaceFirst("(~\\?~)", "§k");
+            input = input.replaceFirst("(~\\?~)", "" + Utils.SELECT + "k").replaceFirst("(~\\?~)", "" + Utils.SELECT + "k");
         }
 
         if (escape >= 1000) {
@@ -151,7 +151,7 @@ public abstract class Part {
 
     public static void addError(LinkedList<String> markdownLines, String message, String errorValue) {
         markdownLines.removeFirst();
-        markdownLines.addFirst("§4Error: " + message + "§4 " + errorValue);
+        markdownLines.addFirst("" + Utils.SELECT + "4Error: " + message + "" + Utils.SELECT + "4 " + errorValue);
     }
 
     public abstract void render(BCFontRenderer font, int xPos, int yPos, int mouseX, int mouseY, int colour, boolean shadow, float partialTicks);

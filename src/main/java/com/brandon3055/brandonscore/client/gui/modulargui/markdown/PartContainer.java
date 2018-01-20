@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
@@ -34,10 +35,10 @@ import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
  * An "part" refers to a line of text, a link, an image, an entity renderer or a stack renderer.
  */
 public class PartContainer extends MGuiElementBase<PartContainer> {
-    private static final Pattern leftPat = Pattern.compile("(?<=[^\\\\]|^)(§align:left)");
-    private static final Pattern centrePat = Pattern.compile("(?<=[^\\\\]|^)(§align:center)");
-    private static final Pattern rightPat = Pattern.compile("(?<=[^\\\\]|^)(§align:right)");
-    private static final Pattern shadowPat = Pattern.compile("(?<=[^\\\\]|^)(§shadow)");
+    private static final Pattern leftPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "align:left)");
+    private static final Pattern centrePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "align:center)");
+    private static final Pattern rightPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "align:right)");
+    private static final Pattern shadowPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "shadow)");
 
 //    public int colour = 0xFF3c3f41;
     public GuiColourProvider<Integer> colourProvider;
@@ -173,8 +174,8 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
     private boolean checkRule(LinkedList<String> markdownLines) {
         String line = markdownLines.getFirst();
 
-        Pattern rulePat = Pattern.compile("(?<=[^\\\\]|^)(§rule\\[[^]]*])");
-        Pattern ruleOptionsPat = Pattern.compile("(?<=§rule\\[)([^]]*)(?=])");
+        Pattern rulePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "rule\\[[^]]*])");
+        Pattern ruleOptionsPat = Pattern.compile("(?<=" + Utils.SELECT + "rule\\[)([^]]*)(?=])");
 
         Matcher ruleMatch = rulePat.matcher(line);
         Matcher ruleOptMatch = ruleOptionsPat.matcher(line);
@@ -317,7 +318,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
     }
 
     /**
-     * Reads paragraph formatting tags such as §colour, §align and §shadow
+     * Reads paragraph formatting tags such as " + Utils.SELECT + "colour, " + Utils.SELECT + "align and " + Utils.SELECT + "shadow
      */
     private void readParagraphFormatting(LinkedList<String> markdownLines) {
         String line = markdownLines.getFirst();
@@ -326,22 +327,22 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
         boolean formatLine = false;
         if (leftPat.matcher(line).find()) {
             element.currentAlign = LEFT;
-            line = line.replace("§align:left", "");
+            line = line.replace("" + Utils.SELECT + "align:left", "");
             formatLine = true;
         }
         else if (centrePat.matcher(line).find()) {
             element.currentAlign = CENTER;
-            line = line.replace("§align:center", "");
+            line = line.replace("" + Utils.SELECT + "align:center", "");
             formatLine = true;
         }
         else if (rightPat.matcher(line).find()) {
             element.currentAlign = GuiAlign.RIGHT;
-            line = line.replace("§align:right", "");
+            line = line.replace("" + Utils.SELECT + "align:right", "");
             formatLine = true;
         }
         if (shadowPat.matcher(line).find()) {
             shadow = true;
-            line = line.replace("§shadow", "");
+            line = line.replace("" + Utils.SELECT + "shadow", "");
             formatLine = true;
         }
 
@@ -361,7 +362,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
         }
         catch (NumberFormatException e) {
             markdownLines.removeFirst();
-            markdownLines.addFirst("§4Invalid colour value! Must be a hex starting with 0x or # or it can be separate integer or float R G B values separated by comma's. Float values must contain a decimal point.§4 " + line);
+            markdownLines.addFirst("" + Utils.SELECT + "4Invalid colour value! Must be a hex starting with 0x or # or it can be separate integer or float R G B values separated by comma's. Float values must contain a decimal point." + Utils.SELECT + "4 " + line);
             return;
         }
 
