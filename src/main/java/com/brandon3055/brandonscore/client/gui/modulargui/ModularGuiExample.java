@@ -79,7 +79,6 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
 //        }
 //        else { LogHelper.dev("No Match"); }
 
-
 //        String test1 = " :------: | -----: | ------- |";
 //        String test2 = " :------: | -----: | ------- ";
 //
@@ -91,11 +90,11 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
 //        testMatch = test.matcher("S:invalid=\"Data == t be in quotes. Things \"CAN\" be escaped \\n to allow for stuff like this \\t.\"");
 //        LogHelper.dev((testMatch.find() ? testMatch.group(2) : "No Match") + " " + testMatch.matches());
 //
-//        Pattern linkPat = Pattern.compile("(?<=[^\\\\]|^)(§link\\[[^]]*]\\{[^§]*})|(?<=[^\\\\]|^)(§link\\[[^]]*])");
-//        String test1 = "§link[httpBla] Rand Text";
-//        String test2 = "§link[httpBla] Rand Text §link[httpBla2]";
-//        String test3 = "Rand Text §link[httpBla]{ops} Rand Text §link[httpBla2]";
-//        String test4 = "Rand Text §link[httpBla] Rand Text §link[httpBla2]{ops}";
+//        Pattern linkPat = Pattern.compile("(?<=[^\\\\]|^)(\u00A7link\\[[^]]*]\\{[^\u00A7]*})|(?<=[^\\\\]|^)(\u00A7link\\[[^]]*])");
+//        String test1 = "\u00A7link[httpBla] Rand Text";
+//        String test2 = "\u00A7link[httpBla] Rand Text \u00A7link[httpBla2]";
+//        String test3 = "Rand Text \u00A7link[httpBla]{ops} Rand Text \u00A7link[httpBla2]";
+//        String test4 = "Rand Text \u00A7link[httpBla] Rand Text \u00A7link[httpBla2]{ops}";
 //        Matcher mat = linkPat.matcher(test1);
 //        if (mat.find()) LogHelper.dev(mat.group());
 //        mat = linkPat.matcher(test2);
