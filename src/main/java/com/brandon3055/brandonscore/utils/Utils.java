@@ -223,6 +223,25 @@ public class Utils {
         return (valueIn - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
+    public static boolean validInteger(String value) {
+        try {
+            Long.parseLong(value);
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validDouble(String value) {
+        try {
+            Double.parseDouble(value);
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
 
     @Nullable
     public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance) {

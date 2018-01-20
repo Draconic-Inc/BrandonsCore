@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModuleManager;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * Created by brandon3055 on 23/10/2016.
  */
+@Deprecated //I hate this. It needs to die... But i need to think of something better to replace it...
 public class ModuleBuilder {
 
 
@@ -51,11 +52,10 @@ public class ModuleBuilder {
             int column = index % columns;
             int row = index / columns;
 
-            element.xSize = elementWidth;
-            element.ySize = elementHeight;
-            element.xPos = xPos + (column * elementWidth) + (column * elementSpacing);
-            element.yPos = yPos + (row * elementHeight) + (row * elementSpacing);
-            builderEndY = element.yPos + element.ySize;
+            element.setSize(elementWidth, elementHeight);
+            element.setXPos(xPos + (column * elementWidth) + (column * elementSpacing));
+            element.setYPos(yPos + (row * elementHeight) + (row * elementSpacing));
+            builderEndY = element.yPos() + element.ySize();
             elements.add(element);
 
             index++;
@@ -65,7 +65,7 @@ public class ModuleBuilder {
             return elements;
         }
 
-        public void finish(ModuleManager manager, int level) {
+        public void finish(GuiElementManager manager, int level) {
             for (MGuiElementBase elementBase : elements) {
                 manager.add(elementBase, level);
             }
@@ -103,12 +103,12 @@ public class ModuleBuilder {
 
             int columnPos = xPos;
             if (column > 0) {
-                columnPos = elements.getLast().xPos + elements.getLast().xSize;
+                columnPos = elements.getLast().xPos() + elements.getLast().xSize();
             }
 
-            element.moveBy((columnPos + elementSpacing) - element.xPos, (yPos + (row * elementHeight) + (row * elementSpacing)) - element.yPos);
+            element.translate((columnPos + elementSpacing) - element.xPos(), (yPos + (row * elementHeight) + (row * elementSpacing)) - element.yPos());
 
-            builderEndY = element.yPos + elementHeight;
+            builderEndY = element.yPos() + elementHeight;
             elements.add(element);
 
             index++;
@@ -118,7 +118,7 @@ public class ModuleBuilder {
             return elements;
         }
 
-        public void finish(ModuleManager manager, int level) {
+        public void finish(GuiElementManager manager, int level) {
             for (MGuiElementBase elementBase : elements) {
                 manager.add(elementBase, level);
             }

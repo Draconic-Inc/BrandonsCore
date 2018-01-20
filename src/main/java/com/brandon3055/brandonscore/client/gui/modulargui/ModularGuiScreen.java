@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
 
 import java.io.IOException;
 
@@ -12,7 +13,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     protected int xSize;
     protected int ySize;
-    protected ModuleManager manager = new ModuleManager(this);
+    protected GuiElementManager manager = new GuiElementManager(this);
     protected int zLevel = 0;
 
     public ModularGuiScreen() {
@@ -22,6 +23,27 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     public ModularGuiScreen(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
+        this.mc = Minecraft.getMinecraft();
+        ScaledResolution scaledresolution = new ScaledResolution(mc);
+        this.itemRender = mc.getRenderItem();
+        this.fontRenderer = mc.fontRenderer;
+        this.width = scaledresolution.getScaledWidth();
+        this.height = scaledresolution.getScaledHeight();
+        manager.setWorldAndResolution(mc, width, height);
+    }
+
+    /**
+     * If you need to do anything in init use the reloadGui method, Remember you should no longer be adding elements during init as it may be called more than once.
+     */
+    @Override
+    public final void initGui() {
+        super.initGui();
+        manager.onGuiInit(mc, width, height);
+        reloadGui();
+    }
+
+    public void reloadGui() {
+        manager.reloadElements();
     }
 
     //region IModularGui
@@ -51,22 +73,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
         return (this.height - this.ySize) / 2;
     }
 
-    @Override
-    public int screenWidth() {
-        return width;
-    }
-
-    @Override
-    public int screenHeight() {
-        return height;
-    }
-
-    @Override
-    public Minecraft getMinecraft() {
-        return mc;
-    }
-
-    public ModuleManager getManager() {
+    public GuiElementManager getManager() {
         return manager;
     }
 
@@ -144,19 +151,13 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        renderBackgroundLayer(mouseX, mouseY, partialTicks);
+        renderElements(mouseX, mouseY, partialTicks);
         super.drawScreen(mouseX, mouseY, partialTicks);
-        renderForegroundLayer(mouseX, mouseY, partialTicks);
         renderOverlayLayer(mouseX, mouseY, partialTicks);
     }
 
-
-    public void renderBackgroundLayer(int mouseX, int mouseY, float partialTicks) {
-        manager.renderBackgroundLayer(mc, mouseX, mouseY, partialTicks);
-    }
-
-    public void renderForegroundLayer(int mouseX, int mouseY, float partialTicks) {
-        manager.renderForegroundLayer(mc, mouseX, mouseY, partialTicks);
+    public void renderElements(int mouseX, int mouseY, float partialTicks) {
+        manager.renderElements(mc, mouseX, mouseY, partialTicks);
     }
 
     public void renderOverlayLayer(int mouseX, int mouseY, float partialTicks) {

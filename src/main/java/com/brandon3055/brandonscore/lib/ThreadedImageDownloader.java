@@ -143,7 +143,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
             }
 
             TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedimage, flag, flag1);
-            LogHelperBC.info(dlLocation);
+            LogHelperBC.warn("Unable to load resource from URL: " + resourceUrl);
             if (dlLocation != null) {
                 dlLocation.width = bufferedimage.getWidth();
                 dlLocation.height = bufferedimage.getHeight();

@@ -1,11 +1,11 @@
 package com.brandon3055.brandonscore.client.gui.config;
 
 import com.brandon3055.brandonscore.client.gui.ButtonColourRect;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiScreen;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.EnumAlignment;
-import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.MGuiLabel;
-import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.MGuiList;
-import com.brandon3055.brandonscore.client.gui.modulargui.modularelements.MGuiListEntryWrapper;
+import com.brandon3055.brandonscore.client.gui.modulargui_old.ModularGuiScreen;
+import com.brandon3055.brandonscore.client.gui.modulargui_old.lib.EnumAlignment;
+import com.brandon3055.brandonscore.client.gui.modulargui_old.modularelements.MGuiLabel;
+import com.brandon3055.brandonscore.client.gui.modulargui_old.modularelements.MGuiList;
+import com.brandon3055.brandonscore.client.gui.modulargui_old.modularelements.MGuiListEntryWrapper;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import net.minecraft.client.gui.GuiButton;
