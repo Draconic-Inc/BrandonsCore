@@ -78,4 +78,8 @@ public class CommonProxy {
     public void registerModFeatures(String modid) {
         ModFeatureParser.registerMod(modid);
     }
+
+    public void runSidedProcess(IProcess process) {
+        ProcessHandler.addProcess(process);
+    }
 }

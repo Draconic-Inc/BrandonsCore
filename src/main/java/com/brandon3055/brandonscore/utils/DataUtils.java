@@ -21,6 +21,14 @@ public class DataUtils {
         return lowercaseArray;
     }
 
+    public static String[] arrayToString(Object[] array) {
+        String[] lowercaseArray = new String[array.length];
+        for (int i = 0; i < array.length; i++) {
+            lowercaseArray[i] = String.valueOf(array[i]);
+        }
+        return lowercaseArray;
+    }
+
     /**
      * Shift all objects in an array by the number of places specified.
      * <p/>
@@ -52,7 +60,7 @@ public class DataUtils {
     /**
      * Counts elements in the array that conform to the Function check.
      *
-     * @param array The array to check.
+     * @param iterable The iterable to check.
      * @param check The Function to apply to each element.
      * @param <T>   What we are dealing with.
      * @return The count.

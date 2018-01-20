@@ -96,4 +96,9 @@ public class ClientProxy extends CommonProxy {
         super.registerModFeatures(modid);
         ModFeatureParser.registerModRendering(modid);
     }
+
+    @Override
+    public void runSidedProcess(IProcess process) {
+        ProcessHandlerClient.addProcess(process);
+    }
 }
