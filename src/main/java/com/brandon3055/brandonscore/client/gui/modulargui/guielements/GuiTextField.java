@@ -12,7 +12,9 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 
+import java.io.IOException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Created by brandon3055 on 10/09/2016.
@@ -36,6 +38,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
     private Predicate<String> validator = s -> true;
     public int fillColour = 0xFF5f5f60;
     public int borderColour = 0xFF000000;
+    private Supplier<String> linkedValue;
 
     public GuiTextField() {}
 
@@ -67,6 +70,14 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
             this.setCursorPositionEnd();
         }
+        return this;
+    }
+
+    /**
+     * The value to which this field is linked. If the values returned by this supplier is not the same as the text field the text field will automatically get updated.
+     */
+    public GuiTextField setLinkedValue(Supplier<String> linkedValue) {
+        this.linkedValue = linkedValue;
         return this;
     }
 
@@ -372,7 +383,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
+    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         boolean mouseOver = isMouseOver(mouseX, mouseY);
 
         if (this.canLoseFocus) {
@@ -393,7 +404,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
             setText("");
         }
 
-        return mouseOver;
+        return mouseOver || super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -423,7 +434,6 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
-//                j1 = fontRenderer.drawStringWithShadow(s1, (float)l, (float)i1, i);
             j1 = drawString(fontRenderer, s1, (float) l, (float) i1, i, true);
         }
 
@@ -431,7 +441,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
         int k1 = j1;
 
         if (!flag) {
-            k1 = j > 0 ? l + xPos() : l;
+            k1 = j > 0 ? l + fontRenderer.getStringWidth(s) : l;
         }
         else if (flag2) {
             k1 = j1 - 1;
@@ -599,5 +609,19 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
     public void setColours(int fillColour, int borderColour) {
         this.fillColour = fillColour;
         this.borderColour = borderColour;
+    }
+
+    @Override
+    public boolean onUpdate() {
+        if (super.onUpdate()) {
+            return true;
+        }
+
+        if (linkedValue != null && !linkedValue.get().equals(getText())) {
+            setText(linkedValue.get());
+            return true;
+        }
+
+        return false;
     }
 }

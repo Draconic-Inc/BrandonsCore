@@ -89,7 +89,7 @@ public class PartBuilderEntity extends IPartBuilder {
         int xOffset;
         int yOffset;
         try {
-            size = Integer.parseInt(Part.readOption(ops, "size", "64"));
+            size = Part.parseSize(elementRight - elementLeft, Part.readOption(ops, "size", "64"));
             xOffset = Integer.parseInt(Part.readOption(ops, "x_offset", "0"));
             yOffset = Integer.parseInt(Part.readOption(ops, "y_offset", "0"));
         }

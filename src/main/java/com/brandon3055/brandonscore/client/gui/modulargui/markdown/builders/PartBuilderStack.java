@@ -68,7 +68,7 @@ public class PartBuilderStack extends IPartBuilder {
 
         int size;
         try {
-            size = Integer.parseInt(Part.readOption(ops, "size", "18"));
+            size = Part.parseSize(elementRight - elementLeft, Part.readOption(ops, "size", "18"));
         }
         catch (NumberFormatException e) {
             return stackPatMatch.replaceFirst("[Broken Stack. Invalid size value! Must be an integer number]");

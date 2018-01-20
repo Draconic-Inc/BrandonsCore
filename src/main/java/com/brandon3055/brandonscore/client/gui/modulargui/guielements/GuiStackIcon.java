@@ -45,10 +45,18 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+
         if (drawHoverHighlight && isMouseOver(mouseX, mouseY)) {
             drawColouredRect(xPos(), yPos(), xSize(), ySize(), -2130706433);
         }
+
         GlStateManager.pushMatrix();
+        renderStack(minecraft);
+        GlStateManager.popMatrix();
+    }
+
+
+    private void renderStack(Minecraft minecraft) {
         RenderHelper.enableGUIStandardItemLighting();
 
         double scaledWidth = xSize() / 18D;
@@ -58,17 +66,28 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
         GlStateManager.scale(scaledWidth, scaledHeight, 1);
         minecraft.getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
 
+        if (getStack().getItem().showDurabilityBar(getStack())) {
+            double health = getStack().getItem().getDurabilityForDisplay(getStack());
+            int rgbfordisplay = getStack().getItem().getRGBDurabilityForDisplay(getStack());
+            int i = Math.round(13.0F - (float) health * 13.0F);
+
+            GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
+            zOffset += 45;
+            drawColouredRect(2, 13, 13, 2, 0xFF000000);
+            drawColouredRect(2, 13, i, 1, rgbfordisplay | 0xFF000000);
+            zOffset -= 45;
+            GlStateManager.translate(0, 0, (getRenderZLevel() - 80));
+        }
+
         if (drawCount && getStack().getCount() > 1) {
             String s = getStack().getCount() + "";
             GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
-            zOffset = 45;
-            drawString(fontRenderer, s, xSize() - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
-            zOffset = 0;
+            zOffset += 45;
+            drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
+            zOffset -= 45;
         }
 
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.popMatrix();
-
     }
 
     @Override
@@ -91,6 +110,7 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
      * Recommend {@link GuiSlotRender} or {@link GuiBorderedRect}<br>
      * But really you can use any element base including buttons which will make the element function as a button.<br>
      * When you add a background element its size and position will automatically be adjusted to match the stack icon.
+     *
      * @param background a MGuiElementBase object.
      * @return the MGuiStackIcon
      */
@@ -116,6 +136,7 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
 
     /**
      * Will render the normal item tool tip when you hover over the stack.
+     *
      * @return the MGuiStackIcon
      */
     public GuiStackIcon setToolTip(boolean drawToolTip) {
@@ -146,13 +167,23 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
         return stack;
     }
 
+    public GuiStackIcon setToolTipOverride(List<String> toolTipOverride) {
+        this.toolTipOverride = toolTipOverride;
+        return this;
+    }
+
     public GuiStackIcon setDrawHoverHighlight(boolean drawHoverHighlight) {
         this.drawHoverHighlight = drawHoverHighlight;
         return this;
     }
 
     public GuiStackIcon addSlotBackground() {
-        addChild(new GuiSlotRender().setPos(this).setSizeModifiers((guiSlotRender, integer) -> GuiStackIcon.this.xSize(), (guiSlotRender, integer) -> GuiStackIcon.this.ySize()));
+        setBackground(null);
+        addChild(background = new GuiSlotRender().setPos(this).setSizeModifiers((guiSlotRender, integer) -> GuiStackIcon.this.xSize(), (guiSlotRender, integer) -> GuiStackIcon.this.ySize()));
         return this;
+    }
+
+    public MGuiElementBase getBackground() {
+        return background;
     }
 }

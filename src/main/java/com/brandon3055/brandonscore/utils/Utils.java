@@ -7,8 +7,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.text.DecimalFormat;
 
 /**
@@ -188,6 +193,26 @@ public class Utils {
         return parseInt(s, true);
     }
 
+    public static double parseDouble(String s, boolean catchException) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+
+        try {
+            return Double.parseDouble(s);
+        }
+        catch (Exception e) {
+            if (catchException) {
+                return 0;
+            }
+            throw e;
+        }
+    }
+
+    public static double parseDouble(String s) {
+        return parseDouble(s, true);
+    }
+
     public static int parseInt(String s, boolean catchException) {
         if (s == null || s.length() == 0) {
             return 0;
@@ -203,6 +228,7 @@ public class Utils {
             throw e;
         }
     }
+
 
     public static int parseHex(String s) {
         return parseHex(s, true);
@@ -300,6 +326,28 @@ public class Utils {
         }
         else {
             return input.substring(0, length) + trimExtension;
+        }
+    }
+
+    public static String getClipboardString() {
+        try {
+            Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+            if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                return (String) transferable.getTransferData(DataFlavor.stringFlavor);
+            }
+        }
+        catch (Exception var1) {}
+
+        return "";
+    }
+
+    public static void setClipboardString(String copyText) {
+        if (!StringUtils.isEmpty(copyText)) {
+            try {
+                StringSelection stringselection = new StringSelection(copyText);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
+            }
+            catch (Exception var2) {}
         }
     }
 }

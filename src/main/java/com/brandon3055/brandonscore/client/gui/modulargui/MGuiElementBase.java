@@ -7,7 +7,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -97,6 +96,11 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     protected boolean drawHoverText = false;
     protected boolean capturesClicks = false;
     protected boolean frameAnimation = false;
+    /**
+     * When true child elements will be disabled when they are removed.
+     * This is useful for edge cases where the 1 tick delay in removing an element can cause issues.
+     */
+    protected boolean disableOnRemove = false;
     protected boolean animatedTranslating = false;
     protected List<MGuiElementBase> toRemove = new ArrayList<>();
     protected List<MGuiElementBase> boundSizeElements = new ArrayList<>();
@@ -300,6 +304,8 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     /**
      * This schedules a child element to be removed at the start of the next update tick.
      * The reason this works this way is to avoid concurrent modification exceptions.
+     * If this 1 tick delay is an issue then you can set disableOnRemove to true for the parent element
+     * which disables all child elements the instant they are scheduled for removal by this method.
      *
      * @param child the child element to remove.
      * @return the element that will be removed or null if the element was not a child of this element.
@@ -307,6 +313,9 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     public <C extends MGuiElementBase> C removeChild(C child) {
         if (child != null && childElements.contains(child)) {
             toRemove.add(child);
+            if (disableOnRemove) {
+                child.setEnabled(false);
+            }
             return child;
         }
         return null;
@@ -1246,6 +1255,13 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         return (E) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public E setPosAndSize(int xPos, int yPos, int xSize, int ySize) {
+        setPos(xPos, yPos);
+        setSize(xSize, ySize);
+        return (E) this;
+    }
+
     /**
      * @return the size and pos of this element as a {@link Rectangle}
      */
@@ -1344,11 +1360,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     public GuiScreen getScreen() {
         return modularGui.getScreen();
-    }
-
-    @Override
-    public int hashCode() {
-        return ("[" + id + "-" + xPos() + "-" + yPos() + "-" + xSize() + "-" + ySize() + "" + displayZLevel + "]").hashCode();
     }
 
     /**
@@ -2013,6 +2024,37 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         vertexbuffer.pos(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
         vertexbuffer.pos(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
         vertexbuffer.pos(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+        tessellator.draw();
+        GlStateManager.shadeModel(GL11.GL_FLAT);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
+    public void drawMultiPassGradientRect(double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
+        double zLevel = getRenderZLevel();
+        float alpha1 = ((colour1 >> 24 & 255) / 255.0F);
+        float red1 = (float) (colour1 >> 16 & 255) / 255.0F;
+        float green1 = (float) (colour1 >> 8 & 255) / 255.0F;
+        float blue1 = (float) (colour1 & 255) / 255.0F;
+        float alpha2 = ((colour2 >> 24 & 255) / 255.0F);
+        float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
+        float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
+        float blue2 = (float) (colour2 & 255) / 255.0F;
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.shadeModel(GL11.GL_SMOOTH);
+        Tessellator tessellator = Tessellator.getInstance();
+        VertexBuffer vertexbuffer = tessellator.getBuffer();
+        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        for (int i = 0; i < layers; i++) {
+            vertexbuffer.pos(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
+            vertexbuffer.pos(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
+            vertexbuffer.pos(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+            vertexbuffer.pos(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+        }
         tessellator.draw();
         GlStateManager.shadeModel(GL11.GL_FLAT);
         GlStateManager.disableBlend();

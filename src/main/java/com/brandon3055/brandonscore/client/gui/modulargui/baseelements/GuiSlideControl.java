@@ -11,11 +11,13 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
 import com.brandon3055.brandonscore.lib.functions.TriPredicate;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.client.Minecraft;
+import org.lwjgl.input.Mouse;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl.SliderRotation.HORIZONTAL;
 
@@ -35,6 +37,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     private List<TriPredicate<GuiSlideControl, Integer, Integer>> scrollChecks = new ArrayList<>();
 
     public IGuiEventListener listener;
+    public Consumer<GuiSlideControl> inputListener;
 
     protected int sliderSize = 10;
     protected int mouseDragOffset = 0;
@@ -98,6 +101,18 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         return this;
     }
 
+    /**
+     * Basically the same as setListener except it uses a convenient Consumer
+     */
+    public GuiSlideControl setInputListener(Consumer<GuiSlideControl> inputListener) {
+        this.inputListener = inputListener;
+        return this;
+    }
+
+    public Consumer<GuiSlideControl> getInputListener() {
+        return inputListener;
+    }
+
     @Nullable
     @Override
     public IGuiEventListener getListener() {
@@ -120,6 +135,9 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         //If the mouse is actually over this element then we want to
         if (isMouseOver(mouseX, mouseY)) {
             updateRawPos(position + (scrollDirection > 0 ? -scrollSpeed : scrollSpeed));
+            if (inputListener != null) {
+                inputListener.accept(this);
+            }
             return true;
         }
         else if (parentScroll) {
@@ -134,6 +152,9 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
             }
 
             updateRawPos(position + (scrollDirection > 0 ? -scrollSpeed : scrollSpeed));
+            if (inputListener != null) {
+                inputListener.accept(this);
+            }
             return true;
         }
 
@@ -174,12 +195,18 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
                     double maxXOffset = getInsetRect().width - sliderElement.xSize();
                     double xOffset = sliderElement.xPos() - getInsetRect().x;
                     updateRawPos(xOffset / maxXOffset);
+                    if (inputListener != null) {
+                        inputListener.accept(this);
+                    }
                 }
                 else {
                     sliderElement.setYPos(mouseY - (sliderElement.ySize() / 2));
                     double maxYOffset = getInsetRect().height - sliderElement.ySize();
                     double yOffset = sliderElement.yPos() - getInsetRect().y;
                     updateRawPos(yOffset / maxYOffset);
+                    if (inputListener != null) {
+                        inputListener.accept(this);
+                    }
                 }
             }
             else {
@@ -195,9 +222,46 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
 
     @Override
     public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        double doubleMouseX = (double) Mouse.getEventX() * (double) modularGui.xSize() / (double) this.mc.displayWidth;
+        double doubleMouseY = (double) modularGui.ySize() - (double) Mouse.getEventY() * modularGui.ySize() / (double) this.mc.displayHeight - 1;
+
+//        if (isDragging || isMiddleClickDragging) { //TODO figure out why this is borked
+//            if (distFromElement(mouseX, mouseY) > dragOutResetThreshold && isDragging) {
+//                updateRawPos(prevPosition);
+//                return true;
+//            }
+//
+//            if (rotation == HORIZONTAL) {
+//                if (isMiddleClickDragging) {
+//                    sliderElement.setXPos(dragStartElementX - (int) ((mouseX - dragStartX) * scrollSpeed * 2));
+//                }
+//                else {
+//                    sliderElement.setXPos((int) (doubleMouseX - mouseDragOffset));
+//                }
+//                double maxXOffset = getInsetRect().width - sliderElement.xSize();
+//                double xOffset = (doubleMouseX - mouseDragOffset) - getInsetRect().x;//sliderElement.xPos() - getInsetRect().x;
+//                updateRawPos(xOffset / maxXOffset);
+//            }
+//            else {
+//                if (isMiddleClickDragging) {
+//                    sliderElement.setYPos(dragStartElementY - (int) ((doubleMouseY - dragStartY) * scrollSpeed * 2));
+//                }
+//                else {
+//                    sliderElement.setYPos((int) (doubleMouseY - mouseDragOffset));
+//                }
+//                double maxYOffset = getInsetRect().height - sliderElement.ySize();
+//                double yOffset = (doubleMouseY - mouseDragOffset) - getInsetRect().y;//sliderElement.yPos() - getInsetRect().y;
+//                updateRawPos(yOffset / maxYOffset);
+//            }
+//            return !isMiddleClickDragging;
+//        }
+
         if (isDragging || isMiddleClickDragging) {
             if (distFromElement(mouseX, mouseY) > dragOutResetThreshold && isDragging) {
                 updateRawPos(prevPosition);
+                if (inputListener != null) {
+                    inputListener.accept(this);
+                }
                 return true;
             }
 
@@ -211,6 +275,9 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
                 double maxXOffset = getInsetRect().width - sliderElement.xSize();
                 double xOffset = sliderElement.xPos() - getInsetRect().x;
                 updateRawPos(xOffset / maxXOffset);
+                if (inputListener != null) {
+                    inputListener.accept(this);
+                }
             }
             else {
                 if (isMiddleClickDragging) {
@@ -222,6 +289,9 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
                 double maxYOffset = getInsetRect().height - sliderElement.ySize();
                 double yOffset = sliderElement.yPos() - getInsetRect().y;
                 updateRawPos(yOffset / maxYOffset);
+                if (inputListener != null) {
+                    inputListener.accept(this);
+                }
             }
             return !isMiddleClickDragging;
         }
@@ -235,6 +305,9 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
             isMiddleClickDragging = false;
             if (listener != null) {
                 listener.onMGuiEvent(new SliderMoveEvent(this, getPosition(), getPosition(), false), this);
+            }
+            if (inputListener != null) {
+                inputListener.accept(this);
             }
         }
         return super.mouseReleased(mouseX, mouseY, state);
@@ -263,7 +336,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      * @return the scroll position in its raw form which will always be a value between 0 and 1.
      */
     public double getRawPos() {
-        return position;
+        return Double.isNaN(position) ? 0 : position;
     }
 
     /**
@@ -277,8 +350,10 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         double previousPos = getPosition();
         this.position = MathHelper.clip(position, 0, 1);
         updateSliderPos();
-        if (listener != null && fireEvent) {
-            listener.onMGuiEvent(new SliderMoveEvent(this, getPosition(), previousPos, isDragging), this);
+        if (fireEvent) {
+            if (listener != null) {
+                listener.onMGuiEvent(new SliderMoveEvent(this, getPosition(), previousPos, isDragging), this);
+            }
         }
         return this;
     }
@@ -295,8 +370,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      */
     public GuiSlideControl updatePos(double position, boolean fireEvent) {
         double value = MathHelper.map(position, posRangeMin, posRangeMax, 0, 1);
-//        LogHelperBC.dev("NewPos: " + value + ", PosIn: " + position + ", Range: " + posRangeMin + " - > " + posRangeMax + ", Travel:" + (posRangeMax - posRangeMin));
-        updateRawPos(value, fireEvent);
+        updateRawPos(Double.isNaN(value) ? 0 : value, fireEvent);
         return this;
     }
 

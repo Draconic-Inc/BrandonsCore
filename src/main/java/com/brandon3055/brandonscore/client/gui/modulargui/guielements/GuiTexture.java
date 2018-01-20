@@ -23,8 +23,6 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
 
     public ResourceLocation texture;
 
-
-
     public GuiTexture(int xPos, int yPos, int textureX, int textureY, int xSize, int ySize, ResourceLocation texture) {
         super(xPos, yPos, xSize, ySize);
         this.texU = textureX;

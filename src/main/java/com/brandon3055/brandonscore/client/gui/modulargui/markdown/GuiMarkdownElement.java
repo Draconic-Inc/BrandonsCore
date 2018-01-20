@@ -4,7 +4,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders.*;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Profiler;
 import net.minecraft.item.ItemStack;
 
@@ -163,8 +162,10 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
     }
 
     public GuiMarkdownElement parseMarkdown(LinkedList<String> markdownLines) {
+        currentAlign = GuiAlign.LEFT;
+
         profiler.startSection("Parsing Markdown");
-        LogHelperBC.startTimer("Parsing Markdown " + markdownLines.size() + " Lines");
+//        LogHelperBC.startTimer("Parsing Markdown " + markdownLines.size() + " Lines");
         this.mlCache = new LinkedList<>(markdownLines);
         markdownLines = new LinkedList<>(markdownLines);
         int yPos = getInsetRect().y;
@@ -181,8 +182,8 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
             profiler.endSection();
         }
 
-        setYSize(yPos - yPos());
-        LogHelperBC.stopTimer();
+        setYSize((yPos - yPos()) + getInsets().bottom);
+//        LogHelperBC.stopTimer();
         profiler.endSection();
         profiler.finish();
 

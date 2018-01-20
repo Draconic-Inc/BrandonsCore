@@ -135,14 +135,7 @@ public class PartContainerTable extends PartContainer {
         if (options.toLowerCase().contains("width")) {
             try {
                 String widthString = Part.readOption(options, "width", "-1px");
-                int w;
-                if (widthString.endsWith("%")) {
-                    w = (int) ((Double.parseDouble(widthString.replace("%", "")) / 100D) * xSize());
-                }
-                else if (widthString.endsWith("px")) {
-                    w = Integer.parseInt(widthString.replace("px", ""));
-                }
-                else { throw new NumberFormatException(); }
+                int w = Part.parseSize(xSize(), widthString);
                 tableWidth = MathHelper.clip(w, 64, xSize());
             }
             catch (NumberFormatException e) {
@@ -199,9 +192,9 @@ public class PartContainerTable extends PartContainer {
 
         String[] divs = line.split("\\|");
 
-        LogHelperBC.dev(line + " Divs: " + divs.length);
+//        LogHelperBC.dev(line + " Divs: " + divs.length);
         for (String div : divs) {
-            LogHelperBC.dev("D: " + div);
+//            LogHelperBC.dev("D: " + div);
             boolean leftColon = false;
             div = div.trim();
             if (div.length() == 0) {
@@ -217,7 +210,7 @@ public class PartContainerTable extends PartContainer {
             }
 
             if (div.startsWith("n")) {
-                LogHelperBC.dev("Fixed: "+div);
+//                LogHelperBC.dev("Fixed: "+div);
                 boolean rightBinding = false;
                 if (div.endsWith(":")) {
                     div = div.substring(0, div.length() - 1);
@@ -233,7 +226,7 @@ public class PartContainerTable extends PartContainer {
                 }
             }
             else {
-                LogHelperBC.dev(div);
+//                LogHelperBC.dev(div);
                 int index = 0;
                 while (index < div.length()) {
                     char charAt = div.charAt(index);
@@ -470,7 +463,7 @@ public class PartContainerTable extends PartContainer {
 
                     part.lastXPos = xPos + alignOffset;
                     part.lastYPos = renderYPos;
-                    part.render(fontRenderer, xPos + alignOffset, renderYPos + yOffset, mouseX, mouseY, collatorProvider.getColour(), shadow, partialTicks);
+                    part.render(fontRenderer, xPos + alignOffset, renderYPos + yOffset, mouseX, mouseY, colourProvider.getColour(), shadow, partialTicks);
 //                    drawBorderedRect(xPos + alignOffset, renderYPos, part.width, part.height, 1, 0, 0xFF00FFFF);
                     prevHeight = Math.max(part.height, prevHeight);
                     xPos += part.width;
@@ -482,7 +475,12 @@ public class PartContainerTable extends PartContainer {
                 colLeft += data.colWidth;
                 if (renderCells) {
                     colLeft += 4;
-                    drawColouredRect(colLeft - 2, yPos(), 1, ySize(), cellColour);
+                    if (colIndex + 1 == rowCells.size()) {
+                        drawColouredRect(tableXPos + tableWidth - 1, yPos(), 1, ySize(), cellColour);
+                    }
+                    else {
+                        drawColouredRect(colLeft - 2, yPos(), 1, ySize(), cellColour);
+                    }
                 }
 
                 renderYPos = rowYPos;

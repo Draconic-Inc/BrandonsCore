@@ -3,13 +3,12 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders;
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
-import com.brandon3055.brandonscore.lib.DLRSCache;
-import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.IPartBuilder;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MouseIntractable;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
-
+import com.brandon3055.brandonscore.lib.DLRSCache;
+import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.renderer.GlStateManager;
 
@@ -99,7 +98,7 @@ public class PartBuilderImage extends IPartBuilder {
         int padding;
 
         try {
-            padding = Integer.parseInt(Part.readOption(ops, "padding", "1"));
+            padding = Integer.parseInt(Part.readOption(ops, "padding", "0"));
             leftPad = Integer.parseInt(Part.readOption(ops, "left_pad", String.valueOf(padding)));
             rightPad = Integer.parseInt(Part.readOption(ops, "right_pad", String.valueOf(padding)));
             topPad = Integer.parseInt(Part.readOption(ops, "top_pad", String.valueOf(padding)));
@@ -114,29 +113,19 @@ public class PartBuilderImage extends IPartBuilder {
         try {
             String widthString = Part.readOption(ops, "width", "-1px");
             String heightString = Part.readOption(ops, "height", "-1px");
-            int w;
-            if (widthString.endsWith("%")) {
-                w = (int) ((Double.parseDouble(widthString.replace("%", "")) / 100D) * container.xSize());
-            }
-            else if (widthString.endsWith("px")) {
-                w = Integer.parseInt(widthString.replace("px", ""));
-            }
-            else { throw new NumberFormatException(); }
-            int h;
+            int w = Part.parseSize(elementRight - elementLeft, widthString);
+            int h = Part.parseSize(elementRight - elementLeft, heightString);
             int maxY = container.getParent() != null ? container.getParent().ySize() : 255;
-            if (heightString.endsWith("%")) {
-                h = (int) ((Double.parseDouble(heightString.replace("%", "")) / 100D) * maxY);
-            }
-            else if (heightString.endsWith("px")) {
-                h = Integer.parseInt(heightString.replace("px", ""));
-            }
-            else { throw new NumberFormatException(); }
+
             width = MathHelper.clip(w, -1, container.xSize());
             height = MathHelper.clip(h, -1, maxY);
         }
         catch (NumberFormatException e) {
             return linkMatch.replaceFirst("[Broken Image. Invalid width or height value! Must be an integer number]");
         }
+
+        int addWidth = leftPad + rightPad;
+        int addHeight = topPad + bottomPad;
 
         String hover = Part.readOption(ops, "hover", "");
 
@@ -200,26 +189,28 @@ public class PartBuilderImage extends IPartBuilder {
         mi.parts.add(part);
 
         //region Calculate width and height
-        if (width == -1 && height == -1) width = 28;
+        if (width == -1 && height == -1) {
+            width = 28;
+        }
         if (width != -1) {
-            part.width = width;
+            part.width = width + addWidth;
             if (height == -1) {
                 if (resourceLocation.sizeSet) {
-                    part.height = (int) (((double) resourceLocation.height / (double) resourceLocation.width) * width);
+                    part.height = (int) (((double) resourceLocation.height / (double) resourceLocation.width) * width) + addHeight;
                 }
                 else {
-                    part.height = width;
+                    part.height = width + addHeight;
                 }
             }
         }
         if (height != -1) {
-            part.height = height;
+            part.height = height + addHeight;
             if (width == -1) {
                 if (resourceLocation.sizeSet) {
-                    part.width = (int) (((double) resourceLocation.width / (double) resourceLocation.height) * height);
+                    part.width = (int) (((double) resourceLocation.width / (double) resourceLocation.height) * height) + addWidth;
                 }
                 else {
-                    part.width = height;
+                    part.width = height + addWidth;
                 }
             }
         }

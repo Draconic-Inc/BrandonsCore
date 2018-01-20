@@ -33,6 +33,7 @@ public class ProcessHandlerClient {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
+            sync();
 
             Iterator<IProcess> i = processes.iterator();
             while (i.hasNext()) {
@@ -84,5 +85,27 @@ public class ProcessHandlerClient {
      */
     public static void addPersistentProcess(IProcess process) {
         newPersistentProcesses.add(process);
+    }
+
+    private static final List<Runnable> syncTasks = new ArrayList<>();
+
+    public static void sync() {
+        if (!syncTasks.isEmpty()) {
+            List<Runnable> tasks = new ArrayList<>();
+            synchronized (syncTasks) {
+                tasks.addAll(syncTasks);
+                syncTasks.removeAll(tasks);
+            }
+
+            for (Runnable task : tasks) {
+                task.run();
+            }
+        }
+    }
+
+    public static void syncTask(Runnable task) {
+        synchronized (syncTasks) {
+            syncTasks.add(task);
+        }
     }
 }

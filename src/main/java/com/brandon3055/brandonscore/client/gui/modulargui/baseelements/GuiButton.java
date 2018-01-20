@@ -1,12 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
@@ -25,6 +22,7 @@ import java.util.function.Supplier;
 public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDispatcher {
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     protected IGuiEventListener listener = null;
+    protected IButtonListener buttonListener = null;
     protected boolean trim = true;
     protected boolean wrap = false;
     protected boolean disabled = false;
@@ -125,6 +123,11 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     @Override
     public GuiButton setListener(IGuiEventListener listener) {
         this.listener = listener;
+        return this;
+    }
+
+    public GuiButton setButtonListener(IButtonListener buttonListener) {
+        this.buttonListener = buttonListener;
         return this;
     }
 
@@ -423,7 +426,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
      */
     public void onPressed(int mouseX, int mouseY, int mouseButton) {
         if (toggleMode) {
-            toggleActiveState = !toggleActiveState;
+            toggleActiveState = !getToggleState();
         }
 
         if (playClick) {
@@ -432,6 +435,10 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
 
         if (listener != null) {
             listener.onMGuiEvent(new GuiEvent.ButtonEvent(this), this);
+        }
+
+        if (buttonListener != null) {
+            buttonListener.onClick(this, mouseButton);
         }
     }
 
@@ -554,7 +561,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {
         bindTexture(BUTTON_TEXTURES);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && toggleActiveState);
+        boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         int texVIndex = getRenderState(hovered);
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);

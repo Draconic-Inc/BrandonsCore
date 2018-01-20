@@ -201,6 +201,13 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
         return this;
     }
 
+    public GuiSelectDialog<T> clearItems() {
+        sectionItems.clear();
+        sectionElements.clear();
+        reloadSelectionList();
+        return this;
+    }
+
     /**
      * Convenience method. Adds an item with a null renderer.
      * @see #addItem(Object, MGuiElementBase)

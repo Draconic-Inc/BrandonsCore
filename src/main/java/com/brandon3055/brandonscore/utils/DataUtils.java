@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.util.ArrayUtils;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +53,7 @@ public class DataUtils {
     /**
      * Counts elements in the array that conform to the Function check.
      *
-     * @param array The array to check.
+     * @param iterable The iterable to check.
      * @param check The Function to apply to each element.
      * @param <T>   What we are dealing with.
      * @return The count.
@@ -103,6 +104,33 @@ public class DataUtils {
             }
         }
         return null;
+    }
+
+    public static <E> E firstMatch(Iterable<E> elements, Predicate<E> matcher, E defaultValue) {
+        for (E element : elements) {
+            if (matcher.test(element)) {
+                return element;
+            }
+        }
+        return defaultValue;
+    }
+
+    public static <E> E firstMatch(E[] elements, Predicate<E> matcher) {
+        for (E element : elements) {
+            if (matcher.test(element)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public static <E> E firstMatch(E[] elements, Predicate<E> matcher, E defaultValue) {
+        for (E element : elements) {
+            if (matcher.test(element)) {
+                return element;
+            }
+        }
+        return defaultValue;
     }
 
     /**
@@ -229,6 +257,45 @@ public class DataUtils {
             result[i] = list.get(i);
         }
         return result;
+    }
+
+    public static int fotmatColour(TextFormatting formatting) {
+        switch (formatting) {
+            case BLACK:
+                return 0x000000;
+            case DARK_BLUE:
+                return 0x0000AA;
+            case DARK_GREEN:
+                return 0x00AA00;
+            case DARK_AQUA:
+                return 0x00AAAA;
+            case DARK_RED:
+                return 0xAA0000;
+            case DARK_PURPLE:
+                return 0xAA00AA;
+            case GOLD:
+                return 0xFFAA00;
+            case GRAY:
+                return 0xAAAAAA;
+            case DARK_GRAY:
+                return 0x555555;
+            case BLUE:
+                return 0x5555FF;
+            case GREEN:
+                return 0x55FF55;
+            case AQUA:
+                return 0x55FFFF;
+            case RED:
+                return 0xFF5555;
+            case LIGHT_PURPLE:
+                return 0xFF55FF;
+            case YELLOW:
+                return 0xFFFF55;
+            case WHITE:
+                return 0xFFFFFF;
+            default:
+                return 0xFFFFFF;
+        }
     }
 
     //endregion

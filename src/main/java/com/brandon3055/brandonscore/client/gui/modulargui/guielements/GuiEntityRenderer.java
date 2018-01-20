@@ -40,6 +40,8 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
     private boolean rotationLocked = false;
     private boolean trackMouse = false;
     private boolean drawName = false;
+    public boolean silentErrors = false;
+    public boolean force2dSize = false;
 
     public GuiEntityRenderer() {
     }
@@ -54,6 +56,14 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
 
     public GuiEntityRenderer setEntity(Entity entity) {
         this.entity = entity;
+        if (this.entity == null) {
+            if (!silentErrors) {
+                LogHelperBC.dev("GuiEntityRenderer#setEntity: Invalid Entity - " + entityName);
+            }
+            invalidEntity = true;
+            return this;
+        }
+
         this.entityName = EntityList.getKey(entity);
         invalidEntity = false;
 
@@ -70,7 +80,9 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
         invalidEntity = false;
 
         if (this.entity == null) {
-            LogHelperBC.dev("GuiEntityRenderer#setEntity: Invalid Entity - " + entityName);
+            if (!silentErrors) {
+                LogHelperBC.dev("GuiEntityRenderer#setEntity: Invalid Entity - " + entityName);
+            }
             invalidEntity = true;
         }
 
@@ -81,11 +93,21 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
         return this;
     }
 
+    public GuiEntityRenderer setSilentErrors(boolean silentErrors) {
+        this.silentErrors = silentErrors;
+        return this;
+    }
+
+    public GuiEntityRenderer setForce2dSize(boolean force2dSize) {
+        this.force2dSize = force2dSize;
+        return this;
+    }
+
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
 
-        if (invalidEntity) {
+        if (invalidEntity && !silentErrors) {
             LogHelperBC.dev("GuiEntityRenderer: Invalid Entity - " + entityName);
             return;
         }
@@ -93,7 +115,7 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
         try {
             if (entity != null) {
                 Rectangle rect = getInsetRect();
-                float scale = (float) rect.height / entity.height;
+                float scale = (float) (force2dSize ? (Math.min(rect.height / entity.height, rect.width / entity.width)) : rect.height / entity.height);
 
                 double zLevel = getRenderZLevel() + 100;
                 double posX = rect.x + (rect.width/ 2D);
@@ -106,34 +128,6 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
                 else {
                     drawEntityOnScreen(posX, rect.y, scale, entity, rotation, zLevel);
                 }
-//                if (entity instanceof EntityLivingBase || entity instanceof EntityMinecart) {
-////                    LogHelperBC.dev("GuiEntityRenderer: Should Render - " + entityName);
-//                    Entity ent = entity;
-//                    GlStateManager.enableColorMaterial();
-//                    GlStateManager.pushMatrix();
-//
-//                    float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
-//
-//                    GlStateManager.translate((float) posX, (float) yPos() + (entity.height * scale), zLevel);
-//                    GlStateManager.scale(-scale, scale, scale);
-//                    GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
-//                    GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
-//                    RenderHelper.enableStandardItemLighting();
-//                    GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
-//                    GlStateManager.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-//                    RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
-//                    rendermanager.setPlayerViewY(180.0F);
-//                    rendermanager.setRenderShadow(false);
-//                    rendermanager.doRenderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-//                    rendermanager.setRenderShadow(true);
-//
-//                    GlStateManager.popMatrix();
-//                    RenderHelper.disableStandardItemLighting();
-//                    GlStateManager.disableRescaleNormal();
-//                    GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-//                    GlStateManager.disableTexture2D();
-//                    GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-//                }
             }
         }
         catch (Throwable e) {
@@ -268,7 +262,7 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
     }
 
     public static EntityPlayer createRenderPlayer(World world, String username) {
-        EntityOtherPlayerMP player = new EntityOtherPlayerMP(world, TileEntitySkull.updateGameprofile(new GameProfile(null, username))) {
+        return new EntityOtherPlayerMP(world, TileEntitySkull.updateGameprofile(new GameProfile(null, username))) {
             @Override
             public String getSkinType() {
                 return super.getSkinType();
@@ -297,7 +291,5 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
                 return true;
             }
         };
-
-        return player;
     }
 }

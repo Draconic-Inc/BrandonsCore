@@ -38,7 +38,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
     private static final Pattern shadowPat = Pattern.compile("(?<=[^\\\\]|^)(§shadow)");
 
 //    public int colour = 0xFF3c3f41;
-    public GuiColourProvider<Integer> collatorProvider;
+    public GuiColourProvider<Integer> colourProvider;
     public boolean shadow = false;
     public List<MouseIntractable> mouseIntractables = new ArrayList<>();
     public GuiAlign align;
@@ -50,7 +50,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
     public PartContainer(GuiMarkdownElement element) {
         this.element = element;
         this.align = element.currentAlign;
-        this.collatorProvider = element.colourProvider;
+        this.colourProvider = element.colourProvider;
     }
 
     /**
@@ -186,7 +186,8 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
 
             if (options.contains("colour:")) {
                 try {
-                    collatorProvider = () -> Part.readColour(Part.readOption(options, "colour", "#606060"));
+                    int colour = Part.readColour(Part.readOption(options, "colour", "#606060"));
+                    colourProvider = () -> colour;
                 }
                 catch (NumberFormatException e) {
                     Part.addError(markdownLines, "Invalid Colour Value! Valid formats are 0xRRGGBB or #RRGGBB (hex) or Red,Green,Blue (RGB)", line);
@@ -206,14 +207,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
 
             try {
                 String value = Part.readOption(options, "width", "100%");
-                int v;
-                if (value.endsWith("%")) {
-                    v = (int) ((Double.parseDouble(value.replace("%", "")) / 100D) * xSize());
-                }
-                else if (value.endsWith("px")) {
-                    v = Integer.parseInt(value.replace("px", ""));
-                }
-                else { throw new NumberFormatException(); }
+                int v = Part.parseSize(xSize(), value);
                 ruleWidth = MathHelper.clip(v, 0, xSize());
             }
             catch (NumberFormatException e) {
@@ -358,7 +352,8 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
             if (c.find() && cx.find()) {
                 formatLine = true;
                 String raw = cx.group();
-                collatorProvider = () -> Part.readColour(raw);
+                int colour = Part.readColour(raw);
+                colourProvider = () -> colour;
                 line = c.replaceAll("");
             }
         }
@@ -449,7 +444,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
 
             part.lastXPos = xPos + alignOffset;
             part.lastYPos = yPos;
-            part.render(fontRenderer, xPos + alignOffset, yPos, mouseX, mouseY, collatorProvider.getColour(), shadow, partialTicks);
+            part.render(fontRenderer, xPos + alignOffset, yPos, mouseX, mouseY, colourProvider.getColour(), shadow, partialTicks);
             prevHeight = Math.max(part.height, prevHeight);
             xPos += part.width;
         }

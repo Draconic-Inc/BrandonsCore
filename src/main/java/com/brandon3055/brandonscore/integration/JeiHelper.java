@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.integration;
 
 import mezz.jei.api.IRecipeRegistry;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
+import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeCategory;
 import mezz.jei.api.recipe.IRecipeWrapper;
@@ -71,6 +72,22 @@ public class JeiHelper {
     }
 
     //endregion
+
+    public static ItemStack getPanelItemUnderMouse() {
+        if (!jeiAvailable()) {
+            return null;
+        }
+
+        Object ingredient = BCJEIPlugin.jeiRuntime.getIngredientListOverlay().getIngredientUnderMouse();
+
+        if (ingredient == null) {
+            return null;
+        }
+
+        IIngredientHelper helper = BCJEIPlugin.ingredientRegistry.getIngredientHelper(ingredient);
+
+        return helper.cheatIngredient(ingredient, false);
+    }
 
     //region IRecipeRenderer
 

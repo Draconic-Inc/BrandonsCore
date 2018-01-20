@@ -139,14 +139,16 @@ public class PartBuilderRecipe extends IPartBuilder {
 
         int lastHeight = 0;
         for (IRecipeRenderer renderer : renderers) {
-            if (finalXPos + renderer.getWidth() + spacing > elementRight) {
+            int height = renderer.getHeight() + topPad + bottomPad;
+            int width = renderer.getWidth() + leftPad + rightPad + spacing;
+            if (finalXPos + width > elementRight) {
                 finalXPos = elementLeft;
                 finalYPos = Math.max(nextYLevel, lastHeight);
                 lastHeight = 0;
             }
 
-            if (finalYPos + renderer.getHeight() > lastHeight) {
-                lastHeight = finalYPos + renderer.getHeight();
+            if (finalYPos + height > lastHeight) {
+                lastHeight = finalYPos + height;
             }
 
             Part part = new Part(container) {
@@ -165,8 +167,8 @@ public class PartBuilderRecipe extends IPartBuilder {
                     GlStateManager.color(font.red, font.blue, font.green, 1);
                 }
             };
-            part.width = renderer.getWidth() + leftPad + rightPad + spacing;
-            part.height = renderer.getHeight() + topPad + bottomPad;
+            part.width = width;
+            part.height = height;
             finalXPos += part.width;
 
             parts.add(part);

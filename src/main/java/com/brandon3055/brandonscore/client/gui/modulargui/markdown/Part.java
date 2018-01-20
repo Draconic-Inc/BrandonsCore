@@ -155,4 +155,14 @@ public abstract class Part {
     }
 
     public abstract void render(BCFontRenderer font, int xPos, int yPos, int mouseX, int mouseY, int colour, boolean shadow, float partialTicks);
+
+    public static int parseSize(int maxWidth, String value) throws NumberFormatException {
+        if (value.endsWith("%")) {
+            return (int) ((Double.parseDouble(value.replace("%", "")) / 100D) * maxWidth);
+        }
+        else if (value.endsWith("px") || Utils.validInteger(value)) {
+            return Integer.parseInt(value.replace("px", ""));
+        }
+        else { throw new NumberFormatException(); }
+    }
 }
