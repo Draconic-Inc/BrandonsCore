@@ -22,7 +22,6 @@ import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -156,7 +155,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     @SuppressWarnings("unchecked")
     public void addChildElements() {
         if (elementInitialized) {
-            throw new InvalidStateException("MGuiElementBase.addChildElements was fired but child elements have already been added!");
+            throw new RuntimeException("MGuiElementBase.addChildElements was fired but child elements have already been added!");
         }
 
         if (onInit != null) {
