@@ -36,6 +36,10 @@ public interface IModularGui<T extends GuiScreen> extends IMouseOver {
 
     int getZLevel();
 
+    default MGuiElementBase addElement(MGuiElementBase element) {
+        return getManager().add(element);
+    }
+
     @Override
     default boolean isMouseOver(int mouseX, int mouseY) {
         return GuiHelper.isInRect(guiLeft(), guiTop(), xSize(), ySize(), mouseX, mouseY);

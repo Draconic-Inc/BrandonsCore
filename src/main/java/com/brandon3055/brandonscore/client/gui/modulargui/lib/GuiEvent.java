@@ -11,6 +11,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTextFie
  * Created by brandon3055 on 1/07/2017.
  */
 //TODO Add new events as needed
+@Deprecated
 public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
     private E element;
     /**
@@ -98,6 +99,7 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
 
     //region Sub Event Classes
 
+    @Deprecated
     public static class ButtonEvent extends GuiEvent<GuiButton, ButtonEvent> {
         public ButtonEvent(GuiButton element) {
             super(element);
@@ -107,6 +109,7 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
     /**
      * Used by selector type elements such as the select dialog.
      */
+    @Deprecated
     public static class SelectEvent extends GuiEvent<GuiSelectDialog, SelectEvent> {
         private final Object selected;
         private final MGuiElementBase itemRenderer;
@@ -126,6 +129,7 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
         }
     }
 
+    @Deprecated
     public static class TextFieldEvent extends GuiEvent<GuiTextField, TextFieldEvent> {
         private final String theText;
         private final boolean textChanged;
@@ -151,6 +155,7 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
         }
     }
 
+    @Deprecated
     public static class SliderMoveEvent extends GuiEvent<GuiSlideControl, SliderMoveEvent> {
 
         private final double position;
@@ -189,6 +194,7 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
     /**
      * Used by elements like the colour picker.
      */
+    @Deprecated
     public static class ColourEvent extends GuiEvent<GuiPickColourDialog, ColourEvent> {
         private final int colour;
         private final boolean canceled;

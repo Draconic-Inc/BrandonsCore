@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 @SuppressWarnings("unchecked")
 public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDispatcher {
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
+    @Deprecated
     protected IGuiEventListener listener = null;
     protected IButtonListener buttonListener = null;
     protected boolean trim = true;
@@ -121,6 +122,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     }
 
     @Override
+    @Deprecated
     public GuiButton setListener(IGuiEventListener listener) {
         this.listener = listener;
         return this;
@@ -129,6 +131,10 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     public GuiButton setButtonListener(IButtonListener buttonListener) {
         this.buttonListener = buttonListener;
         return this;
+    }
+
+    public GuiButton setButtonListener(Runnable action) {
+        return setButtonListener((b, m) -> action.run());
     }
 
     public boolean isDisabled() {
@@ -142,6 +148,7 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
 
     @Nullable
     @Override
+    @Deprecated
     public IGuiEventListener getListener() {
         return listener;
     }
@@ -274,6 +281,14 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
     public GuiButton setVanillaButtonRender(boolean vanillaButtonRender) {
         this.vanillaButtonRender = vanillaButtonRender;
         return this;
+    }
+
+    public GuiButton enableVanillaRender() {
+        return setVanillaButtonRender(true);
+    }
+
+    public GuiButton disableVanillaRender() {
+        return setVanillaButtonRender(false);
     }
 
     /**
