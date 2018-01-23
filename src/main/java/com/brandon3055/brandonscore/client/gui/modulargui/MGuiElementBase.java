@@ -1302,7 +1302,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         }
 
         for (MGuiElementBase element : childElements) {
-            if (!toRemove.contains(element)) {
+            if (!toRemove.contains(element) && element.isEnabled()) {
                 element.addBoundsToRect(enclosingRect);
             }
         }

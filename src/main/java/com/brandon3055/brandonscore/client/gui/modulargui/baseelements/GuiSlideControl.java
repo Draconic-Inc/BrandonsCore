@@ -328,7 +328,6 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      * @see #setRange
      */
     public double getPosition() {
-//        return position * (posRangeMax - posRangeMin);
         return MathHelper.map(getRawPos(), 0, 1, posRangeMin, posRangeMax);
     }
 

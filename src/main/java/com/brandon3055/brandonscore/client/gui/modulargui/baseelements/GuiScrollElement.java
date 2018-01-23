@@ -21,6 +21,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.Gu
  * Created by brandon3055 on 4/07/2017.
  */
 public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implements IGuiEventListener {
+//public class GuiScrollElement<T extends com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement<T>> extends MGuiElementBase<T> implements IGuiEventListener {
     public static final String DEFAULT_SCROLL_BAR_GROUP = "GuiScrollElement_Default_Scroll_Bars";
 
     protected int listSpacing = 0;
@@ -37,6 +38,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     protected Insets defaultInsets = new Insets(0, 0, 0, 0);
     protected boolean smoothScroll = false;
     protected boolean enableVerticalScroll = true;
+    protected boolean useAbsoluteElementSize = false;
     protected boolean enableHorizontalScroll = true;
     protected boolean scrollBarExclusionMode = true;
     protected ListMode listMode = DISABLED;
@@ -63,7 +65,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public void reloadElement() {
         super.reloadElement();
         resetScrollPositions();
-        updateListElementsScrollBoundsAndScrollBars();
+        updateScrollElement();
         resetScrollPositions();
     }
 
@@ -134,6 +136,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     /**
+     * If enabled the size of the element plus all of its children will be used when positioning elements.
+     */
+    public GuiScrollElement useAbsoluteElementSize(boolean useAbsoluteElementSize) {
+        this.useAbsoluteElementSize = useAbsoluteElementSize;
+        return this;
+    }
+
+    /**
      * Applies standard mouse scroll wheel behavior for the scroll bars.
      * Vertical scrolling when cursor is over the GuiScrollElement or the vertical scroll bar.
      * Horizontal scrolling when cursor is over the GuiScrollElement and shift key is pressed
@@ -186,13 +196,13 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public GuiScrollElement addElement(MGuiElementBase element) {
         scrollingElements.add(element);
         super.addChild(element);
-        updateListElementsScrollBoundsAndScrollBars();
+        updateScrollElement();
         return this;
     }
 
     public GuiScrollElement removeElement(MGuiElementBase element) {
         removeChild(element);
-        updateListElementsScrollBoundsAndScrollBars();
+        updateScrollElement();
         return this;
     }
 
@@ -232,7 +242,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public void clearElements() {
         scrollingElements.forEach(super::removeChild);
         scrollingElements.clear();
-        updateListElementsScrollBoundsAndScrollBars();
+        updateScrollElement();
     }
 
     /**
@@ -242,9 +252,28 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         return ImmutableList.copyOf(scrollingElements);
     }
 
+    protected int elementXSize(MGuiElementBase element) {
+        if (useAbsoluteElementSize) {
+            return element.getEnclosingRect().width;
+        }
+        return element.xSize();
+    }
+
+    protected int elementYSize(MGuiElementBase element) {
+        if (useAbsoluteElementSize) {
+            return element.getEnclosingRect().height;
+        }
+        return element.ySize();
+    }
+
     //endregion
 
     //region Scrolling Logic
+
+    public void updateScrollElement() {
+        resetScrollPositions();
+        updateListElementsScrollBoundsAndScrollBars();
+    }
 
     /**
      * Updates the position of all size/pos of all contained elements if in list mode
@@ -264,7 +293,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
                         element.setYSize(getInsetRect().height);
                     }
                     element.setXPos(lastPos);
-                    lastPos += element.xSize() + listSpacing;
+                    lastPos += elementXSize(element) + listSpacing;
                 }
                 else {
                     if (listMode.lockPos()) {
@@ -274,7 +303,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
                         element.setXSize(getInsetRect().width);
                     }
                     element.setYPos(lastPos);
-                    lastPos += element.ySize() + listSpacing;
+                    lastPos += elementYSize(element) + listSpacing;
                 }
             }
         }
@@ -559,7 +588,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         }
         this.backgroundElement = backgroundElement;
         addElement(this.backgroundElement);
-        updateListElementsScrollBoundsAndScrollBars();
+        updateScrollElement();
         return this;
     }
 
@@ -678,7 +707,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             int vsp = verticalScrollPos;
             int hsp = horizontalScrollPos;
             resetScrollPositions();
-            updateListElementsScrollBoundsAndScrollBars();
+            updateScrollElement();
             resetScrollPositions();
             verticalScrollBar.updatePos(vsp);
             horizontalScrollBar.updatePos(hsp);
@@ -691,7 +720,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             int vsp = verticalScrollPos;
             int hsp = horizontalScrollPos;
             resetScrollPositions();
-            updateListElementsScrollBoundsAndScrollBars();
+            updateScrollElement();
             resetScrollPositions();
             verticalScrollBar.updatePos(vsp);
             horizontalScrollBar.updatePos(hsp);

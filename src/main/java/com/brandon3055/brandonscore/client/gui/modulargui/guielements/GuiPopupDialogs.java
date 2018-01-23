@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.IButtonListener;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -22,23 +22,23 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
         super(parent);
     }
 
-    public GuiPopupDialogs setYesListener(IGuiEventListener yesListener) {
-        if (yesButton != null) yesButton.setListener(yesListener);
+    public GuiPopupDialogs setYesListener(IButtonListener yesListener) {
+        if (yesButton != null) yesButton.setButtonListener(yesListener);
         return this;
     }
 
-    public GuiPopupDialogs setNoListener(IGuiEventListener noListener) {
-        if (noButton != null) noButton.setListener(noListener);
+    public GuiPopupDialogs setNoListener(IButtonListener noListener) {
+        if (noButton != null) noButton.setButtonListener(noListener);
         return this;
     }
 
-    public GuiPopupDialogs setOkListener(IGuiEventListener okListener) {
-        if (okButton != null) okButton.setListener(okListener);
+    public GuiPopupDialogs setOkListener(IButtonListener okListener) {
+        if (okButton != null) okButton.setButtonListener(okListener);
         return this;
     }
 
-    public GuiPopupDialogs setCancelListener(IGuiEventListener cancelListener) {
-        if (cancelButton != null) cancelButton.setListener(cancelListener);
+    public GuiPopupDialogs setCancelListener(IButtonListener cancelListener) {
+        if (cancelButton != null) cancelButton.setButtonListener(cancelListener);
         return this;
     }
 

@@ -1,8 +1,10 @@
 package com.brandon3055.brandonscore.command;
 
 import com.brandon3055.brandonscore.client.gui.config.GuiIncompatibleConfig;
+import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
+import com.brandon3055.brandonscore.lib.DelayedTask;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -59,8 +61,11 @@ public class BCClientCommands extends CommandBase {
             else if (function.equals("nbt")) {
                 functionNBT(server, sender, args);
             }
+            else if (function.equals("testui")) {
+                DelayedTask.run(10, () -> Minecraft.getMinecraft().displayGuiScreen(new ModularGuiTest()));
+            }
             else {
-                help(sender);
+//                help(sender);
             }
 
         }

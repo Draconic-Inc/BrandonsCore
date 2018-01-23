@@ -1,16 +1,16 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.IButtonListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.function.Supplier;
 
@@ -19,10 +19,10 @@ import java.util.function.Supplier;
  * This is the base Modular GUI button class. This should be extended when creating customized modular gui buttons.
  */
 @SuppressWarnings("unchecked")
-public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDispatcher {
+public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEventDispatcher*/ {
     protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
-    @Deprecated
-    protected IGuiEventListener listener = null;
+//    @Deprecated
+//    protected IGuiEventListener listener = null;
     protected IButtonListener buttonListener = null;
     protected boolean trim = true;
     protected boolean wrap = false;
@@ -121,12 +121,12 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         this.buttonId = buttonId;
     }
 
-    @Override
-    @Deprecated
-    public GuiButton setListener(IGuiEventListener listener) {
-        this.listener = listener;
-        return this;
-    }
+//    @Override
+//    @Deprecated
+//    public GuiButton setListener(IGuiEventListener listener) {
+//        this.listener = listener;
+//        return this;
+//    }
 
     public GuiButton setButtonListener(IButtonListener buttonListener) {
         this.buttonListener = buttonListener;
@@ -146,12 +146,12 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
         return this;
     }
 
-    @Nullable
-    @Override
-    @Deprecated
-    public IGuiEventListener getListener() {
-        return listener;
-    }
+//    @Nullable
+//    @Override
+//    @Deprecated
+//    public IGuiEventListener getListener() {
+//        return listener;
+//    }
 
     //region Button Identification
 
@@ -448,9 +448,9 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
             playClickSound();
         }
 
-        if (listener != null) {
-            listener.onMGuiEvent(new GuiEvent.ButtonEvent(this), this);
-        }
+//        if (listener != null) {
+//            listener.onMGuiEvent(new GuiEvent.ButtonEvent(this), this);
+//        }
 
         if (buttonListener != null) {
             buttonListener.onClick(this, mouseButton);
@@ -550,7 +550,6 @@ public class GuiButton extends MGuiElementBase<GuiButton> implements IGuiEventDi
 
             int yPos = (getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2);
             int xPos = getInsetRect().x;
-
             switch (rotation) {
                 case NORMAL:
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);

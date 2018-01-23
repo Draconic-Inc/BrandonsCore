@@ -74,7 +74,8 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     public void addChildElements() {
         super.addChildElements();
         if (scrollElement == null) {
-            addChild(scrollElement = new GuiScrollElement().setPosAndSize(this.getInsetRect()).setStandardScrollBehavior());
+            addChild(scrollElement = new GuiScrollElement());
+            scrollElement.setPosAndSize(this.getInsetRect()).setStandardScrollBehavior();
             scrollElement.setListMode(GuiScrollElement.ListMode.VERT_LOCK_POS_WIDTH);
             if (noScrollBars) {
                 scrollElement.getVerticalScrollBar().setHidden(true);

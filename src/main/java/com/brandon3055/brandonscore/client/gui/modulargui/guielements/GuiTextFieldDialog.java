@@ -61,7 +61,16 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
             textField.setValidator(validator);
         }
 
-        addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.format("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777).setListener(this));
+        addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.format("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777));
+        okButton.setButtonListener(() -> {
+            if (confirmCallBack != null) {
+                confirmCallBack.accept(textField.getText());
+            }
+            if (listener != null) {
+                listener.onMGuiEvent(new GuiEvent.TextFieldEvent(textField, textField.getText(), false, true), textField);
+            }
+            close();
+        });
         super.addChildElements();
     }
 
@@ -80,16 +89,6 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
             if (event.asTextField().textEnterPressed()) {
                 close();
             }
-        }
-
-        if (eventElement == okButton) {
-            if (confirmCallBack != null) {
-                confirmCallBack.accept(textField.getText());
-            }
-            if (listener != null) {
-                listener.onMGuiEvent(new GuiEvent.TextFieldEvent(textField, textField.getText(), false, true), textField);
-            }
-            close();
         }
     }
 

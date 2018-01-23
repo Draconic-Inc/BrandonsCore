@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.effects.GuiEffect;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement.TreeNode;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
@@ -11,7 +12,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
@@ -32,10 +32,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -48,9 +44,9 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Te
 /**
  * Created by brandon3055 on 2/07/2017.
  */
-public class ModularGuiExample extends ModularGuiScreen implements IGuiEventListener {
+public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListener {
 
-    public ModularGuiExample() {
+    public ModularGuiTest() {
         super(550, 300);
     }
 
@@ -69,125 +65,58 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
         scrollElement.applyBackgroundElement(new GuiBorderedRect().setColours(0xFFc0c0c0, 0xFFFFFFFF));
 
 
-//        String test = "option1:option,option2:op2,op3:\"Comma, Seperated,Option ,String\",Op4:op4";
-//        String[] ops = test.split("(?!\\B\"[^\"]*),(?![^\"]*\"\\B)");
-//        for (String s : ops) LogHelper.dev(s);
+        GuiTreeElement tree = (GuiTreeElement) new GuiTreeElement().setRelPos(10, 10).setSize(150, 200);
+        scrollElement.addElement(tree);
+        tree.addBackgroundChild(new GuiBorderedRect().setRelPos(0, 0).setSize(150, 200).setFillColour(0xFF505050));
 
-//        Pattern test = Pattern.compile("(?<=.:\")(.*)(\"=\")(.*)(?=\")");
-//        Matcher testMatch = test.matcher("S:\"invalid=\"Data == t be in quotes. Things \"CAN\" be escaped \\n to allow for stuff like this \\t.\"");
-//        if (testMatch.find()) {
-//            LogHelper.dev("Group1: " + testMatch.group(1) + ", Group2: " + testMatch.group(2) + ", Group3: " + testMatch.group(3));
-//        }
-//        else { LogHelper.dev("No Match"); }
+        for (int i = 0; i < 10; i++) {
+            GuiButton rootLabel = new GuiButton("Root Node " + i).setSize(140, 14).setRelPos(10, 0);
+            rootLabel.setAlignment(LEFT);
+            TreeNode rootNode = tree.addRootNode(rootLabel);
+            rootNode.addDefaultExtendButton(-10, 2, 10, 10);
 
-//        String test1 = " :------: | -----: | ------- |";
-//        String test2 = " :------: | -----: | ------- ";
-//
-//        LogHelper.dev(Arrays.asList(test1.split("\\|")));
-//        LogHelper.dev(Arrays.asList(test2.split("(?<=[^\\n])(\\|)")));
+            for (int j = 0; j < 4; j++) {
+                GuiLabel Label = new GuiLabel("Sub " + i + ", Node " + j).setSize(140, 14).setRelPos(15, 0);
+                Label.setAlignment(LEFT);
+                TreeNode subNode = rootNode.addSubNode(Label);
+                subNode.addDefaultExtendButton(-10, 2, 10, 10);
 
-//        LogHelper.dev((testMatch.find() ? testMatch.group(2) : "No Match") + " " + testMatch.matches());
-
-//        testMatch = test.matcher("S:invalid=\"Data == t be in quotes. Things \"CAN\" be escaped \\n to allow for stuff like this \\t.\"");
-//        LogHelper.dev((testMatch.find() ? testMatch.group(2) : "No Match") + " " + testMatch.matches());
-//
-//        Pattern linkPat = Pattern.compile("(?<=[^\\\\]|^)(\u00A7link\\[[^]]*]\\{[^\u00A7]*})|(?<=[^\\\\]|^)(\u00A7link\\[[^]]*])");
-//        String test1 = "\u00A7link[httpBla] Rand Text";
-//        String test2 = "\u00A7link[httpBla] Rand Text \u00A7link[httpBla2]";
-//        String test3 = "Rand Text \u00A7link[httpBla]{ops} Rand Text \u00A7link[httpBla2]";
-//        String test4 = "Rand Text \u00A7link[httpBla] Rand Text \u00A7link[httpBla2]{ops}";
-//        Matcher mat = linkPat.matcher(test1);
-//        if (mat.find()) LogHelper.dev(mat.group());
-//        mat = linkPat.matcher(test2);
-//        if (mat.find()) LogHelper.dev(mat.group());
-//        mat = linkPat.matcher(test3);
-//        if (mat.find()) LogHelper.dev(mat.group());
-//        mat = linkPat.matcher(test4);
-//        if (mat.find()) LogHelper.dev(mat.group());
-
-
-        GuiMarkdownElement element = new GuiMarkdownElement();
-        element.setInsets(5, 5, 5, 5);
-        element.setRelPos(scrollElement, 0, 0).setXSize(scrollElement.xSize() - 10);
-
-        String markdown = "This is test string to test the functionality of the Markdown element.\n\n" + //
-                "Random Text " + Utils.SELECT + "link[http://www.google.com] Random Text\n" + //
-                "Random Text " + Utils.SELECT + "link[http://www.google.com]{altText:\"Alternate Link Text!\"} Random Text\n" + //
-                "Random Text " + Utils.SELECT + "link[http://www.google.com]{altText:\"Alternate Link Text!\",hover:\"This link has hover text!\"} Random Text\n" + //
-                "Random Text " + Utils.SELECT + "link[http://www.google.com]{altText:\"Alternate Link Text!\",hover:\"This link has\\nMulti-Line\\nhover text!\"} Random Text\n\n" + //
-                "Random Text: " + Utils.SELECT + "stack[minecraft:gold_block]" + Utils.SELECT + "stack[minecraft:beacon,10]{drawSlot:true,size:64}" + Utils.SELECT + "stack[minecraft:gold_block] " + Utils.SELECT + "stack[minecraft:gold_block]Text\n" + //
-                "" + Utils.SELECT + "stack[minecraft:iron_sword,1,0,{ench:[0:{lvl:3s,id:21s},1:{lvl:1s,id:6s},2:{lvl:3s,id:22s},3:{lvl:5s,id:48s},4:{lvl:5s,id:16s}],RepairCost:63}]{drawSlot:true}\n" + //
-                "" + Utils.SELECT + "stack[minecraft:stone]\n\n" + //
-                "" + Utils.SELECT + "entity[player:brandon3055]{size:128,track_mouse:true,hover:\"This is the creator of this mod!\",main_hand:\"minecraft:diamond_sword,1,0,{ench:[0:{lvl:1s,id:18s}]}\",off_hand:\"minecraft:shield,1,0,{ench:[0:{lvl:1s,id:70s}]}\",chest:\"minecraft:diamond_chestplate,1,0,{ench:[0:{lvl:1s,id:3s}]}\"}" + "" + Utils.SELECT + "entity[minecraft:ender_crystal]\n" + //
-                "" + Utils.SELECT + "entity[player:brandon3055] " + Utils.SELECT + "entity[player:covers1624] " + Utils.SELECT + "entity[minecraft:ender_dragon] " + Utils.SELECT + "entity[minecraft:Pig] " + Utils.SELECT + "entity[player:brandon3055]{size:128} " + Utils.SELECT + "entity[player:brandon3055]{size:200} " + Utils.SELECT + "entity[player:brandon3055]{size:256,track_mouse:true}\n" + //
-                "" + Utils.SELECT + "recipe[minecraft:gold_ingot]\n\n" + //
-                "\\" + Utils.SELECT + "align:centre \\" + Utils.SELECT + "recipe[minecraft:iron_ingot]{padding:2,borderColour:#00ff00,spacing:10}\n" + //
-                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "recipe[minecraft:iron_ingot]{padding:2,borderColour:#00ff00,spacing:10}\n\n" + //
-                "" + Utils.SELECT + "link[http://www.google.com]{altText:\"This is a button style link!\",render:vanilla,padding:5}\n\n" +//
-                "" + Utils.SELECT + "colour[#00ff00]" + Utils.SELECT + "link[http://www.google.com]{altText:\"This is a solid button style link!\",render:solid,borderColourHover:#00FFFF,padding:5}\n\n" + //
-                "" + Utils.SELECT + "img[http://ss.brandon3055.com/nr36p5s.png]{width:50%}" + Utils.SELECT + "img[http://ss.brandon3055.com/wq6lvf9.png]{width:50%,borderColour:#FF0000,hover:\"Yay! Hover Text!\"}\n" +//
-                "This is a new paragraph\n" + //
-                "This is a new line\n\n" + //
-                "This is a new paragraph.\n\n" +//
-                "This is a very long single line of text. This " + Utils.SELECT + "3line" + Utils.SELECT + "3 is so \\" + Utils.SELECT + "2ling\\" + Utils.SELECT + "2 that it \\" + Utils.SELECT + "4will not be able " + Utils.SELECT + "7to fit " + Utils.SELECT + "lwithin the " + Utils.SELECT + "4screen width " + Utils.SELECT + "8however this should" + Utils.SELECT + "8 not be a problem because it should be automatically wrapped to the next line. The purpose of this string is to test this functionality.\n\n" + //
-                "" + Utils.SELECT + "align:centre" + Utils.SELECT + "colour[0xff0000]\n" +//
-                "Headings:\n" +//
-                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[#00ff00] # Heading 1\n" + //
-                "" + Utils.SELECT + "shadow\n" + //
-                "" + Utils.SELECT + "align:centre ## Heading 2\n" + //
-                "" + Utils.SELECT + "align:centre" + Utils.SELECT + "colour[#00ff00]### Heading 3\n" +//
-                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[0.0,1.0,0.5] #### Heading 4\n" +//
-                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[255,255,0] ##### Heading 5\n" +//
-                "" + Utils.SELECT + "align:centre " + Utils.SELECT + "colour[10,2,0.5] ###### Heading 6\n" + //
-                "" + Utils.SELECT + "align:centre Plain Text\n" +//
-                "Rules\n" + //
-                "" + Utils.SELECT + "rule[]\n" +//
-                "" + Utils.SELECT + "rule[colour:#700090,height:3,topPadding:2,bottomPadding:2]\n" + //
-                "" + Utils.SELECT + "rule[colour:#ff0000,height:3,topPadding:2,bottomPadding:2,width:70%,align:left]\n" +//
-                "" + Utils.SELECT + "rule[colour:#00ff00,height:3,topPadding:2,bottomPadding:2,width:100px,align:center]\n" + //
-                "" + Utils.SELECT + "rule[colour:#0000ff,height:3,topPadding:2,bottomPadding:2,width:100px,align:right]\n" + //
-                "" + Utils.SELECT + "rule[colour:#FFFFFF,height:3,topPadding:2,bottomPadding:2,width:20px,align:left]\n" + //
-                "Text Formatting:\n" + //
-                "*Italic*\n" + //
-                "**Bold**\n" +//
-                "~~Strikethrough~~\n" +//
-                "~?~Obfustated~?~\n" +//
-                "__Underline__\n" +//
-                "__Underline *Italic*__\n" +//
-                "__Underline **Bold**__\n" + //
-                "__Underline **Bold *Italic***__\n" + //
-                "__Underline ~~*Italic*~~__\n" + //
-                "This **is** __*a* ~~test__ string **containing *a* combination~~ *of** various* different format flags\n\n" +//
-                "" + Utils.SELECT + "link[http://www.google.com] A link\n" + //
-                "" + Utils.SELECT + "link[http://www.google.com](Alternate Link Text) A link with alt text\n" +//
-                "" + Utils.SELECT + "img[http://url.png] An image\n" + //
-                "" + Utils.SELECT + "img[http://url.png] An image with options\n" + //
-                "" + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] A Recipe\n" +//
-                "" + Utils.SELECT + "entity[entity:registryName] An entity\n" +//
-                "" + Utils.SELECT + "entity[entity:registryName]{renderSize:32,hoverText:\"Hover text\",rotate:false,rotateSpeed:1,rotation:180} An entity with options\n" +//
-                "" + Utils.SELECT + "link[http://www.google.com] A link " + Utils.SELECT + "img[http://url.png] An image " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] And a Recipe " + Utils.SELECT + "link[http://www.google.com] t " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] " + Utils.SELECT + "link[http://www.googlee.com] t " + Utils.SELECT + "recipe[minecraft:furnace,0,1,{}] " + Utils.SELECT + "link[http://www.google.com] t " + Utils.SELECT + "link[http://www.google.com] t " + Utils.SELECT + "entity[http://www.google.com]";
-
-
-        File file = new File("C:\\Users\\brand\\Desktop\\MarkdownDemo.txt");
-
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            LinkedList<String> s = new LinkedList<>();
-
-            String str;
-            while ((str = reader.readLine()) != null) {
-                s.add(str);
+                for (int k = 0; k < 4; k++) {
+                    GuiButton subSubLabel = new GuiButton("Sub " + i + ", Node " + j+" - " + k).setSize(100, 14).setRelPos(15, 0);
+                    subSubLabel.setAlignment(LEFT);
+                    subSubLabel.enableVanillaRender();
+                    TreeNode subSubNode = subNode.addSubNode(subSubLabel);
+                    subSubNode.addDefaultExtendButton(-10, 2, 10, 10);
+//                  subSubLabel.enableVanillaRender().setButtonListener(() -> mc.displayGuiScreen(new ModularGuiTest()));
+                }
             }
-
-            element.parseMarkdown(s);
-        }
-        catch (Throwable e) {
-            e.printStackTrace();
         }
 
+        if (true) return;
 
-        scrollElement.addElement(element);
+        //region Markdown
+        GuiMarkdownElement element = new GuiMarkdownElement();
+//        element.setInsets(5, 5, 5, 5);
+//        element.setRelPos(scrollElement, 0, 0).setXSize(scrollElement.xSize() - 10);
+//        File file = new File("C:\\Users\\brand\\Desktop\\MarkdownDemo.txt");
+//
+//        try {
+//            BufferedReader reader = new BufferedReader(new FileReader(file));
+//            LinkedList<String> s = new LinkedList<>();
+//
+//            String str;
+//            while ((str = reader.readLine()) != null) {
+//                s.add(str);
+//            }
+//
+//            element.parseMarkdown(s);
+//        }
+//        catch (Throwable e) {
+//            e.printStackTrace();
+//        }
 
+//        scrollElement.addElement(element);
+        //endregion
 
         int yOffset = element.maxYPos() + 1600;
 
@@ -230,7 +159,7 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
         stack.addEnchantment(Enchantments.BLAST_PROTECTION, 1);
         player.setItemStackToSlot(EntityEquipmentSlot.CHEST, stack);
 
-
+        //region thing
         //All other components will be added to the background component. This is not required but it has the advantage of not needing to use a callback to set the position of these elements.
         //This is because when the background element's position is updated it will automatically update the position of all of its child elements.
         //I will also be using the setRelPos method to set the positions of the child elements. This simply sets the position relative to the position of the parent.
@@ -303,6 +232,7 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
 
             }
         }.setColours(0xFFFFFFFF, 0xFF00FF00).setInsetRelPos(0, yOffset).setSize(xSize - 20, 110));
+        //endregion
 
         //region Buttons
         scrollElement.addElement(new GuiButton().setInsetRelPos(0, 125 + yOffset).setSize(130, 20).setText("Vanilla Style Button").setVanillaButtonRender(true).setHoverText("With Hover Text!").setHoverTextDelay(10)); //The parent gui is automatically assigned as the event listener because it is an instance of IGuiEventListener
@@ -325,7 +255,7 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
         GuiButton pickColour = new GuiButton().setRelPos(0, 220 + yOffset).setSize(200, 30).setWrap(true).setText("This button opens a colour picker that sets the colour of this button.");
         pickColour.setBorderColour(0xFF000000);
         pickColour.setFillColour(0xFFFFFFFF);
-        pickColour.setListener((event, eventSource) -> new GuiPickColourDialog(pickColour).setColour(pickColour.getFillColour(false, false)).setColourChangeListener(pickColour::setFillColour).showCenter());
+        pickColour.setButtonListener(() -> new GuiPickColourDialog(pickColour).setColour(pickColour.getFillColour(false, false)).setColourChangeListener(pickColour::setFillColour).showCenter());
         scrollElement.addElement(pickColour);
         //endregion
 
@@ -374,7 +304,7 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
         GuiButton tfButton = new GuiButton().setRelPosBottom(lastElement, 0, 10).setXPos(scrollElement.getInsetRect().x).setSize(200, 30).setWrap(true).setText("This button opens a popup text field that allows you to alter its text.");
         tfButton.setBorderColour(0xFF000000);
         tfButton.setFillColour(0xFF909090);
-        tfButton.setListener((event, eventSource) -> new GuiTextFieldDialog(tfButton).addTextConfirmCallback(tfButton::setText).setMaxLength(128).setText(tfButton.getDisplayString()).setXSize(400).showCenter(500));
+        tfButton.setButtonListener((event, eventSource) -> new GuiTextFieldDialog(tfButton).addTextConfirmCallback(tfButton::setText).setMaxLength(128).setText(tfButton.getDisplayString()).setXSize(400).showCenter(500));
         scrollElement.addElement(tfButton);
         lastElement = tfButton;
 
@@ -399,11 +329,10 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
         selectDialog.setCloseOnSelection(true);
         selectDialog.setSelectionListener(selectButton::setText);
 
-        selectButton.setListener((event, eventSource) -> selectDialog.showCenter());
+        selectButton.setButtonListener((event, eventSource) -> selectDialog.showCenter());
 
 
         //endregion
-
 
         //region Sub Scroll Element
         scrollElement.addElement(new GuiLabel().setInsetRelPos(5, 850 + yOffset).setSize(300, 12).setAlignment(LEFT).setLabelText("Yes. This is a scroll element inside a scroll element!"));
@@ -433,7 +362,8 @@ public class ModularGuiExample extends ModularGuiScreen implements IGuiEventList
     @Override
     public void onMGuiEvent(GuiEvent event, MGuiElementBase eventSource) {
         if (event.isButton() && !event.asButton().getElement().getToggleMode()) {
-            mc.displayGuiScreen(new ModularGuiExample());
+            mc.displayGuiScreen(new ModularGuiTest());
         }
     }
+
 }
