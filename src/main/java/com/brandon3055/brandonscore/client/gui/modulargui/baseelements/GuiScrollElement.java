@@ -270,17 +270,12 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
 
     //region Scrolling Logic
 
-    public void updateScrollElement() {
-        resetScrollPositions();
-        updateListElementsScrollBoundsAndScrollBars();
-    }
-
     /**
      * Updates the position of all size/pos of all contained elements if in list mode
      * then recalculates the bounds of the scrolling area.
      * And finally updates the scroll bars.
      */
-    public void updateListElementsScrollBoundsAndScrollBars() {
+    public void updateScrollElement() {
         if (listMode != DISABLED) {
             int lastPos = listMode.horizontal() ? getInsetRect().x : getInsetRect().y;
             for (MGuiElementBase element : scrollingElements) {
@@ -308,16 +303,19 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             }
         }
 
-//        int xMin = Integer.MAX_VALUE;
-//        int xMax = Integer.MIN_VALUE;
-//        int yMin = Integer.MAX_VALUE;
-//        int yMax = Integer.MIN_VALUE;
+        updateScrollBounds();
+        updateScrollbars();
+        if (backgroundElement != null) {
+            backgroundElement.setPosAndSize(scrollBounds);
+        }
+    }
+
+    protected void updateScrollBounds() {
         int xMin = getInsetRect().x;
         int xMax = xMin;
         int yMin = getInsetRect().y;
         int yMax = yMin;
 
-        //Just so we don't end up with IntMax bounds in the event there are no scrollable elements.
         if (DataUtils.firstMatch(scrollingElements, elementBase -> elementBase.isEnabled() || elementBase != backgroundElement) == null) {
             xMin = xPos();
             xMax = maxXPos();
@@ -328,18 +326,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             for (MGuiElementBase element : scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 Rectangle rect = element.getEnclosingRect();
-                if (element.xPos() < xMin) xMin = (int) rect.getX();
-                if (element.maxXPos() > xMax) xMax = (int) rect.getMaxX();
-                if (element.yPos() < yMin) yMin = (int) rect.getY();
-                if (element.maxYPos() > yMax) yMax = (int) rect.getMaxY();
+                if (rect.x < xMin) xMin = (int) rect.getX();
+                if (rect.getMaxX() > xMax) xMax = (int) rect.getMaxX();
+                if (rect.y < yMin) yMin = (int) rect.getY();
+                if (rect.getMaxY() > yMax) yMax = (int) rect.getMaxY();
             }
         }
 
         scrollBounds.setBounds(xMin, yMin, xMax - xMin, yMax - yMin);
-        updateScrollbars();
-        if (backgroundElement != null) {
-            backgroundElement.setPosAndSize(scrollBounds);
-        }
     }
 
     /**
@@ -356,8 +350,6 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         double horizontalMinScroll = Math.min(0, scrollBounds.x - getInsetRect().x);
         double horizontalMaxScroll = Math.max(0, scrollBounds.getMaxX() - getInsetRect().getMaxX());
         boolean hozNoExc = Math.abs(horizontalMinScroll) + Math.abs(horizontalMaxScroll) <= 0;
-
-        updateScrollbarExclusion();
 
         verticalMinScroll = Math.min(0, scrollBounds.y - getInsetRect().y);
         verticalMaxScroll = Math.max(0, scrollBounds.getMaxY() - getInsetRect().getMaxY());
@@ -383,14 +375,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         setInsets(defaultInsets.top, defaultInsets.left, defaultInsets.bottom, defaultInsets.right);
         updateScrollbarExclusion();
 
-        if (!verticalScrollBar.isEnabled() && horizontalScrollBar.isEnabled() && horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
+        if ((!verticalScrollBar.isEnabled() || verticalScrollBar.isHidden()) && horizontalScrollBar.isEnabled() && horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
             horizontalScrollBar.setXSize(xSize()).setYPos(maxYPos() - horizontalScrollBar.ySize()).updateElements();
         }
         else if (horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
             horizontalScrollBar.setXSize(xSize() - verticalScrollBar.xSize()).setYPos(maxYPos() - horizontalScrollBar.ySize()).updateElements();
         }
 
-        if (!horizontalScrollBar.isEnabled() && verticalScrollBar.isEnabled() && verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
+        if ((!horizontalScrollBar.isEnabled() || horizontalScrollBar.isHidden()) && verticalScrollBar.isEnabled() && verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
             verticalScrollBar.setYSize(ySize()).setXPos(maxXPos() - verticalScrollBar.xSize()).updateElements();
         }
         else if (verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
@@ -720,6 +712,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             int vsp = verticalScrollPos;
             int hsp = horizontalScrollPos;
             resetScrollPositions();
+            updateScrollBounds();
             updateScrollElement();
             resetScrollPositions();
             verticalScrollBar.updatePos(vsp);

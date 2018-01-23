@@ -26,10 +26,11 @@ public class GuiTreeElement extends GuiScrollElement {
     @Override
     public void addChildElements() {
         super.addChildElements();
-        setListMode(ListMode.VERTICAL);
+        setAllowedScrollAxes(true, true);
         setStandardScrollBehavior();
         useAbsoluteElementSize(true);
         getVerticalScrollBar().setHidden(true);
+        defaultInsets.bottom = maxYPos() - horizontalScrollBar.yPos();
     }
 
     public LinkedList<TreeNode> getRootElements() {
@@ -66,6 +67,17 @@ public class GuiTreeElement extends GuiScrollElement {
             rootElements.remove(node);
             removeElement(node.element);
         }
+    }
+
+    @Override
+    public void updateScrollElement() {
+        int lastPos = getInsetRect().y;
+        for (MGuiElementBase element : scrollingElements) {
+            if (!element.isEnabled() || element == backgroundElement) continue;
+            element.setYPos(lastPos);
+            lastPos += elementYSize(element) + listSpacing;
+        }
+        super.updateScrollElement();
     }
 
     public static class TreeNode {

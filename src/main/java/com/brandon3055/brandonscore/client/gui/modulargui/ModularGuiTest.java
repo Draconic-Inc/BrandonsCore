@@ -67,10 +67,10 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
 
         GuiTreeElement tree = (GuiTreeElement) new GuiTreeElement().setRelPos(10, 10).setSize(150, 200);
         scrollElement.addElement(tree);
-        tree.addBackgroundChild(new GuiBorderedRect().setRelPos(0, 0).setSize(150, 200).setFillColour(0xFF505050));
+        tree.addBackgroundChild(new GuiBorderedRect().setRelPos(-1, -1).setSize(152, 202).setFillColour(0xFF505050).setBorderColour(0xFF000000));
 
         for (int i = 0; i < 10; i++) {
-            GuiButton rootLabel = new GuiButton("Root Node " + i).setSize(140, 14).setRelPos(10, 0);
+            GuiLabel rootLabel = new GuiLabel("Root Node " + i).setSize(140, 14).setRelPos(10, 0);
             rootLabel.setAlignment(LEFT);
             TreeNode rootNode = tree.addRootNode(rootLabel);
             rootNode.addDefaultExtendButton(-10, 2, 10, 10);
@@ -82,7 +82,7 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
                 subNode.addDefaultExtendButton(-10, 2, 10, 10);
 
                 for (int k = 0; k < 4; k++) {
-                    GuiButton subSubLabel = new GuiButton("Sub " + i + ", Node " + j+" - " + k).setSize(100, 14).setRelPos(15, 0);
+                    GuiButton subSubLabel = new GuiButton("Sub " + i + ", Node " + j+" - " + k).setSize(170, 14).setRelPos(15, 0);
                     subSubLabel.setAlignment(LEFT);
                     subSubLabel.enableVanillaRender();
                     TreeNode subSubNode = subNode.addSubNode(subSubLabel);
@@ -91,6 +91,8 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
                 }
             }
         }
+
+        scrollElement.addElement(new MGuiElementBase().setRelPos(0, 0).setSize(170, 220));
 
         if (true) return;
 
