@@ -4,6 +4,7 @@ import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.network.ServerPacketHandler;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,6 +23,7 @@ public class CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new BCEventHandler());
         MinecraftForge.EVENT_BUS.register(new ModFeatureParser());
+        ModHelperBC.init();
     }
 
     public void registerPacketHandlers() {

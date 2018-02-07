@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.IProcess;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
@@ -14,13 +16,15 @@ import java.util.function.BiConsumer;
  */
 public class ThreadFileDownloader extends Thread implements IProcess {
 
-    private final String sourceURL;
-    private final File outputFile;
+    public final String sourceURL;
+    public final File outputFile;
+    private volatile double progress = 0;
     private volatile boolean finished = false;
     private volatile boolean failed = false;
+    private volatile boolean running = false;
     private boolean processComplete = false;
     private Exception exception = null;
-    private BiConsumer<ThreadFileDownloader, File> downloadCompleteHandler;
+    private BiConsumer<ThreadFileDownloader, File> downloadCompleteHandler = null;
 
     /**
      * The completionCallBack as a consumer that you supply to run your code once the download is complete.
@@ -43,9 +47,16 @@ public class ThreadFileDownloader extends Thread implements IProcess {
         this.downloadCompleteHandler = completionCallBack;
     }
 
+    public ThreadFileDownloader(String threadName, String sourceURL, File outputFile) {
+        this(threadName, sourceURL, outputFile, null);
+    }
+
     @Override
     public synchronized void start() {
-        BrandonsCore.proxy.addProcess(this);
+        if (downloadCompleteHandler != null) {
+            BrandonsCore.proxy.addProcess(this);
+        }
+        running = true;
         super.start();
     }
 
@@ -53,27 +64,45 @@ public class ThreadFileDownloader extends Thread implements IProcess {
     public void run() {
         try {
             URL url = new URL(sourceURL);
+            if (!outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
+                throw new IOException("Could not create parent folder, Reason unknown");
+            }
             if (!outputFile.exists() && !outputFile.createNewFile()) {
                 throw new IOException("Could not create file, Reason unknown");
             }
 
-            InputStream is = url.openStream();
+            InputStream is = FileHandler.openURLStream(url);//url.openStream();
             OutputStream os = new FileOutputStream(outputFile);
 
-            IOUtils.copy(is, os);
+            int size = is.available();
+            final byte[] buffer = new byte[8192];
+            int n;
+            long count=0;
+            while (-1 != (n = is.read(buffer))) {
+                os.write(buffer, 0, n);
+                count += n;
+                progress = (double) count / (double) size;
+            }
+
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
 
             finished = true;
         }
         catch (Exception e) {
+            LogHelperBC.dev("ThreadFileDownloader: DL Failed " + e.getMessage());
             exception = e;
             failed = true;
         }
+        running = false;
     }
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     public boolean downloadFailed() {
@@ -82,6 +111,13 @@ public class ThreadFileDownloader extends Thread implements IProcess {
 
     public Exception getException() {
         return exception;
+    }
+
+    /**
+     * @return the download progress as a value between 0 and 1
+     */
+    public double getProgress() {
+        return progress;
     }
 
     @Override

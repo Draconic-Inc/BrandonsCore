@@ -87,7 +87,7 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
                     subSubLabel.enableVanillaRender();
                     TreeNode subSubNode = subNode.addSubNode(subSubLabel);
                     subSubNode.addDefaultExtendButton(-10, 2, 10, 10);
-//                  subSubLabel.enableVanillaRender().setButtonListener(() -> mc.displayGuiScreen(new ModularGuiTest()));
+//                  subSubLabel.enableVanillaRender().setListener(() -> mc.displayGuiScreen(new ModularGuiTest()));
                 }
             }
         }
@@ -257,7 +257,7 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
         GuiButton pickColour = new GuiButton().setRelPos(0, 220 + yOffset).setSize(200, 30).setWrap(true).setText("This button opens a colour picker that sets the colour of this button.");
         pickColour.setBorderColour(0xFF000000);
         pickColour.setFillColour(0xFFFFFFFF);
-        pickColour.setButtonListener(() -> new GuiPickColourDialog(pickColour).setColour(pickColour.getFillColour(false, false)).setColourChangeListener(pickColour::setFillColour).showCenter());
+        pickColour.setListener(() -> new GuiPickColourDialog(pickColour).setColour(pickColour.getFillColour(false, false)).setColourChangeListener(pickColour::setFillColour).showCenter());
         scrollElement.addElement(pickColour);
         //endregion
 
@@ -306,7 +306,7 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
         GuiButton tfButton = new GuiButton().setRelPosBottom(lastElement, 0, 10).setXPos(scrollElement.getInsetRect().x).setSize(200, 30).setWrap(true).setText("This button opens a popup text field that allows you to alter its text.");
         tfButton.setBorderColour(0xFF000000);
         tfButton.setFillColour(0xFF909090);
-        tfButton.setButtonListener((event, eventSource) -> new GuiTextFieldDialog(tfButton).addTextConfirmCallback(tfButton::setText).setMaxLength(128).setText(tfButton.getDisplayString()).setXSize(400).showCenter(500));
+        tfButton.setListener((event, eventSource) -> new GuiTextFieldDialog(tfButton).addTextConfirmCallback(tfButton::setText).setMaxLength(128).setText(tfButton.getDisplayString()).setXSize(400).showCenter(500));
         scrollElement.addElement(tfButton);
         lastElement = tfButton;
 
@@ -331,7 +331,7 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
         selectDialog.setCloseOnSelection(true);
         selectDialog.setSelectionListener(selectButton::setText);
 
-        selectButton.setButtonListener((event, eventSource) -> selectDialog.showCenter());
+        selectButton.setListener((event, eventSource) -> selectDialog.showCenter());
 
 
         //endregion

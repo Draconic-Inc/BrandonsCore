@@ -98,6 +98,10 @@ public class StackReference {
 //        return "name:" + stack + ",size:" + stackSize + ",meta:" + metadata + ",nbt:" + (nbt == null ? "{}" : nbt.toString());
     }
 
+    public static String stackString(ItemStack stack) {
+        return new StackReference(stack).toString();
+    }
+
     /**
      * @param string A stack string from which to generate a new stack reference.
      * @return A new stack reference or null if the string was invalid.<br>

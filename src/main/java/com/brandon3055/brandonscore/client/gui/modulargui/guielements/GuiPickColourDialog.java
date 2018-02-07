@@ -97,7 +97,22 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         }
 
         addChild(selectButton = new GuiButton(xPos + 4, yPos + ySize - 14, cancelEnabled ? (xSize / 2) - 5 : xSize - 8, 10, I18n.format("generic.ok.txt")));
+        selectButton.setListener(() -> {
+            if (listener != null) {
+                listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), false, false), this);
+            }
+            if (colourSelectListener != null) {
+                colourSelectListener.accept(getColourARGB());
+            }
+            close();
+        });
         addChild(cancelButton = new GuiButton(selectButton.xPos() + selectButton.xSize() + 2, yPos + ySize - 14, (xSize / 2) - 5, 10, I18n.format("gui.back")));
+        cancelButton.setListener(() -> {
+            if (listener != null) {
+                listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), true, false), this);
+            }
+            close();
+        });
         selectButton.setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777);
         cancelButton.setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777);
         cancelButton.setEnabled(cancelEnabled);
@@ -153,21 +168,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
             }
             catch (Exception e) {}
         }
-        else if (eventElement == cancelButton) {
-            if (listener != null) {
-                listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), true, false), this);
-            }
-            close();
-        }
-        else if (eventElement == selectButton) {
-            if (listener != null) {
-                listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), false, false), this);
-            }
-            if (colourSelectListener != null) {
-                colourSelectListener.accept(getColourARGB());
-            }
-            close();
-        }
+
         if (colourChanged) {
             if (colourChangeListener != null) {
                 colourChangeListener.accept(getColourARGB());

@@ -1,9 +1,16 @@
 package com.brandon3055.brandonscore.handlers;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.google.common.collect.Sets;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.apache.commons.compress.utils.IOUtils;
 
-import java.io.File;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Created by Brandon on 7/6/2015.
@@ -23,4 +30,41 @@ public class FileHandler {
 
         mcDirectory = rootConfigFolder.getParentFile();
     }
+
+    /**
+     * This is a simple helper method that downloads a file from the specified url to the specified output file.
+     * This only supports http connections and will not work with https.
+     * This is a blocking method meaning it will hang the thread until the download is complete or an exception is thrown.
+     * @param sourceUrl Source URL
+     * @param output Target File
+     * @throws IOException
+     */
+    public static void downloadFile(String sourceUrl, File output) throws IOException {
+        URL url = new URL(sourceUrl);
+
+        if (!output.exists() && !output.createNewFile()) {
+            throw new IOException("Could not create file, Reason unknown");
+        }
+
+        InputStream is = openURLStream(url);
+        OutputStream os = new FileOutputStream(output);
+        IOUtils.copy(is, os);
+        IOUtils.closeQuietly(is);
+        IOUtils.closeQuietly(os);
+    }
+
+    public static InputStream openURLStream(URL url) throws IOException {
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.setRequestProperty("User-Agent", "BCore/" + BrandonsCore.VERSION);
+        return urlConnection.getInputStream();
+    }
+
+    private static final Set<Character> ILLEGAL_CHARACTERS = Sets.newHashSet('/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' );
+    public static final Predicate<String> FILE_NAME_VALIDATOR = s -> {
+        if (s == null || s.isEmpty()) return false;
+        for (char c : s.toCharArray()) {
+            if (ILLEGAL_CHARACTERS.contains(c)) return false;
+        }
+        return true;
+    };
 }

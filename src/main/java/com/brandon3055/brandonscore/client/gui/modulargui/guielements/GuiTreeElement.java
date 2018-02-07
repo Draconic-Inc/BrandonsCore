@@ -143,7 +143,7 @@ public class GuiTreeElement extends GuiScrollElement {
             button.setTrim(false).setInsets(0, 0, 0, 0);
             button.setDisplaySupplier(() -> extended ? "\u25BC" : "\u25B6");
             button.setTextColour(0);
-            button.setButtonListener(() -> setExtended(!extended));
+            button.setListener(() -> setExtended(!extended));
             button.setSize(xSize, ySize).setRelPos(element, xOffset, yOffset);
             button.setEnabledCallback(() -> !branches.isEmpty());
             element.addChild(button);

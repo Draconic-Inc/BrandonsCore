@@ -121,20 +121,13 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         this.buttonId = buttonId;
     }
 
-//    @Override
-//    @Deprecated
-//    public GuiButton setListener(IGuiEventListener listener) {
-//        this.listener = listener;
-//        return this;
-//    }
-
-    public GuiButton setButtonListener(IButtonListener buttonListener) {
+    public GuiButton setListener(IButtonListener buttonListener) {
         this.buttonListener = buttonListener;
         return this;
     }
 
-    public GuiButton setButtonListener(Runnable action) {
-        return setButtonListener((b, m) -> action.run());
+    public GuiButton setListener(Runnable action) {
+        return setListener((b, m) -> action.run());
     }
 
     public boolean isDisabled() {
@@ -145,13 +138,6 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         this.disabled = disabled;
         return this;
     }
-
-//    @Nullable
-//    @Override
-//    @Deprecated
-//    public IGuiEventListener getListener() {
-//        return listener;
-//    }
 
     //region Button Identification
 

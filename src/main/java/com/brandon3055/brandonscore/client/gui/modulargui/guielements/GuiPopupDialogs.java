@@ -23,22 +23,22 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
     }
 
     public GuiPopupDialogs setYesListener(IButtonListener yesListener) {
-        if (yesButton != null) yesButton.setButtonListener(yesListener);
+        if (yesButton != null) yesButton.setListener(yesListener);
         return this;
     }
 
     public GuiPopupDialogs setNoListener(IButtonListener noListener) {
-        if (noButton != null) noButton.setButtonListener(noListener);
+        if (noButton != null) noButton.setListener(noListener);
         return this;
     }
 
     public GuiPopupDialogs setOkListener(IButtonListener okListener) {
-        if (okButton != null) okButton.setButtonListener(okListener);
+        if (okButton != null) okButton.setListener(okListener);
         return this;
     }
 
     public GuiPopupDialogs setCancelListener(IButtonListener cancelListener) {
-        if (cancelButton != null) cancelButton.setButtonListener(cancelListener);
+        if (cancelButton != null) cancelButton.setListener(cancelListener);
         return this;
     }
 

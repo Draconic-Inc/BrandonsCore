@@ -1,10 +1,12 @@
 package com.brandon3055.brandonscore.command;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.gui.config.GuiIncompatibleConfig;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.DelayedTask;
+import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -18,8 +20,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,21 +102,38 @@ public class BCClientCommands extends CommandBase {
     }
 
     private void functionNBT(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayer player = Minecraft.getMinecraft().player;
+        EntityPlayer player = getCommandSenderAsPlayer(sender);
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException("You are not holding an item!");
-        }
-        else if (!stack.hasTagCompound()) {
+        } else if (!stack.hasTagCompound()) {
             throw new CommandException("That stack has no NBT tag!");
         }
 
         NBTTagCompound compound = stack.getTagCompound();
         LogHelperBC.logNBT(compound);
+
+        String s = compound+"";
+        if (args.length == 2) {
+            s = new StackReference(stack).toString();
+        }
+
+        LogHelperBC.info(s);
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.message(sender, s, TextFormatting.GOLD));
+        DataUtils.forEach(lines, st -> ChatHelper.message(sender, st, TextFormatting.GOLD));
+
+        if (!StringUtils.isEmpty(compound+"") && !BrandonsCore.proxy.isDedicatedServer())
+        {
+            try
+            {
+                StringSelection stringselection = new StringSelection(s);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
+                ChatHelper.message(sender, "NBT Copied to clipboard!", TextFormatting.GREEN);
+            }
+            catch (Exception ignored) {}
+        }
     }
 
     private void randomFunction4(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {

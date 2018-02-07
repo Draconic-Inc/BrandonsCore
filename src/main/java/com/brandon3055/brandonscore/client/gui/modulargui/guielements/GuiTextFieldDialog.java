@@ -62,7 +62,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
         }
 
         addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.format("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777));
-        okButton.setButtonListener(() -> {
+        okButton.setListener(() -> {
             if (confirmCallBack != null) {
                 confirmCallBack.accept(textField.getText());
             }
