@@ -4,6 +4,8 @@ import com.brandon3055.brandonscore.utils.MultiBlockHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.function.Consumer;
+
 /**
  * Created by brandon3055 on 1/4/2016.
  * This class is going to be used to define and hold a 3 dimensional array of blocks that makes up a structure.
@@ -87,6 +89,18 @@ public class MultiBlockStorage {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     helper.forBlock(blockStorage[x][y][z], world, pos.add(startPos), startPos, flag);
+                }
+            }
+        }
+    }
+
+    public void forEachBlock(BlockPos startPos, Consumer<BlockPos> consumer) {
+        for (int x = 0; x < blockStorage.length; x++) {
+            for (int y = 0; y < blockStorage[0].length; y++) {
+                for (int z = 0; z < blockStorage[0][0].length; z++) {
+                    if (!blockStorage[x][y][z].equals("")){
+                        consumer.accept(new BlockPos(x, y, z).add(startPos));
+                    }
                 }
             }
         }

@@ -14,6 +14,7 @@ public class PacketDispatcher {
     public static final int C_TILE_DATA_MANAGER = 1;
     public static final int C_TILE_MESSAGE = 2;
     public static final int C_SERVER_CONFIG_SYNC = 3;
+    public static final int C_NOCLIP = 4;
 
     public static final int S_TILE_MESSAGE = 1;
 
@@ -22,5 +23,12 @@ public class PacketDispatcher {
         ModConfigParser.writeConfigForSync(packet);
         packet.sendToPlayer(player);
         LogHelperBC.dev("Sending Config To Client: " + player);
+    }
+
+    public static void sendNoclip(EntityPlayerMP player, boolean enabled) {
+        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, C_SERVER_CONFIG_SYNC);
+        packet.writeBoolean(enabled);
+        packet.sendToPlayer(player);
+        LogHelperBC.dev("Sending NoClip update to player: " + player + " Enabled: " + enabled);
     }
 }

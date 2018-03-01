@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.command;
 
+import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
+import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.block.state.IBlockState;
@@ -9,6 +11,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketChunkData;
@@ -18,6 +21,7 @@ import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -55,8 +59,6 @@ public class BCUtilCommands extends CommandBase {
         }
 
         try {
-
-
             String function = args[0];
 
             if (function.toLowerCase().equals("nbt")) {
@@ -65,8 +67,8 @@ public class BCUtilCommands extends CommandBase {
             else if (function.equals("regenchunk")) {
                 regenChunk(server, sender, args);
             }
-            else if (function.equals("")) {
-
+            else if (function.equals("noclip")) {
+                toggleNoClip(server, sender, args);
             }
             else if (function.equals("")) {
 
@@ -87,7 +89,7 @@ public class BCUtilCommands extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk");
+        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip");
     }
 
     private void help(ICommandSender sender) {
@@ -96,8 +98,8 @@ public class BCUtilCommands extends CommandBase {
         ChatHelper.message(sender, "-Prints the NBT tag of the stack you are holding to chat and to the console.", TextFormatting.GRAY);
         ChatHelper.message(sender, "/bcore_util regenchunk [radius]", TextFormatting.BLUE);
         ChatHelper.message(sender, "-Regenerates the chunk(s) at your position.", TextFormatting.GRAY);
-//        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
-//        ChatHelper.message(sender, "-", TextFormatting.GRAY);
+        ChatHelper.message(sender, "/bcore_util noclip", TextFormatting.BLUE);
+        ChatHelper.message(sender, "-Toggles noclip allowing you to fly through blocks as if in spectator mode... Or fall into the void if you dont have flight", TextFormatting.GRAY);
 //        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
 //        ChatHelper.message(sender, "-", TextFormatting.GRAY);
 //        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
@@ -123,8 +125,6 @@ public class BCUtilCommands extends CommandBase {
         DataUtils.forEach(lines, s -> ChatHelper.message(sender, s, TextFormatting.GOLD));
     }
 
-
-    //I dont like restarting minecraft! These are here so i can implement new functions runtime and just rename them later.
     private void regenChunk(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         int rad = 0;
         if (args.length > 1) {
@@ -181,12 +181,21 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
-    private void randomFunction3(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void toggleNoClip(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        String name = sender.getName();
+        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+        boolean enabled = BCEventHandler.noClipPlayers.contains(name);
+
+        if (enabled) {
+            BCEventHandler.noClipPlayers.remove(name);
+            PacketDispatcher.sendNoclip(player, false);
+            sender.sendMessage(new TextComponentString("NoClip Disabled!"));
+        }
+        else {
+            BCEventHandler.noClipPlayers.add(name);
+            PacketDispatcher.sendNoclip(player, true);
+            sender.sendMessage(new TextComponentString("NoClip Enabled!"));
+        }
     }
 
-    private void randomFunction4(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-    }
-
-    private void randomFunction5(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-    }
 }
