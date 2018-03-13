@@ -129,6 +129,7 @@ public class PartBuilderImage extends IPartBuilder {
         int addHeight = topPad + bottomPad;
 
         String hover = Part.readOption(ops, "hover", "");
+        String linkTarget = Part.readOption(ops, "link_to", "");
 
         //endregion
 
@@ -137,7 +138,12 @@ public class PartBuilderImage extends IPartBuilder {
         MouseIntractable mi = new MouseIntractable() {
             @Override
             public boolean onClick(int mouseX, int mouseY, int button) {
-                container.imageClick(url, button);
+                if (linkTarget.isEmpty()){
+                    container.imageClick(url, button);
+                }
+                else {
+                    container.linkClick(linkTarget, button);
+                }
                 return true;
             }
         };
@@ -181,6 +187,7 @@ public class PartBuilderImage extends IPartBuilder {
 
                 int w = width - rightPad - leftPad;
                 int h = height - bottomPad - topPad;
+
                 GlStateManager.color(1, 1, 1, 1);
                 container.drawModalRectWithCustomSizedTexture(xPos + leftPad, yPos + topPad, 0, 0, w, h, w, h);
                 GlStateManager.color(font.red, font.blue, font.green, 1);

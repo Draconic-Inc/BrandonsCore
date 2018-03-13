@@ -87,6 +87,8 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
      * @return true if a heading was parsed.
      */
     private boolean checkHeading(LinkedList<String> markdownLines) {
+        if (markdownLines.isEmpty()) return false;
+
         String line = markdownLines.getFirst();
         String line2 = markdownLines.size() > 1 ? markdownLines.get(1) : "";
         int headingSize = 0;
@@ -172,6 +174,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
      * @return true if a rule was parsed.
      */
     private boolean checkRule(LinkedList<String> markdownLines) {
+        if (markdownLines.isEmpty()) return false;
         String line = markdownLines.getFirst();
 
         Pattern rulePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "rule\\[[^]]*])");
@@ -272,6 +275,8 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
      * This method should be called last after all special case parsing such as headings, tables and rule's
      */
     private void applyBuilders(LinkedList<String> markdownLines) {
+        if (markdownLines.isEmpty()) return;
+
         String next = markdownLines.removeFirst();
         boolean empty = next.isEmpty();
 
@@ -321,6 +326,7 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
      * Reads paragraph formatting tags such as " + Utils.SELECT + "colour, " + Utils.SELECT + "align and " + Utils.SELECT + "shadow
      */
     private void readParagraphFormatting(LinkedList<String> markdownLines) {
+        if (markdownLines.isEmpty()) return;
         String line = markdownLines.getFirst();
 
         //region Read Paragraph formatting flags
@@ -391,14 +397,14 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
     }
 
     public void linkClick(String linkTarget, int button) {
-        LogHelperBC.dev("Link Clicked! " + linkTarget);
+//        LogHelperBC.dev("Link Clicked! " + linkTarget);
         if (element.linkListener != null) {
             element.linkListener.accept(linkTarget, button);
         }
     }
 
     public void imageClick(String linkTarget, int button) {
-        LogHelperBC.dev("Image Clicked! " + linkTarget);
+//        LogHelperBC.dev("Image Clicked! " + linkTarget);
         if (element.imageListener != null) {
             element.imageListener.accept(linkTarget, button);
         }
