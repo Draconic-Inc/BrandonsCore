@@ -2,6 +2,12 @@ package com.brandon3055.brandonscore.handlers;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.commons.compress.utils.IOUtils;
 
@@ -34,8 +40,9 @@ public class FileHandler {
      * This is a simple helper method that downloads a file from the specified url to the specified output file.
      * This only supports http connections and will not work with https.
      * This is a blocking method meaning it will hang the thread until the download is complete or an exception is thrown.
+     *
      * @param sourceUrl Source URL
-     * @param output Target File
+     * @param output    Target File
      * @throws IOException
      */
     public static void downloadFile(String sourceUrl, File output) throws IOException {
@@ -58,7 +65,7 @@ public class FileHandler {
         return urlConnection.getInputStream();
     }
 
-    private static final Set<Character> ILLEGAL_CHARACTERS = Sets.newHashSet('/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' );
+    private static final Set<Character> ILLEGAL_CHARACTERS = Sets.newHashSet('/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':');
     public static final Predicate<String> FILE_NAME_VALIDATOR = s -> {
         if (s == null || s.isEmpty()) return false;
         for (char c : s.toCharArray()) {
@@ -66,4 +73,21 @@ public class FileHandler {
         }
         return true;
     };
+
+    public static JsonObject readObj(File file) throws IOException {
+        JsonReader reader = new JsonReader(new FileReader(file));
+        JsonParser parser = new JsonParser();
+        reader.setLenient(true);
+        JsonElement element = parser.parse(reader);
+        org.apache.commons.io.IOUtils.closeQuietly(reader);
+        return element.getAsJsonObject();
+    }
+
+    public static void writeJson(JsonObject obj, File file) throws IOException {
+        JsonWriter writer = new JsonWriter(new FileWriter(file));
+        writer.setIndent("  ");
+        Streams.write(obj, writer);
+        writer.flush();
+        org.apache.commons.io.IOUtils.closeQuietly(writer);
+    }
 }

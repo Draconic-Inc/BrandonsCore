@@ -216,7 +216,9 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     public void writeToStackNBT(NBTTagCompound compound) {
         NBTTagCompound dataTag = new NBTTagCompound();
         DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).saveToItem, p -> p.toNBT(dataTag));
-        compound.setTag("BCManagedData", dataTag);
+        if (!dataTag.hasNoTags()){
+            compound.setTag("BCManagedData", dataTag);
+        }
     }
 
     public void readFromStackNBT(NBTTagCompound compound) {

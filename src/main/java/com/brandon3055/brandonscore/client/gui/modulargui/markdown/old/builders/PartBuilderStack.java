@@ -1,24 +1,30 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders;
 
+import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.BCTextures;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.IPartBuilder;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MouseIntractable;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.IPartBuilder;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.MouseIntractable;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.Part;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.PartContainer;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
+import net.minecraftforge.oredict.OreDictionary;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -59,10 +65,13 @@ public class PartBuilderStack extends IPartBuilder {
         }
 
         Matcher stackStringMatch = stackString.matcher(match);
-        String stackString;
+        String stackString = "";
+        boolean isOre;
+
         if (!stackStringMatch.find() || (stackString = stackStringMatch.group()).isEmpty()) {
             return stackPatMatch.replaceFirst("[Broken Stack. No stack string Found]");
         }
+        isOre = OreDictionary.doesOreNameExist(stackString);
 
         Matcher opsMatch = stackOPS.matcher(match);
         String ops = opsMatch.find() ? opsMatch.group() : "";
@@ -79,22 +88,49 @@ public class PartBuilderStack extends IPartBuilder {
         boolean drawHover = Part.readOption(ops, "draw_hover", "true").equals("true");
         String altHover = Part.readOption(ops, "alt_hover", "");
 
-        StackReference stackRef = StackReference.fromString(stackString);
-        ItemStack stack;
-        if (stackRef == null || (stack = stackRef.createStack()).isEmpty()) {
-            return stackPatMatch.replaceFirst("[Broken Stack. Specified Item or Block could not be found!]");
+        List<ItemStack> baseStacks = new ArrayList<>();
+
+        if (isOre) {
+            baseStacks.addAll(OreDictionary.getOres(stackString));
+        }
+        else {
+            StackReference stackRef = StackReference.fromString(stackString);
+            ItemStack stack;
+            if (stackRef == null || (stack = stackRef.createStack()).isEmpty()) {
+                return stackPatMatch.replaceFirst("[Broken Stack. Specified Item or Block could not be found!]");
+            }
+            baseStacks.add(stack);
         }
 
-        //endregion
-
-        //endregion
-
-        MouseIntractable mi = new MouseIntractable();
-        if (drawHover) {
-            if (altHover.isEmpty()) {
-                mi.hoverStack = stack;
+        NonNullList<ItemStack> finalStacks = NonNullList.create();
+        for (ItemStack stack : baseStacks) {
+            if (stack.getMetadata() == OreDictionary.WILDCARD_VALUE && stack.getHasSubtypes()) {
+                stack.getItem().getSubItems(CreativeTabs.SEARCH, finalStacks);
             }
             else {
+                finalStacks.add(stack);
+            }
+        }
+
+        ItemStack[] stacks = finalStacks.toArray(new ItemStack[finalStacks.size()]);
+
+        //32767
+
+        //endregion
+
+        //endregion
+
+        MouseIntractable mi = new MouseIntractable() {
+            @Override
+            public ItemStack getHoverStack() {
+                if (altHover.isEmpty()) {
+                    return stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
+                }
+                return super.getHoverStack();
+            }
+        };
+        if (drawHover) {
+            if (!altHover.isEmpty()) {
                 if (altHover.contains("\\n")) {
                     mi.hoverText.addAll(Arrays.asList(altHover.split("(\\\\n)")));
                 }
@@ -124,6 +160,8 @@ public class PartBuilderStack extends IPartBuilder {
 
                 double scaledWidth = size / 18D;
                 double scaledHeight = size / 18D;
+
+                ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
 
                 RenderHelper.enableGUIStandardItemLighting();
                 GlStateManager.translate(xPos + scaledWidth, yPos + scaledHeight, container.getRenderZLevel() - 80);

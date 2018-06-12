@@ -1,13 +1,13 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.IPartBuilder;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.IPartBuilder;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.Part;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.PartContainer;
 
 import java.util.LinkedList;
 
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.

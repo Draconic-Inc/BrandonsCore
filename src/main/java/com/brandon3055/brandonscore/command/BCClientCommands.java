@@ -102,7 +102,7 @@ public class BCClientCommands extends CommandBase {
     }
 
     private void functionNBT(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayer player = getCommandSenderAsPlayer(sender);
+        EntityPlayer player = (EntityPlayer) sender;
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException("You are not holding an item!");

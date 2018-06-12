@@ -6,6 +6,7 @@ import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeCategory;
 import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.config.KeyBindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
@@ -70,6 +71,42 @@ public class JeiHelper {
 
         return renderers;
     }
+
+    public static void openJEIRecipe(ItemStack stack, boolean usage) {
+        if (jeiAvailable()) {
+            openJEIRecipeInternal(stack, usage);
+        }
+    }
+
+    @Optional.Method(modid = "jei")
+    private static void openJEIRecipeInternal(ItemStack stack, boolean usage) {
+        if (checkJEIRuntime()) {
+            IFocus f = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, stack);
+            BCJEIPlugin.jeiRuntime.getRecipesGui().show(f);
+        }
+    }
+
+
+    public static int getRecipeKey(boolean usage) {
+        if (jeiAvailable()) {
+            return getRecipeKeyInternal(usage);
+        }
+        return -1;
+    }
+
+    @Optional.Method(modid = "jei")
+    private static int getRecipeKeyInternal(boolean usage) {
+        try {
+            return usage ? KeyBindings.showUses.getKeyCode() : KeyBindings.showRecipe.getKeyCode();
+        }
+        catch (Throwable e) {
+            e.printStackTrace();
+            return 01;
+        }
+    }
+
+
+
 
     //endregion
 
@@ -138,15 +175,15 @@ public class JeiHelper {
         }
 
         @Override
-        public boolean handleClick(Minecraft minecraft, int mouseX, int mouseY, int mouseButton) {
+        public boolean handleRecipeClick(Minecraft minecraft, int mouseX, int mouseY, boolean usage) {
             Object clicked = recipeLayout.getIngredientUnderMouse(mouseX, mouseY);
 
             if (clicked != null) {
-                IFocus f = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createFocus(mouseButton == 0 ? IFocus.Mode.OUTPUT : IFocus.Mode.INPUT, clicked);
+                IFocus f = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, clicked);
                 BCJEIPlugin.jeiRuntime.getRecipesGui().show(f);
             }
 
-            return false;//layout.handleClick(minecraft, mouseX, mouseY, mouseButton);
+            return false;//layout.handleRecipeClick(minecraft, mouseX, mouseY, mouseButton);
         }
 
         @Override

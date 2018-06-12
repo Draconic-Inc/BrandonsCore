@@ -720,9 +720,13 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         }
     }
 
+    public Rectangle getScrollBounds() {
+        return scrollBounds;
+    }
+
     //endregion
 
-    public static enum ListMode {
+    public enum ListMode {
         DISABLED(false, false, false), VERTICAL(false, false, false), VERT_LOCK_POS(false, false, true), VERT_LOCK_POS_WIDTH(false, true, true), HORIZONTAL(true, false, false), HORIZ_LOCK_POS(true, false, true), HORIZ_LOCK_POS_HEIGHT(true, true, true);
 
         private final boolean horizontal;

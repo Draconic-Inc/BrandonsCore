@@ -10,13 +10,11 @@ import com.brandon3055.brandonscore.lib.datamanager.IManagedData;
 import com.brandon3055.brandonscore.lib.datamanager.TileDataManager;
 import com.brandon3055.brandonscore.lib.datamanager.TileDataOptions;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
-import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -39,7 +37,6 @@ import java.util.function.Consumer;
  */
 public class TileBCBase extends TileEntity implements IDataManagerProvider, IDataRetainingTile {
 
-    public static final String TILE_DATA_TAG = "BCTileData";
     protected boolean shouldRefreshOnState = true;
     protected TileDataManager<TileBCBase> dataManager = new TileDataManager<>(this);
 
@@ -169,8 +166,7 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     /**
      * Is minecraft seriously so screwed up that i have to resort to things like this?
      */
-    public Block getBlockTypeSafe(Block defaultBlock)
-    {
+    public Block getBlockTypeSafe(Block defaultBlock) {
         if (getBlockType() != Blocks.AIR) {
             return getBlockType();
         }
@@ -183,7 +179,8 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      * checks that the player is allowed to interact with this tile bu firing the RightClickBlock.
      * If the event is canceled bu another mod such as a permissions mod this will return false.
      */
-    @Deprecated //Just a reminder that i nolonger need to do this in the tile because its handled via the packet handler.
+    @Deprecated
+    //Just a reminder that i nolonger need to do this in the tile because its handled via the packet handler.
     public boolean verifyPlayerPermission(EntityPlayer player) {
         PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, EnumFacing.UP, player.getLookVec());
         MinecraftForge.EVENT_BUS.post(event);
@@ -203,22 +200,17 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      * @return the tile data compound so that tiles that override this method can easily write extra data to it.
      */
     @Override
-    public NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest) {
-        NBTTagCompound dataTag = new NBTTagCompound();
-        dataManager.writeToStackNBT(dataTag);
-        ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, dataTag);
-        return dataTag;
+    public void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest) {
+        dataManager.writeToStackNBT(tileCompound);
     }
 
     /**
      * @return the tile data compound so that tiles that override this method can easily read extra data from it.
      */
-    @Nullable
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public NBTTagCompound readFromItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = stack.getOrCreateSubCompound(TILE_DATA_TAG);
-        dataManager.readFromStackNBT(dataTag);
-        return dataTag;
+    public void readFromItemStack(NBTTagCompound tileCompound) {
+        dataManager.readFromStackNBT(tileCompound);
     }
 
     /**
@@ -226,10 +218,10 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      * This data is also synced to the client via getUpdateTag and getUpdatePacket.
      * Note: This will not save data to the item when the block is harvested.<br>
      * For that you need to override read and writeToStack just be sure to pay attention to the doc for those.
-     * */
-    public void writeExtraNBT(NBTTagCompound compound){}
+     */
+    public void writeExtraNBT(NBTTagCompound compound) {}
 
-    public void readExtraNBT(NBTTagCompound compound){}
+    public void readExtraNBT(NBTTagCompound compound) {}
 
     @Override
     public final NBTTagCompound writeToNBT(NBTTagCompound compound) {

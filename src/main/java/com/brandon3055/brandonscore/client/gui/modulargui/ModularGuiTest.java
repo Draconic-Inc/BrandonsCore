@@ -9,7 +9,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.authlib.GameProfile;

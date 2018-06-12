@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.utils.DataUtils;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
@@ -235,17 +234,17 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest) {
-        NBTTagCompound dataTag = super.writeToItemStack(stack, willHarvest);
-        writeInventoryToNBT(dataTag);
-        return dataTag;
+    public void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest) {
+        super.writeToItemStack(tileCompound, willHarvest);
+        if (!isEmpty()){
+            writeInventoryToNBT(tileCompound);
+        }
     }
 
     @Override
-    public NBTTagCompound readFromItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = super.readFromItemStack(stack);
-        readInventoryFromNBT(dataTag);
-        return dataTag;
+    public void readFromItemStack(NBTTagCompound tileCompound) {
+        super.readFromItemStack(tileCompound);
+        readInventoryFromNBT(tileCompound);
     }
 
     @Override

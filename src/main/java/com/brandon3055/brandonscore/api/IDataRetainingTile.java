@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.api;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -9,9 +8,9 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public interface IDataRetainingTile {
 
-    NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest);
+    void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest);
 
-    NBTTagCompound readFromItemStack(ItemStack stack);
+    void readFromItemStack(NBTTagCompound tileCompound);
 
     /**
      * @return false to completely disable tile data saving and restore default harvest logic. Deeded because IDataRetainingTile is now implemented on {@link com.brandon3055.brandonscore.blocks.TileBCBase}

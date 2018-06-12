@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import net.minecraft.item.ItemStack;
@@ -15,7 +15,7 @@ public class MouseIntractable {
     public List<Part> parts = new ArrayList<>();
     public List<String> hoverText = new LinkedList<>();
     public String errorText = null;
-    public ItemStack hoverStack = null;
+    private ItemStack hoverStack = null;
 
     public boolean onClick(int mouseX, int mouseY, int button) {
         return false;
@@ -32,5 +32,9 @@ public class MouseIntractable {
         }
 
         return false;
+    }
+
+    public ItemStack getHoverStack() {
+        return hoverStack;
     }
 }

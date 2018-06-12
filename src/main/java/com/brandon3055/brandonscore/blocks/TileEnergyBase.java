@@ -69,17 +69,17 @@ public class TileEnergyBase extends TileBCBase {
     }
 
     @Override
-    public NBTTagCompound writeToItemStack(ItemStack stack, boolean willHarvest) {
-        NBTTagCompound dataTag = super.writeToItemStack(stack, willHarvest);
-        energyStorage.writeToNBT(dataTag);
-        return dataTag;
+    public void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest) {
+        super.writeToItemStack(tileCompound, willHarvest);
+        if (energyStorage.getEnergyStored() > 0){
+            energyStorage.writeToNBT(tileCompound);
+        }
     }
 
     @Override
-    public NBTTagCompound readFromItemStack(ItemStack stack) {
-        NBTTagCompound dataTag = super.readFromItemStack(stack);
-        energyStorage.readFromNBT(dataTag);
-        return dataTag;
+    public void readFromItemStack(NBTTagCompound tileCompound) {
+        super.readFromItemStack(tileCompound);
+        energyStorage.readFromNBT(tileCompound);
     }
 
     @Override

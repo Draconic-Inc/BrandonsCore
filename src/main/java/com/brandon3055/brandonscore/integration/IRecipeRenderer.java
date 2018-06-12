@@ -19,7 +19,7 @@ public interface IRecipeRenderer {
 
     void renderOverlay(Minecraft mc, int mouseX, int mouseY);
 
-    boolean handleClick(Minecraft minecraft, int mouseX, int mouseY, int mouseButton);
+    boolean handleRecipeClick(Minecraft minecraft, int mouseX, int mouseY, boolean usage);
 
     @Nullable
     Object getIngredientUnderMouse(int mouseX, int mouseY);

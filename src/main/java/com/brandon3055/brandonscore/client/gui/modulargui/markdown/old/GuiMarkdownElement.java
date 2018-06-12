@@ -1,9 +1,9 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders.*;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders.*;
 import com.brandon3055.brandonscore.utils.Profiler;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.item.ItemStack;
@@ -37,7 +37,7 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
         partBuilders.add(new PartBuilderLink());
         partBuilders.add(new PartBuilderImage());
         partBuilders.add(new PartBuilderRecipe());
-        partBuilders.add(new PartBuilderStack());
+//        partBuilders.add(new PartBuilderStack());
         partBuilders.add(new PartBuilderEntity());
 
         //This is the default part builder that will accept anything its given so it must be called last.
@@ -164,6 +164,8 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
 
     public GuiMarkdownElement parseMarkdown(LinkedList<String> markdownLines) {
         currentAlign = GuiAlign.LEFT;
+        //Strip out comments
+        markdownLines.removeIf(s -> s.startsWith("//"));
 
         profiler.startSection("Parsing Markdown");
 //        LogHelperBC.startTimer("Parsing Markdown " + markdownLines.size() + " Lines");

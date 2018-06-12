@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.lib.IActivatableTile;
 import com.brandon3055.brandonscore.lib.IChangeListener;
 import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
+import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -37,6 +38,7 @@ import java.util.Map;
  * This is the base block class form all blocks.
  */
 public class BlockBCore extends Block {
+    public static final String TILE_DATA_TAG = "BCTileData";
     protected boolean isFullCube = true;
     private boolean ifcSet = false;
     protected boolean canProvidePower = false;
@@ -79,7 +81,11 @@ public class BlockBCore extends Block {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile) {
-            ((IDataRetainingTile) tile).writeToItemStack(stack, false);
+            NBTTagCompound tileData = new NBTTagCompound();
+            ((IDataRetainingTile) tile).writeToItemStack(tileData, true);
+            if (!tileData.hasNoTags()) {
+                ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, tileData);
+            }
         }
 
         return stack;
@@ -206,7 +212,9 @@ public class BlockBCore extends Block {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile) {
-            ((IDataRetainingTile) tile).readFromItemStack(stack);
+            if (stack.hasTagCompound() && stack.getTagCompound().hasKey(TILE_DATA_TAG)){
+                ((IDataRetainingTile) tile).readFromItemStack(stack.getSubCompound(TILE_DATA_TAG));
+            }
         }
     }
 
@@ -214,7 +222,11 @@ public class BlockBCore extends Block {
     public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
         if (te instanceof IDataRetainingTile && ((IDataRetainingTile) te).saveToItem()) {
             ItemStack stack = new ItemStack(this, 1, damageDropped(state));
-            ((IDataRetainingTile) te).writeToItemStack(stack, true);
+            NBTTagCompound tileData = new NBTTagCompound();
+            ((IDataRetainingTile) te).writeToItemStack(tileData, true);
+            if (!tileData.hasNoTags()) {
+                ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, tileData);
+            }
             spawnAsEntity(world, pos, stack);
             //Remove tile to make sure no one else can mess with it and dupe its contents.
             world.removeTileEntity(pos);
@@ -240,7 +252,7 @@ public class BlockBCore extends Block {
     @Override
     public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced) {
         super.addInformation(stack, world, tooltip, advanced);
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(TileBCBase.TILE_DATA_TAG)) {
+        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(TILE_DATA_TAG)) {
             tooltip.add(I18n.format("info.de.hasSavedData.txt"));
         }
     }

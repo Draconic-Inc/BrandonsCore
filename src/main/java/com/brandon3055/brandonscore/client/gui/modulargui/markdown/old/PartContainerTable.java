@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
@@ -17,7 +17,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CE
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.RIGHT;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Vertical.BOTTOM;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Vertical.MIDDLE;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -193,9 +193,7 @@ public class PartContainerTable extends PartContainer {
 
         String[] divs = line.split("\\|");
 
-//        LogHelperBC.dev(line + " Divs: " + divs.length);
         for (String div : divs) {
-//            LogHelperBC.dev("D: " + div);
             boolean leftColon = false;
             div = div.trim();
             if (div.length() == 0) {
@@ -211,7 +209,6 @@ public class PartContainerTable extends PartContainer {
             }
 
             if (div.startsWith("n")) {
-//                LogHelperBC.dev("Fixed: "+div);
                 boolean rightBinding = false;
                 if (div.endsWith(":")) {
                     div = div.substring(0, div.length() - 1);
@@ -227,7 +224,6 @@ public class PartContainerTable extends PartContainer {
                 }
             }
             else {
-//                LogHelperBC.dev(div);
                 int index = 0;
                 while (index < div.length()) {
                     char charAt = div.charAt(index);
@@ -246,45 +242,6 @@ public class PartContainerTable extends PartContainer {
             }
         }
 
-//
-//        int index = 0;
-//        boolean inDiv = false;
-//        boolean leftColon = false;
-//
-//        int currentDiv = 0;
-//
-//        while (index < line.length()) {
-//            char charAt = line.charAt(index);
-//
-//            if (inDiv) {
-//                if (charAt == '-' ) {
-//                    currentDiv++;
-//                }
-//                else if (charAt == ':' | charAt == ' ' || charAt == '|') {
-//                    awMaps.add(new PairKV<>(GuiAlign.fromBindings(leftColon, charAt == ':'), currentDiv));
-//                    currentDiv = 0;
-//                }
-//                else {
-//                    return false;
-//                }
-//            }
-//            else {
-//                if (charAt == ':' || charAt == '-') {
-//                    inDiv = true;
-//                    leftColon = charAt == ':';
-//                }
-//                else if (charAt != '|' && charAt != ' '){
-//                    return false;
-//                }
-//            }
-//
-//            index++;
-//        }
-//
-//        if (inDiv) {
-//            awMaps.add(new PairKV<>(GuiAlign.fromBindings(leftColon, false), currentDiv));
-//        }
-//
         columnData = awMaps;
 
         return true;
@@ -496,7 +453,7 @@ public class PartContainerTable extends PartContainer {
     }
 
     public static class ColumnData {
-        public int colOffset = 0;
+        public int colOffset = 0; //This is position offset... Should be able to find an alternative with the new builder
         public int colWidth = 0;
         public int divN = 0;
         boolean fixedWidth = false;

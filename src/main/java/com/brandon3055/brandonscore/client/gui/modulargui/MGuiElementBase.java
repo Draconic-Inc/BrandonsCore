@@ -89,6 +89,8 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * An id that is unique to this element (may or may not be used. If unused will be an empty string)
      */
     protected String id = "";
+    /**If true {@link #addBoundsToRect(Rectangle)} will ignore the bounds of this element and only check child elements.*/
+    protected boolean boundless = false;
     /**
      * Offsets the zLevel when rendering
      */
@@ -790,6 +792,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         if (frameAnimation) {
             GlStateManager.popMatrix();
         }
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.5, 0, 0xFF00FF00);
     }
 
     /**
@@ -1282,23 +1285,25 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * And all of its child elements recursively.
      */
     public Rectangle addBoundsToRect(Rectangle enclosingRect) {
-        int enRectMaxX = (int) enclosingRect.getMaxX();
-        int enRectMaxY = (int) enclosingRect.getMaxY();
+        if (!boundless) {
+            int enRectMaxX = (int) enclosingRect.getMaxX();
+            int enRectMaxY = (int) enclosingRect.getMaxY();
 
-        if (getRect().x < enclosingRect.x) {
-            enclosingRect.x = getRect().x;
-            enclosingRect.width = enRectMaxX - enclosingRect.x;
-        }
-        if (getRect().getMaxX() > enRectMaxX) {
-            enclosingRect.width = (int) getRect().getMaxX() - enclosingRect.x;
-        }
+            if (getRect().x < enclosingRect.x) {
+                enclosingRect.x = getRect().x;
+                enclosingRect.width = enRectMaxX - enclosingRect.x;
+            }
+            if (getRect().getMaxX() > enRectMaxX) {
+                enclosingRect.width = (int) getRect().getMaxX() - enclosingRect.x;
+            }
 
-        if (getRect().y < enclosingRect.y) {
-            enclosingRect.y = getRect().y;
-            enclosingRect.height = enRectMaxY - enclosingRect.y;
-        }
-        if (getRect().getMaxY() > enRectMaxY) {
-            enclosingRect.height = (int) getRect().getMaxY() - enclosingRect.y;
+            if (getRect().y < enclosingRect.y) {
+                enclosingRect.y = getRect().y;
+                enclosingRect.height = enRectMaxY - enclosingRect.y;
+            }
+            if (getRect().getMaxY() > enRectMaxY) {
+                enclosingRect.height = (int) getRect().getMaxY() - enclosingRect.y;
+            }
         }
 
         for (MGuiElementBase element : childElements) {
@@ -1383,7 +1388,23 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         }
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * This method allows you to initialize the element using another already initialized element.
+     * @param initializer the initialized element from which to retrieve the initialization variables.
+     */
+    public void initializeElementData(MGuiElementBase initializer) {
+        this.mc = initializer.mc;
+        if (mc == null) mc = Minecraft.getMinecraft();
+        this.fontRenderer = initializer.fontRenderer;
+        this.screenWidth = initializer.screenWidth;
+        this.screenHeight = initializer.screenHeight;
+        this.modularGui = initializer.modularGui;
+        for (MGuiElementBase element : childElements) {
+            element.applyGeneralElementData(modularGui, mc, screenWidth, screenHeight, fontRenderer);
+        }
+    }
+
+        @SuppressWarnings("unchecked")
     public E setLinkedObject(Object linkedObject) {
         this.linkedObject = linkedObject;
         return (E) this;
@@ -1465,6 +1486,14 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     public E setPostDrawCallback(IDrawCallback postDrawCallback) {
         this.postDrawCallback = postDrawCallback;
         return (E) this;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s:[x=%s,y=%s,w=%s,h=%s|ix=%s,iy=%s,iw=%s,ih=%s]", //
+                getClass().getSimpleName(), //
+                xPos(), yPos(), xSize(), ySize(), //
+                getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height);
     }
 
     //endregion

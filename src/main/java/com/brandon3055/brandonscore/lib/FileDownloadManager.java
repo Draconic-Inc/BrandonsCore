@@ -7,27 +7,31 @@ import java.util.*;
 
 /**
  * Created by brandon3055 on 5/08/2017.
+ * This is a general purpose download manager that can be used to que up
+ * files for download and monitor download progress.
  */
-public class FileDownloadHandler implements Runnable {
+public class FileDownloadManager implements Runnable {
 
+    //Monitoring Fields
     public volatile int totalFiles = 0;
     public volatile int filesDownloaded = 0;
     public volatile boolean running = false;
     public volatile boolean downloadsComplete = false;
     public Map<String, File> failedFiles = Collections.synchronizedMap(new HashMap<>());
+    //================
+
 
     private String name;
-    private final int maxWorkers;
-
+    private boolean resetOnFinish;
+    private Runnable queCompeteCallback = null;
     private final ThreadFileDownloader[] workers;
-
-    private List<PairKV<String, File>> downloadQue = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean stopDownload = false;
+    private List<PairKV<String, File>> downloadQue = Collections.synchronizedList(new ArrayList<>());
 
-    public FileDownloadHandler(String name, int maxWorkers) {
+    public FileDownloadManager(String name, int maxWorkers, boolean resetOnFinish) {
         this.name = name;
-        this.maxWorkers = maxWorkers;
         this.workers = new ThreadFileDownloader[maxWorkers];
+        this.resetOnFinish = resetOnFinish;
     }
 
     public void startDownload() {
@@ -39,8 +43,12 @@ public class FileDownloadHandler implements Runnable {
 
     @Override
     public void run() {
+        //While downloads are in progress
         while (!downloadsComplete) {
+            //Synchronize on workers
             synchronized (workers) {
+
+                //If stop has been requested stop all workers and add their files back to the que
                 if (stopDownload) {
                     for (int i = 0; i < workers.length; i++) {
                         if (!workers[i].isRunning()) {
@@ -53,6 +61,7 @@ public class FileDownloadHandler implements Runnable {
                     break;
                 }
 
+                //If download que is empty then set complete to true (for now)
                 downloadsComplete = downloadQue.isEmpty();
 
                 for (int i = 0; i < workers.length; i++) {
@@ -62,12 +71,13 @@ public class FileDownloadHandler implements Runnable {
                         failedFiles.put(worker.sourceURL, worker.outputFile);
                     }
 
+                    //If worker is still running then  set complete back to false
                     if (worker != null && worker.isRunning()) {
                         downloadsComplete = false;
                     }
                     else if (downloadQue.size() > 0) {
                         PairKV<String, File> file = downloadQue.remove(0);
-                        worker = new ThreadFileDownloader(name + ":DLThread-" + i, file.getKey(), file.getValue());
+                        worker = new ThreadFileDownloader(name + ":worker-" + i, file.getKey(), file.getValue());
                         LogHelperBC.dev("FileDownloadHandler: Starting Download: " + file.getKey() + " -> " + file.getValue());
                         workers[i] = worker;
                         worker.start();
@@ -82,6 +92,12 @@ public class FileDownloadHandler implements Runnable {
         }
 
         running = false;
+        if (queCompeteCallback != null) {
+            queCompeteCallback.run();
+        }
+        if (resetOnFinish) {
+            reset();
+        }
     }
 
     //region File Que
@@ -99,6 +115,7 @@ public class FileDownloadHandler implements Runnable {
         if (startIfStopped) {
             startDownload();
         }
+        totalFiles++;
         return running;
     }
 
@@ -126,16 +143,18 @@ public class FileDownloadHandler implements Runnable {
         downloadQue.clear();
     }
 
+    //endregion
+
     /**
      * @return a map of all currently downloading files and their progress.
      */
-    public Map<String, Double> getActiveProgress() {
-        Map<String, Double> map = new HashMap<>();
+    public Map<File, Double> getActiveProgress() {
+        Map<File, Double> map = new HashMap<>();
 
         synchronized (workers) {
             for (ThreadFileDownloader thread : workers) {
                 if (thread != null && thread.isRunning()) {
-                    map.put(thread.sourceURL, thread.getProgress());
+                    map.put(thread.outputFile, thread.getProgress());
                 }
             }
         }
@@ -143,6 +162,15 @@ public class FileDownloadHandler implements Runnable {
         return map;
     }
 
-    //endregion
+    public double getDownloadProgressTotal() {
+        double total = filesDownloaded;
+        for (Double d : getActiveProgress().values()) {
+            total += d;
+        }
+        return total;
+    }
 
+    public void setQueCompeteCallback(Runnable queCompeteCallback) {
+        this.queCompeteCallback = queCompeteCallback;
+    }
 }

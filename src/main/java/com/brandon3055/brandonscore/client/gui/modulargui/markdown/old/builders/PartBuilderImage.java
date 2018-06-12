@@ -1,16 +1,17 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders;
 
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.IPartBuilder;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MouseIntractable;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.IPartBuilder;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.MouseIntractable;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.Part;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.PartContainer;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 
 import java.util.Arrays;
@@ -18,7 +19,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -138,6 +139,10 @@ public class PartBuilderImage extends IPartBuilder {
         MouseIntractable mi = new MouseIntractable() {
             @Override
             public boolean onClick(int mouseX, int mouseY, int button) {
+                if (GuiScreen.isShiftKeyDown()) {
+                    DLRSCache.clearFileCache(url);
+                    return false;
+                }
                 if (linkTarget.isEmpty()){
                     container.imageClick(url, button);
                 }

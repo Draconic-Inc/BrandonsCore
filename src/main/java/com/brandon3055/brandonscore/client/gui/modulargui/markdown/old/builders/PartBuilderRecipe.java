@@ -1,10 +1,10 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown.builders;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.IPartBuilder;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MouseIntractable;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.Part;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.PartContainer;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.IPartBuilder;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.MouseIntractable;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.Part;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.PartContainer;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CENTER;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.RIGHT;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement.profiler;
 
 /**
  * Created by brandon3055 on 20/07/2017.
@@ -140,16 +140,18 @@ public class PartBuilderRecipe extends IPartBuilder {
 
         int lastHeight = 0;
         for (IRecipeRenderer renderer : renderers) {
-            int height = renderer.getHeight() + topPad + bottomPad;
+            int height = renderer.getHeight() + topPad + bottomPad + spacing;
             int width = renderer.getWidth() + leftPad + rightPad + spacing;
+
             if (finalXPos + width > elementRight) {
                 finalXPos = elementLeft;
-                finalYPos = Math.max(nextYLevel, lastHeight);
+                finalYPos = Math.max(nextYLevel, finalYPos + lastHeight);
                 lastHeight = 0;
             }
 
-            if (finalYPos + height > lastHeight) {
-                lastHeight = finalYPos + height;
+            //We are figuring out how far to move down so the height of this component is irrelevant in the previous if statement
+            if (height > lastHeight) {
+                lastHeight = height;
             }
 
             Part part = new Part(container) {
@@ -158,7 +160,7 @@ public class PartBuilderRecipe extends IPartBuilder {
                     int offset = container.align == CENTER ? (spacing / 2) : container.align == RIGHT ? spacing : 0;
                     if (borderColour != -1) {
                         int border = mi.isMouseOver ? borderColourHover : borderColour;
-                        container.drawColouredRect(xPos + offset, yPos, width - spacing, height, 0xFF000000 | border);
+                        container.drawColouredRect(xPos + offset, yPos, width - spacing, height - spacing, 0xFF000000 | border);
                     }
 
                     renderer.render(container.mc, xPos + leftPad + offset, yPos + topPad, mouseX, mouseY);
@@ -176,8 +178,8 @@ public class PartBuilderRecipe extends IPartBuilder {
             mi.parts.add(part);
         }
 
-        finalYPos = Math.max(nextYLevel, lastHeight);
-        builtHeight = (finalYPos - yPos);
+//        finalYPos = Math.max(nextYLevel, lastHeight);
+        builtHeight = (finalYPos - yPos) + lastHeight + 1;
 
 
         return recipeMatch.replaceFirst("");

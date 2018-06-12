@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.CENTER;
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LEFT;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.GuiMarkdownElement.profiler;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement.profiler;
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
 
@@ -476,20 +476,20 @@ public class PartContainer extends MGuiElementBase<PartContainer> {
                 }
                 return true;
             }
-            else if (mi.isMouseOver && mi.hoverStack != null) {
-                List<String> list = mi.hoverStack.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
+            else if (mi.isMouseOver && mi.getHoverStack() != null) {
+                List<String> list = mi.getHoverStack().getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
 
                 for (int i = 0; i < list.size(); ++i) {
                     if (i == 0) {
-                        list.set(i, mi.hoverStack.getRarity().rarityColor + list.get(i));
+                        list.set(i, mi.getHoverStack().getRarity().rarityColor + list.get(i));
                     }
                     else {
                         list.set(i, TextFormatting.GRAY + list.get(i));
                     }
                 }
 
-                GuiUtils.preItemToolTip(mi.hoverStack);
-                this.drawHoveringText(mi.hoverStack, list, mouseX, mouseY, screenWidth, screenHeight, -1, fontRenderer);
+                GuiUtils.preItemToolTip(mi.getHoverStack());
+                this.drawHoveringText(mi.getHoverStack(), list, mouseX, mouseY, screenWidth, screenHeight, -1, fontRenderer);
                 GuiUtils.postItemToolTip();
                 return true;
             }

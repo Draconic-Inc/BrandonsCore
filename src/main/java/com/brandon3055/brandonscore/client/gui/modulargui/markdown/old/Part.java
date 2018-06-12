@@ -1,4 +1,4 @@
-package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
+package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.utils.LogHelperBC;

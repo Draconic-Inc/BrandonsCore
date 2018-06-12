@@ -209,11 +209,13 @@ public class ThreadedImageDownloader extends SimpleTexture{
                 try
                 {
                     httpurlconnection = (HttpURLConnection)(new URL(ThreadedImageDownloader.this.resourceUrl)).openConnection(Minecraft.getMinecraft().getProxy());
+                    httpurlconnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
                     httpurlconnection.setDoInput(true);
                     httpurlconnection.setDoOutput(false);
                     httpurlconnection.connect();
+                    int response = httpurlconnection.getResponseCode();
 
-                    if (httpurlconnection.getResponseCode() / 100 == 2)
+                    if (response / 100 == 2)
                     {
                         BufferedImage bufferedimage;
 
