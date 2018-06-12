@@ -131,10 +131,10 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 ResourceHelperBC.bindTexture(texture);
                 drawTexturedModalRect(xPos(), yPos(), 0, 0, xSize() / 2, ySize() / 2);
-                drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 255 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 256 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
 
-                drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 255 - (ySize() / 2), xSize() / 2, ySize() / 2);
-                drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 255 - (xSize() / 2), 255 - (ySize() / 2), xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 256 - (xSize() / 2), 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
 
                 for (MGuiElementBase element : childElements) {
                     if (element.isEnabled()) {
@@ -156,10 +156,10 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
 //                LogHelperBC.dev("R " + xPos() + " " + yPos() + " " + xSize() + " " + ySize() + " " + isMouseOver(mouseX, mouseY));
 //                setYSize(10);
                 drawTexturedModalRect(xPos(), yPos(), 0, 0, xSize() / 2, ySize() / 2);
-                drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 255 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 256 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
 
-                drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 255 - (ySize() / 2), xSize() / 2, ySize() / 2);
-                drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 255 - (xSize() / 2), 255 - (ySize() / 2), xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 256 - (xSize() / 2), 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
 
                 for (MGuiElementBase element : childElements) {
                     if (element.isEnabled()) {
