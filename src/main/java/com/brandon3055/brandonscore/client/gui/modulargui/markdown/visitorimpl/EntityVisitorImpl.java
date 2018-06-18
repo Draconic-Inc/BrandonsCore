@@ -44,7 +44,7 @@ public class EntityVisitorImpl extends EntityVisitor {
 
     @Override
     public void visitScale(double scale) {
-        element.scale = scale;
+        element.drawScale = scale;
     }
 
     @Override
@@ -94,6 +94,6 @@ public class EntityVisitorImpl extends EntityVisitor {
 
     @Override
     public void endVisit() {
-        element.invalidProps.putAll(invalidCalls);
+        element.invalidProps.addAll(invalidCalls.keySet());
     }
 }

@@ -1,13 +1,12 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.visitorimpl;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementFactory;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.TableElement;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.TableElement.TableCellContainer;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.CellData;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.TableDefinition;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.TableVisitor;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.VAlign;
 
 /**
  * Created by brandon3055 on 5/30/2018.
@@ -15,30 +14,38 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visito
 public class TableVisitorImpl extends TableVisitor {
 
     private TableElement element;
+    //In the case of an xml table these are the default values
+    private int cellColour = 0;
+    private boolean hasCellColour = false;
+//    private int borderColour = 0;
+//    private boolean hasBorderColour = false;
+    private int headingColour = 0;
+    private boolean hasHeadingColour = false;
+    private int leftPadding = 0;
+    private int rightPadding = 0;
+    private int topPadding = 0;
+    private int bottomPadding = 0;
+    private VAlign vertAlignment = VAlign.TOP;
 
     public TableVisitorImpl(TableElement element) {
         this.element = element;
     }
 
     @Override
-    public void visitBorderColour(int argb) {
-        element.setColourBorder(argb);
+    public void visitColour(int cellColour) {
+        this.cellColour = cellColour;
+        this.hasCellColour = true;
     }
 
     @Override
-    public void visitHeadingColour(int argb) {
-        element.headingColour = argb;
-        element.colourHeading = true;
+    public void visitBorderColour(int borderColour) {
+        element.setColourBorder(borderColour);
     }
 
     @Override
-    public void visitRows(int rows) {
-        element.rows = rows;
-    }
-
-    @Override
-    public void visitColumns(int columns) {
-        element.columns = columns;
+    public void visitHeadingColour(int headingColour) {
+        this.headingColour = headingColour;
+        this.hasHeadingColour = true;
     }
 
     @Override
@@ -48,13 +55,13 @@ public class TableVisitorImpl extends TableVisitor {
     }
 
     @Override
-    public void visitAlignment(HAlign alignment) {
-        element.hAlign = alignment;
+    public void visitHeight(int height) {
+        element.height = height;
     }
 
     @Override
     public void visitVertAlign(VAlign vertAlignment) {
-        element.vAlign = vertAlignment;
+        this.vertAlignment = vertAlignment;
     }
 
     @Override
@@ -68,17 +75,56 @@ public class TableVisitorImpl extends TableVisitor {
     }
 
     @Override
-    public void visitTableDefinition(TableDefinition definition) {
-        element.definition = definition;
+    public void visitLeftPad(int leftPadding) {
+        this.leftPadding = leftPadding;
     }
 
     @Override
-    public MarkdownVisitor getCellVisitor(int row, int column) {
-        return new MDElementFactory(new MDElementContainer(element, 100));//todo
+    public void visitRightPad(int rightPadding) {
+        this.rightPadding = rightPadding;
+    }
+
+    @Override
+    public void visitTopPad(int topPadding) {
+        this.topPadding = topPadding;
+    }
+
+    @Override
+    public void visitBottomPad(int bottomPadding) {
+        this.bottomPadding = bottomPadding;
+    }
+
+    @Override
+    public MarkdownVisitor getCellVisitor(CellData data) {
+        TableCellContainer tableCell = element.getCreateCell(data);
+        MarkdownVisitor visitor = tableCell.createContainer();
+
+        MDElementContainer container = tableCell.container;
+        int lPad = data.lPad != -9999 ? data.lPad : leftPadding;
+        int rPad = data.rPad != -9999 ? data.rPad : rightPadding;
+        int tPad = data.tPad != -9999 ? data.tPad : topPadding;
+        int bPad = data.bPad != -9999 ? data.bPad : bottomPadding;
+        container.setInsets(tPad, lPad, bPad, rPad);
+
+        if (data.colourSet) {
+            tableCell.background.setFillColour(0xFF000000 | data.colour);
+        }
+        else if (hasHeadingColour && data.row == 0) {
+            tableCell.background.setFillColour(0xFF000000 | headingColour);
+        }
+        else if (hasCellColour) {
+            tableCell.background.setFillColour(0xFF000000 | cellColour);
+        }
+
+        if (data.vAlign == null) {
+            data.vAlign = vertAlignment;
+        }
+
+        return visitor;
     }
 
     @Override
     public void endVisit() {
-        element.invalidProps.putAll(invalidCalls);
+        element.invalidProps.addAll(invalidCalls.keySet());
     }
 }

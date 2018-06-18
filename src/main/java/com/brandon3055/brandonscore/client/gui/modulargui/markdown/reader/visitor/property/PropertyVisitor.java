@@ -1,5 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

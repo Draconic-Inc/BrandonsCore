@@ -21,7 +21,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.Gu
  * Created by brandon3055 on 4/07/2017.
  */
 public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implements IGuiEventListener {
-//public class GuiScrollElement<T extends com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement<T>> extends MGuiElementBase<T> implements IGuiEventListener {
+    //public class GuiScrollElement<T extends com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement<T>> extends MGuiElementBase<T> implements IGuiEventListener {
     public static final String DEFAULT_SCROLL_BAR_GROUP = "GuiScrollElement_Default_Scroll_Bars";
 
     protected int listSpacing = 0;
@@ -278,7 +278,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public void updateScrollElement() {
         if (listMode != DISABLED) {
             int lastPos = listMode.horizontal() ? getInsetRect().x : getInsetRect().y;
-            for (MGuiElementBase element : scrollingElements) {
+            for (MGuiElementBase element: scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 if (listMode.horizontal()) {
                     if (listMode.lockPos()) {
@@ -323,7 +323,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             yMax = maxYPos();
         }
         else {
-            for (MGuiElementBase element : scrollingElements) {
+            for (MGuiElementBase element: scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 Rectangle rect = element.getEnclosingRect();
                 if (rect.x < xMin) xMin = (int) rect.getX();
@@ -460,14 +460,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (getInsetRect().contains(mouseX, mouseY)) {
-            for (MGuiElementBase element : scrollingElements) {
+            for (MGuiElementBase element: scrollingElements) {
                 if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                     return true;
                 }
             }
         }
 
-        for (MGuiElementBase element : foregroundElements) {
+        for (MGuiElementBase element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -477,13 +477,13 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
 
     @Override
     public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (MGuiElementBase element : scrollingElements) {
+        for (MGuiElementBase element: scrollingElements) {
             if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
         }
 
-        for (MGuiElementBase element : foregroundElements) {
+        for (MGuiElementBase element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
@@ -493,13 +493,13 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
 
     @Override
     public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
-        for (MGuiElementBase element : scrollingElements) {
+        for (MGuiElementBase element: scrollingElements) {
             if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
         }
 
-        for (MGuiElementBase element : foregroundElements) {
+        for (MGuiElementBase element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
@@ -520,7 +520,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             horizontalScrollPos = (int) horizontalScrollBar.getPosition();
         }
 
-        for (MGuiElementBase scrollableElement : scrollingElements) {
+        for (MGuiElementBase scrollableElement: scrollingElements) {
 //            scrollableElement.animateMoveFrames();
             if (smoothScroll) {
                 scrollableElement.translateAnim(xAdjustment, yAdjustment, animSpeed);
@@ -590,7 +590,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        for (MGuiElementBase element : backgroundElements) {
+        for (MGuiElementBase element: backgroundElements) {
             if (element.isEnabled()) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -620,7 +620,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             backgroundElement.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 
-        for (MGuiElementBase element : scrollingElements) {
+        for (MGuiElementBase element: scrollingElements) {
             if (element.isEnabled() && element != backgroundElement) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -629,7 +629,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         ScissorHelper.popScissor();
 //        GlStateManager.popMatrix();
 
-        for (MGuiElementBase element : foregroundElements) {
+        for (MGuiElementBase element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element)) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -677,7 +677,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             enclosingRect.height = (int) getRect().getMaxY() - enclosingRect.y;
         }
 
-        for (MGuiElementBase element : childElements) {
+        for (MGuiElementBase element: childElements) {
             if (!scrollingElements.contains(element)) {
                 element.addBoundsToRect(enclosingRect);
             }
@@ -727,7 +727,13 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     //endregion
 
     public enum ListMode {
-        DISABLED(false, false, false), VERTICAL(false, false, false), VERT_LOCK_POS(false, false, true), VERT_LOCK_POS_WIDTH(false, true, true), HORIZONTAL(true, false, false), HORIZ_LOCK_POS(true, false, true), HORIZ_LOCK_POS_HEIGHT(true, true, true);
+        DISABLED(false, false, false),
+        VERTICAL(false, false, false),
+        VERT_LOCK_POS(false, false, true),
+        VERT_LOCK_POS_WIDTH(false, true, true),
+        HORIZONTAL(true, false, false),
+        HORIZ_LOCK_POS(true, false, true),
+        HORIZ_LOCK_POS_HEIGHT(true, true, true);
 
         private final boolean horizontal;
         private final boolean lockWidth;

@@ -29,3 +29,7 @@ gui.de.button.toggleOn=Toggle On
 gui.de.button.toggle=Toggle
 gui.de.button.close=Close
 gui.button.save=Save
+
+//---- Modular GUI ----//
+gui.bc.downloading_image.info=Downloading Image
+gui.bc.downloading_image_failed.info=Image Download failed! Shift + Left click to retry.

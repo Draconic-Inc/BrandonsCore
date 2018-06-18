@@ -1,12 +1,18 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.*;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.TableDefinition;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.TableVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.visitorimpl.*;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement.Type.NEW_LINE;
 
@@ -14,6 +20,13 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelem
  * Created by brandon3055 on 5/31/2018.
  */
 public class MDElementFactory extends MarkdownVisitor {
+
+    private static Pattern obf = Pattern.compile("(?<=[^\\\\]|^)(~\\?~.*~\\?~)");
+    private static Pattern bold = Pattern.compile("(?<=[^\\\\]|^)(\\*\\*.*\\*\\*)");
+    private static Pattern italic = Pattern.compile("(?<=[^\\\\]|^)(\\*.*\\*)");
+    private static Pattern strike = Pattern.compile("(?<=[^\\\\]|^)(~~.*~~)");
+    private static Pattern tablePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "table\\[[^]]*])");
+    private static Pattern underline = Pattern.compile("(?<=[^\\\\]|^)(__.*__)");
 
     private MDElementContainer container;
 
@@ -31,6 +44,7 @@ public class MDElementFactory extends MarkdownVisitor {
 
     public MDElementFactory(MDElementContainer container) {
         this.container = container;
+        container.lastFactory = this;
     }
 
     @Override
@@ -75,7 +89,7 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
-    //Second Pass doc TODO Link confirmation dialog
+    //Second Pass doc
     @Override
     public LinkVisitor visitLink(String linkTarget) {
         LinkElement element = new LinkElement(container, linkTarget);
@@ -86,6 +100,7 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
+    //Second Pass doc
     @Override
     public EntityVisitor visitEntity(String regName) {
         EntityElement element = new EntityElement(regName);
@@ -104,8 +119,8 @@ public class MDElementFactory extends MarkdownVisitor {
     }
 
     @Override
-    public TableVisitor visitTable() {
-        TableElement element = new TableElement();
+    public TableVisitor visitTable(TableDefinition definition) {
+        TableElement element = new TableElement(container, definition);
         TableVisitor visitor = new TableVisitorImpl(element);
         addElement(element);
         return visitor;
@@ -113,6 +128,7 @@ public class MDElementFactory extends MarkdownVisitor {
 
     @Override
     public void visitHeading(String text, int heading, boolean underlineDefinition) { //First Pass
+        text = applyTextFormatting(text);
         TextElement element = new TextElement(text, heading);
         element.colour = colourOverridden ? () -> colourOverride : colourSupplier;
         element.shadow = shadow;
@@ -121,6 +137,7 @@ public class MDElementFactory extends MarkdownVisitor {
 
     @Override
     public void visitText(String text) { //First Pass
+        text = applyTextFormatting(text);
         TextElement element = new TextElement(text, 0);
         element.colour = colourOverridden ? () -> colourOverride : colourSupplier;
         element.shadow = shadow;
@@ -198,13 +215,46 @@ public class MDElementFactory extends MarkdownVisitor {
 
     @Override
     public void visitError(String errorMessage) {
-        TextElement error = new TextElement(errorMessage, 0);
-        error.colour = () -> 0xFF0000;
+        TextElement error = new TextElement("\n" + errorMessage + "\n", 0);
+        error.colour = () -> 0xFF3030;
         error.shadow = true;
         addElement(error);
     }
 
     public void setColourSupplier(Supplier<Integer> colourSupplier) {
         this.colourSupplier = colourSupplier;
+    }
+
+    public void inherit(MDElementFactory parentFactory) {
+        this.colourSupplier = parentFactory.colourSupplier;
+    }
+
+    private static String applyTextFormatting(String input) {
+        input = input.replaceAll("\t", "");
+        int escape = 0;
+        while (bold.matcher(input).find() && escape++ < 1000) {
+            input = input.replaceFirst("(\\*\\*)", "" + Utils.SELECT + "l").replaceFirst("(\\*\\*)", "" + Utils.SELECT + "l");
+        }
+
+        while (italic.matcher(input).find() && escape++ < 1000) {
+            input = input.replaceFirst("(\\*)", "" + Utils.SELECT + "o").replaceFirst("(\\*)", "" + Utils.SELECT + "o");
+        }
+
+        while (underline.matcher(input).find() && escape++ < 1000) {
+            input = input.replaceFirst("(__)", "" + Utils.SELECT + "n").replaceFirst("(__)", "" + Utils.SELECT + "n");
+        }
+
+        while (strike.matcher(input).find() && escape++ < 1000) {
+            input = input.replaceFirst("(~~)", "" + Utils.SELECT + "m").replaceFirst("(~~)", "" + Utils.SELECT + "m");
+        }
+
+        while (obf.matcher(input).find() && escape++ < 1000) {
+            input = input.replaceFirst("(~\\?~)", "" + Utils.SELECT + "k").replaceFirst("(~\\?~)", "" + Utils.SELECT + "k");
+        }
+
+        if (escape >= 1000) {
+            LogHelperBC.dev("Escape!");
+        }
+        return input;
     }
 }

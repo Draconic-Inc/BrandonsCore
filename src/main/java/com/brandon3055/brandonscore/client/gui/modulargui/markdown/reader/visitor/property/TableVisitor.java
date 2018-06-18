@@ -1,5 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.CellData;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
 
 /**
@@ -8,19 +10,18 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visito
 public abstract class TableVisitor extends PropertyVisitor {
 
     @Override
+    public abstract void visitColour(int argb);
+
+    @Override
     public abstract void visitBorderColour(int argb);
 
     public abstract void visitHeadingColour(int argb);
-
-    public abstract void visitRows(int rows);
-
-    public abstract void visitColumns(int columns);
 
     @Override
     public abstract void visitWidth(int width, boolean screenRelative);
 
     @Override
-    public abstract void visitAlignment(HAlign alignment);
+    public abstract void visitHeight(int height);
 
     @Override
     public abstract void visitVertAlign(VAlign vertAlignment);
@@ -30,10 +31,17 @@ public abstract class TableVisitor extends PropertyVisitor {
     //Called for each row with the raw row string (just in case its needed)
     public abstract void visitTableRow(String row);
 
-    public abstract void visitTableDefinition(TableDefinition definition);
+    @Override
+    public abstract void visitLeftPad(int leftPadding);
 
-    //Override this if you need to know when the table being read is an xmtable
-    public void visitXMTable() {}
+    @Override
+    public abstract void visitRightPad(int rightPadding);
 
-    public abstract MarkdownVisitor getCellVisitor(int row, int column);
+    @Override
+    public abstract void visitTopPad(int topPadding);
+
+    @Override
+    public abstract void visitBottomPad(int bottomPadding);
+
+    public abstract MarkdownVisitor getCellVisitor(CellData cell);
 }

@@ -39,6 +39,6 @@ public class StackVisitorImpl extends StackVisitor {
 
     @Override
     public void endVisit() {
-        element.invalidProps.putAll(invalidCalls);
+        element.invalidProps.addAll(invalidCalls.keySet());
     }
 }

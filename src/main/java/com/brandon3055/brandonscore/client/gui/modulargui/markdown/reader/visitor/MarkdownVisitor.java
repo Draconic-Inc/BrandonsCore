@@ -1,5 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.TableDefinition;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.TableVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.*;
 
 /**
@@ -23,7 +26,7 @@ public abstract class MarkdownVisitor {
 
     public abstract RuleVisitor visitRule();
 
-    public abstract TableVisitor visitTable();
+    public abstract TableVisitor visitTable(TableDefinition definition);
 
     public abstract void visitHeading(String headingText, int heading, boolean underlineDefinition);
 

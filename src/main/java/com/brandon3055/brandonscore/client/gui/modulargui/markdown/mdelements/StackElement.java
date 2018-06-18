@@ -82,14 +82,12 @@ public class StackElement extends MDElementBase<StackElement> {
             drawScaledCustomSizeModalRect(xPos(), yPos(), 0, 0, 18, 18, xSize(), ySize(), 255, 255);
         }
 
-        double scaledWidth = size / 18D;
-        double scaledHeight = size / 18D;
-
+        double scale = size / 18D;
         ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
 
         RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.translate(xPos() + scaledWidth, yPos() + scaledHeight, getRenderZLevel() - 80);
-        GlStateManager.scale(scaledWidth, scaledHeight, 1);
+        GlStateManager.translate(xPos() + scale, yPos() + scale, getRenderZLevel() - 80);
+        GlStateManager.scale(scale, scale, 1);
         minecraft.getRenderItem().renderItemIntoGUI(stack, 0, 0);
 
         if (stack.getCount() > 1) {

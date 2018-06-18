@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.VAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import net.minecraft.client.Minecraft;
 
 import java.awt.*;
@@ -39,7 +39,8 @@ public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiEl
     private String elementError = "";
     public boolean hasSubParts = false;
     public LinkedList<MDElementBase> subParts = new LinkedList<>();
-    public Map<String, String> invalidProps = new HashMap<>();
+    public List<String> invalidProps = new ArrayList<>();
+    public List<String> errors = new ArrayList<>();
 
     public MDElementBase() {
     }
@@ -57,6 +58,9 @@ public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiEl
     }
 
     public void error(String errorMessage) {
+        if (!errors.contains(errorMessage)) {
+            errors.add(errorMessage);
+        }
         if (elementError.isEmpty()){
             this.elementError = errorMessage;
         }
@@ -107,9 +111,10 @@ public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiEl
 
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (!invalidProps.isEmpty()) {
+        if (!invalidProps.isEmpty() && yPos() > 0 && yPos() < screenHeight) {
             List<String> list = new ArrayList<>();
-            invalidProps.forEach((s, s2) -> list.add("§cProperty \"" + s + "\" is invalid or not supported by this tag!§c"));
+            invalidProps.forEach(s -> list.add("§cProperty \"" + s + "\" is invalid or not supported by this tag!§c"));
+            errors.forEach(s -> list.add("§c" + s + "§c"));
             zOffset += 100;
             BCFontRenderer.setStileToggleMode(true);
             drawHoveringText(list, xPos() - 8, yPos() + 15, fontRenderer, screenWidth, screenHeight);

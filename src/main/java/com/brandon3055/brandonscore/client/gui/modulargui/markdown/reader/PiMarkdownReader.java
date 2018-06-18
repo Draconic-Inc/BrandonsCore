@@ -1,11 +1,21 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.CellData;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.TableDefinition;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.*;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -13,9 +23,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign.CENTER;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign.LEFT;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign.RIGHT;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign.*;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign.*;
 
 /**
  * Created by brandon3055 on 5/30/2018.
@@ -30,13 +39,6 @@ public class PiMarkdownReader {
     private static String alignReg = "(?<=[^\\\\]|^)(" + S + "align:%1$s)";
 //    private static final Pattern shadowOnPat = Pattern.compile("(?<=[^\\\\]|^)(" + S + "shadow:on)");
 //    private static final Pattern shadowOffPat = Pattern.compile("(?<=[^\\\\]|^)(" + S + "shadow:off)");
-
-    private static Pattern obf = Pattern.compile("(?<=[^\\\\]|^)(~\\?~.*~\\?~)");
-    private static Pattern bold = Pattern.compile("(?<=[^\\\\]|^)(\\*\\*.*\\*\\*)");
-    private static Pattern italic = Pattern.compile("(?<=[^\\\\]|^)(\\*.*\\*)");
-    private static Pattern strike = Pattern.compile("(?<=[^\\\\]|^)(~~.*~~)");
-    private static Pattern tablePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "table\\[[^]]*])");
-    private static Pattern underline = Pattern.compile("(?<=[^\\\\]|^)(__.*__)");
 
     private static final String LINK = "link";
     private static final String IMG = "img";
@@ -85,238 +87,372 @@ public class PiMarkdownReader {
             //-Calls the visit method for that tag
             //-Reads all properties and passes them to the property visitor
 
-            while (currentLine.length() > 0) {
-                int nextPart = currentLine.length();
+            final String thisLine = currentLine;
+            try {
+                while (currentLine.length() > 0) {
+                    int nextPart = currentLine.length();
 
-                if ((matcher = getTagMatcher(LINK, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        acceptLink(visitor, matcher.group());
-                        currentLine = matcher.replaceFirst("");
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if ((matcher = getTagMatcher(IMG, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        acceptImg(visitor, matcher.group());
-                        currentLine = matcher.replaceFirst("");
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if ((matcher = getTagMatcher(RECIPE, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        acceptRecipe(visitor, matcher.group());
-                        currentLine = matcher.replaceFirst("");
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if ((matcher = getTagMatcher(STACK, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        acceptStack(visitor, matcher.group());
-                        currentLine = matcher.replaceFirst("");
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if ((matcher = getTagMatcher(ENTITY, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        acceptEntity(visitor, matcher.group());
-                        currentLine = matcher.replaceFirst("");
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if ((matcher = getTagMatcher(RULE, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        acceptRule(visitor, matcher.group());
-                        currentLine = matcher.replaceFirst("");
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if ((matcher = getTagMatcher(TABLE, currentLine)).find()) { //Done? Maybe?
-                    int start = matcher.start();
-                    if (start == 0) {
-                        String tagString = matcher.group();
-                        TableVisitor tableVisitor = visitor.visitTable();
-                        String[] props = extractProps(TABLE, tagString);
-                        acceptProps(tableVisitor, props, false);
-                        currentLine = matcher.replaceFirst("");
-
-                        if (!currentLine.isEmpty()) { //There shouldn't be anything after the table tag but if there is then skip it.
-                            visitor.visitSkipped(currentLine);
-                            currentLine = "";
-                        }
-
-                        if (markdownLines.size() < 2) {
+                    //region Basic Tags
+                    if ((matcher = getTagMatcher(LINK, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            acceptLink(visitor, matcher.group());
+                            currentLine = matcher.replaceFirst("");
                             continue;
                         }
-
-                        String nextLine = markdownLines.getFirst();
-                        TableDefinition definition = checkDelimiter(nextLine);
-                        if (definition != null) {
-                            markdownLines.removeFirst();
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
                         }
-                        else if ((definition = checkDelimiter(markdownLines.get(1))) != null) {
-                            definition.hasHeading = true;
-                            markdownLines.remove(1);
+                    }
+                    if ((matcher = getTagMatcher(IMG, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            acceptImg(visitor, matcher.group());
+                            currentLine = matcher.replaceFirst("");
+                            continue;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    if ((matcher = getTagMatcher(RECIPE, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            acceptRecipe(visitor, matcher.group());
+                            currentLine = matcher.replaceFirst("");
+                            continue;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    if ((matcher = getTagMatcher(STACK, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            acceptStack(visitor, matcher.group());
+                            currentLine = matcher.replaceFirst("");
+                            continue;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    if ((matcher = getTagMatcher(ENTITY, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            acceptEntity(visitor, matcher.group());
+                            currentLine = matcher.replaceFirst("");
+                            continue;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    if ((matcher = getTagMatcher(RULE, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            acceptRule(visitor, matcher.group());
+                            currentLine = matcher.replaceFirst("");
+                            continue;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    //endregion
+
+                    //region Table Tags
+                    if ((matcher = getTagMatcher(TABLE, currentLine)).find()) { //Done? Maybe?
+                        int start = matcher.start();
+                        if (start == 0) {
+                            String tagString = matcher.group();
+                            currentLine = matcher.replaceFirst("");
+
+                            if (markdownLines.size() < 2) {
+                                continue;
+                            }
+
+                            //Extract the table definition
+                            String nextLine = markdownLines.getFirst();
+                            TableDefinition definition = checkDelimiter(nextLine);
+                            if (definition != null) {
+                                markdownLines.removeFirst();
+                            }
+                            else if ((definition = checkDelimiter(markdownLines.get(1))) != null) {
+                                definition.hasHeading = true;
+                                markdownLines.remove(1);
+                            }
+                            else {
+                                //Check / parse XML table
+                                if (!nextLine.trim().startsWith("<table")) {
+                                    continue;
+                                }
+
+                                //Create a copy so an un-closed table wont eat the entire page.
+                                LinkedList<String> linesCopy = new LinkedList<>(markdownLines);
+                                TableCeptionHelper helper = new TableCeptionHelper();
+                                String tableXML = helper.parseXML(linesCopy, true);
+
+                                if (!helper.tableClosed) {
+                                    visitor.visitError("XML table is missing its closing tag! \"</table>\" (must be at the start of the line)");
+                                    continue;
+                                }
+
+                                readXMLTableRows(visitor, tableXML, tagString, currentLine);
+                                currentLine = "";
+
+                                //Strip out the table xml
+                                new TableCeptionHelper().parseXML(markdownLines, true);
+
+                                continue;
+                            }
+
+                            //Parse normal table
+
+                            TableVisitor tableVisitor = visitor.visitTable(definition);
+                            String[] props = extractProps(TABLE, tagString);
+                            acceptProps(tableVisitor, props, false);
+
+                            if (!currentLine.isEmpty()) { //There shouldn't be anything after the table tag but if there is then skip it.
+                                visitor.visitSkipped(currentLine);
+                                currentLine = "";
+                            }
+
+                            readMDTableRows(tableVisitor, markdownLines, definition);
+                            tableVisitor.endVisit();
+                            continue;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    //endregion
+
+                    //region Formatting and text
+                    String nextLine = markdownLines.size() > 1 ? markdownLines.get(1) : "";
+                    if (currentLine.startsWith("#") || isAllChar(nextLine, '=') || isAllChar(nextLine, '-')) {
+                        int headingType = 0;
+                        while (headingType < currentLine.length() && currentLine.charAt(headingType) == '#')
+                            headingType++;
+
+                        if (headingType == 0) {
+                            headingType = isAllChar(nextLine, '=') ? 1 : 2;
+                            visitor.visitHeading(currentLine, headingType, true);
+                            markdownLines.removeFirst();
+                            currentLine = "";
+                            continue;
                         }
                         else {
-                            continue;//Do deliminator found so table is invalid
+                            visitor.visitHeading(trim(currentLine, '#'), headingType, true);
+                            currentLine = "";
+                            continue;
+                        }
+                    }
+
+                    //Check for alignment tag
+                    boolean formatLine = false;
+                    if ((matcher = getTagMatcher(COLOUR, currentLine)).find()) { //Done
+                        int start = matcher.start();
+                        if (start == 0) {
+                            String tagString = matcher.group();
+                            try {
+                                acceptColour(visitor, tagString);
+                            }
+                            catch (Exception e) {
+                                visitor.visitError("[An error occurred while reading colour tag]: " + e.toString());
+                                visitor.visitSkipped(tagString);
+                            }
+                            currentLine = matcher.replaceFirst("");
+                            if (currentLine.trim().isEmpty()) {
+                                visitor.visitSkipped(currentLine);
+                                currentLine = "";
+                            }
+                            formatLine = true;
+                        }
+                        else if (start > 0 && start < nextPart) {
+                            nextPart = start;
+                        }
+                    }
+                    if (getMatcher("left", alignReg, currentLine).find()) {
+                        visitor.visitAlignment(LEFT);
+                        currentLine = currentLine.replace("" + S + "align:left", "");
+                        formatLine = true;
+                    }
+                    else if (getMatcher("center", alignReg, currentLine).find()) {
+                        visitor.visitAlignment(CENTER);
+                        currentLine = currentLine.replace("" + S + "align:center", "");
+                        formatLine = true;
+                    }
+                    else if (getMatcher("right", alignReg, currentLine).find()) {
+                        visitor.visitAlignment(RIGHT);
+                        currentLine = currentLine.replace("" + S + "align:right", "");
+                        formatLine = true;
+                    }
+
+                    if (formatLine) {
+                        if (!currentLine.isEmpty()) {
+                            while (currentLine.startsWith(" ") && currentLine.length() > 1) {
+                                currentLine = currentLine.substring(1);
+                                visitor.visitSkipped(" ");
+                            }
                         }
 
-                        tableVisitor.visitTableDefinition(definition);
-
-                        int row = 0;
-                        while ((nextLine = markdownLines.getFirst()).startsWith("|") && nextLine.length() > 2 && nextLine.substring(1).contains("|")) {
-                            tableVisitor.visitTableRow(nextLine);
-                            nextLine = nextLine.trim();
-
-                            if (nextLine.startsWith("|") && nextLine.length() > 1) {
-                                nextLine = nextLine.substring(1);
-                            }
-                            if (nextLine.endsWith("|") && nextLine.length() > 1) {
-                                nextLine = nextLine.substring(0, nextLine.length() - 1);
-                            }
-                            if (!nextLine.contains("|")) {
-                                break; //We have found the end of the table..
-                            }
-
-                            String[] columns = nextLine.split("\\|");
-                            for (int column = 0; column < columns.length; column++) {
-                                String cell = columns[column];
-                                if (cell.startsWith(" ") && cell.length() > 1) cell = cell.substring(1);
-                                if (cell.endsWith(" ") && cell.length() > 1) cell = cell.substring(0, cell.length() - 1);
-
-                                MarkdownVisitor cellVisitor = tableVisitor.getCellVisitor(row, column);
-                                new PiMarkdownReader(cell.getBytes()).accept(cellVisitor);
-                            }
-
-                            markdownLines.removeFirst();
-                            row ++;
-                        }
-
-                        tableVisitor.endVisit();
-                        continue;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                //Check Heading
-                String nextLine = markdownLines.size() > 1 ? markdownLines.get(1) : "";
-                if (currentLine.startsWith("#") || isAllChar(nextLine, '=') || isAllChar(nextLine, '-')) {
-                    int headingType = 0;
-                    while (headingType < currentLine.length() && currentLine.charAt(headingType) == '#') headingType++;
-
-                    if (headingType == 0) {
-                        headingType = isAllChar(nextLine, '=') ? 1 : 2;
-                        visitor.visitHeading(applyTextFormatting(currentLine), headingType, true);
-                        markdownLines.removeFirst();
-                        currentLine = "";
-                        continue;
-                    }
-                    else {
-                        visitor.visitHeading(trim(applyTextFormatting(currentLine), '#'), headingType, true);
-                        currentLine = "";
-                        continue;
-                    }
-                }
-
-                //Check for alignment tag
-                boolean formatLine = false;
-                if ((matcher = getTagMatcher(COLOUR, currentLine)).find()) { //Done
-                    int start = matcher.start();
-                    if (start == 0) {
-                        String tagString = matcher.group();
-                        try {
-                            acceptColour(visitor, tagString);
-                        }
-                        catch (Exception e) {
-                            visitor.visitError("[An error occurred while reading colour tag]: " + e.toString());
-                            visitor.visitSkipped(tagString);
-                        }
-                        currentLine = matcher.replaceFirst("");
                         if (currentLine.trim().isEmpty()) {
                             visitor.visitSkipped(currentLine);
                             currentLine = "";
                         }
-                        formatLine = true;
-                    }
-                    else if (start > 0 && start < nextPart) {
-                        nextPart = start;
-                    }
-                }
-                if (getMatcher("left", alignReg, currentLine).find()) {
-                    visitor.visitAlignment(LEFT);
-                    currentLine = currentLine.replace("" + S + "align:left", "");
-                    formatLine = true;
-                }
-                else if (getMatcher("center", alignReg, currentLine).find()) {
-                    visitor.visitAlignment(CENTER);
-                    currentLine = currentLine.replace("" + S + "align:center", "");
-                    formatLine = true;
-                }
-                else if (getMatcher("right", alignReg, currentLine).find()) {
-                    visitor.visitAlignment(RIGHT);
-                    currentLine = currentLine.replace("" + S + "align:right", "");
-                    formatLine = true;
-                }
-//                if (shadowOnPat.matcher(currentLine).find()) {
-//                    visitor.visitShadow(true);
-//                    currentLine = currentLine.replace("" + S + "shadow:on", "");
-//                    formatLine = true;
-//                }
-//                if (shadowOffPat.matcher(currentLine).find()) {
-//                    visitor.visitShadow(false);
-//                    currentLine = currentLine.replace("" + S + "shadow:off", "");
-//                    formatLine = true;
-//                }
-
-                if (formatLine) {
-                    if (!currentLine.isEmpty()) {
-                        while (currentLine.startsWith(" ") && currentLine.length() > 1) {
-                            currentLine = currentLine.substring(1);
-                            visitor.visitSkipped(" ");
-                        }
+                        continue;
                     }
 
-                    if (currentLine.trim().isEmpty()) {
-                        visitor.visitSkipped(currentLine);
-                        currentLine = "";
-                    }
-                    continue;
+                    String text = currentLine.substring(0, nextPart);
+                    currentLine = currentLine.substring(nextPart);
+                    visitor.visitText(text);
+                    //endregion
                 }
-
-                String text = currentLine.substring(0, nextPart);
-                currentLine = currentLine.substring(nextPart);
-                visitor.visitText(applyTextFormatting(text));
-
+                visitor.endLine();
             }
-            visitor.endLine();
+            catch (Throwable e) {
+                e.printStackTrace();
+                visitor.visitError("En exception was thrown while reading line: " + thisLine);
+            }
         }
 
+
         visitor.endVisit();
+    }
+
+    //Table Parsing
+
+    private void readMDTableRows(TableVisitor tableVisitor, LinkedList<String> markdownLines, TableDefinition definition) {
+        int row = 0;
+        String nextLine;
+        while ((nextLine = markdownLines.getFirst()).startsWith("|") && nextLine.length() > 2 && nextLine.substring(1).contains("|")) {
+            tableVisitor.visitTableRow(nextLine);
+            nextLine = nextLine.trim();
+
+            if (!nextLine.contains("|")) {
+                break; //We have found the end of the table..
+            }
+            if (nextLine.startsWith("|") && nextLine.length() > 1) {
+                nextLine = nextLine.substring(1);
+            }
+            if (nextLine.endsWith("|") && nextLine.length() > 1) {
+                nextLine = nextLine.substring(0, nextLine.length() - 1);
+            }
+
+            String[] cells = nextLine.split("\\|");
+            for (int cellIndex = 0; cellIndex < cells.length; cellIndex++) {
+                String cell = cells[cellIndex];
+                if (cell.startsWith(" ") && cell.length() > 1) cell = cell.substring(1);
+                if (cell.endsWith(" ") && cell.length() > 1) cell = cell.substring(0, cell.length() - 1);
+
+                CellData data = new CellData(cellIndex, row);
+
+                if (cellIndex < definition.columns.size()) {
+                    data.hAlign = definition.columns.get(cellIndex).align;
+                }
+
+                MarkdownVisitor cellVisitor = tableVisitor.getCellVisitor(data);
+                new PiMarkdownReader(cell.getBytes()).accept(cellVisitor);
+            }
+
+            markdownLines.removeFirst();
+            row++;
+        }
+    }
+
+    private void readXMLTableRows(MarkdownVisitor visitor, String rawXML, String tagString, String currentLine) {
+        rawXML = rawXML.substring(0, rawXML.length() - 1);
+
+        try {
+            TableDefinition definition = new TableDefinition(true);
+            List<XMLTableElement.Row> rows = readTableXML(rawXML, definition);
+            List<CellData> cellDataList = new ArrayList<>();
+            int maxColumn = 0;
+
+            for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+                XMLTableElement.Row row = rows.get(rowIndex);
+                for (int columnIndex = 0; columnIndex < row.cells.size(); columnIndex++) {
+                    XMLTableElement.Cell cell = row.cells.get(columnIndex);
+                    maxColumn = Math.max(maxColumn, columnIndex);
+                    cellDataList.add(cell.getCellData(columnIndex, rowIndex));
+                }
+            }
+
+            if (maxColumn >= definition.columns.size()) {
+                throw new TableReadException("Layout Error! The table has " + (maxColumn + 1) + " columns\n" + "but you have only defined " + definition.columns.size() + " in the column_layout attribute!");
+            }
+
+            TableVisitor tableVisitor = visitor.visitTable(definition);
+            String[] props = extractProps(TABLE, tagString);
+            acceptProps(tableVisitor, props, false);
+
+            if (!currentLine.isEmpty()) { //There shouldn't be anything after the table tag but if there is then skip it.
+                visitor.visitSkipped(currentLine);
+            }
+
+            for (CellData data: cellDataList) {
+                MarkdownVisitor cellVisitor = tableVisitor.getCellVisitor(data);
+                new PiMarkdownReader(data.readerCellContent.getBytes()).accept(cellVisitor);
+            }
+        }
+        catch (TableReadException e) {
+            visitor.visitError("An error occurred while reading XML table!");
+            visitor.visitError(e.getMessage() == null ? e.toString() : e.getMessage());
+        }
+        catch (Throwable e) {
+            visitor.visitError("An error occurred while reading XML table!");
+            visitor.visitError(e.toString());
+        }
+    }
+
+    private List<XMLTableElement.Row> readTableXML(String rawXML, TableDefinition definition) throws Exception {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = docFactory.newDocumentBuilder();
+        Document document = builder.parse(new ByteArrayInputStream(rawXML.getBytes()));
+        Element tableE = document.getDocumentElement();
+        tableE.getTagName();
+
+        boolean layoutSet = false;
+        if (tableE.hasAttribute("column_layout")) {
+            String layoutString = tableE.getAttribute("column_layout");
+            String[] columns = layoutString.split(",");
+            for (String column: columns) {
+                boolean dynamic = column.endsWith("*");
+                column = column.replace("*", "");
+                int width;
+                try { width = Integer.parseInt(column); }
+                catch (NumberFormatException e) {
+                    throw new TableReadException("Invalid column layout specified! \"" + layoutString + "\"\n" + //
+                            "A valid layout should look something like this\n" + //
+                            "\"50,1*,2*\" * indicates the width of the column is dynamic relative to the other dynamic columns\n" + //
+                            "The number of column width's specified must match the number of columns in the table.");
+                }
+                definition.addColumn(width, !dynamic, LEFT);
+            }
+            layoutSet = true;
+        }
+
+        List<XMLTableElement.Row> rows = new ArrayList<>();
+        NodeList rowNodes = tableE.getChildNodes();
+        for (int row = 0; row < rowNodes.getLength(); row++) {
+            Node node = rowNodes.item(row);
+            if (node instanceof Element) {
+                rows.add(new XMLTableElement.Row((Element) node));
+            }
+        }
+
+        if (!layoutSet) {
+            int columns = 0;
+            for (XMLTableElement.Row row: rows) {
+                columns = Math.max(columns, row.cells.size());
+            }
+            for (int i = 0; i < columns; i++) {
+                definition.addColumn(1, true, LEFT);
+            }
+        }
+
+        return rows;
     }
 
     private void acceptLink(MarkdownVisitor visitor, String tagString) {
@@ -367,7 +503,7 @@ public class PiMarkdownReader {
 
     private void acceptProps(PropertyVisitor visitor, String[] props, boolean endVisit) {
         visitor.startVisit();
-        for (String prop : props) {
+        for (String prop: props) {
             if (!prop.contains(":")) {
                 visitor.visitInvalid(prop, "Invalid property");
                 continue;
@@ -425,7 +561,7 @@ public class PiMarkdownReader {
                     case "vert_align":
                         switch (value.toLowerCase()) {
                             case "top":
-                                visitor.visitVertAlign(VAlign.TOP);
+                                visitor.visitVertAlign(TOP);
                                 break;
                             case "middle":
                                 visitor.visitVertAlign(VAlign.MIDDLE);
@@ -527,12 +663,6 @@ public class PiMarkdownReader {
                     case "heading_colour":
                         ((TableVisitor) visitor).visitHeadingColour(readColour(value));
                         break;
-                    case "rows":
-                        ((TableVisitor) visitor).visitRows(Integer.parseInt(value));
-                        break;
-                    case "columns":
-                        ((TableVisitor) visitor).visitColumns(Integer.parseInt(value));
-                        break;
                     case "render_cells":
                         ((TableVisitor) visitor).visitRenderCells(parseBoolean(value));
                         break;
@@ -551,20 +681,6 @@ public class PiMarkdownReader {
             visitor.endVisit();
         }
     }
-
-
-//    public Pattern getTagPat(String tag) {
-//        return Pattern.compile(String.format(tagMatchReg, tag));
-//    }
-
-//    public boolean hasTag(String tag, String line) {
-//        Pattern pattern = Pattern.compile(String.format(tagMatchReg, tag));
-//        Matcher matcher = pattern.matcher(line);
-//        if (matcher.find()) {
-//            return matcher.start() == 0;
-//        }
-//        return false;
-//    }
 
     public Matcher getTagMatcher(String tag, String line) {
         Pattern pattern = Pattern.compile(String.format(tagMatchReg, tag));
@@ -612,14 +728,15 @@ public class PiMarkdownReader {
         }
         else if (input.contains(",")) {
             String[] vals = input.split(",");
-            if (vals.length != 3) throw new NumberFormatException();
+            if (vals.length != 3)
+                throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
             int r = vals[0].contains(".") ? (int) (Double.parseDouble(vals[0]) * 255) : Integer.parseInt(vals[0]);
             int g = vals[1].contains(".") ? (int) (Double.parseDouble(vals[1]) * 255) : Integer.parseInt(vals[0]);
             int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[0]);
             return r << 16 | g << 8 | b;
         }
         else {
-            throw new NumberFormatException();
+            throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
         }
     }
 
@@ -656,7 +773,7 @@ public class PiMarkdownReader {
     }
 
     private TableDefinition checkDelimiter(String line) {
-        TableDefinition definition = new TableDefinition();
+        TableDefinition definition = new TableDefinition(false);
         line = line.trim();
 
         if (line.length() < 2) {
@@ -669,7 +786,7 @@ public class PiMarkdownReader {
 
         String[] divs = line.split("\\|");
 
-        for (String div : divs) {
+        for (String div: divs) {
             boolean leftColon = false;
             div = div.trim();
             if (div.length() == 0) {
@@ -693,10 +810,8 @@ public class PiMarkdownReader {
 
                 try {
                     definition.addColumn(Integer.parseInt(div.substring(1)), true, getColumnAlign(leftColon, rightBinding));
-//                    awMaps.add(new ColumnData(GuiAlign.fromBindings(leftColon, rightBinding), Integer.parseInt(div.substring(1)), true));
                 }
                 catch (Exception e) {
-//                    LogHelperBC.error("Error reading Delimiter with fixed column width. " + e.getMessage());
                     return null;
                 }
             }
@@ -712,7 +827,6 @@ public class PiMarkdownReader {
                     }
                     if (charAt == ' ' || charAt == ':' || index + 1 == div.length()) {
                         definition.addColumn(Math.max(index, 1), false, getColumnAlign(leftColon, charAt == ':'));
-//                        awMaps.add(new ColumnData(GuiAlign.fromBindings(leftColon, charAt == ':'), Math.max(index, 1)));
                         break;
                     }
                     index++;
@@ -731,31 +845,198 @@ public class PiMarkdownReader {
         return rightBind ? RIGHT : CENTER;
     }
 
-    private static String applyTextFormatting(String input) {
-        int escape = 0;
-        while (bold.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(\\*\\*)", "" + Utils.SELECT + "l").replaceFirst("(\\*\\*)", "" + Utils.SELECT + "l");
+    //For internal xml parsing use only
+    private static class XMLTableElement {
+        public int colour = 0;
+        public boolean colourSet = false;
+        public int lPad = -9999;
+        public int rPad = -9999;
+        public int tPad = -9999;
+        public int bPad = -9999;
+        public HAlign hAlign = null;
+        public VAlign vAlign = null;
+
+        protected void readAttributes(Element element, XMLTableElement parent) throws Exception {
+            if (parent != null) {
+                this.colour = parent.colour;
+                this.colourSet = parent.colourSet;
+                this.lPad = parent.lPad;
+                this.rPad = parent.rPad;
+                this.tPad = parent.tPad;
+                this.bPad = parent.bPad;
+                this.hAlign = parent.hAlign;
+                this.vAlign = parent.vAlign;
+            }
+
+            if (element.hasAttribute("colour")) {
+                colourSet = true;
+                colour = readColour(element.getAttribute("colour"));
+            }
+            if (element.hasAttribute("padding")) {
+                String paddingAttrib = element.getAttribute("padding");
+                String[] sValues = paddingAttrib.split(",");
+                int[] values = new int[sValues.length];
+                for (int i = 0; i < sValues.length; i++) {
+                    values[i] = Integer.parseInt(sValues[i]);
+                }
+
+                try {
+                    tPad = values[0];
+                    rPad = values.length > 1 ? values[1] : values[0];
+                    bPad = values.length > 2 ? values[2] : values[0];
+                    lPad = values.length == 4 ? values[3] : values.length > 1 ? values[1] : values[0];
+                }
+                catch (Throwable e) {
+                    throw new TableReadException("Invalid padding attribute: \"" + paddingAttrib + "\"\n" + //
+                            "Valid formats are \"n\", \"n,n\", \"n,n,n\" or \"n,n,n,n\" Where n is the padding value as an integer.\n" +
+                            "The values specified apply to:\n" +
+                            "\"<all sides>\", \"<top & bottom>,<right & left>\",\n" +
+                            "\"<top>,<right & left>,<bottom>\" or \"<top>,<right>,<bottom>,<left>\"");
+                }
+            }
+            if (element.hasAttribute("align")) {
+                String alignString = element.getAttribute("align");
+                if (alignString.contains("left")) {
+                    hAlign = LEFT;
+                    alignString = alignString.replace("left", "");
+                }
+                else if (alignString.contains("center")) {
+                    hAlign = CENTER;
+                    alignString = alignString.replace("center", "");
+                }
+                else if (alignString.contains("right")) {
+                    hAlign = RIGHT;
+                    alignString = alignString.replace("right", "");
+                }
+
+                if (alignString.contains("top")) {
+                    vAlign = TOP;
+                    alignString = alignString.replace("top", "");
+                }
+                else if (alignString.contains("middle")) {
+                    vAlign = MIDDLE;
+                    alignString = alignString.replace("middle", "");
+                }
+                else if (alignString.contains("bottom")) {
+                    vAlign = BOTTOM;
+                    alignString = alignString.replace("bottom", "");
+                }
+
+                alignString = alignString.replaceAll(" ", "").replaceAll("-", "");
+                if (!alignString.isEmpty()) {
+                    throw new TableReadException("Detected invalid characters in alignment attribute: " + alignString + //
+                            "\nAnd example of a valid alignment is \"top\" or \"left\" or \"top left\" or \"bottom-right\"\n" + //
+                            "Valid horizontal alignments are left, center and right\n" + //
+                            "Valid vertical alignments are tob, middle and bottom");
+                }
+            }
         }
 
-        while (italic.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(\\*)", "" + Utils.SELECT + "o").replaceFirst("(\\*)", "" + Utils.SELECT + "o");
+        private static class Row extends XMLTableElement {
+            public List<Cell> cells = new ArrayList<>();
+
+            public Row(Element rowE) throws Exception {
+                String tag = rowE.getTagName();
+                if (!tag.equals("tr")) {
+                    throw new TableReadException("Found <" + tag + "> Tag where <tr> tag was expected!");
+                }
+                readAttributes(rowE, null);
+
+                NodeList cellNodes = rowE.getChildNodes();
+                for (int cell = 0; cell < cellNodes.getLength(); cell++) {
+                    Node node = cellNodes.item(cell);
+                    if (node instanceof Element) {
+                        cells.add(new XMLTableElement.Cell(this, (Element) node));
+                    }
+                }
+            }
         }
 
-        while (underline.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(__)", "" + Utils.SELECT + "n").replaceFirst("(__)", "" + Utils.SELECT + "n");
+        private static class Cell extends XMLTableElement {
+            public String cellContent;
+
+            public Cell(Row row, Element cellE) throws Exception {
+                String tag = cellE.getTagName();
+                if (!tag.equals("td")) {
+                    if (tag.equals("th")) {
+                        throw new TableReadException("<th> tag is not supported as it is not needed. If you want to format this as a heading cell then just do so via cell/row colour");
+                    }
+                    else {
+                        throw new TableReadException("Found <" + tag + "> Tag where <td> tag was expected!");
+                    }
+                }
+                readAttributes(cellE, row);
+
+                cellContent = cellE.getTextContent();
+                if (cellContent.startsWith("\n") && cellContent.length() > 1) {
+                    cellContent = cellContent.substring(1);
+                }
+                while (cellContent.endsWith("\t") && cellContent.length() > 1) {
+                    cellContent = cellContent.substring(0, cellContent.length() - 1);
+                }
+                if (cellContent.endsWith("\n") && cellContent.length() > 1) {
+                    cellContent = cellContent.substring(0, cellContent.length() - 1);
+                }
+            }
+
+            public CellData getCellData(int column, int row) {
+                CellData data = new CellData(column, row);
+                data.colour = colour;
+                data.colourSet = colourSet;
+                data.lPad = lPad;
+                data.rPad = rPad;
+                data.tPad = tPad;
+                data.bPad = bPad;
+                if (hAlign != null) {
+                    data.hAlign = hAlign;
+                }
+                if (vAlign != null){
+                    data.vAlign = vAlign;
+                }
+                data.readerCellContent = cellContent;
+                return data;
+            }
         }
 
-        while (strike.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(~~)", "" + Utils.SELECT + "m").replaceFirst("(~~)", "" + Utils.SELECT + "m");
+    }
+
+    protected static class TableReadException extends Exception {
+        public TableReadException(String message) {
+            super(message);
+        }
+    }
+
+    private static class TableCeptionHelper {
+        public boolean tableClosed = false;
+
+        public String parseXML(LinkedList<String> markdownLines, boolean isRoot) {
+            StringBuilder xmlBuilder = new StringBuilder();
+
+            //Need to do this to avoid a stack overflow because the first line will always be an opening table element.
+            String next = markdownLines.removeFirst();
+            xmlBuilder.append(next).append("\n");
+
+            do {
+                if (markdownLines.isEmpty()) {
+                    return xmlBuilder.toString();
+                }
+                next = markdownLines.removeFirst();
+                if (next.trim().startsWith("<table")) {
+                    markdownLines.addFirst(next);
+                    next = new TableCeptionHelper().parseXML(markdownLines, false);
+                }
+                xmlBuilder.append(next).append("\n");
+            }
+            while (!next.trim().startsWith("</table>"));
+            tableClosed = true;
+            String xml= xmlBuilder.toString();
+
+            if (!isRoot) {
+                xml = StringEscapeUtils.escapeXml11(xml);
+            }
+
+            return xml;
         }
 
-        while (obf.matcher(input).find() && escape++ < 1000) {
-            input = input.replaceFirst("(~\\?~)", "" + Utils.SELECT + "k").replaceFirst("(~\\?~)", "" + Utils.SELECT + "k");
-        }
-
-        if (escape >= 1000) {
-            LogHelperBC.dev("Escape!");
-        }
-        return input;
     }
 }

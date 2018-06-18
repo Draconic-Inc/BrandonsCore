@@ -37,7 +37,7 @@ public class TextElement extends MDElementBase<TextElement> {
 
     @Override
     public void layoutElement(LayoutHelper layout, List<MDElementBase> lineElement) {
-        if (layout.getWidth() < 20) return;
+        if (layout.getWidth() < 5) return;
         toRemove.addAll(subParts);
         subParts.clear();
 
@@ -46,8 +46,11 @@ public class TextElement extends MDElementBase<TextElement> {
 
         boolean newln = false;
         while (text.length() > 0) {
-            int avalibleWidth = layout.getWidth() - layout.getCaretXOffset() - 15;
-            int nextSplit = fontRenderer.sizeStringToWidth(text, (int) Math.ceil(avalibleWidth * textScale));
+            int avalibleWidth = layout.getWidth() - layout.getCaretXOffset();
+            int nextSplit = fontRenderer.sizeStringToWidth(text, (int) Math.ceil(avalibleWidth / textScale));
+            if (nextSplit == 0 && avalibleWidth == layout.getWidth()) {
+                nextSplit = 1;
+            }
             if (nextSplit == 0) {
                 layout.newLine(0);
                 subParts.add(new MarkerElement(NEW_LINE));
@@ -56,6 +59,7 @@ public class TextElement extends MDElementBase<TextElement> {
             }
 
             String nextPart = text.substring(0, nextSplit);
+            nextPart = nextPart.replace("\n", "");
 
             //Remove leading spaces when wrapping.
             if (newln && nextPart.length() > 1 && nextPart.startsWith(" ")) {

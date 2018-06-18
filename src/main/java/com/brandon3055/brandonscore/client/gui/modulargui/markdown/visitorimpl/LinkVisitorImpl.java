@@ -78,6 +78,6 @@ public class LinkVisitorImpl extends LinkVisitor {
 
     @Override
     public void endVisit() {
-        element.invalidProps.putAll(invalidCalls);
+        element.invalidProps.addAll(invalidCalls.keySet());
     }
 }

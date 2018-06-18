@@ -513,7 +513,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         boolean mouseOver = isMouseOver(mouseX, mouseY);
 
         if (drawBorderedRectBackground) {
-            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && toggleActiveState), disabled), getBorderColour(mouseOver || (toggleMode && toggleActiveState), disabled));
+            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && getToggleState()), disabled), getBorderColour(mouseOver || (toggleMode && getToggleState()), disabled));
         }
 
         if (vanillaButtonRender) {

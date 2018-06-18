@@ -23,6 +23,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -70,8 +72,8 @@ public class BCUtilCommands extends CommandBase {
             else if (function.equals("noclip")) {
                 toggleNoClip(server, sender, args);
             }
-            else if (function.equals("")) {
-
+            else if (function.equals("uuid")) {
+                getUUID(server, sender, args);
             }
             else if (function.equals("")) {
 
@@ -89,7 +91,7 @@ public class BCUtilCommands extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip");
+        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid");
     }
 
     private void help(ICommandSender sender) {
@@ -198,4 +200,17 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
+    private void getUUID(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+        if (args.length == 2) {
+            player = getPlayer(server, sender, args[1]);
+        }
+
+        TextComponentString comp = new TextComponentString(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUniqueID());
+        Style style = new Style();
+        style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, player.getUniqueID().toString()));
+        style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to get text")));
+        comp.setStyle(style);
+        sender.sendMessage(comp);
+    }
 }

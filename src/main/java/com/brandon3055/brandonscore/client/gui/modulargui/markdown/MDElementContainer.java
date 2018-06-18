@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MDElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -28,6 +28,8 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
      * */
     public MGuiElementBase linkDisplayTarget = this;
     public int linkDisplayZOffset = 600;
+    public MDElementFactory lastFactory = null;
+    public HAlign defaultAlignment = HAlign.LEFT;
 
     /**
      * @param initializer can be any initialized MGuiElementBase. This is just used for initialize this element before layout occurs.
@@ -149,7 +151,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         }
 
         currentLine.clear();
-        HAlign currentAlignment = HAlign.LEFT;
+        HAlign currentAlignment = defaultAlignment;
 
         //Alignment Pass
         for (MDElementBase element : getDisplayElements()) {
@@ -158,17 +160,19 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
                 if (((MarkerElement) element).isAlign()){
                     currentAlignment = ((MarkerElement) element).getAlign();
                 }
-                else if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE && currentAlignment != HAlign.LEFT) {
-                    int lineWidth = 0;
-                    for (MDElementBase lineElement : currentLine) {
-                        lineWidth += lineElement.xSize();
-                    }
-                    int offset = layout.getWidth() - lineWidth;
-                    if (currentAlignment == HAlign.CENTER) {
-                        offset /= 2;
-                    }
-                    for (MDElementBase lineElement : currentLine) {
-                        lineElement.translate(offset, 0);
+                else if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE) {
+                    if (currentAlignment != HAlign.LEFT) {
+                        int lineWidth = 0;
+                        for (MDElementBase lineElement : currentLine) {
+                            lineWidth += lineElement.xSize();
+                        }
+                        int offset = layout.getWidth() - lineWidth;
+                        if (currentAlignment == HAlign.CENTER) {
+                            offset /= 2;
+                        }
+                        for (MDElementBase lineElement : currentLine) {
+                            lineElement.translate(offset, 0);
+                        }
                     }
                     endOfLine = true;
                 }
@@ -182,7 +186,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
             }
         }
 
-        setYSize(layout.getContainerHeight());
+        setYSize(layout.getContainerHeight() + getInsets().bottom + getInsets().top);
     }
 
     public void addElement(MDElementBase element) {
@@ -226,12 +230,9 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
-    }
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
+//        drawBorderedRect(getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height, 1, 0, 0x8000FF00);
 
-    @Override
-    public MDElementContainer translate(int xAmount, int yAmount) {
-        return super.translate(xAmount, yAmount);
     }
 
     @Override
@@ -250,5 +251,11 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
 
     public void setLinkClickCallback(BiConsumer<String, Integer> linkClickCallback) {
         this.linkClickCallback = linkClickCallback;
+    }
+
+    public void inherit(MDElementContainer parent) {
+        linkClickCallback = parent.linkClickCallback;
+        linkDisplayTarget = parent.linkDisplayTarget;
+        linkDisplayZOffset = parent.linkDisplayZOffset;
     }
 }

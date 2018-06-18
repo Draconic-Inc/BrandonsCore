@@ -115,6 +115,14 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
         return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
     }
 
+    @Override
+    protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+        if (keyCode == 1) {
+            close();
+            return true;
+        }
+        return super.keyTyped(typedChar, keyCode);
+    }
 
     /**
      * When set to true the this popup will close if the user clicks outside of its bounds.

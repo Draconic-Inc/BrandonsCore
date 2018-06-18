@@ -179,7 +179,7 @@ public class PartContainerTable extends PartContainer {
         return null;
     }
 
-    private boolean checkDelimiter(String line) {
+    private boolean checkDelimiter(String line)            {
         LinkedList<ColumnData> awMaps = new LinkedList<>();
         line = line.trim();
 

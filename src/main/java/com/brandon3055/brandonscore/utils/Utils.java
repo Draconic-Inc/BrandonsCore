@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.net.URI;
 import java.text.DecimalFormat;
 
 /**
@@ -85,7 +86,8 @@ public class Utils {
             return false;
         }
 
-        else return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
+        else
+            return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
     }
 
     /**
@@ -155,7 +157,7 @@ public class Utils {
      * multiplier: 10<br>
      * Output 17.5<br><br>
      *
-     * @param number The input value.
+     * @param number     The input value.
      * @param multiplier The multiplier.
      * @return The input rounded to a number of decimal places based on the multiplier.
      */
@@ -282,21 +284,17 @@ public class Utils {
 
 
     @Nullable
-    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators)
-    {
+    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
         double d0 = -1.0D;
         EntityPlayer closestPlayer = null;
 
-        for (int i = 0; i < world.playerEntities.size(); ++i)
-        {
+        for (int i = 0; i < world.playerEntities.size(); ++i) {
             EntityPlayer player = world.playerEntities.get(i);
 
-            if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators))
-            {
+            if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators)) {
                 double d1 = player.getDistanceSq(posX, posY, posZ);
 
-                if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0))
-                {
+                if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0)) {
                     d0 = d1;
                     closestPlayer = player;
                 }
@@ -346,6 +344,18 @@ public class Utils {
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
             }
             catch (Exception var2) {}
+        }
+    }
+
+    public static void openWebLink(URI url) {
+        try {
+            Class<?> oclass = Class.forName("java.awt.Desktop");
+            Object object = oclass.getMethod("getDesktop").invoke((Object) null);
+            oclass.getMethod("browse", URI.class).invoke(object, url);
+        }
+        catch (Throwable throwable1) {
+            Throwable throwable = throwable1.getCause();
+            LogHelperBC.error("Couldn't open link: {}", (Object) (throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.HAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
 
 import java.awt.*;
 import java.util.List;

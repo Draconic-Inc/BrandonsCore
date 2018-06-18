@@ -62,6 +62,6 @@ public class RuleVisitorImpl extends RuleVisitor {
 
     @Override
     public void endVisit() {
-        element.invalidProps.putAll(invalidCalls);
+        element.invalidProps.addAll(invalidCalls.keySet());
     }
 }

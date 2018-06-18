@@ -51,6 +51,6 @@ public class RecipeVisitorImpl extends RecipeVisitor {
 
     @Override
     public void endVisit() {
-        element.invalidProps.putAll(invalidCalls);
+        element.invalidProps.addAll(invalidCalls.keySet());
     }
 }

@@ -74,13 +74,13 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     private Insets insets = new Insets(0, 0, 0, 0);
     private boolean enabled = true;
     private boolean elementInitialized = false;
-    private Rectangle rectangle = new Rectangle();
     private Rectangle insetRectangle = new Rectangle();
     private IDrawCallback preDrawCallback = null;
     private IDrawCallback postDrawCallback = null;
     private List<String> groups = new ArrayList<>();
     private MGuiElementBase parentElement = null;
     private Supplier<Boolean> enabledCallback = null;
+    private Rectangle rectangle = new Rectangle();
 
     protected int hoverTime = 0;
     protected int hoverTextDelay = 0;
@@ -121,6 +121,10 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     public Object linkedObject = null;
     public boolean reportXSizeChange = false;
     public boolean reportYSizeChange = false;
+    /**
+     * If enabled this element will return true in renderOverlay when the mouse is over this element.
+     * */
+    public boolean consumeHoverOverlay = false;
     public Minecraft mc = Minecraft.getMinecraft();
     public IModularGui modularGui;
     public BCFontRenderer fontRenderer = BCFontRenderer.convert(mc.fontRenderer);
@@ -145,7 +149,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         setSize(xSize, ySize);
     }
 
-    //############################################################################
     //# Init & Reload
     //region //############################################################################
 
@@ -223,7 +226,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Child Elements
     //region //############################################################################
 
@@ -233,6 +235,9 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @return The child element that was added.
      */
     public <C extends MGuiElementBase> C addChild(C child) {
+        if (childElements.contains(child)) {
+            return child;
+        }
         childElements.add(child);
         onChildAdded(child);
         return child;
@@ -244,6 +249,9 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @return The child element that was added.
      */
     public <C extends MGuiElementBase> C addChildFirst(C child) {
+        if (childElements.contains(child)) {
+            return child;
+        }
         childElements.addFirst(child);
         onChildAdded(child);
         return child;
@@ -406,13 +414,15 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         return parentElement;
     }
 
-    public LinkedList<MGuiElementBase> getChildElements() {
-        return childElements;
+    /**
+     * @return the list of child elements. This list should not be modified directly instead use the add/remove methods.
+     */
+    public void getChildElements() {
+        return ;//ImmutableList.copyOf(childElements);
     }
 
     //endregion
 
-    //############################################################################
     //# Group & ID Stuff
     //region //############################################################################
 
@@ -546,7 +556,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Mouse
     //region //############################################################################
 
@@ -681,7 +690,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Keyboard
     //region //############################################################################
 
@@ -699,7 +707,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Update
     //region //############################################################################
 
@@ -729,7 +736,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
         int mouseX = Mouse.getX() * screenWidth / this.mc.displayWidth;
         int mouseY = screenHeight - Mouse.getY() * screenHeight / this.mc.displayHeight - 1;
-        if (drawHoverText && isMouseOver(mouseX, mouseY)) {
+        if (isMouseOver(mouseX, mouseY)) {
             hoverTime++;
         }
         else {
@@ -760,7 +767,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Render
     //region //############################################################################
 
@@ -822,12 +828,11 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
             }
         }
 
-        return false;
+        return isMouseOver(mouseX, mouseY) && consumeHoverOverlay;
     }
 
     //endregion
 
-    //############################################################################
     //# Position
     //region //############################################################################
 
@@ -1071,7 +1076,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Size
     //region //############################################################################
 
@@ -1239,7 +1243,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Size & Position
     //region //############################################################################
 
@@ -1358,7 +1361,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Misc
     //region //############################################################################
 
@@ -1498,7 +1500,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# GUI Render Helper ports
     //region //############################################################################
 
@@ -1766,7 +1767,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Custom Render Helpers
     //region //############################################################################
 
@@ -2231,7 +2231,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     //endregion
 
-    //############################################################################
     //# Hover Text
     //region //############################################################################
 
