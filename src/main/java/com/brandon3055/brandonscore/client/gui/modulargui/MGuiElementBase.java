@@ -415,10 +415,12 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     }
 
     /**
-     * @return the list of child elements. This list should not be modified directly instead use the add/remove methods.
+     * Returns a unmodifiable view of the children.
+     *
+     * @return The children.
      */
-    public void getChildElements() {
-        return ;//ImmutableList.copyOf(childElements);
+    public List<MGuiElementBase> getChildElements() {
+        return Collections.unmodifiableList(childElements);
     }
 
     //endregion
