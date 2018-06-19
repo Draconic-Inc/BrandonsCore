@@ -415,7 +415,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
             return true;
         }
 
-        if (isMouseOver(mouseX, mouseY) && !disabled) {
+        if (isMouseOver(mouseX, mouseY) && !isDisabled()) {
             onPressed(mouseX, mouseY, mouseButton);
             return true;
         }
@@ -498,7 +498,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     protected int getRenderState(boolean hovered) {
         int i = 1;
 
-        if (disabled) {
+        if (isDisabled()) {
             i = 0;
         }
         else if (hovered) {
@@ -513,7 +513,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         boolean mouseOver = isMouseOver(mouseX, mouseY);
 
         if (drawBorderedRectBackground) {
-            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && getToggleState()), disabled), getBorderColour(mouseOver || (toggleMode && getToggleState()), disabled));
+            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && getToggleState()), isDisabled()), getBorderColour(mouseOver || (toggleMode && getToggleState()), disabled));
         }
 
         if (vanillaButtonRender) {
@@ -524,7 +524,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
         String displayString = getDisplayString();
         if (!displayString.isEmpty()) {
-            int colour = getTextColour(mouseOver, disabled);
+            int colour = getTextColour(mouseOver, isDisabled());
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 
             int ySize = fontRenderer.FONT_HEIGHT;
