@@ -2322,4 +2322,9 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
             GlStateManager.color(1, 1, 1, 1);
         }
     }
+
+    public MGuiElementBase<E> $plus$eq(MGuiElementBase<?> other) {
+        addChild(other);
+        return this;
+    }
 }
