@@ -22,6 +22,7 @@ import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import scala.Function1;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -132,7 +133,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     //Lambdas!
     protected Consumer<E> onReload = null;
     protected Consumer<E> onInit = null;
-    protected HoverTextSupplier hoverText = null;
+    protected HoverTextSupplier<?, E> hoverText = null;
     protected BiFunction<E, Integer, Integer> xPosModifier = null;
     protected BiFunction<E, Integer, Integer> yPosModifier = null;
     protected BiFunction<E, Integer, Integer> xSizeModifier = null;
@@ -2292,6 +2293,13 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     }
 
     @SuppressWarnings("unchecked")
+    public E setHoverTextFunc(Function1<E, String> hoverText) {
+        this.hoverText = hoverText::apply;
+        setHoverTextEnabled(true);
+        return (E) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public E setHoverText(String singleLine) {
         setHoverText(element -> singleLine);
         return (E) this;
@@ -2309,8 +2317,9 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         return (E) this;
     }
 
+    @SuppressWarnings ("unchecked")
     public List<String> getHoverText() {
-        return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText(this);
+        return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E) this);
     }
 
     //endregion
