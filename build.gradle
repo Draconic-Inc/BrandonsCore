@@ -64,7 +64,7 @@ version = version + ".${buildNo}"
 dependencies {
     compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
     compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
-	compile "cofh:RedstoneFlux:${config.mc_version}-${config.rf_version}:deobf"
+	compile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:deobf"
 }
 
 
