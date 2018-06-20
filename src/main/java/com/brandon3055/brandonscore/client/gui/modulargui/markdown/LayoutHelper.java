@@ -8,6 +8,12 @@ import java.awt.*;
  * This class defines the pos and width of an MDElementContainer as well as the caret position.
  * The caret position refers to the position where the next element will be placed or where the last element ends.
  * This is used when arranging elements in an element container.
+ *
+ * TODO want to investigate using the layout helper to manage alignment as well.
+ * Because there is currently the issue that right aligned text does not remove trailing spaces.
+ * This would also make layout a lot smoother.
+ * May be able to use some sort of "space marker" that would be stripped if it ends up at the start or end of the line
+ * This marker would be added by the text element when it does a new line split.
  */
 public class LayoutHelper {
     private final int xPos;
@@ -75,5 +81,13 @@ public class LayoutHelper {
 
     public void addCaretOffset(int xOffset) {
         caretX += xOffset;
+    }
+
+    public int getCaretX() {
+        return caretX;
+    }
+
+    public int getCaretY() {
+        return caretY;
     }
 }

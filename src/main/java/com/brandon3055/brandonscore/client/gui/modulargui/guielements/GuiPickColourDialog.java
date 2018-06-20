@@ -30,8 +30,8 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
     public IGuiEventListener listener;
     private boolean cancelEnabled = false;
     private boolean includeAlpha = true;
-    private Consumer<Integer> colourChangeListener = null;
-    private Consumer<Integer> colourSelectListener = null;
+    private Consumer<Colour> colourChangeListener = null;
+    private Consumer<Colour> colourSelectListener = null;
 
     public GuiPickColourDialog(MGuiElementBase parent) {
         super(parent);
@@ -102,7 +102,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
                 listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), false, false), this);
             }
             if (colourSelectListener != null) {
-                colourSelectListener.accept(getColourARGB());
+                colourSelectListener.accept(colour.copy());
             }
             close();
         });
@@ -171,7 +171,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
 
         if (colourChanged) {
             if (colourChangeListener != null) {
-                colourChangeListener.accept(getColourARGB());
+                colourChangeListener.accept(colour.copy());
             }
         }
     }
@@ -186,6 +186,16 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
      * Adding this disabled the cancel button.
      */
     public GuiPickColourDialog setColourChangeListener(Consumer<Integer> colourChangeListener) {
+        this.colourChangeListener = c -> colourChangeListener.accept(c.argb());
+        setCancelEnabled(false);
+        return this;
+    }
+
+    /**
+     * This is called whenever the colour is adjusted NOT when the ok button is pressed.
+     * Adding this disabled the cancel button.
+     */
+    public GuiPickColourDialog setCCColourChangeListener(Consumer<Colour> colourChangeListener) {
         this.colourChangeListener = colourChangeListener;
         setCancelEnabled(false);
         return this;
@@ -195,6 +205,14 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
      * This is called when the ok button is pressed and the picker closes.
      */
     public GuiPickColourDialog setColourSelectListener(Consumer<Integer> colourSelectListener) {
+        this.colourSelectListener = c -> colourSelectListener.accept(c.argb());
+        return this;
+    }
+
+    /**
+     * This is called when the ok button is pressed and the picker closes.
+     */
+    public GuiPickColourDialog setCCColourSelectListener(Consumer<Colour> colourSelectListener) {
         this.colourSelectListener = colourSelectListener;
         return this;
     }

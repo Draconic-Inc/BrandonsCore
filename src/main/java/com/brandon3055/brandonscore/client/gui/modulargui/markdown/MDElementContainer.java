@@ -25,7 +25,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     /**
      * When the user hovers their cursor over a link the link target will be displayed in the bottom left corner of this element.
      * Similar to what most browsers do when you hover over a link.
-     * */
+     */
     public MGuiElementBase linkDisplayTarget = this;
     public int linkDisplayZOffset = 600;
     public MDElementFactory lastFactory = null;
@@ -133,7 +133,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         List<MDElementBase> currentLine = new ArrayList<>();
 
         //Layout Pass
-        for (MDElementBase element : elements) {
+        for (MDElementBase element: elements) {
             boolean endOfLine = false;
             if (element instanceof MarkerElement) {
                 if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE) {
@@ -154,37 +154,74 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         HAlign currentAlignment = defaultAlignment;
 
         //Alignment Pass
-        for (MDElementBase element : getDisplayElements()) {
+        int lineY = getInsetRect().y;
+        MDElementBase last = getDisplayElements().getLast();
+        for (MDElementBase element: getDisplayElements()) {
             boolean endOfLine = false;
-            if (element instanceof MarkerElement) {
-                if (((MarkerElement) element).isAlign()){
-                    currentAlignment = ((MarkerElement) element).getAlign();
-                }
-                else if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE) {
-                    if (currentAlignment != HAlign.LEFT) {
-                        int lineWidth = 0;
-                        for (MDElementBase lineElement : currentLine) {
-                            lineWidth += lineElement.xSize();
-                        }
-                        int offset = layout.getWidth() - lineWidth;
-                        if (currentAlignment == HAlign.CENTER) {
-                            offset /= 2;
-                        }
-                        for (MDElementBase lineElement : currentLine) {
-                            lineElement.translate(offset, 0);
-                        }
-                    }
-                    endOfLine = true;
-                }
+
+            if (element instanceof MarkerElement && ((MarkerElement) element).isAlign()) {
+                currentAlignment = ((MarkerElement) element).getAlign();
             }
+            else if (element.yPos() > lineY || last == element) {
+                if (currentAlignment != HAlign.LEFT) {
+                    int lineWidth = 0;
+                    for (MDElementBase lineElement: currentLine) {
+                        lineWidth += lineElement.xSize();
+                    }
+                    int offset = layout.getWidth() - lineWidth;
+                    if (currentAlignment == HAlign.CENTER) {
+                        offset /= 2;
+                    }
+                    for (MDElementBase lineElement: currentLine) {
+                        lineElement.translate(offset, 0);
+                    }
+                }
+                lineY = element.yPos();
+                endOfLine = true;
+            }
+
 
             if (endOfLine) {
                 currentLine.clear();
             }
-            else {
-                currentLine.add(element);
-            }
+
+            currentLine.add(element);
         }
+
+//  The marker based system had issues because in order for it to work properly the layout manager would have to be in charge
+//  of adding the markers but that isn't as simple as it sounds because text elements need to set their own markers.
+//  The new method should fix this but i'm keeping this here in case i run into issues and need to revert.
+//        for (MDElementBase element : getDisplayElements()) {
+//            boolean endOfLine = false;
+//            if (element instanceof MarkerElement) {
+//                if (((MarkerElement) element).isAlign()){
+//                    currentAlignment = ((MarkerElement) element).getAlign();
+//                }
+//                else if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE) {
+//                    if (currentAlignment != HAlign.LEFT) {
+//                        int lineWidth = 0;
+//                        for (MDElementBase lineElement : currentLine) {
+//                            lineWidth += lineElement.xSize();
+//                        }
+//                        int offset = layout.getWidth() - lineWidth;
+//                        if (currentAlignment == HAlign.CENTER) {
+//                            offset /= 2;
+//                        }
+//                        for (MDElementBase lineElement : currentLine) {
+//                            lineElement.translate(offset, 0);
+//                        }
+//                    }
+//                    endOfLine = true;
+//                }
+//            }
+//
+//            if (endOfLine) {
+//                currentLine.clear();
+//            }
+//            else {
+//                currentLine.add(element);
+//            }
+//        }
 
         setYSize(layout.getContainerHeight() + getInsets().bottom + getInsets().top);
     }
@@ -211,7 +248,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
      */
     public LinkedList<MDElementBase> getDisplayElements() {
         LinkedList<MDElementBase> displayElements = new LinkedList<>();
-        for (MDElementBase element : elements) {
+        for (MDElementBase element: elements) {
             if (element.hasSubParts) {
                 displayElements.addAll(element.subParts);
             }
@@ -238,7 +275,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     @Override
     public void ySizeChanged(MGuiElementBase elementChanged) {
         //The parent scroll element does not need to be informed when markdown elements have their size assigned.
-        if (elementChanged == this){
+        if (elementChanged == this) {
             super.ySizeChanged(elementChanged);
         }
     }

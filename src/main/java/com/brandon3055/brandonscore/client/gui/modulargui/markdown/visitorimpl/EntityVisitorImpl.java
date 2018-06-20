@@ -63,6 +63,11 @@ public class EntityVisitorImpl extends EntityVisitor {
     }
 
     @Override
+    public void visitAnimate(boolean animate) {
+        element.animate = animate;
+    }
+
+    @Override
     public void visitMainHand(String mainHand) {
         element.mainHand = mainHand;
     }

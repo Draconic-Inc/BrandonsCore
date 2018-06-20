@@ -40,6 +40,7 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
     private boolean rotationLocked = false;
     private boolean trackMouse = false;
     private boolean drawName = false;
+//    private boolean animate = false;
     public boolean silentErrors = false;
     public boolean force2dSize = false;
 
@@ -118,7 +119,7 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
                 float scale = (float) (force2dSize ? (Math.min(rect.height / entity.height, rect.width / entity.width)) : rect.height / entity.height);
 
                 double zLevel = getRenderZLevel() + 100;
-                double posX = rect.x + (rect.width/ 2D);
+                double posX = rect.x + (rect.width / 2D);
 
                 float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
                 if (entity instanceof EntityLivingBase) {
@@ -176,6 +177,11 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
         this.drawName = drawName;
         return this;
     }
+
+//    public GuiEntityRenderer setAnimate(boolean animate) {
+//        this.animate = animate;
+//        return this;
+//    }
 
     public float getRotationSpeedMultiplier() {
         return rotationSpeed;
@@ -291,5 +297,20 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
                 return true;
             }
         };
+    }
+
+//    boolean animateBroken = false;
+    @Override
+    public boolean onUpdate() {
+//        if (animate && entity != null && !invalidEntity && !animateBroken && entity.ticksExisted != BCClientEventHandler.elapsedTicks) {
+//            try {
+//                entity.onUpdate();
+//                entity.ticksExisted = BCClientEventHandler.elapsedTicks;
+//            }
+//            catch (Throwable e) {
+//                animateBroken = true;
+//            }
+//        }
+        return super.onUpdate();
     }
 }

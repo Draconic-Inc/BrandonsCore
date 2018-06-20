@@ -45,8 +45,8 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
         if (renderers == null) {
             error("[Broken recipe. No recipe's were found for " + stackString + "]");
         }
-        else if (renderers.isEmpty()) {
-            error(I18n.format("pi.md.no_recipe_for_item.txt"));
+        else if (renderers.isEmpty() && false) {
+            error(I18n.format("pi.md.no_recipe_for_item.txt") + " (This message will only show in edit mode)");
         }
     }
 
@@ -63,9 +63,10 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
             int nextWidth = renderer.getWidth() + leftPad + rightPad;
             if (avalibleWidth - spacing < nextWidth && layout.getCaretXOffset() > 0) {
                 layout.newLine(0, subParts.isEmpty() ? 0 : 0);
-                subParts.add(new MarkerElement(NEW_LINE));
+                MarkerElement marker = new MarkerElement(NEW_LINE);
+                subParts.add(marker);
             }
-            else if (!subParts.isEmpty()) {
+            else if (lineElement.isEmpty() || !(lineElement.get(lineElement.size() - 1) instanceof RecipeElement)) {
                 MarkerElement spacer = new MarkerElement(spacing, 0);
                 spacer.layoutElement(layout, lineElement);
                 subParts.add(spacer);
@@ -78,6 +79,12 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 setXPosMod((element1, integer) -> element.xPos());
                 setYPosMod((element1, integer) -> element.yPos());
             }
+        }
+
+        if (!renderers.isEmpty()) {
+            MarkerElement spacer = new MarkerElement(spacing, 0);
+            spacer.layoutElement(layout, lineElement);
+            subParts.add(spacer);
         }
     }
 

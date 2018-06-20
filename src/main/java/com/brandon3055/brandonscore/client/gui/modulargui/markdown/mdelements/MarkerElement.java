@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
+import net.minecraft.client.Minecraft;
 
 import java.awt.*;
 import java.util.List;
@@ -26,6 +27,7 @@ public class MarkerElement extends MDElementBase<MarkerElement> {
     public void layoutElement(LayoutHelper layout, List<MDElementBase> lineElement) {
         switch (type) {
             case NEW_LINE:
+                setPos(layout.getCaretX(), layout.getCaretY());
                 layout.newLine(lineElement.isEmpty() ? 8 : 0);
                 break;
             case SPACER:
@@ -55,11 +57,16 @@ public class MarkerElement extends MDElementBase<MarkerElement> {
         return new MarkerElement(align == HAlign.LEFT ? Type.ALIGN_LEFT : align == HAlign.CENTER ? Type.ALIGN_CENTER : Type.ALIGN_RIGHT);
     }
 
+    @Override
+    public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+    }
+
     public enum Type {
         NEW_LINE,
         ALIGN_LEFT,
         ALIGN_CENTER,
         ALIGN_RIGHT,
-        SPACER,
+        SPACER
     }
 }

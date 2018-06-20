@@ -53,7 +53,8 @@ public class TextElement extends MDElementBase<TextElement> {
             }
             if (nextSplit == 0) {
                 layout.newLine(0);
-                subParts.add(new MarkerElement(NEW_LINE));
+                MarkerElement marker = new MarkerElement(NEW_LINE);
+                subParts.add(marker);
                 newln = true;
                 continue;
             }

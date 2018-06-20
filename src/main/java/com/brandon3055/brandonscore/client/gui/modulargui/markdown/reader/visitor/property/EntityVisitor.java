@@ -27,6 +27,8 @@ public abstract class EntityVisitor extends PropertyVisitor {
 
     public abstract void visitDrawName(boolean drawName);
 
+    public abstract void visitAnimate(boolean animate);
+
     public abstract void visitMainHand(String mainHand);
 
     public abstract void visitOffHand(String offhand);

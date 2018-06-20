@@ -17,6 +17,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -42,6 +43,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
     public double rotateSpeed = 0;
     public double rotation = 0;
     public double drawScale = 1;
+    public boolean animate = false;
     public boolean trackMouse = false;
     public boolean drawName = false;
     public String mainHand = "";
@@ -179,6 +181,10 @@ public class EntityElement extends MDElementBase<EntityElement> {
             mouseY = 0;
         }
 
+        if (ent instanceof EntityDragon && trackMouse) {
+            mouseY += scale * 16;
+        }
+
         GlStateManager.enableColorMaterial();
         GlStateManager.pushMatrix();
         GlStateManager.translate((float) posX, (float) posY, 50.0F);
@@ -198,6 +204,12 @@ public class EntityElement extends MDElementBase<EntityElement> {
         ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
         ent.rotationYawHead = ent.rotationYaw;
         ent.prevRotationYawHead = ent.rotationYaw;
+
+        if (ent instanceof EntityDragon) {
+            GlStateManager.rotate(ent.rotationPitch, 1, 0, 0);
+            GlStateManager.rotate(-ent.rotationYawHead + 180, 0, 1, 0);
+        }
+
         GlStateManager.translate(0.0F, 0.0F, 0.0F);
         RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
         rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
@@ -219,7 +231,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
 
     public Entity getRenderEntity(World world, String entityString, EquipmentHelper helper) {
         String ident = String.format("%s|mh:%s|oh:%s|h:%s|ch:%s|le:%s|bo:%s", entityString, mainHand, offHand, head, chest, legs, boots);
-        if (renderEntityCache.containsKey(ident)) {
+        if (renderEntityCache.containsKey(ident) && !animate) {
             return renderEntityCache.get(ident);
         }
 
@@ -246,7 +258,9 @@ public class EntityElement extends MDElementBase<EntityElement> {
             throw new IllegalArgumentException("The specified entity does not allow equipment!");
         }
 
-        renderEntityCache.put(ident, entity);
+        if (!animate) {
+            renderEntityCache.put(ident, entity);
+        }
         return entity;
     }
 
@@ -282,6 +296,23 @@ public class EntityElement extends MDElementBase<EntityElement> {
         };
     }
 
+    boolean animateBroken = false;
+    int animTick = 0;
+
+    @Override
+    public boolean onUpdate() {
+        if (animate && renderEntity != null && !errored && !animateBroken && animTick != BCClientEventHandler.elapsedTicks) {
+            try {
+                renderEntity.ticksExisted = animTick;
+                animTick = BCClientEventHandler.elapsedTicks;
+                renderEntity.onUpdate();
+            }
+            catch (Throwable e) {
+                animateBroken = true;
+            }
+        }
+        return super.onUpdate();
+    }
 
     static class EquipmentHelper {
         private ItemStack mainHand = ItemStack.EMPTY;

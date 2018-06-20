@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.Ta
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.*;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Document;
@@ -80,12 +81,6 @@ public class PiMarkdownReader {
             }
 
             Matcher matcher;
-
-            //All that needs to happen here for each thing.
-            //-Finds a match for the tag
-            //-Extracts the tag's constructor parameter if it has one
-            //-Calls the visit method for that tag
-            //-Reads all properties and passes them to the property visitor
 
             final String thisLine = currentLine;
             try {
@@ -229,7 +224,7 @@ public class PiMarkdownReader {
                     //endregion
 
                     //region Formatting and text
-                    String nextLine = markdownLines.size() > 1 ? markdownLines.get(1) : "";
+                    String nextLine = markdownLines.size() > 1 ? markdownLines.getFirst() : "";
                     if (currentLine.startsWith("#") || isAllChar(nextLine, '=') || isAllChar(nextLine, '-')) {
                         int headingType = 0;
                         while (headingType < currentLine.length() && currentLine.charAt(headingType) == '#')
@@ -641,6 +636,9 @@ public class PiMarkdownReader {
                     case "draw_name":
                         ((EntityVisitor) visitor).visitDrawName(parseBoolean(value));
                         break;
+                    case "animate":
+                        ((EntityVisitor) visitor).visitAnimate(parseBoolean(value));
+                        break;
                     case "main_hand":
                         ((EntityVisitor) visitor).visitMainHand(value);
                         break;
@@ -748,12 +746,16 @@ public class PiMarkdownReader {
     }
 
     public static boolean isAllChar(String input, char target) {
-        if (input.length() == 0) return false;
+        if (input.length() == 0) {
+            return false;
+        }
         for (int i = 0; i < input.length(); i++) {
             if (input.charAt(i) != target) {
+                LogHelperBC.dev("Invalid: " + input);
                 return false;
             }
         }
+        LogHelperBC.dev("Valid: " + input);
         return true;
     }
 
