@@ -133,7 +133,11 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     }
 
     public GuiButton setListener(Function0<Unit> action) {
-        return setListener((b, m) -> action.apply());
+        return setListener((b, m) -> {
+            //Fixes casting issue.
+            @SuppressWarnings ("unused")
+            Object unused = action.apply();
+        });
     }
 
     public boolean isDisabled() {
