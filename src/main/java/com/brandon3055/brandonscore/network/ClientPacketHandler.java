@@ -5,9 +5,11 @@ import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
+import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -59,6 +61,9 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                     gui.pos = packet.readPos();
                     gui.dimension = packet.readInt();
                 }
+                break;
+            case PacketDispatcher.C_INDEXED_LOCALIZED_CHAT:
+                ChatHelper.indexedMsg(mc.player, I18n.format(packet.readString()));
                 break;
         }
     }

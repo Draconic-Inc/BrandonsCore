@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.network.PacketDispatcher;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -66,27 +68,30 @@ public class ChatHelper {
     /**
      * Client side use only!
      */
-    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, int index, Object... args) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, Object... args) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args), index);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args), -442611624);
+        }
+        else if (player instanceof EntityPlayerMP){
+            PacketDispatcher.sendIndexedLocalizedChat((EntityPlayerMP) player, unlocalizedMessage);
         }
     }
 
     /**
      * Client side use only!
      */
-    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, TextFormatting colour, int index, Object... args) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, TextFormatting colour, Object... args) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)), index);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)), -442611624);
         }
     }
 
     /**
      * Client side use only!
      */
-    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, Style style, int index, Object... args) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, Style style, Object... args) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style), index);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style), -442611624);
         }
     }
 
@@ -145,27 +150,27 @@ public class ChatHelper {
     /**
      * Client side use only!
      */
-    public static void indexedMsg(ICommandSender player, String message, int index) {
+    public static void indexedMsg(ICommandSender player, String message) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), index);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), -442611624);
         }
     }
 
     /**
      * Client side use only!
      */
-    public static void indexedMsg(ICommandSender player, String message, TextFormatting colour, int index) {
+    public static void indexedMsg(ICommandSender player, String message, TextFormatting colour) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(new Style().setColor(colour)), index);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(new Style().setColor(colour)), -442611624);
         }
     }
 
     /**
      * Client side use only!
      */
-    public static void indexedMsg(ICommandSender player, String message, Style style, int index) {
+    public static void indexedMsg(ICommandSender player, String message, Style style) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(style), index);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(style), -442611624);
         }
     }
 
