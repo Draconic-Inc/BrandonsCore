@@ -10,6 +10,8 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
+import scala.Function0;
+import scala.Unit;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -128,6 +130,14 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
     public GuiButton setListener(Runnable action) {
         return setListener((b, m) -> action.run());
+    }
+
+    public GuiButton setListener(Function0<Unit> action) {
+        return setListener((b, m) -> {
+            //Fixes casting issue.
+            @SuppressWarnings ("unused")
+            Object unused = action.apply();
+        });
     }
 
     public boolean isDisabled() {
