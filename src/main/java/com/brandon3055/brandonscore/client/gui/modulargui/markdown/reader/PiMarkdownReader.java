@@ -6,7 +6,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.Ta
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.*;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Document;
@@ -751,11 +750,9 @@ public class PiMarkdownReader {
         }
         for (int i = 0; i < input.length(); i++) {
             if (input.charAt(i) != target) {
-                LogHelperBC.dev("Invalid: " + input);
                 return false;
             }
         }
-        LogHelperBC.dev("Valid: " + input);
         return true;
     }
 

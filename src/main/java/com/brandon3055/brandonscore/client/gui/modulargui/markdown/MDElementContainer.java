@@ -155,7 +155,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
 
         //Alignment Pass
         int lineY = getInsetRect().y;
-        MDElementBase last = getDisplayElements().getLast();
+        MDElementBase last = getDisplayElements().isEmpty() ? null : getDisplayElements().getLast();
         for (MDElementBase element: getDisplayElements()) {
             boolean endOfLine = false;
 

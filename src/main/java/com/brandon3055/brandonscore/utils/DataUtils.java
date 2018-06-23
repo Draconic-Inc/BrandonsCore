@@ -114,6 +114,15 @@ public class DataUtils {
         return null;
     }
 
+    public static <E> boolean contains(E[] elements, Predicate<E> matcher) {
+        for (E element : elements) {
+            if (matcher.test(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //region Converters
 
     public static long[] toPrimitive(final Long[] array) {
