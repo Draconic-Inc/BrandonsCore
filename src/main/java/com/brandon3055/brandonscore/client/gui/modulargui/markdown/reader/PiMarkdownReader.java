@@ -184,7 +184,7 @@ public class PiMarkdownReader {
 
                                 //Create a copy so an un-closed table wont eat the entire page.
                                 LinkedList<String> linesCopy = new LinkedList<>(markdownLines);
-                                TableCeptionHelper helper = new TableCeptionHelper();
+                                TableHelper helper = new TableHelper();
                                 String tableXML = helper.parseXML(linesCopy, true);
 
                                 if (!helper.tableClosed) {
@@ -196,7 +196,7 @@ public class PiMarkdownReader {
                                 currentLine = "";
 
                                 //Strip out the table xml
-                                new TableCeptionHelper().parseXML(markdownLines, true);
+                                new TableHelper().parseXML(markdownLines, true);
 
                                 continue;
                             }
@@ -1005,7 +1005,7 @@ public class PiMarkdownReader {
         }
     }
 
-    private static class TableCeptionHelper {
+    private static class TableHelper {
         public boolean tableClosed = false;
 
         public String parseXML(LinkedList<String> markdownLines, boolean isRoot) {
@@ -1022,11 +1022,11 @@ public class PiMarkdownReader {
                 next = markdownLines.removeFirst();
                 if (next.trim().startsWith("<table")) {
                     markdownLines.addFirst(next);
-                    next = new TableCeptionHelper().parseXML(markdownLines, false);
+                    next = new TableHelper().parseXML(markdownLines, false);
                 }
                 xmlBuilder.append(next).append("\n");
             }
-            while (!next.trim().startsWith("</table>"));
+            while (!next.trim().endsWith("</table>"));
             tableClosed = true;
             String xml= xmlBuilder.toString();
 

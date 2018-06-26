@@ -232,6 +232,9 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
 
     public GuiPickColourDialog setColour(Colour colour) {
         this.colour = colour;
+        if (colour == null) {
+            this.colour = new ColourARGB(0xFFFFFFFF);
+        }
         return this;
     }
 

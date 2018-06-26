@@ -154,13 +154,16 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         HAlign currentAlignment = defaultAlignment;
 
         //Alignment Pass
+        LinkedList<MDElementBase> display = getDisplayElements();
         int lineY = getInsetRect().y;
-        MDElementBase last = getDisplayElements().isEmpty() ? null : getDisplayElements().getLast();
-        for (MDElementBase element: getDisplayElements()) {
+        MDElementBase last = display.isEmpty() ? null : display.getLast(); //Used to find the end of the md
+        for (MDElementBase element: display) {
             boolean endOfLine = false;
 
-            if (element instanceof MarkerElement && ((MarkerElement) element).isAlign()) {
-                currentAlignment = ((MarkerElement) element).getAlign();
+            if (element instanceof MarkerElement && element != last) {
+                if (((MarkerElement) element).isAlign()) {
+                    currentAlignment = ((MarkerElement) element).getAlign();
+                }
             }
             else if (element.yPos() > lineY || last == element) {
                 if (currentAlignment != HAlign.LEFT) {
@@ -179,7 +182,6 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
                 lineY = element.yPos();
                 endOfLine = true;
             }
-
 
             if (endOfLine) {
                 currentLine.clear();

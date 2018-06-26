@@ -113,7 +113,9 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
             int w = xSize() - rightPad - leftPad;
             int h = ySize() - bottomPad - topPad;
+            GlStateManager.enableBlend();
             container.drawModalRectWithCustomSizedTexture(xPos() + leftPad, yPos() + topPad, 0, 0, w, h, w, h);
+            GlStateManager.disableBlend();
         }
 
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);

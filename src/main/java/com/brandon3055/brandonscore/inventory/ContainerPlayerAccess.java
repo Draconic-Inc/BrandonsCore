@@ -124,7 +124,7 @@ public class ContainerPlayerAccess extends Container {
 
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     private static class ArmorSlot extends Slot {
