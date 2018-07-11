@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.DelayedTask;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
+import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
@@ -77,6 +78,9 @@ public class BCClientCommands extends CommandBase {
             }
             else if (function.equals("testui")) {
                 DelayedTask.run(10, () -> Minecraft.getMinecraft().displayGuiScreen(new ModularGuiTest()));
+            }
+            else if (function.equals("profiler")) {
+                BCProfiler.enableProfiler = !BCProfiler.enableProfiler;
             }
             else {
 //                help(sender);

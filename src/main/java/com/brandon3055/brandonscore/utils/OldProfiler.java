@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Created by brandon3055 on 13/11/2017.
  */
-public class Profiler {
+public class OldProfiler {
 
     public String currentSection = "";
     public Stack<Section> sectionStack = new Stack<>();

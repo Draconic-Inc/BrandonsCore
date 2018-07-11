@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.network.ClientPacketHandler;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
+import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -32,6 +33,7 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
         DLRSCache.initialize();
         ProcessHandlerClient.init();
+        BCProfiler.init();
 
         ClientCommandHandler.instance.registerCommand(new BCClientCommands());
     }

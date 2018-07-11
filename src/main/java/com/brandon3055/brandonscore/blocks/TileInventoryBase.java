@@ -23,7 +23,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
  */
 public class TileInventoryBase extends TileBCBase implements IInventory {
 
-    private NonNullList<ItemStack> inventoryStacks = NonNullList.create();
+    protected NonNullList<ItemStack> inventoryStacks = NonNullList.create();
     protected int stackLimit = 64;
 
     protected IItemHandler itemHandler;
@@ -74,9 +74,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
             stack = ItemStack.EMPTY;
         }
 
-        if (!stack.isEmpty()) {
-            markDirty();
-        }
+        markDirty();
 
         return stack;
     }
@@ -91,9 +89,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
             stack = ItemStack.EMPTY;
         }
 
-        if (!stack.isEmpty()) {
-            markDirty();
-        }
+        markDirty();
 
         return stack;
     }

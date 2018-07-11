@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import com.brandon3055.brandonscore.network.PacketSpawnParticle;
+import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -223,10 +224,13 @@ public class BCEffectHandler {
         if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
             return;
         }
+
         if (effectRenderer.world != null) {
+            BCProfiler.TICK.start("update_bc_effect_renderer");
             Minecraft.getMinecraft().mcProfiler.startSection("DEParticlesUpdate");
             effectRenderer.updateEffects();
             Minecraft.getMinecraft().mcProfiler.endSection();
+            BCProfiler.TICK.stop();
         }
     }
 
@@ -238,9 +242,11 @@ public class BCEffectHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
+        BCProfiler.RENDER.start("bc_effect_renderer_draw");
         Minecraft.getMinecraft().mcProfiler.startSection("DEParticles");
         effectRenderer.renderParticles(Minecraft.getMinecraft().player, event.getPartialTicks());
         Minecraft.getMinecraft().mcProfiler.endSection();
+        BCProfiler.RENDER.stop();
     }
 
     //TODO Move this to a separate client event handler if i ever need this event elsewhere

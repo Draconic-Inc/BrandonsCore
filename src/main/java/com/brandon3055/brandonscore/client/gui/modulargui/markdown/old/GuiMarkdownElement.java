@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders.*;
-import com.brandon3055.brandonscore.utils.Profiler;
+import com.brandon3055.brandonscore.utils.OldProfiler;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.item.ItemStack;
 
@@ -29,7 +29,7 @@ public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
 
     public static Pattern colourPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "colour\\[[^]]*])");
     public static Pattern colourExtractPat = Pattern.compile("(?<=" + Utils.SELECT + "colour\\[)([^]]*)(?=])");
-    public static Profiler profiler = new Profiler();
+    public static OldProfiler profiler = new OldProfiler();
 
     protected static LinkedList<IPartBuilder> partBuilders = new LinkedList<>();
 

@@ -97,7 +97,6 @@ public class BCUtilCommands extends CommandBase {
             else {
                 help(sender);
             }
-
         }
         catch (Throwable e) {
             e.printStackTrace();

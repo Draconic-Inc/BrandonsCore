@@ -113,11 +113,8 @@ public class TeleportUtils {
         WorldServer sourceWorld = server.getWorld(sourceDim);
         WorldServer targetWorld = server.getWorld(targetDim);
 
-        //Set the entity dead before calling changeDimension. Still need to call changeDimension for things like minecarts which will drop their contents otherwise.
         if (!entity.isDead && entity instanceof EntityMinecart) {
-            entity.isDead = true;
-            entity.changeDimension(targetDim);
-            entity.isDead = false;
+            entity.setDropItemsWhenDead(false);
         }
 
         entity.dimension = targetDim;

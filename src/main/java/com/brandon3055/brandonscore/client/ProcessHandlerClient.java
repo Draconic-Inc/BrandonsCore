@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.handlers.IProcess;
+import com.brandon3055.brandonscore.utils.BCProfiler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -33,6 +34,7 @@ public class ProcessHandlerClient {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
+            BCProfiler.TICK.start("process_handler");
             sync();
 
             Iterator<IProcess> i = processes.iterator();
@@ -67,6 +69,7 @@ public class ProcessHandlerClient {
                 persistentProcesses.addAll(newPersistentProcesses);
                 newPersistentProcesses.clear();
             }
+            BCProfiler.TICK.stop();
         }
     }
 

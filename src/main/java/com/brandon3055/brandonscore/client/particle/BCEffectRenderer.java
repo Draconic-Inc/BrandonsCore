@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
+import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.google.common.collect.Queues;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -232,8 +233,12 @@ public class BCEffectRenderer {
         Tessellator tessellator = Tessellator.getInstance();
 
         for (int layer = 0; layer < 4; layer++) {
+            BCProfiler.RENDER.start("render_glfx");
             renderGlParticlesInLayer(layer, tessellator, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+            BCProfiler.RENDER.stop();
+            BCProfiler.RENDER.start("render_particles");
             renderTexturedParticlesInLayer(layer, tessellator, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+            BCProfiler.RENDER.stop();
         }
 
         GlStateManager.depthMask(true);
@@ -250,7 +255,9 @@ public class BCEffectRenderer {
 
             for (final Particle particle : glRenderQueue.get(handler)[layer]) {
                 try {
+                    BCProfiler.RENDER.start("glfx: " + particle.getClass().getSimpleName());
                     particle.renderParticle(vertexbuffer, entityIn, partialTicks, rotationX, rotationXZ, rotationZ, rotationYZ, rotationXY);
+                    BCProfiler.RENDER.stop();
                 }
                 catch (Throwable throwable) {
                     CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
