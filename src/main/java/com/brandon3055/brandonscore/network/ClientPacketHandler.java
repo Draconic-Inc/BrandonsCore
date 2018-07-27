@@ -63,7 +63,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 }
                 break;
             case PacketDispatcher.C_INDEXED_LOCALIZED_CHAT:
-                ChatHelper.indexedMsg(mc.player, I18n.format(packet.readString()));
+                ChatHelper.indexedMsg(mc.player, I18n.format(packet.readString()), packet.readInt());
                 break;
         }
     }

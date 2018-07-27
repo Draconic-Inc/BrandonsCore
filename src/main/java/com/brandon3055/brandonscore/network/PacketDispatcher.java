@@ -58,9 +58,10 @@ public class PacketDispatcher {
         packet.sendToServer();
     }
 
-    public static void sendIndexedLocalizedChat(EntityPlayerMP player, String unlocalizedText) {
+    public static void sendIndexedLocalizedChat(EntityPlayerMP player, String unlocalizedText, int index) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_INDEXED_LOCALIZED_CHAT);
         packet.writeString(unlocalizedText);
+        packet.writeInt(index);
         packet.sendToPlayer(player);
     }
 }

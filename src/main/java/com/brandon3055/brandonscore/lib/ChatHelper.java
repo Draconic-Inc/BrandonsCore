@@ -65,15 +65,12 @@ public class ChatHelper {
         player.sendMessage(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style));
     }
 
-    /**
-     * Client side use only!
-     */
-    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, Object... args) {
+    public static void indexedTrans(ICommandSender player, String unlocalizedMessage, int index, Object... args) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args), -442611624);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args), index);
         }
         else if (player instanceof EntityPlayerMP){
-            PacketDispatcher.sendIndexedLocalizedChat((EntityPlayerMP) player, unlocalizedMessage);
+            PacketDispatcher.sendIndexedLocalizedChat((EntityPlayerMP) player, unlocalizedMessage, index);
         }
     }
 
@@ -82,7 +79,7 @@ public class ChatHelper {
      */
     public static void indexedTrans(ICommandSender player, String unlocalizedMessage, TextFormatting colour, Object... args) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)), -442611624);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(new Style().setColor(colour)), -330553055);
         }
     }
 
@@ -91,7 +88,7 @@ public class ChatHelper {
      */
     public static void indexedTrans(ICommandSender player, String unlocalizedMessage, Style style, Object... args) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style), -442611624);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentTranslation(unlocalizedMessage, args).setStyle(style), -330553055);
         }
     }
 
@@ -147,12 +144,18 @@ public class ChatHelper {
         player.sendMessage(new TextComponentString(message).setStyle(style));
     }
 
+    public static void indexedMsg(ICommandSender player, String message, int index) {
+        if (player.getEntityWorld().isRemote) {
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), index);
+        }
+    }
+
     /**
      * Client side use only!
      */
     public static void indexedMsg(ICommandSender player, String message) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), -442611624);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message), -330553055);
         }
     }
 
@@ -161,7 +164,7 @@ public class ChatHelper {
      */
     public static void indexedMsg(ICommandSender player, String message, TextFormatting colour) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(new Style().setColor(colour)), -442611624);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(new Style().setColor(colour)), -330553055);
         }
     }
 
@@ -170,7 +173,7 @@ public class ChatHelper {
      */
     public static void indexedMsg(ICommandSender player, String message, Style style) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(style), -442611624);
+            BrandonsCore.proxy.setChatAtIndex(new TextComponentString(message).setStyle(style), -330553055);
         }
     }
 
