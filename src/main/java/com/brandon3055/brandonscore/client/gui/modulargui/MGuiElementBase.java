@@ -76,8 +76,6 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     private boolean enabled = true;
     private boolean elementInitialized = false;
     private Rectangle insetRectangle = new Rectangle();
-    private IDrawCallback preDrawCallback = null;
-    private IDrawCallback postDrawCallback = null;
     private List<String> groups = new ArrayList<>();
     private MGuiElementBase parentElement = null;
     private Supplier<Boolean> enabledCallback = null;
@@ -85,6 +83,8 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
     protected int hoverTime = 0;
     protected int hoverTextDelay = 0;
+    protected IDrawCallback preDrawCallback = null;
+    protected IDrawCallback postDrawCallback = null;
 
     /**
      * An id that is unique to this element (may or may not be used. If unused will be an empty string)
@@ -997,6 +997,16 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     public E setYPosMod(BiFunction<E, Integer, Integer> yMod) {
         this.yPosModifier = yMod;
         return (E) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public E setXPosMod(Supplier<Integer> xMod) {
+        return setXPosMod((e, integer) -> xMod.get());
+    }
+
+    @SuppressWarnings("unchecked")
+    public E setYPosMod(Supplier<Integer> yMod) {
+        return setYPosMod((e, integer) -> yMod.get());
     }
 
     /**

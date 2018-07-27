@@ -71,11 +71,12 @@ public class FileDownloadManager implements Runnable {
                         failedFiles.put(worker.sourceURL, worker.outputFile);
                     }
 
-                    //If worker is still running then  set complete back to false
+                    //If worker is still running then set complete back to false
                     if (worker != null && worker.isRunning()) {
                         downloadsComplete = false;
                     }
                     else if (downloadQue.size() > 0) {
+                        filesDownloaded++;
                         PairKV<String, File> file = downloadQue.remove(0);
                         worker = new ThreadFileDownloader(name + ":worker-" + i, file.getKey(), file.getValue());
                         LogHelperBC.dev("FileDownloadHandler: Starting Download: " + file.getKey() + " -> " + file.getValue());
@@ -167,7 +168,7 @@ public class FileDownloadManager implements Runnable {
         for (Double d : getActiveProgress().values()) {
             total += d;
         }
-        return total;
+        return total / totalFiles;
     }
 
     public void setQueCompeteCallback(Runnable queCompeteCallback) {

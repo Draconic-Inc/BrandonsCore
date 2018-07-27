@@ -57,11 +57,8 @@ public class HandHelper {
         if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == item) {
             return true;
         }
-        else if (!player.getHeldItemOffhand().isEmpty() && player.getHeldItemOffhand().getItem() == item) {
-            return true;
-        }
         else {
-            return false;
+            return !player.getHeldItemOffhand().isEmpty() && player.getHeldItemOffhand().getItem() == item;
         }
     }
 }

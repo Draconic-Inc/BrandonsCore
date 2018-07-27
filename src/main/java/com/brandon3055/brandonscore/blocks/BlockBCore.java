@@ -82,7 +82,7 @@ public class BlockBCore extends Block {
 
         if (tile instanceof IDataRetainingTile) {
             NBTTagCompound tileData = new NBTTagCompound();
-            ((IDataRetainingTile) tile).writeToItemStack(tileData, true);
+            ((IDataRetainingTile) tile).writeToItemStack(tileData, false);
             if (!tileData.hasNoTags()) {
                 ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, tileData);
             }

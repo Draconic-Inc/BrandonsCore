@@ -46,6 +46,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     private boolean drawBorderedRectBackground = false;
     private Supplier<Boolean> toggleStateSupplier;
     private Supplier<String> displayStringSupplier;
+    private Supplier<Boolean> disabledStateSupplier;
     private HoverDisableColour<Integer> texColGetter;
     private HoverDisableColour<Integer> rectFillColour;
     private HoverDisableColour<Integer> rectBorderColour;
@@ -59,6 +60,8 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
      */
     public String buttonName = "";
     public boolean playClick = true;
+    public int textXOffset = 0;
+    public int textYOffset = 0;
 
     //Super Constructors
     public GuiButton() {
@@ -141,11 +144,16 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     }
 
     public boolean isDisabled() {
-        return disabled;
+        return disabledStateSupplier != null ? disabledStateSupplier.get() : disabled;
     }
 
     public GuiButton setDisabled(boolean disabled) {
         this.disabled = disabled;
+        return this;
+    }
+
+    public GuiButton setDisabledStateSupplier(Supplier<Boolean> disabledStateSupplier) {
+        this.disabledStateSupplier = disabledStateSupplier;
         return this;
     }
 
@@ -544,20 +552,20 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
             boolean wrap = this.wrap && fontRenderer.getStringWidth(displayString) > widthLimit;
 
-            int yPos = (getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2);
-            int xPos = getInsetRect().x;
+            int xPos = textXOffset + getInsetRect().x;
+            int yPos = textYOffset + ((getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2));
             switch (rotation) {
                 case NORMAL:
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
                 case ROT_CC:
-                    xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
-                    yPos = getInsetRect().y;
+                    xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2));
+                    yPos = textYOffset + getInsetRect().y;
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
                 case ROT_C:
-                    xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
-                    yPos = getInsetRect().y;
+                    xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2));
+                    yPos = textYOffset + getInsetRect().y;
                     drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
                 case ROT_180:
@@ -566,6 +574,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
             }
             GlStateManager.color(1, 1, 1, 1);
         }
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
     }
 
     protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {

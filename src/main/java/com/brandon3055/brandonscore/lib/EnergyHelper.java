@@ -34,7 +34,11 @@ public class EnergyHelper {
             return ((IEnergyHandler) tile).getEnergyStored(side);
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
-            return tile.getCapability(CapabilityEnergy.ENERGY, side).getEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
+            if (cap != null && cap.canReceive()) {
+                return cap.getEnergyStored();
+            }
+            return 0;
         }
         else {
             return 0;
@@ -50,7 +54,11 @@ public class EnergyHelper {
             return ((IEnergyHandler) tile).getMaxEnergyStored(side);
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
-            return tile.getCapability(CapabilityEnergy.ENERGY, side).getMaxEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
+            if (cap != null && cap.canReceive()) {
+                return cap.getMaxEnergyStored();
+            }
+            return 0;
         }
         else {
             return 0;
@@ -66,7 +74,14 @@ public class EnergyHelper {
     }
 
     public static boolean canReceiveEnergy(TileEntity tile, EnumFacing side) {
-        return (tile instanceof IEnergyReceiver && (side == null || ((IEnergyReceiver) tile).canConnectEnergy(side))) || (tile.hasCapability(CapabilityEnergy.ENERGY, side) && tile.getCapability(CapabilityEnergy.ENERGY, side).canReceive());
+        if (tile instanceof IEnergyProvider) {
+            return true;
+        }
+        else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
+            net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
+            return cap != null && cap.canReceive();
+        }
+        return false;
     }
 
     public static int insertEnergy(TileEntity tile, int energy, boolean simulate) {
@@ -78,12 +93,15 @@ public class EnergyHelper {
             LogHelperBC.bigDev("Attempt to do energy operation client side!");
             return 0;
         }
+        if (energy < 0) {
+            return 0;
+        }
         if (tile instanceof IEnergyReceiver) {
             return ((IEnergyReceiver) tile).receiveEnergy(side, energy, simulate);
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
             net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
-            if (cap.canReceive()) {
+            if (cap != null && cap.canReceive()) {
                 return cap.receiveEnergy(energy, simulate);
             }
         }
@@ -99,7 +117,14 @@ public class EnergyHelper {
     }
 
     public static boolean canExtractEnergy(TileEntity tile, EnumFacing side) {
-        return tile instanceof IEnergyProvider || (tile.hasCapability(CapabilityEnergy.ENERGY, side) && tile.getCapability(CapabilityEnergy.ENERGY, side).canExtract());
+        if (tile instanceof IEnergyProvider) {
+            return true;
+        }
+        else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
+            net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
+            return cap != null && cap.canExtract();
+        }
+        return false;
     }
 
     public static int extractEnergy(TileEntity tile, int energy, boolean simulate) {
@@ -111,12 +136,15 @@ public class EnergyHelper {
             LogHelperBC.bigDev("Attempt to do energy operation client side!");
             return 0;
         }
+        if (energy < 0) {
+            return 0;
+        }
         if (tile instanceof IEnergyProvider) {
             return ((IEnergyProvider) tile).extractEnergy(side, energy, simulate);
         }
         else if (tile.hasCapability(CapabilityEnergy.ENERGY, side)) {
             net.minecraftforge.energy.IEnergyStorage cap = tile.getCapability(CapabilityEnergy.ENERGY, side);
-            if (cap.canExtract()) {
+            if (cap != null && cap.canExtract()) {
                 return cap.extractEnergy(energy, simulate);
             }
         }
@@ -140,7 +168,11 @@ public class EnergyHelper {
             return ((IEnergyContainerItem) stack.getItem()).getEnergyStored(stack);
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
-            return stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap != null) {
+                return cap.getEnergyStored();
+            }
+            return 0;
         }
         else {
             return 0;
@@ -155,7 +187,11 @@ public class EnergyHelper {
             return ((IEnergyContainerItem) stack.getItem()).getMaxEnergyStored(stack);
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
-            return stack.getCapability(CapabilityEnergy.ENERGY, null).getMaxEnergyStored();
+            net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (cap != null) {
+                return cap.getMaxEnergyStored();
+            }
+            return 0;
         }
         else {
             return 0;
@@ -167,11 +203,21 @@ public class EnergyHelper {
     //region Receive ItemStack
 
     public static boolean canReceiveEnergy(ItemStack stack) {
-        return !stack.isEmpty() && (stack.getItem() instanceof IEnergyContainerItem || (stack.hasCapability(CapabilityEnergy.ENERGY, null) && stack.getCapability(CapabilityEnergy.ENERGY, null).canReceive()));
+        if (stack.isEmpty()) {
+            return false;
+        }
+        else if (stack.getItem() instanceof IEnergyContainerItem) {
+            return true;
+        }
+        else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
+            net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            return cap != null && cap.canReceive();
+        }
+        return false;
     }
 
     public static int insertEnergy(ItemStack stack, int energy, boolean simulate) {
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || energy < 0) {
             return 0;
         }
         else if (stack.getItem() instanceof IEnergyContainerItem) {
@@ -179,7 +225,7 @@ public class EnergyHelper {
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
             net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
-            if (cap.canReceive()) {
+            if (cap != null && cap.canReceive()) {
                 return cap.receiveEnergy(energy, simulate);
             }
         }
@@ -191,11 +237,21 @@ public class EnergyHelper {
     //region Extract ItemStack
 
     public static boolean canExtractEnergy(ItemStack stack) {
-        return !stack.isEmpty() && (stack.getItem() instanceof IEnergyContainerItem || (stack.hasCapability(CapabilityEnergy.ENERGY, null) && stack.getCapability(CapabilityEnergy.ENERGY, null).canExtract()));
+        if (stack.isEmpty()) {
+            return false;
+        }
+        else if (stack.getItem() instanceof IEnergyContainerItem) {
+            return true;
+        }
+        else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
+            net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            return cap != null && cap.canExtract();
+        }
+        return false;
     }
 
     public static int extractEnergy(ItemStack stack, int energy, boolean simulate) {
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() || energy < 0) {
             return 0;
         }
         else if (stack.getItem() instanceof IEnergyContainerItem) {
@@ -203,7 +259,7 @@ public class EnergyHelper {
         }
         else if (stack.hasCapability(CapabilityEnergy.ENERGY, null)) {
             net.minecraftforge.energy.IEnergyStorage cap = stack.getCapability(CapabilityEnergy.ENERGY, null);
-            if (cap.canExtract()) {
+            if (cap != null && cap.canExtract()) {
                 return cap.extractEnergy(energy, simulate);
             }
         }

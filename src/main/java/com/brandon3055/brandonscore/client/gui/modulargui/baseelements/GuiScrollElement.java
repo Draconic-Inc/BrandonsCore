@@ -601,7 +601,6 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         double xSize = getInsetRect().width;
         double ySize = getInsetRect().height;
 
-//        LogHelperBC.dev(minecraft.displayHeight +" "+ screenHeight);
         double yResScale = (double) minecraft.displayHeight / (screenHeight);
         double xResScale = (double) minecraft.displayWidth / (screenWidth);
         double scaledWidth = xSize * xResScale;
@@ -609,11 +608,6 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         int x = (int) (xPos * xResScale);
         int y = (int) (minecraft.displayHeight - (yPos * yResScale) - scaledHeight);
 
-//        GlStateManager.pushMatrix();
-//        double scale = 0.5;
-//        GlStateManager.translate(xPos(), yPos(), 0);
-//        GlStateManager.scale(scale, scale, 1);
-//        GlStateManager.translate(-xPos(), -yPos(), 0);
         ScissorHelper.pushScissor(x, y, (int) scaledWidth, (int) scaledHeight);
 
         if (backgroundElement != null) {
@@ -627,17 +621,11 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         }
 
         ScissorHelper.popScissor();
-//        GlStateManager.popMatrix();
-
         for (MGuiElementBase element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element)) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }
-
-//        drawBorderedRect(scrollBounds.x, scrollBounds.y, scrollBounds.width, scrollBounds.height, 1, 0, 0xFF0000FF);
-//        drawBorderedRect(getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height, 1, 0, 0xFF00FFFF);
-//        drawBorderedRect(getRect().x, getRect().y, getRect().width, getRect().height, 1, 0, 0xFFFF00FF);
     }
 
     //endregion

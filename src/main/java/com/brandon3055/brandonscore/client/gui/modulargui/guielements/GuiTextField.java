@@ -13,6 +13,7 @@ import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -35,6 +36,9 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
     private int enabledColor = 14737632;
     private int disabledColor = 7368816;
     private IGuiEventListener listener;
+    private Consumer<String> changeListener;
+    private Consumer<String> returnListener;
+    private Consumer<Boolean> focusListener;
     private Predicate<String> validator = s -> true;
     public int fillColour = 0xFF5f5f60;
     public int borderColour = 0xFF000000;
@@ -52,6 +56,29 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
     public GuiTextField setListener(IGuiEventListener listener) {
         this.listener = listener;
+        return this;
+    }
+
+    public GuiTextField setChangeListener(Consumer<String> changeListener) {
+        this.changeListener = changeListener;
+        return this;
+    }
+
+    public GuiTextField setReturnListener(Consumer<String> returnListener) {
+        this.returnListener = returnListener;
+        return this;
+    }
+
+    public GuiTextField setChangeListener(Runnable changeListener) {
+        return setChangeListener((s) -> changeListener.run());
+    }
+
+    public GuiTextField setReturnListener(Runnable returnListener) {
+        return setReturnListener((s) -> returnListener.run());
+    }
+
+    public GuiTextField setFocusListener(Consumer<Boolean> focusListener) {
+        this.focusListener = focusListener;
         return this;
     }
 
@@ -141,6 +168,9 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
             if (listener != null) {
                 listener.onMGuiEvent(new GuiEvent.TextFieldEvent(this, text, true, false), this);
             }
+            if (changeListener != null) {
+                changeListener.accept(text);
+            }
         }
     }
 
@@ -183,6 +213,10 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
                     if (listener != null) {
                         listener.onMGuiEvent(new GuiEvent.TextFieldEvent(this, text, true, false), this);
+                    }
+
+                    if (changeListener != null) {
+                        changeListener.accept(text);
                     }
                 }
             }
@@ -284,6 +318,9 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                 case 28:
                     if (listener != null) {
                         listener.onMGuiEvent(new GuiEvent.TextFieldEvent(this, text, false, true), this);
+                    }
+                    if (returnListener != null) {
+                        returnListener.accept(text);
                     }
                     return true;
                 case 14:
@@ -402,6 +439,12 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
         }
         else if (this.isFocused && mouseOver && mouseButton == 1) {
             setText("");
+            if (listener != null) {
+                listener.onMGuiEvent(new GuiEvent.TextFieldEvent(this, text, true, false), this);
+            }
+            if (changeListener != null) {
+                changeListener.accept(text);
+            }
         }
 
         return mouseOver || super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -545,6 +588,9 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
         }
 
         this.isFocused = isFocusedIn;
+        if (focusListener != null) {
+            focusListener.accept(isFocused);
+        }
     }
 
     public boolean isFocused() {

@@ -25,16 +25,23 @@ public class BCFontRenderer extends FontRenderer {
         super(gameSettingsIn, location, textureManagerIn, unicode);
     }
 
+    int recurs = 0;
     @Override
     public String wrapFormattedStringToWidth(String str, int wrapWidth) {
         int i = this.sizeStringToWidth(str, wrapWidth);
 
         if (i <= 0) i = 1;
 
+        if (i <= 2 && str.startsWith("\u00a7")) {
+            i = 3;
+        }
+
         if (str.length() <= i) {
+            recurs = 0;
             return str;
         }
         else {
+            recurs++;
             String s = str.substring(0, i);
             char c0 = str.charAt(i);
             boolean flag = c0 == 32 || c0 == 10;

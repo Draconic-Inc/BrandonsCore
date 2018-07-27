@@ -93,7 +93,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
     }
 
     /**
-     * Allows you to add a validator that restricts what the user is able to enter into this field.
+     * Allows you to add a positionRestraint that restricts what the user is able to enter into this field.
      */
     public GuiTextFieldDialog setValidator(Predicate<String> validator) {
         this.validator = validator;

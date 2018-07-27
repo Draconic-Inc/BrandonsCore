@@ -88,7 +88,7 @@ public class LinkElement extends MDElementBase<LinkElement> {
                 int width = fontRenderer.getStringWidth(linkTarget);
                 int height = fontRenderer.getWordWrappedHeight(linkTarget, e.xSize()) + 4;
                 zOffset += container.linkDisplayZOffset;
-                drawColouredRect(e.xPos(), e.maxYPos() - height, Math.max(width + 4, e.xSize() / 2), height, 0x90000000);
+                drawColouredRect(e.xPos(), e.maxYPos() - height, Math.min(Math.max(width + 4, e.xSize() / 2), e.xSize()), height, 0x90000000);
                 drawSplitString(fontRenderer, linkTarget, e.xPos() + 2, e.maxYPos() - height + 2, e.xSize(), 0xc0c0c0, false);
                 zOffset -= container.linkDisplayZOffset;
             }

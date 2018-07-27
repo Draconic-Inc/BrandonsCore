@@ -54,8 +54,7 @@ public class JeiHelper {
         List<IRecipeRenderer> renderers = new ArrayList<>();
 
         IRecipeRegistry registry = BCJEIPlugin.jeiRuntime.getRecipeRegistry();
-        List<IRecipeCategory> categories = new LinkedList<>();
-        categories.addAll(registry.getRecipeCategories(registry.createFocus(IFocus.Mode.OUTPUT, result)));
+        List<IRecipeCategory> categories = new LinkedList<>(registry.getRecipeCategories(registry.createFocus(IFocus.Mode.OUTPUT, result)));
 
         for (IRecipeCategory category : categories) {
             List wrappers = registry.getRecipeWrappers(category, registry.createFocus(IFocus.Mode.OUTPUT, result));
@@ -86,7 +85,6 @@ public class JeiHelper {
         }
     }
 
-
     public static int getRecipeKey(boolean usage) {
         if (jeiAvailable()) {
             return getRecipeKeyInternal(usage);
@@ -104,8 +102,6 @@ public class JeiHelper {
             return 01;
         }
     }
-
-
 
 
     //endregion

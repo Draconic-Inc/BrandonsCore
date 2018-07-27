@@ -157,25 +157,27 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         LinkedList<MDElementBase> display = getDisplayElements();
         int lineY = getInsetRect().y;
         MDElementBase last = display.isEmpty() ? null : display.getLast(); //Used to find the end of the md
-        for (MDElementBase element: display) {
+        for (int i = 0; i < display.size(); i++) {
+            MDElementBase element = display.get(i);
             boolean endOfLine = false;
+            boolean newLine = element instanceof MarkerElement && ((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE;
 
-            if (element instanceof MarkerElement && element != last) {
+            if (element instanceof MarkerElement && !newLine && element != last) {
                 if (((MarkerElement) element).isAlign()) {
                     currentAlignment = ((MarkerElement) element).getAlign();
                 }
             }
-            else if (element.yPos() > lineY || last == element) {
+            else if (element.yPos() > lineY || last == element || newLine) {
                 if (currentAlignment != HAlign.LEFT) {
                     int lineWidth = 0;
-                    for (MDElementBase lineElement: currentLine) {
+                    for (MDElementBase lineElement : currentLine) {
                         lineWidth += lineElement.xSize();
                     }
                     int offset = layout.getWidth() - lineWidth;
                     if (currentAlignment == HAlign.CENTER) {
                         offset /= 2;
                     }
-                    for (MDElementBase lineElement: currentLine) {
+                    for (MDElementBase lineElement : currentLine) {
                         lineElement.translate(offset, 0);
                     }
                 }

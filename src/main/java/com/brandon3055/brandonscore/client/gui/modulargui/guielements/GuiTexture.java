@@ -46,7 +46,9 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         bindTexture(texture);
-        GlStateManager.color(1, 1, 1, 1);
+        if (preDrawCallback == null) {
+            GlStateManager.color(1, 1, 1, 1);
+        }
 
         if (texSizeOverride) {
             drawScaledCustomSizeModalRect(xPos(), yPos(), getTexU(), getTexV(), texUSize, texVSize, xSize(), ySize(), textSheetSizeX, textSheetSizeY);

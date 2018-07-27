@@ -30,26 +30,30 @@ public class GuiElementManager {
         this.parentGui = parentGui;
     }
 
-    //This will now be called by the parent when the element is added to its parent and after the parent calls applyGeneralElementData.
-//    public void addChildElements() {
-//        for (MGuiElementBase element : elements) {
-//            element.addChildElements();
-//        }
-//    }
-
     public void onGuiInit(Minecraft mc, int width, int height) {
         setWorldAndResolution(mc, width, height);
         if (!initialized) {
             parentGui.addElements(this);
             initialized = true;
         }
-//        reloadElements();
+    }
+
+    public void reinitialize(Minecraft mc, int width, int height) {
+        elements.clear();
+        actionList.clear();
+        toRemove.clear();
+        initialized = false;
+        onGuiInit(mc, width, height);
     }
 
     public void reloadElements() {
         for (MGuiElementBase element : elements) {
             element.reloadElement();
         }
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     //region Elements

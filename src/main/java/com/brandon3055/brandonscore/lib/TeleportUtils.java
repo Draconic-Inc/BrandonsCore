@@ -236,6 +236,10 @@ public class TeleportUtils {
          * Recursively remounts all of this entities riders and offsets their position relative to their position before teleporting.
          */
         public void remountRiders() {
+            //If the mount was dead before teleporting then entity will be null.
+            if (entity == null) {
+                return;
+            }
             if (entity.isRiding()) {
                 entity.setLocationAndAngles(entity.posX + offsetX, entity.posY + offsetY, entity.posZ + offsetZ, entity.rotationYaw, entity.rotationPitch);
             }

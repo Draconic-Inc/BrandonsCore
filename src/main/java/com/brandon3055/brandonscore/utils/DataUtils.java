@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.utils;
 import codechicken.lib.util.ArrayUtils;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -98,6 +99,14 @@ public class DataUtils {
         for (E element : elements) {
             if (matcher.test(element)) {
                 consumer.accept(element);
+            }
+        }
+    }
+
+    public static <E> void addIf(Iterable<E> elements, Collection<E> addTo, Predicate<E> matcher) {
+        for (E element : elements) {
+            if (matcher.test(element)) {
+                addTo.add(element);
             }
         }
     }

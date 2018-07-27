@@ -59,12 +59,6 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
         tile.getDataManager().detectAndSendChangesToListeners(listeners);
-//        for (int i = 0; i < this.listeners.size(); ++i) {
-//            IContainerListener icrafting = this.listeners.get(i);
-//            if (icrafting instanceof EntityPlayerMP && tile != null) {
-//                tile.detectAndSendChangesToPlayer(false, (EntityPlayerMP) icrafting);
-//            }
-//        }
     }
 
     @Override

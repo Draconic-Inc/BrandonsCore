@@ -19,7 +19,7 @@ public class ModHelperBC {
     private static Map<String, String> modVersionMap = null;
 
     public static boolean isJEIInstalled;
-
+    public static boolean isPIInstalled;
 
     public static void init() {
         if (initialized) return;
@@ -39,6 +39,7 @@ public class ModHelperBC {
         }
 
         isJEIInstalled = Loader.isModLoaded("jei");
+        isPIInstalled = Loader.isModLoaded("projectintelligence");
 
         initialized = true;
     }

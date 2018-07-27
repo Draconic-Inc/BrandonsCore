@@ -320,7 +320,7 @@ public class PiMarkdownReader {
     private void readMDTableRows(TableVisitor tableVisitor, LinkedList<String> markdownLines, TableDefinition definition) {
         int row = 0;
         String nextLine;
-        while ((nextLine = markdownLines.getFirst()).startsWith("|") && nextLine.length() > 2 && nextLine.substring(1).contains("|")) {
+        while (!markdownLines.isEmpty() && (nextLine = markdownLines.getFirst()).startsWith("|") && nextLine.length() > 2 && nextLine.substring(1).contains("|")) {
             tableVisitor.visitTableRow(nextLine);
             nextLine = nextLine.trim();
 

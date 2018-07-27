@@ -102,6 +102,30 @@ public class StackReference {
         return new StackReference(stack).toString();
     }
 
+    public NBTTagCompound getNbt() {
+        return nbt;
+    }
+
+    public void setNbt(NBTTagCompound nbt) {
+        this.nbt = nbt;
+    }
+
+    public int getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(int metadata) {
+        this.metadata = metadata;
+    }
+
+    public int getStackSize() {
+        return stackSize;
+    }
+
+    public void setStack(ResourceLocation stack) {
+        this.stack = stack;
+    }
+
     /**
      * @param string A stack string from which to generate a new stack reference.
      * @return A new stack reference or null if the string was invalid.<br>
