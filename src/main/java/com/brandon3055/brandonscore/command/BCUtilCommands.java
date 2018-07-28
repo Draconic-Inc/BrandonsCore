@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.ChatHelper;
+import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -39,11 +40,16 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.*;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -94,6 +100,9 @@ public class BCUtilCommands extends CommandBase {
             else if (function.equals("player_access")) {
                 playerAccess(server, sender, args);
             }
+            else if (function.equals("dump_event_listeners")) {
+                dumpEventListeners(sender);
+            }
             else {
                 help(sender);
             }
@@ -113,7 +122,7 @@ public class BCUtilCommands extends CommandBase {
             list.addAll(Lists.newArrayList(cache.getUsernames()));
             return getListOfStringsMatchingLastWord(args, list);
         }
-        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access");
+        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners");
     }
 
     private void help(ICommandSender sender) {
@@ -235,6 +244,74 @@ public class BCUtilCommands extends CommandBase {
         sender.sendMessage(comp);
     }
 
+    //region Dump Event Handlers
+
+    public static void dumpEventListeners(ICommandSender sender) throws CommandException {
+        Map<String, Map<Class<?>, List<PairKV<EventPriority, Method>>>> eventListenerMap = new HashMap<>();
+        dumpBus("EVENT_BUS", MinecraftForge.EVENT_BUS, eventListenerMap);
+        dumpBus("ORE_GEN_BUS", MinecraftForge.ORE_GEN_BUS, eventListenerMap);
+        dumpBus("TERRAIN_GEN_BUS", MinecraftForge.TERRAIN_GEN_BUS, eventListenerMap);
+
+        StringBuilder builder = new StringBuilder("\n");
+        for (String bus : eventListenerMap.keySet()) {
+            builder.append("Dumping listeners for bus: ").append(bus).append("\n");
+            Map<Class<?>, List<PairKV<EventPriority, Method>>> busListeners = eventListenerMap.get(bus);
+            List<Class<?>> sortedClasses = Lists.newArrayList(busListeners.keySet());
+            sortedClasses.sort(Comparator.comparing(Class::getName));
+            for (Class<?> eventClass : sortedClasses) {
+                List<PairKV<EventPriority, Method>> listenerList = busListeners.get(eventClass);
+                listenerList.sort(Comparator.comparingInt(value -> value.getKey().ordinal()));
+                builder.append("    Handlers for event: ").append(eventClass).append("\n");
+                for (PairKV<EventPriority, Method> listener : listenerList) {
+                    Method m = listener.getValue();
+                    builder.append("        ").append(listener.getKey()).append(" ").append(m.getDeclaringClass().getName()).append(" ").append(m.getName()).append("(").append(separateWithCommas(m.getParameterTypes())).append(")\n");
+                }
+                builder.append("\n");
+            }
+        }
+
+        LogHelperBC.info(builder.toString());
+        for (String s : builder.toString().split("\n")) {
+            sender.sendMessage(new TextComponentString(s));
+        }
+    }
+
+    private static String separateWithCommas(Class<?>[] types) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < types.length; j++) {
+            sb.append(types[j].getTypeName());
+            if (j < (types.length - 1))
+                sb.append(",");
+        }
+        return sb.toString();
+    }
+
+    private static void dumpBus(String name, EventBus bus, Map<String, Map<Class<?>, List<PairKV<EventPriority, Method>>>> baseMap) throws CommandException {
+        Map<Class<?>, List<PairKV<EventPriority, Method>>> map = baseMap.computeIfAbsent(name, eventBus -> new HashMap<>());
+
+        try {
+            ConcurrentHashMap<Object, ArrayList<IEventListener>> listeners = ReflectionHelper.getPrivateValue(EventBus.class, bus, "listeners");
+            for (Object obj : listeners.keySet()) {
+                for (Method method : obj.getClass().getMethods()) {
+                    SubscribeEvent anno;
+                    if ((anno = method.getAnnotation(SubscribeEvent.class)) != null) {
+                        for (Class<?> parameter : method.getParameterTypes()) {
+                            if (Event.class.isAssignableFrom(parameter)) {
+                                map.computeIfAbsent(parameter, aClass -> new ArrayList<>()).add(new PairKV<>(anno.priority(), method));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Throwable e) {
+            e.printStackTrace();
+            throw new CommandException(e.getMessage());
+        }
+    }
+
+    //endregion
+
     //region Player Access Command
 
     private void playerAccess(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
@@ -252,12 +329,12 @@ public class BCUtilCommands extends CommandBase {
         }
 
         Map<String, File> playerFiles = new HashMap<>();
-        for (File file: playerArray) {
+        for (File file : playerArray) {
             playerFiles.put(file.getName().replace(".dat", ""), file);
         }
 
         Map<UUID, GameProfile> playerMap = new HashMap<>();
-        for (String stringId: playerFiles.keySet()) {
+        for (String stringId : playerFiles.keySet()) {
             try {
                 UUID uuid = UUID.fromString(stringId);
                 GameProfile profile = cache.getProfileByUUID(uuid);
@@ -270,11 +347,11 @@ public class BCUtilCommands extends CommandBase {
 
         if (target.equals("list")) {
             sender.sendMessage(new TextComponentString("################## All Known Players ##################"));
-            for (UUID uuid: playerMap.keySet()) {
+            for (UUID uuid : playerMap.keySet()) {
                 GameProfile profile = playerMap.get(uuid);
 
                 boolean online = false;
-                for (EntityPlayer player: server.getPlayerList().getPlayers()) {
+                for (EntityPlayer player : server.getPlayerList().getPlayers()) {
                     if (player.getGameProfile().getId().equals(uuid)) {
                         online = true;
                         break;
@@ -340,7 +417,7 @@ public class BCUtilCommands extends CommandBase {
             throw new PlayerNotFoundException("There are no players in the playerdata folder");
         }
 
-        for (File file: playerArray) {
+        for (File file : playerArray) {
             if (file.getName().replace(".dat", "").equals(uuid)) {
                 return file;
             }
