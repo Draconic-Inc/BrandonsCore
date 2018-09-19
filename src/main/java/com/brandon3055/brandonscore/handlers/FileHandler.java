@@ -66,6 +66,7 @@ public class FileHandler {
     }
 
     private static final Set<Character> ILLEGAL_CHARACTERS = Sets.newHashSet('/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':');
+
     public static final Predicate<String> FILE_NAME_VALIDATOR = s -> {
         if (s == null || s.isEmpty()) return false;
         for (char c : s.toCharArray()) {

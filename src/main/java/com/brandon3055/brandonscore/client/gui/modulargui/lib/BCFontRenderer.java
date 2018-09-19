@@ -199,6 +199,7 @@ public class BCFontRenderer extends FontRenderer {
         super.resetStyles();
     }
 
+    @Override
     public int renderString(String text, float x, float y, int color, boolean dropShadow) {
         if (text == null) {
             return 0;
@@ -247,6 +248,7 @@ public class BCFontRenderer extends FontRenderer {
     }
 
     //Modified to accurately return the length of bold text when style toggle mode is enabled
+    @Override
     public int getStringWidth(String text) {
         if (text == null) {
             return 0;
@@ -296,6 +298,7 @@ public class BCFontRenderer extends FontRenderer {
     }
 
     //Modified to accurately return the length of bold text when style toggle mode is enabled
+    @Override
     public int sizeStringToWidth(String str, int wrapWidth) {
         int totalLength = str.length();
         int currentWidth = 0;

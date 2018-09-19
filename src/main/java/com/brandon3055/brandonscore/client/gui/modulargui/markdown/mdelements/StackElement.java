@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.Utils;
+import com.brandon3055.projectintelligence.api.PiAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -157,6 +158,13 @@ public class StackElement extends MDElementBase<StackElement> {
             else if (keyCode == JeiHelper.getRecipeKey(true)) {
                 JeiHelper.openJEIRecipe(stack, true);
                 return true;
+            }
+            else if (PiAPI.isAPIAvalible() && keyCode == PiAPI.getETGuiKey().getKeyCode()) {
+                List<String> pages = PiAPI.getRelatedPages(stack);
+                if (!pages.isEmpty()) {
+                    PiAPI.openGui(modularGui.getScreen(), pages);
+                    return true;
+                }
             }
         }
 

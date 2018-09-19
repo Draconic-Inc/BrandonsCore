@@ -106,6 +106,7 @@ public class JeiHelper {
 
     //endregion
 
+    @Nullable //Because reasons!
     public static ItemStack getPanelItemUnderMouse() {
         if (!jeiAvailable()) {
             return null;

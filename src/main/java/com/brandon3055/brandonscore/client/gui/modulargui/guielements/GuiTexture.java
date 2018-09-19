@@ -57,6 +57,7 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
             drawModalRectWithCustomSizedTexture(xPos(), yPos(), getTexU(), getTexV(), xSize(), ySize(), textSheetSizeX, textSheetSizeY);
         }
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFFFFFF00);
     }
 
     /**
@@ -157,8 +158,6 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 ResourceHelperBC.bindTexture(texture);
-//                LogHelperBC.dev("R " + xPos() + " " + yPos() + " " + xSize() + " " + ySize() + " " + isMouseOver(mouseX, mouseY));
-//                setYSize(10);
                 drawTexturedModalRect(xPos(), yPos(), 0, 0, xSize() / 2, ySize() / 2);
                 drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 256 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
 

@@ -263,7 +263,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * Adds a Collection of child elements to this element.
      */
     @SuppressWarnings("unchecked")
-    public E addChildren(Collection<MGuiElementBase> elements) {
+    public E addChildren(Collection<? extends MGuiElementBase> elements) {
         childElements.addAll(elements);
         for (MGuiElementBase element : elements) {
             onChildAdded(element);
@@ -2115,6 +2115,23 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), fillColour);
     }
 
+    public void drawShadedRect(int x, int y, int width, int height, int borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
+        //Fill
+        drawColouredRect(x + borderWidth, y + borderWidth, width - (borderWidth * 2), height - (borderWidth * 2), fill);
+        //Top
+        drawColouredRect(x, y, width - borderWidth, borderWidth, topLeftColour);
+        //Left
+        drawColouredRect(x, y + borderWidth, borderWidth, height - (borderWidth * 2), topLeftColour);
+        //Bottom
+        drawColouredRect(x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour);
+        //Right
+        drawColouredRect(x + width - borderWidth, y + borderWidth, borderWidth, height - (borderWidth * 2), bottomRightColour);
+        //Top Right Corner
+        drawColouredRect(x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour);
+        //Bottom Left Corner
+        drawColouredRect(x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
+    }
+
     public static int mixColours(int colour1, int colour2) {
         return mixColours(colour1, colour2, false);
     }
@@ -2178,6 +2195,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         int trimWidth = texWidth - leftTrim - rightTrim;
         int trimHeight = texHeight - topTrim - bottomTrim;
         if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -2185,7 +2203,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
         for (int x = 0; x < xSize; ) {
             int rWidth = Math.min(xSize - x, trimWidth);
-            int trimU = x == 0 ? texU : x + texWidth < xSize ? texU + leftTrim : texU + (texWidth - (xSize - x));
+            int trimU = x == 0 ? texU : x + texWidth <= xSize ? texU + leftTrim : texU + (texWidth - (xSize - x));
 
             //Top & Bottom trim
             bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim);
@@ -2195,7 +2213,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
             rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
             for (int y = 0; y < ySize; ) {
                 int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
-                int trimV = y + texHeight < ySize ? texV + topTrim : texV + (texHeight - (ySize - y));
+                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + (texHeight - (ySize - y));
 
                 //Left & Right trim
                 if (x == 0) {

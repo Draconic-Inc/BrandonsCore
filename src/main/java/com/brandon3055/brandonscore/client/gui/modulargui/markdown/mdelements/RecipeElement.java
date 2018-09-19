@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
+import com.brandon3055.projectintelligence.api.PiAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -141,6 +142,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
             int mouseY = parent.screenHeight - Mouse.getY() * parent.screenHeight / this.mc.displayHeight - 1;
 
             if (isMouseOver(mouseX, mouseY)) {
+                Object o = renderer.getIngredientUnderMouse(mouseX, mouseY);
                 if (keyCode == JeiHelper.getRecipeKey(false)) {
                     renderer.handleRecipeClick(mc, mouseX, mouseY, false);
                     return true;
@@ -148,6 +150,13 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 else if (keyCode == JeiHelper.getRecipeKey(true)) {
                     renderer.handleRecipeClick(mc, mouseX, mouseY, true);
                     return true;
+                }
+                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PiAPI.isAPIAvalible() && keyCode == PiAPI.getETGuiKey().getKeyCode()) {
+                    List<String> pages = PiAPI.getRelatedPages((ItemStack) o);
+                    if (!pages.isEmpty()) {
+                        PiAPI.openGui(modularGui.getScreen(), pages);
+                        return true;
+                    }
                 }
             }
 

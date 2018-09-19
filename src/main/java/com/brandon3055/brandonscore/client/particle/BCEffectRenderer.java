@@ -109,16 +109,16 @@ public class BCEffectRenderer {
                 }
 
                 ArrayDeque<Particle>[][] array = renderQueue.get(entry.getKey());
-                Particle Particle = entry.getValue();
+                Particle particle = entry.getValue();
 
-                int layer = Particle.getFXLayer();
-                int mask = Particle.shouldDisableDepth() ? 0 : 1;
+                int layer = particle.getFXLayer();
+                int mask = particle.shouldDisableDepth() ? 0 : 1;
 
                 if (array[layer][mask].size() >= 6000) {
                     array[layer][mask].removeFirst().setExpired();
                 }
 
-                array[layer][mask].add(Particle);
+                array[layer][mask].add(particle);
             }
         }
 

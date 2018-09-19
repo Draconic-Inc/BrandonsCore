@@ -13,10 +13,10 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
 
-    protected GuiButton yesButton;
-    protected GuiButton noButton;
-    protected GuiButton okButton;
-    protected GuiButton cancelButton;
+    public GuiButton yesButton;
+    public GuiButton noButton;
+    public GuiButton okButton;
+    public GuiButton cancelButton;
 
     public GuiPopupDialogs(MGuiElementBase parent) {
         super(parent);

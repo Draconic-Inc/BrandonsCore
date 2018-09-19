@@ -10,6 +10,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * This is a class used to run processes that implement IProcess.
@@ -35,7 +37,9 @@ public class ProcessHandlerClient {
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             BCProfiler.TICK.start("process_handler");
-            sync();
+            while (!syncTasks.isEmpty()) {
+                syncTasks.poll().run();
+            }
 
             Iterator<IProcess> i = processes.iterator();
             while (i.hasNext()) {
@@ -90,25 +94,9 @@ public class ProcessHandlerClient {
         newPersistentProcesses.add(process);
     }
 
-    private static final List<Runnable> syncTasks = new ArrayList<>();
-
-    public static void sync() {
-        if (!syncTasks.isEmpty()) {
-            List<Runnable> tasks;
-            synchronized (syncTasks) {
-                tasks = new ArrayList<>(syncTasks);
-                syncTasks.removeAll(tasks);
-            }
-
-            for (Runnable task : tasks) {
-                task.run();
-            }
-        }
-    }
+    private static final Queue<Runnable> syncTasks = new ConcurrentLinkedQueue<>();
 
     public static void syncTask(Runnable task) {
-        synchronized (syncTasks) {
-            syncTasks.add(task);
-        }
+        syncTasks.add(task);
     }
 }

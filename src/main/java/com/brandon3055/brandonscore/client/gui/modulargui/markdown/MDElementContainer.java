@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MD
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -271,9 +272,9 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+        GlStateManager.color(1, 1, 1, 1);
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
 //        drawBorderedRect(getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height, 1, 0, 0x8000FF00);
-
     }
 
     @Override

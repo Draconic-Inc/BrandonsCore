@@ -626,6 +626,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
     }
 
     //endregion
@@ -711,6 +712,8 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public Rectangle getScrollBounds() {
         return scrollBounds;
     }
+
+
 
     //endregion
 
