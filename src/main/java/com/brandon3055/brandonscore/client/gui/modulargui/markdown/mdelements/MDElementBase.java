@@ -16,6 +16,7 @@ import java.util.List;
  */
 public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiElementBase<E> {
 
+    public static final char S = '\u00a7';
     public int size = 0;
     public int width = -1;
     public int height = -1;
@@ -113,8 +114,8 @@ public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiEl
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (!invalidProps.isEmpty() && yPos() > 0 && yPos() < screenHeight) {
             List<String> list = new ArrayList<>();
-            invalidProps.forEach(s -> list.add("§cProperty \"" + s + "\" is invalid or not supported by this tag!§c"));
-            errors.forEach(s -> list.add("§c" + s + "§c"));
+            invalidProps.forEach(s -> list.add(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c"));
+            errors.forEach(s -> list.add(S + "c" + s + S + "c"));
             zOffset += 100;
             BCFontRenderer.setStileToggleMode(true);
             drawHoveringText(list, xPos() - 8, yPos() + 15, fontRenderer, screenWidth, screenHeight);
