@@ -65,6 +65,10 @@ public class CommonProxy {
         return false;
     }
 
+    public boolean isCTRLKeyDown() {
+        return false;
+    }
+
     public EntityPlayer getClientPlayer() {
         return null;
     }

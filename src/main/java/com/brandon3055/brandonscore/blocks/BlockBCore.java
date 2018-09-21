@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.blocks;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.lib.IActivatableTile;
 import com.brandon3055.brandonscore.lib.IChangeListener;
@@ -80,7 +81,7 @@ public class BlockBCore extends Block {
 
         TileEntity tile = world.getTileEntity(pos);
 
-        if (tile instanceof IDataRetainingTile) {
+        if (tile instanceof IDataRetainingTile && !BrandonsCore.proxy.isCTRLKeyDown()) {
             NBTTagCompound tileData = new NBTTagCompound();
             ((IDataRetainingTile) tile).writeToItemStack(tileData, false);
             if (!tileData.hasNoTags()) {

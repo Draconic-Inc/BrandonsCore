@@ -11,6 +11,7 @@ import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
@@ -72,6 +73,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public boolean isSprintKeyDown() {
         return Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown();
+    }
+
+    @Override
+    public boolean isCTRLKeyDown() {
+        return GuiScreen.isCtrlKeyDown();
     }
 
     @Override
