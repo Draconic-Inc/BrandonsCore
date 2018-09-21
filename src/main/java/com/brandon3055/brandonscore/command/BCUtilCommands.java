@@ -12,8 +12,6 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -22,20 +20,16 @@ import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -45,7 +39,6 @@ import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
@@ -62,7 +55,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT;
-import static net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE;
 
 /**
  * Created by brandon3055 on 23/06/2017.
@@ -115,7 +107,7 @@ public class BCUtilCommands extends CommandBase {
                 dumpEventListeners(sender);
             }
             else if (function.equals("light") && !ObfMapping.obfuscated) {
-                new LightTest((WorldServer) sender.getEntityWorld()).runTest(new BlockPos(getCommandSenderAsPlayer(sender)));
+//                new LightTest((WorldServer) sender.getEntityWorld()).runTest(new BlockPos(getCommandSenderAsPlayer(sender)));
             }
             else {
                 help(sender);
@@ -325,300 +317,300 @@ public class BCUtilCommands extends CommandBase {
 
     //endregion
 
-    private static class LightTest {
-        private HashSet<Chunk> modifiedChunks = new HashSet<>();
-        private WorldServer world;
-
-        private Object2IntMap<BlockPos> skyLight = new Object2IntOpenHashMap<>();
-        private Object2IntMap<BlockPos> blockLight = new Object2IntOpenHashMap<>();
-        private Object2IntMap<BlockPos> LEBs = new Object2IntOpenHashMap<>();
-
-
-        private LightTest(WorldServer serverWorld) {
-            this.world = serverWorld;
-        }
-
-        private void runTest(BlockPos origin) {
-            IBlockState[] randStates = new IBlockState[]{Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), Blocks.GLASS.getDefaultState()};
-            Map<BlockPos, IBlockState> blockList = new HashMap<>();
-
-            origin = new BlockPos(origin.getX(), 90, origin.getZ());
-            Iterable<BlockPos> blocks = BlockPos.getAllInBox(origin.add(-80, -40, -80), origin.add(80, 40, 80));
-
-            LogHelperBC.dev("Calc Blocks");
-            int i = 0;
-            for (BlockPos blockPos : blocks) {
-                i++;
-                IBlockState randState = randStates[rand.nextInt(randStates.length)];
-                if (rand.nextInt(100) == 0) {
-                    randState = Blocks.GLOWSTONE.getDefaultState();
-                }
-                blockList.put(blockPos, randState);
-            }
-
-            LogHelperBC.dev("Place " + i + " Blocks");
-            long start = System.currentTimeMillis();
-
-            for (BlockPos pos : blockList.keySet()) {
-//                world.setBlockState(pos, blockList.get(pos), 0);
-                changeBlock(pos, blockList.get(pos));
-//                world.setBlockToAir(pos);
-            }
-
-            LogHelperBC.dev("Blocks Placed in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-
-            start = System.currentTimeMillis();
-            doLightingMagics();
-            LogHelperBC.dev("Light Calculated in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-
-            start = System.currentTimeMillis();
-            sendChanges();
-            LogHelperBC.dev("Changes Sent in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-        }
-
-        private void doLightingMagics() {
-            HashSet<Chunk> lightChunks = new HashSet<>(modifiedChunks);
-            for (Chunk chunk : modifiedChunks) {
-                for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-                    Chunk adjacent = world.getChunkFromChunkCoords(chunk.x + facing.getFrontOffsetX(), chunk.z + facing.getFrontOffsetZ());
-                    lightChunks.add(adjacent);
-                }
-            }
-
-            long start = System.currentTimeMillis();
-            for (Chunk chunk : lightChunks) {
-                runPreCalculation(chunk); //Light in .88 before block search
-            }
-
-            LogHelperBC.dev(" - Pre-calculation Completed in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-            start = System.currentTimeMillis();
-
-            for (BlockPos pos : LEBs.keySet()) {
-                //Around ~7 seconds with vanilla calc and is a little broken.
-//                world.checkLightFor(EnumSkyBlock.BLOCK, pos);
-                propagateBlockLight(pos, LEBs.get(pos), true);
-            }
-
-            LogHelperBC.dev(" - Block Light Calculated in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-        }
-
-        //Generates sky light map and finds all light emitting blocks
-        private void runPreCalculation(Chunk chunk) {
-            int topFilled = chunk.getTopFilledSegment();
-//            chunk.heightMapMinimum = Integer.MAX_VALUE;
-
-            for (int x = 0; x < 16; ++x) {
-                for (int z = 0; z < 16; ++z) {
-                    chunk.precipitationHeightMap[x + (z << 4)] = -999;
-
-                    for (int y = topFilled + 16; y > 0; --y) {
-                        if (getBlockLightOpacity(chunk, x, y - 1, z) != 0) {
-                            chunk.heightMap[z << 4 | x] = y;
-
-//                            if (y < chunk.heightMapMinimum)
-//                            {
-//                                chunk.heightMapMinimum = y;
-//                            }
-
-                            break;
-                        }
-                    }
-
-                    if (chunk.getWorld().provider.hasSkyLight()) {
-                        //Start at the top "Empty block" where the light level will always ne 15
-                        //Go down block by block and subtract each blocks opacity from the light level then apply the remaining light
-                        //once the light level reaches 0 stop (essentially a ray trace)
-                        int lightLevel = 15;
-                        int offsetYPos = topFilled + 16 - 1;
-
-                        while (true) {
-                            ExtendedBlockStorage storage = chunk.storageArrays[offsetYPos >> 4];
-                            if (lightLevel > 0) {
-                                int opacityAtOffset = getBlockLightOpacity(chunk, x, offsetYPos, z);
-
-                                if (opacityAtOffset == 0 && lightLevel != 15) {
-                                    opacityAtOffset = 1;
-                                }
-
-                                lightLevel -= opacityAtOffset;
-
-                                if (lightLevel > 0) {
-                                    if (storage != NULL_BLOCK_STORAGE) {
-                                        skyLight.put(new BlockPos((chunk.x << 4) + x, offsetYPos, (chunk.z << 4) + z), lightLevel);
-                                        storage.setSkyLight(x, offsetYPos & 15, z, lightLevel);
-//                                        chunk.getWorld().notifyLightSet(new BlockPos((chunk.x << 4) + x, offsetYPos, (chunk.z << 4) + z)); //Dont need this because it just sends changes to clients. We already do this with chunk packets
-                                    }
-                                }
-                            }
-
-                            if (storage != null) {
-                                int blockEmittedLight = getBlockLightLevel(chunk, x, offsetYPos, z);
-                                if (blockEmittedLight > 0) {
-                                    LEBs.put(new BlockPos(chunk.x << 4 | x & 15, offsetYPos, chunk.z << 4 | z & 15), blockEmittedLight);
-                                }
-
-                                storage.setBlockLight(x, offsetYPos & 15, z, blockEmittedLight); //This way i don't have to worry about updating blocks when a light source is removed. Though may cause other issues... Actually it will... Fuck this is hard!
-                            }
-
-
-                            --offsetYPos;
-
-                            if (offsetYPos <= 0) {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private void propagateBlockLight(BlockPos pos, int light, boolean source) {
-            if (!world.isValid(pos)) return;
-
-            int opacity = getBlockLightOpacity(pos);
-            if (opacity == 0 && light != 15) {
-                opacity = 1;
-            }
-
-            if (!source){
-                light -= opacity;
-            }
-
-            if (light <= 0) {
-                return;
-            }
-
-            Integer current = blockLight.get(pos);
-
-            if (current != null && current >= light) {
-                return;
-            }
-
-            blockLight.put(pos, light);
-            setBlockLight(pos, light);
-
-            for (EnumFacing facing : EnumFacing.values()) {
-                BlockPos adjacent = pos.offset(facing);
-                propagateBlockLight(adjacent, light - 1, false);
-            }
-        }
-
-        private int getBlockLightOpacity(Chunk chunk, int x, int y, int z) {
-            IBlockState state = chunk.getBlockState(x, y, z);
-            return !chunk.loaded ? state.getLightOpacity() : state.getLightOpacity(world, new BlockPos(chunk.x << 4 | x & 15, y, chunk.z << 4 | z & 15));
-        }
-
-        private int getBlockLightOpacity(BlockPos pos) {
-            Chunk chunk = world.getChunkFromBlockCoords(pos);
-            IBlockState state = chunk.getBlockState(pos);
-            return !chunk.loaded ? state.getLightOpacity() : state.getLightOpacity(world, pos);
-        }
-
-
-        private int getBlockLightLevel(Chunk chunk, int x, int y, int z) {
-            IBlockState state = chunk.getBlockState(x, y, z);
-            return !chunk.loaded ? state.getLightValue() : state.getLightValue(world, new BlockPos(chunk.x << 4 | x & 15, y, chunk.z << 4 | z & 15));
-        }
-
-        private void setBlockLight(BlockPos pos, int light) {
-            ExtendedBlockStorage storage = getBlockStorage(pos);
-            if (storage != null) {
-                storage.setBlockLight(pos.getX() & 0xf, pos.getY() & 0xf, pos.getZ() & 0xf, light);
-            }
-        }
-
-//        public void setBlockLight(BlockPos pos, int value) {
-//            if (!world.isValid(pos)) return;
-//            Chunk chunk = world.getChunkFromBlockCoords(pos);
-//            int i = pos.getX() & 15;
-//            int j = pos.getY();
-//            int k = pos.getZ() & 15;
-//            ExtendedBlockStorage extendedblockstorage = chunk.storageArrays[j >> 4];
+//    private static class LightTest {
+//        private HashSet<Chunk> modifiedChunks = new HashSet<>();
+//        private WorldServer world;
 //
-//            if (extendedblockstorage == NULL_BLOCK_STORAGE) {
-//                return;
-//                extendedblockstorage = new ExtendedBlockStorage(j >> 4 << 4, this.world.provider.hasSkyLight());
-//                chunk.storageArrays[j >> 4] = extendedblockstorage;
-//                chunk.generateSkylightMap();
+//        private Object2IntMap<BlockPos> skyLight = new Object2IntOpenHashMap<>();
+//        private Object2IntMap<BlockPos> blockLight = new Object2IntOpenHashMap<>();
+//        private Object2IntMap<BlockPos> LEBs = new Object2IntOpenHashMap<>();
+//
+//
+//        private LightTest(WorldServer serverWorld) {
+//            this.world = serverWorld;
+//        }
+//
+//        private void runTest(BlockPos origin) {
+//            IBlockState[] randStates = new IBlockState[]{Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), Blocks.GLASS.getDefaultState()};
+//            Map<BlockPos, IBlockState> blockList = new HashMap<>();
+//
+//            origin = new BlockPos(origin.getX(), 90, origin.getZ());
+//            Iterable<BlockPos> blocks = BlockPos.getAllInBox(origin.add(-80, -40, -80), origin.add(80, 40, 80));
+//
+//            LogHelperBC.dev("Calc Blocks");
+//            int i = 0;
+//            for (BlockPos blockPos : blocks) {
+//                i++;
+//                IBlockState randState = randStates[rand.nextInt(randStates.length)];
+//                if (rand.nextInt(100) == 0) {
+//                    randState = Blocks.GLOWSTONE.getDefaultState();
+//                }
+//                blockList.put(blockPos, randState);
 //            }
 //
-//            extendedblockstorage.setBlockLight(i, j & 15, k, value);
+//            LogHelperBC.dev("Place " + i + " Blocks");
+//            long start = System.currentTimeMillis();
+//
+//            for (BlockPos pos : blockList.keySet()) {
+////                world.setBlockState(pos, blockList.get(pos), 0);
+//                changeBlock(pos, blockList.get(pos));
+////                world.setBlockToAir(pos);
+//            }
+//
+//            LogHelperBC.dev("Blocks Placed in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
+//
+//            start = System.currentTimeMillis();
+//            doLightingMagics();
+//            LogHelperBC.dev("Light Calculated in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
+//
+//            start = System.currentTimeMillis();
+//            sendChanges();
+//            LogHelperBC.dev("Changes Sent in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
 //        }
-
-        private void changeBlock(BlockPos pos, IBlockState state) {
-            Chunk chunk = getChunk(pos);
-            IBlockState oldState = chunk.getBlockState(pos);
-
-            if (oldState.getBlock().hasTileEntity(oldState)) {
-                world.setBlockToAir(pos);
-
-                PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
-                if (playerChunkMap != null) {
-                    PlayerChunkMapEntry watcher = playerChunkMap.getEntry(pos.getX() >> 4, pos.getZ() >> 4);
-                    if (watcher != null) {
-                        watcher.sendPacket(new SPacketBlockChange(world, pos));
-                    }
-                }
-
-                return;
-            }
-
-            ExtendedBlockStorage storage = getBlockStorage(pos);
-            if (storage != null) {
-                storage.set(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15, state);
-            }
-            setChunkModified(pos);
-        }
-
-        private ExtendedBlockStorage getBlockStorage(BlockPos pos) {
-            Chunk chunk = getChunk(pos);
-            ExtendedBlockStorage storage = chunk.storageArrays[pos.getY() >> 4];
-            if (storage == null) {
-                storage = new ExtendedBlockStorage(pos.getY() >> 4 << 4, world.provider.hasSkyLight());
-                chunk.storageArrays[pos.getY() >> 4] = storage;
-            }
-            return storage;
-        }
-
-        private HashMap<ChunkPos, Chunk> chunkCache = new HashMap<>();
-
-        private Chunk getChunk(BlockPos pos) {
-            ChunkPos cp = new ChunkPos(pos);
-            if (!chunkCache.containsKey(cp)) {
-                chunkCache.put(cp, world.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4));
-            }
-
-            return chunkCache.get(cp);
-        }
-
-        public void setChunkModified(BlockPos blockPos) {
-            Chunk chunk = getChunk(blockPos);
-            setChunkModified(chunk);
-        }
-
-        public void setChunkModified(Chunk chunk) {
-            modifiedChunks.add(chunk);
-        }
-
-        public void sendChanges() {
-            PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
-            if (playerChunkMap == null) {
-                return;
-            }
-
-            for (Chunk chunk : modifiedChunks) {
-                chunk.setModified(true);
-//                chunk.runPreCalculation(); //This is where this falls short. It can calculate basic sky lighting for blocks exposed to the sky but thats it.
-
-                PlayerChunkMapEntry watcher = playerChunkMap.getEntry(chunk.x, chunk.z);
-                if (watcher != null) {//TODO Change chunk mask to only the sub chunks changed.
-                    watcher.sendPacket(new SPacketChunkData(chunk, 65535));
-                }
-            }
-
-            modifiedChunks.clear();
-        }
-    }
+//
+//        private void doLightingMagics() {
+//            HashSet<Chunk> lightChunks = new HashSet<>(modifiedChunks);
+//            for (Chunk chunk : modifiedChunks) {
+//                for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+//                    Chunk adjacent = world.getChunkFromChunkCoords(chunk.x + facing.getFrontOffsetX(), chunk.z + facing.getFrontOffsetZ());
+//                    lightChunks.add(adjacent);
+//                }
+//            }
+//
+//            long start = System.currentTimeMillis();
+//            for (Chunk chunk : lightChunks) {
+//                runPreCalculation(chunk); //Light in .88 before block search
+//            }
+//
+//            LogHelperBC.dev(" - Pre-calculation Completed in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
+//            start = System.currentTimeMillis();
+//
+//            for (BlockPos pos : LEBs.keySet()) {
+//                //Around ~7 seconds with vanilla calc and is a little broken.
+////                world.checkLightFor(EnumSkyBlock.BLOCK, pos);
+//                propagateBlockLight(pos, LEBs.get(pos), true);
+//            }
+//
+//            LogHelperBC.dev(" - Block Light Calculated in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
+//        }
+//
+//        //Generates sky light map and finds all light emitting blocks
+//        private void runPreCalculation(Chunk chunk) {
+//            int topFilled = chunk.getTopFilledSegment();
+////            chunk.heightMapMinimum = Integer.MAX_VALUE;
+//
+//            for (int x = 0; x < 16; ++x) {
+//                for (int z = 0; z < 16; ++z) {
+//                    chunk.precipitationHeightMap[x + (z << 4)] = -999;
+//
+//                    for (int y = topFilled + 16; y > 0; --y) {
+//                        if (getBlockLightOpacity(chunk, x, y - 1, z) != 0) {
+//                            chunk.heightMap[z << 4 | x] = y;
+//
+////                            if (y < chunk.heightMapMinimum)
+////                            {
+////                                chunk.heightMapMinimum = y;
+////                            }
+//
+//                            break;
+//                        }
+//                    }
+//
+//                    if (chunk.getWorld().provider.hasSkyLight()) {
+//                        //Start at the top "Empty block" where the light level will always ne 15
+//                        //Go down block by block and subtract each blocks opacity from the light level then apply the remaining light
+//                        //once the light level reaches 0 stop (essentially a ray trace)
+//                        int lightLevel = 15;
+//                        int offsetYPos = topFilled + 16 - 1;
+//
+//                        while (true) {
+//                            ExtendedBlockStorage storage = chunk.storageArrays[offsetYPos >> 4];
+//                            if (lightLevel > 0) {
+//                                int opacityAtOffset = getBlockLightOpacity(chunk, x, offsetYPos, z);
+//
+//                                if (opacityAtOffset == 0 && lightLevel != 15) {
+//                                    opacityAtOffset = 1;
+//                                }
+//
+//                                lightLevel -= opacityAtOffset;
+//
+//                                if (lightLevel > 0) {
+//                                    if (storage != NULL_BLOCK_STORAGE) {
+//                                        skyLight.put(new BlockPos((chunk.x << 4) + x, offsetYPos, (chunk.z << 4) + z), lightLevel);
+//                                        storage.setSkyLight(x, offsetYPos & 15, z, lightLevel);
+////                                        chunk.getWorld().notifyLightSet(new BlockPos((chunk.x << 4) + x, offsetYPos, (chunk.z << 4) + z)); //Dont need this because it just sends changes to clients. We already do this with chunk packets
+//                                    }
+//                                }
+//                            }
+//
+//                            if (storage != null) {
+//                                int blockEmittedLight = getBlockLightLevel(chunk, x, offsetYPos, z);
+//                                if (blockEmittedLight > 0) {
+//                                    LEBs.put(new BlockPos(chunk.x << 4 | x & 15, offsetYPos, chunk.z << 4 | z & 15), blockEmittedLight);
+//                                }
+//
+//                                storage.setBlockLight(x, offsetYPos & 15, z, blockEmittedLight); //This way i don't have to worry about updating blocks when a light source is removed. Though may cause other issues... Actually it will... Fuck this is hard!
+//                            }
+//
+//
+//                            --offsetYPos;
+//
+//                            if (offsetYPos <= 0) {
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        private void propagateBlockLight(BlockPos pos, int light, boolean source) {
+//            if (!world.isValid(pos)) return;
+//
+//            int opacity = getBlockLightOpacity(pos);
+//            if (opacity == 0 && light != 15) {
+//                opacity = 1;
+//            }
+//
+//            if (!source){
+//                light -= opacity;
+//            }
+//
+//            if (light <= 0) {
+//                return;
+//            }
+//
+//            Integer current = blockLight.get(pos);
+//
+//            if (current != null && current >= light) {
+//                return;
+//            }
+//
+//            blockLight.put(pos, light);
+//            setBlockLight(pos, light);
+//
+//            for (EnumFacing facing : EnumFacing.values()) {
+//                BlockPos adjacent = pos.offset(facing);
+//                propagateBlockLight(adjacent, light - 1, false);
+//            }
+//        }
+//
+//        private int getBlockLightOpacity(Chunk chunk, int x, int y, int z) {
+//            IBlockState state = chunk.getBlockState(x, y, z);
+//            return !chunk.loaded ? state.getLightOpacity() : state.getLightOpacity(world, new BlockPos(chunk.x << 4 | x & 15, y, chunk.z << 4 | z & 15));
+//        }
+//
+//        private int getBlockLightOpacity(BlockPos pos) {
+//            Chunk chunk = world.getChunkFromBlockCoords(pos);
+//            IBlockState state = chunk.getBlockState(pos);
+//            return !chunk.loaded ? state.getLightOpacity() : state.getLightOpacity(world, pos);
+//        }
+//
+//
+//        private int getBlockLightLevel(Chunk chunk, int x, int y, int z) {
+//            IBlockState state = chunk.getBlockState(x, y, z);
+//            return !chunk.loaded ? state.getLightValue() : state.getLightValue(world, new BlockPos(chunk.x << 4 | x & 15, y, chunk.z << 4 | z & 15));
+//        }
+//
+//        private void setBlockLight(BlockPos pos, int light) {
+//            ExtendedBlockStorage storage = getBlockStorage(pos);
+//            if (storage != null) {
+//                storage.setBlockLight(pos.getX() & 0xf, pos.getY() & 0xf, pos.getZ() & 0xf, light);
+//            }
+//        }
+//
+////        public void setBlockLight(BlockPos pos, int value) {
+////            if (!world.isValid(pos)) return;
+////            Chunk chunk = world.getChunkFromBlockCoords(pos);
+////            int i = pos.getX() & 15;
+////            int j = pos.getY();
+////            int k = pos.getZ() & 15;
+////            ExtendedBlockStorage extendedblockstorage = chunk.storageArrays[j >> 4];
+////
+////            if (extendedblockstorage == NULL_BLOCK_STORAGE) {
+////                return;
+////                extendedblockstorage = new ExtendedBlockStorage(j >> 4 << 4, this.world.provider.hasSkyLight());
+////                chunk.storageArrays[j >> 4] = extendedblockstorage;
+////                chunk.generateSkylightMap();
+////            }
+////
+////            extendedblockstorage.setBlockLight(i, j & 15, k, value);
+////        }
+//
+//        private void changeBlock(BlockPos pos, IBlockState state) {
+//            Chunk chunk = getChunk(pos);
+//            IBlockState oldState = chunk.getBlockState(pos);
+//
+//            if (oldState.getBlock().hasTileEntity(oldState)) {
+//                world.setBlockToAir(pos);
+//
+//                PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
+//                if (playerChunkMap != null) {
+//                    PlayerChunkMapEntry watcher = playerChunkMap.getEntry(pos.getX() >> 4, pos.getZ() >> 4);
+//                    if (watcher != null) {
+//                        watcher.sendPacket(new SPacketBlockChange(world, pos));
+//                    }
+//                }
+//
+//                return;
+//            }
+//
+//            ExtendedBlockStorage storage = getBlockStorage(pos);
+//            if (storage != null) {
+//                storage.set(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15, state);
+//            }
+//            setChunkModified(pos);
+//        }
+//
+//        private ExtendedBlockStorage getBlockStorage(BlockPos pos) {
+//            Chunk chunk = getChunk(pos);
+//            ExtendedBlockStorage storage = chunk.storageArrays[pos.getY() >> 4];
+//            if (storage == null) {
+//                storage = new ExtendedBlockStorage(pos.getY() >> 4 << 4, world.provider.hasSkyLight());
+//                chunk.storageArrays[pos.getY() >> 4] = storage;
+//            }
+//            return storage;
+//        }
+//
+//        private HashMap<ChunkPos, Chunk> chunkCache = new HashMap<>();
+//
+//        private Chunk getChunk(BlockPos pos) {
+//            ChunkPos cp = new ChunkPos(pos);
+//            if (!chunkCache.containsKey(cp)) {
+//                chunkCache.put(cp, world.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4));
+//            }
+//
+//            return chunkCache.get(cp);
+//        }
+//
+//        public void setChunkModified(BlockPos blockPos) {
+//            Chunk chunk = getChunk(blockPos);
+//            setChunkModified(chunk);
+//        }
+//
+//        public void setChunkModified(Chunk chunk) {
+//            modifiedChunks.add(chunk);
+//        }
+//
+//        public void sendChanges() {
+//            PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
+//            if (playerChunkMap == null) {
+//                return;
+//            }
+//
+//            for (Chunk chunk : modifiedChunks) {
+//                chunk.setModified(true);
+////                chunk.runPreCalculation(); //This is where this falls short. It can calculate basic sky lighting for blocks exposed to the sky but thats it.
+//
+//                PlayerChunkMapEntry watcher = playerChunkMap.getEntry(chunk.x, chunk.z);
+//                if (watcher != null) {//TODO Change chunk mask to only the sub chunks changed.
+//                    watcher.sendPacket(new SPacketChunkData(chunk, 65535));
+//                }
+//            }
+//
+//            modifiedChunks.clear();
+//        }
+//    }
 
     //region Player Access Command
 

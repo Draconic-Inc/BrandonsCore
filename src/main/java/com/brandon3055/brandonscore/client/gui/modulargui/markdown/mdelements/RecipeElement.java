@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
+import com.brandon3055.brandonscore.integration.PIHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
-import com.brandon3055.projectintelligence.api.PiAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -151,10 +151,10 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                     renderer.handleRecipeClick(mc, mouseX, mouseY, true);
                     return true;
                 }
-                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PiAPI.isAPIAvalible() && keyCode == PiAPI.getETGuiKey().getKeyCode()) {
-                    List<String> pages = PiAPI.getRelatedPages((ItemStack) o);
+                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && keyCode == PIHelper.getETGuiKey().getKeyCode()) {
+                    List<String> pages = PIHelper.getRelatedPages((ItemStack) o);
                     if (!pages.isEmpty()) {
-                        PiAPI.openGui(modularGui.getScreen(), pages);
+                        PIHelper.openGui(modularGui.getScreen(), pages);
                         return true;
                     }
                 }
