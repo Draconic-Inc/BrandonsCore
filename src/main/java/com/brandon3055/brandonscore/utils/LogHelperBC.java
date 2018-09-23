@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.reflect.ObfMapping;
+import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -35,7 +36,7 @@ public class LogHelperBC {
     //region Standard log entries.
 
     public static void dev(Object object) {
-        if (!ObfMapping.obfuscated) {
+        if (!ObfMapping.obfuscated || BCConfig.devLog) {
             log(Level.INFO, "[DEV]: " + object);
         }
     }
@@ -77,7 +78,7 @@ public class LogHelperBC {
     //region Log with format.
 
     public static void dev(String object, Object... format) {
-        if (!ObfMapping.obfuscated) {
+        if (!ObfMapping.obfuscated || BCConfig.devLog) {
             log(Level.INFO, "[DEV]: " + String.format(object, format));
         }
     }
@@ -191,7 +192,7 @@ public class LogHelperBC {
     //region Log with trace element.
 
     public static void bigDev(String format, Object... data) {
-        if (!ObfMapping.obfuscated) {
+        if (!ObfMapping.obfuscated || BCConfig.devLog) {
             StackTraceElement[] trace = Thread.currentThread().getStackTrace();
             dev("****************************************");
             dev("* " + format, data);
@@ -303,7 +304,7 @@ public class LogHelperBC {
     }
 
     public static void logNBT(NBTTagCompound compound, boolean debug) {
-        if (debug && ObfMapping.obfuscated) {
+        if (debug && ObfMapping.obfuscated && !BCConfig.devLog) {
             return;
         }
 

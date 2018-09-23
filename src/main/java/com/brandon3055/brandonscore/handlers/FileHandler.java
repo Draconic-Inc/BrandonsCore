@@ -29,7 +29,7 @@ public class FileHandler {
         rootConfigFolder = event.getModConfigurationDirectory();
         brandon3055Folder = new File(rootConfigFolder, "brandon3055");
 
-        if (!brandon3055Folder.exists() && brandon3055Folder.mkdirs()) {
+        if (!brandon3055Folder.exists() && !brandon3055Folder.mkdirs()) {
             LogHelperBC.error("Could not create config directory! Things are probably going to break!");
         }
 

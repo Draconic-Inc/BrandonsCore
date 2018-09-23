@@ -118,7 +118,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
             return 0;
         }
         TileEntity tile = world.getTileEntity(pos.offset(side));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile)) {
+        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
             return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
         }
         return 0;

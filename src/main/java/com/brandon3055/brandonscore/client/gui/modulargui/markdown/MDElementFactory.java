@@ -209,15 +209,13 @@ public class MDElementFactory extends MarkdownVisitor {
     private void addErrorElement(MDElementBase erredElement) {
         TextElement error = new TextElement(erredElement.getError(), 0);
         error.colour = () -> 0xFF0000;
-        error.shadow = true;
         addElement(error);
     }
 
     @Override
     public void visitError(String errorMessage) {
         TextElement error = new TextElement("\n" + errorMessage + "\n", 0);
-        error.colour = () -> 0xFF3030;
-        error.shadow = true;
+        error.colour = () -> 0xFF0000;
         addElement(error);
     }
 

@@ -12,10 +12,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -403,7 +405,8 @@ public class PiMarkdownReader {
     private List<XMLTableElement.Row> readTableXML(String rawXML, TableDefinition definition) throws Exception {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = docFactory.newDocumentBuilder();
-        Document document = builder.parse(new ByteArrayInputStream(rawXML.getBytes()));
+        ByteArrayInputStream is = new ByteArrayInputStream(rawXML.getBytes());
+        Document document = builder.parse(new InputSource(new InputStreamReader(is))); //because pare(is) will try to read the is as UTF-8 but the bytes were already decoded when read from disk so this just breaks (but only on windows)
         Element tableE = document.getDocumentElement();
         tableE.getTagName();
 

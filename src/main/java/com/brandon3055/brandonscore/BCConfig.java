@@ -37,4 +37,7 @@ public class BCConfig implements IModConfigHelper {
 
     @ModConfigProperty(name = "disableInvasiveConfigGui", category = "Server", comment = "This disables the gui that is shown to clients if a server side config that cant be hot swapped has changed.\nIt is replaced by a chat message that has an option to open the gui")
     public static boolean disableInvasiveGui = false;
+
+    @ModConfigProperty(name = "devLog", category = "Misc", comment = "Enable DEV log output.")
+    public static boolean devLog = false;
 }
