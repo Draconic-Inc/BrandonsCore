@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
+import com.brandon3055.brandonscore.utils.InventoryUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -17,9 +18,12 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,7 +33,10 @@ import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -109,6 +116,9 @@ public class BCUtilCommands extends CommandBase {
             else if (function.equals("light") && !ObfMapping.obfuscated) {
 //                new LightTest((WorldServer) sender.getEntityWorld()).runTest(new BlockPos(getCommandSenderAsPlayer(sender)));
             }
+            else if (function.equals("eggify")) {
+                eggify(server, sender, args);
+            }
             else {
                 help(sender);
             }
@@ -128,7 +138,7 @@ public class BCUtilCommands extends CommandBase {
             list.addAll(Lists.newArrayList(cache.getUsernames()));
             return getListOfStringsMatchingLastWord(args, list);
         }
-        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners");
+        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners", "eggify");
     }
 
     private void help(ICommandSender sender) {
@@ -316,6 +326,63 @@ public class BCUtilCommands extends CommandBase {
     }
 
     //endregion
+
+    private void eggify(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+        Entity entity = traceEntity(player);
+
+        if (entity == null) {
+            player.sendMessage(new TextComponentString("You must be looking at an entity!"));
+            return;
+        }
+
+        ItemStack spawnEgg = new ItemStack(Items.SPAWN_EGG);
+        NBTTagCompound data = entity.writeToNBT(new NBTTagCompound());
+        data.setString("id", String.valueOf(EntityList.getKey(entity)));
+        spawnEgg.setTagInfo("EntityTag", data);
+
+        data.removeTag("Pos");
+        data.removeTag("Motion");
+        data.removeTag("Rotation");
+        data.removeTag("FallDistance");
+        data.removeTag("Fire");
+        data.removeTag("Air");
+        data.removeTag("OnGround");
+        data.removeTag("Dimension");
+        data.removeTag("Invulnerable");
+        data.removeTag("PortalCooldown");
+        data.removeTag("UUID");
+
+        InventoryUtils.givePlayerStack(player, spawnEgg);
+    }
+
+    @Nullable
+    protected Entity traceEntity(EntityPlayer player) {
+        Entity entity = null;
+        List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().grow(20.0D));
+        double d0 = 0.0D;
+
+        Vec3d start = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
+        Vec3d look = player.getLookVec();
+        Vec3d end = new Vec3d(player.posX + (look.x * 20), player.posY + player.getEyeHeight() + (look.y * 20), player.posZ + (look.z * 20));
+
+        for (int i = 0; i < list.size(); ++i) {
+            Entity entity1 = list.get(i);
+            AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(0.2);
+            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+
+            if (raytraceresult != null) {
+                double d1 = start.squareDistanceTo(raytraceresult.hitVec);
+
+                if (d1 < d0 || d0 == 0.0D) {
+                    entity = entity1;
+                    d0 = d1;
+                }
+            }
+        }
+
+        return entity;
+    }
 
 //    private static class LightTest {
 //        private HashSet<Chunk> modifiedChunks = new HashSet<>();

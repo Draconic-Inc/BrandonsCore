@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,6 +75,9 @@ public class BCClientCommands extends CommandBase {
             else if (function.equals("dump_event_listeners")) {
                 BCUtilCommands.dumpEventListeners(sender);
             }
+            else if (function.equals("set_ui_scale")) {
+                setUiScale(server, sender, args);
+            }
             else {
 //                help(sender);
             }
@@ -87,7 +91,7 @@ public class BCClientCommands extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners");
+        return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale");
     }
 
     private void help(ICommandSender sender) {
@@ -141,7 +145,15 @@ public class BCClientCommands extends CommandBase {
         }
     }
 
-    private void randomFunction4(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void setUiScale(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        if (args.length < 2) {
+            sender.sendMessage(new TextComponentString("Usage: /bcore_client set_ui_scale <0 to 8>"));
+            return;
+        }
+
+        Minecraft.getMinecraft().gameSettings.guiScale = parseInt(args[1], 0, 8);
+        Minecraft.getMinecraft().gameSettings.saveOptions();
+        sender.sendMessage(new TextComponentString("Gui Scale Updated!"));
     }
 
     private void randomFunction5(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
