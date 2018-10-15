@@ -109,11 +109,13 @@ public class TextElement extends MDElementBase<TextElement> {
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(xPos(), yPos(), 0);
                 GlStateManager.scale(scale, scale, 1);
-                fontRenderer.drawString(text, 0, 0, colour.get(), shadow);
+//                fontRenderer.drawString(text, 0, 0, colour.get(), shadow);
+                drawString(fontRenderer, text, 0, 0, colour.get(), shadow);
                 GlStateManager.popMatrix();
             }
             else {
-                fontRenderer.drawString(text, xPos(), yPos(), colour.get(), shadow);
+//                fontRenderer.drawString(text, xPos(), yPos(), colour.get(), shadow);
+                drawString(fontRenderer, text, xPos(), yPos(), colour.get(), shadow);
             }
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }

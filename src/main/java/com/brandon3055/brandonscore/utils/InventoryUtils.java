@@ -2,12 +2,14 @@ package com.brandon3055.brandonscore.utils;
 
 
 import codechicken.lib.vec.Vector3;
+import com.brandon3055.brandonscore.lib.functions.TriPredicate;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraftforge.items.IItemHandler;
 
 /**
  * Created by brandon3055 on 31/05/2016.
@@ -108,5 +110,14 @@ public class InventoryUtils {
         item.motionZ = world.rand.nextGaussian() * 0.05;
         world.spawnEntity(item);
         item.setPickupDelay(0);
+    }
+
+    public static int findMatchingStack(IItemHandler itemHandler, TriPredicate<IItemHandler, ItemStack, Integer> predicate) {
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            if (predicate.test(itemHandler, itemHandler.getStackInSlot(i), i)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

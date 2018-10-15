@@ -3,7 +3,9 @@ package com.brandon3055.brandonscore.client.particle;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.utils.BCProfiler;
+import com.brandon3055.brandonscore.utils.DataUtils;
 import com.google.common.collect.Queues;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,6 +15,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
+import net.minecraft.profiler.Profiler;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -229,28 +232,33 @@ public class BCEffectRenderer {
         Particle.interpPosZ = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double) partialTicks;
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.alphaFunc(516, 0.003921569F);
+        GlStateManager.alphaFunc(GL11.GL_GREATER, 0);
         Tessellator tessellator = Tessellator.getInstance();
 
+        Profiler profiler = Minecraft.getMinecraft().mcProfiler;
+
+
         for (int layer = 0; layer < 4; layer++) {
+            profiler.startSection("GL_Particles");
             BCProfiler.RENDER.start("render_glfx");
             renderGlParticlesInLayer(layer, tessellator, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
             BCProfiler.RENDER.stop();
+            profiler.endStartSection("Tex_Particles");
             BCProfiler.RENDER.start("render_particles");
             renderTexturedParticlesInLayer(layer, tessellator, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
+            profiler.endSection();
             BCProfiler.RENDER.stop();
         }
 
         GlStateManager.depthMask(true);
         GlStateManager.disableBlend();
-        GlStateManager.alphaFunc(516, 0.1F);
+        GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
     }
 
     private void renderGlParticlesInLayer(int layer, Tessellator tessellator, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
         BufferBuilder vertexbuffer = tessellator.getBuffer();
 
         for (IGLFXHandler handler : glRenderQueue.keySet()) {
-
             handler.preDraw(layer, vertexbuffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
 
             for (final Particle particle : glRenderQueue.get(handler)[layer]) {
@@ -346,6 +354,20 @@ public class BCEffectRenderer {
         }
 
         return "" + i + " GLFX: " + g;
+    }
+
+    public void clear() {
+        renderQueue.forEach((resourceLocation, arrayDeques) -> DataUtils.forEach(arrayDeques, arrayDeques1 -> DataUtils.forEach(arrayDeques1, particles -> particles.forEach(Particle::setExpired))));
+        renderQueue.clear();
+
+        newParticleQueue.forEach(pairKV -> pairKV.getValue().setExpired());
+        newParticleQueue.clear();
+
+        glRenderQueue.forEach((iglfxHandler, arrayDeques) -> DataUtils.forEach(arrayDeques, particles -> particles.forEach(Particle::setExpired)));
+        glRenderQueue.clear();
+
+        newGlParticleQueue.forEach(pairKV -> pairKV.getValue().setExpired());
+        newGlParticleQueue.clear();
     }
 
     public static final IGLFXHandler DEFAULT_IGLFX_HANDLER = new IGLFXHandler() {

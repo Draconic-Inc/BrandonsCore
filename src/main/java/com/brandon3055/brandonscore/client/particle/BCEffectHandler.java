@@ -227,7 +227,7 @@ public class BCEffectHandler {
 
         if (effectRenderer.world != null) {
             BCProfiler.TICK.start("update_bc_effect_renderer");
-            Minecraft.getMinecraft().mcProfiler.startSection("DEParticlesUpdate");
+            Minecraft.getMinecraft().mcProfiler.startSection("BCParticlesUpdate");
             effectRenderer.updateEffects();
             Minecraft.getMinecraft().mcProfiler.endSection();
             BCProfiler.TICK.stop();
@@ -243,7 +243,7 @@ public class BCEffectHandler {
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
         BCProfiler.RENDER.start("bc_effect_renderer_draw");
-        Minecraft.getMinecraft().mcProfiler.startSection("DEParticles");
+        Minecraft.getMinecraft().mcProfiler.startSection("BCParticles");
         effectRenderer.renderParticles(Minecraft.getMinecraft().player, event.getPartialTicks());
         Minecraft.getMinecraft().mcProfiler.endSection();
         BCProfiler.RENDER.stop();
@@ -255,7 +255,7 @@ public class BCEffectHandler {
     public void debugOverlay(RenderGameOverlayEvent.Text event) {
         if (event.getLeft().size() >= 5 && effectRenderer != null) {
             String particleTxt = event.getLeft().get(4);
-            particleTxt += "." + TextFormatting.GOLD + " DE-P: " + effectRenderer.getStatistics();
+            particleTxt += "." + TextFormatting.GOLD + " BC-P: " + effectRenderer.getStatistics();
             event.getLeft().set(4, particleTxt);
         }
     }

@@ -230,6 +230,10 @@ public class Vec3D {
         return Utils.getDistanceAtoB(this, vec3D);
     }
 
+    public double distanceSq(Vec3D v) {
+        return Utils.getDistanceSq(x, y, z, v.x, v.y, v.z);
+    }
+
     public int floorX() {
         return MathHelper.floor(x);
     }

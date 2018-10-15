@@ -97,7 +97,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
             renderEntity.ticksExisted = BCClientEventHandler.elapsedTicks;
 
             GlStateManager.pushMatrix();
-            GlStateManager.translate(0, 0, 25 + scale);
+            GlStateManager.translate(0, 0, 25 + getRenderZLevel() + scale);
             GlStateManager.color(1, 1, 1, 1);
 
             int eyeOffset = (int) ((renderEntity.height - renderEntity.getEyeHeight()) * scale);

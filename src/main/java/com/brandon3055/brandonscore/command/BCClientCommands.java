@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.command;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.gui.config.GuiIncompatibleConfig;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
+import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.DelayedTask;
@@ -78,6 +79,9 @@ public class BCClientCommands extends CommandBase {
             else if (function.equals("set_ui_scale")) {
                 setUiScale(server, sender, args);
             }
+            else if (function.equals("clear_fx")) {
+                BCEffectHandler.effectRenderer.clear();
+            }
             else {
 //                help(sender);
             }
@@ -91,7 +95,7 @@ public class BCClientCommands extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale");
+        return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale", "clear_fx");
     }
 
     private void help(ICommandSender sender) {
