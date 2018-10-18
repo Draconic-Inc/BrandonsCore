@@ -4,13 +4,12 @@ import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.DataUtils;
-import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -37,7 +36,7 @@ public class BCEffectRenderer {
     private final Queue<PairKV<ResourceLocation, Particle>> newParticleQueue = new ArrayDeque<>();
     @SuppressWarnings("unchecked")
     private final Map<IGLFXHandler, ArrayDeque<Particle>[]> glRenderQueue = new HashMap<>();
-    private final Queue<PairKV<IGLFXHandler, Particle>> newGlParticleQueue = Queues.newArrayDeque();
+    private final Queue<PairKV<IGLFXHandler, Particle>> newGlParticleQueue = new ArrayDeque<>();//Queues.newConcurrentLinkedQueue();
 
     @SuppressWarnings("unchecked")
     public BCEffectRenderer(World world) {
@@ -259,9 +258,12 @@ public class BCEffectRenderer {
         BufferBuilder vertexbuffer = tessellator.getBuffer();
 
         for (IGLFXHandler handler : glRenderQueue.keySet()) {
+            ArrayDeque<Particle> particles = glRenderQueue.get(handler)[layer];
+            if (particles.isEmpty()) continue;
+
             handler.preDraw(layer, vertexbuffer, entityIn, partialTicks, rotationX, rotationZ, rotationYZ, rotationXY, rotationXZ);
 
-            for (final Particle particle : glRenderQueue.get(handler)[layer]) {
+            for (final Particle particle : particles) {
                 try {
                     BCProfiler.RENDER.start("glfx: " + particle.getClass().getSimpleName());
                     particle.renderParticle(vertexbuffer, entityIn, partialTicks, rotationX, rotationXZ, rotationZ, rotationYZ, rotationXY);

@@ -209,6 +209,21 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
         showCenter(pz >= 500 ? pz + 50 : 500);
     }
 
+
+    /**
+     * Display this popup in the centre of the specified Element.
+     */
+    public void showCenter(MGuiElementBase centerOn, int displayZLevel) {
+        show(displayZLevel);
+        setXPos(centerOn.xPos() + (centerOn.xSize() / 2) - (xSize() / 2));
+        setYPos(centerOn.yPos() + (centerOn.ySize() / 2) - (ySize() / 2));
+    }
+
+    public void showCenter(MGuiElementBase centerOn) {
+        int pz = getParent() == null ? 100 : getParent().displayZLevel;
+        showCenter(centerOn, pz >= 500 ? pz + 50 : 500);
+    }
+
     /**
      * Close this popup. Popup can be reopened by calling show() again.
      */

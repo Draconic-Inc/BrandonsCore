@@ -159,9 +159,11 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
                 redSlider.updateRawPos((colour.r & 0xFF) / 255D);
                 greenSlider.updateRawPos((colour.g & 0xFF) / 255D);
                 blueSlider.updateRawPos((colour.b & 0xFF) / 255D);
-                alphaSlider.updateRawPos((colour.a & 0xFF) / 255D);
                 if (!includeAlpha) {
                     colour.a = (byte) 0xFF;
+                }
+                else {
+                    alphaSlider.updateRawPos((colour.a & 0xFF) / 255D);
                 }
                 hexField.setCursorPosition(pos);
                 colourChanged = true;

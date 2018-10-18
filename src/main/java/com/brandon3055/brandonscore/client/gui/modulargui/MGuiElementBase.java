@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -236,6 +237,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @return The child element that was added.
      */
     public <C extends MGuiElementBase> C addChild(C child) {
+        if (child == this) throw new InvalidParameterException("Attempted to add element to itself as a child element.");
         if (childElements.contains(child)) {
             return child;
         }

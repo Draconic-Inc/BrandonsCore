@@ -103,7 +103,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
     }
 
     public int sendEnergyToAll() {
-        if (getEnergyStored() == 0) {
+        if (getEnergyStored() <= 0) {
             return 0;
         }
         int i = 0;
