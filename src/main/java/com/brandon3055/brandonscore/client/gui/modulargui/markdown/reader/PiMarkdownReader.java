@@ -854,7 +854,7 @@ public class PiMarkdownReader {
     }
 
     //For internal xml parsing use only
-    private static class XMLTableElement {
+    public static class XMLTableElement {
         public int colour = 0;
         public boolean colourSet = false;
         public int lPad = -9999;
@@ -940,7 +940,7 @@ public class PiMarkdownReader {
             }
         }
 
-        private static class Row extends XMLTableElement {
+        public static class Row extends XMLTableElement {
             public List<Cell> cells = new ArrayList<>();
 
             public Row(Element rowE) throws Exception {

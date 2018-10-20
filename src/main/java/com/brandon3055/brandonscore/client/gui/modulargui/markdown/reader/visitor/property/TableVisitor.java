@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.PiMarkdownReader.XMLTableElement.Row;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.CellData;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
@@ -30,6 +31,8 @@ public abstract class TableVisitor extends PropertyVisitor {
 
     //Called for each row with the raw row string (just in case its needed)
     public abstract void visitTableRow(String row);
+    
+    public void visitXMLTableRow(int row, Row rowData) {}
 
     @Override
     public abstract void visitLeftPad(int leftPadding);
