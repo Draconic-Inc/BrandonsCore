@@ -3,7 +3,11 @@ package com.brandon3055.brandonscore.lib;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Created by brandon3055 on 5/08/2017.
@@ -26,7 +30,7 @@ public class FileDownloadManager implements Runnable {
     private Runnable queCompeteCallback = null;
     private final ThreadFileDownloader[] workers;
     private volatile boolean stopDownload = false;
-    private List<PairKV<String, File>> downloadQue = Collections.synchronizedList(new ArrayList<>());
+    private Queue<PairKV<String, File>> downloadQue = new ConcurrentLinkedDeque<>();
 
     public FileDownloadManager(String name, int maxWorkers, boolean resetOnFinish) {
         this.name = name;
@@ -77,7 +81,7 @@ public class FileDownloadManager implements Runnable {
                     }
                     else if (downloadQue.size() > 0) {
                         filesDownloaded++;
-                        PairKV<String, File> file = downloadQue.remove(0);
+                        PairKV<String, File> file = downloadQue.poll();
                         worker = new ThreadFileDownloader(name + ":worker-" + i, file.getKey(), file.getValue());
                         LogHelperBC.dev("FileDownloadHandler: Starting Download: " + file.getKey() + " -> " + file.getValue());
                         workers[i] = worker;

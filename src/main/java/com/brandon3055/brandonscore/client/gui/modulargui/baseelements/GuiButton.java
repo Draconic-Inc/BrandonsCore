@@ -239,9 +239,9 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         }
 
         if (disabled) {
-            return 10526880;
+            return 0xa0a0a0;
         }
-        return hovered ? 16777120 : 14737632;
+        return hovered ? 0xffffa0 : 0xe0e0e0;
     }
 
     /**

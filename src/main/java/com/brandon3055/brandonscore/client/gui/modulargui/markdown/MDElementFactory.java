@@ -57,12 +57,6 @@ public class MDElementFactory extends MarkdownVisitor {
 
     }
 
-    //First pass      - Basic implementation but not fully tested.
-    //Second pass     - All functions working including mouse interaction.
-    //Second pass doc - Documentation has been updated and any required changes to insert code have been made.
-    //Done            - Extensively tested and no issues found.
-
-    //Second Pass doc
     @Override
     public StackVisitor visitStack(String stackString) {
         StackElement element = new StackElement(stackString);
@@ -71,7 +65,6 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
-    //Second Pass doc
     @Override
     public RecipeVisitor visitRecipe(String stackString) {
         RecipeElement element = new RecipeElement(stackString);
@@ -80,7 +73,6 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
-    //Second Pass doc
     @Override
     public ImageVisitor visitImage(String imageURL) {
         ImageElement element = new ImageElement(container, imageURL);
@@ -89,7 +81,6 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
-    //Second Pass doc
     @Override
     public LinkVisitor visitLink(String linkTarget) {
         LinkElement element = new LinkElement(container, linkTarget);
@@ -100,7 +91,6 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
-    //Second Pass doc
     @Override
     public EntityVisitor visitEntity(String regName) {
         EntityElement element = new EntityElement(regName);
@@ -109,7 +99,6 @@ public class MDElementFactory extends MarkdownVisitor {
         return visitor;
     }
 
-    //Second Pass doc
     @Override
     public RuleVisitor visitRule() {
         RuleElement element = new RuleElement();

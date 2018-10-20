@@ -30,6 +30,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader
 
 /**
  * Created by brandon3055 on 5/30/2018.
+ *
+ * This is a reader for the modified markdown language used by {@link com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementFactory}
  */
 public class PiMarkdownReader {
 
@@ -239,7 +241,7 @@ public class PiMarkdownReader {
                             continue;
                         }
                         else {
-                            visitor.visitHeading(trim(currentLine, '#'), headingType, true);
+                            visitor.visitHeading(trim(currentLine, '#'), headingType, false);
                             currentLine = "";
                             continue;
                         }
