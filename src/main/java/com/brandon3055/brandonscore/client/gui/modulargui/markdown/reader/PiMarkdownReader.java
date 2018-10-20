@@ -361,7 +361,7 @@ public class PiMarkdownReader {
 
     private void readXMLTableRows(MarkdownVisitor visitor, String rawXML, String tagString, String currentLine) {
         rawXML = rawXML.substring(0, rawXML.length() - 1);
-
+        TableVisitor tableVisitor = null;
         try {
             TableDefinition definition = new TableDefinition(true);
             List<XMLTableElement.Row> rows = readTableXML(rawXML, definition);
@@ -381,7 +381,7 @@ public class PiMarkdownReader {
                 throw new TableReadException("Layout Error! The table has " + (maxColumn + 1) + " columns\n" + "but you have only defined " + definition.columns.size() + " in the column_layout attribute!");
             }
 
-            TableVisitor tableVisitor = visitor.visitTable(definition);
+            tableVisitor = visitor.visitTable(definition);
             String[] props = extractProps(TABLE, tagString);
             acceptProps(tableVisitor, props, false);
 
@@ -401,6 +401,10 @@ public class PiMarkdownReader {
         catch (Throwable e) {
             visitor.visitError("An error occurred while reading XML table!");
             visitor.visitError(e.toString());
+        }
+
+        if (tableVisitor != null) {
+            tableVisitor.endVisit();
         }
     }
 
