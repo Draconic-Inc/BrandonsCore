@@ -31,7 +31,7 @@ public abstract class TableVisitor extends PropertyVisitor {
 
     //Called for each row with the raw row string (just in case its needed)
     public abstract void visitTableRow(String row);
-    
+
     public void visitXMLTableRow(int row, Row rowData) {}
 
     @Override

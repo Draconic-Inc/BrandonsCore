@@ -365,11 +365,13 @@ public class PiMarkdownReader {
         try {
             TableDefinition definition = new TableDefinition(true);
             List<XMLTableElement.Row> rows = readTableXML(rawXML, definition);
+            tableVisitor = visitor.visitTable(definition);
             List<CellData> cellDataList = new ArrayList<>();
             int maxColumn = 0;
 
             for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
                 XMLTableElement.Row row = rows.get(rowIndex);
+                tableVisitor.visitXMLTableRow(rowIndex, row);
                 for (int columnIndex = 0; columnIndex < row.cells.size(); columnIndex++) {
                     XMLTableElement.Cell cell = row.cells.get(columnIndex);
                     maxColumn = Math.max(maxColumn, columnIndex);
@@ -381,7 +383,6 @@ public class PiMarkdownReader {
                 throw new TableReadException("Layout Error! The table has " + (maxColumn + 1) + " columns\n" + "but you have only defined " + definition.columns.size() + " in the column_layout attribute!");
             }
 
-            tableVisitor = visitor.visitTable(definition);
             String[] props = extractProps(TABLE, tagString);
             acceptProps(tableVisitor, props, false);
 
