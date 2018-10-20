@@ -14,6 +14,7 @@ public class TableDefinition {
     public boolean hasHeading = false;
     public List<ColumnDef> columns = new LinkedList<>();
     public boolean isXML;
+    public String rawMDDeliminator = null;
 
     public TableDefinition(boolean isXML) {
         this.isXML = isXML;
@@ -21,6 +22,11 @@ public class TableDefinition {
 
     public void addColumn(int width, boolean fixedWidth, HAlign align) {
         columns.add(new ColumnDef(width, fixedWidth, align));
+    }
+
+    public TableDefinition setRawMDDeliminator(String rawMDDeliminator) {
+        this.rawMDDeliminator = rawMDDeliminator;
+        return this;
     }
 
     public static class ColumnDef {

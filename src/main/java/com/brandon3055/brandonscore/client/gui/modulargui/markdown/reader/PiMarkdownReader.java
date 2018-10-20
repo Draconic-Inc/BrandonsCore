@@ -776,9 +776,9 @@ public class PiMarkdownReader {
         return input.substring(start);
     }
 
-    private TableDefinition checkDelimiter(String line) {
+    private TableDefinition checkDelimiter(String input) {
         TableDefinition definition = new TableDefinition(false);
-        line = line.trim();
+        String line = input.trim();
 
         if (line.length() < 2) {
             return null;
@@ -838,7 +838,7 @@ public class PiMarkdownReader {
             }
         }
 
-        return definition;
+        return definition.setRawMDDeliminator(input);
     }
 
     public static HAlign getColumnAlign(boolean leftBind, boolean rightBind) {
