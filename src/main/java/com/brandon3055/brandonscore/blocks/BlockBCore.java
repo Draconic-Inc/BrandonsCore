@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.blocks;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.lib.IActivatableTile;
+import com.brandon3055.brandonscore.lib.IBCoreBlock;
 import com.brandon3055.brandonscore.lib.IChangeListener;
 import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
@@ -38,7 +39,7 @@ import java.util.Map;
  * Created by brandon3055 on 18/3/2016.
  * This is the base block class form all blocks.
  */
-public class BlockBCore extends Block {
+public class BlockBCore extends Block implements IBCoreBlock {
     public static final String TILE_DATA_TAG = "BCTileData";
     protected boolean isFullCube = true;
     private boolean ifcSet = false;
@@ -120,8 +121,14 @@ public class BlockBCore extends Block {
         return this;
     }
 
+    @Override
     public boolean hasSubItemTypes() {
         return hasSubItemTypes;
+    }
+
+    @Override
+    public Map<Integer, String> getNameOverrides() {
+        return nameOverrides;
     }
 
     /**
@@ -258,10 +265,12 @@ public class BlockBCore extends Block {
         }
     }
 
+    @Override
     public boolean overrideShareTag() {
         return false;
     }
 
+    @Override
     public NBTTagCompound getNBTShareTag(ItemStack stack) {
         return stack.getTagCompound();
     }

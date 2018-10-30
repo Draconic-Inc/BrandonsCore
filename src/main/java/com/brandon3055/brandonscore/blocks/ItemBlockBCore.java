@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.blocks;
 
+import com.brandon3055.brandonscore.lib.IBCoreBlock;
 import com.brandon3055.brandonscore.lib.ITilePlaceListener;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -22,15 +23,15 @@ public class ItemBlockBCore extends ItemBlock {
 
     public ItemBlockBCore(Block block) {
         super(block);
-        if (block instanceof BlockBCore) {
-            setHasSubtypes(((BlockBCore) block).hasSubItemTypes());
+        if (block instanceof IBCoreBlock) {
+            setHasSubtypes(((IBCoreBlock) block).hasSubItemTypes());
         }
     }
 
     @Override
     public String getUnlocalizedName(ItemStack stack) {
-        if (block instanceof BlockBCore && ((BlockBCore) block).nameOverrides.containsKey(stack.getItemDamage())) {
-            return "tile." + getRegistryDomain() + ":" +((BlockBCore) block).nameOverrides.get(stack.getItemDamage());
+        if (block instanceof IBCoreBlock && ((IBCoreBlock) block).getNameOverrides().containsKey(stack.getItemDamage())) {
+            return "tile." + getRegistryDomain() + ":" +((IBCoreBlock) block).getNameOverrides().get(stack.getItemDamage());
         }
 
         return super.getUnlocalizedName(stack);
@@ -73,8 +74,8 @@ public class ItemBlockBCore extends ItemBlock {
 
     @Override
     public NBTTagCompound getNBTShareTag(ItemStack stack) {
-        if (block instanceof BlockBCore && ((BlockBCore) block).overrideShareTag()) {
-            return ((BlockBCore) block).getNBTShareTag(stack);
+        if (block instanceof IBCoreBlock && ((IBCoreBlock) block).overrideShareTag()) {
+            return ((IBCoreBlock) block).getNBTShareTag(stack);
         }
         return super.getNBTShareTag(stack);
     }

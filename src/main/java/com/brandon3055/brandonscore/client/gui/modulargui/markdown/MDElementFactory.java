@@ -125,7 +125,7 @@ public class MDElementFactory extends MarkdownVisitor {
     }
 
     @Override
-    public void visitText(String text) { //First Pass
+    public void visitText(String text) {
         text = applyTextFormatting(text);
         TextElement element = new TextElement(text, 0);
         element.colour = colourOverridden ? () -> colourOverride : colourSupplier;

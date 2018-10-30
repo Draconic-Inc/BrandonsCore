@@ -172,6 +172,7 @@ public class ModFeatureParser {
 
     /**
      * Call this from your mods preInit and make sure your mod is set to load AFTER Brandon'sCore
+     * TODO in 1.13 find a solution that does not require a callback from the mod. Maybe i can just manually change the active mod container via Loader.instance().setActiveModContainer()?
      */
     public static void registerModFeatures(String modid) {
         BrandonsCore.proxy.registerModFeatures(modid);
