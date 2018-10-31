@@ -157,7 +157,11 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
         shouldRefreshOnState = false;
     }
 
+    @Deprecated //I want to store everything on the tile in 1.13. I'm done dealing with these bullshit blockstate crashes.
     public IBlockState getState(Block expectedBlock) {
+        if (world == null) {
+            return expectedBlock.getDefaultState();//Because apparently this is a thing........
+        }
         IBlockState state = world.getBlockState(pos);
         return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
     }
