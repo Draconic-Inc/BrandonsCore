@@ -1,0 +1,35 @@
+//---- Entity Filter ----//
+gui.entityFilter.filter.txt=필터
+gui.entityFilter.button.passive=공격적
+gui.entityFilter.button.hostile=적대적
+gui.entityFilter.button.players=플레이어
+gui.entityFilter.button.other=기타
+gui.entityFilter.button.whiteList=화이트리스트
+gui.entityFilter.button.blackList=블랙리스트
+gui.entityFilter.button.editList=수정리스트
+gui.entityFilter.customTip.txt=플레이어의 이름은 [player]:username으로 되어야합니다.
+
+//---- Generic ----//
+generic.de.Mode.txt=모드
+generic.de.energyCost.txt=에너지 값
+generic.options.txt=설정
+generic.ok.txt=OK
+generic.cancel.txt=취소
+generic.yes.txt=네
+generic.no.txt=아니오
+generic.remove.txt=제거
+generic.edit.txt=편집
+generic.configureRedstone.txt=레드스톤 조절 설정
+
+//---- Generic Gui Buttons ----//
+gui.de.button.start=시작
+gui.de.button.extract=추출
+gui.de.button.toggleOff=토글 Off
+gui.de.button.toggleOn=토글 On
+gui.de.button.toggle=토글
+gui.de.button.close=닫기
+gui.button.save=저장
+
+//---- Modular GUI ----//
+gui.bc.downloading_image.info=이미지 다운로드
+gui.bc.downloading_image_failed.info=이미지 다운로드에 실패했습니다! 재시도를 하려면 쉬프트+좌클릭을 .
