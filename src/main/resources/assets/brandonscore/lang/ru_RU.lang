@@ -1,0 +1,35 @@
+//---- Entity Filter ----//
+gui.entityFilter.filter.txt=Фильтр
+gui.entityFilter.button.passive=Пассивные
+gui.entityFilter.button.hostile=Враждебные
+gui.entityFilter.button.players=Игроки
+gui.entityFilter.button.other=Другие
+gui.entityFilter.button.whiteList=Белый список
+gui.entityFilter.button.blackList=Чёрный список
+gui.entityFilter.button.editList=Редактировать список
+gui.entityFilter.customTip.txt=Ник игрока должен быть в формате [player]:username
+
+//---- Generic ----//
+generic.de.Mode.txt=Режим
+generic.de.energyCost.txt=Затраты энергии
+generic.options.txt=Опции
+generic.ok.txt=OK
+generic.cancel.txt=Отмена
+generic.yes.txt=Да
+generic.no.txt=Нет
+generic.remove.txt=Удалить
+generic.edit.txt=Изменить
+generic.configureRedstone.txt=Настроить контроль редстоуном
+
+//---- Generic Gui Buttons ----//
+gui.de.button.start=Старт
+gui.de.button.extract=Извлечь
+gui.de.button.toggleOff=Выключить
+gui.de.button.toggleOn=Включить
+gui.de.button.toggle=Переключить
+gui.de.button.close=Закрыть
+gui.button.save=Сохранить
+
+//---- Modular GUI ----//
+gui.bc.downloading_image.info=Загрузка изображения...
+gui.bc.downloading_image_failed.info=Загрузка изображения не удалась! Чтобы попробовать снова, нажмите Shift + ЛКМ.
