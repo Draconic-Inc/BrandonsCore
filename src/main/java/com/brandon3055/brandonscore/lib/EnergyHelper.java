@@ -17,7 +17,7 @@ public class EnergyHelper {
 
     //region Energy Tile
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static boolean isEnergyTile(TileEntity tile) {
         return isEnergyTile(tile, null);
     }
@@ -26,7 +26,7 @@ public class EnergyHelper {
         return tile instanceof IEnergyReceiver || tile.hasCapability(CapabilityEnergy.ENERGY, side);
     }
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static int getEnergyStored(TileEntity tile) {
         return getEnergyStored(tile, null);
     }
@@ -47,7 +47,7 @@ public class EnergyHelper {
         }
     }
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static int getMaxEnergyStored(TileEntity tile) {
         return getEnergyStored(tile, null);
     }
@@ -72,7 +72,7 @@ public class EnergyHelper {
 
     //region Receive Tile
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static boolean canReceiveEnergy(TileEntity tile) {
         return canReceiveEnergy(tile, null);
     }
@@ -88,7 +88,7 @@ public class EnergyHelper {
         return false;
     }
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static int insertEnergy(TileEntity tile, int energy, boolean simulate) {
         return insertEnergy(tile, energy, null, simulate);
     }
@@ -117,7 +117,7 @@ public class EnergyHelper {
 
     //region Extract Tile
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static boolean canExtractEnergy(TileEntity tile) {
         return canReceiveEnergy(tile, null);
     }
@@ -133,7 +133,7 @@ public class EnergyHelper {
         return false;
     }
 
-    @Deprecated//Should always yse sided methods fore tiles
+    @Deprecated//Should always use sided methods fore tiles
     public static int extractEnergy(TileEntity tile, int energy, boolean simulate) {
         return extractEnergy(tile, energy, null, simulate);
     }
