@@ -15,10 +15,6 @@ public class DLResourceLocation extends ResourceLocation {
     public volatile boolean dlFailed = false;
     public volatile boolean dlFinished = false;
     public boolean lastCheckStatus = false;
-//
-//    protected DLResourceLocation(int unused, String... resourceName) {
-//        super(unused, resourceName);
-//    }
 
     public DLResourceLocation(String resourceDomainIn, String url) {
         super(resourceDomainIn, url);

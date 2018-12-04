@@ -12,7 +12,7 @@ import java.io.IOException;
  * But it makes it very easy to create a simple popup dialog that is bound to another static element.<br>
  * Simply add all the elements you need as child elements then call show() to display the dialog.<br>
  * The dialog will automatically show 10 display level above its parent element to avoid any potential zLevel issues.<br><br>
- *
+ * <p>
  * The popup can automatically close if the player clicks outside the popup or if you call the close() method.<br>
  * setting canDrag to true makes the window draggable by clicking and dragging withing the top 10 pixels of the popup (adjustable)
  */
@@ -24,6 +24,8 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     protected boolean closeOnOutsideClick = true;
     protected boolean closeOnScroll = false;
     protected boolean isVisible = false;
+    protected boolean blockOutsideClicks = false;
+
     /**
      * Will close the dialog if one of its child elements capture a mouse click.
      * e.g. if a child button or button in a child list is pressed the dialog will close.
@@ -31,6 +33,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
      */
     protected boolean closeOnCapturedClick = false;
     protected Rectangle dragZone = null;
+    protected Runnable escapeCallback = null;
 
     public GuiPopUpDialogBase(MGuiElementBase parent) {
         this.setParent(parent);
@@ -81,7 +84,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
             dragYOffset = mouseY - yPos();
         }
 
-        return captured;
+        return captured || blockOutsideClicks;
     }
 
     @Override
@@ -97,14 +100,13 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
             translate(xMove, yMove);
         }
 
-
-        return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) || blockOutsideClicks;
     }
 
     @Override
     public boolean mouseReleased(int mouseX, int mouseY, int state) {
         dragging = false;
-        return super.mouseReleased(mouseX, mouseY, state);
+        return super.mouseReleased(mouseX, mouseY, state) || blockOutsideClicks;
     }
 
     @Override
@@ -112,13 +114,16 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
         if (closeOnScroll) {
             close();
         }
-        return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
+        return super.handleMouseScroll(mouseX, mouseY, scrollDirection) || blockOutsideClicks;
     }
 
     @Override
     protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
         if (keyCode == 1) {
             close();
+            if (escapeCallback != null) {
+                escapeCallback.run();
+            }
             return true;
         }
         return super.keyTyped(typedChar, keyCode);
@@ -176,6 +181,16 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
      */
     public E setCloseOnCapturedClick(boolean closeOnCapturedClick) {
         this.closeOnCapturedClick = closeOnCapturedClick;
+        return (E) this;
+    }
+
+    public E setBlockOutsideClicks(boolean blockOutsideClicks) {
+        this.blockOutsideClicks = blockOutsideClicks;
+        return (E) this;
+    }
+
+    public E setEscapeCallback(Runnable escapeCallback) {
+        this.escapeCallback = escapeCallback;
         return (E) this;
     }
 

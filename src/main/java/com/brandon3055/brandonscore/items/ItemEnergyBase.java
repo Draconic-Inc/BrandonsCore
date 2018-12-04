@@ -42,7 +42,12 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
         }
     }
 
-    //endregion
+    @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return oldStack.getItem() != newStack.getItem();
+    }
+
+//endregion
 
     //region Energy
 
