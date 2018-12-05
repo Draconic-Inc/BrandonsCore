@@ -11,6 +11,7 @@ import com.google.gson.stream.JsonWriter;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.commons.io.IOUtils;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.net.*;
 import java.util.Set;
@@ -61,11 +62,49 @@ public class FileHandler {
     }
 
     public static InputStream openURLStream(String url) throws IOException {
+//        URL resourceUrl, base, next;
+//        HttpURLConnection conn = null;
+//        String location;
+//
+//        for (int i = 0; i < 3; i++) {
+//            URL url1 = new URL(url);
+//            URI uri;
+//            try {
+//                uri = new URI(url1.getProtocol(), url1.getUserInfo(), url1.getHost(), url1.getPort(), url1.getPath(), url1.getQuery(), url1.getRef());
+//                resourceUrl = new URL(uri.toASCIIString());
+//            }
+//            catch (URISyntaxException e) {
+//                resourceUrl = new URL(url);
+//            }
+//            conn = (HttpURLConnection) resourceUrl.openConnection();
+//
+//            conn.setConnectTimeout(15000);
+//            conn.setReadTimeout(15000);
+//            conn.setInstanceFollowRedirects(true);
+//            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+//
+//            switch (conn.getResponseCode()) {
+//                case HttpURLConnection.HTTP_MOVED_PERM:
+//                case HttpURLConnection.HTTP_MOVED_TEMP:
+//                    location = conn.getHeaderField("Location");
+//                    location = URLDecoder.decode(location, "UTF-8");
+//                    base = new URL(url);
+//                    next = new URL(base, location);  // Deal with relative URLs
+//                    url = next.toExternalForm();
+//                    continue;
+//            }
+//
+//            break;
+//        }
+        return openConnection(url, null).getInputStream();
+    }
+
+    public static HttpURLConnection openConnection(String url, @Nullable Proxy proxy) throws IOException {
         URL resourceUrl, base, next;
         HttpURLConnection conn = null;
         String location;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             URL url1 = new URL(url);
             URI uri;
             try {
@@ -75,7 +114,12 @@ public class FileHandler {
             catch (URISyntaxException e) {
                 resourceUrl = new URL(url);
             }
-            conn = (HttpURLConnection) resourceUrl.openConnection();
+            if (proxy != null) {
+                conn = (HttpURLConnection) resourceUrl.openConnection(proxy);
+            }
+            else {
+                conn = (HttpURLConnection) resourceUrl.openConnection();
+            }
 
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
@@ -96,7 +140,7 @@ public class FileHandler {
             break;
         }
 
-        return conn.getInputStream();
+        return conn;
     }
 
     private static final Set<Character> ILLEGAL_CHARACTERS = Sets.newHashSet('/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':');

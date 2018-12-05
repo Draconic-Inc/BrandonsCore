@@ -39,6 +39,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
     private static final List<Block> LOADING_BLOCKS = Lists.newArrayList(Blocks.STONE, Blocks.SAND, Blocks.GRASS, Blocks.COBBLESTONE, Blocks.LOG, Blocks.GLASS, Blocks.MYCELIUM, Blocks.CHEST, Blocks.ENCHANTING_TABLE, Blocks.CRAFTING_TABLE, Blocks.ANVIL, Blocks.BEACON, Blocks.BOOKSHELF, Blocks.DIAMOND_ORE, Blocks.OBSIDIAN, Blocks.DIRT, Blocks.DISPENSER, Blocks.FURNACE, Blocks.HAY_BLOCK);
     private ItemStack renderLoadingStack = ItemStack.EMPTY;
     private int loadingTime = 0;
+    private int maxLoadTime = 40;
     private boolean downloading = false;
 
     private MDElementContainer container;
@@ -96,12 +97,12 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        GlStateManager.color(1, 1, 1, 1);
         if (downloading) {
             renderDownloading(partialTicks);
         }
         else {
             ResourceHelperBC.bindTexture(resourceLocation);
-            GlStateManager.color(1, 1, 1, 1);
             boolean mouseOver = isMouseOver(mouseX, mouseY);
 
             if (hasColourBorder) {
@@ -125,7 +126,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
         boolean failed = resourceLocation.dlFailed;
         float failTicks = failed ? 0 : partialTicks;
         drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
-        double anim = (64 + 10) * ((loadingTime + failTicks) / 100D);
+        double anim = (64 + 10) * ((loadingTime + failTicks) / (double) maxLoadTime);
 
         bindTexture(BCTextures.MODULAR_GUI);
         double texAnim = Math.max(0, (1 - (anim / 64)) * 48);
@@ -231,18 +232,25 @@ public class ImageElement extends MDElementBase<ImageElement> {
                 }
                 loadingTime++;
 
-                if (resourceLocation.dlFailed && loadingTime == 41) {
-                    loadingTime = 40;
+                if (resourceLocation.dlFailed && loadingTime == maxLoadTime / 2) {
+                    loadingTime = (maxLoadTime / 2) - 1;
                 }
 
-                if (loadingTime >= 100) {
+                if (loadingTime >= maxLoadTime) {
                     loadingTime = 0;
-                    if (resourceLocation.dlStateChanged()) {
-                        container.layoutMarkdownElements();
-                        downloading = false;
-                        return true;
-                    }
                 }
+
+                if (resourceLocation.dlStateChanged()) {
+                    container.getTopLevelContainer().layoutMarkdownElements();
+                    downloading = false;
+                    return true;
+                }
+            }
+            else if (downloading){
+                loadingTime = 0;
+                downloading = false;
+                container.getTopLevelContainer().layoutMarkdownElements();
+                return true;
             }
         }
 

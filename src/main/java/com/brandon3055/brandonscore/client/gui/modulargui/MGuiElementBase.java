@@ -2205,7 +2205,16 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
 
         for (int x = 0; x < xSize; ) {
             int rWidth = Math.min(xSize - x, trimWidth);
-            int trimU = x == 0 ? texU : x + texWidth <= xSize ? texU + leftTrim : texU + (texWidth - (xSize - x));
+            int trimU;
+            if (x == 0) {
+                trimU = texU;
+            }
+            else if (x + trimWidth <= xSize) {
+                trimU = texU + leftTrim;
+            }
+            else {
+                trimU = texU + (texWidth - (xSize - x));
+            }
 
             //Top & Bottom trim
             bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim);

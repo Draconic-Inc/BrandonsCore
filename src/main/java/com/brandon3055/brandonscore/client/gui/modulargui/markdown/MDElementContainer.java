@@ -31,6 +31,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     public int linkDisplayZOffset = 600;
     public MDElementFactory lastFactory = null;
     public HAlign defaultAlignment = HAlign.LEFT;
+    private MDElementContainer parentContainer = null;
 
     /**
      * @param initializer can be any initialized MGuiElementBase. This is just used for initialize this element before layout occurs.
@@ -299,5 +300,10 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         linkClickCallback = parent.linkClickCallback;
         linkDisplayTarget = parent.linkDisplayTarget;
         linkDisplayZOffset = parent.linkDisplayZOffset;
+        parentContainer = parent;
+    }
+
+    public MDElementContainer getTopLevelContainer() {
+        return parentContainer == null ? this : parentContainer.getTopLevelContainer();
     }
 }

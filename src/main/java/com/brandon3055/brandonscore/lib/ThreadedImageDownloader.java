@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
@@ -19,7 +20,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -203,17 +203,18 @@ public class ThreadedImageDownloader extends SimpleTexture{
         {
             public void run()
             {
-                HttpURLConnection httpurlconnection = null;
+                HttpURLConnection connection = null;
                 LogHelperBC.debug("Downloading http texture from %s to %s", ThreadedImageDownloader.this.resourceUrl, ThreadedImageDownloader.this.cacheFile);
 
                 try
                 {
-                    httpurlconnection = (HttpURLConnection)(new URL(ThreadedImageDownloader.this.resourceUrl)).openConnection(Minecraft.getMinecraft().getProxy());
-                    httpurlconnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-                    httpurlconnection.setDoInput(true);
-                    httpurlconnection.setDoOutput(false);
-                    httpurlconnection.connect();
-                    int response = httpurlconnection.getResponseCode();
+//                    connection = (HttpURLConnection)(new URL(ThreadedImageDownloader.this.resourceUrl)).openConnection(Minecraft.getMinecraft().getProxy());
+//                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+//                    connection.setDoInput(true);
+//                    connection.setDoOutput(false);
+//                    connection.connect();
+                    connection = FileHandler.openConnection(ThreadedImageDownloader.this.resourceUrl, Minecraft.getMinecraft().getProxy());
+                    int response = connection.getResponseCode();
 
                     if (response / 100 == 2)
                     {
@@ -221,12 +222,12 @@ public class ThreadedImageDownloader extends SimpleTexture{
 
                         if (ThreadedImageDownloader.this.cacheFile != null)
                         {
-                            FileUtils.copyInputStreamToFile(httpurlconnection.getInputStream(), ThreadedImageDownloader.this.cacheFile);
+                            FileUtils.copyInputStreamToFile(connection.getInputStream(), ThreadedImageDownloader.this.cacheFile);
                             bufferedimage = ImageIO.read(ThreadedImageDownloader.this.cacheFile);
                         }
                         else
                         {
-                            bufferedimage = TextureUtil.readBufferedImage(httpurlconnection.getInputStream());
+                            bufferedimage = TextureUtil.readBufferedImage(connection.getInputStream());
                         }
 
                         if (ThreadedImageDownloader.this.imageBuffer != null)
@@ -247,7 +248,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
                         return;
                     }
                     else {
-                        LogHelperBC.error("Could not download resource. Server returned response code " + httpurlconnection.getResponseCode());
+                        LogHelperBC.error("Could not download resource. Server returned response code " + connection.getResponseCode());
                         ThreadedImageDownloader.this.downloadFailed = true;
                         if (ThreadedImageDownloader.this.dlLocation != null) {
                             ThreadedImageDownloader.this.dlLocation.dlFailed =  ThreadedImageDownloader.this.dlLocation.dlFinished = true;
@@ -265,9 +266,9 @@ public class ThreadedImageDownloader extends SimpleTexture{
                 }
                 finally
                 {
-                    if (httpurlconnection != null)
+                    if (connection != null)
                     {
-                        httpurlconnection.disconnect();
+                        connection.disconnect();
                     }
                 }
             }
