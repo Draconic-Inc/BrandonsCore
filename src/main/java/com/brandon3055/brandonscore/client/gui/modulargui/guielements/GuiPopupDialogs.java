@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IButtonListener;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -44,6 +45,7 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
 
     public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, String title, int xSize, MGuiElementBase background, boolean vanillaButtons, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
         GuiPopupDialogs dialog = new GuiPopupDialogs(parent);
+        dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> GlStateManager.color(1, 1, 1, 1));
         dialog.setXSize(xSize);
         dialog.setDragBar(12);
         dialog.addChild(background);
