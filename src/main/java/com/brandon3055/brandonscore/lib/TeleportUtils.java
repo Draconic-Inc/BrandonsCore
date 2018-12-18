@@ -180,6 +180,11 @@ public class TeleportUtils {
         net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, sourceDim, targetDim);
         player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
 
+        //Fixes stat syncing
+        player.lastExperience = -1;
+        player.lastHealth = -1.0F;
+        player.lastFoodLevel = -1;
+
         return player;
     }
 
