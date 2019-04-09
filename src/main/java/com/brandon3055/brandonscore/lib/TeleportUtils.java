@@ -170,6 +170,7 @@ public class TeleportUtils {
         player.connection.setPlayerLocation(xCoord, yCoord, zCoord, yaw, pitch);
         player.interactionManager.setWorld(targetWorld);
         player.connection.sendPacket(new SPacketPlayerAbilities(player.capabilities));
+        player.invulnerableDimensionChange = true;
 
         playerList.updateTimeAndWeatherForPlayer(player, targetWorld);
         playerList.syncPlayerInventory(player);

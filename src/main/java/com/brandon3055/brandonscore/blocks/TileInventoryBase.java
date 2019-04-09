@@ -27,7 +27,6 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     protected int stackLimit = 64;
 
     protected IItemHandler itemHandler;
-
     {
         itemHandler = new InvWrapper(this);
     }

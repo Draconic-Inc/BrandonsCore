@@ -2,13 +2,11 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.effects.GuiEffect;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement.TreeNode;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement.TreeNode;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.GuiMarkdownElement;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -44,7 +42,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.Te
 /**
  * Created by brandon3055 on 2/07/2017.
  */
-public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListener {
+public class ModularGuiTest extends ModularGuiScreen {
 
     public ModularGuiTest() {
         super(550, 300);
@@ -361,11 +359,5 @@ public class ModularGuiTest extends ModularGuiScreen implements IGuiEventListene
         super.reloadGui();
     }
 
-    @Override
-    public void onMGuiEvent(GuiEvent event, MGuiElementBase eventSource) {
-        if (event.isButton() && !event.asButton().getElement().getToggleMode()) {
-            mc.displayGuiScreen(new ModularGuiTest());
-        }
-    }
 
 }
