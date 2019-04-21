@@ -2,8 +2,8 @@ package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 

@@ -8,8 +8,7 @@ import net.minecraft.item.ItemStack;
 /**
  * Created by brandon3055 on 7/06/2016.
  * Used to store a reference to a specific slot in a players inventory.
- * The field for the inventory which the item is located in should be set to the slot index.
- * The other two fields should be set to -1.
+ * The slot field corresponds to the index of the item within the sub inventory for the given category.
  */
 public class PlayerSlot {
 

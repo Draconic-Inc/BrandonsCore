@@ -229,6 +229,7 @@ public class BCEffectRenderer {
         Particle.interpPosX = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double) partialTicks;
         Particle.interpPosY = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double) partialTicks;
         Particle.interpPosZ = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double) partialTicks;
+
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         GlStateManager.alphaFunc(GL11.GL_GREATER, 0);
@@ -236,6 +237,7 @@ public class BCEffectRenderer {
 
         Profiler profiler = Minecraft.getMinecraft().mcProfiler;
 
+        GlStateManager.disableLighting();
 
         for (int layer = 0; layer < 4; layer++) {
             profiler.startSection("GL_Particles");
