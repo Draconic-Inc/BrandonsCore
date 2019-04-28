@@ -8,8 +8,12 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 31/08/2016.
@@ -25,6 +29,7 @@ public class GuiElementManager {
     private int width;
     private int height;
     private List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
+    private Supplier<List<MGuiElementBase>> jeiExclusions = null;
 
     public GuiElementManager(IModularGui parentGui) {
         this.parentGui = parentGui;
@@ -353,6 +358,21 @@ public class GuiElementManager {
         actionList.clear();
         actionList.addAll(elements);
         Collections.sort(actionList, actionSorter);
+    }
+
+    public IModularGui getParentGui() {
+        return parentGui;
+    }
+
+    public void setJeiExclusions(Supplier<List<MGuiElementBase>> exclusions) {
+        this.jeiExclusions = exclusions;
+    }
+
+    public List<Rectangle> getJeiExclusions() {
+        if (jeiExclusions == null) {
+            return Collections.emptyList();
+        }
+        return jeiExclusions.get().stream().map(elementBase -> new Rectangle(elementBase.getRect())).collect(Collectors.toList());
     }
 
     //endregion

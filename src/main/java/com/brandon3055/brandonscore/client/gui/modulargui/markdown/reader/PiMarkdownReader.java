@@ -738,8 +738,8 @@ public class PiMarkdownReader {
             if (vals.length != 3)
                 throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
             int r = vals[0].contains(".") ? (int) (Double.parseDouble(vals[0]) * 255) : Integer.parseInt(vals[0]);
-            int g = vals[1].contains(".") ? (int) (Double.parseDouble(vals[1]) * 255) : Integer.parseInt(vals[0]);
-            int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[0]);
+            int g = vals[1].contains(".") ? (int) (Double.parseDouble(vals[1]) * 255) : Integer.parseInt(vals[1]);
+            int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[2]);
             return r << 16 | g << 8 | b;
         }
         else {
