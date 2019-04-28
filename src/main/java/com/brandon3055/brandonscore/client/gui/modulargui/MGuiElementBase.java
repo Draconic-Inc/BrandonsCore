@@ -1258,6 +1258,16 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
         return (E) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public E setXSizeMod(Supplier<Integer> xMod) {
+        return setXSizeMod((e, integer) -> xMod.get());
+    }
+
+    @SuppressWarnings("unchecked")
+    public E setYSizeMod(Supplier<Integer> yMod) {
+        return setYSizeMod((e, integer) -> yMod.get());
+    }
+
     /**
      * Informs the parent when the xSize of this element changes. Used by things like GuiScrollElement
      */

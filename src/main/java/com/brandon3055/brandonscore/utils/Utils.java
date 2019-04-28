@@ -20,6 +20,7 @@ import java.text.DecimalFormat;
 /**
  * Created by Brandon on 25/07/2014.
  */
+@SuppressWarnings("ALL")
 public class Utils {
 
     public static final String SELECT = "\u00A7";
@@ -358,4 +359,44 @@ public class Utils {
             LogHelperBC.error("Couldn't open link: {}", (Object) (throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
         }
     }
+
+    public static int parseColourRGB(String value) {
+        if (value.startsWith("0x") || value.startsWith("#")) {
+            value = value.replace("0x", "").replace("#", "");
+            return parseHex(value, false);
+        }
+        else if (value.contains(",")) {
+            String[] vals = value.split(",");
+            if (vals.length != 3)
+                throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
+            int r = vals[0].contains(".") ? (int) (Double.parseDouble(vals[0]) * 255) : Integer.parseInt(vals[0]);
+            int g = vals[1].contains(".") ? (int) (Double.parseDouble(vals[1]) * 255) : Integer.parseInt(vals[1]);
+            int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[2]);
+            return r << 16 | g << 8 | b;
+        }
+        else {
+            throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
+        }
+    }
+
+    public static int parseColourARGB(String value) {
+        if (value.startsWith("0x") || value.startsWith("#")) {
+            value = value.replace("0x", "").replace("#", "");
+            return parseHex(value, false);
+        }
+        else if (value.contains(",")) {
+            String[] vals = value.split(",");
+            if (vals.length < 3 || vals.length > 4){
+                throw new NumberFormatException("Number must be a hex using the format 0xAARRGGBB or #AARRGGBB");
+            }
+            int r = vals[0].contains(".") ? (int) (Double.parseDouble(vals[0]) * 255) : Integer.parseInt(vals[0]);
+            int g = vals[1].contains(".") ? (int) (Double.parseDouble(vals[1]) * 255) : Integer.parseInt(vals[1]);
+            int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[2]);
+            int a = vals.length == 4 ? vals[3].contains(".") ? (int) (Double.parseDouble(vals[3]) * 255) : Integer.parseInt(vals[3]) : 0xFF;
+            return a << 24 | r << 16 | g << 8 | b;
+        }
+        else {
+            throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
+        }    }
 }
+

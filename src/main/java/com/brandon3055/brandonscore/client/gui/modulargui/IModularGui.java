@@ -1,14 +1,18 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.api.IJEIClearance;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import net.minecraft.client.gui.GuiScreen;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.awt.*;
+import java.util.List;
+
 /**
  * Created by brandon3055 on 30/08/2016.
  */
-public interface IModularGui<T extends GuiScreen> extends IMouseOver {
+public interface IModularGui<T extends GuiScreen> extends IMouseOver, IJEIClearance {
 
     void addElements(GuiElementManager manager);
 
@@ -48,5 +52,10 @@ public interface IModularGui<T extends GuiScreen> extends IMouseOver {
     @Override
     default boolean isMouseOver(int mouseX, int mouseY) {
         return GuiHelper.isInRect(guiLeft(), guiTop(), xSize(), ySize(), mouseX, mouseY);
+    }
+
+    @Override
+    default List<Rectangle> getGuiExtraAreas() {
+        return getManager().getJeiExclusions();
     }
 }
