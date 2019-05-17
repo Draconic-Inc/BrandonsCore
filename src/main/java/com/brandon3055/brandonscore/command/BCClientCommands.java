@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.DelayedTask;
+import com.brandon3055.brandonscore.lib.PairKV;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.BCProfiler;
@@ -24,16 +25,38 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 23/06/2017.
  */
 public class BCClientCommands extends CommandBase {
+
+    private static Map<String, PairKV<Integer, Integer>> RESOLUTIONS = new HashMap<>();
+
+    static {
+        RESOLUTIONS.put("240p", new PairKV<>(352, 240));
+        RESOLUTIONS.put("360p", new PairKV<>(480, 360));
+        RESOLUTIONS.put("480p", new PairKV<>(858, 480));
+        RESOLUTIONS.put("576p", new PairKV<>(1024, 576));
+        RESOLUTIONS.put("648p", new PairKV<>(1152, 648));
+        RESOLUTIONS.put("720p", new PairKV<>(1280, 720));
+        RESOLUTIONS.put("768p", new PairKV<>(1366, 768));
+        RESOLUTIONS.put("900p", new PairKV<>(1600, 900));
+        RESOLUTIONS.put("1080p", new PairKV<>(1920, 1080));
+        RESOLUTIONS.put("1440p", new PairKV<>(2560, 1440));
+        RESOLUTIONS.put("4k", new PairKV<>(3840, 2160));
+        RESOLUTIONS.put("8k", new PairKV<>(7680, 4320));
+    }
 
     @Override
     public String getName() {
@@ -79,6 +102,9 @@ public class BCClientCommands extends CommandBase {
             else if (function.equals("set_ui_scale")) {
                 setUiScale(server, sender, args);
             }
+            else if (function.equals("set_ui_size")) {
+                setUISize(server, sender, args);
+            }
             else if (function.equals("clear_fx")) {
                 BCEffectHandler.effectRenderer.clear();
             }
@@ -95,7 +121,11 @@ public class BCClientCommands extends CommandBase {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale", "clear_fx");
+        if (args.length == 2 && args[0].equals("set_ui_size")) {
+            return getListOfStringsMatchingLastWord(args, RESOLUTIONS.keySet());
+        }
+
+        return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale", "clear_fx", "set_ui_size");
     }
 
     private void help(ICommandSender sender) {
@@ -119,14 +149,15 @@ public class BCClientCommands extends CommandBase {
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException("You are not holding an item!");
-        } else if (!stack.hasTagCompound()) {
+        }
+        else if (!stack.hasTagCompound()) {
             throw new CommandException("That stack has no NBT tag!");
         }
 
         NBTTagCompound compound = stack.getTagCompound();
         LogHelperBC.logNBT(compound);
 
-        String s = compound+"";
+        String s = compound + "";
         if (args.length == 2) {
             s = new StackReference(stack).toString();
         }
@@ -137,15 +168,14 @@ public class BCClientCommands extends CommandBase {
         String[] lines = builder.toString().split("\n");
         DataUtils.forEach(lines, st -> ChatHelper.message(sender, st, TextFormatting.GOLD));
 
-        if (!StringUtils.isEmpty(compound+"") && !BrandonsCore.proxy.isDedicatedServer())
-        {
-            try
-            {
+        if (!StringUtils.isEmpty(compound + "") && !BrandonsCore.proxy.isDedicatedServer()) {
+            try {
                 StringSelection stringselection = new StringSelection(s);
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
                 ChatHelper.message(sender, "NBT Copied to clipboard!", TextFormatting.GREEN);
             }
-            catch (Exception ignored) {}
+            catch (Exception ignored) {
+            }
         }
     }
 
@@ -160,6 +190,34 @@ public class BCClientCommands extends CommandBase {
         sender.sendMessage(new TextComponentString("Gui Scale Updated!"));
     }
 
-    private void randomFunction5(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    //Sometimes i just have too much free time on my hands xD
+    private void setUISize(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        if ((args.length > 3 || args.length < 2) && !RESOLUTIONS.containsKey(args[1])) {
+            sender.sendMessage(new TextComponentString("Usage: /set_ui_size (<width> <height> or <res name>)"));
+            return;
+        }
+
+        int width;
+        int height;
+
+        if (args.length == 2) {
+            width = RESOLUTIONS.get(args[1]).getKey();
+            height = RESOLUTIONS.get(args[1]).getValue();
+        }
+        else {
+            width = parseInt(args[1], 64, 7680);
+            height = parseInt(args[2], 64, 4320);
+        }
+
+
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.resize(width, height);
+        try {
+            Display.setDisplayMode(new DisplayMode(mc.displayWidth, mc.displayHeight));
+        }
+        catch (LWJGLException e) {
+            e.printStackTrace();
+            throw new CommandException(e.getMessage());
+        }
     }
 }
