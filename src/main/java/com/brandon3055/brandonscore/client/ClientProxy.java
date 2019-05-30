@@ -109,4 +109,9 @@ public class ClientProxy extends CommonProxy {
     public void runSidedProcess(IProcess process) {
         ProcessHandlerClient.addProcess(process);
     }
+
+    @Override
+    public void particleWorldLoad(World world) {
+        BCEffectHandler.effectRenderer.clearEffects(world);
+    }
 }
