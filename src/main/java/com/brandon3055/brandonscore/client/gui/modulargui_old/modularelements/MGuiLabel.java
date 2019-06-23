@@ -146,7 +146,7 @@ public class MGuiLabel extends MGuiElementBase {
     }
 
     /**
-     * Dose not support rotated ot Right Aligned labels.
+     * does not support rotated ot Right Aligned labels.
      */
     public MGuiLabel setWrap(boolean wrap) {
         this.wrap = wrap;

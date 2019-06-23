@@ -26,7 +26,7 @@ public abstract class MessageHandlerWrapper<REQ extends IMessage, REPLY extends 
             syncObject.addPacketServer();
         }
 
-        //TODO Find a way to handle replies (when needed) because this dose not actually work
+        //TODO Find a way to handle replies (when needed) because this does not actually work
         return syncObject.reply;
     }
 

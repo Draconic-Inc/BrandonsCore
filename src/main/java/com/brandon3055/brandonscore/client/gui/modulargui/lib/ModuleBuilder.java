@@ -73,7 +73,7 @@ public class ModuleBuilder {
     }
 
     /**
-     * Similar to the functionality of the above method except dose not set the size of the elements.
+     * Similar to the functionality of the above method except does not set the size of the elements.
      * elementHeight should be the ySize of the tallest element.
      */
     public static class RawColumns {
