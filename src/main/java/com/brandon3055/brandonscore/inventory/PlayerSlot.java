@@ -64,21 +64,21 @@ public class PlayerSlot {
     public void setStackInSlot(EntityPlayer player, ItemStack stack) {
         if (category == EnumInvCategory.ARMOR){
             if (slot < 0 || slot >= player.inventory.armorInventory.size()) {
-                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
             player.inventory.armorInventory.set(slot, stack);
         }
         else if (category == EnumInvCategory.MAIN){
             if (slot < 0 || slot >= player.inventory.mainInventory.size()) {
-                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
             player.inventory.mainInventory.set(slot, stack);
         }
         else if (category == EnumInvCategory.OFF_HAND){
             if (slot < 0 || slot >= player.inventory.offHandInventory.size()) {
-                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot dose not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
             player.inventory.offHandInventory.set(slot, stack);

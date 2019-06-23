@@ -207,7 +207,7 @@ public class BCEffectHandler {
     }
 
     /**
-     * Strait pass-through method that dose thats adds the affect directly to the renderer without doing any checks.
+     * Strait pass-through method that does thats adds the affect directly to the renderer without doing any checks.
      */
     @SideOnly(Side.CLIENT)
     public static void spawnGLParticle(IGLFXHandler handler, BCParticle particle) {
