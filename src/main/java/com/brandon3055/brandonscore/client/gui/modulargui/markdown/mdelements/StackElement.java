@@ -75,6 +75,8 @@ public class StackElement extends MDElementBase<StackElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        if (stacks.length == 0) return;
+
         GlStateManager.pushMatrix();
 
         if (drawSlot) {
