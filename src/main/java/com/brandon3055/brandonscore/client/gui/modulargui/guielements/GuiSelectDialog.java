@@ -33,6 +33,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     protected boolean closeOnSelection = false;
     protected Consumer<T> selectionListener = null;
     protected LinkedList<T> sectionItems = new LinkedList<>();
+    protected LinkedList<T> filteredItems = new LinkedList<>();
     protected GuiScrollElement scrollElement;
     protected IGuiEventListener listener = null;
     protected Map<T, MGuiElementBase> sectionElements = new HashMap<>();
@@ -101,11 +102,18 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
             return;
         }
         scrollElement.clearElements();
+        filteredItems.clear();
         if (selectionFilter != null) {
-            sectionItems.stream().filter(selectionFilter).forEach(t -> scrollElement.addElement(sectionElements.get(t)));
+            sectionItems.stream().filter(selectionFilter).forEach(t -> {
+                scrollElement.addElement(sectionElements.get(t));
+                filteredItems.add(t);
+            });
         }
         else {
-            sectionItems.forEach(t -> scrollElement.addElement(sectionElements.get(t)));
+            sectionItems.forEach(t -> {
+                scrollElement.addElement(sectionElements.get(t));
+                filteredItems.add(t);
+            });
         }
     }
 
@@ -262,7 +270,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (mouseButton == 0)
-        for (T item : sectionElements.keySet()) {
+        for (T item : filteredItems) {
             if (sectionElements.get(item).isMouseOver(mouseX, mouseY)) {
                 if (listener != null) {
                     listener.onMGuiEvent(new GuiEvent.SelectEvent(this, item, sectionElements.get(item)), this);
