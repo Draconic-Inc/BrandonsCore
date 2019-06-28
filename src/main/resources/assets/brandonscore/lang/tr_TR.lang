@@ -1,0 +1,35 @@
+//---- Entity Filter ----//
+gui.entityFilter.filter.txt=Filtre
+gui.entityFilter.button.passive=Pasif
+gui.entityFilter.button.hostile=Saldırgan
+gui.entityFilter.button.players=Oyuncular
+gui.entityFilter.button.other=Diğer
+gui.entityFilter.button.whiteList=Beyaz Liste
+gui.entityFilter.button.blackList=Kara Liste
+gui.entityFilter.button.editList=Listeyi Düzenle
+gui.entityFilter.customTip.txt=Oyuncu kullanıcı adları böyle yazılmalı= [player]:username
+
+//---- Generic ----//
+generic.de.Mode.txt=Mod
+generic.de.energyCost.txt=Enerji Masrafı
+generic.options.txt=Ayarlar
+generic.ok.txt=Tamam
+generic.cancel.txt=İptal
+generic.yes.txt=Evet
+generic.no.txt=Hayır
+generic.remove.txt=Kaldır
+generic.edit.txt=Düzenle
+generic.configureRedstone.txt=Kızıltaş Kontrolünü Düzenle
+
+//---- Generic Gui Buttons ----//
+gui.de.button.start=Başlat
+gui.de.button.extract=Çıkart
+gui.de.button.toggleOff=Kapa
+gui.de.button.toggleOn=Aç
+gui.de.button.toggle=Aç/Kapa
+gui.de.button.close=Kapat
+gui.button.save=Kaydet
+
+//---- Modular GUI ----//
+gui.bc.downloading_image.info=Resim İndiriliyor
+gui.bc.downloading_image_failed.info=Resim İndirmesi başarısız! Shift + Sol Tık ile tekrar deneyin.
