@@ -1,7 +1,5 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
-import com.brandon3055.brandonscore.integration.ModHelperBC;
-import com.brandon3055.brandonscore.integration.SmoothFontCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -22,8 +20,6 @@ public class BCFontRenderer extends FontRenderer {
     private static int prevFormat = -1;
     private static boolean colourFormatSet = false;
     private static Map<FontRenderer, BCFontRenderer> cashedRenderers = new HashMap<>();
-    public Object sfh = null;
-    public boolean sfhb = false;
 
     public BCFontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
         super(gameSettingsIn, location, textureManagerIn, unicode);
@@ -56,10 +52,6 @@ public class BCFontRenderer extends FontRenderer {
 
     @Override
     public void renderStringAtPos(String text, boolean shadow) {
-        if (ModHelperBC.isSmoothFont) {
-            SmoothFontCompat.renderStringAtPosEnterHook(this, text, unicodeFlag, shadow);
-        }
-
         for (int index = 0; index < text.length(); ++index) {
             char c0 = text.charAt(index);
 
@@ -187,10 +179,6 @@ public class BCFontRenderer extends FontRenderer {
                 doDraw(f);
             }
         }
-
-        if (ModHelperBC.isSmoothFont) {
-            SmoothFontCompat.renderStringAtPosExitHook(this, unicodeFlag);
-        }
     }
 
     public static BCFontRenderer convert(FontRenderer fontRenderer) {
@@ -213,17 +201,7 @@ public class BCFontRenderer extends FontRenderer {
 
     @Override
     public int renderString(String text, float x, float y, int color, boolean dropShadow) {
-        if (ModHelperBC.isSmoothFont) {
-            SmoothFontCompat.Result result = SmoothFontCompat.renderStringHook(this, text, color, dropShadow, unicodeFlag);
-            if (result != null) {
-                color = result.result;
-            }
-        }
-
         if (text == null) {
-            if (ModHelperBC.isSmoothFont) {
-                SmoothFontCompat.renderStringExitHook(this, text, unicodeFlag);
-            }
             return 0;
         }
         else {
@@ -265,9 +243,6 @@ public class BCFontRenderer extends FontRenderer {
                 setColor(red, blue, green, alpha);
             }
 
-            if (ModHelperBC.isSmoothFont) {
-                SmoothFontCompat.renderStringExitHook(this, text, unicodeFlag);
-            }
             return (int) this.posX;
         }
     }
@@ -275,13 +250,6 @@ public class BCFontRenderer extends FontRenderer {
     //Modified to accurately return the length of bold text when style toggle mode is enabled
     @Override
     public int getStringWidth(String text) {
-        if (ModHelperBC.isSmoothFont) {
-            SmoothFontCompat.Result result = SmoothFontCompat.getStringWidthFloatHook(this, text);
-            if (result != null) {
-                return result.result;
-            }
-        }
-
         if (text == null) {
             return 0;
         }
@@ -332,13 +300,6 @@ public class BCFontRenderer extends FontRenderer {
     //Modified to accurately return the length of bold text when style toggle mode is enabled
     @Override
     public int sizeStringToWidth(String str, int wrapWidth) {
-        if (ModHelperBC.isSmoothFont) {
-            SmoothFontCompat.Result result = SmoothFontCompat.sizeStringToWidthFloatHook(this, str, wrapWidth);
-            if (result != null) {
-                return result.result;
-            }
-        }
-
         int totalLength = str.length();
         int currentWidth = 0;
         int index = 0;

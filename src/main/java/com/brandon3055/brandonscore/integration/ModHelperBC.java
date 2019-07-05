@@ -20,14 +20,13 @@ public class ModHelperBC {
 
     public static boolean isJEIInstalled;
     public static boolean isPIInstalled;
-    public static boolean isSmoothFont;
 
     public static void init() {
         if (initialized) return;
 
         loadedMods = Collections.synchronizedList(new ArrayList<>());
-        modNameMap = Collections.synchronizedMap(new HashMap<>());
-        modVersionMap = Collections.synchronizedMap(new HashMap<>());
+        modNameMap = Collections.synchronizedMap(new HashMap<String, String>());
+        modVersionMap = Collections.synchronizedMap(new HashMap<String, String>());
 
         for (ModContainer mod : Loader.instance().getModList()) {
             loadedMods.add(mod.getModId());
@@ -41,7 +40,6 @@ public class ModHelperBC {
 
         isJEIInstalled = Loader.isModLoaded("jei");
         isPIInstalled = Loader.isModLoaded("projectintelligence");
-        isSmoothFont = Loader.isModLoaded("smoothfont");
 
         initialized = true;
     }

@@ -5,19 +5,14 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath "com.wynprice.cursemaven:CurseMaven:1.1.0"
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: "com.wynprice.cursemaven"
 
 repositories {
     maven {
@@ -31,10 +26,6 @@ repositories {
     maven {
         name "JEI Maven."
         url "http://dvs1.progwml6.com/files/maven"
-    }
-    maven {
-        name = "CurseForge"
-        url = "https://minecraft.curseforge.com/api/maven/"
     }
 }
 
@@ -74,7 +65,6 @@ dependencies {
     compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
     compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 	compile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:deobf"
-    deobfCompile curse.resolve("smooth-font", "2715482")
 }
 
 
