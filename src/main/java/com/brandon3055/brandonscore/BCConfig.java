@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.registry.ModConfigContainer;
 import com.brandon3055.brandonscore.registry.ModConfigProperty;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.io.File;
@@ -40,4 +41,7 @@ public class BCConfig implements IModConfigHelper {
 
     @ModConfigProperty(name = "devLog", category = "Misc", comment = "Enable DEV log output.")
     public static boolean devLog = false;
+
+    @ModConfigProperty(name = "enableTpx", category = "Misc", comment = "Allows you to disable the tpx command.")
+    public static boolean enableTpx = !Loader.isModLoaded("mystcraft");
 }
