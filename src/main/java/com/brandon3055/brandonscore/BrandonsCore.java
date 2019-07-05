@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore;
 
 import codechicken.lib.CodeChickenLib;
 import com.brandon3055.brandonscore.command.BCUtilCommands;
+import com.brandon3055.brandonscore.command.CommandTPX;
 import com.brandon3055.brandonscore.command.CommandTickTime;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
@@ -62,6 +63,7 @@ public class BrandonsCore {
     public void serverStart(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandTickTime());
         event.registerServerCommand(new BCUtilCommands());
+        event.registerServerCommand(new CommandTPX());
     }
 
     @Mod.EventHandler
