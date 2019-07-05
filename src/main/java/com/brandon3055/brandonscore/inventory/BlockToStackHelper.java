@@ -43,7 +43,7 @@ public class BlockToStackHelper {
         if (player == null) {
             player = getHarvester((WorldServer) world);
         }
-        itemCollection = new ArrayList<ItemStack>();
+        itemCollection = new ArrayList<>();
 
         TileEntity tile = world.getTileEntity(pos);
         if (block.removedByPlayer(state, world, pos, player, true)) {
@@ -64,7 +64,9 @@ public class BlockToStackHelper {
     public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, EntityPlayer player, int xp) {
         List<ItemStack> stacks = breakAndCollectWithPlayer(world, pos, player, xp);
         for (ItemStack stack : stacks) {
-            InventoryUtils.insertItem(inventoryDynamic, stack, false);
+            if (stack != null && !stack.isEmpty()){
+                InventoryUtils.insertItem(inventoryDynamic, stack, false);
+            }
         }
         inventoryDynamic.xp += xp;
     }
