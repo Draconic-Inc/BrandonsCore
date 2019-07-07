@@ -122,19 +122,19 @@ public class FileHandler {
     };
 
     public static JsonObject readObj(File file) throws IOException {
-        JsonReader reader = new JsonReader(new FileReader(file));
-        JsonParser parser = new JsonParser();
-        reader.setLenient(true);
-        JsonElement element = parser.parse(reader);
-        org.apache.commons.io.IOUtils.closeQuietly(reader);
-        return element.getAsJsonObject();
+        try (JsonReader reader = new JsonReader(new FileReader(file))) {
+            JsonParser parser = new JsonParser();
+            reader.setLenient(true);
+            JsonElement element = parser.parse(reader);
+            return element.getAsJsonObject();
+        }
     }
 
     public static void writeJson(JsonObject obj, File file) throws IOException {
-        JsonWriter writer = new JsonWriter(new FileWriter(file));
-        writer.setIndent("  ");
-        Streams.write(obj, writer);
-        writer.flush();
-        org.apache.commons.io.IOUtils.closeQuietly(writer);
+        try(JsonWriter writer = new JsonWriter(new FileWriter(file))) {
+            writer.setIndent("  ");
+            Streams.write(obj, writer);
+            writer.flush();
+        }
     }
 }
