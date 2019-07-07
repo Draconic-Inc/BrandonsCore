@@ -132,23 +132,7 @@ public class BCEffectHandler {
                 Particle particle = pair.getKey().getEntityFX(particleID, world, pos, speed, args);
 
                 if (particle instanceof BCParticle && ((BCParticle) particle).isRawGLParticle()) {
-                    IGLFXHandler iglfxHandler = ((BCParticle) particle).getFXHandler();
-                    iglfxHandler = new IGLFXHandler() {
-                        @Override
-                        public void preDraw(int layer, BufferBuilder vertexbuffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
-
-                        }
-
-                        @Override
-                        public void postDraw(int layer, BufferBuilder vertexbuffer, Tessellator tessellator) {
-
-                        }
-                    };
-                    if (iglfxHandler == null) {
-                        LogHelperBC.bigError("Attempted to spawn a raw GL particle with a null glfx handler! " + particle);
-                        return;
-                    }
-                    effectRenderer.addRawGLEffect(iglfxHandler, (BCParticle) particle);
+                    effectRenderer.addRawGLEffect(RAW_GL_DUMMY_HANDLER, (BCParticle) particle);
                 }
                 else {
                     effectRenderer.addEffect(pair.getValue(), particle);
@@ -233,6 +217,7 @@ public class BCEffectHandler {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
         BrandonsCore.proxy.particleWorldLoad(event.getWorld());
@@ -277,4 +262,14 @@ public class BCEffectHandler {
     }
 
     //endregion
+
+    private static final IGLFXHandler RAW_GL_DUMMY_HANDLER = new IGLFXHandler() {
+        @Override
+        public void preDraw(int layer, BufferBuilder buffer, Entity entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
+        }
+
+        @Override
+        public void postDraw(int layer, BufferBuilder buffer, Tessellator tessellator) {
+        }
+    };
 }

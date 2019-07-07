@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
  * Created by brandon3055 on 23/4/2016.
  * Custom effect renderer used by all of my mods
  */
+@SuppressWarnings("Duplicates")
 public class BCEffectRenderer {
     public World world;
 
