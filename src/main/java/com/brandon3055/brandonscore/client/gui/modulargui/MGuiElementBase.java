@@ -200,6 +200,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * Its worth remembering that reload is also called when the element is added to its parent.
      */
     @SuppressWarnings("unchecked")
+    @Deprecated
     public E addReloadCallback(Consumer<E> callBack) {
         onReload = onReload != null ? onReload.andThen(callBack) : callBack;
         return (E) this;
@@ -209,9 +210,28 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * This is the same as {@link #addReloadCallback(Consumer)} except this method also immediately fires the callback.
      * This is useful for situations where the callback sets critical values such as the size and pos which need to be set before child elements are added.
      */
+    @Deprecated
     public E addAndFireReloadCallback(Consumer<E> callBack) {
         onReload = onReload != null ? onReload.andThen(callBack) : callBack;
         onReload.accept((E) this);
+        return (E) this;
+    }
+
+    /**
+     * Adds a reload call back that will be fired on creation of the callback and then every time the element is reloaded.
+     */
+    public E onReload(Consumer<E> callBack) {
+        return onReload(callBack, true);
+    }
+
+    /**
+     * Adds a reload call back that will be fired every time the element is reloaded. With the option of firing the callback now
+     */
+    public E onReload(Consumer<E> callBack, boolean callNow) {
+        onReload = onReload != null ? onReload.andThen(callBack) : callBack;
+        if (callNow) {
+            onReload.accept((E) this);
+        }
         return (E) this;
     }
 
@@ -2359,6 +2379,10 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     @SuppressWarnings ("unchecked")
     public List<String> getHoverText() {
         return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E) this);
+    }
+
+    public int getHoverTime() {
+        return hoverTime;
     }
 
     //endregion

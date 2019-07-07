@@ -23,6 +23,7 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
     private Supplier<Integer> texYGetter = null;
 
     public ResourceLocation texture;
+    public Supplier<ResourceLocation> textureSupplier;
 
     public GuiTexture(int xPos, int yPos, int textureX, int textureY, int xSize, int ySize, ResourceLocation texture) {
         super(xPos, yPos, xSize, ySize);
@@ -43,9 +44,14 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
         this.texture = texture;
     }
 
+    public GuiTexture(Supplier<ResourceLocation> textureSupplier) {
+        super(0, 0);
+        this.textureSupplier = textureSupplier;
+    }
+
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        bindTexture(texture);
+        bindTexture(getTexture());
         if (preDrawCallback == null) {
             GlStateManager.color(1, 1, 1, 1);
         }
@@ -74,6 +80,14 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
     public GuiTexture setTexture(ResourceLocation texture) {
         this.texture = texture;
         return this;
+    }
+
+    public void setTextureSupplier(Supplier<ResourceLocation> textureSupplier) {
+        this.textureSupplier = textureSupplier;
+    }
+
+    public ResourceLocation getTexture() {
+        return textureSupplier == null ? texture : textureSupplier.get();
     }
 
     public GuiTexture setTexture(String texture) {

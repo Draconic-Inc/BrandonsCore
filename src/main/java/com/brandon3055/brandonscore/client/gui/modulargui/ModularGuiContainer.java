@@ -73,6 +73,12 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     }
 
     @Override
+    public void setUISize(int xSize, int ySize) {
+        this.xSize = xSize;
+        this.ySize = ySize;
+    }
+
+    @Override
     public int guiLeft() {
         return guiLeft;
     }

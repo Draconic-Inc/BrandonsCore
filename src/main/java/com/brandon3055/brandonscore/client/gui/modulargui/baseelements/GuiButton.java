@@ -22,8 +22,10 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEventDispatcher*/ {
-    protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
-//    @Deprecated
+    protected static ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
+    protected ResourceLocation textureOverride;
+    protected Supplier<ResourceLocation> textureSupplier;
+    //    @Deprecated
 //    protected IGuiEventListener listener = null;
     protected IButtonListener buttonListener = null;
     protected boolean trim = true;
@@ -138,8 +140,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     public GuiButton setListener(Function0<Unit> action) {
         return setListener((b, m) -> {
             //Fixes casting issue.
-            @SuppressWarnings ("unused")
-            Object unused = action.apply();
+            @SuppressWarnings("unused") Object unused = action.apply();
         });
     }
 
@@ -578,7 +579,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     }
 
     protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {
-        bindTexture(BUTTON_TEXTURES);
+        bindTexture(textureSupplier != null ? textureSupplier.get() : textureOverride != null ? textureOverride : BUTTON_TEXTURES);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         int texVIndex = getRenderState(hovered);
@@ -605,6 +606,16 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
             drawTexturedModalRect(xPos(), yPos() + ySize() - 15, 0, texPos + 5, xSize() % 2 + xSize() / 2, 15);
             drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, yPos() + ySize() - 15, 200 - xSize() / 2, texPos + 5, xSize() / 2, 15);
         }
+    }
+
+    //Must match the vanilla button texture
+    public void setTextureOverride(ResourceLocation textureOverride) {
+        this.textureOverride = textureOverride;
+    }
+
+    //Must match the vanilla button texture
+    public void setTextureSupplier(Supplier<ResourceLocation> textureSupplier) {
+        this.textureSupplier = textureSupplier;
     }
 
     //endregion
