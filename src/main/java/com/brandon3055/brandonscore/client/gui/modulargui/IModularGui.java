@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.api.IJEIClearance;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import net.minecraft.client.gui.GuiScreen;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.awt.*;
 import java.util.List;
@@ -29,6 +30,10 @@ public interface IModularGui<T extends GuiScreen> extends IMouseOver, IJEICleara
      * @return the y size of the modular gui
      */
     int ySize();
+
+    default void setUISize(int xSize, int ySize) {
+        throw new NotImplementedException("setUISize has not been implemented in " + this.getClass().getName());
+    }
 
     int guiLeft();
 

@@ -64,6 +64,12 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     }
 
     @Override
+    public void setUISize(int xSize, int ySize) {
+        this.xSize = xSize;
+        this.ySize = ySize;
+    }
+
+    @Override
     public int guiLeft() {
         return (this.width - this.xSize) / 2;
     }
