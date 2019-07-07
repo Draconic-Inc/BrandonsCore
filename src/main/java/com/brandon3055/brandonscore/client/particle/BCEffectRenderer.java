@@ -157,7 +157,7 @@ public class BCEffectRenderer {
     /**
      * This should never be fired manually!
      */
-    protected void clearEffects(World worldIn) {
+    public void clearEffects(World worldIn) {
         this.world = worldIn;
 
         for (int j = 0; j < 4; ++j) {

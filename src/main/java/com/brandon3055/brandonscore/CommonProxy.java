@@ -88,4 +88,8 @@ public class CommonProxy {
     public void runSidedProcess(IProcess process) {
         ProcessHandler.addProcess(process);
     }
+
+    public void particleWorldLoad(World world) {
+
+    }
 }

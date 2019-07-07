@@ -218,7 +218,6 @@ public class BCEffectHandler {
 
     //region Events
 
-    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
@@ -236,10 +235,9 @@ public class BCEffectHandler {
 
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
-        effectRenderer.clearEffects(event.getWorld());
+        BrandonsCore.proxy.particleWorldLoad(event.getWorld());
     }
 
-    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
         BCProfiler.RENDER.start("bc_effect_renderer_draw");
@@ -250,7 +248,6 @@ public class BCEffectHandler {
     }
 
     //TODO Move this to a separate client event handler if i ever need this event elsewhere
-    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void debugOverlay(RenderGameOverlayEvent.Text event) {
         if (event.getLeft().size() >= 5 && effectRenderer != null) {
