@@ -203,6 +203,7 @@ public class BCEffectHandler {
     //region Events
 
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
             return;
@@ -223,6 +224,7 @@ public class BCEffectHandler {
     }
 
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void renderWorld(RenderWorldLastEvent event) {
         BCProfiler.RENDER.start("bc_effect_renderer_draw");
         Minecraft.getMinecraft().mcProfiler.startSection("BCParticles");
@@ -233,6 +235,7 @@ public class BCEffectHandler {
 
     //TODO Move this to a separate client event handler if i ever need this event elsewhere
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void debugOverlay(RenderGameOverlayEvent.Text event) {
         if (event.getLeft().size() >= 5 && effectRenderer != null) {
             String particleTxt = event.getLeft().get(4);
