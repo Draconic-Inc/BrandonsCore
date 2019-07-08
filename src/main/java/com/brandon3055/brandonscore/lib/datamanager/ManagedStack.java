@@ -5,7 +5,8 @@ import codechicken.lib.data.MCDataOutput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Created by brandon3055 on 12/06/2017.
@@ -13,23 +14,72 @@ import javax.annotation.Nonnull;
  */
 public class ManagedStack extends AbstractManagedData {
 
-    @Nonnull
-	public ItemStack value;
-	@Nonnull
-    private ItemStack lastTickValue;
+    private ItemStack value;
+    private ItemStack lastValue;
+    protected Function<ItemStack, ItemStack> validator = null;
 
-    public ManagedStack(@Nonnull ItemStack value) {
-        this.value = value;
-        this.lastTickValue = value.copy();
+    public ManagedStack(String name, ItemStack defaultValue, DataFlags... flags) {
+        super(name, flags);
+        this.value = defaultValue;
+        this.lastValue = defaultValue.copy();
+    }
+
+    /**
+     * Default 0
+     */
+    public ManagedStack(String name, DataFlags... flags) {
+        this(name, ItemStack.EMPTY, flags);
+    }
+
+    public ItemStack set(ItemStack value) {
+        lastValue = value.copy();
+        validate();
+        if (!Objects.equals(this.value, value)) {
+            boolean set = true;
+            if (dataManager.isClientSide() && flags.allowClientControl) {
+                dataManager.sendToServer(this);
+                set = ccscsFlag;
+            }
+
+            if (set) {
+                this.value = value;
+                markDirty();
+            }
+        }
+
+        return this.value;
+    }
+
+    public ItemStack get() {
+        return value;
+    }
+
+    /**
+     * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
+     *
+     * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     */
+    public void setValidator(Function<ItemStack, ItemStack> validator) {
+        this.validator = validator;
     }
 
     @Override
-    public boolean detectChanges() {
-        if (value != lastTickValue) {
-            lastTickValue = value;
+    public void validate() {
+        if (validator != null) {
+            value = validator.apply(value);
+        }
+    }
+
+    @Override
+    public boolean isDirty(boolean reset) {
+        if (lastValue != null && !lastValue.equals(value)) {
+            if (reset) {
+                lastValue = value.copy();
+            }
             return true;
         }
-        return false;
+
+        return super.isDirty(reset);
     }
 
     @Override
@@ -54,6 +104,6 @@ public class ManagedStack extends AbstractManagedData {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
     }
 }

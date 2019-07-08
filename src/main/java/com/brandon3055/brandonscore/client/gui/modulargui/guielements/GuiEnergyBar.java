@@ -112,7 +112,7 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
             energy = energyHandler.getEnergyStored(EnumFacing.UP);
         }
         if (energyHandler instanceof TileEnergyBase) {
-            energy = ((TileEnergyBase) energyHandler).energySync.value;
+            energy = ((TileEnergyBase) energyHandler).energySync.get();
         }
         return super.onUpdate();
     }

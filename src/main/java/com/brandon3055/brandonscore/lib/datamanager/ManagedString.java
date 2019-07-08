@@ -4,27 +4,65 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.NBTTagCompound;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Created by brandon3055 on 12/06/2017.
  */
 public class ManagedString extends AbstractManagedData {
 
-    public String value;
-    private String lastTickValue;
+    private String value;
+    protected Function<String, String> validator = null;
 
-    public ManagedString(@Nonnull String value) {
-        this.value = this.lastTickValue = value;
+    public ManagedString(String name, String defaultValue, DataFlags... flags) {
+        super(name, flags);
+        this.value = defaultValue;
+    }
+
+    /**
+     * Default "" (Empty String)
+     */
+    public ManagedString(String name, DataFlags... flags) {
+        this(name, "", flags);
+    }
+
+    public String set(String value) {
+        validate();
+        if (!Objects.equals(this.value, value)) {
+            boolean set = true;
+            if (dataManager.isClientSide() && flags.allowClientControl) {
+                dataManager.sendToServer(this);
+                set = ccscsFlag;
+            }
+
+            if (set) {
+                this.value = value;
+                markDirty();
+            }
+        }
+
+        return this.value;
+    }
+
+    public String get() {
+        return value;
+    }
+
+    /**
+     * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
+     *
+     * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     */
+    public void setValidator(Function<String, String> validator) {
+        this.validator = validator;
     }
 
     @Override
-    public boolean detectChanges() {
-        if (!value.equals(lastTickValue)) {
-            lastTickValue = value;
-            return true;
+    public void validate() {
+        if (validator != null) {
+            value = validator.apply(value);
         }
-        return false;
     }
 
     @Override
@@ -49,6 +87,6 @@ public class ManagedString extends AbstractManagedData {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
     }
 }

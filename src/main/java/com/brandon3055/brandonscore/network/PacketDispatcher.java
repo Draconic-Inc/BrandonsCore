@@ -23,6 +23,7 @@ public class PacketDispatcher {
 
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
+    public static final int S_TILE_DATA_MANAGER = 3;
 
     public static void sendConfigToClient(EntityPlayerMP player) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_SERVER_CONFIG_SYNC);

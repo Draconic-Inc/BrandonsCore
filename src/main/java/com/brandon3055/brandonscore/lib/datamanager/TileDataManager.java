@@ -12,19 +12,17 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by brandon3055 on 12/06/2017.
  * My implementation if IDataManager for tile {@link TileBCBase}
  */
+@SuppressWarnings("DuplicatedCode")
 public class TileDataManager<T extends TileEntity & IDataManagerProvider> implements IDataManager {
 
     protected LinkedList<IManagedData> managedDataList = new LinkedList<>();
-    protected Map<IManagedData, TileDataOptions> dataOptions = new HashMap<>();
     public final T tile;
 
     public TileDataManager(T tile) {
@@ -35,39 +33,31 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      * Use this to create, Configure and register your Managed Data Objects<br>
      * Example Registration:<br><br>
      * <p>
-     * public ManagedInt anInt = register("anInt", new ManagedInt(0)).saveToTile().saveToItem().syncViaTile().finish();
+     * public ManagedInt anInt = register(new ManagedInt("anInt", 0, {@link DataFlags#SAVE_BOTH_SYNC_TILE}));
      *
-     * @param name        The name to register the managed data as. This will be sued to sage the data to NBT.
      * @param managedData A new instance of this managed data type.
      * @return Returns a generified data options class. Set the flags you need then call finish to get your shiny new ManagedData object!
      */
-    public <M extends IManagedData> TileDataOptions<M> register(String name, M managedData) {
-        managedData.setName(name);
-        managedData.setIndex(managedDataList.size());
+    public <M extends IManagedData> M register(M managedData) {
+        managedData.init(this, managedDataList.size());
         managedDataList.add(managedData);
-        TileDataOptions<M> ops = new TileDataOptions<>(managedData);
-        dataOptions.put(managedData, ops);
-        return ops;
+        return managedData;
     }
-//    public ManagedInt anInt = register("anInt", new ManagedInt(0)).saveToTile().saveToItem().syncViaTile().finish();
 
     /**
-     * You can store IManagedData instances however you want in your manager implementation
-     * As long as you are able to retrieve them as a collection and supply them via this method.
-     *
-     * @return All data objects stored in the manager as a collection.
+     * Use this to detect and send changes to the client via your own sync packet. See {@link TileDataManager} for an example
+     * This should be called by your tile, container, etc every tick.
      */
     @Override
     public void detectAndSendChanges() {
-        if (tile.getWorld().isRemote) {
-            return;
-        }
-        for (IManagedData data : managedDataList) {
-            if (dataOptions.get(data).syncViaTile && data.detectChanges()) {
-                PacketCustom syncPacket = createSyncPacket();
-                syncPacket.writeByte((byte) data.getIndex());
-                data.toBytes(syncPacket);
-                syncPacket.sendToChunk(tile);
+        if (!tile.getWorld().isRemote) {
+            for (IManagedData data : managedDataList) {
+                if (data.flags().syncTile && data.isDirty(true)) {
+                    PacketCustom syncPacket = createSyncPacket();
+                    syncPacket.writeByte((byte) data.getIndex());
+                    data.toBytes(syncPacket);
+                    syncPacket.sendToChunk(tile);
+                }
             }
         }
     }
@@ -78,16 +68,15 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      * @param listeners The list of container listeners.
      */
     public void detectAndSendChangesToListeners(List<IContainerListener> listeners) {
-        if (tile.getWorld().isRemote) {
-            return;
-        }
-        for (IManagedData data : managedDataList) {
-            if (dataOptions.get(data).syncViaContainer && data.detectChanges()) {
-                PacketCustom syncPacket = createSyncPacket();
-                syncPacket.writeByte((byte) data.getIndex());
-                data.toBytes(syncPacket);
-                syncPacket.sendToChunk(tile);
-                DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
+        if (!tile.getWorld().isRemote) {
+            for (IManagedData data : managedDataList) {
+                if (data.flags().syncContainer && data.isDirty(true)) {
+                    PacketCustom syncPacket = createSyncPacket();
+                    syncPacket.writeByte((byte) data.getIndex());
+                    data.toBytes(syncPacket);
+                    syncPacket.sendToChunk(tile);
+                    DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
+                }
             }
         }
     }
@@ -98,55 +87,51 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      * will see incorrect values until the next sync.
      */
     public void forceContainerSync(List<IContainerListener> listeners) {
-        if (tile.getWorld().isRemote) {
-            return;
-        }
-        for (IManagedData data : managedDataList) {
-            if (dataOptions.get(data).syncViaContainer) {
-                PacketCustom syncPacket = createSyncPacket();
-                syncPacket.writeByte((byte) data.getIndex());
-                data.toBytes(syncPacket);
-                DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
+        if (!tile.getWorld().isRemote) {
+            for (IManagedData data : managedDataList) {
+                if (data.flags().syncContainer) {
+                    PacketCustom syncPacket = createSyncPacket();
+                    syncPacket.writeByte((byte) data.getIndex());
+                    data.toBytes(syncPacket);
+                    DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
+                }
             }
         }
     }
 
     public void forceSync() {
-        if (tile.getWorld().isRemote) {
-            return;
-        }
-        for (IManagedData data : managedDataList) {
-            if (dataOptions.get(data).syncViaTile) {
-                PacketCustom syncPacket = createSyncPacket();
-                syncPacket.writeByte((byte) data.getIndex());
-                data.toBytes(syncPacket);
-                syncPacket.sendToChunk(tile);
+        if (!tile.getWorld().isRemote) {
+            for (IManagedData data : managedDataList) {
+                if (data.flags().syncTile) {
+                    PacketCustom syncPacket = createSyncPacket();
+                    syncPacket.writeByte((byte) data.getIndex());
+                    data.toBytes(syncPacket);
+                    syncPacket.sendToChunk(tile);
+                }
             }
         }
     }
 
     public void forcePlayerSync(EntityPlayerMP player) {
-        if (tile.getWorld().isRemote) {
-            return;
-        }
-        for (IManagedData data : managedDataList) {
-            if (dataOptions.get(data).syncViaContainer) {
-                PacketCustom syncPacket = createSyncPacket();
-                syncPacket.writeByte((byte) data.getIndex());
-                data.toBytes(syncPacket);
-                syncPacket.sendToPlayer(player);
+        if (!tile.getWorld().isRemote) {
+            for (IManagedData data : managedDataList) {
+                if (data.flags().syncContainer) {
+                    PacketCustom syncPacket = createSyncPacket();
+                    syncPacket.writeByte((byte) data.getIndex());
+                    data.toBytes(syncPacket);
+                    syncPacket.sendToPlayer(player);
+                }
             }
         }
     }
 
     public void forceSync(IManagedData data) {
-        if (tile.getWorld().isRemote) {
-            return;
+        if (!tile.getWorld().isRemote) {
+            PacketCustom syncPacket = createSyncPacket();
+            syncPacket.writeByte((byte) data.getIndex());
+            data.toBytes(syncPacket);
+            syncPacket.sendToChunk(tile);
         }
-        PacketCustom syncPacket = createSyncPacket();
-        syncPacket.writeByte((byte) data.getIndex());
-        data.toBytes(syncPacket);
-        syncPacket.sendToChunk(tile);
     }
 
     @Override
@@ -162,7 +147,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
         IManagedData data = getDataByIndex(index);
         if (data != null) {
             data.fromBytes(input);
-            if (dataOptions.get(data).triggerUpdate) {
+            if (data.flags().triggerUpdate) {
                 IBlockState state = tile.getWorld().getBlockState(tile.getPos());
                 tile.getWorld().notifyBlockUpdate(tile.getPos(), state, state, 3);
             }
@@ -182,7 +167,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     @Override
     public void writeToNBT(NBTTagCompound compound) {
         NBTTagCompound dataTag = new NBTTagCompound();
-        DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).saveToNBT, p -> p.toNBT(dataTag));
+        DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.toNBT(dataTag));
         compound.setTag("BCManagedData", dataTag);
     }
 
@@ -190,7 +175,48 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     public void readFromNBT(NBTTagCompound compound) {
         if (compound.hasKey("BCManagedData", 10)) {
             NBTTagCompound dataTag = compound.getCompoundTag("BCManagedData");
-            DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).saveToNBT, p -> p.fromNBT(dataTag));
+            DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.fromNBT(dataTag));
+        }
+    }
+
+    @Override
+    public void markDirty() {
+        if (!tile.getWorld().isRemote) {
+            tile.markDirty();
+            for (IManagedData data : managedDataList) {
+                if (data.flags().syncOnSet && data.isDirty(true)) {
+                    PacketCustom syncPacket = createSyncPacket();
+                    syncPacket.writeByte((byte) data.getIndex());
+                    data.toBytes(syncPacket);
+                    syncPacket.sendToChunk(tile);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean isClientSide() {
+        return BrandonsCore.proxy.isRemoteWorld();
+    }
+
+    @Override
+    public void sendToServer(IManagedData data) {
+        if (tile.getWorld().isRemote && data.flags().allowClientControl) {
+            PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.S_TILE_DATA_MANAGER);
+            packet.writePos(tile.getPos());
+            packet.writeByte((byte) data.getIndex());
+            data.toBytes(packet);
+            packet.sendToServer();
+        }
+    }
+
+    public void receiveDataFromClient(MCDataInput input) {
+        int index = input.readByte() & 0xFF;
+        IManagedData data = getDataByIndex(index);
+        if (data != null && data.flags().allowClientControl) {
+            data.fromBytes(input);
+            data.validate(); //This is very important! Assuming this data has a validator this prevents a malicious or bugged client from sending an invalid value.
+            data.markDirty();
         }
     }
 
@@ -199,14 +225,14 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      */
     public void writeSyncNBT(NBTTagCompound compound) {
         NBTTagCompound dataTag = new NBTTagCompound();
-        DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).syncViaTile, p -> p.toNBT(dataTag));
+        DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.toNBT(dataTag));
         compound.setTag("BCManagedData", dataTag);
     }
 
     public void readSyncNBT(NBTTagCompound compound) {
         if (compound.hasKey("BCManagedData", 10)) {
             NBTTagCompound dataTag = compound.getCompoundTag("BCManagedData");
-            DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).syncViaTile, p -> p.fromNBT(dataTag));
+            DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.fromNBT(dataTag));
         }
     }
 
@@ -215,8 +241,8 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      */
     public void writeToStackNBT(NBTTagCompound compound) {
         NBTTagCompound dataTag = new NBTTagCompound();
-        DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).saveToItem, p -> p.toNBT(dataTag));
-        if (!dataTag.hasNoTags()){
+        DataUtils.forEachMatch(managedDataList, data -> data.flags().saveItem, data -> data.toNBT(dataTag));
+        if (!dataTag.hasNoTags()) {
             compound.setTag("BCManagedData", dataTag);
         }
     }
@@ -224,7 +250,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     public void readFromStackNBT(NBTTagCompound compound) {
         if (compound.hasKey("BCManagedData", 10)) {
             NBTTagCompound dataTag = compound.getCompoundTag("BCManagedData");
-            DataUtils.forEachMatch(managedDataList, p -> dataOptions.get(p).saveToItem, p -> p.fromNBT(dataTag));
+            DataUtils.forEachMatch(managedDataList, data -> data.flags().saveItem, data -> data.fromNBT(dataTag));
         }
     }
 }

@@ -8,7 +8,6 @@ import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
 import com.brandon3055.brandonscore.lib.datamanager.IManagedData;
 import com.brandon3055.brandonscore.lib.datamanager.TileDataManager;
-import com.brandon3055.brandonscore.lib.datamanager.TileDataOptions;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -50,8 +49,8 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     /**
      * Convenience method for dataManager.register();
      */
-    public <M extends IManagedData> TileDataOptions<M> register(String name, M managedData) {
-        return dataManager.register(name, managedData);
+    public <M extends IManagedData> M register(M managedData) {
+        return dataManager.register(managedData);
     }
 
     /**

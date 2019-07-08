@@ -92,4 +92,8 @@ public class CommonProxy {
     public void particleWorldLoad(World world) {
 
     }
+
+    public boolean isRemoteWorld() {
+        return false;
+    }
 }

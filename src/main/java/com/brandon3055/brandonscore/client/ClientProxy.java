@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.packet.PacketCustom;
+import codechicken.lib.util.ClientUtils;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.command.BCClientCommands;
@@ -113,5 +114,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void particleWorldLoad(World world) {
         BCEffectHandler.effectRenderer.clearEffects(world);
+    }
+
+    @Override
+    public boolean isRemoteWorld() {
+        return ClientUtils.inWorld() && Minecraft.getMinecraft().world.isRemote;
     }
 }

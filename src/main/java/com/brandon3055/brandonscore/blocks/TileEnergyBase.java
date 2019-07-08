@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.blocks;
 import cofh.redstoneflux.impl.EnergyStorage;
 import com.brandon3055.brandonscore.lib.EnergyHandlerWrapper;
 import com.brandon3055.brandonscore.lib.EnergyHelper;
+import com.brandon3055.brandonscore.lib.datamanager.DataFlags;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedInt;
-import com.brandon3055.brandonscore.lib.datamanager.TileDataOptions;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -29,17 +29,16 @@ public class TileEnergyBase extends TileBCBase {
         super.update();
         if (energySync != null) {
             if (world.isRemote) {
-                energyStorage.setEnergyStored(energySync.value);
+                energyStorage.setEnergyStored(energySync.get());
             } else {
-                energySync.value = energyStorage.getEnergyStored();
+                energySync.set(energyStorage.getEnergyStored());
             }
         }
     }
 
-    public TileDataOptions<ManagedInt> setEnergySyncMode() {
-        TileDataOptions<ManagedInt> options = dataManager.register("anInt", new ManagedInt(0));
-        energySync = options.finish();
-        return options;
+    public ManagedInt setEnergySyncMode(DataFlags... flags) {
+        energySync = dataManager.register(new ManagedInt("anInt", 0, flags));
+        return energySync;
     }
 
     protected void setCapacityAndTransfer(int capacity, int receive, int extract) {

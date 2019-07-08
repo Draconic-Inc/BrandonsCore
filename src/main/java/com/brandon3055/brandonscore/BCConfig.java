@@ -44,4 +44,7 @@ public class BCConfig implements IModConfigHelper {
 
     @ModConfigProperty(name = "enableTpx", category = "Misc", comment = "Allows you to disable the tpx command.")
     public static boolean enableTpx = !Loader.isModLoaded("mystcraft");
+
+    @ModConfigProperty(name = "darkMode", category = "Client", comment = "Enable gui dark mode.")
+    public static boolean darkMode = false;
 }

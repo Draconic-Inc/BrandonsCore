@@ -10,12 +10,12 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedInt extends AbstractManagedData {
+public class ManagedFloat extends AbstractManagedData {
 
-    private int value;
-    protected Function<Integer, Integer> validator = null;
+    private float value;
+    protected Function<Float, Float> validator = null;
 
-    public ManagedInt(String name, int defaultValue, DataFlags... flags) {
+    public ManagedFloat(String name, float defaultValue, DataFlags... flags) {
         super(name, flags);
         this.value = defaultValue;
     }
@@ -23,11 +23,11 @@ public class ManagedInt extends AbstractManagedData {
     /**
      * Default 0
      */
-    public ManagedInt(String name, DataFlags... flags) {
-        this(name, 0, flags);
+    public ManagedFloat(String name, DataFlags... flags) {
+        this(name, 0F, flags);
     }
 
-    public int set(int value) {
+    public float set(float value) {
         validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
@@ -45,7 +45,7 @@ public class ManagedInt extends AbstractManagedData {
         return this.value;
     }
 
-    public int get() {
+    public float get() {
         return value;
     }
 
@@ -54,7 +54,7 @@ public class ManagedInt extends AbstractManagedData {
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      */
-    public void setValidator(Function<Integer, Integer> validator) {
+    public void setValidator(Function<Float, Float> validator) {
         this.validator = validator;
     }
 
@@ -67,22 +67,22 @@ public class ManagedInt extends AbstractManagedData {
 
     @Override
     public void toBytes(MCDataOutput output) {
-        output.writeInt(value);
+        output.writeFloat(value);
     }
 
     @Override
     public void fromBytes(MCDataInput input) {
-        value = input.readInt();
+        value = input.readFloat();
     }
 
     @Override
     public void toNBT(NBTTagCompound compound) {
-        compound.setInteger(name, value);
+        compound.setFloat(name, value);
     }
 
     @Override
     public void fromNBT(NBTTagCompound compound) {
-        value = compound.getInteger(name);
+        value = compound.getFloat(name);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class ManagedInt extends AbstractManagedData {
      * @param add The value to add.
      * @return The new value stored in this data object.
      */
-    public int add(int add) {
+    public float add(float add) {
         return set(get() + add);
     }
 
@@ -114,7 +114,7 @@ public class ManagedInt extends AbstractManagedData {
      * @param subtract The value to subtract.
      * @return The new value stored in this data object.
      */
-    public int subtract(int subtract) {
+    public float subtract(float subtract) {
         return set(get() - subtract);
     }
 
@@ -127,7 +127,7 @@ public class ManagedInt extends AbstractManagedData {
      * @param multiplyBy The value to multiply by.
      * @return The new value stored in this data object.
      */
-    public int multiply(int multiplyBy) {
+    public float multiply(float multiplyBy) {
         return set(get() * multiplyBy);
     }
 
@@ -140,7 +140,7 @@ public class ManagedInt extends AbstractManagedData {
      * @param divideBy The value to divide by.
      * @return The new value stored in this data object.
      */
-    public int divide(int divideBy) {
+    public float divide(float divideBy) {
         return set(get() / divideBy);
     }
 
@@ -149,7 +149,7 @@ public class ManagedInt extends AbstractManagedData {
      *
      * @return zero.
      */
-    public int zero() {
+    public float zero() {
         return set(0);
     }
 
@@ -158,7 +158,7 @@ public class ManagedInt extends AbstractManagedData {
      *
      * @return The new value stored in this data object.
      */
-    public int inc() {
+    public float inc() {
         return add(1);
     }
 
@@ -167,7 +167,7 @@ public class ManagedInt extends AbstractManagedData {
      *
      * @return The new value stored in this data object.
      */
-    public int dec() {
+    public float dec() {
         return subtract(1);
     }
 }

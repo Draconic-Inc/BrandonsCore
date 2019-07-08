@@ -28,7 +28,7 @@ public interface IDataManager {
      *
      * @return a new {@link PacketCustom} with your chanel key and any additional data required to get it to the data manager client side.
      */
-    PacketCustom createSyncPacket();
+    PacketCustom createSyncPacket(); //TODO Not sure if i really need to define this in the interface...
 
     void receiveSyncData(MCDataInput input);
 
@@ -57,4 +57,25 @@ public interface IDataManager {
      */
     void readFromNBT(NBTTagCompound compound);
 
+    /**
+     * Called by a data object when its value is updated.
+     * Primarily used to mark the base tile as dirty.
+     * Also handles {@link DataFlags#CLIENT_CONTROL} flag.
+     */
+    void markDirty();
+
+    /**
+     * @return true if called client side.
+     */
+    boolean isClientSide();
+
+    /**
+     * This is used by data objects with the {@link DataFlags#CLIENT_CONTROL} flag enabled.
+     * This is responsible for sending the data to the server.
+     * Upon receival of the data the server must first confirm that client control is enabled for this data
+     * then validate the received value before applying it.
+     *
+     * @param data The data to be send to the server.
+     */
+    void sendToServer(IManagedData data);
 }

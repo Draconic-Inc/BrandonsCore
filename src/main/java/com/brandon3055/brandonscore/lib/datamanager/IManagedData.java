@@ -6,22 +6,14 @@ import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Created by brandon3055 on 12/06/2017.
- *
+ * <p>
  * The idea behind managed data objects is to make saving, loading and synchronizing data as simple as possible.
  * For example you can create a ManagedInt in a tile that implements {@link IDataManager} then simply register that int and... that is.
  * The int value stored in that int object will be saved, loaded and synchronized automatically.
- *
+ * <p>
  * Note: depending on the the manager implementation you can create an object that only saves or only syncs you dont have to do both.
  */
 public interface IManagedData {
-
-    /**
-     * Set the unique name for this object.
-     * Note this name only has to be unique within the DataManager its registered to.
-     *
-     * @param name the new unique id.
-     */
-    void setName(String name);
 
     /**
      * @return A unique (within the manager its registered to) name for the purpose of identifying and saving this data.
@@ -33,23 +25,10 @@ public interface IManagedData {
      * This index should be set by the manager and must be the same both server and client side.
      * How you assign this index is up to you but a safe bet would be to just start at 0 ind increment
      * every time a new data object is registered.
-     */
-    void setIndex(int index);
-
-    /**
+     *
      * @return the index of this managed data.
      */
     int getIndex();
-
-
-    /**
-     * When this is called compare the stored data to whatever data cache you use to check for changes.
-     * If the data has changed return true and reset the cache so that the next time this is called it will return false
-     * Unless the data has changed again of course.
-     *
-     * @return true if the data has changed since the last time detectChanges was called.
-     */
-    boolean detectChanges();
 
     /**
      * Serialize this object to bytes for the purpose of sending it over the network.
@@ -76,4 +55,34 @@ public interface IManagedData {
      * Load this data from nbt.
      */
     void fromNBT(NBTTagCompound compound);
+
+    /**
+     * Marks this data as 'dirty' meaning it needs to be saved/synchronized
+     */
+    void markDirty();
+
+    /**
+     * Checks if this data is dirty. Meaning it needs to be saved/synced.
+     * @param reset If true the dirty status will be reset to false (Will not affect the returned value).
+     * @return true if this data is dirty.
+     */
+    boolean isDirty(boolean reset);
+
+    void init(IDataManager dataManager, int index);
+
+    /**
+     * @return the data manager this is registered to.
+     */
+    IDataManager getDataManager();
+
+    /**
+     * @return this data's flags object.
+     */
+    DataFlags flags();
+
+    /**
+     * When called this data object should validate its current value and ensure it is within any restrictions that may have been set.
+     * This is called whenever the data value is set and more importantly when the data value is set by the client if {@link DataFlags#CLIENT_CONTROL} is enabled.
+     */
+    void validate();
 }
