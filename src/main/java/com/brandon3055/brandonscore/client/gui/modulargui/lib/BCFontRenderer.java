@@ -18,7 +18,7 @@ public class BCFontRenderer extends FontRenderer {
     private static boolean styleToggleMode = false;
     private static boolean colourSet = false;
     private static int prevFormat = -1;
-    private static boolean colourFormatSet = false;
+    private static boolean colourFormatSet = false; //Used to detect when the same format is used a second time in a row (for toggle mode)
     private static Map<FontRenderer, BCFontRenderer> cashedRenderers = new HashMap<>();
 
     public BCFontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
@@ -179,6 +179,15 @@ public class BCFontRenderer extends FontRenderer {
                 doDraw(f);
             }
         }
+
+        if (!styleToggleMode) {
+            //Ensure reset after draw
+            this.randomStyle = false;
+            this.boldStyle = false;
+            this.strikethroughStyle = false;
+            this.underlineStyle = false;
+            this.italicStyle = false;
+        }
     }
 
     public static BCFontRenderer convert(FontRenderer fontRenderer) {
@@ -255,7 +264,7 @@ public class BCFontRenderer extends FontRenderer {
         }
         else {
             int width = 0;
-            boolean bold = boldStyle;
+            boolean bold = boldStyle && styleToggleMode;
 
             for (int index = 0; index < text.length(); ++index) {
                 char charAtIndex = text.charAt(index);
@@ -305,7 +314,7 @@ public class BCFontRenderer extends FontRenderer {
         int index = 0;
         int lastWord = -1;
 
-        for (boolean bold = boldStyle; index < totalLength; ++index) {
+        for (boolean bold = boldStyle && styleToggleMode; index < totalLength; ++index) {
             char charAtIndex = str.charAt(index);
 
             switch (charAtIndex) {
@@ -329,8 +338,8 @@ public class BCFontRenderer extends FontRenderer {
                         char c1 = str.charAt(index);
 
                         //l L (Not bold)?
-                        if (c1 != 108 && c1 != 76) {
-                            if (c1 == 114 || c1 == 82 || isFormatColor(c1)) {
+                        if (c1 != 'l' && c1 != 'L') {
+                            if (c1 == 'r' || c1 == 'R' || isFormatColor(c1)) {
                                 bold = false;
                             }
                         }
@@ -340,7 +349,7 @@ public class BCFontRenderer extends FontRenderer {
                     }
             }
 
-            if (charAtIndex == 10) {
+            if (charAtIndex == '\n') {
                 ++index;
                 lastWord = index;
                 break;
@@ -357,9 +366,13 @@ public class BCFontRenderer extends FontRenderer {
     /**
      * This should be enabled before you start drawing and disabled immediately after.
      */
-    public static void setStileToggleMode(boolean enabled) {
+    public static void setStyleToggleMode(boolean enabled) {
         styleToggleMode = enabled;
         colourSet = false;
+    }
+
+    public static boolean isStyleToggleMode() {
+        return styleToggleMode;
     }
 
     public FontState getState() {
@@ -382,6 +395,7 @@ public class BCFontRenderer extends FontRenderer {
         public boolean boldStyle;
         public boolean italicStyle;
         public boolean underlineStyle;
+        public boolean colourFormatSet;
         public boolean strikethroughStyle;
 
         protected FontState(BCFontRenderer font) {
@@ -395,6 +409,7 @@ public class BCFontRenderer extends FontRenderer {
             boldStyle = font.boldStyle;
             italicStyle = font.italicStyle;
             underlineStyle = font.underlineStyle;
+            colourFormatSet = BCFontRenderer.colourFormatSet;
             strikethroughStyle = font.strikethroughStyle;
         }
 
@@ -409,6 +424,7 @@ public class BCFontRenderer extends FontRenderer {
             font.boldStyle = boldStyle;
             font.italicStyle = italicStyle;
             font.underlineStyle = underlineStyle;
+            BCFontRenderer.colourFormatSet = colourFormatSet;
             font.strikethroughStyle = strikethroughStyle;
             font.setColor(red, green, blue, alpha);
         }

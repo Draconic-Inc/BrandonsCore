@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 public class DLRSCache {
 
-    public static final DLResourceLocation DOWNLOADING_TEXTURE = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), "textures/loading_texture.png");
+    public static final DLResourceLocation DOWNLOADING_TEXTURE = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH), "textures/loading_texture.png");
     static {
         DOWNLOADING_TEXTURE.height = 16;
         DOWNLOADING_TEXTURE.width = 16;
@@ -33,7 +34,7 @@ public class DLRSCache {
     public static DLResourceLocation getResource(String url) {
         if (!resourceCache.containsKey(url)) {
 
-            DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), url);
+            DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH), url);
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
 
             File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");

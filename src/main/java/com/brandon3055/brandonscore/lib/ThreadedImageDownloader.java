@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -27,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ThreadedImageDownloader extends SimpleTexture{
 
-    private static final ResourceLocation RESOURCE_BROKEN_DOWNLOAD = new ResourceLocation(BrandonsCore.MODID.toLowerCase() + ":textures/loading_texture_failed.png");
+    private static final ResourceLocation RESOURCE_BROKEN_DOWNLOAD = new ResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH) + ":textures/loading_texture_failed.png");
     private static final AtomicInteger TEXTURE_DOWNLOADER_THREAD_ID = new AtomicInteger(0);
     private final File cacheFile;
     private final String resourceUrl;

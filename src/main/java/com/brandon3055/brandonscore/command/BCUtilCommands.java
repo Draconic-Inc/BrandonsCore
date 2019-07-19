@@ -95,7 +95,7 @@ public class BCUtilCommands extends CommandBase {
         try {
             String function = args[0];
 
-            if (function.toLowerCase().equals("nbt")) {
+            if (function.equals("nbt")) {
                 functionNBT(server, sender, args);
             }
             else if (function.equals("regenchunk")) {

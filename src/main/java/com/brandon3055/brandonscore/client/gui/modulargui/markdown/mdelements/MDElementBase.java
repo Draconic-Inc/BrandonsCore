@@ -117,9 +117,9 @@ public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiEl
             invalidProps.forEach(s -> list.add(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c"));
             errors.forEach(s -> list.add(S + "c" + s + S + "c"));
             zOffset += 100;
-            BCFontRenderer.setStileToggleMode(true);
+            BCFontRenderer.setStyleToggleMode(true);
             drawHoveringText(list, xPos() - 8, yPos() + 15, fontRenderer, screenWidth, screenHeight);
-            BCFontRenderer.setStileToggleMode(false);
+            BCFontRenderer.setStyleToggleMode(false);
             fontRenderer.resetStyles();
             zOffset -= 100;
         }

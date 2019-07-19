@@ -135,7 +135,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
         List<MDElementBase> currentLine = new ArrayList<>();
 
         //Layout Pass
-        for (MDElementBase element: elements) {
+        for (MDElementBase element : elements) {
             boolean endOfLine = false;
             if (element instanceof MarkerElement) {
                 if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE) {
@@ -254,7 +254,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
      */
     public LinkedList<MDElementBase> getDisplayElements() {
         LinkedList<MDElementBase> displayElements = new LinkedList<>();
-        for (MDElementBase element: elements) {
+        for (MDElementBase element : elements) {
             if (element.hasSubParts) {
                 displayElements.addAll(element.subParts);
             }

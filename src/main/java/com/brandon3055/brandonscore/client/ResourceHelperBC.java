@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -14,8 +15,8 @@ import java.util.Map;
 public class ResourceHelperBC {
 
     private static ResourceLocation vanillaParticles;
-    private static Map<String, ResourceLocation> cachedResources = new HashMap<String, ResourceLocation>();
-    public static final String RESOURCE_PREFIX = BrandonsCore.MODID.toLowerCase() + ":";
+    private static Map<String, ResourceLocation> cachedResources = new HashMap<>();
+    public static final String RESOURCE_PREFIX = BrandonsCore.MODID.toLowerCase(Locale.ENGLISH) + ":";
 
     public static void bindTexture(ResourceLocation texture) {
         Minecraft.getMinecraft().renderEngine.bindTexture(texture);

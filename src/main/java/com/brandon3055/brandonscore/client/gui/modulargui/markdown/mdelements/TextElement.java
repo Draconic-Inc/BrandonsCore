@@ -38,6 +38,8 @@ public class TextElement extends MDElementBase<TextElement> {
     @Override
     public void layoutElement(LayoutHelper layout, List<MDElementBase> lineElement) {
         if (layout.getWidth() < 5) return;
+        fontRenderer.resetStyles();
+        BCFontRenderer.setStyleToggleMode(true);
         toRemove.addAll(subParts);
         subParts.clear();
 
@@ -78,14 +80,17 @@ public class TextElement extends MDElementBase<TextElement> {
 
             newln = false;
         }
+
+        BCFontRenderer.setStyleToggleMode(false);
+        fontRenderer.resetStyles();
     }
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         fontRenderer.resetStyles();
-        BCFontRenderer.setStileToggleMode(true);
+        BCFontRenderer.setStyleToggleMode(true);
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        BCFontRenderer.setStileToggleMode(false);
+        BCFontRenderer.setStyleToggleMode(false);
         fontRenderer.resetStyles();
     }
 

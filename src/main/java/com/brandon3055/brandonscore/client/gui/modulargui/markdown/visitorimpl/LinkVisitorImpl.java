@@ -4,10 +4,9 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.Li
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.LinkVisitor;
 
 import java.util.List;
+import java.util.Locale;
 
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.LinkElement.Style.SOLID;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.LinkElement.Style.TEXT;
-import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.LinkElement.Style.VANILLA;
+import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.LinkElement.Style.*;
 
 /**
  * Created by brandon3055 on 5/30/2018.
@@ -62,7 +61,7 @@ public class LinkVisitorImpl extends LinkVisitor {
 
     @Override
     public void visitLinkStyle(String linkStyle) {
-        linkStyle = linkStyle.toLowerCase();
+        linkStyle = linkStyle.toLowerCase(Locale.ENGLISH);
         element.linkStyle = linkStyle.equals("vanilla") ? VANILLA : linkStyle.equals("solid") ? SOLID : TEXT;
     }
 
