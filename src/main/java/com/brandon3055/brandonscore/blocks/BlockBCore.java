@@ -85,7 +85,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
         if (tile instanceof IDataRetainingTile && !BrandonsCore.proxy.isCTRLKeyDown()) {
             NBTTagCompound tileData = new NBTTagCompound();
             ((IDataRetainingTile) tile).writeToItemStack(tileData, false);
-            if (!tileData.hasNoTags()) {
+            if (!tileData.isEmpty()) {
                 ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, tileData);
             }
         }
@@ -232,7 +232,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
             ItemStack stack = new ItemStack(this, 1, damageDropped(state));
             NBTTagCompound tileData = new NBTTagCompound();
             ((IDataRetainingTile) te).writeToItemStack(tileData, true);
-            if (!tileData.hasNoTags()) {
+            if (!tileData.isEmpty()) {
                 ItemNBTHelper.getCompound(stack).setTag(TILE_DATA_TAG, tileData);
             }
             spawnAsEntity(world, pos, stack);

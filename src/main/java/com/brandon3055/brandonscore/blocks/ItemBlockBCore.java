@@ -29,12 +29,12 @@ public class ItemBlockBCore extends ItemBlock {
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack stack) {
+    public String getTranslationKey(ItemStack stack) {
         if (block instanceof IBCoreBlock && ((IBCoreBlock) block).getNameOverrides().containsKey(stack.getItemDamage())) {
             return "tile." + getRegistryDomain() + ":" +((IBCoreBlock) block).getNameOverrides().get(stack.getItemDamage());
         }
 
-        return super.getUnlocalizedName(stack);
+        return super.getTranslationKey(stack);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ItemBlockBCore extends ItemBlock {
                 return "null";
             }
             else {
-                registryDomain = getRegistryName().getResourceDomain();
+                registryDomain = getRegistryName().getNamespace();
             }
         }
 

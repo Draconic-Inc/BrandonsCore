@@ -211,9 +211,9 @@ public class BCEffectHandler {
 
         if (effectRenderer.world != null) {
             BCProfiler.TICK.start("update_bc_effect_renderer");
-            Minecraft.getMinecraft().mcProfiler.startSection("BCParticlesUpdate");
+            Minecraft.getMinecraft().profiler.startSection("BCParticlesUpdate");
             effectRenderer.updateEffects();
-            Minecraft.getMinecraft().mcProfiler.endSection();
+            Minecraft.getMinecraft().profiler.endSection();
             BCProfiler.TICK.stop();
         }
     }
@@ -227,9 +227,9 @@ public class BCEffectHandler {
     @SideOnly(Side.CLIENT)
     public void renderWorld(RenderWorldLastEvent event) {
         BCProfiler.RENDER.start("bc_effect_renderer_draw");
-        Minecraft.getMinecraft().mcProfiler.startSection("BCParticles");
+        Minecraft.getMinecraft().profiler.startSection("BCParticles");
         effectRenderer.renderParticles(Minecraft.getMinecraft().player, event.getPartialTicks());
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getMinecraft().profiler.endSection();
         BCProfiler.RENDER.stop();
     }
 

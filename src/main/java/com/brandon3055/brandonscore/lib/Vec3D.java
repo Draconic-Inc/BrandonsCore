@@ -164,9 +164,9 @@ public class Vec3D {
     }
 
     public Vec3D offset(EnumFacing direction, double offsetDistance) {
-        this.x += direction.getFrontOffsetX() * offsetDistance;
-        this.y += direction.getFrontOffsetY() * offsetDistance;
-        this.z += direction.getFrontOffsetZ() * offsetDistance;
+        this.x += direction.getXOffset() * offsetDistance;
+        this.y += direction.getYOffset() * offsetDistance;
+        this.z += direction.getZOffset() * offsetDistance;
         return this;
     }
 

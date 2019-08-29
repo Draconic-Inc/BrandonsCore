@@ -145,7 +145,7 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
     }
 
     public void dirtyBlock() {
-        Chunk chunk = world.getChunkFromBlockCoords(getPos());
+        Chunk chunk = world.getChunk(getPos());
         chunk.setModified(true);
     }
 

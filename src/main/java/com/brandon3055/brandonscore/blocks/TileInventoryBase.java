@@ -191,7 +191,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
             }
         }
 
-        if (!nbttaglist.hasNoTags()) {
+        if (nbttaglist.tagCount() != 0) {
             compound.setTag("Items", nbttaglist);
         }
     }

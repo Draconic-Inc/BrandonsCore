@@ -218,7 +218,7 @@ public class ModFeatureParser {
      */
     private static void registerFeatureBlock(Feature feature, Block block) {
         block.setRegistryName(feature.getRegistryName());
-        block.setUnlocalizedName(feature.getRegistryName().toString());
+        block.setTranslationKey(feature.getRegistryName().toString());
 
         if (iModFeaturesMap.containsKey(feature.getModid()) && feature.isActive()) {
             CreativeTabs tab = iModFeaturesMap.get(feature.getModid()).getCreativeTab(feature);
@@ -254,7 +254,7 @@ public class ModFeatureParser {
      */
     private static void registerFeatureItem(Feature feature, Item item) {
         item.setRegistryName(feature.getRegistryName());
-        item.setUnlocalizedName(feature.getRegistryName().toString());
+        item.setTranslationKey(feature.getRegistryName().toString());
 
         if (iModFeaturesMap.containsKey(feature.getModid()) && feature.isActive()) {
             CreativeTabs tab = iModFeaturesMap.get(feature.getModid()).getCreativeTab(feature);

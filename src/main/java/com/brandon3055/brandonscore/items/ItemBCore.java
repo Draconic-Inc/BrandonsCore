@@ -20,11 +20,11 @@ public class ItemBCore extends Item {
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack stack) {
+    public String getTranslationKey(ItemStack stack) {
         if (getHasSubtypes() && nameMap.containsKey(stack.getItemDamage())) {
-            return super.getUnlocalizedName(stack) + "." + nameMap.get(stack.getItemDamage());
+            return super.getTranslationKey(stack) + "." + nameMap.get(stack.getItemDamage());
         }
-        else return super.getUnlocalizedName(stack);
+        else return super.getTranslationKey(stack);
     }
 
     /**

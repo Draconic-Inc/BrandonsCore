@@ -38,12 +38,12 @@ public class ItemSimpleSubs extends ItemBCore {
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack stack) {
+    public String getTranslationKey(ItemStack stack) {
         if (getHasSubtypes() && nameMap.containsKey(stack.getItemDamage())) {
-            return (super.getUnlocalizedName(stack) + "." + nameMap.get(stack.getItemDamage())).replaceAll("=", ".");
+            return (super.getTranslationKey(stack) + "." + nameMap.get(stack.getItemDamage())).replaceAll("=", ".");
         }
         else {
-            return super.getUnlocalizedName(stack);
+            return super.getTranslationKey(stack);
         }
     }
 }

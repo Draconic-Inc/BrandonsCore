@@ -268,7 +268,7 @@ public class GuiEntityRenderer extends MGuiElementBase<GuiEntityRenderer> {
     }
 
     public static EntityPlayer createRenderPlayer(World world, String username) {
-        return new EntityOtherPlayerMP(world, TileEntitySkull.updateGameprofile(new GameProfile(null, username))) {
+        return new EntityOtherPlayerMP(world, TileEntitySkull.updateGameProfile(new GameProfile(null, username))) {
             @Override
             public String getSkinType() {
                 return super.getSkinType();

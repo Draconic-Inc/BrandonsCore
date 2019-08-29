@@ -42,7 +42,7 @@ public class BlockHelper {
         String name = "Unknown";
 
         if (!stack.isEmpty()) {
-            return I18n.format(stack.getUnlocalizedName() + ".name");
+            return I18n.format(stack.getTranslationKey() + ".name");
         }
 
         return name;

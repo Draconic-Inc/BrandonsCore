@@ -238,7 +238,7 @@ public class StackReference {
             int meta = Integer.parseInt(string.substring(string.indexOf(",meta:") + 6, string.indexOf(",nbt:")));
             NBTTagCompound compound = JsonToNBT.getTagFromJson(string.substring(string.indexOf(",nbt:") + 5, string.length()));
 
-            return new StackReference(name, size, meta, compound.hasNoTags() ? null : compound);
+            return new StackReference(name, size, meta, compound.isEmpty() ? null : compound);
         }
         catch (Exception e) {
             LogHelperBC.error("An error occurred while generating a StackReference from a string");

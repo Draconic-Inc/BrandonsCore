@@ -236,7 +236,7 @@ public class BCEffectRenderer {
         GlStateManager.alphaFunc(GL11.GL_GREATER, 0);
         Tessellator tessellator = Tessellator.getInstance();
 
-        Profiler profiler = Minecraft.getMinecraft().mcProfiler;
+        Profiler profiler = Minecraft.getMinecraft().profiler;
 
         GlStateManager.disableLighting();
 

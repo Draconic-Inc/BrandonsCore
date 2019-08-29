@@ -308,7 +308,7 @@ public class LogHelperBC {
             return;
         }
 
-        if (compound == null || compound.hasNoTags()) {
+        if (compound == null || compound.isEmpty()) {
             info("[NBT]: " + compound);
             return;
         }

@@ -116,7 +116,7 @@ public class StackElement extends MDElementBase<StackElement> {
 
                 for (int i = 0; i < list.size(); ++i) {
                     if (i == 0) {
-                        list.set(i, stack.getRarity().rarityColor + list.get(i));
+                        list.set(i, stack.getRarity().rarityName + list.get(i));
                     }
                     else {
                         list.set(i, TextFormatting.GRAY + list.get(i));

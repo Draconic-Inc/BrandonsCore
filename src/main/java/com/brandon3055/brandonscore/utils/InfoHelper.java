@@ -58,7 +58,7 @@ public class InfoHelper {
      * returns lore text or an empty string if the lore is not set
      */
     public static String[] getLore(ItemStack stack) {
-        String unlocalizeLore = stack.getItem().getUnlocalizedName() + ".lore";
+        String unlocalizeLore = stack.getItem().getTranslationKey() + ".lore";
         String rawLore = I18n.format(unlocalizeLore);
 
         if (rawLore.contains(unlocalizeLore)) {

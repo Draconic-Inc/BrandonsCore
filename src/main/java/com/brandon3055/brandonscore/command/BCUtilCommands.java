@@ -188,7 +188,7 @@ public class BCUtilCommands extends CommandBase {
                 int chunkX = (int) player.chunkCoordX + xOffset;
                 int chunkZ = (int) player.chunkCoordZ + yOffset;
 
-                Chunk oldChunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
+                Chunk oldChunk = world.getChunk(chunkX, chunkZ);
                 ChunkProviderServer chunkProviderServer = world.getChunkProvider();
                 IChunkGenerator chunkGenerate = chunkProviderServer.chunkGenerator;
 
