@@ -111,7 +111,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void particleWorldLoad(World world) {
+    public void resetEffectRenderer(World world) {
         BCEffectHandler.effectRenderer.clearEffects(world);
     }
 }

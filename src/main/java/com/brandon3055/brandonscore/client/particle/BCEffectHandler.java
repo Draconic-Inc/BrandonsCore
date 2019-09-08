@@ -37,6 +37,7 @@ public class BCEffectHandler {
     public static BCEffectRenderer effectRenderer;
     public static Map<Integer, PairKV<IBCParticleFactory, ResourceLocation>> particleRegistry = new LinkedHashMap<Integer, PairKV<IBCParticleFactory, ResourceLocation>>();
     private static int lastIndex = -1;
+    private static World currentWorld = null;
 
     @SideOnly(Side.CLIENT)
     public static void iniEffectRenderer() {
@@ -205,22 +206,28 @@ public class BCEffectHandler {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (event.phase != TickEvent.Phase.END || mc.isGamePaused()) {
             return;
+        }
+
+        if (currentWorld != mc.world && mc.world != null) {
+            currentWorld = mc.world;
+            BrandonsCore.proxy.resetEffectRenderer(currentWorld);
         }
 
         if (effectRenderer.world != null) {
             BCProfiler.TICK.start("update_bc_effect_renderer");
-            Minecraft.getMinecraft().mcProfiler.startSection("BCParticlesUpdate");
+            mc.mcProfiler.startSection("BCParticlesUpdate");
             effectRenderer.updateEffects();
-            Minecraft.getMinecraft().mcProfiler.endSection();
+            mc.mcProfiler.endSection();
             BCProfiler.TICK.stop();
         }
     }
 
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
-        BrandonsCore.proxy.particleWorldLoad(event.getWorld());
+        BrandonsCore.proxy.resetEffectRenderer(event.getWorld());
     }
 
     @SubscribeEvent

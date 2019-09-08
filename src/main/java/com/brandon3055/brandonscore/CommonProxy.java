@@ -89,7 +89,7 @@ public class CommonProxy {
         ProcessHandler.addProcess(process);
     }
 
-    public void particleWorldLoad(World world) {
+    public void resetEffectRenderer(World world) {
 
     }
 }
