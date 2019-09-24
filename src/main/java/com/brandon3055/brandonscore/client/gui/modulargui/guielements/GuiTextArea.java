@@ -569,7 +569,9 @@ public class GuiTextArea extends MGuiElementBase<GuiTextArea> {
     }
 
     private void drawTextBox(int startX, int startY) {
-        if (this.lines.isEmpty() && !Strings.isNullOrEmpty(this.placeHolder) && !this.isFocused) {
+        if ((this.lines.isEmpty() || (this.lines.size() == 1 && this.lines.get(0).isEmpty()))
+            && !Strings.isNullOrEmpty(this.placeHolder)
+            && !this.isFocused) {
             drawString(fontRenderer, this.placeHolder, startX, startY, this.placeHolderColor, false);
             return;
         }
