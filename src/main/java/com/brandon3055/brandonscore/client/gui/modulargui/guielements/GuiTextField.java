@@ -3,6 +3,8 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
+import com.brandon3055.brandonscore.utils.InfoHelper;
+import com.google.common.base.Strings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -12,6 +14,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -23,6 +26,8 @@ import java.util.function.Supplier;
  */
 public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
+    private int placeHolderColor = Color.GRAY.getRGB();
+    private String placeHolder = "";
     private String text = "";
     private int maxStringLength = 64;
     private int cursorCounter;
@@ -52,6 +57,16 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
 
     public GuiTextField(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
+    }
+
+    public GuiTextField setPlaceHolderColor(int placeHolderColor) {
+        this.placeHolderColor = placeHolderColor;
+        return this;
+    }
+
+    public GuiTextField setPlaceHolder(String placeHolder) {
+        this.placeHolder = Strings.nullToEmpty(placeHolder);
+        return this;
     }
 
     public GuiTextField setListener(IGuiEventListener listener) {
@@ -460,53 +475,61 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
         if (this.getEnableBackgroundDrawing()) {
             drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, fillColour, borderColour);
         }
+        int startX = this.enableBackgroundDrawing ? xPos() + 4 : xPos();
+        int startY = this.enableBackgroundDrawing ? yPos() + (ySize() - 8) / 2 : yPos();
 
-        int i = this.isEnabled ? this.enabledColor : this.disabledColor;
-        int j = this.cursorPosition - this.lineScrollOffset;
-        int k = this.selectionEnd - this.lineScrollOffset;
-        String s = fontRenderer.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
-        boolean flag = j >= 0 && j <= s.length();
-        boolean flag1 = this.isFocused && this.cursorCounter / 6 % 2 == 0 && flag;
-        int l = this.enableBackgroundDrawing ? xPos() + 4 : xPos();
-        int i1 = this.enableBackgroundDrawing ? yPos() + (ySize() - 8) / 2 : yPos();
-        int j1 = l;
-
-        if (k > s.length()) {
-            k = s.length();
+        if (Strings.isNullOrEmpty(this.text) && !Strings.isNullOrEmpty(this.placeHolder) && !this.isFocused) {
+            drawString(fontRenderer, this.placeHolder, startX, startY, this.placeHolderColor, false);
+            return;
         }
 
-        if (!s.isEmpty()) {
-            String s1 = flag ? s.substring(0, j) : s;
-            j1 = drawString(fontRenderer, s1, (float) l, (float) i1, i, true);
-        }
+        int color = this.isEnabled ? this.enabledColor : this.disabledColor;
+        int physicsCursorPosition = this.cursorPosition - this.lineScrollOffset;
+        int physicsSelectionEnd = this.selectionEnd - this.lineScrollOffset;
+        if (this.isFocused) {
+            String s = this.fontRenderer.trimStringToWidth(this.text.substring(this.lineScrollOffset), this.getWidth());
+            boolean cursorValid = physicsCursorPosition >= 0 && physicsCursorPosition <= s.length();
+            boolean shouldDrawCursor = this.isFocused && this.cursorCounter / 6 % 2 == 0 && cursorValid;
+            int xAfterCursor = startX;
 
-        boolean flag2 = this.cursorPosition < this.text.length() || this.text.length() >= this.getMaxStringLength();
-        int k1 = j1;
-
-        if (!flag) {
-            k1 = j > 0 ? l + fontRenderer.getStringWidth(s) : l;
-        }
-        else if (flag2) {
-            k1 = j1 - 1;
-            --j1;
-        }
-
-        if (!s.isEmpty() && flag && j < s.length()) {
-            drawString(fontRenderer, s.substring(j), (float) j1, (float) i1, i, true);
-        }
-
-        if (flag1) {
-            if (flag2) {
-                drawRect(k1, i1 - 1, k1 + 1, i1 + 1 + fontRenderer.FONT_HEIGHT, -3092272);
+            if (physicsSelectionEnd > s.length()) {
+                physicsSelectionEnd = s.length();
             }
-            else {
-                drawString(fontRenderer, "_", (float) k1, (float) i1, i, true);
-            }
-        }
 
-        if (k != j) {
-            int l1 = l + fontRenderer.getStringWidth(s.substring(0, k));
-            this.drawCursorVertical(k1, i1 - 1, l1 - 1, i1 + 1 + fontRenderer.FONT_HEIGHT);
+            if (!s.isEmpty()) {
+                String strBeforeCursor = this.isFocused && cursorValid ? s.substring(0, physicsCursorPosition) : s;
+                xAfterCursor = drawString(fontRenderer, strBeforeCursor, startX, startY, color, false);
+            }
+
+            boolean cursorInWords = this.cursorPosition < this.text.length() || this.text.length() >= this.getMaxStringLength();
+            int xCursor = xAfterCursor;
+
+            if (!cursorValid) {
+                xCursor = physicsCursorPosition > 0 ? startX + fontRenderer.getStringWidth(s) : startX;
+            } else if (cursorInWords) {
+                xCursor = xAfterCursor - 1;
+            }
+
+            if (this.isFocused && !s.isEmpty() && cursorValid && physicsCursorPosition < s.length()) {
+                drawString(fontRenderer, s.substring(physicsCursorPosition), xAfterCursor, startY, color, false);
+            }
+
+            if (shouldDrawCursor) {
+                if (cursorInWords) {
+                    drawRect(xCursor, startY - 1, xCursor + 1, startY + 1 + fontRenderer.FONT_HEIGHT, -3092272);
+                } else {
+                    drawString(fontRenderer, "_", xCursor, startY, color, true);
+                }
+            }
+
+            if (physicsSelectionEnd != physicsCursorPosition) {
+                int l1 = startX + fontRenderer.getStringWidth(s.substring(0, physicsSelectionEnd));
+                this.drawCursorVertical(xCursor, startY - 1, l1 - 1, startY + 1 + fontRenderer.FONT_HEIGHT);
+            }
+        } else {
+            String str = this.text;
+            str = this.fontRenderer.trimStringToWidth(str, this.getWidth());
+            drawString(this.fontRenderer, str, startX, startY, color, false);
         }
     }
 
@@ -666,6 +689,10 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
         if (linkedValue != null && !linkedValue.get().equals(getText())) {
             setText(linkedValue.get());
             return true;
+        }
+
+        if (this.isFocused) {
+            this.updateCursorCounter();
         }
 
         return false;
