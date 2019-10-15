@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * Created by brandon3055 on 31/08/2016.
  */
-public class GuiElementManager {
+public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     protected LinkedList<MGuiElementBase> elements = new LinkedList<MGuiElementBase>();
     protected LinkedList<MGuiElementBase> actionList = new LinkedList<MGuiElementBase>();
@@ -69,15 +69,21 @@ public class GuiElementManager {
      * @param displayZLevel The display level for this element.
      * Elements with higher display levels will be in front of manager with lower display levels.
      * This also applies to mouse and key events.
+     * @param first if true the element will be added to the start of the element array placing it under/before all other elements.
      * @return The Element.
      */
-    public MGuiElementBase add(MGuiElementBase element, int displayZLevel) {
+    public <C extends MGuiElementBase> C addChild(C element, int displayZLevel, boolean first) {
         if (displayZLevel >= 950) {
             LogHelperBC.error("ModularGui Display Level Out Of Bounds! Can not be greater than 950 " + displayZLevel);
         }
         element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRenderer));
         element.displayZLevel = displayZLevel;
-        elements.add(element);
+        if (first) {
+            elements.addFirst(element);
+        }
+        else {
+            elements.add(element);
+        }
         if (!element.isElementInitialized()) {
             element.addChildElements();
         }
@@ -98,59 +104,72 @@ public class GuiElementManager {
      * @param element The element to add.
      * @return The Element.
      */
-    public MGuiElementBase add(MGuiElementBase element) {
-        return add(element, 0);
+    @Override
+    public <C extends MGuiElementBase> C addChild(C element) {
+        return addChild(element, 0, false);
     }
 
-    public void remove(MGuiElementBase element) {
+    @Override
+    public <C extends MGuiElementBase> C addChildFirst(C element) {
+        return addChild(element, 0, true);
+    }
+
+    @Override
+    public GuiElementManager addChildren(Collection<? extends MGuiElementBase> elements) {
+        return null;
+    }
+
+    @Override
+    public <C extends MGuiElementBase> C removeChild(C element) {
         if (elements.contains(element)) {
             toRemove.add(element);
             requiresReSort = true;
+            return element;
         }
+        return null;
     }
 
-    public void removeByID(String id) {
-        Iterator<MGuiElementBase> i = elements.iterator();
-        while (i.hasNext()) {
-            MGuiElementBase element = i.next();
+    @Override
+    public GuiElementManager removeChildByID(String id) {
+        for (MGuiElementBase element : elements) {
             if (element.id != null && element.id.equals(id)) {
                 toRemove.add(element);
                 requiresReSort = true;
-                return;
+                return this;
             }
         }
+        return this;
     }
 
-    public void removeByGroup(String group) {
-        Iterator<MGuiElementBase> i = elements.iterator();
-        while (i.hasNext()) {
-            MGuiElementBase element = i.next();
+    @Override
+    public GuiElementManager removeChildByGroup(String group) {
+        for (MGuiElementBase element : elements) {
             if (element.isInGroup(group)) {
                 toRemove.add(element);
                 requiresReSort = true;
             }
         }
+        return this;
     }
 
-    public void setIDEnabled(String id, boolean enabled) {
-        Iterator<MGuiElementBase> i = elements.iterator();
-        while (i.hasNext()) {
-            MGuiElementBase element = i.next();
+    @Override
+    public GuiElementManager setChildIDEnabled(String id, boolean enabled) {
+        for (MGuiElementBase element : elements) {
             if (element.id != null && element.id.equals(id)) {
                 element.setEnabled(enabled);
-                return;
+                return this;
             }
         }
+        return this;
     }
 
-    public void setGroupEnabled(String group, boolean enabled) {
-        Iterator<MGuiElementBase> i = elements.iterator();
-        while (i.hasNext()) {
-            MGuiElementBase element = i.next();
+    public GuiElementManager setChildGroupEnabled(String group, boolean enabled) {
+        for (MGuiElementBase element : elements) {
             if (element.isInGroup(group)) {
                 element.setEnabled(enabled);
             }
         }
+        return this;
     }
 
     public List<MGuiElementBase> getElements() {

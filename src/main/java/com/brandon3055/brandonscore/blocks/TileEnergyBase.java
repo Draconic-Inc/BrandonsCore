@@ -2,12 +2,10 @@ package com.brandon3055.brandonscore.blocks;
 
 import cofh.redstoneflux.impl.EnergyStorage;
 import com.brandon3055.brandonscore.lib.EnergyHandlerWrapper;
-import com.brandon3055.brandonscore.lib.EnergyHelper;
 import com.brandon3055.brandonscore.lib.datamanager.DataFlags;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedInt;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -19,6 +17,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
  * The base tile for energy providers and receivers that do not have inventories. When extending ether implement implement IEnergyReceiver,
  * IEnergyProvider or both.
  */
+@Deprecated
 public class TileEnergyBase extends TileBCBase {
 
     public ManagedInt energySync = null;
@@ -68,17 +67,17 @@ public class TileEnergyBase extends TileBCBase {
     }
 
     @Override
-    public void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest) {
-        super.writeToItemStack(tileCompound, willHarvest);
+    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+        super.writeToItemStack(compound, willHarvest);
         if (energyStorage.getEnergyStored() > 0){
-            energyStorage.writeToNBT(tileCompound);
+            energyStorage.writeToNBT(compound);
         }
     }
 
     @Override
-    public void readFromItemStack(NBTTagCompound tileCompound) {
-        super.readFromItemStack(tileCompound);
-        energyStorage.readFromNBT(tileCompound);
+    public void readFromItemStack(NBTTagCompound compound) {
+        super.readFromItemStack(compound);
+        energyStorage.readFromNBT(compound);
     }
 
     @Override
@@ -113,21 +112,21 @@ public class TileEnergyBase extends TileBCBase {
     }
 
     public int sendEnergyTo(EnumFacing side) {
-        if (getEnergyStored() == 0) {
-            return 0;
-        }
-        TileEntity tile = world.getTileEntity(pos.offset(side));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
-            return EnergyHelper.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
-        }
+//        if (getEnergyStored() == 0) {
+//            return 0;
+//        }
+//        TileEntity tile = world.getTileEntity(pos.offset(side));
+//        if (tile != null && EnergyUtils.canReceiveEnergy(tile, side.getOpposite())) {
+//            return EnergyUtils.insertEnergy(tile, getEnergyStored(), side.getOpposite(), false);
+//        }
         return 0;
     }
 
     public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {
-        TileEntity tile = world.getTileEntity(pos.offset(side));
-        if (tile != null && EnergyHelper.canReceiveEnergy(tile, side.getOpposite())) {
-            return EnergyHelper.insertEnergy(tile, maxSend, side.getOpposite(), false);
-        }
+//        TileEntity tile = world.getTileEntity(pos.offset(side));
+//        if (tile != null && EnergyUtils.canReceiveEnergy(tile, side.getOpposite())) {
+//            return EnergyUtils.insertEnergy(tile, maxSend, side.getOpposite(), false);
+//        }
         return 0;
     }
 
@@ -140,9 +139,9 @@ public class TileEnergyBase extends TileBCBase {
     }
 
     public int extractEnergyFromItem(ItemStack stack, int maxExtract, boolean simulate) {
-        if (EnergyHelper.isEnergyStack(stack)) {
-            return EnergyHelper.extractEnergy(stack, maxExtract, simulate);
-        }
+//        if (EnergyUtils.isEnergyStack(stack)) {
+//            return EnergyUtils.extractEnergy(stack, maxExtract, simulate);
+//        }
         return 0;
     }
 

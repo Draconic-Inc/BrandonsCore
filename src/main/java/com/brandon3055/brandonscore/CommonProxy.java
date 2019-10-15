@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.network.ServerPacketHandler;
+import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
@@ -24,6 +25,7 @@ public class CommonProxy {
         MinecraftForge.EVENT_BUS.register(new BCEventHandler());
         MinecraftForge.EVENT_BUS.register(new ModFeatureParser());
         ModHelperBC.init();
+        CapabilityOP.register();
     }
 
     public void registerPacketHandlers() {
@@ -89,7 +91,7 @@ public class CommonProxy {
         ProcessHandler.addProcess(process);
     }
 
-    public void particleWorldLoad(World world) {
+    public void resetEffectRenderer(World world) {
 
     }
 

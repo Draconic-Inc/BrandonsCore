@@ -10,6 +10,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 /**
  * Created by brandon3055 on 15/11/2016.
  */
+@Deprecated //Wont be needing wrappers in 1.14
 public class EnergyHandlerWrapper implements IEnergyStorage {
 
     private TileEntity tile;

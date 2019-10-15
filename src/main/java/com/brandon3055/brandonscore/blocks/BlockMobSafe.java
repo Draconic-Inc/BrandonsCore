@@ -13,6 +13,7 @@ import net.minecraft.world.World;
  * Created by brandon3055 on 22/3/2016.
  * This is a base for any block that needs to be resistant to all mobs
  */
+@Deprecated //Use BlockBCore#setMobResistant
 public class BlockMobSafe extends BlockBCore {
 
     public BlockMobSafe(Material material) {

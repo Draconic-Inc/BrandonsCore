@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.blocks.TileBCore;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -11,14 +11,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * Created by brandon3055 on 28/3/2016.
  * Base class for all containers. Handles syncing on syncable objects inside an attached TileBCBase.
  */
-public class ContainerBCBase<T extends TileBCBase> extends Container {
+public class ContainerBCBase<T extends TileBCore> extends Container {
 
     /**
      * A reference to the attached tile. This may be null if the container is not attached to a tile
@@ -44,12 +43,12 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
 
     public ContainerBCBase addPlayerSlots(int posX, int posY, int hotbarSpacing) {
         for (int x = 0; x < 9; x++) {
-            addSlotToContainer(new SlotCheckValid(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
+            addSlotToContainer(new SlotCheckValid.IInv(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                addSlotToContainer(new SlotCheckValid(player.inventory, x + y * 9 + 9, posX + 18 * x, posY + y * 18));
+                addSlotToContainer(new SlotCheckValid.IInv(player.inventory, x + y * 9 + 9, posX + 18 * x, posY + y * 18));
             }
         }
         return this;
@@ -58,7 +57,7 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-        tile.getDataManager().detectAndSendChangesToListeners(listeners);
+        tile.detectAndSendChangesToListeners(listeners);
     }
 
     @Override
@@ -71,15 +70,51 @@ public class ContainerBCBase<T extends TileBCBase> extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        if (tile instanceof IInventory) {
-            return ((IInventory) tile).isUsableByPlayer(playerIn);
+        if (tile.getWorld().getTileEntity(tile.getPos()) != tile)
+        {
+            return false;
         }
-        return tile != null;
+        else
+        {
+            return player.getDistanceSq((double)tile.getPos().getX() + 0.5D, (double)tile.getPos().getY() + 0.5D, (double)tile.getPos().getZ() + 0.5D) <= 64.0D;
+        }
     }
 
-    @Nullable
+
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+    public ItemStack transferStackInSlot(EntityPlayer player, int i) {
+        if (tile instanceof IInventory) {
+            Slot slot = getSlot(i);
+
+            if (slot != null && slot.getHasStack()) {
+                ItemStack stack = slot.getStack();
+                ItemStack result = stack.copy();
+
+                //Transferring from tile to player
+                if (i >= 36) {
+                    if (!mergeItemStack(stack, 0, 36, false)) {
+                        return ItemStack.EMPTY; //Return if failed to merge
+                    }
+                }
+                else {
+                    //Transferring from player to tile
+                    if (!mergeItemStack(stack, 36, 36 + ((IInventory) tile).getSizeInventory(), false)) {
+                        return ItemStack.EMPTY;  //Return if failed to merge
+                    }
+                }
+
+                if (stack.getCount() == 0) {
+                    slot.putStack(ItemStack.EMPTY);
+                }
+                else {
+                    slot.onSlotChanged();
+                }
+
+                slot.onTake(player, stack);
+
+                return result;
+            }
+        }
         return ItemStack.EMPTY;
     }
 

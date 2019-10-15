@@ -55,7 +55,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         //Alternatively you could store a reference to the element and update its size and pos in the reloadGui method.
 
         GuiBorderedRect background;
-        manager.add(background = new GuiBorderedRect().setFillColour(0xFF303030).addReloadCallback(guiRect -> guiRect.setPos(guiLeft(), guiTop()).setSize(xSize, ySize)));
+        manager.addChild(background = new GuiBorderedRect().setFillColour(0xFF303030).addReloadCallback(guiRect -> guiRect.setPos(guiLeft(), guiTop()).setSize(xSize, ySize)));
         GuiScrollElement scrollElement = new GuiScrollElement().setRelPos(5, 5).setSize(xSize - 10, ySize - 10).setStandardScrollBehavior();
         background.addChild(scrollElement);
 

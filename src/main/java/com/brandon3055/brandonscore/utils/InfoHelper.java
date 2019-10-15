@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.utils;
 
-import cofh.redstoneflux.api.IEnergyContainerItem;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
@@ -11,15 +10,15 @@ import java.util.List;
 /**
  * Created by Brandon on 1/07/2014.
  */
+@Deprecated
 public class InfoHelper {
 
     public static final int GUI_TITLE = 0x00FFFF;
 
     @SuppressWarnings("unchecked")
     public static void addEnergyInfo(ItemStack stack, List list) {
-		IEnergyContainerItem item = (IEnergyContainerItem)stack.getItem();
-		String energy = Utils.formatNumber(item.getEnergyStored(stack));
-        String maxEnergy = Utils.formatNumber(item.getMaxEnergyStored(stack));
+		String energy = Utils.formatNumber(EnergyUtils.getEnergyStored(stack));
+        String maxEnergy = Utils.formatNumber(EnergyUtils.getMaxEnergyStored(stack));
 		list.add(I18n.format("info.bc.charge.txt") + ": " + energy + " / " + maxEnergy + " RF");
     }
 

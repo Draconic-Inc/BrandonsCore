@@ -57,7 +57,7 @@ import java.util.function.Supplier;
  * imagine to Particle effect renderers! Labels, Slider controls, Texture Renderers, Colour Pickers and Stack Renderers
  * just to name a few.
  */
-public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver {
+public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver, IGuiParentElement<E> {
     protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
 
     private int xPos;
@@ -256,6 +256,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      *
      * @return The child element that was added.
      */
+    @Override
     public <C extends MGuiElementBase> C addChild(C child) {
         if (child == this) throw new InvalidParameterException("Attempted to add element to itself as a child element.");
         if (childElements.contains(child)) {
@@ -271,6 +272,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      *
      * @return The child element that was added.
      */
+    @Override
     public <C extends MGuiElementBase> C addChildFirst(C child) {
         if (childElements.contains(child)) {
             return child;
@@ -285,6 +287,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * Adds a Collection of child elements to this element.
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E addChildren(Collection<? extends MGuiElementBase> elements) {
         childElements.addAll(elements);
         for (MGuiElementBase element : elements) {
@@ -342,6 +345,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @param child the child element to remove.
      * @return the element that will be removed or null if the element was not a child of this element.
      */
+    @Override
     public <C extends MGuiElementBase> C removeChild(C child) {
         if (child != null && childElements.contains(child)) {
             toRemove.add(child);
@@ -361,6 +365,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @see #setId(String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E removeChildByID(String id) {
         for (MGuiElementBase element : childElements) {
             if (element.id != null && element.id.equals(id)) {
@@ -378,6 +383,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @see #addToGroup(String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E removeChildByGroup(String group) {
         for (MGuiElementBase element : childElements) {
             if (element.isInGroup(group)) {
@@ -393,6 +399,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @see #setId(String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E setChildIDEnabled(String id, boolean enabled) {
         for (MGuiElementBase element : childElements) {
             if (element.id != null && element.id.equals(id)) {
@@ -409,6 +416,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * @see #addToGroup(String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E setChildGroupEnabled(String group, boolean enabled) {
         for (MGuiElementBase element : childElements) {
             if (element.isInGroup(group)) {
@@ -977,6 +985,49 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
     @SuppressWarnings("unchecked")
     public E setPos(MGuiElementBase element) {
         setPos(element.xPos(), element.yPos());
+        return (E) this;
+    }
+
+    /**
+     * Sets the max x position of this element by ether moving the element or by manipulating its width.
+     *
+     * @param x the new max x position.
+     * @param resize If true the element will be resized so that its max x matches the specified value. If false the element will be moved instead.
+     */
+    public E setMaxXPos(int x, boolean resize) {
+        if (resize) {
+            return setXSize(x - xPos());
+        }
+        else {
+            return setXPos(x - xSize());
+        }
+    }
+
+    /**
+     * Sets the max y position of this element by ether moving the element or by manipulating its height.
+     *
+     * @param y the new max y position.
+     * @param resize If true the element will be resized so that its max y matches the specified value. If false the element will be moved instead.
+     */
+    public E setMaxYPos(int y, boolean resize) {
+        if (resize) {
+            return setYSize(y - yPos());
+        }
+        else {
+            return setYPos(y - ySize());
+        }
+    }
+
+    /**
+     * Sets the max x and y positions of this element by ether moving the element or by manipulating its size.
+     * @param x the new max x position.
+     * @param y the new max y position.
+     * @param resize If true the element will be resized so that its max x and y matches the specified values. If false the element will be moved instead.
+     */
+    @SuppressWarnings("unchecked")
+    public E setMaxPos(int x, int y, boolean resize) {
+        setMaxXPos(x, resize);
+        setMaxYPos(y, resize);
         return (E) this;
     }
 
@@ -1874,7 +1925,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      */
     public void drawCustomString(BCFontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
         if (width <= 0) return;
-        if (trim && fr.getStringWidth(text) > width - 4) {
+        if (trim && fr.getStringWidth(text) > width) {
             text = fr.trimStringToWidth(text, width - 8) + "..";
         }
 
@@ -1926,7 +1977,7 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      * Allows you to draw a string aligned to the left, middle or right of the specified area.
      */
     public void drawAlignedString(BCFontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
-        if (trim && fr.getStringWidth(text) > width - 4) {
+        if (trim && fr.getStringWidth(text) > width) {
             text = fr.trimStringToWidth(text, width - 8) + "..";
         }
 

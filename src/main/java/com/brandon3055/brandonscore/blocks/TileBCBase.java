@@ -17,7 +17,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -34,7 +33,8 @@ import java.util.function.Consumer;
  * Created by brandon3055 on 26/3/2016.
  * Base tile entity class for all tile entities
  */
-public class TileBCBase extends TileEntity implements IDataManagerProvider, IDataRetainingTile {
+@Deprecated
+public class TileBCBase extends TileBCore implements IDataManagerProvider, IDataRetainingTile {
 
     protected boolean shouldRefreshOnState = true;
     protected TileDataManager<TileBCBase> dataManager = new TileDataManager<>(this);
@@ -203,8 +203,8 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      * @return the tile data compound so that tiles that override this method can easily write extra data to it.
      */
     @Override
-    public void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest) {
-        dataManager.writeToStackNBT(tileCompound);
+    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+        dataManager.writeToStackNBT(compound);
     }
 
     /**
@@ -212,8 +212,8 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
      */
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void readFromItemStack(NBTTagCompound tileCompound) {
-        dataManager.readFromStackNBT(tileCompound);
+    public void readFromItemStack(NBTTagCompound compound) {
+        dataManager.readFromStackNBT(compound);
     }
 
     /**
@@ -226,25 +226,25 @@ public class TileBCBase extends TileEntity implements IDataManagerProvider, IDat
 
     public void readExtraNBT(NBTTagCompound compound) {}
 
-    @Override
-    public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
-
-        dataManager.writeToNBT(compound);
-        writeExtraNBT(compound);
-
-        return compound;
-    }
-
-    @Override
-    public final void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-
-        dataManager.readFromNBT(compound);
-        readExtraNBT(compound);
-
-        onTileLoaded();
-    }
+//    @Override
+//    public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
+//        super.writeToNBT(compound);
+//
+//        dataManager.writeToNBT(compound);
+//        writeExtraNBT(compound);
+//
+//        return compound;
+//    }
+//
+//    @Override
+//    public final void readFromNBT(NBTTagCompound compound) {
+//        super.readFromNBT(compound);
+//
+//        dataManager.readFromNBT(compound);
+//        readExtraNBT(compound);
+//
+//        onTileLoaded();
+//    }
 
     @Override
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {

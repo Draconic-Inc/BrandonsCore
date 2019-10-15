@@ -198,7 +198,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
      * Display this popup with the given zOffset.
      */
     public void show(int displayZLevel) {
-        modularGui.getManager().add(this, displayZLevel);
+        modularGui.getManager().addChild(this, displayZLevel, false);
         isVisible = true;
     }
 
@@ -243,7 +243,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
      * Close this popup. Popup can be reopened by calling show() again.
      */
     public void close() {
-        modularGui.getManager().remove(this);
+        modularGui.getManager().removeChild(this);
         isVisible = false;
     }
 

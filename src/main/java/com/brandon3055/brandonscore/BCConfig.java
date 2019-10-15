@@ -16,6 +16,7 @@ import java.io.File;
  */
 @ModConfigContainer(modid = "brandonscore")
 public class BCConfig implements IModConfigHelper {
+
     @Override
     public Configuration createConfiguration(FMLPreInitializationEvent event) {
         File configFile = new File(FileHandler.brandon3055Folder, "BrandonsCore.cfg");
@@ -47,4 +48,7 @@ public class BCConfig implements IModConfigHelper {
 
     @ModConfigProperty(name = "darkMode", category = "Client", comment = "Enable gui dark mode.")
     public static boolean darkMode = false;
+
+    @ModConfigProperty(category = "Client Settings", name = "useShaders", comment = "Set this to false if your system can not handle the awesomeness that is shaders! (Warning: Will make cool things look much less cool!)")
+    public static boolean useShaders = true;
 }

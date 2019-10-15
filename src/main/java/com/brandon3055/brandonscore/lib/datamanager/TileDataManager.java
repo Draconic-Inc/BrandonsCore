@@ -50,14 +50,12 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      */
     @Override
     public void detectAndSendChanges() {
-        if (!tile.getWorld().isRemote) {
-            for (IManagedData data : managedDataList) {
-                if (data.flags().syncTile && data.isDirty(true)) {
-                    PacketCustom syncPacket = createSyncPacket();
-                    syncPacket.writeByte((byte) data.getIndex());
-                    data.toBytes(syncPacket);
-                    syncPacket.sendToChunk(tile);
-                }
+        for (IManagedData data : managedDataList) {
+            if (data.flags().syncTile && data.isDirty(true)) {
+                PacketCustom syncPacket = createSyncPacket();
+                syncPacket.writeByte((byte) data.getIndex());
+                data.toBytes(syncPacket);
+                syncPacket.sendToChunk(tile);
             }
         }
     }
@@ -68,15 +66,13 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      * @param listeners The list of container listeners.
      */
     public void detectAndSendChangesToListeners(List<IContainerListener> listeners) {
-        if (!tile.getWorld().isRemote) {
-            for (IManagedData data : managedDataList) {
-                if (data.flags().syncContainer && data.isDirty(true)) {
-                    PacketCustom syncPacket = createSyncPacket();
-                    syncPacket.writeByte((byte) data.getIndex());
-                    data.toBytes(syncPacket);
-                    syncPacket.sendToChunk(tile);
-                    DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
-                }
+        for (IManagedData data : managedDataList) {
+            if (data.flags().syncContainer && data.isDirty(true)) {
+                PacketCustom syncPacket = createSyncPacket();
+                syncPacket.writeByte((byte) data.getIndex());
+                data.toBytes(syncPacket);
+//                syncPacket.sendToChunk(tile);
+                DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
             }
         }
     }

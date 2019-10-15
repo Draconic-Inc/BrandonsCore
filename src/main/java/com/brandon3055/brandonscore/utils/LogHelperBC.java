@@ -385,10 +385,10 @@ public class LogHelperBC {
         long s = ms * 1000;
 
         if (ns > s) {
-            value = Utils.round(ns / (double) s, 1000) + "s";
+            value = MathUtils.round(ns / (double) s, 1000) + "s";
         }
         else if (ns > 1000) {
-            value = Utils.round(ns / (double) ms, 10000) + "ms";
+            value = MathUtils.round(ns / (double) ms, 10000) + "ms";
         }
         else {
             value = ns + "ns";

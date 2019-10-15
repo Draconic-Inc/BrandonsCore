@@ -14,6 +14,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -25,6 +26,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -45,6 +47,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     private boolean ifcSet = false;
     protected boolean canProvidePower = false;
     protected boolean hasSubItemTypes = false;
+    protected boolean isMobResistant = false;
     public Map<Integer, String> nameOverrides = new HashMap<>();
 
     public BlockBCore() {
@@ -242,6 +245,37 @@ public class BlockBCore extends Block implements IBCoreBlock {
         else {
             super.harvestBlock(world, player, pos, state, te, heldStack);
         }
+    }
+
+    //endregion
+
+    //region Mob Resistance
+
+    public void setMobResistant(boolean mobResistant) {
+        isMobResistant = mobResistant;
+    }
+
+    @Override
+    public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity) {
+        if (!isMobResistant) {
+            return super.canEntityDestroy(state, world, pos, entity);
+        }
+        return entity instanceof EntityPlayer;
+    }
+
+    @Override
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+        if (!isMobResistant) {
+            super.onBlockExploded(world, pos, explosion);
+        }
+    }
+
+    @Override
+    public boolean canDropFromExplosion(Explosion explosionIn) {
+        if (!isMobResistant) {
+            return super.canDropFromExplosion(explosionIn);
+        }
+        return false;
     }
 
     //endregion

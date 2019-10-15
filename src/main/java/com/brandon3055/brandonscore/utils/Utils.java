@@ -150,37 +150,6 @@ public class Utils {
     }
 
     /**
-     * Rounds the number of decimal places based on the given multiplier.<br>
-     * e.g.<br>
-     * Input: 17.5245743<br>
-     * multiplier: 1000<br>
-     * Output: 17.534<br>
-     * multiplier: 10<br>
-     * Output 17.5<br><br>
-     *
-     * @param number     The input value.
-     * @param multiplier The multiplier.
-     * @return The input rounded to a number of decimal places based on the multiplier.
-     */
-    public static double round(double number, double multiplier) {
-        return Math.round(number * multiplier) / multiplier;
-    }
-
-    public static int getNearestMultiple(int number, int multiple) {
-        int result = number;
-
-        if (number < 0) result *= -1;
-
-        if (result % multiple == 0) return number;
-        else if (result % multiple < multiple / 2) result = result - result % multiple;
-        else result = result + (multiple - result % multiple);
-
-        if (number < 0) result *= -1;
-
-        return result;
-    }
-
-    /**
      * Simple method to convert a Double object to a primitive int
      */
     public static int toInt(double d) {
@@ -247,10 +216,6 @@ public class Utils {
         else {
             return (int) Long.parseLong(s, 16);
         }
-    }
-
-    public static double map(double valueIn, double inMin, double inMax, double outMin, double outMax) {
-        return (valueIn - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 
     public static boolean validInteger(String value) {

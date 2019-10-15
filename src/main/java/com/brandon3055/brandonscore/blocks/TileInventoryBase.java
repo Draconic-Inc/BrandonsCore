@@ -21,6 +21,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
  * Created by brandon3055 on 26/3/2016.
  * The base class for all inventory tiles
  */
+@Deprecated
 public class TileInventoryBase extends TileBCBase implements IInventory {
 
     protected NonNullList<ItemStack> inventoryStacks = NonNullList.create();
@@ -229,17 +230,17 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public void writeToItemStack(NBTTagCompound tileCompound, boolean willHarvest) {
-        super.writeToItemStack(tileCompound, willHarvest);
+    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+        super.writeToItemStack(compound, willHarvest);
         if (!isEmpty()){
-            writeInventoryToNBT(tileCompound);
+            writeInventoryToNBT(compound);
         }
     }
 
     @Override
-    public void readFromItemStack(NBTTagCompound tileCompound) {
-        super.readFromItemStack(tileCompound);
-        readInventoryFromNBT(tileCompound);
+    public void readFromItemStack(NBTTagCompound compound) {
+        super.readFromItemStack(compound);
+        readInventoryFromNBT(compound);
     }
 
     @Override

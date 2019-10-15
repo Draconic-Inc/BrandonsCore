@@ -67,7 +67,7 @@ public class ModuleBuilder {
 
         public void finish(GuiElementManager manager, int level) {
             for (MGuiElementBase elementBase : elements) {
-                manager.add(elementBase, level);
+                manager.addChild(elementBase, level, false);
             }
         }
     }
@@ -120,7 +120,7 @@ public class ModuleBuilder {
 
         public void finish(GuiElementManager manager, int level) {
             for (MGuiElementBase elementBase : elements) {
-                manager.add(elementBase, level);
+                manager.addChild(elementBase, level, false);
             }
         }
     }

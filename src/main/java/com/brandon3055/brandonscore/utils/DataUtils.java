@@ -63,8 +63,8 @@ public class DataUtils {
      * Counts elements in the array that conform to the Function check.
      *
      * @param iterable The iterable to check.
-     * @param check The Function to apply to each element.
-     * @param <T>   What we are dealing with.
+     * @param check    The Function to apply to each element.
+     * @param <T>      What we are dealing with.
      * @return The count.
      */
     public static <T> int count(Iterable<T> iterable, Function<T, Boolean> check) {
@@ -287,4 +287,15 @@ public class DataUtils {
     }
 
     //endregion
+
+    public static long averageLongArray(long[] array) {
+        long average = 0;
+        double remainder = 0;
+        int count = array.length;
+        for (long val : array) {
+            average += val / count;
+            remainder += ((double) val % (double) count) / (double) count;
+        }
+        return average + (long) remainder;
+    }
 }

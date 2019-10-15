@@ -8,8 +8,8 @@ import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -37,6 +37,7 @@ public class BCEffectHandler {
     public static BCEffectRenderer effectRenderer;
     public static Map<Integer, PairKV<IBCParticleFactory, ResourceLocation>> particleRegistry = new LinkedHashMap<Integer, PairKV<IBCParticleFactory, ResourceLocation>>();
     private static int lastIndex = -1;
+    private static World currentWorld = null;
 
     @SideOnly(Side.CLIENT)
     public static void iniEffectRenderer() {
@@ -202,17 +203,24 @@ public class BCEffectHandler {
 
     //region Events
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().isGamePaused()) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (event.phase != TickEvent.Phase.END || mc.isGamePaused()) {
             return;
+        }
+
+        if (currentWorld != mc.world && mc.world != null) {
+            currentWorld = mc.world;
+            BrandonsCore.proxy.resetEffectRenderer(currentWorld);
         }
 
         if (effectRenderer.world != null) {
             BCProfiler.TICK.start("update_bc_effect_renderer");
-            Minecraft.getMinecraft().mcProfiler.startSection("BCParticlesUpdate");
+            mc.mcProfiler.startSection("BCParticlesUpdate");
             effectRenderer.updateEffects();
-            Minecraft.getMinecraft().mcProfiler.endSection();
+            mc.mcProfiler.endSection();
             BCProfiler.TICK.stop();
         }
     }
@@ -220,9 +228,11 @@ public class BCEffectHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
-        BrandonsCore.proxy.particleWorldLoad(event.getWorld());
+        BrandonsCore.proxy.resetEffectRenderer(event.getWorld());
+        currentWorld = event.getWorld();
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
         BCProfiler.RENDER.start("bc_effect_renderer_draw");
@@ -233,6 +243,7 @@ public class BCEffectHandler {
     }
 
     //TODO Move this to a separate client event handler if i ever need this event elsewhere
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void debugOverlay(RenderGameOverlayEvent.Text event) {
         if (event.getLeft().size() >= 5 && effectRenderer != null) {

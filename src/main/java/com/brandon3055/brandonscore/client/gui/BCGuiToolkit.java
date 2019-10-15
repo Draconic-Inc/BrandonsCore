@@ -1,14 +1,18 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.client.BCTextures;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
+import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -19,10 +23,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Property;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.awt.*;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static com.brandon3055.brandonscore.client.gui.BCGuiToolkit.GuiLayout.CUSTOM;
@@ -31,10 +36,6 @@ import static com.brandon3055.brandonscore.client.gui.BCGuiToolkit.GuiLayout.CUS
  * Created by brandon3055 on 5/7/19.
  */
 public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
-
-    public static final ResourceLocation WIDGETS_LIGHT = new ResourceLocation(BrandonsCore.MODID + ":textures/gui/light/widgets.png");
-    public static final ResourceLocation WIDGETS_DARK = new ResourceLocation(BrandonsCore.MODID + ":textures/gui/dark/widgets.png");
-    public static final ResourceLocation MISC_TEXTURES = new ResourceLocation(BrandonsCore.MODID + ":textures/gui/misc_textures.png");
 
     public static int HEADING_LIGHT = 0x111111;
     public static int HEADING_DARK = 0xAFB1B3;
@@ -64,7 +65,7 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
     public GuiButton createThemeButton() {
         GuiButton button = new GuiButton();
         button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, MISC_TEXTURES);
+        GuiTexture icon = new GuiTexture(12, 12, BCTextures.MISC_TEXTURES);
         icon.setTexXGetter(() -> darkMode ? 12 : 0);
         icon.setTexYGetter(() -> button.getHoverTime() > 0 ? 12 : 0);
         button.addChild(icon);
@@ -98,14 +99,15 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
     //Create Background (various sizes)
     public GuiTexture createBackground(boolean addToManager, boolean center) {
-        if (layout.xSize == -1 || layout.ySize == -1) {
+        if (layout.xSize == -1 || layout.ySize == -1) {  //TODO maybe add a way do provide a background builder in this case?
             throw new UnsupportedOperationException("Layout type " + layout + " does not have an associated default background.");
         }
 
+        //TODO move to a function in BCTextures?
         GuiTexture texture = new GuiTexture(() -> getRS(BrandonsCore.MODID + ":textures/gui/" + (darkMode ? "dark" : "light") + "/" + layout.texture()));
         texture.setSize(layout.xSize, layout.ySize);
         if (addToManager) {
-            gui.getManager().add(texture);
+            gui.getManager().addChild(texture);
         }
         if (center) {
             texture.addAndFireReloadCallback(guiTex -> guiTex.setPos(gui.guiLeft(), gui.guiTop()));
@@ -114,7 +116,7 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
     }
 
     public GuiTexture createBackground(boolean center) {
-        return createBackground(false, false);
+        return createBackground(false, center);
     }
 
     public GuiTexture createBackground() {
@@ -124,7 +126,7 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
     //Create Themed Button
     public GuiButton createButton(String unlocalizedText, @Nullable MGuiElementBase parent) {
         GuiButton button = new GuiButton(I18n.format(unlocalizedText));
-        button.setTextureSupplier(() -> darkMode ? WIDGETS_DARK : WIDGETS_LIGHT);
+        button.setTextureSupplier(BCTextures::widgets);
         button.enableVanillaRender();
         if (parent != null) {
             parent.addChild(button);
@@ -138,13 +140,9 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
     //UI Heading
     public GuiLabel createHeading(String unlocalizedHeading, @Nullable MGuiElementBase parent, boolean layout) {
-        GuiLabel heading = new GuiLabel(I18n.format(unlocalizedHeading)) {
-            @Override
-            public boolean hasShadow() {
-                return darkMode;
-            }
-        };
+        GuiLabel heading = new GuiLabel(I18n.format(unlocalizedHeading));
         heading.setTextColGetter(hovering -> darkMode ? HEADING_DARK : HEADING_LIGHT);
+        heading.setShadowStateSupplier(() -> darkMode);
         if (parent != null) {
             parent.addChild(heading);
             if (layout) {
@@ -164,13 +162,13 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
     /**
      * Creates a generic set of inventory slots with the specified dimensions.
-     * */
+     */
     public MGuiElementBase createSlots(MGuiElementBase parent, int columns, int rows, int spacing) {
         MGuiElementBase element = new MGuiElementBase() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                bindTexture(darkMode ? WIDGETS_DARK : WIDGETS_LIGHT);
+                bindTexture(BCTextures.widgets());
 
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buffer = tessellator.getBuffer();
@@ -211,12 +209,23 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
     /**
      * Creates the standard player inventory slot layout.
-     * */
-    public MGuiElementBase createPlayerSlots(MGuiElementBase parent, int hotBarSpacing) {
+     */
+    public MGuiElementBase createPlayerSlots(MGuiElementBase parent, int hotBarSpacing, boolean title) {
         MGuiElementBase container = new MGuiElementBase();
         MGuiElementBase main = createSlots(container, 9, 3);
         MGuiElementBase bar = createSlots(container, 9, 1);
         bar.setYPos(main.maxYPos() + hotBarSpacing);
+
+        if (title) {
+            GuiLabel invTitle = new GuiLabel(I18n.format("container.inventory"));
+            invTitle.setAlignment(GuiAlign.LEFT).setTextColGetter(hovering -> darkMode ? HEADING_DARK : HEADING_LIGHT);
+            invTitle.setShadowStateSupplier(() -> darkMode);
+            container.addChild(invTitle);
+            invTitle.setSize(main.xSize(), 8);
+            main.translate(0, 10);
+            bar.translate(0, 10);
+        }
+
         container.setSize(container.getEnclosingRect());
         if (parent != null) {
             parent.addChild(container);
@@ -225,19 +234,58 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
     }
 
     public MGuiElementBase createPlayerSlots(int hotBarSpacing) {
-        return createPlayerSlots(null, hotBarSpacing);
+        return createPlayerSlots(null, hotBarSpacing, true);
     }
 
     public MGuiElementBase createPlayerSlots() {
         return createPlayerSlots(4);
     }
 
-        //Create Slot
+    //Create Slot
     // - Slot Ghost Images
 
     //Create Progress Bar..
 
     //Create Power Bar
+    public GuiEnergyBar createEnergyBar(MGuiElementBase parent) {
+        GuiEnergyBar energyBar = new GuiEnergyBar();
+        //TODO add ability to bind to
+        //TODO Theme? Maybe? Maybe not needed?
+
+        if (parent != null) {
+            parent.addChild(energyBar);
+        }
+        return energyBar;
+    }
+
+    public GuiEnergyBar createEnergyBar(MGuiElementBase parent, int capacity) {
+        GuiEnergyBar energyBar = new GuiEnergyBar();
+        energyBar.setEnergy(0, capacity);
+        //TODO add ability to bind to
+        //TODO Theme? Maybe? Maybe not needed?
+
+        if (parent != null) {
+            parent.addChild(energyBar);
+        }
+        return energyBar;
+    }
+
+    public GuiEnergyBar createEnergyBar(int hotBarSpacing) {
+        return createEnergyBar(null, hotBarSpacing);
+    }
+
+    public GuiEnergyBar createEnergyBar() {
+        return createEnergyBar(4);
+    }
+
+    //Info Panel
+    public InfoPanel createInfoPanel(MGuiElementBase parent, boolean leftSide) {
+        InfoPanel panel = new InfoPanel(parent, leftSide);
+        parent.addChild(panel);
+        jeiExclude(panel);
+        return panel;
+    }
+
     //etc...
 
     //LayoutUtils
@@ -252,6 +300,12 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
     public void centerY(MGuiElementBase element, MGuiElementBase centerOn, int yOffset) {
         element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2));
+    }
+
+    //Templates
+    public <TEM extends IGuiTemplate> TEM loadTemplate(TEM template) {
+        template.addElements(gui.getManager(), this);
+        return template;
     }
 
     /**
@@ -327,5 +381,135 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
         BOTTOM_CENTER,
         BOTTOM_LEFT,
         MIDDLE_LEFT
+    }
+
+    public static class InfoPanel extends MGuiElementBase<InfoPanel> {
+        private Map<MGuiElementBase, Dimension> elementsDimMap = new LinkedHashMap<>();
+        private final MGuiElementBase parent;
+        private boolean leftSide = false;
+        private boolean hasPI = true;
+        private static boolean expanded = false;
+        private static double animState = 0;
+        private Supplier<Point> origin;
+        public String hoverText = I18n.format("bc.guitoolkit.uiinfo");
+
+        public InfoPanel(MGuiElementBase parent, boolean leftSide) {
+            this.parent = parent;
+            this.leftSide = leftSide;
+            setEnabled(false);
+            if (animState == -0.5) {
+                setHoverText(hoverText);
+            }
+            updatePosSize();
+        }
+
+        public void setOrigin(Supplier<Point> origin) {
+            this.origin = origin;
+        }
+
+        public InfoPanel addElement(MGuiElementBase element, Dimension preferredSize) {
+            if (elementsDimMap.isEmpty()) {
+                setEnabled(true);
+            }
+            elementsDimMap.put(element, preferredSize);
+            addChild(element);
+            updatePosSize();
+            return this;
+        }
+
+        public InfoPanel addElement(MGuiElementBase element) {
+            return addElement(element, new Dimension(element.xSize(), element.ySize()));
+        }
+
+        @Override
+        public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+            boolean ret = super.mouseClicked(mouseX, mouseY, mouseButton);
+            if (!ret && isMouseOver(mouseX, mouseY)) {
+                expanded = !expanded;
+                GuiButton.playGenericClick(mc);
+                return true;
+            }
+
+            return ret;
+        }
+
+        private void updatePosSize() {
+            Dimension prefBounds = new Dimension();
+            for (Dimension dim : elementsDimMap.values()) {
+                prefBounds.width = Math.max(prefBounds.width, dim.width);
+                prefBounds.height += dim.height;
+            }
+
+            Dimension available = new Dimension();
+            available.height = parent.screenHeight - parent.yPos() - (leftSide && hasPI ? 25 : 0);
+            available.width = leftSide ? parent.xPos() - 10 : parent.screenWidth - parent.maxXPos() - 10;
+            Dimension actSize = new Dimension(Math.min(available.width, prefBounds.width), Math.min(available.height, prefBounds.height));
+            int xPos = leftSide ? parent.xPos() - xSize() - 2 : parent.maxXPos() + 2;
+            int yPos = parent.yPos() + (leftSide && hasPI ? 25 : 0);
+            Rectangle bounds = new Rectangle(xPos, yPos, actSize.width + 6, actSize.height + 6);
+            Point origin = this.origin == null ? new Point(xPos, yPos) : this.origin.get();
+            Rectangle collapsed = new Rectangle(origin.x, origin.y, 12, 12);
+
+            double animState = Math.max(0, InfoPanel.animState);
+            int sx = (int) MathUtils.map(animState, 0, 1, collapsed.x, bounds.x);
+            int sy = (int) MathUtils.map(animState, 0, 1, collapsed.y, bounds.y);
+            int sw = (int) MathUtils.map(animState, 0, 1, collapsed.width, bounds.width);
+            int sh = (int) MathUtils.map(animState, 0, 1, collapsed.height, bounds.height);
+            setPosAndSize(sx, sy, sw, sh);
+
+            int y = yPos + 3;
+            for (MGuiElementBase element : elementsDimMap.keySet()) {
+                if (animState >= 1) {
+                    element.setEnabled(true);
+                    element.setPos(xPos + 3, y);
+                    Dimension dim = elementsDimMap.get(element);
+                    element.setXSize(Math.min(actSize.width, dim.width));
+                    element.setYSize(Math.min((int) (((double) actSize.height / prefBounds.height) * dim.height), dim.height));
+                    y += element.ySize();
+                }
+                else {
+                    element.setEnabled(false);
+                }
+            }
+        }
+
+        @Override
+        public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+            double fadeAlpha = Math.min(1, ((animState + 0.5) * 2));
+            int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
+            int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
+            int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
+
+            if (fadeAlpha < 1) {
+                bindTexture(BCTextures.widgets());
+                drawTexturedModalRect(xPos(), yPos(), 0, 18, 12, 12);
+            }
+
+            drawColouredRect(xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
+            drawColouredRect(xPos() + 1, yPos(), xSize() - 2, ySize(), col1);
+
+            drawGradientRect(xPos() + 1, yPos() + 1, xPos() + xSize() - 1, yPos() + ySize() - 1, col2, col3);
+            drawColouredRect(xPos() + 2, yPos() + 2, xSize() - 4, ySize() - 4, col1);
+
+            super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+        }
+
+        @Override
+        public boolean onUpdate() {
+            if (expanded && animState < 1) {
+                animState = Math.min(1, animState + 0.2);
+                setHoverTextEnabled(false);
+                updatePosSize();
+            }
+            else if (!expanded && animState > -0.5) {
+                animState = Math.max(-0.5, animState - 0.2);
+                if (animState == -0.5) {
+                    setHoverText(hoverText);
+                }
+                updatePosSize();
+            }
+
+            return super.onUpdate();
+        }
     }
 }

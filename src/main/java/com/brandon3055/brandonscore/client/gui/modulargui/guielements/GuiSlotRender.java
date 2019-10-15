@@ -26,7 +26,7 @@ public class GuiSlotRender extends MGuiElementBase<GuiSlotRender> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        bindTexture(BCTextures.MODULAR_GUI);
+        bindTexture(BCTextures.widgets());
         GlStateManager.color(1F, 1F, 1F, 1F);
         drawScaledCustomSizeModalRect(getInsetRect().x, getInsetRect().y, 0, 0, 18, 18, getInsetRect().width, getInsetRect().height, 255, 255);
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);

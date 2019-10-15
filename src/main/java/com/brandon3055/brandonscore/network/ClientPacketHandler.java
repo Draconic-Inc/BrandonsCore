@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.network;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.lib.ChatHelper;
@@ -64,6 +65,13 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 break;
             case PacketDispatcher.C_INDEXED_LOCALIZED_CHAT:
                 ChatHelper.indexedMsg(mc.player, I18n.format(packet.readString()), packet.readInt());
+                break;
+            case PacketDispatcher.C_TILE_CAP_DATA:
+                BlockPos pos = packet.readPos();
+                TileEntity tile = Minecraft.getMinecraft().world.getTileEntity(pos);
+                if (tile instanceof TileBCore) {
+                    ((TileBCore) tile).receiveCapSyncData(packet);
+                }
                 break;
         }
     }

@@ -46,7 +46,7 @@ public interface IModularGui<T extends GuiScreen> extends IMouseOver, IJEICleara
     int getZLevel();
 
     default MGuiElementBase addElement(MGuiElementBase element) {
-        return getManager().add(element);
+        return getManager().addChild(element);
     }
 
     @Override

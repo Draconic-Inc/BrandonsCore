@@ -20,6 +20,7 @@ public class PacketDispatcher {
     public static final int C_PLAYER_ACCESS = 5;
     public static final int C_PLAYER_ACCESS_UPDATE = 6;
     public static final int C_INDEXED_LOCALIZED_CHAT = 7;
+    public static final int C_TILE_CAP_DATA = 8;
 
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;

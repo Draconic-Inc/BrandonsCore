@@ -1,10 +1,11 @@
 package com.brandon3055.brandonscore.items;
 
 
-import cofh.redstoneflux.api.IEnergyContainerItem;
-import com.brandon3055.brandonscore.lib.EnergyContainerWrapper;
+import com.brandon3055.brandonscore.api.power.IOPStorage;
+import com.brandon3055.brandonscore.capability.OPMultiProvider;
 import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
+import com.brandon3055.brandonscore.utils.MathUtils;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -22,11 +23,11 @@ import java.util.List;
  * Created by brandon3055 on 31/05/2016.
  * The base RF item for Brandon's Core
  */
-public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
+public class ItemEnergyBase extends ItemBCore {
 
-    private int capacity;
-    private int receive;
-    private int extract;
+    private long capacity;
+    private long receive;
+    private long extract;
 
     public ItemEnergyBase(){}
 
@@ -54,7 +55,7 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
     /**
      * Set the Capacity, Receive and Extract stats for the item
      * */
-    public void setEnergyStats(int capacity, int receive, int extract) {
+    public void setEnergyStats(long capacity, long receive, long extract) {
         this.capacity = capacity;
         this.receive = receive;
         this.extract = extract;
@@ -64,7 +65,7 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
      * Returns the items RF capacity.
      * Overriding will override the capacity set by setEnergyStats
      * */
-    public int getCapacity(ItemStack stack) {
+    protected long getCapacity(ItemStack stack) {
         return capacity;
     }
 
@@ -72,7 +73,7 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
      * Returns the items max receive.
      * Overriding will override the receive set by setEnergyStats
      * */
-    public int getMaxReceive(ItemStack stack) {
+    protected long getMaxReceive(ItemStack stack) {
         return receive;
     }
 
@@ -80,68 +81,55 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
      * Returns the items max extract.
      * Overriding will override the extract set by setEnergyStats
      * */
-    public int getMaxExtract(ItemStack stack) {
+    protected long getMaxExtract(ItemStack stack) {
         return extract;
     }
 
-    @Override
-    public int receiveEnergy(ItemStack container, int maxReceive, boolean simulate) {
-        int energy = ItemNBTHelper.getInteger(container, "Energy", 0);
-        int energyReceived = Math.min(getCapacity(container) - energy, Math.min(getMaxReceive(container), maxReceive));
+    protected long receiveEnergy(ItemStack stack, long maxReceive, boolean simulate) {
+        if (getMaxReceive(stack) > 0) {
+            long energy = ItemNBTHelper.getLong(stack, "energy", 0);
+            long energyReceived = Math.min(getCapacity(stack) - energy, Math.min(getMaxReceive(stack), maxReceive));
 
-        if (!simulate) {
-            energy += energyReceived;
-            ItemNBTHelper.setInteger(container, "Energy", energy);
+            if (!simulate) {
+                energy += energyReceived;
+                ItemNBTHelper.setLong(stack, "energy", energy);
+            }
+            return energyReceived;
         }
 
-        return energyReceived;
+        return 0;
     }
 
-    @Override
-    public int extractEnergy(ItemStack container, int maxExtract, boolean simulate) {
-        int energy = ItemNBTHelper.getInteger(container, "Energy", 0);
-        int energyExtracted = Math.min(energy, Math.min(getMaxExtract(container), maxExtract));
+    protected long extractEnergy(ItemStack stack, long maxExtract, boolean simulate) {
+        if (getMaxExtract(stack) > 0) {
+            long energy = ItemNBTHelper.getLong(stack, "energy", 0);
+            long energyExtracted = Math.min(energy, Math.min(getMaxExtract(stack), maxExtract));
 
-        if (!simulate) {
-            energy -= energyExtracted;
-            ItemNBTHelper.setInteger(container, "Energy", energy);
+            if (!simulate) {
+                energy -= energyExtracted;
+                ItemNBTHelper.setLong(stack, "energy", energy);
+            }
+            return energyExtracted;
         }
-        return energyExtracted;
+
+        return 0;
     }
 
-    @Override
-    public int getEnergyStored(ItemStack container) {
-        return ItemNBTHelper.getInteger(container, "Energy", 0);
+    public long getEnergyStored(ItemStack stack) {
+        return ItemNBTHelper.getLong(stack, "energy", 0);
     }
 
-    @Override
-    public int getMaxEnergyStored(ItemStack container) {
-        return getCapacity(container);
+    protected long getEnergyStored(ItemStack stack, boolean isOPAsking) {
+        return getEnergyStored(stack);
     }
 
-    public void setEnergy(ItemStack container, int energy) {
-        if (energy > getCapacity(container)) {
-            energy = getCapacity(container);
-        }
-        else if (energy < 0) {
-            energy = 0;
-        }
-
-        ItemNBTHelper.setInteger(container, "Energy", energy);
+    public void setEnergy(ItemStack stack, long energy) {
+        ItemNBTHelper.setLong(stack, "energy", MathUtils.clamp(energy, 0, getCapacity(stack)));
     }
 
-    public void modifyEnergy(ItemStack container, int modify) {
-        int energy = ItemNBTHelper.getInteger(container, "Energy", 0);
-        energy += modify;
-
-        if (energy > getCapacity(container)) {
-            energy = getCapacity(container);
-        }
-        else if (energy < 0) {
-            energy = 0;
-        }
-
-        ItemNBTHelper.setInteger(container, "Energy", energy);
+    public void modifyEnergy(ItemStack stack, long modify) {
+        long energy = ItemNBTHelper.getLong(stack, "energy", 0);
+        ItemNBTHelper.setLong(stack, "energy", MathUtils.clamp(energy + modify, 0, getCapacity(stack)));
     }
 
     //endregion
@@ -150,12 +138,14 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
 
     @Override
     public boolean showDurabilityBar(ItemStack stack) {
-        return !(getEnergyStored(stack) == getMaxEnergyStored(stack));
+        return !(getEnergyStored(stack) == getCapacity(stack));
     }
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
-        return 1D - ((double)getEnergyStored(stack) / (double)getMaxEnergyStored(stack));
+        long es = getEnergyStored(stack, true);
+        long mes = getCapacity(stack);
+        return 1D - ((double)es / (double)mes);
     }
 
     @SideOnly(Side.CLIENT)
@@ -170,7 +160,65 @@ public class ItemEnergyBase extends ItemBCore implements IEnergyContainerItem {
 
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, NBTTagCompound nbt) {
-        return new EnergyContainerWrapper(stack);
+        return new OPMultiProvider(new OPStorageItem(stack), null);
+    }
+
+    private class OPStorageItem implements IOPStorage {
+        private ItemStack stack;
+
+        public OPStorageItem(ItemStack stack) {
+            this.stack = stack;
+        }
+
+        @Override
+        public long receiveOP(long maxReceive, boolean simulate) {
+            return ItemEnergyBase.this.receiveEnergy(stack, maxReceive, simulate);
+        }
+
+        @Override
+        public long extractOP(long maxExtract, boolean simulate) {
+            return ItemEnergyBase.this.extractEnergy(stack, maxExtract, simulate);
+        }
+
+        @Override
+        public long getOPStored() {
+            return ItemEnergyBase.this.getEnergyStored(stack, true);
+        }
+
+        @Override
+        public long getMaxOPStored() {
+            return ItemEnergyBase.this.getCapacity(stack);
+        }
+
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            return (int) receiveOP(maxReceive, simulate);
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return (int) extractOP(maxExtract, simulate);
+        }
+
+        @Override
+        public int getEnergyStored() {
+            return (int) Math.min(Integer.MAX_VALUE, ItemEnergyBase.this.getEnergyStored(stack, false));
+        }
+
+        @Override
+        public int getMaxEnergyStored() {
+            return (int) Math.min(Integer.MAX_VALUE, getMaxOPStored());
+        }
+
+        @Override
+        public boolean canExtract() {
+            return getMaxExtract(stack) > 0;
+        }
+
+        @Override
+        public boolean canReceive() {
+            return getMaxReceive(stack) > 0;
+        }
     }
 
     //endregion

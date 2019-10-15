@@ -35,7 +35,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
     public void addElements(GuiElementManager manager) {
         GuiTexture bg = GuiTexture.newBCTexture(xSize, ySize);
         bg.setPos(guiLeft(), guiTop());
-        manager.add(bg);
+        manager.addChild(bg);
 
         GuiLabel label = new GuiLabel().setDisplaySupplier(() -> name + "'s Inventory");
         label.setSize(bg.xSize(), 10);

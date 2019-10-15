@@ -24,6 +24,7 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
     private int textColour = 0xFFFFFFFF;
     private String labelText = "";
     private Supplier<String> displayStringSupplier;
+    private Supplier<Boolean> shadowStateSupplier;
     private HoverColour<Integer> texColGetter;
 
     public GuiLabel() {}
@@ -113,11 +114,16 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
 
     public GuiLabel setShadow(boolean dropShadow) {
         this.dropShadow = dropShadow;
+        shadowStateSupplier = null;
         return this;
     }
 
+    public void setShadowStateSupplier(Supplier<Boolean> shadowStateSupplier) {
+        this.shadowStateSupplier = shadowStateSupplier;
+    }
+
     public boolean hasShadow() {
-        return dropShadow;
+        return shadowStateSupplier != null ? shadowStateSupplier.get() : dropShadow;
     }
 
     public int getTextColour(boolean hovered) {

@@ -6,7 +6,7 @@ import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import com.brandon3055.brandonscore.network.PacketUpdateMount;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.brandon3055.brandonscore.utils.Utils;
+import com.brandon3055.brandonscore.utils.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -118,7 +118,7 @@ public class BCClientEventHandler {
         if (debugTimeout < 190) {
             FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
             fontRenderer.drawString("Server Stopped Sending Updates!", 0, event.getResolution().getScaledHeight() - 21, 0xFF0000, true);
-            fontRenderer.drawString("Display will time out in " + Utils.round((debugTimeout / 20D), 10), 0, event.getResolution().getScaledHeight() - 11, 0xFF0000, true);
+            fontRenderer.drawString("Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getResolution().getScaledHeight() - 11, 0xFF0000, true);
         }
 
         GlStateManager.popMatrix();

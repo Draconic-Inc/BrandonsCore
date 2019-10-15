@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 /**
  * Created by brandon3055 on 15/11/2016.
  */
+@Deprecated //Wont be needing wrappers in 1.14
 public class EnergyContainerWrapper implements IEnergyStorage, ICapabilityProvider {
 
     private ItemStack stack;
