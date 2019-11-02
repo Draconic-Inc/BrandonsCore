@@ -15,7 +15,7 @@ public class SlotCheckValid extends SlotItemHandler {
 
     @Override
     public boolean isItemValid(ItemStack stack) {
-        return inventory.isItemValidForSlot(getSlotIndex(), stack);
+        return getItemHandler().isItemValid(getSlotIndex(), stack);
     }
 
     public static class IInv extends Slot {

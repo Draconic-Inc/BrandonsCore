@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedVec3I extends AbstractManagedData {
+public class ManagedVec3I extends AbstractManagedData<Vec3I> {
 
     private Vec3I value;
     private Vec3I lastValue;
@@ -33,18 +33,23 @@ public class ManagedVec3I extends AbstractManagedData {
     }
 
     public Vec3I set(Vec3I value) {
-        lastValue = value.copy();
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            Vec3I prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
+                lastValue = prev.copy();
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -59,9 +64,11 @@ public class ManagedVec3I extends AbstractManagedData {
      * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     * @return
      */
-    public void setValidator(Function<Vec3I, Vec3I> validator) {
+    public ManagedVec3I setValidator(Function<Vec3I, Vec3I> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -96,6 +103,7 @@ public class ManagedVec3I extends AbstractManagedData {
         value.x = input.readInt();
         value.y = input.readInt();
         value.z = input.readInt();
+        notifyListeners(value);
     }
 
     @Override
@@ -116,6 +124,7 @@ public class ManagedVec3I extends AbstractManagedData {
             value.y = list.getIntAt(1);
             value.z = list.getIntAt(2);
         }
+        notifyListeners(value);
     }
 
     @Override

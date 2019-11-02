@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedByte extends AbstractManagedData {
+public class ManagedByte extends AbstractManagedData<Byte> {
 
     private byte value;
     protected Function<Byte, Byte> validator = null;
@@ -28,17 +28,22 @@ public class ManagedByte extends AbstractManagedData {
     }
 
     public byte set(byte value) {
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            byte prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -54,8 +59,9 @@ public class ManagedByte extends AbstractManagedData {
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      */
-    public void setValidator(Function<Byte, Byte> validator) {
+    public ManagedByte setValidator(Function<Byte, Byte> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -73,6 +79,7 @@ public class ManagedByte extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = input.readByte();
+        notifyListeners(value);
     }
 
     @Override
@@ -83,6 +90,7 @@ public class ManagedByte extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = compound.getByte(name);
+        notifyListeners(value);
     }
 
     @Override

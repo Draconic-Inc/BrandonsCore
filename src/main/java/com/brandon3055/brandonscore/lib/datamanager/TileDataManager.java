@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
@@ -164,13 +165,13 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     public void writeToNBT(NBTTagCompound compound) {
         NBTTagCompound dataTag = new NBTTagCompound();
         DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.toNBT(dataTag));
-        compound.setTag("BCManagedData", dataTag);
+        compound.setTag(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound compound) {
-        if (compound.hasKey("BCManagedData", 10)) {
-            NBTTagCompound dataTag = compound.getCompoundTag("BCManagedData");
+        if (compound.hasKey(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
+            NBTTagCompound dataTag = compound.getCompoundTag(BlockBCore.BC_MANAGED_DATA_FLAG);
             DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.fromNBT(dataTag));
         }
     }
@@ -192,7 +193,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
 
     @Override
     public boolean isClientSide() {
-        return BrandonsCore.proxy.isRemoteWorld();
+        return tile.hasWorld() && tile.getWorld().isRemote;
     }
 
     @Override
@@ -222,12 +223,12 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     public void writeSyncNBT(NBTTagCompound compound) {
         NBTTagCompound dataTag = new NBTTagCompound();
         DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.toNBT(dataTag));
-        compound.setTag("BCManagedData", dataTag);
+        compound.setTag(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
     public void readSyncNBT(NBTTagCompound compound) {
-        if (compound.hasKey("BCManagedData", 10)) {
-            NBTTagCompound dataTag = compound.getCompoundTag("BCManagedData");
+        if (compound.hasKey(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
+            NBTTagCompound dataTag = compound.getCompoundTag(BlockBCore.BC_MANAGED_DATA_FLAG);
             DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.fromNBT(dataTag));
         }
     }
@@ -239,13 +240,13 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
         NBTTagCompound dataTag = new NBTTagCompound();
         DataUtils.forEachMatch(managedDataList, data -> data.flags().saveItem, data -> data.toNBT(dataTag));
         if (!dataTag.hasNoTags()) {
-            compound.setTag("BCManagedData", dataTag);
+            compound.setTag(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
         }
     }
 
     public void readFromStackNBT(NBTTagCompound compound) {
-        if (compound.hasKey("BCManagedData", 10)) {
-            NBTTagCompound dataTag = compound.getCompoundTag("BCManagedData");
+        if (compound.hasKey(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
+            NBTTagCompound dataTag = compound.getCompoundTag(BlockBCore.BC_MANAGED_DATA_FLAG);
             DataUtils.forEachMatch(managedDataList, data -> data.flags().saveItem, data -> data.fromNBT(dataTag));
         }
     }

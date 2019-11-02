@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedNBT extends AbstractManagedData {
+public class ManagedNBT extends AbstractManagedData<NBTTagCompound> {
 
     private NBTTagCompound value;
     private NBTTagCompound lastValue;
@@ -31,17 +31,22 @@ public class ManagedNBT extends AbstractManagedData {
 
     public NBTTagCompound set(NBTTagCompound value) {
         lastValue = value.copy();
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            NBTTagCompound prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -56,9 +61,11 @@ public class ManagedNBT extends AbstractManagedData {
      * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     * @return
      */
-    public void setValidator(Function<NBTTagCompound, NBTTagCompound> validator) {
+    public ManagedNBT setValidator(Function<NBTTagCompound, NBTTagCompound> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -88,6 +95,7 @@ public class ManagedNBT extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = input.readNBTTagCompound();
+        notifyListeners(value);
     }
 
     @Override
@@ -98,6 +106,7 @@ public class ManagedNBT extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = compound.getCompoundTag(name);
+        notifyListeners(value);
     }
 
     @Override

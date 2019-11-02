@@ -1,11 +1,15 @@
 package com.brandon3055.brandonscore.lib.datamanager;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 /**
  * Created by brandon3055 on 12/06/2017.
  * <p>
  * wow so much less clutter than the old SyncableObject!
  */
-public abstract class AbstractManagedData implements IManagedData {
+public abstract class AbstractManagedData<T> implements IManagedData {
     private boolean isDirty = true;
 
     protected int index = 0;
@@ -13,6 +17,7 @@ public abstract class AbstractManagedData implements IManagedData {
     protected DataFlags flags = DataFlags.NONE;
     protected IDataManager dataManager;
     protected boolean ccscsFlag = false; //clientControlSetClientSide
+    protected List<Consumer<T>> valueListeners = new ArrayList<>();
 
     public AbstractManagedData(String name, /*T defaultValue,*/ DataFlags... flags) {
         this.name = name;
@@ -43,6 +48,7 @@ public abstract class AbstractManagedData implements IManagedData {
 
     @Override
     public void markDirty() {
+        validate();
         isDirty = true;
         dataManager.markDirty();
     }
@@ -68,5 +74,27 @@ public abstract class AbstractManagedData implements IManagedData {
 
     public void setCCSCS() {
         this.ccscsFlag = true;
+    }
+
+    /**
+     * No matter what a value listener will always have the current value stored in this object.
+     * The value listener is updated when any of the following actions occur.
+     *
+     * Client Side: when value syncs from client to server.
+     * Server Side: when value syncs from server to client.
+     * Server side: when value is loaded from nbt.
+     *
+     * @param listener A value listener
+     */
+    public void addValueListener(Consumer<T> listener) {
+        valueListeners.add(listener);
+    }
+
+    public void removeValueListener(Consumer<T> listener) {
+        valueListeners.remove(listener);
+    }
+
+    protected void notifyListeners(T newValue) {
+        valueListeners.forEach(listener -> listener.accept(newValue));
     }
 }

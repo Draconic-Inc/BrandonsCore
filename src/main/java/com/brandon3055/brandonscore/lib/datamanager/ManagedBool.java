@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedBool extends AbstractManagedData {
+public class ManagedBool extends AbstractManagedData<Boolean> {
 
     private boolean value;
     protected Function<Boolean, Boolean> validator = null;
@@ -28,20 +28,24 @@ public class ManagedBool extends AbstractManagedData {
     }
 
     public boolean set(boolean value) {
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            boolean prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
-
         return this.value;
     }
 
@@ -54,8 +58,9 @@ public class ManagedBool extends AbstractManagedData {
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      */
-    public void setValidator(Function<Boolean, Boolean> validator) {
+    public ManagedBool setValidator(Function<Boolean, Boolean> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -73,6 +78,7 @@ public class ManagedBool extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = input.readBoolean();
+        notifyListeners(value);
     }
 
     @Override
@@ -83,11 +89,12 @@ public class ManagedBool extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = compound.getBoolean(name);
+        notifyListeners(value);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
+        return getClass().getSimpleName() + ":[" + getName() + "=" + value + "]";
     }
 
     /**

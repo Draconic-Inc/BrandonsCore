@@ -27,8 +27,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
     protected long capacity;
     protected long maxReceive;
     protected long maxExtract;
-    protected IOTracker ioTracker = new IOTracker();
-    protected boolean ioTrackerEnabled = true;
+    protected IOTracker ioTracker;
 
     public OPStorage(long capacity) {
         this(capacity, capacity);
@@ -58,7 +57,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         long energyReceived = Math.min(capacity - energy, Math.min(this.maxReceive, maxReceive));
         if (!simulate) {
             energy += energyReceived;
-            if (ioTrackerEnabled && ioTracker != null) {
+            if (ioTracker != null) {
                 ioTracker.energyInserted(energyReceived);
             }
         }
@@ -74,7 +73,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         long energyExtracted = Math.min(energy, Math.min(this.maxExtract, maxExtract));
         if (!simulate) {
             energy -= energyExtracted;
-            if (ioTrackerEnabled && ioTracker != null) {
+            if (ioTracker != null) {
                 ioTracker.energyExtracted(energyExtracted);
             }
         }
@@ -121,7 +120,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         }
 
         energy += amount;
-        if (ioTrackerEnabled && ioTracker != null) {
+        if (ioTracker != null) {
             ioTracker.energyModified(amount);
         }
         return this;
@@ -205,18 +204,18 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
     public NBTTagCompound serializeNBT() {
         NBTTagCompound compound = new NBTTagCompound();
         smartWrite("energy", energy, compound);
-        smartWrite("capacity", capacity, compound);
-        smartWrite("max_receive", maxReceive, compound);
-        smartWrite("max_extract", maxExtract, compound);
+//        smartWrite("capacity", capacity, compound);  On second thought i think its better if the tile has full control over this.
+//        smartWrite("max_receive", maxReceive, compound);
+//        smartWrite("max_extract", maxExtract, compound);
         return compound;
     }
 
     @Override
     public void deserializeNBT(NBTTagCompound nbt) {
         energy = smartRead("energy", nbt);
-        capacity = smartRead("capacity", nbt);
-        maxReceive = smartRead("max_receive", nbt);
-        maxExtract = smartRead("max_extract", nbt);
+//        capacity = smartRead("capacity", nbt);
+//        maxReceive = smartRead("max_receive", nbt);
+//        maxExtract = smartRead("max_extract", nbt);
     }
 
     private void smartWrite(String name, long value, NBTTagCompound compound) {
@@ -242,6 +241,11 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         output.writeVarLong(capacity);
         output.writeVarLong(maxReceive);
         output.writeVarLong(maxExtract);
+        output.writeBoolean(ioTracker != null);
+        if (ioTracker != null) {
+            output.writeVarLong(ioTracker.currentInput());
+            output.writeVarLong(ioTracker.currentOutput());
+        }
     }
 
     @Override
@@ -250,6 +254,15 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         capacity = input.readVarLong();
         maxReceive = input.readVarLong();
         maxExtract = input.readVarLong();
+        if (input.readBoolean()) {
+            if (ioTracker == null) {
+                ioTracker = new IOTrackerSelfTimed();
+            }
+            ioTracker.syncClientValues(input.readVarLong(), input.readVarLong());
+        }
+        else if (ioTracker != null) {
+            ioTracker = null;
+        }
     }
 
     @Override
@@ -262,7 +275,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         if (vh instanceof ComparableValue) {
             ComparableValue v = (ComparableValue) vh;
             boolean mainCheck = v.energy == energy && v.capacity == capacity && v.maxExtract == maxExtract && v.maxReceive == maxReceive;
-            if (ioTrackerEnabled && ioTracker != null) {
+            if (ioTracker != null) {
                 return mainCheck && v.currentInput == ioTracker.currentInput() && v.currentOutput == ioTracker.currentOutput();
             }
             return mainCheck;
@@ -271,18 +284,15 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
         return false;
     }
 
-    public void setIoTracker(@Nullable IOTracker ioTracker) {
+    public void setIOTracker(@Nullable IOTracker ioTracker) {
         this.ioTracker = ioTracker;
     }
 
-    public void setIoTrackerEnabled(boolean ioTrackerEnabled) {
-        this.ioTrackerEnabled = ioTrackerEnabled;
-    }
 
     @Nullable
     @Override
     public IOInfo getIOInfo() {
-        return ioTrackerEnabled ? ioTracker : null;
+        return ioTracker;
     }
 
     protected static class ComparableValue {
@@ -298,7 +308,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
             capacity = storage.capacity;
             maxReceive = storage.maxReceive;
             maxExtract = storage.maxExtract;
-            if (storage.ioTrackerEnabled && storage.ioTracker != null) {
+            if (storage.ioTracker != null) {
                 currentInput = storage.ioTracker.currentInput();
                 currentOutput = storage.ioTracker.currentOutput();
             }

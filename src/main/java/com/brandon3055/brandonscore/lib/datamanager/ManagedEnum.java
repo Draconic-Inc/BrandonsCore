@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData {
+public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
 
     private T value;
     public Map<Integer, T> indexToValue = new HashMap<>();
@@ -33,17 +33,22 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData {
     }
 
     public T set(T value) {
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            T prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -58,9 +63,11 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData {
      * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     * @return
      */
-    public void setValidator(Function<T, T> validator) {
+    public ManagedEnum<T> setValidator(Function<T, T> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -78,6 +85,7 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = indexToValue.get(input.readByte() & 0xFF);
+        notifyListeners(value);
     }
 
     @Override
@@ -88,6 +96,7 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = indexToValue.get(compound.getByte(name) & 0xFF);
+        notifyListeners(value);
     }
 
     @Override

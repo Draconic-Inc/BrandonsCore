@@ -67,11 +67,13 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
     //Super Constructors
     public GuiButton() {
+        setSize(100, 20);
         setInsets(5, 5, 5, 5);
     }
 
     public GuiButton(int xPos, int yPos) {
         super(xPos, yPos);
+        setSize(100, 20);
         setInsets(5, 5, 5, 5);
     }
 
@@ -82,6 +84,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
     //Button Text
     public GuiButton(String buttonText) {
+        setSize(100, 20);
         setInsets(5, 5, 5, 5);
         this.displayString = buttonText;
     }
@@ -128,15 +131,18 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         this.buttonId = buttonId;
     }
 
+    @Deprecated //Fix Listeners
     public GuiButton setListener(IButtonListener buttonListener) {
         this.buttonListener = buttonListener;
         return this;
     }
 
+    @Deprecated //Fix Listeners
     public GuiButton setListener(Runnable action) {
         return setListener((b, m) -> action.run());
     }
 
+    @Deprecated //Fix Listeners
     public GuiButton setListener(Function0<Unit> action) {
         return setListener((b, m) -> {
             //Fixes casting issue.
@@ -609,13 +615,15 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     }
 
     //Must match the vanilla button texture
-    public void setTextureOverride(ResourceLocation textureOverride) {
+    public GuiButton setTextureOverride(ResourceLocation textureOverride) {
         this.textureOverride = textureOverride;
+        return this;
     }
 
     //Must match the vanilla button texture
-    public void setTextureSupplier(Supplier<ResourceLocation> textureSupplier) {
+    public GuiButton setTextureSupplier(Supplier<ResourceLocation> textureSupplier) {
         this.textureSupplier = textureSupplier;
+        return this;
     }
 
     //endregion

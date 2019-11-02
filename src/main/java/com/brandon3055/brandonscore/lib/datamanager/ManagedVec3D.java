@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedVec3D extends AbstractManagedData {
+public class ManagedVec3D extends AbstractManagedData<Vec3D> {
 
     private Vec3D value;
     private Vec3D lastValue;
@@ -33,18 +33,23 @@ public class ManagedVec3D extends AbstractManagedData {
     }
 
     public Vec3D set(Vec3D value) {
-        lastValue = value.copy();
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            Vec3D prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
+                lastValue = prev.copy();
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -59,9 +64,11 @@ public class ManagedVec3D extends AbstractManagedData {
      * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     * @return
      */
-    public void setValidator(Function<Vec3D, Vec3D> validator) {
+    public ManagedVec3D setValidator(Function<Vec3D, Vec3D> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -96,6 +103,7 @@ public class ManagedVec3D extends AbstractManagedData {
         value.x = input.readDouble();
         value.y = input.readDouble();
         value.z = input.readDouble();
+        notifyListeners(value);
     }
 
     @Override
@@ -116,6 +124,7 @@ public class ManagedVec3D extends AbstractManagedData {
             value.x = list.getDoubleAt(1);
             value.x = list.getDoubleAt(2);
         }
+        notifyListeners(value);
     }
 
     @Override

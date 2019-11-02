@@ -14,6 +14,7 @@ import java.util.Map;
  * Created by brandon3055 on 08/10/2019.
  * This is only used for synchronization purposes though it could theoretically be used to save values as well.
  */
+@Deprecated //Avoid if possible
 public class ManagedNBTSerializableMap extends AbstractManagedData {
 
     private Map<String, INBTSerializable<NBTTagCompound>> valueMap;

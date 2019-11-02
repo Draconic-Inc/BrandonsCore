@@ -2,33 +2,35 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import codechicken.lib.render.shader.ShaderProgram;
 import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.api.power.IOInfo;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.blocks.TileEnergyBase;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.render.BCShaders;
-import com.brandon3055.brandonscore.utils.InfoHelper;
+import com.brandon3055.brandonscore.utils.MathUtils;
 import com.brandon3055.brandonscore.utils.Utils;
+import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Supplier;
+
+import static net.minecraft.util.text.TextFormatting.*;
 
 /**
  * Created by brandon3055 on 18/10/2016.
  */
 public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
 
-    private long energy = 0;
-    private long maxEnergy = 0;
     private boolean drawHoveringText = true;
-    private IOPStorage energyHandler;
+    private IOPStorage energyHandler = null;
+    private Supplier<Long> capacitySupplier = null;
+    private Supplier<Long> energySupplier = null;
     private boolean horizontal = false;
     private boolean rfMode = false;
     private static ShaderProgram shaderProgram;
@@ -46,17 +48,19 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
         super(xPos, yPos, xSize, ySize);
     }
 
-    public GuiEnergyBar setEnergy(int energy, int maxEnergy) {
-        this.energy = energy;
-        this.maxEnergy = maxEnergy;
+    public GuiEnergyBar setEnergySupplier(Supplier<Long> energySupplier) {
+        this.energySupplier = energySupplier;
         return this;
     }
 
-    public GuiEnergyBar setEnergy(int energy) {
-        this.energy = energy;
+    public GuiEnergyBar setCapacitySupplier(Supplier<Long> capacitySupplier) {
+        this.capacitySupplier = capacitySupplier;
         return this;
     }
 
+    /**
+     * Forces this energy bar to display as RF/Energy Storage instead of OP/Operational Potential
+     */
     public GuiEnergyBar setRfMode(boolean rfMode) {
         this.rfMode = rfMode;
         return this;
@@ -72,9 +76,41 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
         return this;
     }
 
-    public GuiEnergyBar setEnergyHandler(IOPStorage energyHandler) {
+    public GuiEnergyBar setEnergyStorage(IOPStorage energyHandler) {
         this.energyHandler = energyHandler;
         return this;
+    }
+
+    protected boolean isRfMode() {
+        return rfMode;
+    }
+
+    protected long getCapacity() {
+        if (capacitySupplier != null) {
+            return capacitySupplier.get();
+        }
+        else if (energyHandler != null) {
+            return energyHandler.getMaxOPStored();
+        }
+        return 0;
+    }
+
+    protected long getEnergy() {
+        if (energySupplier != null) {
+            return energySupplier.get();
+        }
+        else if (energyHandler != null) {
+            return energyHandler.getOPStored();
+        }
+        return 0;
+    }
+
+    protected IOInfo getIOInfo() {
+        return energyHandler != null ? energyHandler.getIOInfo() : null;
+    }
+
+    protected float getSOC() {
+        return (float) getEnergy() / (float) Math.max(1, getCapacity());
     }
 
     @Override
@@ -82,10 +118,8 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
 
-//        energy = 100;
-//        maxEnergy = 200;
         int size = horizontal ? xSize() : ySize();
-        int draw = (int) ((double) energy / (double) maxEnergy * (size - 2));
+        int draw = (int) ((double) getEnergy() / (double) getCapacity() * (size - 2));
 
         int posY = yPos();
         int posX = xPos();
@@ -126,28 +160,43 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
         return new Rectangle(x, y, (int) scaledWidth, (int) scaledHeight);
     }
 
+    //TODO some sort of "modular tool tip" that would allow me to properly define key: value columns in the tooltip
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (drawHoveringText && isMouseOver(mouseX, mouseY)) {
-            List<String> list = new ArrayList<>();
-            if (rfMode) {
-                list.add(InfoHelper.ITC() + I18n.format("gui.bc.energy_storage.txt"));
+            long maxEnergy = getCapacity();
+            long energy = getEnergy();
+
+            String title = rfMode ? "gui.bc.energy_storage.txt" : "gui.bc.operational_potential.txt";
+            boolean shift = GuiScreen.isShiftKeyDown();
+            String suffix = rfMode ? "RF" : "OP";
+            String capString = (shift ? Utils.addCommas(maxEnergy) : Utils.formatNumber(maxEnergy)) + " " + suffix;
+            String storedString = (shift ? Utils.addCommas(energy) : Utils.formatNumber(energy)) + " " + suffix;
+            String percent = " (" + MathUtils.round(((double)energy / (double)maxEnergy) * 100D, 100) + "%)";
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(DARK_AQUA).append(I18n.format(title)).append("\n");
+
+            builder.append(GOLD).append(I18n.format("gui.bc.capacity.txt")).append(" ").append(GRAY).append(capString).append("\n");
+            builder.append(GOLD).append(I18n.format("gui.bc.stored.txt")).append(" ").append(GRAY).append(storedString).append(percent).append("\n");
+
+            IOInfo ioInfo = getIOInfo();
+            if (ioInfo != null) {
+                if (shift) {
+                    builder.append(GOLD).append(I18n.format("gui.bc.input.txt")).append(" ").append(GREEN).append("+").append(Utils.formatNumber(ioInfo.currentInput()));
+                    builder.append(" ").append(suffix).append("/t\n");
+
+                    builder.append(GOLD).append(I18n.format("gui.bc.output.txt")).append(" ").append(RED).append("-").append(Utils.formatNumber(ioInfo.currentOutput()));
+                    builder.append(" ").append(suffix).append("/t\n");
+                }
+                else {
+                    long io = ioInfo.currentInput() - ioInfo.currentOutput();
+                    builder.append(GOLD).append(I18n.format("gui.bc.io.txt")).append(" ").append(io > 0 ? GREEN + "+" : io < 0 ? RED : GRAY);
+                    builder.append(Utils.formatNumber(io)).append(" ").append(suffix).append("/t\n");
+                }
             }
-            else {
-                list.add(InfoHelper.ITC() + I18n.format("gui.bc.operational_potential.txt"));
-            }
 
-            //gui.bc.shift_for_more_info.txt
-
-            list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
-            list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
-
-            if (energyHandler != null && energyHandler.getIOInfo() != null) {
-                list.add("Input: " + energyHandler.getIOInfo().currentInput());
-                list.add("Output: " + energyHandler.getIOInfo().currentOutput());
-            }
-
-            drawHoveringText(list, mouseX, mouseY, fontRenderer, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            drawHoveringText(Lists.newArrayList(builder.toString().split("\n")), mouseX, mouseY, fontRenderer, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
             return true;
         }
 
@@ -156,13 +205,6 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
 
     @Override
     public boolean onUpdate() {
-        if (energyHandler != null) {
-            maxEnergy = energyHandler.getMaxOPStored();
-            energy = energyHandler.getOPStored();
-        }
-        if (energyHandler instanceof TileEnergyBase) {
-            energy = ((TileEnergyBase) energyHandler).energySync.get();
-        }
         return super.onUpdate();
     }
 
@@ -190,7 +232,7 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
 
                 shader.useShader(cache -> {
                     cache.glUniform1F("time", BCClientEventHandler.elapsedTicks / 10F);
-                    cache.glUniform1F("charge", (float) energy / (float) maxEnergy);
+                    cache.glUniform1F("charge", getSOC());
                     cache.glUniform2I("ePos", rect.x, rect.y);
                     cache.glUniform2I("eSize", rect.width, rect.height);
                     cache.glUniform2I("screenSize", mc.displayWidth, mc.displayHeight);

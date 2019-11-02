@@ -1,8 +1,6 @@
 package com.brandon3055.brandonscore.api;
 
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -22,8 +20,6 @@ public class TimeKeeper {
     protected void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             clientTick++;
-//            LogHelperBC.dev("Client: " + FMLCommonHandler.instance().getSide());
-            LogHelperBC.dev("Client-Effective: " + FMLCommonHandler.instance().getEffectiveSide());
         }
     }
 
@@ -31,8 +27,6 @@ public class TimeKeeper {
     protected void serverTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             serverTick++;
-//            LogHelperBC.dev("Server: " + FMLCommonHandler.instance().getSide());
-            LogHelperBC.dev("Server-Effective: " + FMLCommonHandler.instance().getEffectiveSide());
         }
     }
 

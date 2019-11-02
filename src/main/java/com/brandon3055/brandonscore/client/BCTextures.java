@@ -12,11 +12,10 @@ public class BCTextures {
     @Deprecated //TODO remove this
     public static final ResourceLocation MODULAR_GUI = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/modular_gui.png");
 
-    private static final ResourceLocation WIDGETS_LIGHT = new ResourceLocation(BrandonsCore.MODID + ":textures/gui/light/widgets.png");
-    private static final ResourceLocation WIDGETS_DARK = new ResourceLocation(BrandonsCore.MODID + ":textures/gui/dark/widgets.png");
+    private static final ResourceLocation WIDGETS_LIGHT = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/light/widgets.png");
+    private static final ResourceLocation WIDGETS_DARK = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/dark/widgets.png");
 
-    public static final ResourceLocation MISC_TEXTURES = new ResourceLocation(BrandonsCore.MODID + ":textures/gui/misc_textures.png");
-
+    public static final ResourceLocation WIDGETS_GENERIC = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/generic/widgets_generic.png");
 
     public static ResourceLocation widgets() {
         return BCConfig.darkMode ? WIDGETS_DARK : WIDGETS_LIGHT;

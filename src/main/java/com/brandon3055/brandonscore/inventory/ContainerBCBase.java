@@ -5,11 +5,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.IItemHandler;
 
 import java.util.List;
 
@@ -70,20 +70,19 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {
-        if (tile.getWorld().getTileEntity(tile.getPos()) != tile)
-        {
+        if (tile.getWorld().getTileEntity(tile.getPos()) != tile) {
             return false;
         }
-        else
-        {
-            return player.getDistanceSq((double)tile.getPos().getX() + 0.5D, (double)tile.getPos().getY() + 0.5D, (double)tile.getPos().getZ() + 0.5D) <= 64.0D;
+        else {
+            return player.getDistanceSq((double) tile.getPos().getX() + 0.5D, (double) tile.getPos().getY() + 0.5D, (double) tile.getPos().getZ() + 0.5D) <= 64.0D;
         }
     }
 
 
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int i) {
-        if (tile instanceof IInventory) {
+        IItemHandler handler = getItemHandler();
+        if (handler != null) {
             Slot slot = getSlot(i);
 
             if (slot != null && slot.getHasStack()) {
@@ -98,7 +97,7 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
                 }
                 else {
                     //Transferring from player to tile
-                    if (!mergeItemStack(stack, 36, 36 + ((IInventory) tile).getSizeInventory(), false)) {
+                    if (!mergeItemStack(stack, 36, 36 + handler.getSlots(), false)) {
                         return ItemStack.EMPTY;  //Return if failed to merge
                     }
                 }
@@ -145,5 +144,12 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
                 slot.putStack(stacks.get(i));
             }
         }
+    }
+
+    /**
+     * @return the item handler for the tile entity.
+     */
+    public IItemHandler getItemHandler() {
+        return null;
     }
 }

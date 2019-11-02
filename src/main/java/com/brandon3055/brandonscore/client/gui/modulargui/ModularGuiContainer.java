@@ -28,6 +28,7 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
     protected int zLevel = 0;
     protected T container;
     protected boolean itemTooltipsEnabled = true;
+    public boolean enableDefaultBackground = true;
 
     public ModularGuiContainer(T container) {
         super(container);
@@ -217,7 +218,9 @@ public abstract class ModularGuiContainer<T extends Container> extends GuiContai
 
     //This override is needed because vanilla draws item highlights with Depth disabled meaning they render on top of everything which just will not do!
     public void drawSuperScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
+        if (enableDefaultBackground) {
+            this.drawDefaultBackground();
+        }
         int i = this.guiLeft;
         int j = this.guiTop;
         this.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);

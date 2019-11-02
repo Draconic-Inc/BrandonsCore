@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
-import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
@@ -36,9 +36,9 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         try {
             BlockPos pos = packet.readPos();
             TileEntity tile = sender.world.getTileEntity(pos);
-            if (tile instanceof TileBCBase && ((TileBCBase) tile).verifyPlayerPermission(sender)) {
+            if (tile instanceof TileBCore && ((TileBCore) tile).verifyPlayerPermission(sender)) {
                 int id = packet.readByte() & 0xFF;
-                ((TileBCBase) tile).receivePacketFromClient(packet, sender, id);
+                ((TileBCore) tile).receivePacketFromClient(packet, sender, id);
             }
         }
         catch (Throwable e) {
@@ -78,8 +78,8 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         try {
             BlockPos pos = packet.readPos();
             TileEntity tile = sender.world.getTileEntity(pos);
-            if (tile instanceof TileBCBase && ((TileBCBase) tile).verifyPlayerPermission(sender)) {
-                ((TileBCBase) tile).getDataManager().receiveDataFromClient(packet);
+            if (tile instanceof TileBCore && ((TileBCore) tile).verifyPlayerPermission(sender)) {
+                ((TileBCore) tile).getDataManager().receiveDataFromClient(packet);
             }
         }
         catch (Throwable e) {

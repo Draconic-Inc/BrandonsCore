@@ -109,6 +109,7 @@ public class InfoHelper {
     /**
      * "Information Text Colour" The colour used for custom tool tip info
      */
+    @Deprecated //I would rather have colour built into modular GUI elements in most cases.
     public static String ITC() {
         return "" + TextFormatting.RESET + "" + TextFormatting.DARK_AQUA;
     }
@@ -116,6 +117,7 @@ public class InfoHelper {
     /**
      * "Highlighted Information Text Colour" The colour used for parts that need to stand out
      */
+    @Deprecated //I would rather have colour built into modular GUI elements in most cases.
     public static String HITC() {
         return "" + TextFormatting.RESET + "" + TextFormatting.ITALIC + "" + TextFormatting.GOLD;
     }

@@ -213,6 +213,12 @@ public class EnergyUtils {
         return storage == null ? 0 : storage.getMaxOPStored();
     }
 
+    public static boolean isFullyOrInvalid(ItemStack stack) {
+        IOPStorage storage = getStorage(stack);
+        if (storage == null) return true;
+        return storage.getOPStored() >= storage.getMaxOPStored();
+    }
+
 
 //    //region Energy Tile
 //

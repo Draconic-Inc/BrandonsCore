@@ -6,47 +6,49 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * Created by brandon3055 on 16/10/19.
+ *
+ * This io tracker does not need to be updated every tick in order to function.
+ * However it does have increased overhead as a result.
  */
-public class IOTracker implements IOInfo, Runnable {
+public class IOTrackerSelfTimed extends IOTracker {
 
-    protected long[] inputArray;
-    protected long[] outputArray;
-    protected long inputPerTick = 0;
-    protected long outputPerTick = 0;
-    protected int tick;
-    protected int lastInputCheck = 0;
-    protected int lastOutputCheck = 0;
+    protected int lastInputTick = 0;
+    protected int lastOutputTick = 0;
 
     /**
      * @param averageTime Over how many ticks the IO data will be averaged
      */
-    public IOTracker(int averageTime) {
-        this.inputArray = new long[averageTime];
-        this.outputArray = new long[averageTime];
+    public IOTrackerSelfTimed(int averageTime) {
+        super(averageTime);
     }
 
-    public IOTracker() {
-        this(20);
+    public IOTrackerSelfTimed() {
+        super(20);
     }
 
-    /**
-     * This method must be called every tick (server side) by whatever is implementing the parent OPStorage. e.g. a tile entity.
-     * If this is not possible then use {@link IOTrackerSelfTimed} Its less efficient but it does not need to be updated.
-     */
-    public void run() {
-        tick++;
-        inputArray[tick % inputArray.length] = 0;
-        outputArray[tick % outputArray.length] = 0;
-    }
-
+    @Override
     public void energyInserted(long amount) {
+        int tick = TimeKeeper.getServerTick();
+        zeroSkippedTicks(inputArray, lastInputTick, tick);
+        if (tick != lastInputTick) {
+            lastInputTick = tick;
+            inputArray[tick % inputArray.length] = 0;
+        }
         inputArray[tick % inputArray.length] += amount;
     }
 
+    @Override
     public void energyExtracted(long amount) {
+        int tick = TimeKeeper.getServerTick();
+        zeroSkippedTicks(outputArray, lastInputTick, tick);
+        if (tick != lastOutputTick) {
+            lastOutputTick = tick;
+            outputArray[tick % outputArray.length] = 0;
+        }
         outputArray[tick % outputArray.length] += amount;
     }
 
+    @Override
     public void energyModified(long amount) {
         if (amount > 0) {
             energyInserted(amount);
@@ -56,9 +58,12 @@ public class IOTracker implements IOInfo, Runnable {
         }
     }
 
-    public void syncClientValues(long inputPerTick, long outputPerTick) {
-        this.inputPerTick = inputPerTick;
-        this.outputPerTick = outputPerTick;
+    private void zeroSkippedTicks(long[] array, int lastUpdateTick, int currentTick) {
+        if (currentTick > lastUpdateTick) {
+            for (int i = 1; i < Math.min(currentTick - lastUpdateTick, array.length + 1); i++) {
+                array[(lastUpdateTick + i) % array.length] = 0;
+            }
+        }
     }
 
     @Override
@@ -67,7 +72,9 @@ public class IOTracker implements IOInfo, Runnable {
             return inputPerTick;
         }
         else {
+            int tick = TimeKeeper.getServerTick();
             if (tick != lastInputCheck) {
+                zeroSkippedTicks(inputArray, lastInputTick, tick);
                 lastInputCheck = tick;
                 inputPerTick = averageLongArray(inputArray, tick % inputArray.length);
             }
@@ -83,24 +90,11 @@ public class IOTracker implements IOInfo, Runnable {
         else {
             int tick = TimeKeeper.getServerTick();
             if (tick != lastOutputCheck) {
+                zeroSkippedTicks(outputArray, lastOutputTick, tick);
                 lastOutputCheck = tick;
                 outputPerTick = averageLongArray(outputArray, tick % inputArray.length);
             }
             return outputPerTick;
         }
-    }
-
-    //This gets a little inaccurate when dealing with extremely large numbers but for this use case it is more than accurate enough.
-    public static long averageLongArray(long[] array, int skipIndex) {
-        long average = 0;
-        double remainder = 0;
-        int count = array.length - 1;
-        for (int i = 0; i < array.length; i++) {
-            if (i == skipIndex) continue;
-            long val = array[i];
-            average += val / count;
-            remainder += ((double) val % (double) count) / (double) count;
-        }
-        return average + Math.round(remainder + 0.1F);
     }
 }

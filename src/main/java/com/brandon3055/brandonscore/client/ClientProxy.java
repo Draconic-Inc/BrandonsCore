@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.packet.PacketCustom;
-import codechicken.lib.util.ClientUtils;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.command.BCClientCommands;
@@ -11,15 +10,20 @@ import com.brandon3055.brandonscore.network.ClientPacketHandler;
 import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.ModelUtils;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.animation.ITimeValue;
+import net.minecraftforge.common.model.animation.IAnimationStateMachine;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 /**
@@ -117,7 +121,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public boolean isRemoteWorld() {
-        return ClientUtils.inWorld() && Minecraft.getMinecraft().world.isRemote;
+    public IAnimationStateMachine loadASM(ResourceLocation location, ImmutableMap<String, ITimeValue> customParameters) {
+        return ModelLoaderRegistry.loadASM(location, customParameters);
     }
 }

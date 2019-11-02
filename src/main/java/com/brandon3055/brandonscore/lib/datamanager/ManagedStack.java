@@ -12,7 +12,7 @@ import java.util.function.Function;
  * Created by brandon3055 on 12/06/2017.
  * Will finish this class if i ever find a use for it
  */
-public class ManagedStack extends AbstractManagedData {
+public class ManagedStack extends AbstractManagedData<ItemStack> {
 
     private ItemStack value;
     private ItemStack lastValue;
@@ -32,18 +32,23 @@ public class ManagedStack extends AbstractManagedData {
     }
 
     public ItemStack set(ItemStack value) {
-        lastValue = value.copy();
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            ItemStack prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
+                lastValue = prev.copy();
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -58,9 +63,11 @@ public class ManagedStack extends AbstractManagedData {
      * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     * @return
      */
-    public void setValidator(Function<ItemStack, ItemStack> validator) {
+    public ManagedStack setValidator(Function<ItemStack, ItemStack> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -90,6 +97,7 @@ public class ManagedStack extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = input.readItemStack();
+        notifyListeners(value);
     }
 
     @Override
@@ -100,6 +108,7 @@ public class ManagedStack extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = new ItemStack(compound.getCompoundTag(name));
+        notifyListeners(value);
     }
 
     @Override

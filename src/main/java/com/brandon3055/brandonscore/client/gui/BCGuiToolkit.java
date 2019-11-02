@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCTextures;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
@@ -10,6 +11,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
+import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.MathUtils;
@@ -65,9 +67,10 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
     public GuiButton createThemeButton() {
         GuiButton button = new GuiButton();
         button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, BCTextures.MISC_TEXTURES);
+        GuiTexture icon = new GuiTexture(12, 12, BCTextures.WIDGETS_GENERIC);
         icon.setTexXGetter(() -> darkMode ? 12 : 0);
-        icon.setTexYGetter(() -> button.getHoverTime() > 0 ? 12 : 0);
+//        icon.setTexYGetter(() -> button.getHoverTime() > 0 ? 12 : 0);
+        icon.setTexYGetter(() -> 0);
         button.addChild(icon);
         button.setHoverText(element -> darkMode ? I18n.format("bc.guitoolkit.theme.set.light") : I18n.format("bc.guitoolkit.theme.set.dark"));
         button.setListener(() -> {
@@ -94,6 +97,24 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
         if (jeiExclude) {
             jeiExclude(button);
         }
+        return button;
+    }
+
+    public GuiButton createRSSwitch(IRSSwitchable switchable) {
+        GuiButton button = new GuiButton();
+        button.setSize(12, 12);
+        GuiTexture icon = new GuiTexture(12, 12, BCTextures.WIDGETS_GENERIC);
+        icon.setTexXGetter(() -> 36 + (switchable.getRSMode().index * 12));
+        button.addChild(icon);
+        icon.setYPosMod(button::yPos);
+        button.setHoverText(element -> I18n.format("bc.guitoolkit.rs_mode." + switchable.getRSMode().name().toLowerCase()));
+        button.setListener((guiButton, pressed) -> switchable.setRSMode(switchable.getRSMode().next(GuiScreen.isShiftKeyDown() || pressed == 1)));
+        return button;
+    }
+
+    public GuiButton createRSSwitch(MGuiElementBase parent, IRSSwitchable switchable) {
+        GuiButton button = createRSSwitch(switchable);
+        parent.addChild(button);
         return button;
     }
 
@@ -136,6 +157,30 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
     public GuiButton createButton(String unlocalizedText) {
         return createButton(unlocalizedText, null);
+    }
+
+    public GuiButton createRectButton(String unlocalizedText, @Nullable MGuiElementBase parent) {
+        GuiButton button = new GuiButton(I18n.format(unlocalizedText));
+        button.setRectFillColourGetter((hovering, disabled) -> hovering ? (darkMode ? 0xFF6060AA : 0xFF60AAFF) : (darkMode ? 0xFF606060 : 0xFF808080));
+        button.setRectBorderColourGetter((hovering, disabled) -> hovering ? (darkMode ? 0xFFFFFFFF : 0xFF000000) : (darkMode ? 0xFFDDDDDD : 0xFF000000));
+
+//        if (!GuiHelper.isInRect(10, 10, 50, 100, mouseX, mouseY)) {
+//            drawBorderedRect(10, 10, 50, 14, 1, 0xFF808080, 0xFF000000);
+//            drawBorderedRect(10, 100, 50, 14, 1, 0xFF606060, 0xFFDDDDDD);
+//        }
+//        else {
+//            drawBorderedRect(10, 10, 50, 14, 1, 0xFF60AAFF, 0xFF000000);
+//            drawBorderedRect(10, 100, 50, 14, 1, 0xFF6060AA, 0xFFFFFFFF);
+//        }
+
+        if (parent != null) {
+            parent.addChild(button);
+        }
+        return button;
+    }
+
+    public GuiButton createRectButton(String unlocalizedText) {
+        return createRectButton(unlocalizedText, null);
     }
 
     //UI Heading
@@ -258,11 +303,9 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
         return energyBar;
     }
 
-    public GuiEnergyBar createEnergyBar(MGuiElementBase parent, int capacity) {
+    public GuiEnergyBar createEnergyBar(MGuiElementBase parent, IOPStorage storage) {
         GuiEnergyBar energyBar = new GuiEnergyBar();
-        energyBar.setEnergy(0, capacity);
-        //TODO add ability to bind to
-        //TODO Theme? Maybe? Maybe not needed?
+        energyBar.setEnergyStorage(storage);
 
         if (parent != null) {
             parent.addChild(energyBar);
@@ -270,12 +313,12 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
         return energyBar;
     }
 
-    public GuiEnergyBar createEnergyBar(int hotBarSpacing) {
-        return createEnergyBar(null, hotBarSpacing);
+    public GuiEnergyBar createEnergyBar(IOPStorage storage) {
+        return createEnergyBar(null, storage);
     }
 
     public GuiEnergyBar createEnergyBar() {
-        return createEnergyBar(4);
+        return createEnergyBar((IOPStorage) null);
     }
 
     //Info Panel
@@ -388,9 +431,9 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
         private final MGuiElementBase parent;
         private boolean leftSide = false;
         private boolean hasPI = true;
-        private static boolean expanded = false;
-        private static double animState = 0;
-        private Supplier<Point> origin;
+        public static boolean expanded = false;
+        public static double animState = 0;
+        public Supplier<Point> origin;
         public String hoverText = I18n.format("bc.guitoolkit.uiinfo");
 
         public InfoPanel(MGuiElementBase parent, boolean leftSide) {
@@ -401,6 +444,14 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
                 setHoverText(hoverText);
             }
             updatePosSize();
+        }
+
+        @Override
+        public void reloadElement() {
+            super.reloadElement();
+            if (expanded) {
+                updatePosSize();
+            }
         }
 
         public void setOrigin(Supplier<Point> origin) {
@@ -419,6 +470,62 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
 
         public InfoPanel addElement(MGuiElementBase element) {
             return addElement(element, new Dimension(element.xSize(), element.ySize()));
+        }
+
+        public GuiLabel addDynamicLabel(Supplier<String> stringSupplier, Dimension preferredSize) {
+            GuiLabel label = new GuiLabel().setAlignment(GuiAlign.LEFT);
+            label.setSize(preferredSize.width, preferredSize.height);
+            label.setDisplaySupplier(stringSupplier);
+            addElement(label, preferredSize);
+            return label;
+        }
+
+        public GuiLabel addDynamicLabel(Supplier<String> stringSupplier, int xSize, int ySize) {
+            return addDynamicLabel(stringSupplier, new Dimension(xSize, ySize));
+        }
+
+        public MGuiElementBase addLabeledValue(String labelText, int valueOffset, int lineHeight, Supplier<String> valueSupplier, boolean multiLine) {
+            MGuiElementBase container = new MGuiElementBase();
+            GuiLabel label = new GuiLabel(labelText).setAlignment(GuiAlign.LEFT);
+            label.setSize(multiLine ? fontRenderer.getStringWidth(labelText) : valueOffset, lineHeight);
+            container.addChild(label);
+
+            Dimension dimension;//
+            if (multiLine) {
+                dimension = new Dimension(Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(valueSupplier.get())), lineHeight * 2);
+            }
+            else {
+                dimension = new Dimension(valueOffset + fontRenderer.getStringWidth(valueSupplier.get()), lineHeight);
+            }
+
+            GuiLabel valueLabel = new GuiLabel(){
+                @Override
+                public boolean onUpdate() {
+                    int lastWidth = dimension.width;
+                    if (multiLine) {
+                        dimension.width = Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(valueSupplier.get()));
+                    }
+                    else {
+                        dimension.width = valueOffset + fontRenderer.getStringWidth(valueSupplier.get());
+                    }
+
+                    if (dimension.width != lastWidth) {
+                        updatePosSize();
+                    }
+                    setMaxXPos(container.maxXPos(), true);
+                    return super.onUpdate();
+                }
+            };
+            valueLabel.setTrim(false);
+            valueLabel.setAlignment(GuiAlign.LEFT);
+            valueLabel.setDisplaySupplier(valueSupplier);
+            valueLabel.setYSize(lineHeight);
+            valueLabel.setXPos(valueOffset);
+            valueLabel.setYPos(multiLine ? lineHeight : 0);
+            container.addChild(valueLabel);
+
+            addElement(container, dimension);
+            return container;
         }
 
         @Override
@@ -440,13 +547,13 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
                 prefBounds.height += dim.height;
             }
 
-            Dimension available = new Dimension();
-            available.height = parent.screenHeight - parent.yPos() - (leftSide && hasPI ? 25 : 0);
-            available.width = leftSide ? parent.xPos() - 10 : parent.screenWidth - parent.maxXPos() - 10;
-            Dimension actSize = new Dimension(Math.min(available.width, prefBounds.width), Math.min(available.height, prefBounds.height));
+//            Dimension available = new Dimension();
+//            available.height = parent.screenHeight - parent.yPos() - (leftSide && hasPI ? 25 : 0);
+//            available.width = leftSide ? parent.xPos() - 10 : parent.screenWidth - parent.maxXPos() - 10;
+            Dimension actSize = prefBounds;//new Dimension(Math.min(available.width, prefBounds.width), Math.min(available.height, prefBounds.height));
             int xPos = leftSide ? parent.xPos() - xSize() - 2 : parent.maxXPos() + 2;
             int yPos = parent.yPos() + (leftSide && hasPI ? 25 : 0);
-            Rectangle bounds = new Rectangle(xPos, yPos, actSize.width + 6, actSize.height + 6);
+            Rectangle bounds = /*new Rectangle(xPos, yPos, prefBounds.width + 6, prefBounds.height + 6);*/new Rectangle(xPos, yPos, actSize.width + 8, actSize.height + 8);
             Point origin = this.origin == null ? new Point(xPos, yPos) : this.origin.get();
             Rectangle collapsed = new Rectangle(origin.x, origin.y, 12, 12);
 
@@ -455,13 +562,16 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
             int sy = (int) MathUtils.map(animState, 0, 1, collapsed.y, bounds.y);
             int sw = (int) MathUtils.map(animState, 0, 1, collapsed.width, bounds.width);
             int sh = (int) MathUtils.map(animState, 0, 1, collapsed.height, bounds.height);
+            if (sx + sw > screenWidth) {
+                sx -= (sx + sw) - screenWidth;
+            }
             setPosAndSize(sx, sy, sw, sh);
 
             int y = yPos + 3;
             for (MGuiElementBase element : elementsDimMap.keySet()) {
                 if (animState >= 1) {
                     element.setEnabled(true);
-                    element.setPos(xPos + 3, y);
+                    element.setPos(xPos() + 4, y);
                     Dimension dim = elementsDimMap.get(element);
                     element.setXSize(Math.min(actSize.width, dim.width));
                     element.setYSize(Math.min((int) (((double) actSize.height / prefBounds.height) * dim.height), dim.height));
@@ -481,8 +591,8 @@ public class BCGuiToolkit<T extends GuiScreen & IModularGui> {
             int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
 
             if (fadeAlpha < 1) {
-                bindTexture(BCTextures.widgets());
-                drawTexturedModalRect(xPos(), yPos(), 0, 18, 12, 12);
+                bindTexture(BCTextures.WIDGETS_GENERIC);
+                drawTexturedModalRect(xPos(), yPos(), 24, 0, 12, 12);
             }
 
             drawColouredRect(xPos(), yPos() + 1, xSize(), ySize() - 2, col1);

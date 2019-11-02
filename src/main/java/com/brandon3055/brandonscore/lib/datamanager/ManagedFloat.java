@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedFloat extends AbstractManagedData {
+public class ManagedFloat extends AbstractManagedData<Float> {
 
     private float value;
     protected Function<Float, Float> validator = null;
@@ -28,17 +28,22 @@ public class ManagedFloat extends AbstractManagedData {
     }
 
     public float set(float value) {
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            float prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -54,8 +59,9 @@ public class ManagedFloat extends AbstractManagedData {
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      */
-    public void setValidator(Function<Float, Float> validator) {
+    public ManagedFloat setValidator(Function<Float, Float> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -73,6 +79,7 @@ public class ManagedFloat extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = input.readFloat();
+        notifyListeners(value);
     }
 
     @Override
@@ -83,6 +90,7 @@ public class ManagedFloat extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = compound.getFloat(name);
+        notifyListeners(value);
     }
 
     @Override

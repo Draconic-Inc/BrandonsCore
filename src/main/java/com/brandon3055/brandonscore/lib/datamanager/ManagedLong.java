@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedLong extends AbstractManagedData {
+public class ManagedLong extends AbstractManagedData<Long> {
 
     private long value;
     protected Function<Long, Long> validator = null;
@@ -28,17 +28,22 @@ public class ManagedLong extends AbstractManagedData {
     }
 
     public long set(long value) {
-        validate();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
+            long prev = this.value;
+            this.value = value;
+
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
                 set = ccscsFlag;
             }
 
             if (set) {
-                this.value = value;
                 markDirty();
+                notifyListeners(value);
+            }
+            else {
+                this.value = prev;
             }
         }
 
@@ -53,9 +58,11 @@ public class ManagedLong extends AbstractManagedData {
      * Use to validate new values. Use this to enforce any restrictions such as min/max then return the corrected value.
      *
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
+     * @return
      */
-    public void setValidator(Function<Long, Long> validator) {
+    public ManagedLong setValidator(Function<Long, Long> validator) {
         this.validator = validator;
+        return this;
     }
 
     @Override
@@ -73,6 +80,7 @@ public class ManagedLong extends AbstractManagedData {
     @Override
     public void fromBytes(MCDataInput input) {
         value = input.readLong();
+        notifyListeners(value);
     }
 
     @Override
@@ -83,6 +91,7 @@ public class ManagedLong extends AbstractManagedData {
     @Override
     public void fromNBT(NBTTagCompound compound) {
         value = compound.getLong(name);
+        notifyListeners(value);
     }
 
     @Override
