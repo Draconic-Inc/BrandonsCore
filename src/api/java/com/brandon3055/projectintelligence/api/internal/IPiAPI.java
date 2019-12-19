@@ -1,10 +1,10 @@
 package com.brandon3055.projectintelligence.api.internal;
 
 import com.brandon3055.projectintelligence.api.IGuiDocRegistry;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.Fluid;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -24,7 +24,7 @@ public interface IPiAPI {
      * @param parentScreen The screen the user will be returned to when the PI UI is closed.
      * @since PI 1.0.0
      */
-    void openGui(@Nullable GuiScreen parentScreen);
+    void openGui(@Nullable Screen parentScreen);
 
     /**
      * Opens the main project intelligence gui and opens the specified documentation page.
@@ -34,7 +34,7 @@ public interface IPiAPI {
      *                     You can get this by opening the PI GUI right-clicking on a page in the page list.
      * @since PI 1.0.0
      */
-    void openGui(@Nullable GuiScreen parentScreen, String pageURI);
+    void openGui(@Nullable Screen parentScreen, String pageURI);
 
     /**
      * This method allows you to open pi and display a filtered list of pages.
@@ -43,7 +43,7 @@ public interface IPiAPI {
      * @param pageURIs A list of pages to display in the page list. The first page will be selected.
      * @since PI 1.0.0
      */
-    void openGui(@Nullable GuiScreen parentScreen, List<String> pageURIs);
+    void openGui(@Nullable Screen parentScreen, List<String> pageURIs);
 
     /**
      * Opens the main project intelligence gui and opens the documentation for the specified mod.
@@ -54,7 +54,7 @@ public interface IPiAPI {
      * @param modid the mod id of the mod who's documentation is to be displayed.
      * @since PI 1.0.0
      */
-    void openModPage(@Nullable GuiScreen parentScreen, String modid);
+    void openModPage(@Nullable Screen parentScreen, String modid);
 
     /**
      * This method returns a list containing every the page uri for loaded documentation page.

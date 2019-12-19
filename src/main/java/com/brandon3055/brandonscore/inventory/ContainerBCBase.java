@@ -1,14 +1,14 @@
 package com.brandon3055.brandonscore.inventory;
 
 import com.brandon3055.brandonscore.blocks.TileBCore;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IContainerListener;
-import net.minecraft.inventory.Slot;
+import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.List;
@@ -23,18 +23,43 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
      * A reference to the attached tile. This may be null if the container is not attached to a tile
      */
     public T tile;
-    protected EntityPlayer player;
+    protected PlayerEntity player;
+    protected ContainerSlotLayout slotLayout;
 
-    public ContainerBCBase() {
-    }
+// I want there to ALWAYS be a player
+//    public ContainerBCBase() {
+//    }
+//
+//    public ContainerBCBase(T tile) {
+//        this.tile = tile;
+//    }
+//
+//    public ContainerBCBase(T tile, LayoutFactory<T> factory) {
+//        this(tile);
+//        this.slotLayout = factory.buildLayout(null, tile).retrieveSlotsForContainer(this::addSlotToContainer);
+//    }
 
-    public ContainerBCBase(T tile) {
-        this.tile = tile;
-    }
-
-    public ContainerBCBase(EntityPlayer player, T tile) {
-        this(tile);
+    public ContainerBCBase(PlayerEntity player) {
         this.player = player;
+    }
+
+    public ContainerBCBase(PlayerEntity player, T tile) {
+        this(player);
+        this.tile = tile;
+        this.tile.onPlayerOpenContainer(player);
+    }
+
+    public ContainerBCBase(PlayerEntity player, T tile, LayoutFactory<T> factory) {
+        this(player, tile);
+        this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlotToContainer);
+    }
+
+    @Override
+    public void onContainerClosed(PlayerEntity playerIn) {
+        super.onContainerClosed(playerIn);
+        if (tile != null) {
+            tile.onPlayerCloseContainer(playerIn);
+        }
     }
 
     public ContainerBCBase addPlayerSlots(int posX, int posY) {
@@ -63,13 +88,13 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
     @Override
     public void addListener(IContainerListener listener) {
         super.addListener(listener);
-        if (listener instanceof EntityPlayerMP && tile != null) {
-            tile.getDataManager().forcePlayerSync((EntityPlayerMP) listener);
+        if (listener instanceof ServerPlayerEntity && tile != null) {
+            tile.getDataManager().forcePlayerSync((ServerPlayerEntity) listener);
         }
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer playerIn) {
+    public boolean canInteractWith(PlayerEntity playerIn) {
         if (tile.getWorld().getTileEntity(tile.getPos()) != tile) {
             return false;
         }
@@ -80,7 +105,7 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
 
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int i) {
+    public ItemStack transferStackInSlot(PlayerEntity player, int i) {
         IItemHandler handler = getItemHandler();
         if (handler != null) {
             Slot slot = getSlot(i);
@@ -150,6 +175,10 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
      * @return the item handler for the tile entity.
      */
     public IItemHandler getItemHandler() {
-        return null;
+        return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+    }
+
+    public ContainerSlotLayout getSlotLayout() {
+        return slotLayout;
     }
 }

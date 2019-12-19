@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.capability;
 
 import com.brandon3055.brandonscore.lib.IValueHashable;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.EnergyStorage;
 
@@ -10,7 +10,7 @@ import net.minecraftforge.energy.EnergyStorage;
  * <p>
  * aka EnergyStorageNBTSerializable
  */
-public class EnergyStorageSerial extends EnergyStorage implements INBTSerializable<NBTTagCompound>, IValueHashable<EnergyStorageSerial.ComparableValue> {
+public class EnergyStorageSerial extends EnergyStorage implements INBTSerializable<CompoundNBT>, IValueHashable<EnergyStorageSerial.ComparableValue> {
 
     public EnergyStorageSerial(int capacity) {
         super(capacity);
@@ -29,8 +29,8 @@ public class EnergyStorageSerial extends EnergyStorage implements INBTSerializab
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound compound = new NBTTagCompound();
+    public CompoundNBT serializeNBT() {
+        CompoundNBT compound = new CompoundNBT();
         compound.setInteger("energy", energy);
         compound.setInteger("capacity", capacity);
         compound.setInteger("max_receive", maxReceive);
@@ -39,7 +39,7 @@ public class EnergyStorageSerial extends EnergyStorage implements INBTSerializab
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundNBT nbt) {
         energy = nbt.getInteger("energy");
         capacity = nbt.getInteger("capacity");
         maxReceive = nbt.getInteger("max_receive");

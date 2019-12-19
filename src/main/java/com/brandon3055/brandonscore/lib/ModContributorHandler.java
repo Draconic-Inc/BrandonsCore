@@ -12,11 +12,11 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -123,7 +123,7 @@ public class ModContributorHandler {
     /**
      * @return true if the player is a contributor.
      */
-    public boolean isPlayerContributor(EntityPlayer player) {
+    public boolean isPlayerContributor(PlayerEntity player) {
         return getContributorData(player) != null;
     }
 
@@ -131,7 +131,7 @@ public class ModContributorHandler {
      * @return the players contributor data if they are a contributor or null if they are not
      */
     @Nullable
-    public ContributorData getContributorData(EntityPlayer player) {
+    public ContributorData getContributorData(PlayerEntity player) {
         if (player == null || player.getGameProfile().getId() == null) {
             return null;
         }
@@ -263,9 +263,9 @@ public class ModContributorHandler {
 
     @SubscribeEvent
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.player.world.isRemote && event.player instanceof EntityPlayerMP) {
+        if (!event.player.world.isRemote && event.player instanceof ServerPlayerEntity) {
             for (ContributorData data : nameContributorDataMap.values()) {
-                BrandonsCore.network.sendTo(new PacketContributor(modid, data.name, data.config), (EntityPlayerMP) event.player);
+                BrandonsCore.network.sendTo(new PacketContributor(modid, data.name, data.config), (ServerPlayerEntity) event.player);
             }
         }
     }
@@ -280,20 +280,20 @@ public class ModContributorHandler {
 
     //region Config
 
-    public void handleConfigChange(ContributorData contributor, NBTTagCompound config) {
+    public void handleConfigChange(ContributorData contributor, CompoundNBT config) {
         contributor.config = config;
         BrandonsCore.network.sendToAll(new PacketContributor(modid, contributor.name, config));
         saveConfig();
     }
 
     @SideOnly(Side.CLIENT)
-    public void configReceivedClient(NBTTagCompound config, String contributor) {
+    public void configReceivedClient(CompoundNBT config, String contributor) {
         if (nameContributorDataMap.containsKey(contributor)) {
             nameContributorDataMap.get(contributor).config = config;
         }
     }
 
-    public void configReceivedServer(NBTTagCompound config, String contributor, EntityPlayerMP sender) {
+    public void configReceivedServer(CompoundNBT config, String contributor, ServerPlayerEntity sender) {
         ContributorData data = nameContributorDataMap.get(contributor);
         ContributorData seder = getContributorData(sender);
         if (data != null && data == seder) {
@@ -359,7 +359,7 @@ public class ModContributorHandler {
 
     public class ContributorData {
         private JsonObject jsonObject;
-        private NBTTagCompound config = new NBTTagCompound();
+        private CompoundNBT config = new CompoundNBT();
         public final String name;
         public final UUID uuid;
 
@@ -474,7 +474,7 @@ public class ModContributorHandler {
          *
          * @return the config compound.
          */
-        public NBTTagCompound getConfigNBT() {
+        public CompoundNBT getConfigNBT() {
             return config;
         }
 

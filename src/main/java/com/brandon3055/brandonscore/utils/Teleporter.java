@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 public class Teleporter
 {
@@ -117,7 +117,7 @@ public class Teleporter
             writeProtected = b;
         }
 
-        public void writeToNBT(NBTTagCompound compound) {
+        public void writeToNBT(CompoundNBT compound) {
             compound.setDouble("X", xCoord);
             compound.setDouble("Y", yCoord);
             compound.setDouble("Z", zCoord);
@@ -129,7 +129,7 @@ public class Teleporter
             compound.setBoolean("WP", writeProtected);
         }
 
-        public void readFromNBT(NBTTagCompound compound) {
+        public void readFromNBT(CompoundNBT compound) {
             xCoord = compound.getDouble("X");
             yCoord = compound.getDouble("Y");
             zCoord = compound.getDouble("Z");

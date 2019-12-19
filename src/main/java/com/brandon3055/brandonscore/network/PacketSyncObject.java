@@ -38,6 +38,6 @@ public abstract class PacketSyncObject<REQ extends IMessage, REPLY extends IMess
             LogHelperBC.error("[SyncPacket#addPacketClient] HAY!!! I caught you this time! WRONG SIDE!!!! - " + message.getClass());
             return;
         }
-        Minecraft.getMinecraft().addScheduledTask(this);
+        Minecraft.getInstance().addScheduledTask(this);
     }
 }

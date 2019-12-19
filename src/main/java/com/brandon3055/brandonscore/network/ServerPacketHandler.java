@@ -7,18 +7,22 @@ import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHandler {
     @Override
-    public void handlePacket(PacketCustom packet, EntityPlayerMP sender, INetHandlerPlayServer handler) {
+    public void handlePacket(PacketCustom packet, ServerPlayerEntity sender, INetHandlerPlayServer handler) {
         switch (packet.getType()) {
             case PacketDispatcher.S_TILE_MESSAGE:
                 handleTileMessage(packet, sender, handler);
@@ -32,11 +36,11 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    private void handleTileMessage(PacketCustom packet, EntityPlayerMP sender, INetHandlerPlayServer handler) {
+    private void handleTileMessage(PacketCustom packet, ServerPlayerEntity sender, INetHandlerPlayServer handler) {
         try {
             BlockPos pos = packet.readPos();
             TileEntity tile = sender.world.getTileEntity(pos);
-            if (tile instanceof TileBCore && ((TileBCore) tile).verifyPlayerPermission(sender)) {
+            if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
                 int id = packet.readByte() & 0xFF;
                 ((TileBCore) tile).receivePacketFromClient(packet, sender, id);
             }
@@ -47,7 +51,7 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    private void handlePlayerAccess(PacketCustom packet, EntityPlayerMP sender, INetHandlerPlayServer handler) {
+    private void handlePlayerAccess(PacketCustom packet, ServerPlayerEntity sender, INetHandlerPlayServer handler) {
         int button = packet.readByte();
         if (!sender.canUseCommand(3, "bcore_util")) {
             sender.sendMessage(new TextComponentString("You do not have permission to use that command").setStyle(new Style().setColor(TextFormatting.RED)));
@@ -55,7 +59,7 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
         ContainerPlayerAccess container = sender.openContainer instanceof ContainerPlayerAccess ? (ContainerPlayerAccess) sender.openContainer : null;
         if (container == null) return;
-        EntityPlayer other = container.playerAccess;
+        PlayerEntity other = container.playerAccess;
         switch (button) {
             case 0: //tp to player
                 TeleportUtils.teleportEntity(sender, other.dimension, other.posX, other.posY, other.posZ, other.rotationYaw, other.rotationPitch);
@@ -74,11 +78,11 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    private void handleTileDataManager(PacketCustom packet, EntityPlayerMP sender, INetHandlerPlayServer handler) {
+    private void handleTileDataManager(PacketCustom packet, ServerPlayerEntity sender, INetHandlerPlayServer handler) {
         try {
             BlockPos pos = packet.readPos();
             TileEntity tile = sender.world.getTileEntity(pos);
-            if (tile instanceof TileBCore && ((TileBCore) tile).verifyPlayerPermission(sender)) {
+            if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
                 ((TileBCore) tile).getDataManager().receiveDataFromClient(packet);
             }
         }
@@ -86,5 +90,12 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
             LogHelperBC.error("Something went wrong while attempting to read data manager a packet sent from this client: " + sender);
             e.printStackTrace();
         }
+    }
+
+    //This is to assist things like grief prevention. If a player is not allowed to right click a block then they probably shouldn't be allowed to sent packets to is.
+    private boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, Direction.UP, player.getLookVec());
+        MinecraftForge.EVENT_BUS.post(event);
+        return !event.isCanceled();
     }
 }

@@ -3,63 +3,50 @@ package com.brandon3055.brandonscore.blocks;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
 import com.brandon3055.brandonscore.api.power.OPStorage;
-import com.brandon3055.brandonscore.capability.CapabilityOP;
+import com.brandon3055.brandonscore.inventory.ContainerBCBase;
 import com.brandon3055.brandonscore.inventory.TileItemStackHandler;
-import com.brandon3055.brandonscore.lib.IMCDataSerializable;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.lib.IRSSwitchable.RSMode;
-import com.brandon3055.brandonscore.lib.IValueHashable;
 import com.brandon3055.brandonscore.lib.datamanager.*;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
-import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IContainerListener;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ITickable;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.INameable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.IWorldNameable;
-import net.minecraft.world.World;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.lib.datamanager.DataFlags.*;
@@ -68,20 +55,33 @@ import static com.brandon3055.brandonscore.lib.datamanager.DataFlags.*;
  * Created by brandon3055 on 26/3/2016.
  * Base tile entity class for all tile entities
  */
-public class TileBCore extends TileEntity implements IDataManagerProvider, IDataRetainingTile, IWorldNameable {
+public class TileBCore extends TileEntity implements IDataManagerProvider, IDataRetainingTile, INameable {
 
-    protected boolean shouldRefreshOnState = true;
+    //    protected boolean shouldRefreshOnState = true;
+    protected boolean playerAccessTracking = false;
+    protected TileCapabilityManager capManager = new TileCapabilityManager(this);
     protected TileDataManager<TileBCore> dataManager = new TileDataManager<>(this);
-    private HashMap<EnumFacing, IEnergyStorage> energyCaps = new HashMap<>();
-    private HashMap<EnumFacing, IOPStorage> opEnergyCaps = new HashMap<>();
-    private HashMap<EnumFacing, IItemHandler> invCaps = new HashMap<>();
-    private HashMap<Object, Predicate<EnumFacing>> capSideValidator = new HashMap<>();
-    private HashMap<INBTSerializable<NBTTagCompound>, DataHelper> serializableMap = new HashMap<>();
-    private List<DataHelper> indexedDataList = new ArrayList<>();
+    private Map<Integer, BiConsumer<MCDataInput, ServerPlayerEntity>> serverPacketHandlers = new HashMap<>();
+    protected Map<String, INBTSerializable<CompoundNBT>> savedItemDataObjects = new HashMap<>();
+    protected Map<String, INBTSerializable<CompoundNBT>> savedDataObjects = new HashMap<>();
+    private Map<Integer, Consumer<MCDataInput>> clientPacketHandlers = new HashMap<>();
+
+    //    private Map<Direction, LazyOptional<IEnergyStorage>> energyCaps = new HashMap<>();
+    //    private Map<Direction, LazyOptional<IOPStorage>> opEnergyCaps = new HashMap<>();
+    //    private Map<Direction, LazyOptional<IItemHandler>> invCaps = new HashMap<>();
+    //    private Map<EnumFacing, IEnergyStorage> energyCaps = new HashMap<>();
+    //    private Map<EnumFacing, IOPStorage> opEnergyCaps = new HashMap<>();
+    //    private Map<EnumFacing, IItemHandler> invCaps = new HashMap<>();
     private List<Runnable> tickables = new ArrayList<>();
     private ManagedEnum<RSMode> rsControlMode = this instanceof IRSSwitchable ? register(new ManagedEnum<>("rs_mode", RSMode.ALWAYS_ACTIVE, SAVE_BOTH_SYNC_TILE, CLIENT_CONTROL)) : null;
     private ManagedBool rsPowered = this instanceof IRSSwitchable ? register(new ManagedBool("rs_powered", false, SAVE_NBT_SYNC_TILE, TRIGGER_UPDATE)) : null;
     private String customName = "";
+    private Set<PlayerEntity> accessingPlayers = new HashSet<>();
+    private int tick = 0;
+
+    public TileBCore(TileEntityType<?> tileEntityTypeIn) {
+        super(tileEntityTypeIn);
+    }
 
     //region Data Manager
 
@@ -98,101 +98,68 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     /**
-     * super.update() must be called from your update method in order for Data Manager synchronization to work..
+     * super.tick() must be called from your update method in order for Data Manager synchronization to work..
      */
-    public void update() {
+    public void tick() {
         tickables.forEach(Runnable::run);
         detectAndSendChanges();
+        tick++;
     }
 
     public void detectAndSendChanges() {
-        if (!world.isRemote) {
+        if (world != null && !world.isRemote) {
             dataManager.detectAndSendChanges();
-            for (int i = 0; i < indexedDataList.size(); i++) {
-                DataHelper helper = indexedDataList.get(i);
-                if (helper.syncTile && helper.hasChanged(true)) {
-                    PacketCustom packet = createCapPacket(helper, i);
-                    packet.sendToChunk(this);
-                }
-            }
+            capManager.detectAndSendChanges();
         }
     }
 
     public void detectAndSendChangesToListeners(List<IContainerListener> listeners) {
-        if (!world.isRemote) {
+        if (world != null && !world.isRemote) {
             dataManager.detectAndSendChangesToListeners(listeners);
-            for (int i = 0; i < indexedDataList.size(); i++) {
-                DataHelper helper = indexedDataList.get(i);
-                if (helper.syncContainer && helper.hasChanged(true)) {
-                    PacketCustom packet = createCapPacket(helper, i);
-                    DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> packet.sendToPlayer((EntityPlayerMP) p));
-                }
-            }
+            capManager.detectAndSendChangesToListeners(listeners);
         }
     }
 
-    private PacketCustom createCapPacket(DataHelper helper, int index) {
-        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.C_TILE_CAP_DATA);
-        packet.writePos(pos);
-        packet.writeInt(index);
-        if (helper.getData() instanceof IMCDataSerializable) {
-            ((IMCDataSerializable) helper.getData()).serializeMCD(packet);
-        }
-        else {
-            packet.writeNBTTagCompound((NBTTagCompound) helper.getData().serializeNBT());
-        }
-        return packet;
-    }
 
-    @SuppressWarnings("unchecked")
-    public void receiveCapSyncData(MCDataInput input) {
-        int index = input.readInt();
-        if (index >= 0 && index < indexedDataList.size()) {
-            DataHelper helper = indexedDataList.get(index);
-            if (helper.getData() instanceof IMCDataSerializable) {
-                ((IMCDataSerializable) helper.getData()).deSerializeMCD(input);
-            }
-            else {
-                helper.getData().deserializeNBT(input.readNBTTagCompound());
-            }
-        }
-    }
+    //endregion
 
+    //region Packets
     @Nullable
     @Override
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound compound = new NBTTagCompound();
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        CompoundNBT compound = new CompoundNBT();
         dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
-        return new SPacketUpdateTileEntity(this.pos, 0, compound);
+        return new SUpdateTileEntityPacket(this.pos, 0, compound);
     }
 
     //Used when initially sending chunks to the client... I think
     @Override
-    public NBTTagCompound getUpdateTag() {
-        NBTTagCompound compound = super.getUpdateTag();
+    public CompoundNBT getUpdateTag() {
+        CompoundNBT compound = super.getUpdateTag();
         dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
         return compound;
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
         dataManager.readSyncNBT(pkt.getNbtCompound());
         readExtraNBT(pkt.getNbtCompound());
     }
 
-    //endregion
-
-    //region Packets
+    public PacketCustom createServerBoundPacket(int id) {
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.S_TILE_MESSAGE);
+        packet.writePos(pos);
+        packet.writeByte((byte) id);
+        return packet;
+    }
 
     /**
      * Send a data packet to the server, Supply a consumer to write the data you want to send
      */
     public void sendPacketToServer(Consumer<MCDataOutput> writer, int id) {
-        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.S_TILE_MESSAGE);
-        packet.writePos(pos);
-        packet.writeByte((byte) id);
+        PacketCustom packet = createServerBoundPacket(id);
         writer.accept(packet);
         packet.sendToServer();
     }
@@ -200,33 +167,77 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     /**
      * Override this method to receive data from the server via sendPacketToServer
      */
-    public void receivePacketFromClient(MCDataInput data, EntityPlayerMP client, int id) {
+    public void receivePacketFromClient(MCDataInput data, ServerPlayerEntity client, int id) {
+        if (serverPacketHandlers.containsKey(id)) {
+            serverPacketHandlers.get(id).accept(data, client);
+        }
     }
 
+    public PacketCustom createClientBoundPacket(int id) {
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.C_TILE_MESSAGE);
+        packet.writePos(pos);
+        packet.writeByte((byte) id);
+        return packet;
+    }
 
     /**
      * Create a packet to send to the client
      */
     public PacketCustom sendPacketToClient(Consumer<MCDataOutput> writer, int id) {
-        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.C_TILE_MESSAGE);
-        packet.writePos(pos);
-        packet.writeByte((byte) id);
+        PacketCustom packet = createClientBoundPacket(id);
         writer.accept(packet);
         return packet;
     }
 
-    public void sendPacketToClient(EntityPlayerMP player, Consumer<MCDataOutput> writer, int id) {
+    public void sendPacketToClient(ServerPlayerEntity player, Consumer<MCDataOutput> writer, int id) {
         sendPacketToClient(writer, id).sendToPlayer(player);
     }
 
-    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer, int id) {
-        sendPacketToClient(writer, id).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
+    public void sendPacketToClients(Collection<PlayerEntity> players, Consumer<MCDataOutput> writer, int id) {
+        PacketCustom packet = createClientBoundPacket(id);
+        writer.accept(packet);
+        sendPacketToClients(players, packet);
     }
+
+    public void sendPacketToClients(Collection<PlayerEntity> players, PacketCustom packet) {
+        players.stream().filter(e -> e instanceof ServerPlayerEntity).map(e -> (ServerPlayerEntity) e).forEach(packet::sendToPlayer);
+    }
+
+    public void sendPacketToChunk(Consumer<MCDataOutput> writer, int id) {
+        sendPacketToClient(writer, id).sendToChunk(this);
+    }
+
+//    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer, int id) {
+//        sendPacketToClient(writer, id).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
+//    }
 
     /**
      * Override this method to receive data from the client via sendPacketToClient
      */
     public void receivePacketFromServer(MCDataInput data, int id) {
+        if (clientPacketHandlers.containsKey(id)) {
+            clientPacketHandlers.get(id).accept(data);
+        }
+    }
+
+    /**
+     * Sets a client side packet handler to handle packets sent from the server with the specified id
+     *
+     * @param packetId packet id
+     * @param handler  the handler for this packet
+     */
+    public void setClientSidePacketHandler(int packetId, Consumer<MCDataInput> handler) {
+        this.clientPacketHandlers.put(packetId, handler);
+    }
+
+    /**
+     * Sets a server side packet handler to handle packets sent from the client with the specified id
+     *
+     * @param packetId packet id
+     * @param handler  the handler for this packet
+     */
+    public void setServerSidePacketHandler(int packetId, BiConsumer<MCDataInput, ServerPlayerEntity> handler) {
+        this.serverPacketHandlers.put(packetId, handler);
     }
 
     //endregion
@@ -234,59 +245,58 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     //region Helper Functions.
 
     public void updateBlock() {
-        IBlockState state = world.getBlockState(getPos());
+        BlockState state = world.getBlockState(getPos());
         world.notifyBlockUpdate(getPos(), state, state, 3);
     }
 
     public void dirtyBlock() {
-        Chunk chunk = world.getChunkFromBlockCoords(getPos());
+        Chunk chunk = world.getChunkAt(getPos());
         chunk.setModified(true);
     }
 
-    /**
-     * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
-     * Note that this should NOT be used in cases where the block has a different tile depending on its state.
-     */
-    public void setShouldRefreshOnBlockChange() {
-        shouldRefreshOnState = false;
-    }
+//    /**
+//     * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
+//     * Note that this should NOT be used in cases where the block has a different tile depending on its state.
+//     */
+//    public void setShouldRefreshOnBlockChange() {
+//        shouldRefreshOnState = false;
+//    }
 
-    @Deprecated //I want to store everything on the tile in 1.13. I'm done dealing with these bullshit blockstate crashes.
-    public IBlockState getState(Block expectedBlock) {
-        if (world == null) {
-            return expectedBlock.getDefaultState();//Because apparently this is a thing........
-        }
-        IBlockState state = world.getBlockState(pos);
-        return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
-    }
-
-    /**
-     * Is minecraft seriously so screwed up that i have to resort to things like this?
-     */
-    public Block getBlockTypeSafe(Block defaultBlock) {
-        if (getBlockType() != Blocks.AIR) {
-            return getBlockType();
-        }
-        else {
-            return defaultBlock;
-        }
-    }
+//    @Deprecated //I want to store everything on the tile in 1.13. I'm done dealing with these bullshit blockstate crashes.
+//    public BlockState getState(Block expectedBlock) {
+//        if (world == null) {
+//            return expectedBlock.getDefaultState();//Because apparently this is a thing........
+//        }
+//        BlockState state = world.getBlockState(pos);
+//        return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
+//    }
+//
+//    /**
+//     * Is minecraft seriously so screwed up that i have to resort to things like this?
+//     */
+//    public Block getBlockTypeSafe(Block defaultBlock) {
+//        if (getBlockState().isAir(world, pos)) {
+//            return getBlockType();
+//        } else {
+//            return defaultBlock;
+//        }
+//    }
 
     /**
      * checks that the player is allowed to interact with this tile bu firing the RightClickBlock.
      * If the event is canceled bu another mod such as a permissions mod this will return false.
+     * <br/>
+     * Note: Packets from client to server do not need to be verified because that is already handled by the packet handler.
      */
-    @Deprecated
-    //Just a reminder that i nolonger need to do this in the tile because its handled via the packet handler.
-    public boolean verifyPlayerPermission(EntityPlayer player) {
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, EnumFacing.UP, player.getLookVec());
+    public boolean verifyPlayerPermission(PlayerEntity player) {
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, Direction.UP);
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }
 
     /**
      * Adds an item to the 'tickables' list. Every item in this list will be called every tick via the tiles update method.
-     * Note: in order for this to work the tile must implement ITickable and call super in {@link ITickable#update()}
+     * Note: in order for this to work the tile must implement ITickable and call super in {@link ITickableTileEntity#tick()} ()}
      *
      * @param runnable The runnable to add
      */
@@ -308,27 +318,24 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * now ONLY used to read and write data to and from an itemstack<br>
      * Note: if you wish to add additional data to the item then override this, Call super to get a data tag,
      * Write your data to said tag and finally return said tag.
-     *
-     * @return the tile data compound so that tiles that override this method can easily write extra data to it.
      */
     @Override
-    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+    public void writeToItemStack(CompoundNBT compound, boolean willHarvest) {
         dataManager.writeToStackNBT(compound);
-        NBTTagCompound capTags = serializeCapabilities(true);
-        if (!capTags.hasNoTags()) {
-            compound.setTag("bc_caps", capTags);
+        savedItemDataObjects.forEach((tagName, serializable) -> compound.put(tagName, serializable.serializeNBT()));
+        CompoundNBT capTags = capManager.serialize(true);
+        if (!capTags.isEmpty()) {
+            compound.put("bc_caps", capTags);
         }
     }
 
-    /**
-     * @return the tile data compound so that tiles that override this method can easily read extra data from it.
-     */
-    @SuppressWarnings("ConstantConditions")
+
     @Override
-    public void readFromItemStack(NBTTagCompound compound) {
+    public void readFromItemStack(CompoundNBT compound) {
         dataManager.readFromStackNBT(compound);
-        if (compound.hasKey("bc_caps")) {
-            deserializeCapabilities(compound.getCompoundTag("bc_caps"));
+        savedItemDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(compound.getCompound(tagName)));
+        if (compound.hasUniqueId("bc_caps")) {
+            capManager.deserialize(compound.getCompound("bc_caps"));
         }
     }
 
@@ -338,49 +345,34 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * Note: This will not save data to the item when the block is harvested.<br>
      * For that you need to override read and writeToStack just be sure to pay attention to the doc for those.
      */
-    public void writeExtraNBT(NBTTagCompound compound) {
-        NBTTagCompound capTags = serializeCapabilities(false);
-        if (!capTags.hasNoTags()) {
-            compound.setTag("bc_caps", capTags);
+    public void writeExtraNBT(CompoundNBT compound) {
+        CompoundNBT capTags = capManager.serialize(false);
+        if (!capTags.isEmpty()) {
+            compound.put("bc_caps", capTags);
         }
 
         if (!customName.isEmpty()) {
-            compound.setString("custom_name", customName);
+            compound.putString("custom_name", customName);
         }
+
+        savedDataObjects.forEach((tagName, serializable) -> compound.put(tagName, serializable.serializeNBT()));
     }
 
-    public void readExtraNBT(NBTTagCompound compound) {
-        if (compound.hasKey("bc_caps")) {
-            deserializeCapabilities(compound.getCompoundTag("bc_caps"));
+    public void readExtraNBT(CompoundNBT compound) {
+        if (compound.hasUniqueId("bc_caps")) {
+            capManager.deserialize(compound.getCompound("bc_caps"));
         }
 
-        if (compound.hasKey("custom_name", 8)) {
+        if (compound.contains("custom_name", 8)) {
             customName = compound.getString("custom_name");
         }
-    }
 
-    protected NBTTagCompound serializeCapabilities(boolean forItem) {
-        NBTTagCompound compound = new NBTTagCompound();
-        for (DataHelper helper : serializableMap.values()) {
-            if ((forItem && helper.saveItem) || (!forItem && helper.saveTile)) {
-                compound.setTag(helper.tagName, helper.getData().serializeNBT());
-            }
-        }
-        return compound;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void deserializeCapabilities(NBTTagCompound compound) {
-        for (DataHelper helper : serializableMap.values()) {
-            if (compound.hasKey(helper.tagName)) {
-                helper.getData().deserializeNBT(compound.getCompoundTag(helper.tagName));
-            }
-        }
+        savedDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(compound.getCompound(tagName)));
     }
 
     @Override
-    public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
+    public final CompoundNBT write(CompoundNBT compound) {
+        super.write(compound);
 
         dataManager.writeToNBT(compound);
         writeExtraNBT(compound);
@@ -389,8 +381,8 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
-    public final void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
+    public final void read(CompoundNBT compound) {
+        super.read(compound);
 
         dataManager.readFromNBT(compound);
         readExtraNBT(compound);
@@ -398,10 +390,10 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         onTileLoaded();
     }
 
-    @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
-        return shouldRefreshOnState ? oldState != newSate : (oldState.getBlock() != newSate.getBlock());
-    }
+//    @Override
+//    public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate) {
+//        return shouldRefreshOnState ? oldState != newSate : (oldState.getBlock() != newSate.getBlock());
+//    }
 
     /**
      * Called immediately after all NBT is loaded. World may be null at this point
@@ -409,185 +401,153 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     public void onTileLoaded() {
     }
 
+    /**
+     * Allows you to add raw INBTSerializable data objects too be saved and loaded directly from the tile's NBT.
+     * This saves and loads the data server side. Its also sent in the default chunk sync packet.
+     *
+     * @param tagName    the name to use when saving this object to the tile's NBT
+     * @param dataObject the serializable data object.
+     */
+    public void setSavedDataObject(String tagName, INBTSerializable<CompoundNBT> dataObject) {
+        this.savedDataObjects.put(tagName, dataObject);
+    }
+
+    public void setItemSavedDataObject(String tagName, INBTSerializable<CompoundNBT> dataObject) {
+        this.savedItemDataObjects.put(tagName, dataObject);
+    }
+
     //endregion
 
-    //region Capabilities
+//    //region Capabilities
+//
+//    /**
+//     * Adds an forge energy storage capability to the tile.
+//     * This should be used in the tile's constructor to apply capabilities.
+//     * Capability data will be automatically saved and loaded from tile NBT.
+//     *
+//     * @param tagName The name used to save this cap instance to NBT. FE, OP and Item Handler caps are all stored to the same NBT Compound so this
+//     *                name must be unique. Pass null to prevent this cap from being saved to NBT.
+//     * @param storage The energy storage to add.
+//     * @param sides   The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
+//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags. Or null if tagName is null.
+//     */
+//    protected <T extends IEnergyStorage & INBTSerializable<CompoundNBT>> SerializationFlags<T> addEnergyCap(@Nullable String tagName, T storage, Direction... sides) {
+//        mapCapToSides(storage, energyCaps, sides);
+//        if (storage instanceof IOPStorage) {
+//            mapCapToSides((IOPStorage) storage, opEnergyCaps, sides);
+//        }
+//        if (tagName != null) {
+//            return addInternalCap(tagName, storage);
+//        }
+//        return null;
+//    }
+//
+//    /**
+//     * Convenience method for adding a single FE cap with the tag name "energy_storage"
+//     *
+//     * @param storage The energy storage to add.
+//     * @param sides   The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
+//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
+//     */
+//    protected <T extends IEnergyStorage & INBTSerializable<CompoundNBT>> SerializationFlags<T> addEnergyCap(T storage, Direction... sides) {
+//        return addEnergyCap("energy_storage", storage, sides);
+//    }
+//
+//    /**
+//     * Adds this cap strait to the capability maps bypassing all save and synchronization functionality.
+//     */
+//    protected <T extends IEnergyStorage> T addRawEnergyCap(T storage, Direction... sides) {
+//        mapCapToSides(storage, energyCaps, sides);
+//
+//        if (storage instanceof IOPStorage) {
+//            mapCapToSides((IOPStorage) storage, opEnergyCaps, sides);
+//        }
+//        return storage;
+//    }
+//
+//    /**
+//     * Adds an IItemHandler capability to the tile.
+//     * This should be used in the tile's constructor to apply capabilities.
+//     * Capability data will be automatically saved and loaded from tile NBT.
+//     *
+//     * @param tagName     The name used to save this cap instance to NBT. FE, OP and Item Handler caps are all stored to the same NBT Compound so this
+//     *                    name must be unique. Pass null to prevent this cap from being saved to NBT.
+//     * @param itemHandler The item handler to add.
+//     * @param sides       The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
+//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
+//     */
+//    protected <T extends ItemStackHandler> SerializationFlags<T> addItemHandlerCap(@Nullable String tagName, T itemHandler, Direction... sides) {
+//        mapCapToSides(itemHandler, invCaps, sides);
+//        if (tagName != null) {
+//            return addInternalCap(tagName, itemHandler);
+//        }
+//        return null;
+//    }
+//
+//    /**
+//     * Convenience method for adding a single item handler cap with the tag name "item_handler"
+//     *
+//     * @param itemHandler The item handler to add.
+//     * @param sides       The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
+//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
+//     */
+//    protected <T extends ItemStackHandler> SerializationFlags<T> addItemHandlerCap(T itemHandler, Direction... sides) {
+//        return addItemHandlerCap("item_handler", itemHandler, sides);
+//    }
+//
+//    protected <T extends ItemStackHandler> SerializationFlags<T> addInternalItemHandlerCap(String tagName, T itemHandler) {
+//        return addInternalCap(tagName, itemHandler);
+//    }
+//
+//    protected <T extends ItemStackHandler> SerializationFlags<T> addInternalItemHandlerCap(T itemHandler) {
+//        return addInternalItemHandlerCap("item_handler", itemHandler);
+//    }
+//
+//    /**
+//     * Adds this cap strait to the capability map bypassing all save and synchronization functionality.
+//     */
+//    protected <T extends IItemHandler> T addRawItemCap(T handler, Direction... sides) {
+//        mapCapToSides(handler, invCaps, sides);
+//        return handler;
+//    }
+//
+//    /**
+//     * Allows you to add a capability to be saved and synchronized without actually exposing via has/getCapability.
+//     * Technically this can be used to save and sync any {@link INBTSerializable<CompoundNBT>}
+//     *
+//     * @param tagName  The tag name that will be used to save this capability to nbt.
+//     * @param instance The INBTSerializable instance.
+//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
+//     */
+//    protected <T extends INBTSerializable<CompoundNBT>> SerializationFlags<T> addInternalCap(String tagName, T instance) {
+//        SerializationFlags<T> helper = new SerializationFlags<>(tagName, instance);
+//        serializableMap.put(instance, helper);
+//        indexedDataList.add(helper);
+//        return helper;
+//    }
+//
+//    private <C> void mapCapToSides(C cap, Map<Direction, C> map, Direction... sides) {
+//        if (sides == null || sides.length == 0) {
+//            sides = Direction.values();
+//            map.put(null, cap);
+//        }
+//
+//        for (Direction facing : sides) {
+//            map.put(facing, cap);
+//        }
+//    }
 
-    /**
-     * Adds an forge energy storage capability to the tile.
-     * This should be used in the tile's constructor to apply capabilities.
-     * Capability data will be automatically saved and loaded from tile NBT.
-     *
-     * @param tagName The name used to save this cap instance to NBT. FE, OP and Item Handler caps are all stored to the same NBT Compound so this
-     *                name must be unique. Pass null to prevent this cap from being saved to NBT.
-     * @param storage The energy storage to add.
-     * @param sides   The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-     * @return the {@link DataHelper} instance assigned to this data. Can be used to toggle save and sync flags. Or null if tagName is null.
-     */
-    protected <T extends IEnergyStorage & INBTSerializable<NBTTagCompound>> DataHelper<T> addEnergyCap(@Nullable String tagName, T storage, EnumFacing... sides) {
-        mapCapToSides(storage, energyCaps, sides);
-        if (storage instanceof IOPStorage) {
-            mapCapToSides((IOPStorage) storage, opEnergyCaps, sides);
-        }
-        if (tagName != null) {
-            return addInternalCap(tagName, storage);
-        }
-        return null;
-    }
-
-    /**
-     * Convenience method for adding a single FE cap with the tag name "energy_storage"
-     *
-     * @param storage The energy storage to add.
-     * @param sides   The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-     * @return the {@link DataHelper} instance assigned to this data. Can be used to toggle save and sync flags.
-     */
-    protected <T extends IEnergyStorage & INBTSerializable<NBTTagCompound>> DataHelper<T> addEnergyCap(T storage, EnumFacing... sides) {
-        return addEnergyCap("energy_storage", storage, sides);
-    }
-
-    /**
-     * Adds this cap strait to the capability maps bypassing all save and synchronization functionality.
-     */
-    protected <T extends IEnergyStorage> T addRawEnergyCap(T storage, EnumFacing... sides) {
-        mapCapToSides(storage, energyCaps, sides);
-
-        if (storage instanceof IOPStorage) {
-            mapCapToSides((IOPStorage) storage, opEnergyCaps, sides);
-        }
-        return storage;
-    }
-
-    /**
-     * Adds an IItemHandler capability to the tile.
-     * This should be used in the tile's constructor to apply capabilities.
-     * Capability data will be automatically saved and loaded from tile NBT.
-     *
-     * @param tagName     The name used to save this cap instance to NBT. FE, OP and Item Handler caps are all stored to the same NBT Compound so this
-     *                    name must be unique. Pass null to prevent this cap from being saved to NBT.
-     * @param itemHandler The item handler to add.
-     * @param sides       The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-     * @return the {@link DataHelper} instance assigned to this data. Can be used to toggle save and sync flags.
-     */
-    protected <T extends ItemStackHandler> DataHelper<T> addItemHandlerCap(@Nullable String tagName, T itemHandler, EnumFacing... sides) {
-        mapCapToSides(itemHandler, invCaps, sides);
-        if (tagName != null) {
-            return addInternalCap(tagName, itemHandler);
-        }
-        return null;
-    }
-
-    /**
-     * Convenience method for adding a single item handler cap with the tag name "item_handler"
-     *
-     * @param itemHandler The item handler to add.
-     * @param sides       The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-     * @return the {@link DataHelper} instance assigned to this data. Can be used to toggle save and sync flags.
-     */
-    protected <T extends ItemStackHandler> DataHelper<T> addItemHandlerCap(T itemHandler, EnumFacing... sides) {
-        return addItemHandlerCap("item_handler", itemHandler, sides);
-    }
-
-    protected <T extends ItemStackHandler> DataHelper<T> addInternalItemHandlerCap(String tagName, T itemHandler) {
-        return addInternalCap(tagName, itemHandler);
-    }
-
-    protected <T extends ItemStackHandler> DataHelper<T> addInternalItemHandlerCap(T itemHandler) {
-        return addInternalItemHandlerCap("item_handler", itemHandler);
-    }
-
-    /**
-     * Adds this cap strait to the capability map bypassing all save and synchronization functionality.
-     */
-    protected <T extends IItemHandler> T addRawItemCap(T handler, EnumFacing... sides) {
-        mapCapToSides(handler, invCaps, sides);
-        return handler;
-    }
-
-    /**
-     * Allows you to add a capability to be saved and synchronized without actually exposing via has/getCapability.
-     * Technically this can be used to save and sync any {@link INBTSerializable<NBTTagCompound>}
-     *
-     * @param tagName  The tag name that will be used to save this capability to nbt.
-     * @param instance The INBTSerializable instance.
-     * @return the {@link DataHelper} instance assigned to this data. Can be used to toggle save and sync flags.
-     */
-    protected <T extends INBTSerializable<NBTTagCompound>> DataHelper<T> addInternalCap(String tagName, T instance) {
-        DataHelper<T> helper = new DataHelper<>(tagName, instance);
-        serializableMap.put(instance, helper);
-        indexedDataList.add(helper);
-        return helper;
-    }
-
-    private <C> void mapCapToSides(C cap, Map<EnumFacing, C> map, EnumFacing... sides) {
-        if (sides == null || sides.length == 0) {
-            sides = EnumFacing.values();
-            map.put(null, cap);
-        }
-
-        for (EnumFacing facing : sides) {
-            map.put(facing, cap);
-        }
-    }
-
-    /**
-     * This can give you more dynamic control over capability sidedness.
-     * To use this you must first apply the capability to all sides via the standard add method.
-     * Or at least all the sides you want to be able to give it access to.
-     * Then this predicate can be used to dynamically block or allows access to the configured sides.
-     *
-     * @param capabilityInstance the capability instance (the same instance provided to the add method)
-     * @param predicate          the predicate that determines whether or not the capability can be accessed from a given side.
-     */
-    public void setCapSideValidator(Object capabilityInstance, Predicate<EnumFacing> predicate) {
-        capSideValidator.put(capabilityInstance, predicate);
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction side) {
+        LazyOptional<T> ret = capManager.getCapability(capability, side);
+        return ret.isPresent() ? ret : super.getCapability(capability, side);
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityEnergy.ENERGY && energyCaps.containsKey(facing)) {
-            IEnergyStorage cap = energyCaps.get(facing);
-            if (!capSideValidator.containsKey(cap) || capSideValidator.get(cap).test(facing)) {
-                return true;
-            }
-        }
-        if (capability == CapabilityOP.OP && opEnergyCaps.containsKey(facing)) {
-            IOPStorage cap = opEnergyCaps.get(facing);
-            if (!capSideValidator.containsKey(cap) || capSideValidator.get(cap).test(facing)) {
-                return true;
-            }
-        }
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && invCaps.containsKey(facing)) {
-            IItemHandler cap = invCaps.get(facing);
-            if (!capSideValidator.containsKey(cap) || capSideValidator.get(cap).test(facing)) {
-                return true;
-            }
-        }
-        return super.hasCapability(capability, facing);
-    }
-
-    @Nullable
-    @Override
-    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityEnergy.ENERGY && energyCaps.containsKey(facing)) {
-            IEnergyStorage cap = energyCaps.get(facing);
-            if (!capSideValidator.containsKey(cap) || capSideValidator.get(cap).test(facing)) {
-                return CapabilityEnergy.ENERGY.cast(cap);
-            }
-        }
-        if (capability == CapabilityOP.OP && opEnergyCaps.containsKey(facing)) {
-            IOPStorage cap = opEnergyCaps.get(facing);
-            if (!capSideValidator.containsKey(cap) || capSideValidator.get(cap).test(facing)) {
-                return CapabilityOP.OP.cast(cap);
-            }
-        }
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && invCaps.containsKey(facing)) {
-            IItemHandler cap = invCaps.get(facing);
-            if (!capSideValidator.containsKey(cap) || capSideValidator.get(cap).test(facing)) {
-                return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(cap);
-            }
-        }
-        return super.getCapability(capability, facing);
+    protected void invalidateCaps() {
+        super.invalidateCaps();
+        capManager.invalidate();
     }
 
     //endregion
@@ -596,13 +556,13 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     public long sendEnergyToAll(long maxPerTarget, long maxAvailable) {
         long i = 0;
-        for (EnumFacing direction : EnumFacing.VALUES) {
+        for (Direction direction : Direction.values()) {
             i += sendEnergyTo(Math.min(maxPerTarget, maxAvailable - i), direction);
         }
         return i;
     }
 
-    public long sendEnergyTo(long maxSend, EnumFacing side) {
+    public long sendEnergyTo(long maxSend, Direction side) {
         if (maxSend == 0) {
             return 0;
         }
@@ -614,7 +574,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         return 0;
     }
 
-    public static long sendEnergyTo(IBlockAccess world, BlockPos pos, long maxSend, EnumFacing side) {
+    public static long sendEnergyTo(IWorldReader world, BlockPos pos, long maxSend, Direction side) {
         if (maxSend == 0) {
             return 0;
         }
@@ -626,9 +586,9 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         return 0;
     }
 
-    public static long sendEnergyToAll(IBlockAccess world, BlockPos pos, long maxPerTarget, long maxAvailable) {
+    public static long sendEnergyToAll(IWorldReader world, BlockPos pos, long maxPerTarget, long maxAvailable) {
         long i = 0;
-        for (EnumFacing direction : EnumFacing.VALUES) {
+        for (Direction direction : Direction.values()) {
             i += sendEnergyTo(world, pos, Math.min(maxPerTarget, maxAvailable - i), direction);
         }
         return i;
@@ -656,7 +616,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     /**
      * Adds an io tracker to the specified storage and ensures the tracker is updated every tick.
-     * Note: for updating to work this tile must implement {@link ITickable} and call super in {@link ITickable#update()}
+     * Note: for updating to work this tile must implement {@link ITickableTileEntity} and call super in {@link ITickableTileEntity#tick()} ()}
      *
      * @param storage The storage to add an IO tracker to.
      */
@@ -700,14 +660,13 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         if (itemHandler instanceof TileItemStackHandler) {
             ((TileItemStackHandler) itemHandler).setSlotValidator(slot, stack -> (chargeItem.get() ? EnergyUtils.canReceiveEnergy(stack) : EnergyUtils.canExtractEnergy(stack)));
         }
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
+        if (EffectiveSide.get().isServer()) {
             addTickable(() -> {
                 ItemStack stack = itemHandler.getStackInSlot(slot);
                 if (!stack.isEmpty()) {
                     if (chargeItem.get()) {
                         EnergyUtils.transferEnergy(storage, stack);
-                    }
-                    else {
+                    } else {
                         EnergyUtils.transferEnergy(stack, storage);
                     }
                 }
@@ -719,6 +678,24 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     //endregion
 
     //Other
+
+    /**
+     * Only works on {@link ITickableTileEntity} tiles that call super.update()
+     *
+     * @return an internal tick timer specific to this tile
+     */
+    public int getTime() {
+        return tick;
+    }
+
+    /**
+     * Only works on {@link ITickableTileEntity} tiles that call super.update()
+     *
+     * @return true once every 'tickInterval' based on the tiles internal timer.
+     */
+    public boolean onInterval(int tickInterval) {
+        return tick % tickInterval == 0;
+    }
 
     public RSMode getRSMode() {
         if (!(this instanceof IRSSwitchable)) {
@@ -759,16 +736,12 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
-    public String getName() {
+    public ITextComponent getName() {
         if (hasCustomName()) {
-            return customName;
+            return new StringTextComponent(customName);
         }
 
-        if (getBlockType() != null) {
-            return getBlockType().getUnlocalizedName() + ".gui.title";
-        }
-
-        return "[Failed to compute name]";
+        return getBlockState().getBlock().getNameTextComponent();
     }
 
     @Override
@@ -780,92 +753,37 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         this.customName = customName;
     }
 
-    @Nullable
-    @Override
-    public ITextComponent getDisplayName() {
-        return hasCustomName() ? new TextComponentString(getName()) : new TextComponentTranslation(getName());
+//    @Nullable
+//    @Override
+//    public ITextComponent getDisplayName() {
+//        return hasCustomName() ? new StringTextComponent(getName()) : new TextComponentTranslation(getName());
+//    }
+
+    /**
+     * If enabled a list of players currently accessing this tiles container will be available via {@link #getAccessingPlayers()}
+     *
+     * @param playerAccessTracking enable tracking
+     */
+    public void enablePlayerAccessTracking(boolean playerAccessTracking) {
+        this.playerAccessTracking = playerAccessTracking;
     }
 
-    protected static class DataHelper<T extends INBTSerializable<NBTTagCompound>> {
-        private final String tagName;
-        private final T serializableInstance;
-        private Object lastData;
-
-        private boolean saveTile = true;
-        private boolean saveItem = true;
-        private boolean syncTile = false;
-        private boolean syncContainer = false;
-
-        public DataHelper(String tagName, T serializableInstance) {
-            this.tagName = tagName;
-            this.serializableInstance = serializableInstance;
-
-            if (serializableInstance instanceof IValueHashable) {
-                lastData = ((IValueHashable) serializableInstance).getValueHash();
-                syncContainer = true;
-            }
-            else {
-                lastData = serializableInstance.serializeNBT();
-            }
-        }
-
-        public T getData() {
-            return serializableInstance;
-        }
-
-        /**
-         * Default: true
-         */
-        public DataHelper<T> saveItem(boolean saveItem) {
-            this.saveItem = saveItem;
-            return this;
-        }
-
-        /**
-         * Default: true
-         */
-        public DataHelper<T> saveTile(boolean saveTile) {
-            this.saveTile = saveTile;
-            return this;
-        }
-
-        /**
-         * Default: false
-         * You can also implement {@link IMCDataSerializable} on your data instance to improve sync efficiency.
-         */
-        public DataHelper<T> syncTile(boolean syncTile) {
-            this.syncTile = syncTile;
-            return this;
-        }
-
-        /**
-         * Defaults to true for any serializable that also implements {@link IValueHashable}
-         * You can also implement {@link IMCDataSerializable} on your data instance to improve sync efficiency.
-         */
-        public DataHelper<T> syncContainer(boolean syncContainer) {
-            this.syncContainer = syncContainer;
-            return this;
-        }
-
-        protected boolean hasChanged(boolean reset) {
-            if (serializableInstance instanceof IValueHashable) {
-                if (!((IValueHashable) serializableInstance).checkValueHash(lastData)) {
-                    if (reset) {
-                        lastData = ((IValueHashable) serializableInstance).getValueHash();
-                    }
-                    return true;
-                }
-            }
-            else {
-                if (!serializableInstance.serializeNBT().equals(lastData)) {
-                    if (reset) {
-                        lastData = serializableInstance.serializeNBT();
-                    }
-                    return true;
-                }
-            }
-
-            return false;
-        }
+    /**
+     * @return a list of players currently accessing this tile's container.
+     * playerAccessTracking must be enabled in this tile's constructor in order for this to work.
+     */
+    public Set<PlayerEntity> getAccessingPlayers() {
+        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCBase) || ((ContainerBCBase) e.openContainer).tile != this); //Clean up set
+        return accessingPlayers;
     }
+
+    public void onPlayerOpenContainer(PlayerEntity player) {
+        accessingPlayers.add(player);
+    }
+
+    public void onPlayerCloseContainer(PlayerEntity player) {
+        accessingPlayers.remove(player);
+        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCBase) || ((ContainerBCBase) e.openContainer).tile != this); //Clean up set
+    }
+
 }

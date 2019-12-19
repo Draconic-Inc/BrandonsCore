@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.awt.*;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.Gu
 /**
  * Created by brandon3055 on 4/07/2017.
  */
-public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implements IGuiEventListener {
+public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IGuiEventListener {
     //public class GuiScrollElement<T extends com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement<T>> extends MGuiElementBase<T> implements IGuiEventListener {
     public static final String DEFAULT_SCROLL_BAR_GROUP = "GuiScrollElement_Default_Scroll_Bars";
 
@@ -41,15 +41,17 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     protected boolean useAbsoluteElementSize = false;
     protected boolean enableHorizontalScroll = true;
     protected boolean scrollBarExclusionMode = true;
+    protected boolean disableOffScreenElements = false;
     protected ListMode listMode = DISABLED;
     protected Rectangle scrollBounds = new Rectangle();
-    protected MGuiElementBase backgroundElement = null;
+    protected GuiElement backgroundElement = null;
     protected GuiSlideControl verticalScrollBar = null;
     protected GuiSlideControl horizontalScrollBar = null;
+    protected Runnable scrollBarStateChangingListener = null;
 
-    protected LinkedList<MGuiElementBase> scrollingElements = new LinkedList<>();
-    protected LinkedList<MGuiElementBase> foregroundElements = new LinkedList<>();
-    protected LinkedList<MGuiElementBase> backgroundElements = new LinkedList<>();
+    protected LinkedList<GuiElement> scrollingElements = new LinkedList<>();
+    protected LinkedList<GuiElement> foregroundElements = new LinkedList<>();
+    protected LinkedList<GuiElement> backgroundElements = new LinkedList<>();
 
     public GuiScrollElement() { }
 
@@ -70,6 +72,22 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     //region Scroll Bar Configuration
+
+
+    public GuiScrollElement setDisableOffScreenElements(boolean disableOffScreenElements) {
+        this.disableOffScreenElements = disableOffScreenElements;
+        return this;
+    }
+
+    /**
+     * Called when a scroll bar state is ABOUT to change from disabled to enabled or vice versa.
+     * If you need to reconfigure elements to fit withing the new bounds then do it the tick after this is called.
+     * (There is really no better way to handle this at this point)
+     */
+    public GuiScrollElement setScrollBarStateChangingListener(Runnable scrollBarStateChangingListener) {
+        this.scrollBarStateChangingListener = scrollBarStateChangingListener;
+        return this;
+    }
 
     /**
      * Allows you to set the allowed scrolling axes.
@@ -155,11 +173,11 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         verticalScrollBar.setParentScroll(true);
         verticalScrollBar.allowMiddleClickDrag(true);
         verticalScrollBar.clearScrollChecks();
-        verticalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || !GuiScreen.isShiftKeyDown());
+        verticalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || !Screen.isShiftKeyDown());
         horizontalScrollBar.setParentScroll(true);
         horizontalScrollBar.allowMiddleClickDrag(true);
         horizontalScrollBar.clearScrollChecks();
-        horizontalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || GuiScreen.isShiftKeyDown());
+        horizontalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || Screen.isShiftKeyDown());
         return this;
     }
 
@@ -193,21 +211,21 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
      * @param element
      * @see #setListMode(ListMode)
      */
-    public GuiScrollElement addElement(MGuiElementBase element) {
+    public GuiScrollElement addElement(GuiElement element) {
         scrollingElements.add(element);
         super.addChild(element);
         updateScrollElement();
         return this;
     }
 
-    public GuiScrollElement removeElement(MGuiElementBase element) {
+    public GuiScrollElement removeElement(GuiElement element) {
         removeChild(element);
         updateScrollElement();
         return this;
     }
 
     @Override
-    public <C extends MGuiElementBase> C removeChild(C child) {
+    public <C extends GuiElement> C removeChild(C child) {
         scrollingElements.remove(child);
         backgroundElements.remove(child);
         return super.removeChild(child);
@@ -215,15 +233,15 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
 
     /**
      * Add a child element that will NOT be bound to the scrollable area.
-     * To add actual scrollable elements use {@link #addElement(MGuiElementBase)}
+     * To add actual scrollable elements use {@link #addElement(GuiElement)}
      * This should only be used to add things like buttons or scroll bars which need
      * to be excluded from the scrolling logic, Though if adding scroll bars you
      * should use {@link #setVerticalScrollBar(GuiSlideControl)} or {@link #setHorizontalScrollBar(GuiSlideControl)}<br>
      * Note: child elements will always be rendered after scrollable elements and so will render on top in most cases.
-     * If you need to add an element that renders before the scrolling elements use {@link #addBackgroundChild(MGuiElementBase)}
+     * If you need to add an element that renders before the scrolling elements use {@link #addBackgroundChild(GuiElement)}
      */
     @Override
-    public final <C extends MGuiElementBase> C addChild(C child) {
+    public final <C extends GuiElement> C addChild(C child) {
         foregroundElements.add(child);
         return super.addChild(child);
     }
@@ -231,7 +249,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     /**
      * Use this method to add any child elements that need to render BEFORE the scrolling elements.
      */
-    public <C extends MGuiElementBase> C addBackgroundChild(C child) {
+    public <C extends GuiElement> C addBackgroundChild(C child) {
         backgroundElements.add(child);
         return super.addChild(child);
     }
@@ -248,18 +266,18 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     /**
      * @return the list of scrolling elements as an Immutable list.
      */
-    public ImmutableList<MGuiElementBase> getScrollingElements() {
+    public ImmutableList<GuiElement> getScrollingElements() {
         return ImmutableList.copyOf(scrollingElements);
     }
 
-    protected int elementXSize(MGuiElementBase element) {
+    protected int elementXSize(GuiElement element) {
         if (useAbsoluteElementSize) {
             return element.getEnclosingRect().width;
         }
         return element.xSize();
     }
 
-    protected int elementYSize(MGuiElementBase element) {
+    protected int elementYSize(GuiElement element) {
         if (useAbsoluteElementSize) {
             return element.getEnclosingRect().height;
         }
@@ -278,7 +296,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     public void updateScrollElement() {
         if (listMode != DISABLED) {
             int lastPos = listMode.horizontal() ? getInsetRect().x : getInsetRect().y;
-            for (MGuiElementBase element: scrollingElements) {
+            for (GuiElement element: scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 if (listMode.horizontal()) {
                     if (listMode.lockPos()) {
@@ -308,6 +326,10 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         if (backgroundElement != null) {
             backgroundElement.setPosAndSize(scrollBounds);
         }
+
+        if (disableOffScreenElements) {
+            scrollingElements.forEach(e -> e.setEnabled(getInsetRect().intersects(e.getRect())));
+        }
     }
 
     protected void updateScrollBounds() {
@@ -323,12 +345,12 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             yMax = maxYPos();
         }
         else {
-            for (MGuiElementBase element: scrollingElements) {
+            for (GuiElement element: scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 Rectangle rect = element.getEnclosingRect();
-                if (rect.x < xMin) xMin = (int) rect.getX();
+                if (rect.x < xMin) xMin = (int) rect.x;
                 if (rect.getMaxX() > xMax) xMax = (int) rect.getMaxX();
-                if (rect.y < yMin) yMin = (int) rect.getY();
+                if (rect.y < yMin) yMin = (int) rect.y;
                 if (rect.getMaxY() > yMax) yMax = (int) rect.getMaxY();
             }
         }
@@ -339,7 +361,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     /**
      * Adds default scroll bars if no scroll bars have been set then updates the scroll bars as needed.
      */
-    public void updateScrollbars() {
+    public boolean updateScrollbars() {
         validateScrollBarExistence();
         setInsets(defaultInsets.top, defaultInsets.left, defaultInsets.bottom, defaultInsets.right);
 
@@ -370,6 +392,11 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             canDisHoz = canDisVert;
         }
 
+        boolean scrollStateChange = canDisVert == verticalScrollBar.isEnabled() || (!canDisHoz && enableHorizontalScroll) != horizontalScrollBar.isEnabled();
+        if (scrollStateChange && scrollBarStateChangingListener != null) {
+            scrollBarStateChangingListener.run();
+        }
+
         verticalScrollBar.setEnabled(!canDisVert);
         horizontalScrollBar.setEnabled(!canDisHoz && enableHorizontalScroll);
         setInsets(defaultInsets.top, defaultInsets.left, defaultInsets.bottom, defaultInsets.right);
@@ -398,6 +425,8 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
         horizontalScrollBar.setRange(horizontalMinScroll, horizontalMaxScroll);
         horizontalScrollBar.setScaledSliderSize(getInsetRect().width / contentWidth);
         horizontalScrollBar.updatePos(horizontalScrollPos, false);
+
+        return scrollStateChange;
     }
 
 
@@ -460,14 +489,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (getInsetRect().contains(mouseX, mouseY)) {
-            for (MGuiElementBase element: scrollingElements) {
+            for (GuiElement element: scrollingElements) {
                 if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                     return true;
                 }
             }
         }
 
-        for (MGuiElementBase element: foregroundElements) {
+        for (GuiElement element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -476,15 +505,15 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     @Override
-    public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (MGuiElementBase element: scrollingElements) {
-            if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        for (GuiElement element: scrollingElements) {
+            if (element.isEnabled() && element.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
         }
 
-        for (MGuiElementBase element: foregroundElements) {
-            if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+        for (GuiElement element: foregroundElements) {
+            if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
                 return true;
             }
         }
@@ -492,14 +521,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     @Override
-    public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
-        for (MGuiElementBase element: scrollingElements) {
+    public boolean handleMouseScroll(double mouseX, double mouseY, double scrollDirection) {
+        for (GuiElement element: scrollingElements) {
             if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
         }
 
-        for (MGuiElementBase element: foregroundElements) {
+        for (GuiElement element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
@@ -508,7 +537,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     @Override
-    public void onMGuiEvent(GuiEvent event, MGuiElementBase eventSource) {
+    public void onMGuiEvent(GuiEvent event, GuiElement eventSource) {
         int xAdjustment = 0;
         int yAdjustment = 0;
         if (eventSource == verticalScrollBar) {
@@ -520,13 +549,16 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             horizontalScrollPos = (int) horizontalScrollBar.getPosition();
         }
 
-        for (MGuiElementBase scrollableElement: scrollingElements) {
+        for (GuiElement scrollableElement: scrollingElements) {
 //            scrollableElement.animateMoveFrames();
             if (smoothScroll) {
                 scrollableElement.translateAnim(xAdjustment, yAdjustment, animSpeed);
             }
             else {
                 scrollableElement.translate(xAdjustment, yAdjustment);
+            }
+            if (disableOffScreenElements) {
+                scrollingElements.forEach(e -> e.setEnabled(getInsetRect().intersects(e.getRect())));
             }
         }
     }
@@ -574,7 +606,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
      * Applies an element to be used as the background of this GuiScrollElement.
      * This element will be locked to the same size and position as the scrollable area.
      */
-    public GuiScrollElement applyBackgroundElement(MGuiElementBase backgroundElement) {
+    public GuiScrollElement applyBackgroundElement(GuiElement backgroundElement) {
         if (this.backgroundElement != null) {
             removeChild(this.backgroundElement);
         }
@@ -590,7 +622,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        for (MGuiElementBase element: backgroundElements) {
+        for (GuiElement element: backgroundElements) {
             if (element.isEnabled()) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -614,14 +646,14 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             backgroundElement.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 
-        for (MGuiElementBase element: scrollingElements) {
+        for (GuiElement element: scrollingElements) {
             if (element.isEnabled() && element != backgroundElement) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }
 
         ScissorHelper.popScissor();
-        for (MGuiElementBase element: foregroundElements) {
+        for (GuiElement element: foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element)) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -634,7 +666,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     //region Misc
 
     @Override
-    protected void addDefaultListener(MGuiElementBase childElement) {
+    protected void addDefaultListener(GuiElement childElement) {
         if (childElement instanceof IGuiEventDispatcher && ((IGuiEventDispatcher) childElement).getListener() == null) {
             if (getParent() instanceof IGuiEventListener) {
                 ((IGuiEventDispatcher) childElement).setListener((IGuiEventListener) getParent());
@@ -666,7 +698,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
             enclosingRect.height = (int) getRect().getMaxY() - enclosingRect.y;
         }
 
-        for (MGuiElementBase element: childElements) {
+        for (GuiElement element: childElements) {
             if (!scrollingElements.contains(element)) {
                 element.addBoundsToRect(enclosingRect);
             }
@@ -675,7 +707,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     @Override
-    public boolean allowMouseOver(MGuiElementBase elementRequesting, int mouseX, int mouseY) {
+    public boolean allowMouseOver(GuiElement elementRequesting, double mouseX, double mouseY) {
         if (scrollingElements.contains(elementRequesting)) {
             return getInsetRect().contains(mouseX, mouseY);
         }
@@ -683,7 +715,7 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     @Override
-    public void xSizeChanged(MGuiElementBase elementChanged) {
+    public void xSizeChanged(GuiElement elementChanged) {
         if (scrollingElements.contains(elementChanged) && elementChanged.reportXSizeChange) {
             int vsp = verticalScrollPos;
             int hsp = horizontalScrollPos;
@@ -696,13 +728,15 @@ public class GuiScrollElement extends MGuiElementBase<GuiScrollElement> implemen
     }
 
     @Override
-    public void ySizeChanged(MGuiElementBase elementChanged) {
+    public void ySizeChanged(GuiElement elementChanged) {
         if (scrollingElements.contains(elementChanged) && elementChanged.reportYSizeChange) {
             int vsp = verticalScrollPos;
             int hsp = horizontalScrollPos;
             resetScrollPositions();
             updateScrollBounds();
             updateScrollElement();
+
+//            reloadElement();
             resetScrollPositions();
             verticalScrollBar.updatePos(vsp);
             horizontalScrollBar.updatePos(hsp);

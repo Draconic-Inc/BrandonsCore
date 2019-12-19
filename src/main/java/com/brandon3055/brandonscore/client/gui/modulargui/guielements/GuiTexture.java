@@ -1,9 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Supplier;
@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 /**
  * Created by brandon3055 on 1/10/2016.
  */
-public class GuiTexture extends MGuiElementBase<GuiTexture> {
+public class GuiTexture extends GuiElement<GuiTexture> {
     public int texU;
     public int texV;
     public int textSheetSizeX = 256;
@@ -53,7 +53,7 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         bindTexture(getTexture());
         if (preDrawCallback == null) {
-            GlStateManager.color(1, 1, 1, 1);
+            GlStateManager.color4f(1, 1, 1, 1);
         }
 
         if (texSizeOverride) {
@@ -155,7 +155,7 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
                 drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
                 drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 256 - (xSize() / 2), 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
 
-                for (MGuiElementBase element : childElements) {
+                for (GuiElement element : childElements) {
                     if (element.isEnabled()) {
                         element.renderElement(minecraft, mouseX, mouseY, partialTicks);
                     }
@@ -178,7 +178,7 @@ public class GuiTexture extends MGuiElementBase<GuiTexture> {
                 drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
                 drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 256 - (xSize() / 2), 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
 
-                for (MGuiElementBase element : childElements) {
+                for (GuiElement element : childElements) {
                     if (element.isEnabled()) {
                         element.renderElement(minecraft, mouseX, mouseY, partialTicks);
                     }

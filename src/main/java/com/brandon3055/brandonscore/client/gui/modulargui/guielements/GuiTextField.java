@@ -1,10 +1,10 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * Created by brandon3055 on 10/09/2016.
  * A strait port of the vanilla text field
  */
-public class GuiTextField extends MGuiElementBase<GuiTextField> {
+public class GuiTextField extends GuiElement<GuiTextField> {
 
     private String text = "";
     private int maxStringLength = 64;
@@ -98,6 +98,12 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
             this.setCursorPositionEnd();
         }
         return this;
+    }
+
+    public void triggerChangeEvent() {
+        if (changeListener != null) {
+            changeListener.accept(getText());
+        }
     }
 
     /**
@@ -284,28 +290,28 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
     }
 
     @Override
-    public boolean keyTyped(char typedChar, int keyCode) {
+    public boolean keyPressed(char typedChar, int keyCode) {
         if (!this.isFocused) {
             return false;
         }
-        else if (GuiScreen.isKeyComboCtrlA(keyCode)) {
+        else if (Screen.isKeyComboCtrlA(keyCode)) {
             this.setCursorPositionEnd();
             this.setSelectionPos(0);
             return true;
         }
-        else if (GuiScreen.isKeyComboCtrlC(keyCode)) {
-            GuiScreen.setClipboardString(this.getSelectedText());
+        else if (Screen.isKeyComboCtrlC(keyCode)) {
+            Screen.setClipboardString(this.getSelectedText());
             return true;
         }
-        else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
+        else if (Screen.isKeyComboCtrlV(keyCode)) {
             if (this.isEnabled) {
-                this.writeText(GuiScreen.getClipboardString());
+                this.writeText(Screen.getClipboardString());
             }
 
             return true;
         }
-        else if (GuiScreen.isKeyComboCtrlX(keyCode)) {
-            GuiScreen.setClipboardString(this.getSelectedText());
+        else if (Screen.isKeyComboCtrlX(keyCode)) {
+            Screen.setClipboardString(this.getSelectedText());
 
             if (this.isEnabled) {
                 this.writeText("");
@@ -325,7 +331,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                     return true;
                 case 14:
 
-                    if (GuiScreen.isCtrlKeyDown()) {
+                    if (Screen.isCtrlKeyDown()) {
                         if (this.isEnabled) {
                             this.deleteWords(-1);
                         }
@@ -337,7 +343,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                     return true;
                 case 199:
 
-                    if (GuiScreen.isShiftKeyDown()) {
+                    if (Screen.isShiftKeyDown()) {
                         this.setSelectionPos(0);
                     }
                     else {
@@ -347,15 +353,15 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                     return true;
                 case 203:
 
-                    if (GuiScreen.isShiftKeyDown()) {
-                        if (GuiScreen.isCtrlKeyDown()) {
+                    if (Screen.isShiftKeyDown()) {
+                        if (Screen.isCtrlKeyDown()) {
                             this.setSelectionPos(this.getNthWordFromPos(-1, this.getSelectionEnd()));
                         }
                         else {
                             this.setSelectionPos(this.getSelectionEnd() - 1);
                         }
                     }
-                    else if (GuiScreen.isCtrlKeyDown()) {
+                    else if (Screen.isCtrlKeyDown()) {
                         this.setCursorPosition(this.getNthWordFromCursor(-1));
                     }
                     else {
@@ -365,15 +371,15 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                     return true;
                 case 205:
 
-                    if (GuiScreen.isShiftKeyDown()) {
-                        if (GuiScreen.isCtrlKeyDown()) {
+                    if (Screen.isShiftKeyDown()) {
+                        if (Screen.isCtrlKeyDown()) {
                             this.setSelectionPos(this.getNthWordFromPos(1, this.getSelectionEnd()));
                         }
                         else {
                             this.setSelectionPos(this.getSelectionEnd() + 1);
                         }
                     }
-                    else if (GuiScreen.isCtrlKeyDown()) {
+                    else if (Screen.isCtrlKeyDown()) {
                         this.setCursorPosition(this.getNthWordFromCursor(1));
                     }
                     else {
@@ -383,7 +389,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                     return true;
                 case 207:
 
-                    if (GuiScreen.isShiftKeyDown()) {
+                    if (Screen.isShiftKeyDown()) {
                         this.setSelectionPos(this.text.length());
                     }
                     else {
@@ -393,7 +399,7 @@ public class GuiTextField extends MGuiElementBase<GuiTextField> {
                     return true;
                 case 211:
 
-                    if (GuiScreen.isCtrlKeyDown()) {
+                    if (Screen.isCtrlKeyDown()) {
                         if (this.isEnabled) {
                             this.deleteWords(1);
                         }

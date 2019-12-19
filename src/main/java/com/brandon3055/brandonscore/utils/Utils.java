@@ -1,12 +1,13 @@
 package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -29,7 +30,7 @@ public class Utils {
 
     public static String formatNumber(double value) {
         if (value < 1000D) return String.valueOf(value);
-        else if (value < 1000000D) return addCommas((int)value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
+        else if (value < 1000000D) return addCommas((int) value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
         else if (value < 1000000000D) return String.valueOf(Math.round(value / 1000D) / 1000D) + "M";
         else if (value < 1000000000000D) return String.valueOf(Math.round(value / 1000000D) / 1000D) + "B";
         else return String.valueOf(Math.round(value / 1000000000D) / 1000D) + "T";
@@ -85,9 +86,7 @@ public class Utils {
     public static boolean inRangeSphere(BlockPos posA, BlockPos posB, int range) {
         if (Math.abs(posA.getX() - posB.getX()) > range || Math.abs(posA.getY() - posB.getY()) > range || Math.abs(posA.getZ() - posB.getZ()) > range) {
             return false;
-        }
-
-        else
+        } else
             return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
     }
 
@@ -136,7 +135,7 @@ public class Utils {
     /**
      * Determine the orientation of a blocks based on the position of the entity that placed it.
      */
-    public static int determineOrientation(int x, int y, int z, EntityLivingBase entity) {
+    public static int determineOrientation(int x, int y, int z, LivingEntity entity) {
         if (MathHelper.abs((float) entity.posX - (float) x) < 2.0F && MathHelper.abs((float) entity.posZ - (float) z) < 2.0F) {
             double d0 = entity.posY + 1.82D - (double) entity.getYOffset();
 
@@ -212,8 +211,7 @@ public class Utils {
             catch (Exception e) {
                 return 0;
             }
-        }
-        else {
+        } else {
             return (int) Long.parseLong(s, 16);
         }
     }
@@ -239,23 +237,23 @@ public class Utils {
     }
 
     @Nullable
-    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance) {
+    public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance) {
         return getClosestPlayer(world, posX, posY, posZ, distance, true);
     }
 
     @Nullable
-    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative) {
+    public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative) {
         return getClosestPlayer(world, posX, posY, posZ, distance, includeCreative, false);
     }
 
 
     @Nullable
-    public static EntityPlayer getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
+    public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
         double d0 = -1.0D;
-        EntityPlayer closestPlayer = null;
+        PlayerEntity closestPlayer = null;
 
         for (int i = 0; i < world.playerEntities.size(); ++i) {
-            EntityPlayer player = world.playerEntities.get(i);
+            PlayerEntity player = world.playerEntities.get(i);
 
             if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators)) {
                 double d1 = player.getDistanceSq(posX, posY, posZ);
@@ -285,8 +283,7 @@ public class Utils {
     public static String trimString(String input, int length, String trimExtension) {
         if (input.length() <= length) {
             return input;
-        }
-        else {
+        } else {
             return input.substring(0, length) + trimExtension;
         }
     }
@@ -329,8 +326,7 @@ public class Utils {
         if (value.startsWith("0x") || value.startsWith("#")) {
             value = value.replace("0x", "").replace("#", "");
             return parseHex(value, false);
-        }
-        else if (value.contains(",")) {
+        } else if (value.contains(",")) {
             String[] vals = value.split(",");
             if (vals.length != 3)
                 throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
@@ -338,8 +334,7 @@ public class Utils {
             int g = vals[1].contains(".") ? (int) (Double.parseDouble(vals[1]) * 255) : Integer.parseInt(vals[1]);
             int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[2]);
             return r << 16 | g << 8 | b;
-        }
-        else {
+        } else {
             throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
         }
     }
@@ -348,10 +343,9 @@ public class Utils {
         if (value.startsWith("0x") || value.startsWith("#")) {
             value = value.replace("0x", "").replace("#", "");
             return parseHex(value, false);
-        }
-        else if (value.contains(",")) {
+        } else if (value.contains(",")) {
             String[] vals = value.split(",");
-            if (vals.length < 3 || vals.length > 4){
+            if (vals.length < 3 || vals.length > 4) {
                 throw new NumberFormatException("Number must be a hex using the format 0xAARRGGBB or #AARRGGBB");
             }
             int r = vals[0].contains(".") ? (int) (Double.parseDouble(vals[0]) * 255) : Integer.parseInt(vals[0]);
@@ -359,9 +353,17 @@ public class Utils {
             int b = vals[2].contains(".") ? (int) (Double.parseDouble(vals[2]) * 255) : Integer.parseInt(vals[2]);
             int a = vals.length == 4 ? vals[3].contains(".") ? (int) (Double.parseDouble(vals[3]) * 255) : Integer.parseInt(vals[3]) : 0xFF;
             return a << 24 | r << 16 | g << 8 | b;
-        }
-        else {
+        } else {
             throw new NumberFormatException("Number must be a hex using the format 0xRRGGBB or #RRGGBB");
-        }    }
+        }
+    }
+
+    public static boolean isServerSide() {
+        return FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER;
+    }
+
+    public static boolean isClientSide() {
+        return FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
+    }
 }
 

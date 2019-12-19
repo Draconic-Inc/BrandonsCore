@@ -1,20 +1,18 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import codechicken.lib.render.shader.ShaderProgram;
-import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.api.power.IOInfo;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.render.BCShaders;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
 
 import java.awt.*;
@@ -25,7 +23,7 @@ import static net.minecraft.util.text.TextFormatting.*;
 /**
  * Created by brandon3055 on 18/10/2016.
  */
-public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
+public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
     private boolean drawHoveringText = true;
     private IOPStorage energyHandler = null;
@@ -129,11 +127,11 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
             posY = posX;
             posX = x;
             GlStateManager.pushMatrix();
-            GlStateManager.translate(size + (posY * 2), 0, 0);
-            GlStateManager.rotate(90, 0, 0, 1);
+            GlStateManager.translated(size + (posY * 2), 0, 0);
+            GlStateManager.rotated(90, 0, 0, 1);
         }
 
-        GlStateManager.color(1F, 1F, 1F);
+        GlStateManager.color3f(1F, 1F, 1F);
         drawTexturedModalRect(posX, posY, 0, 0, 14, size);
         drawTexturedModalRect(posX, posY + size - 1, 0, 255, 14, 1);
 
@@ -151,12 +149,12 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
     }
 
     public Rectangle toScreenSpace(int xPos, int yPos, int xSize, int ySize) {
-        double yResScale = (double) mc.displayHeight / screenHeight;
-        double xResScale = (double) mc.displayWidth / screenWidth;
+        double yResScale = (double) displayHeight() / screenHeight;
+        double xResScale = (double) displayWidth() / screenWidth;
         double scaledWidth = xSize * xResScale;
         double scaledHeight = ySize * yResScale;
         int x = (int) (xPos * xResScale);
-        int y = (int) (mc.displayHeight - (yPos * yResScale) - scaledHeight);
+        int y = (int) (displayHeight() - (yPos * yResScale) - scaledHeight);
         return new Rectangle(x, y, (int) scaledWidth, (int) scaledHeight);
     }
 
@@ -168,7 +166,7 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
             long energy = getEnergy();
 
             String title = rfMode ? "gui.bc.energy_storage.txt" : "gui.bc.operational_potential.txt";
-            boolean shift = GuiScreen.isShiftKeyDown();
+            boolean shift = Screen.hasShiftDown();
             String suffix = rfMode ? "RF" : "OP";
             String capString = (shift ? Utils.addCommas(maxEnergy) : Utils.formatNumber(maxEnergy)) + " " + suffix;
             String storedString = (shift ? Utils.addCommas(energy) : Utils.formatNumber(energy)) + " " + suffix;
@@ -196,7 +194,7 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
                 }
             }
 
-            drawHoveringText(Lists.newArrayList(builder.toString().split("\n")), mouseX, mouseY, fontRenderer, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            drawHoveringText(Lists.newArrayList(builder.toString().split("\n")), mouseX, mouseY, fontRenderer, displayWidth(), displayHeight());
             return true;
         }
 
@@ -235,7 +233,7 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
                     cache.glUniform1F("charge", getSOC());
                     cache.glUniform2I("ePos", rect.x, rect.y);
                     cache.glUniform2I("eSize", rect.width, rect.height);
-                    cache.glUniform2I("screenSize", mc.displayWidth, mc.displayHeight);
+                    cache.glUniform2I("screenSize", displayWidth(), displayHeight());
                 });
             }
         }
@@ -251,6 +249,6 @@ public class GuiEnergyBar extends MGuiElementBase<GuiEnergyBar> {
     }
 
     public boolean useShaders() {
-        return !rfMode && OpenGlHelper.shadersSupported && BCConfig.useShaders;
+        return !rfMode && BCShaders.useShaders();
     }
 }

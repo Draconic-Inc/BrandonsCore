@@ -11,7 +11,7 @@
 //import net.minecraft.client.resources.I18n;
 //import net.minecraft.entity.Entity;
 //import net.minecraft.entity.EntityList;
-//import net.minecraft.entity.EntityLivingBase;
+//import net.minecraft.entity.LivingEntity;
 //import net.minecraft.entity.item.EntityItem;
 //import net.minecraft.entity.item.EntityMinecart;
 //import net.minecraft.init.Items;
@@ -339,7 +339,7 @@
 //                    continue;
 //                }
 //
-//                if (entity.isNonBoss() && (entity instanceof EntityLivingBase || entity instanceof EntityMinecart)) {
+//                if (entity.isNonBoss() && (entity instanceof LivingEntity || entity instanceof EntityMinecart)) {
 //                    listCanRender.add(entity);
 //                }
 //                else {

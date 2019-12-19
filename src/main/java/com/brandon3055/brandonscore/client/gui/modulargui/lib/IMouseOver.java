@@ -7,6 +7,5 @@ package com.brandon3055.brandonscore.client.gui.modulargui.lib;
  */
 public interface IMouseOver {
 
-    boolean isMouseOver(int mouseX, int mouseY);
-
+    boolean isMouseOver(double mouseX, double mouseY);
 }

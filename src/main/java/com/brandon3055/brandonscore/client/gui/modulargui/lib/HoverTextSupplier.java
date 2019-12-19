@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 
 import java.util.*;
 
@@ -8,7 +8,7 @@ import java.util.*;
  * Created by brandon3055 on 5/07/2017.
  * Used to supply hover text for an element. Accepted types for T are String, String[] and List<String>
  */
-public interface HoverTextSupplier<T, E extends MGuiElementBase> {
+public interface HoverTextSupplier<T, E extends GuiElement> {
 
     T getText(E element);
 

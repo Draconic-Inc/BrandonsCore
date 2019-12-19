@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.ScaledResolution;
 
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by brandon3055 on 30/08/2016.
  */
-public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<ModularGuiScreen> {
+public abstract class ModularGuiScreen extends Screen implements IModularGui<ModularGuiScreen> {
 
     protected int xSize;
     protected int ySize;
@@ -23,7 +23,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
     public ModularGuiScreen(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
-        this.mc = Minecraft.getMinecraft();
+        this.mc = Minecraft.getInstance();
         ScaledResolution scaledresolution = new ScaledResolution(mc);
         this.itemRender = mc.getRenderItem();
         this.fontRenderer = mc.fontRenderer;
@@ -117,7 +117,7 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        if (manager.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+        if (manager.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
             return;
         }
 
@@ -126,14 +126,14 @@ public abstract class ModularGuiScreen extends GuiScreen implements IModularGui<
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (manager.keyTyped(typedChar, keyCode)) {
+        if (manager.keyPressed(typedChar, keyCode)) {
             return;
         }
 
         if (keyCode == 1)
         {
             this.mc.player.closeScreen();
-            this.mc.displayGuiScreen((GuiScreen)null);
+            this.mc.displayGuiScreen((Screen)null);
 
             if (this.mc.currentScreen == null)
             {

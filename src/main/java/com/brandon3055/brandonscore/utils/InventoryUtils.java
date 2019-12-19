@@ -4,7 +4,7 @@ package com.brandon3055.brandonscore.utils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.lib.functions.TriPredicate;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -63,7 +63,7 @@ public class InventoryUtils {
      * When inserting will first try to insert the item in the main hand and if that fails it will try the off hand.
      * Will not transfer partial stacks.
      */
-    public static void handleHeldStackTransfer(int slot, IInventory inventory, EntityPlayer player) {
+    public static void handleHeldStackTransfer(int slot, IInventory inventory, PlayerEntity player) {
         if (player.world.isRemote) {
             return;
         }
@@ -88,12 +88,12 @@ public class InventoryUtils {
         }
     }
 
-    public static void consumeHeldItem(EntityPlayer player, ItemStack stack, EnumHand hand) {
+    public static void consumeHeldItem(PlayerEntity player, ItemStack stack, EnumHand hand) {
         stack.shrink(1);
         player.setHeldItem(hand, stack.getCount() > 0 ? stack.copy() : ItemStack.EMPTY);
     }
 
-    public static void givePlayerStack(EntityPlayer player, ItemStack stack) {
+    public static void givePlayerStack(PlayerEntity player, ItemStack stack) {
         if (player.world.isRemote) {
             return;
         }

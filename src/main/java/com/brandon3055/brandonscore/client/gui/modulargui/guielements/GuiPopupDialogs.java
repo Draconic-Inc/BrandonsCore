@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
@@ -19,31 +19,31 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
     public GuiButton okButton;
     public GuiButton cancelButton;
 
-    public GuiPopupDialogs(MGuiElementBase parent) {
+    public GuiPopupDialogs(GuiElement parent) {
         super(parent);
     }
 
     public GuiPopupDialogs setYesListener(IButtonListener yesListener) {
-        if (yesButton != null) yesButton.setListener(yesListener);
+        if (yesButton != null) yesButton.setButtonListener(yesListener);
         return this;
     }
 
     public GuiPopupDialogs setNoListener(IButtonListener noListener) {
-        if (noButton != null) noButton.setListener(noListener);
+        if (noButton != null) noButton.setButtonListener(noListener);
         return this;
     }
 
     public GuiPopupDialogs setOkListener(IButtonListener okListener) {
-        if (okButton != null) okButton.setListener(okListener);
+        if (okButton != null) okButton.setButtonListener(okListener);
         return this;
     }
 
     public GuiPopupDialogs setCancelListener(IButtonListener cancelListener) {
-        if (cancelButton != null) cancelButton.setListener(cancelListener);
+        if (cancelButton != null) cancelButton.setButtonListener(cancelListener);
         return this;
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, String title, int xSize, MGuiElementBase background, boolean vanillaButtons, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize, GuiElement background, boolean vanillaButtons, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
         GuiPopupDialogs dialog = new GuiPopupDialogs(parent);
         dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> GlStateManager.color(1, 1, 1, 1));
         dialog.setXSize(xSize);
@@ -99,28 +99,36 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
         return dialog;
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, String title, int xSize, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
         return createDialog(parent, type, message, title, xSize, GuiTexture.newVanillaGuiTexture(0, 0), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, String title, int xSize) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize) {
         return createDialog(parent, type, message, title, xSize, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, int xSize) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, int xSize) {
         return createDialog(parent, type, message, "", xSize, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, String title, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
         return createDialog(parent, type, message, title, 200, GuiTexture.newVanillaGuiTexture(0, 0), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message, String title) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title) {
         return createDialog(parent, type, message, title, 200, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
     }
 
-    public static GuiPopupDialogs createDialog(MGuiElementBase parent, DialogType type, String message) {
+    public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message) {
         return createDialog(parent, type, message, "", 200, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
+    }
+
+    public static GuiPopupDialogs createPopOut(GuiElement parent, GuiElement popOutElement) {
+        GuiPopupDialogs dialog = new GuiPopupDialogs(parent);
+        dialog.setPosAndSize(popOutElement);
+//        dialog.setDragBar(12);
+        dialog.addChild(popOutElement);
+        return dialog;
     }
 
     public enum DialogType {

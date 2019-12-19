@@ -1,8 +1,14 @@
 package com.brandon3055.brandonscore.client.render;
 
+import codechicken.lib.render.shader.ShaderHelper;
 import codechicken.lib.render.shader.ShaderObject;
-import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.BCConfigOld;
+import com.brandon3055.brandonscore.config.BCConfig;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.shader.ShaderLoader;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 
@@ -21,7 +27,7 @@ public class BCShaders {
     public static ShaderObject commonVert;
 
     static {
-        if (OpenGlHelper.shadersSupported && BCConfig.useShaders) {
+        if (useShaders()) {
             try {
                 initShaders();
             } catch (Throwable e) {

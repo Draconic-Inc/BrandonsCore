@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -16,7 +16,7 @@ import java.io.IOException;
  * The popup can automatically close if the player clicks outside the popup or if you call the close() method.<br>
  * setting canDrag to true makes the window draggable by clicking and dragging withing the top 10 pixels of the popup (adjustable)
  */
-public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElementBase<E> {
+public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
 
     protected int dragXOffset = 0;
     protected int dragYOffset = 0;
@@ -34,8 +34,9 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     protected boolean closeOnCapturedClick = false;
     protected Rectangle dragZone = null;
     protected Runnable escapeCallback = null;
+    protected Runnable closeCallback = null;
 
-    public GuiPopUpDialogBase(MGuiElementBase parent) {
+    public GuiPopUpDialogBase(GuiElement parent) {
         this.setParent(parent);
         if (parent.modularGui == null) {
             throw new RuntimeException("GuiPopUpDialogBase parent has must be initialized!");
@@ -43,13 +44,13 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
         applyGeneralElementData(parent.modularGui, parent.mc, parent.screenWidth, parent.screenHeight, parent.fontRenderer);
     }
 
-    public GuiPopUpDialogBase(int xPos, int yPos, MGuiElementBase parent) {
+    public GuiPopUpDialogBase(int xPos, int yPos, GuiElement parent) {
         super(xPos, yPos);
         this.setParent(parent);
         applyGeneralElementData(parent.modularGui, parent.mc, parent.screenWidth, parent.screenHeight, parent.fontRenderer);
     }
 
-    public GuiPopUpDialogBase(int xPos, int yPos, int xSize, int ySize, MGuiElementBase parent) {
+    public GuiPopUpDialogBase(int xPos, int yPos, int xSize, int ySize, GuiElement parent) {
         super(xPos, yPos, xSize, ySize);
         this.setParent(parent);
         applyGeneralElementData(parent.modularGui, parent.mc, parent.screenWidth, parent.screenHeight, parent.fontRenderer);
@@ -88,19 +89,19 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     }
 
     @Override
-    public boolean allowMouseOver(MGuiElementBase elementRequesting, int mouseX, int mouseY) {
+    public boolean allowMouseOver(GuiElement elementRequesting, double mouseX, double mouseY) {
         return true;
     }
 
     @Override
-    public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if (dragging) {
             int xMove = (mouseX - dragXOffset) - xPos();
             int yMove = (mouseY - dragYOffset) - yPos();
             translate(xMove, yMove);
         }
 
-        return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) || blockOutsideClicks;
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) || blockOutsideClicks;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     }
 
     @Override
-    public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
+    public boolean handleMouseScroll(double mouseX, double mouseY, double scrollDirection) {
         if (closeOnScroll) {
             close();
         }
@@ -118,7 +119,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     }
 
     @Override
-    protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+    protected boolean keyPressed(char typedChar, int keyCode) throws IOException {
         if (keyCode == 1) {
             close();
             if (escapeCallback != null) {
@@ -126,7 +127,7 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
             }
             return true;
         }
-        return super.keyTyped(typedChar, keyCode);
+        return super.keyPressed(typedChar, keyCode);
     }
 
     /**
@@ -194,6 +195,11 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
         return (E) this;
     }
 
+    public E setCloseCallback(Runnable closeCallback) {
+        this.closeCallback = closeCallback;
+        return (E) this;
+    }
+
     /**
      * Display this popup with the given zOffset.
      */
@@ -228,13 +234,13 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     /**
      * Display this popup in the centre of the specified Element.
      */
-    public void showCenter(MGuiElementBase centerOn, int displayZLevel) {
+    public void showCenter(GuiElement centerOn, int displayZLevel) {
         show(displayZLevel);
         setXPos(centerOn.xPos() + (centerOn.xSize() / 2) - (xSize() / 2));
         setYPos(centerOn.yPos() + (centerOn.ySize() / 2) - (ySize() / 2));
     }
 
-    public void showCenter(MGuiElementBase centerOn) {
+    public void showCenter(GuiElement centerOn) {
         int pz = getParent() == null ? 100 : getParent().displayZLevel;
         showCenter(centerOn, pz >= 500 ? pz + 50 : 500);
     }
@@ -245,6 +251,9 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
     public void close() {
         modularGui.getManager().removeChild(this);
         isVisible = false;
+        if (closeCallback != null) {
+            closeCallback.run();
+        }
     }
 
     public void toggleShown(boolean centre, int displayZLevel) {
@@ -265,5 +274,22 @@ public class GuiPopUpDialogBase<E extends MGuiElementBase<E>> extends MGuiElemen
 
     public boolean isVisible() {
         return isVisible;
+    }
+
+    /**
+     * This implementation exists for the sole purpose oof being able to use the raw GuiPopUpDialogBase without broken generics.
+     * */
+    public static class PopoutDialog extends GuiPopUpDialogBase<PopoutDialog> {
+        public PopoutDialog(GuiElement parent) {
+            super(parent);
+        }
+
+        public PopoutDialog(int xPos, int yPos, GuiElement parent) {
+            super(xPos, yPos, parent);
+        }
+
+        public PopoutDialog(int xPos, int yPos, int xSize, int ySize, GuiElement parent) {
+            super(xPos, yPos, xSize, ySize, parent);
+        }
     }
 }

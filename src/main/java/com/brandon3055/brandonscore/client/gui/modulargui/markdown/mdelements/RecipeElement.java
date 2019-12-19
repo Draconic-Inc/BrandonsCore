@@ -5,14 +5,12 @@ import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.input.Mouse;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement.Type.NEW_LINE;
@@ -110,9 +108,9 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | parent.colourBorderHover);
             }
 
-            GlStateManager.translate(0, 0, getRenderZLevel());
+            GlStateManager.translated(0, 0, getRenderZLevel());
             renderer.render(minecraft, xPos() + parent.leftPad + 4, yPos() + parent.topPad + 4, mouseX, mouseY);
-            GlStateManager.translate(0, 0, -getRenderZLevel());
+            GlStateManager.translated(0, 0, -getRenderZLevel());
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 
@@ -131,7 +129,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
         }
 
         @Override
-        public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
             if (isMouseOver(mouseX, mouseY) && (mouseButton == 0 || mouseButton == 1)) {
                 renderer.handleRecipeClick(mc, mouseX, mouseY, mouseButton == 1);
                 return true;
@@ -140,9 +138,9 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
         }
 
         @Override
-        protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
-            int mouseX = Mouse.getX() * parent.screenWidth / this.mc.displayWidth;
-            int mouseY = parent.screenHeight - Mouse.getY() * parent.screenHeight / this.mc.displayHeight - 1;
+        protected boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            double mouseX = getMouseX();
+            double mouseY = getMouseY();
 
             if (isMouseOver(mouseX, mouseY)) {
                 Object o = renderer.getIngredientUnderMouse(mouseX, mouseY);
@@ -154,7 +152,8 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                     renderer.handleRecipeClick(mc, mouseX, mouseY, true);
                     return true;
                 }
-                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && keyCode == PIHelper.getETGuiKey().getKeyCode()) {
+                //TODO Test this
+                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && PIHelper.getETGuiKey().matchesKey(keyCode, scanCode)) {
                     List<String> pages = PIHelper.getRelatedPages((ItemStack) o);
                     if (!pages.isEmpty()) {
                         PIHelper.openGui(modularGui.getScreen(), pages);
@@ -163,7 +162,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 }
             }
 
-            return super.keyTyped(typedChar, keyCode);
+            return super.keyPressed(keyCode, scanCode, modifiers);
         }
     }
 }

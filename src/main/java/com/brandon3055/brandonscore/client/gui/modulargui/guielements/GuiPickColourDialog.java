@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import codechicken.lib.colour.Colour;
 import codechicken.lib.colour.ColourARGB;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
@@ -33,7 +33,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
     private Consumer<Colour> colourChangeListener = null;
     private Consumer<Colour> colourSelectListener = null;
 
-    public GuiPickColourDialog(MGuiElementBase parent) {
+    public GuiPickColourDialog(GuiElement parent) {
         super(parent);
         setSize(80, 80);
         setDragBar(80);
@@ -42,7 +42,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         }
     }
 
-    public GuiPickColourDialog(int xPos, int yPos, MGuiElementBase parent) {
+    public GuiPickColourDialog(int xPos, int yPos, GuiElement parent) {
         super(xPos, yPos, parent);
         setSize(80, 80);
         setDragBar(80);
@@ -97,7 +97,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         }
 
         addChild(selectButton = new GuiButton(xPos + 4, yPos + ySize - 14, cancelEnabled ? (xSize / 2) - 5 : xSize - 8, 10, I18n.format("generic.ok.txt")));
-        selectButton.setListener(() -> {
+        selectButton.onPressed(() -> {
             if (listener != null) {
                 listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), false, false), this);
             }
@@ -107,7 +107,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
             close();
         });
         addChild(cancelButton = new GuiButton(selectButton.xPos() + selectButton.xSize() + 2, yPos + ySize - 14, (xSize / 2) - 5, 10, I18n.format("gui.back")));
-        cancelButton.setListener(() -> {
+        cancelButton.onPressed(() -> {
             if (listener != null) {
                 listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), true, false), this);
             }
@@ -130,7 +130,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
     }
 
     @Override
-    public void onMGuiEvent(GuiEvent event, MGuiElementBase eventElement) {
+    public void onMGuiEvent(GuiEvent event, GuiElement eventElement) {
         boolean colourChanged = false;
         if (eventElement == redSlider) {
             colour.r = (byte) (redSlider.getPosition() * 255D);

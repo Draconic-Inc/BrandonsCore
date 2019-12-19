@@ -20,8 +20,8 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -144,11 +144,11 @@ public class PartBuilderEntity extends IPartBuilder {
             return entityPatMatch.replaceFirst("[Broken Entity. " + e.getMessage() + "]");
         }
 
-        if (trackMouse && !(renderEntity instanceof EntityLivingBase)) {
+        if (trackMouse && !(renderEntity instanceof LivingEntity)) {
             return entityPatMatch.replaceFirst("[Broken Entity. track_mouse is only supported with living entities]");
         }
 
-        if (drawName && !(renderEntity instanceof EntityPlayer)) {
+        if (drawName && !(renderEntity instanceof PlayerEntity)) {
             return entityPatMatch.replaceFirst("[Broken Entity. draw_name is only supported by player's]");
         }
 
@@ -173,8 +173,8 @@ public class PartBuilderEntity extends IPartBuilder {
                     GlStateManager.color(1, 1, 1, 1);
 
                     int eyeOffset = (int) ((renderEntity.height - renderEntity.getEyeHeight()) * scale);
-                    if (renderEntity instanceof EntityLivingBase) {
-                        drawEntityOnScreen((int) posX, yPos + height, scale, (int) posX - mouseX, yPos - mouseY + eyeOffset, (EntityLivingBase) renderEntity, trackMouse, entityRotation, drawName);
+                    if (renderEntity instanceof LivingEntity) {
+                        drawEntityOnScreen((int) posX, yPos + height, scale, (int) posX - mouseX, yPos - mouseY + eyeOffset, (LivingEntity) renderEntity, trackMouse, entityRotation, drawName);
                     }
                     else {
                         drawEntityOnScreen((int) posX, yPos + height, scale, renderEntity, entityRotation);
@@ -217,7 +217,7 @@ public class PartBuilderEntity extends IPartBuilder {
 //        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
 //        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
         GlStateManager.translate(0.0F, 0.0F, 0.0F);
-        RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
+        RenderManager rendermanager = Minecraft.getInstance().getRenderManager();
         rendermanager.setPlayerViewY(180.0F);
         rendermanager.setRenderShadow(false);
         rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
@@ -232,7 +232,7 @@ public class PartBuilderEntity extends IPartBuilder {
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
     }
 
-    public static void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, EntityLivingBase ent, boolean trackMouse, double noTrackRotation, boolean drawName) {
+    public static void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName) {
         float rotation = trackMouse ? 0 : (float) noTrackRotation;
         if (!trackMouse) {
             mouseX = 0;
@@ -259,7 +259,7 @@ public class PartBuilderEntity extends IPartBuilder {
         ent.rotationYawHead = ent.rotationYaw;
         ent.prevRotationYawHead = ent.rotationYaw;
         GlStateManager.translate(0.0F, 0.0F, 0.0F);
-        RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
+        RenderManager rendermanager = Minecraft.getInstance().getRenderManager();
         rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
         rendermanager.setRenderShadow(false);
         rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
@@ -300,8 +300,8 @@ public class PartBuilderEntity extends IPartBuilder {
 
         EquipmentHelper helper = EquipmentHelper.create(options);
 
-        if (entity instanceof EntityLivingBase && helper.hasEquipment) {
-            helper.apply((EntityLivingBase) entity);
+        if (entity instanceof LivingEntity && helper.hasEquipment) {
+            helper.apply((LivingEntity) entity);
         }
         else if (helper.hasEquipment) {
             throw new IllegalArgumentException("The specified entity does not allow equipment!");
@@ -310,7 +310,7 @@ public class PartBuilderEntity extends IPartBuilder {
         return entity;
     }
 
-    public static EntityPlayer createRenderPlayer(World world, String username) {
+    public static PlayerEntity createRenderPlayer(World world, String username) {
         EntityOtherPlayerMP player = new EntityOtherPlayerMP(world, TileEntitySkull.updateGameprofile(new GameProfile(null, username))) {
             @Override
             public String getSkinType() {
@@ -321,14 +321,14 @@ public class PartBuilderEntity extends IPartBuilder {
             public ResourceLocation getLocationSkin() {
                 ResourceLocation resourcelocation;
 
-                Minecraft minecraft = Minecraft.getMinecraft();
+                Minecraft minecraft = Minecraft.getInstance();
                 Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(getGameProfile());
 
                 if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
                     resourcelocation = minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
                 }
                 else {
-                    UUID uuid = EntityPlayer.getUUID(getGameProfile());
+                    UUID uuid = PlayerEntity.getUUID(getGameProfile());
                     resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
                 }
 
@@ -353,7 +353,7 @@ public class PartBuilderEntity extends IPartBuilder {
         private ItemStack boots = ItemStack.EMPTY;
         public boolean hasEquipment = false;
 
-        public void apply(EntityLivingBase entity) {
+        public void apply(LivingEntity entity) {
             if (!mainHand.isEmpty()) entity.setHeldItem(EnumHand.MAIN_HAND, mainHand);
             if (!offHand.isEmpty()) entity.setHeldItem(EnumHand.OFF_HAND, offHand);
             if (!head.isEmpty()) entity.setItemStackToSlot(EntityEquipmentSlot.HEAD, head);

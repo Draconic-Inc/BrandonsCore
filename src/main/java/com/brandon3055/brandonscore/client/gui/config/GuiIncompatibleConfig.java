@@ -1,11 +1,12 @@
 package com.brandon3055.brandonscore.client.gui.config;
 
 import com.brandon3055.brandonscore.client.gui.ButtonColourRect;
-import com.brandon3055.brandonscore.client.gui.modulargui_old.ModularGuiScreen;
-import com.brandon3055.brandonscore.client.gui.modulargui_old.lib.EnumAlignment;
-import com.brandon3055.brandonscore.client.gui.modulargui_old.modularelements.MGuiLabel;
-import com.brandon3055.brandonscore.client.gui.modulargui_old.modularelements.MGuiList;
-import com.brandon3055.brandonscore.client.gui.modulargui_old.modularelements.MGuiListEntryWrapper;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
+import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiScreen;
+
+import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import net.minecraft.client.gui.GuiButton;
@@ -22,6 +23,7 @@ import java.util.Map;
 /**
  * Created by brandon3055 on 16/06/2017.
  */
+@Deprecated //This needs to be re written / tested
 public class GuiIncompatibleConfig extends ModularGuiScreen {
 
     private Map<ModConfigParser.PropertyHelper, Object> incompatibleProps;
@@ -32,31 +34,26 @@ public class GuiIncompatibleConfig extends ModularGuiScreen {
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
-
+    public void addElements(GuiElementManager manager) {
         int cx = width / 2;
         int cy = height / 2;
 
         manager.clear();
-        MGuiList list;
-        manager.add(list = new MGuiList(this, cx - 230, cy - 90, 460, 100));
-        list.addEntry(new MGuiListEntryWrapper(this, new MGuiLabel(this, 0, 0, 460, 15, "[modid:configName] - [Your Config] -> [Server Config]").setTextColour(0x00FF00).setAlignment(EnumAlignment.LEFT)));
+        GuiScrollElement list;
+        manager.addChild(list = new GuiScrollElement(cx - 230, cy - 90, 460, 100));
+        list.addElement(new GuiLabel(0, 0, 460, 15, "[modid:configName] - [Your Config] -> [Server Config]").setTextColour(0x00FF00).setAlignment(GuiAlign.LEFT));
         incompatibleProps.forEach((prop, s) -> {
             String client = prop.isArray ? "{Array Value}" : prop.property.getString();
             String server = prop.isArray ? "{Array Value}" : s + "";
-            list.addEntry(new MGuiListEntryWrapper(this, new MGuiLabel(this, 0, 0, 460, 15, TextFormatting.GOLD + prop.modid + ":" + prop.name + ":  " + TextFormatting.RED + client + TextFormatting.RESET + " -> " + TextFormatting.GREEN + server).setAlignment(EnumAlignment.LEFT)));
+            list.addElement(new GuiLabel(0, 0, 460, 15, TextFormatting.GOLD + prop.modid + ":" + prop.name + ":  " + TextFormatting.RED + client + TextFormatting.RESET + " -> " + TextFormatting.GREEN + server).setAlignment(GuiAlign.LEFT));
 
         });
 
-        manager.initElements();
-
+        buttonList.clear();
         addButton(new ButtonColourRect(0, TextFormatting.RED + "Ignore conflict", cx - 230, cy + 80, 100, 15, 0xFF000000, 0xFF909090, 0xFFFFFFFF));
         addButton(new ButtonColourRect(1, "Disconnect from server", cx - 120, cy + 80, 150, 15, 0xFF000000, 0xFF909090, 0xFFFFFFFF));
         addButton(new ButtonColourRect(2, TextFormatting.GREEN + "Accept Server Config", cx + 40, cy + 80, 190, 15, 0xFF000000, 0xFF909090, 0xFFFFFFFF));
-
     }
-
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {

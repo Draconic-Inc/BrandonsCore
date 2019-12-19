@@ -2,8 +2,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.ArrayList;
@@ -17,17 +17,17 @@ import java.util.Map;
 @Deprecated //Avoid if possible
 public class ManagedNBTSerializableMap extends AbstractManagedData {
 
-    private Map<String, INBTSerializable<NBTTagCompound>> valueMap;
-    private Map<String, NBTBase> lastValueMap;
+    private Map<String, INBTSerializable<CompoundNBT>> valueMap;
+    private Map<String, INBT> lastValueMap;
 
-    public ManagedNBTSerializableMap(String name, Map<String, INBTSerializable<NBTTagCompound>> serializableMap, DataFlags... flags) {
+    public ManagedNBTSerializableMap(String name, Map<String, INBTSerializable<CompoundNBT>> serializableMap, DataFlags... flags) {
         super(name, flags);
         this.valueMap = serializableMap;
         lastValueMap = new HashMap<>();
         serializableMap.forEach((key, value) -> lastValueMap.put(key, value.serializeNBT()));
     }
 
-    public Map<String, INBTSerializable<NBTTagCompound>> get() {
+    public Map<String, INBTSerializable<CompoundNBT>> get() {
         return valueMap;
     }
 
@@ -37,7 +37,7 @@ public class ManagedNBTSerializableMap extends AbstractManagedData {
     @Override
     public boolean isDirty(boolean reset) {
         if (lastValueMap != null && (lastValueMap.size() != valueMap.size() || (valueMap.entrySet().stream().anyMatch(entry -> {
-            NBTBase base = lastValueMap.get(entry.getKey());
+            INBT base = lastValueMap.get(entry.getKey());
             return base == null || !(base.equals(entry.getValue().serializeNBT()));
         })))) {
             if (reset) {
@@ -61,7 +61,7 @@ public class ManagedNBTSerializableMap extends AbstractManagedData {
         int c = input.readVarInt();
         for (int i = 0; i < c; i++) {
             String name = input.readString();
-            NBTTagCompound nbt = input.readNBTTagCompound();
+            CompoundNBT nbt = input.readNBTTagCompound();
             if (valueMap.containsKey(name)) {
                 valueMap.get(name).deserializeNBT(nbt);
             }
@@ -71,15 +71,15 @@ public class ManagedNBTSerializableMap extends AbstractManagedData {
     }
 
     @Override
-    public void toNBT(NBTTagCompound compound) {
-        NBTTagCompound tags = new NBTTagCompound();
+    public void toNBT(CompoundNBT compound) {
+        CompoundNBT tags = new CompoundNBT();
         valueMap.forEach((name, serializable) -> tags.setTag(name, serializable.serializeNBT()));
         compound.setTag(name, tags);
     }
 
     @Override
-    public void fromNBT(NBTTagCompound compound) {
-        NBTTagCompound tags = compound.getCompoundTag(name);
+    public void fromNBT(CompoundNBT compound) {
+        CompoundNBT tags = compound.getCompoundTag(name);
         for (String name : new ArrayList<>(valueMap.keySet())) {
             if (tags.hasKey(name)) {
                 valueMap.get(name).deserializeNBT(tags.getCompoundTag(name));

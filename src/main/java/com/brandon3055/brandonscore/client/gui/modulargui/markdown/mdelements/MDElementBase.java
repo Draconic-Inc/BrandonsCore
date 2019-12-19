@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by brandon3055 on 5/31/2018.
  */
-public abstract class MDElementBase<E extends MGuiElementBase<E>> extends MGuiElementBase<E> {
+public abstract class MDElementBase<E extends GuiElement<E>> extends GuiElement<E> {
 
     public static final char S = '\u00a7';
     public int size = 0;

@@ -13,7 +13,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
@@ -71,7 +71,7 @@ public class BCClientEventHandler {
         }
 
         elapsedTicks++;
-        if (Minecraft.getMinecraft().isGamePaused()) {
+        if (Minecraft.getInstance().isGamePaused()) {
             return;
         }
 
@@ -95,7 +95,7 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void renderScreen(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getMinecraft().currentScreen instanceof GuiChat) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().currentScreen instanceof GuiChat) {
             return;
         }
 
@@ -116,7 +116,7 @@ public class BCClientEventHandler {
         }
 
         if (debugTimeout < 190) {
-            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+            FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
             fontRenderer.drawString("Server Stopped Sending Updates!", 0, event.getResolution().getScaledHeight() - 21, 0xFF0000, true);
             fontRenderer.drawString("Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getResolution().getScaledHeight() - 11, 0xFF0000, true);
         }
@@ -126,7 +126,7 @@ public class BCClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void fovUpdate(FOVUpdateEvent event) {
-        EntityPlayer player = event.getEntity();
+        PlayerEntity player = event.getEntity();
         float originalFOV = event.getFov();
         float newFOV = originalFOV;
 
@@ -173,12 +173,12 @@ public class BCClientEventHandler {
 
 //    @SubscribeEvent
 //    public void mouseClickEvent(GuiScreenEvent.MouseInputEvent.Pre event) {
-////        GuiScreen screen = event.getGui();
+////        Screen screen = event.getGui();
 ////        int button = Mouse.getEventButton();
 ////
 ////        if (screen instanceof GuiChat && button == 0) {
 ////
-////            ITextComponent itextcomponent = Minecraft.getMinecraft().ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
+////            ITextComponent itextcomponent = Minecraft.getInstance().ingameGUI.getChatGUI().getChatComponent(Mouse.getX(), Mouse.getY());
 ////            BCLogHelper.info(itextcomponent);
 ////            if (itextcomponent != null) {
 ////                BCLogHelper.info(itextcomponent.getStyle().getClickEvent());
@@ -192,9 +192,9 @@ public class BCClientEventHandler {
 
     private void searchForPlayerMount() {
         if (remountTicksRemaining > 0) {
-            Entity e = Minecraft.getMinecraft().world.getEntityByID(remountEntityID);
+            Entity e = Minecraft.getInstance().world.getEntityByID(remountEntityID);
             if (e != null) {
-                Minecraft.getMinecraft().player.startRiding(e);
+                Minecraft.getInstance().player.startRiding(e);
                 LogHelperBC.info("Successfully placed player on mount after " + (500 - remountTicksRemaining) + " ticks");
                 remountTicksRemaining = 0;
                 return;
@@ -218,7 +218,7 @@ public class BCClientEventHandler {
         int yHeight = screenHeight - 23 - (y * 45);
 
         GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
-        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
         fontRenderer.drawString(name, x + 2, yHeight - 43, 0xFFFFFF, true);
         GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
         GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);

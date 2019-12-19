@@ -1,6 +1,6 @@
 //package com.brandon3055.brandonscore.api.power.scrapped;
 //
-//import net.minecraft.nbt.NBTTagCompound;
+//import net.minecraft.nbt.CompoundNBT;
 //import net.minecraftforge.common.util.INBTSerializable;
 //
 ///**
@@ -13,7 +13,7 @@
 // * Conversion:
 // * Conversion from OP to RF/FE is free and should be supported by anything that supplies OP.
 // */
-//public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound> {
+//public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT> {
 //
 //    protected long capacity;
 //    protected long maxReceive;
@@ -174,8 +174,8 @@
 //    }
 //
 //    @Override
-//    public NBTTagCompound serializeNBT() {
-//        NBTTagCompound compound = new NBTTagCompound();
+//    public CompoundNBT serializeNBT() {
+//        CompoundNBT compound = new CompoundNBT();
 //        compound.setLong("stored_rf", storedRF);
 //        compound.setLong("capacity", capacity);
 //        compound.setLong("max_receive", maxReceive);
@@ -184,7 +184,7 @@
 //    }
 //
 //    @Override
-//    public void deserializeNBT(NBTTagCompound nbt) {
+//    public void deserializeNBT(CompoundNBT nbt) {
 //        storedRF = nbt.getLong("stored_rf");
 //        capacity = nbt.getLong("capacity");
 //        maxReceive = nbt.getLong("max_receive");

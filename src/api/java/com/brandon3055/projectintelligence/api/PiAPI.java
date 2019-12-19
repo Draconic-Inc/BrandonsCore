@@ -1,10 +1,10 @@
 package com.brandon3055.projectintelligence.api;
 
 import com.brandon3055.projectintelligence.api.internal.IPiAPI;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.Fluid;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -32,7 +32,7 @@ public class PiAPI {
      * @param parentScreen The screen the user will be returned to when the PI UI is closed.
      * @since PI 1.0.0
      */
-    public static void openGui(@Nullable GuiScreen parentScreen) {
+    public static void openGui(@Nullable Screen parentScreen) {
         if (isAPIAvalible()) {
             INSTANCE.openGui(parentScreen);
         }
@@ -46,7 +46,7 @@ public class PiAPI {
      *                     You can get this by opening the PI GUI right-clicking on a page in the page list.
      * @since PI 1.0.0
      */
-    public static void openGui(@Nullable GuiScreen parentScreen, String pageURI) {
+    public static void openGui(@Nullable Screen parentScreen, String pageURI) {
         if (isAPIAvalible()) {
             INSTANCE.openGui(parentScreen, pageURI);
         }
@@ -60,7 +60,7 @@ public class PiAPI {
      * @param pageURIs     A list of pages to display in the page list. The first page will be selected.
      * @since PI 1.0.0
      */
-    public static void openGui(@Nullable GuiScreen parentScreen, List<String> pageURIs) {
+    public static void openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
         if (isAPIAvalible()) {
             INSTANCE.openGui(parentScreen, pageURIs);
         }
@@ -75,7 +75,7 @@ public class PiAPI {
      * @param modid        the mod id of the mod who's documentation is to be displayed.
      * @since PI 1.0.0
      */
-    public static void openModPage(@Nullable GuiScreen parentScreen, String modid) {
+    public static void openModPage(@Nullable Screen parentScreen, String modid) {
         if (isAPIAvalible()) {
             INSTANCE.openModPage(parentScreen, modid);
         }

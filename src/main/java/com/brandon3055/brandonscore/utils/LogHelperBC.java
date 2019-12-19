@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.reflect.ObfMapping;
-import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.BCConfigOld;
 import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +36,7 @@ public class LogHelperBC {
     //region Standard log entries.
 
     public static void dev(Object object) {
-        if (!ObfMapping.obfuscated || BCConfig.devLog) {
+        if (!ObfMapping.obfuscated || BCConfigOld.devLog) {
             log(Level.INFO, "[DEV]: " + object);
         }
     }
@@ -78,7 +78,7 @@ public class LogHelperBC {
     //region Log with format.
 
     public static void dev(String object, Object... format) {
-        if (!ObfMapping.obfuscated || BCConfig.devLog) {
+        if (!ObfMapping.obfuscated || BCConfigOld.devLog) {
             log(Level.INFO, "[DEV]: " + String.format(object, format));
         }
     }
@@ -192,7 +192,7 @@ public class LogHelperBC {
     //region Log with trace element.
 
     public static void bigDev(String format, Object... data) {
-        if (!ObfMapping.obfuscated || BCConfig.devLog) {
+        if (!ObfMapping.obfuscated || BCConfigOld.devLog) {
             StackTraceElement[] trace = Thread.currentThread().getStackTrace();
             dev("****************************************");
             dev("* " + format, data);
@@ -287,11 +287,11 @@ public class LogHelperBC {
 
     //region formatted NBT log output
 
-    public static void logNBTDev(NBTTagCompound compound) {
+    public static void logNBTDev(CompoundNBT compound) {
         logNBT(compound, true);
     }
 
-    public static void logNBT(NBTTagCompound compound) {
+    public static void logNBT(CompoundNBT compound) {
         logNBT(compound, false);
     }
 
@@ -303,8 +303,8 @@ public class LogHelperBC {
         logNBTDev(stack.getTagCompound());
     }
 
-    public static void logNBT(NBTTagCompound compound, boolean debug) {
-        if (debug && ObfMapping.obfuscated && !BCConfig.devLog) {
+    public static void logNBT(CompoundNBT compound, boolean debug) {
+        if (debug && ObfMapping.obfuscated && !BCConfigOld.devLog) {
             return;
         }
 
@@ -318,22 +318,22 @@ public class LogHelperBC {
         info(builder.toString());
     }
 
-    public static void buildNBT(StringBuilder builder, NBTBase nbt, String indent, String name, boolean comma) {
-        if (nbt instanceof NBTTagCompound) {
+    public static void buildNBT(StringBuilder builder, INBT nbt, String indent, String name, boolean comma) {
+        if (nbt instanceof CompoundNBT) {
             builder.append("\n[NBT]: ").append(indent).append(name).append(":{");
-            Set<String> keys = ((NBTTagCompound) nbt).getKeySet();
+            Set<String> keys = ((CompoundNBT) nbt).getKeySet();
             int index = 0;
             for (String key : keys) {
                 index++;
-                buildNBT(builder, ((NBTTagCompound) nbt).getTag(key), indent + "|  ", key, index < keys.size());
+                buildNBT(builder, ((CompoundNBT) nbt).getTag(key), indent + "|  ", key, index < keys.size());
             }
             builder.append("\n[NBT]: ").append(indent).append("}").append(comma ? "," : "");
         }
-        else if (nbt instanceof NBTTagList) {
+        else if (nbt instanceof ListNBT) {
             builder.append("\n[NBT]: ").append(indent).append(name).append(":[");
-            int tacCount = ((NBTTagList)nbt).tagCount();
+            int tacCount = ((ListNBT)nbt).tagCount();
             for (int i = 0; i < tacCount; i++) {
-                NBTBase base = ((NBTTagList) nbt).get(i);
+                INBT base = ((ListNBT) nbt).get(i);
                 buildNBT(builder, base , indent + "|  ", i+"", (i + 1) < tacCount);
             }
             builder.append("\n[NBT]: ").append(indent).append("]").append(comma ? "," : "");

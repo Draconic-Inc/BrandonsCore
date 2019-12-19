@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.GlStateManager;
 /**
  * Created by brandon3055 on 4/07/2016.
  */
+@Deprecated //May keep these for when i need to inject a button onto a vanilla gui. But should not be used for anything else.
 public class ButtonColourRect extends GuiButton{
     private final int backColour;
     private final int borderColourInactive;

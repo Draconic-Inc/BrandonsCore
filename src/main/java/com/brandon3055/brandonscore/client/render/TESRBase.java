@@ -26,7 +26,7 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
 
     public void renderItem(ItemStack stack) {
         if (!stack.isEmpty()) {
-            Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
+            Minecraft.getInstance().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
         }
     }
 
@@ -35,7 +35,7 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
             throw new IllegalArgumentException("BrandonsCore:TESRBase#getStackModel Someone attempted to get the model from a null itemstack! ");
         }
 
-        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null));
+        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getInstance().getRenderItem().getItemModelWithOverrides(stack, null, null));
     }
 
     private boolean isLightSet = false;

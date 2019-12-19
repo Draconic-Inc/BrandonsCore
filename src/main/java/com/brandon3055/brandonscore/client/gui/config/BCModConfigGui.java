@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client.gui.config;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
@@ -21,7 +21,7 @@ import static net.minecraftforge.fml.client.config.GuiUtils.UNDO_CHAR;
 
 public class BCModConfigGui extends GuiConfig {
 
-    public BCModConfigGui(GuiScreen parent, ModContainer mod) {
+    public BCModConfigGui(Screen parent, ModContainer mod) {
         super(parent, getConfigElements(mod.getModId()), mod.getModId(), false, false, mod.getName() + " Configuration");
 
         entryList = new BCGuiConfigEntries(this, Minecraft.getMinecraft());
@@ -29,7 +29,7 @@ public class BCModConfigGui extends GuiConfig {
         initEntries.addAll(new ArrayList<>(entryList.listEntries));
     }
 
-    public BCModConfigGui(GuiScreen parentScreen, List<IConfigElement> configElements, String modID, boolean allRequireWorldRestart, boolean allRequireMcRestart, String title, String titleLine2)
+    public BCModConfigGui(Screen parentScreen, List<IConfigElement> configElements, String modID, boolean allRequireWorldRestart, boolean allRequireMcRestart, String title, String titleLine2)
     {
         super(parentScreen, configElements, modID, null, allRequireWorldRestart, allRequireMcRestart, title, titleLine2);
     }
@@ -73,7 +73,7 @@ public class BCModConfigGui extends GuiConfig {
             LogHelperBC.dev("Detected Multi-Cat");
             ModConfigParser.getModCategories(modid).forEach(category -> configElements.add(new BCConfigElement(category)));
         }
-//		if (Minecraft.getMinecraft().world != null) {
+//		if (Minecraft.getInstance().world != null) {
 //			Configuration worldConfig = Config.getWorldConfig();
 //			if (worldConfig != null) {
 //				ConfigCategory categoryWorldConfig = worldConfig.getCategory(SessionData.getWorldUid());

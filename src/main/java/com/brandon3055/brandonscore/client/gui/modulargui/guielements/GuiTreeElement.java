@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 
@@ -54,7 +54,7 @@ public class GuiTreeElement extends GuiScrollElement {
      * @param element the element to add.
      * @return the node representing the element that was added.
      */
-    public TreeNode addRootNode(MGuiElementBase element) {
+    public TreeNode addRootNode(GuiElement element) {
         TreeNode node = new TreeNode(element, this);
         rootElements.add(node);
         addElement(element);
@@ -72,7 +72,7 @@ public class GuiTreeElement extends GuiScrollElement {
     @Override
     public void updateScrollElement() {
         int lastPos = getInsetRect().y;
-        for (MGuiElementBase element : scrollingElements) {
+        for (GuiElement element : scrollingElements) {
             if (!element.isEnabled() || element == backgroundElement) continue;
             element.setYPos(lastPos);
             lastPos += elementYSize(element) + listSpacing;
@@ -81,12 +81,12 @@ public class GuiTreeElement extends GuiScrollElement {
     }
 
     public static class TreeNode {
-        public MGuiElementBase element;
+        public GuiElement element;
         private GuiTreeElement guiElement;
         public LinkedList<TreeNode> branches = new LinkedList<>();
         public boolean extended = false;
 
-        public TreeNode(MGuiElementBase element, GuiTreeElement guiElement) {
+        public TreeNode(GuiElement element, GuiTreeElement guiElement) {
             this.element = element;
             this.guiElement = guiElement;
             this.element.reportYSizeChange = true;
@@ -109,7 +109,7 @@ public class GuiTreeElement extends GuiScrollElement {
             element.ySizeChanged(element);
         }
 
-        public TreeNode addSubNode(MGuiElementBase element) {
+        public TreeNode addSubNode(GuiElement element) {
             TreeNode node = new TreeNode(element, guiElement);
             branches.add(node);
             this.element.addChild(element);
@@ -127,7 +127,7 @@ public class GuiTreeElement extends GuiScrollElement {
             int yPos = element.maxYPos() + guiElement.nodeSpacing;
 
             for (TreeNode node : branches) {
-                MGuiElementBase nodeElement = node.element;
+                GuiElement nodeElement = node.element;
                 nodeElement.setEnabled(extended);
                 nodeElement.setYPos(yPos);
                 yPos = yPos + nodeElement.getEnclosingRect().height + guiElement.nodeSpacing;
@@ -143,7 +143,7 @@ public class GuiTreeElement extends GuiScrollElement {
             button.setTrim(false).setInsets(0, 0, 0, 0);
             button.setDisplaySupplier(() -> extended ? "\u25BC" : "\u25B6");
             button.setTextColour(0);
-            button.setListener(() -> setExtended(!extended));
+            button.onPressed(() -> setExtended(!extended));
             button.setSize(xSize, ySize).setRelPos(element, xOffset, yOffset);
             button.setEnabledCallback(() -> !branches.isEmpty());
             element.addChild(button);

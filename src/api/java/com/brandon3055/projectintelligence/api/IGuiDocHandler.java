@@ -1,6 +1,6 @@
 package com.brandon3055.projectintelligence.api;
 
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.awt.*;
 import java.util.function.Supplier;
@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 /**
  * Created by brandon3055 on 7/26/2018.
  */
-public interface IGuiDocHandler<T extends GuiScreen> {
+public interface IGuiDocHandler<T extends Screen> {
 
     /**
      * Use this to define the size and position of the "collapsed" pi documentation window. When you click the PI Tab/Button
@@ -29,7 +29,7 @@ public interface IGuiDocHandler<T extends GuiScreen> {
 
     /**
      * Use this to define the size and position of the "expanded" pi documentation window. When pi is toggled between
-     * hidden and shown the window will visually expand from the collapsed window area defined by {@link #getCollapsedArea(GuiScreen)}
+     * hidden and shown the window will visually expand from the collapsed window area defined by {@link #getCollapsedArea(Screen)}
      * into the full window area defined by this method. And then shrink from this area back to the collapsed area when PI
      * is hidden again. (Unless animation is disabled in which case the window will just snap between the 2 areas)
      *
@@ -57,7 +57,7 @@ public interface IGuiDocHandler<T extends GuiScreen> {
      * collapsed window area size of 0x0.
      *
      * Disabling the built in pi button allows you to handle the button implementation yourself. In which case you can
-     * use {@link #docDisplayOverride()} to hide/show the documentation using your own button implementation.
+     * use {@link #docDisplayOverride(Screen)} ()} to hide/show the documentation using your own button implementation.
      *
      * @param gui the gui screen instance
      * @return false to disable the builtin PI button functionality.

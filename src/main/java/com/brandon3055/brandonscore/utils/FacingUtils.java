@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -31,15 +31,15 @@ public class FacingUtils {
     /**
      * Facings for the 4 faces around X Axis
      */
-    public static final EnumFacing[] FACES_AROUND_X;
+    public static final Direction[] FACES_AROUND_X;
     /**
      * Facings for the 4 faces around Y Axis
      */
-    public static final EnumFacing[] FACES_AROUND_Y;
+    public static final Direction[] FACES_AROUND_Y;
     /**
      * Facings for the 4 faces around Z Axis
      */
-    public static final EnumFacing[] FACES_AROUND_Z;
+    public static final Direction[] FACES_AROUND_Z;
 
     static {
         AROUND_X = new BlockPos[]{new BlockPos(0, 1, -1), new BlockPos(0, 1, 0), new BlockPos(0, 1, 1), new BlockPos(0, 0, -1), new BlockPos(0, 0, 1), new BlockPos(0, -1, -1), new BlockPos(0, -1, 0), new BlockPos(0, -1, 1)};
@@ -68,25 +68,25 @@ public class FacingUtils {
 
         AROUND_ALL = list.toArray(new BlockPos[0]);
 
-        List<EnumFacing> x = new ArrayList<EnumFacing>();
-        List<EnumFacing> y = new ArrayList<EnumFacing>();
-        List<EnumFacing> z = new ArrayList<EnumFacing>();
+        List<Direction> x = new ArrayList<Direction>();
+        List<Direction> y = new ArrayList<Direction>();
+        List<Direction> z = new ArrayList<Direction>();
 
-        for (EnumFacing facing : EnumFacing.VALUES) {
-            if (facing.getAxis() != EnumFacing.Axis.X) {
+        for (Direction facing : Direction.VALUES) {
+            if (facing.getAxis() != Direction.Axis.X) {
                 x.add(facing);
             }
-            if (facing.getAxis() != EnumFacing.Axis.Y) {
+            if (facing.getAxis() != Direction.Axis.Y) {
                 y.add(facing);
             }
-            if (facing.getAxis() != EnumFacing.Axis.Z) {
+            if (facing.getAxis() != Direction.Axis.Z) {
                 z.add(facing);
             }
         }
 
-        FACES_AROUND_X = x.toArray(new EnumFacing[1]);
-        FACES_AROUND_Y = y.toArray(new EnumFacing[1]);
-        FACES_AROUND_Z = z.toArray(new EnumFacing[1]);
+        FACES_AROUND_X = x.toArray(new Direction[1]);
+        FACES_AROUND_Y = y.toArray(new Direction[1]);
+        FACES_AROUND_Z = z.toArray(new Direction[1]);
     }
 
     /**
@@ -95,11 +95,11 @@ public class FacingUtils {
      * @param axis Axis.X, Axis.Y or Axis.Z
      * @return a BlockPos[] containing 8 positions which are the offset value for each of the 8 blocks around the axis
      */
-    public static BlockPos[] getAroundAxis(EnumFacing.Axis axis) {
-        if (axis == EnumFacing.Axis.X) {
+    public static BlockPos[] getAroundAxis(Direction.Axis axis) {
+        if (axis == Direction.Axis.X) {
             return AROUND_X;
         }
-        else if (axis == EnumFacing.Axis.Y) {
+        else if (axis == Direction.Axis.Y) {
             return AROUND_Y;
         }
         else {
@@ -107,20 +107,20 @@ public class FacingUtils {
         }
     }
 
-    public static EnumFacing[] getAxisFaces(EnumFacing.Axis axis) {
+    public static Direction[] getAxisFaces(Direction.Axis axis) {
         switch (axis) {
-            case X: return new EnumFacing[]{EnumFacing.EAST, EnumFacing.WEST};
-            case Y: return new EnumFacing[]{EnumFacing.UP, EnumFacing.DOWN};
-            case Z: return new EnumFacing[]{EnumFacing.NORTH, EnumFacing.SOUTH};
-            default: return new EnumFacing[0];
+            case X: return new Direction[]{Direction.EAST, Direction.WEST};
+            case Y: return new Direction[]{Direction.UP, Direction.DOWN};
+            case Z: return new Direction[]{Direction.NORTH, Direction.SOUTH};
+            default: return new Direction[0];
         }
     }
 
-    public static EnumFacing[] getFacingsAroundAxis(EnumFacing.Axis axis) {
-        if (axis == EnumFacing.Axis.X) {
+    public static Direction[] getFacingsAroundAxis(Direction.Axis axis) {
+        if (axis == Direction.Axis.X) {
             return FACES_AROUND_X;
         }
-        else if (axis == EnumFacing.Axis.Y) {
+        else if (axis == Direction.Axis.Y) {
             return FACES_AROUND_Y;
         }
         else {
@@ -128,25 +128,25 @@ public class FacingUtils {
         }
     }
 
-    public static EnumFacing rotateAround(EnumFacing facing, EnumFacing.Axis axis, boolean reverse) {
+    public static Direction rotateAround(Direction facing, Direction.Axis axis, boolean reverse) {
         switch (axis) {
             case X:
 
-                if (facing != EnumFacing.WEST && facing != EnumFacing.EAST) {
+                if (facing != Direction.WEST && facing != Direction.EAST) {
                     return rotateX(facing, reverse);
                 }
 
                 return facing;
             case Y:
 
-                if (facing != EnumFacing.UP && facing != EnumFacing.DOWN) {
+                if (facing != Direction.UP && facing != Direction.DOWN) {
                     return rotateY(facing, reverse);
                 }
 
                 return facing;
             case Z:
 
-                if (facing != EnumFacing.NORTH && facing != EnumFacing.SOUTH) {
+                if (facing != Direction.NORTH && facing != Direction.SOUTH) {
                     return rotateZ(facing, reverse);
                 }
 
@@ -156,55 +156,55 @@ public class FacingUtils {
         }
     }
 
-    private static EnumFacing rotateY(EnumFacing facing, boolean reverse) {
+    private static Direction rotateY(Direction facing, boolean reverse) {
         switch (facing) {
             case NORTH:
-                return reverse ? EnumFacing.WEST : EnumFacing.EAST;
+                return reverse ? Direction.WEST : Direction.EAST;
             case EAST:
-                return reverse ? EnumFacing.NORTH : EnumFacing.SOUTH;
+                return reverse ? Direction.NORTH : Direction.SOUTH;
             case SOUTH:
-                return reverse ? EnumFacing.EAST : EnumFacing.WEST;
+                return reverse ? Direction.EAST : Direction.WEST;
             case WEST:
-                return reverse ? EnumFacing.SOUTH : EnumFacing.NORTH;
+                return reverse ? Direction.SOUTH : Direction.NORTH;
             default:
                 throw new IllegalStateException("Unable to get Y-rotated facing of " + facing);
         }
     }
 
-    private static EnumFacing rotateX(EnumFacing facing, boolean reverse) {
+    private static Direction rotateX(Direction facing, boolean reverse) {
         switch (facing) {
             case NORTH:
-                return reverse ? EnumFacing.UP : EnumFacing.DOWN;
+                return reverse ? Direction.UP : Direction.DOWN;
             case EAST:
             case WEST:
             default:
                 throw new IllegalStateException("Unable to get X-rotated facing of " + facing);
             case SOUTH:
-                return reverse ? EnumFacing.DOWN : EnumFacing.UP;
+                return reverse ? Direction.DOWN : Direction.UP;
             case UP:
-                return reverse ? EnumFacing.SOUTH : EnumFacing.NORTH;
+                return reverse ? Direction.SOUTH : Direction.NORTH;
             case DOWN:
-                return reverse ? EnumFacing.NORTH : EnumFacing.SOUTH;
+                return reverse ? Direction.NORTH : Direction.SOUTH;
         }
     }
 
-    private static EnumFacing rotateZ(EnumFacing facing, boolean reverse) {
+    private static Direction rotateZ(Direction facing, boolean reverse) {
         switch (facing) {
             case EAST:
-                return reverse ? EnumFacing.UP : EnumFacing.DOWN;
+                return reverse ? Direction.UP : Direction.DOWN;
             case SOUTH:
             default:
                 throw new IllegalStateException("Unable to get Z-rotated facing of " + facing);
             case WEST:
-                return reverse ? EnumFacing.DOWN : EnumFacing.UP;
+                return reverse ? Direction.DOWN : Direction.UP;
             case UP:
-                return reverse ? EnumFacing.WEST : EnumFacing.EAST;
+                return reverse ? Direction.WEST : Direction.EAST;
             case DOWN:
-                return reverse ? EnumFacing.EAST : EnumFacing.WEST;
+                return reverse ? Direction.EAST : Direction.WEST;
         }
     }
 
-    public static int destanceInDirection(BlockPos fromPos, BlockPos toPos, EnumFacing direction) {
+    public static int destanceInDirection(BlockPos fromPos, BlockPos toPos, Direction direction) {
         switch (direction) {
             case DOWN:
                 return fromPos.getY() - toPos.getY();

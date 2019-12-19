@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ModuleBuilder {
         public int builderEndY;
         private int elementSpacing;
         private int index = 0;
-        private LinkedList<MGuiElementBase> elements = new LinkedList<>();
+        private LinkedList<GuiElement> elements = new LinkedList<>();
 
         public EqualColumns(int xPos, int yPos, int columns, int elementWidth, int elementHeight, int elementSpacing){
             this.xPos = xPos;
@@ -48,7 +48,7 @@ public class ModuleBuilder {
             this.elementSpacing = elementSpacing;
         }
 
-        public void add(MGuiElementBase element) {
+        public void add(GuiElement element) {
             int column = index % columns;
             int row = index / columns;
 
@@ -61,12 +61,12 @@ public class ModuleBuilder {
             index++;
         }
 
-        public List<MGuiElementBase> finish() {
+        public List<GuiElement> finish() {
             return elements;
         }
 
         public void finish(GuiElementManager manager, int level) {
-            for (MGuiElementBase elementBase : elements) {
+            for (GuiElement elementBase : elements) {
                 manager.addChild(elementBase, level, false);
             }
         }
@@ -86,7 +86,7 @@ public class ModuleBuilder {
         private int elementSpacing;
         private int index = 0;
         private int lastLevelY = 0;
-        private LinkedList<MGuiElementBase> elements = new LinkedList<>();
+        private LinkedList<GuiElement> elements = new LinkedList<>();
 
         public RawColumns(int xPos, int yPos, int columns, int elementHeight, int elementSpacing){
             this.xPos = xPos;
@@ -97,7 +97,7 @@ public class ModuleBuilder {
             this.elementSpacing = elementSpacing;
         }
 
-        public void add(MGuiElementBase element) {
+        public void add(GuiElement element) {
             int column = index % columns;
             int row = index / columns;
 
@@ -114,12 +114,12 @@ public class ModuleBuilder {
             index++;
         }
 
-        public List<MGuiElementBase> finish() {
+        public List<GuiElement> finish() {
             return elements;
         }
 
         public void finish(GuiElementManager manager, int level) {
-            for (MGuiElementBase elementBase : elements) {
+            for (GuiElement elementBase : elements) {
                 manager.addChild(elementBase, level, false);
             }
         }

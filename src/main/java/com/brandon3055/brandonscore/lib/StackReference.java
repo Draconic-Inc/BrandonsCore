@@ -7,7 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -16,12 +16,13 @@ import net.minecraft.util.ResourceLocation;
  */
 public class StackReference {
 
+    public static final StackReference EMPTY = new StackReference(ItemStack.EMPTY);
     private ResourceLocation stack;
     protected int metadata = 0;
     protected int stackSize = 0;
-    protected NBTTagCompound nbt = null;
+    protected CompoundNBT nbt = null;
 
-    public StackReference(String stackRegName, int stackSize, int metadata, NBTTagCompound nbt) {
+    public StackReference(String stackRegName, int stackSize, int metadata, CompoundNBT nbt) {
         this.stack = new ResourceLocation(stackRegName);
         this.metadata = metadata;
         this.stackSize = stackSize;
@@ -102,11 +103,11 @@ public class StackReference {
         return new StackReference(stack).toString();
     }
 
-    public NBTTagCompound getNbt() {
+    public CompoundNBT getNbt() {
         return nbt;
     }
 
-    public void setNbt(NBTTagCompound nbt) {
+    public void setNbt(CompoundNBT nbt) {
         this.nbt = nbt;
     }
 
@@ -197,7 +198,7 @@ public class StackReference {
 
         int count = 1;
         int meta = 0;
-        NBTTagCompound compound = null;
+        CompoundNBT compound = null;
 
         if (countString.length() > 0) {
             try {
@@ -236,7 +237,7 @@ public class StackReference {
             String name = string.substring(5, string.indexOf(",size:"));
             int size = Integer.parseInt(string.substring(string.indexOf(",size:") + 6, string.indexOf(",meta:")));
             int meta = Integer.parseInt(string.substring(string.indexOf(",meta:") + 6, string.indexOf(",nbt:")));
-            NBTTagCompound compound = JsonToNBT.getTagFromJson(string.substring(string.indexOf(",nbt:") + 5, string.length()));
+            CompoundNBT compound = JsonToNBT.getTagFromJson(string.substring(string.indexOf(",nbt:") + 5, string.length()));
 
             return new StackReference(name, size, meta, compound.hasNoTags() ? null : compound);
         }

@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.handlers;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -13,7 +13,7 @@ public class HandHelper {
     /**
      * Returns the first item found in ether of the players hands starting with the main hand
      */
-    public static ItemStack getMainFirst(EntityPlayer player) {
+    public static ItemStack getMainFirst(PlayerEntity player) {
         if (!player.getHeldItemMainhand().isEmpty()) {
             return player.getHeldItemMainhand();
         }
@@ -23,7 +23,7 @@ public class HandHelper {
     /**
      * Returns the first item found in ether of the players hands starting with the off hand
      */
-    public static ItemStack getOffFirst(EntityPlayer player) {
+    public static ItemStack getOffFirst(PlayerEntity player) {
         if (!player.getHeldItemOffhand().isEmpty()) {
             return player.getHeldItemOffhand();
         }
@@ -33,7 +33,7 @@ public class HandHelper {
     /**
      * Returns the first item found in ether of the players hands that is the same as the given item
      */
-    public static ItemStack getItem(EntityPlayer player, Item item) {
+    public static ItemStack getItem(PlayerEntity player, Item item) {
         if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == item) {
             return player.getHeldItemMainhand();
         }
@@ -43,7 +43,7 @@ public class HandHelper {
         return ItemStack.EMPTY;
     }
 
-    public static ItemStack getItemStack(EntityPlayer player, ItemStack itemStack) {
+    public static ItemStack getItemStack(PlayerEntity player, ItemStack itemStack) {
         if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == itemStack.getItem() && player.getHeldItemMainhand().getItemDamage() == itemStack.getItemDamage()) {
             return player.getHeldItemMainhand();
         }
@@ -53,7 +53,7 @@ public class HandHelper {
         return ItemStack.EMPTY;
     }
 
-    public static boolean isHoldingItemEther(EntityPlayer player, Item item) {
+    public static boolean isHoldingItemEther(PlayerEntity player, Item item) {
         if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == item) {
             return true;
         }

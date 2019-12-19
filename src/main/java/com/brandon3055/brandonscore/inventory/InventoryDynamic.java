@@ -1,10 +1,10 @@
 package com.brandon3055.brandonscore.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.LinkedList;
@@ -91,17 +91,17 @@ public class InventoryDynamic implements IInventory {
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(PlayerEntity player) {
         return true;
     }
 
     @Override
-    public void openInventory(EntityPlayer player) {
+    public void openInventory(PlayerEntity player) {
 
     }
 
     @Override
-    public void closeInventory(EntityPlayer player) {
+    public void closeInventory(PlayerEntity player) {
 
     }
 
@@ -145,12 +145,12 @@ public class InventoryDynamic implements IInventory {
         return null;
     }
 
-    public void writeToNBT(NBTTagCompound compound) {
-        NBTTagList list = new NBTTagList();
+    public void writeToNBT(CompoundNBT compound) {
+        ListNBT list = new ListNBT();
 
         for (ItemStack stack : stacks) {
             if (!stack.isEmpty() && stack.getCount() > 0) {
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundNBT tag = new CompoundNBT();
                 stack.writeToNBT(tag);
                 list.appendTag(tag);
             }
@@ -159,8 +159,8 @@ public class InventoryDynamic implements IInventory {
         compound.setTag("InvItems", list);
     }
 
-    public void readFromNBT(NBTTagCompound compound) {
-        NBTTagList list = compound.getTagList("InvItems", 10);
+    public void readFromNBT(CompoundNBT compound) {
+        ListNBT list = compound.getTagList("InvItems", 10);
         stacks.clear();
 
         for (int i = 0; i < list.tagCount(); i++) {

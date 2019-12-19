@@ -1,15 +1,15 @@
 package com.brandon3055.brandonscore.utils;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 
 public final class ItemNBTHelper {
 
 
     // SETTERS ///////////////////////////////////////////////////////////////////
-    public static NBTTagCompound getCompound(ItemStack stack) {
-        if (stack.getTagCompound() == null) stack.setTagCompound(new NBTTagCompound());
+    public static CompoundNBT getCompound(ItemStack stack) {
+        if (stack.getTagCompound() == null) stack.setTagCompound(new CompoundNBT());
         return stack.getTagCompound();
     }
 
@@ -56,7 +56,7 @@ public final class ItemNBTHelper {
     // GETTERS ///////////////////////////////////////////////////////////////////
 
     public static boolean verifyExistance(ItemStack stack, String tag) {
-        NBTTagCompound compound = stack.getTagCompound();
+        CompoundNBT compound = stack.getTagCompound();
         if (compound == null) return false;
         else return stack.getTagCompound().hasKey(tag);
     }

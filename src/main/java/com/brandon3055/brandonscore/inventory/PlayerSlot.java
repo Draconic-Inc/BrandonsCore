@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.inventory;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -61,7 +61,7 @@ public class PlayerSlot {
         }
     }
 
-    public void setStackInSlot(EntityPlayer player, ItemStack stack) {
+    public void setStackInSlot(PlayerEntity player, ItemStack stack) {
         if (category == EnumInvCategory.ARMOR){
             if (slot < 0 || slot >= player.inventory.armorInventory.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
@@ -85,7 +85,7 @@ public class PlayerSlot {
         }
     }
 
-    public ItemStack getStackInSlot(EntityPlayer player) {
+    public ItemStack getStackInSlot(PlayerEntity player) {
         if (category == EnumInvCategory.ARMOR){
             return player.inventory.armorInventory.get(slot);
         }

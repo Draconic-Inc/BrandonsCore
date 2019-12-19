@@ -1,17 +1,17 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui.JEITargetAdapter;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 
 import java.awt.*;
-import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -20,16 +20,17 @@ import java.util.stream.Collectors;
  */
 public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
-    protected LinkedList<MGuiElementBase> elements = new LinkedList<MGuiElementBase>();
-    protected LinkedList<MGuiElementBase> actionList = new LinkedList<MGuiElementBase>();
+    protected LinkedList<GuiElement> elements = new LinkedList<GuiElement>();
+    protected LinkedList<GuiElement> actionList = new LinkedList<GuiElement>();
     private boolean requiresReSort = false;
     private boolean initialized = false;
     private IModularGui parentGui;
     private Minecraft mc;
     private int width;
     private int height;
-    private List<MGuiElementBase> toRemove = new ArrayList<MGuiElementBase>();
-    private Supplier<List<MGuiElementBase>> jeiExclusions = null;
+    private List<GuiElement> toRemove = new ArrayList<GuiElement>();
+    private Supplier<List<GuiElement>> jeiExclusions = null;
+    private List<JEITargetAdapter> jeiGhostTargets = new ArrayList<>();
 
     public GuiElementManager(IModularGui parentGui) {
         this.parentGui = parentGui;
@@ -52,7 +53,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     }
 
     public void reloadElements() {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             element.reloadElement();
         }
     }
@@ -65,14 +66,18 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     /**
      * Adds a new element to the manager with the given display level.
-     * @param element The element to add.
+     *
+     * @param element       The element to add.
      * @param displayZLevel The display level for this element.
-     * Elements with higher display levels will be in front of manager with lower display levels.
-     * This also applies to mouse and key events.
-     * @param first if true the element will be added to the start of the element array placing it under/before all other elements.
+     *                      Elements with higher display levels will be in front of manager with lower display levels.
+     *                      This also applies to mouse and key events.
+     * @param first         if true the element will be added to the start of the element array placing it under/before all other elements.
      * @return The Element.
      */
-    public <C extends MGuiElementBase> C addChild(C element, int displayZLevel, boolean first) {
+    //TODO When i re-write this i need to nuke the entire display level system and implement something better that
+    // supports not only offsetting the position of an element but its child elements as well. It should probably
+    // also be a separate system not tied to GuiElementManager (if i even keep GuiElementManager)
+    public <C extends GuiElement> C addChild(C element, int displayZLevel, boolean first) {
         if (displayZLevel >= 950) {
             LogHelperBC.error("ModularGui Display Level Out Of Bounds! Can not be greater than 950 " + displayZLevel);
         }
@@ -80,8 +85,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         element.displayZLevel = displayZLevel;
         if (first) {
             elements.addFirst(element);
-        }
-        else {
+        } else {
             elements.add(element);
         }
         if (!element.isElementInitialized()) {
@@ -101,26 +105,27 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     /**
      * Adds a new element to the manager with a display level of 0.<br>
      * Note: Adding an element automatically calls that element's addElements method.
+     *
      * @param element The element to add.
      * @return The Element.
      */
     @Override
-    public <C extends MGuiElementBase> C addChild(C element) {
+    public <C extends GuiElement> C addChild(C element) {
         return addChild(element, 0, false);
     }
 
     @Override
-    public <C extends MGuiElementBase> C addChildFirst(C element) {
+    public <C extends GuiElement> C addBackGroundChild(C element) {
         return addChild(element, 0, true);
     }
 
     @Override
-    public GuiElementManager addChildren(Collection<? extends MGuiElementBase> elements) {
+    public GuiElementManager addChildren(Collection<? extends GuiElement> elements) {
         return null;
     }
 
     @Override
-    public <C extends MGuiElementBase> C removeChild(C element) {
+    public <C extends GuiElement> C removeChild(C element) {
         if (elements.contains(element)) {
             toRemove.add(element);
             requiresReSort = true;
@@ -131,7 +136,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     @Override
     public GuiElementManager removeChildByID(String id) {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.id != null && element.id.equals(id)) {
                 toRemove.add(element);
                 requiresReSort = true;
@@ -143,7 +148,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     @Override
     public GuiElementManager removeChildByGroup(String group) {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.isInGroup(group)) {
                 toRemove.add(element);
                 requiresReSort = true;
@@ -154,7 +159,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     @Override
     public GuiElementManager setChildIDEnabled(String id, boolean enabled) {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.id != null && element.id.equals(id)) {
                 element.setEnabled(enabled);
                 return this;
@@ -164,7 +169,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     }
 
     public GuiElementManager setChildGroupEnabled(String group, boolean enabled) {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.isInGroup(group)) {
                 element.setEnabled(enabled);
             }
@@ -172,7 +177,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return this;
     }
 
-    public List<MGuiElementBase> getElements() {
+    public List<GuiElement> getElements() {
         return elements;
     }
 
@@ -185,9 +190,9 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     //region Mouse & Key
 
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int clickedDisplay = -100;
-        for (MGuiElementBase element : actionList) {
+        for (GuiElement element : actionList) {
             if (element.isEnabled() && clickedDisplay > -100 && element.displayZLevel < clickedDisplay) {
                 return true;
             }
@@ -196,60 +201,87 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
                 clickedDisplay = element.displayZLevel;
             }
 
-            if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
+            if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean mouseReleased(int mouseX, int mouseY, int state) {
-        for (MGuiElementBase element : actionList) {
-            if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, state)) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, button)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for (MGuiElementBase element : actionList) {
-            if (element.isEnabled() && element.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean keyTyped(char typedChar, int keyCode) throws IOException {
-        for (MGuiElementBase element : actionList) {
-            if (element.isEnabled() && element.keyTyped(typedChar, keyCode)) {
+    public void mouseMoved(double mouseX, double mouseY) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.mouseMoved(mouseX, mouseY)) {
+                return;
+            }
+        }
+    }
+
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.keyPressed(keyCode, scanCode, modifiers)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean handleMouseInput() throws IOException {
-        for (MGuiElementBase element : actionList) {
-            if (element.isEnabled() && element.handleMouseInput()) {
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.keyReleased(keyCode, scanCode, modifiers)) {
                 return true;
             }
         }
         return false;
     }
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollAmount) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollAmount)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+//    public boolean handleMouseInput() throws IOException {
+//        for (GuiElement element : actionList) {
+//            if (element.isEnabled() && element.handleMouseInput()) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     /**
      * Returns a list of all elements who's bounds contain the given position.
      * This can for example be used to find all elements that are currently under the mouse cursor.
+     *
      * @param posX The x position.
      * @param posY The y position.
-     * @return a list of elements who's {@link MGuiElementBase#isMouseOver} method returns true with the given position.
+     * @return a list of elements who's {@link GuiElement#isMouseOver} method returns true with the given position.
      */
-    public List<MGuiElementBase> getElementsAtPosition(int posX, int posY) {
-        List<MGuiElementBase> list = new LinkedList<>();
+    public List<GuiElement> getElementsAtPosition(int posX, int posY) {
+        List<GuiElement> list = new LinkedList<>();
 
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             element.getElementsAtPosition(posX, posY, list);
         }
 
@@ -260,8 +292,8 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
      * Similar to {@link #getElementsAtPosition(int, int)} except only returns elements that are an instance of the specified class.
      * Note: This method is a little inefficient so probably not something you want to be doing say every render frame.
      */
-    public <C extends MGuiElementBase> List<C> getElementsAtPosition(int posX, int posY, Class<C> clazz) {
-        List<MGuiElementBase> list = getElementsAtPosition(posX, posY);
+    public <C extends GuiElement> List<C> getElementsAtPosition(int posX, int posY, Class<C> clazz) {
+        List<GuiElement> list = getElementsAtPosition(posX, posY);
         List<C> matches = new LinkedList<>();
         DataUtils.forEachMatch(list, element -> clazz.isAssignableFrom(element.getClass()), element -> matches.add(clazz.cast(element)));
         return matches;
@@ -272,8 +304,8 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     //region Render
 
     public void renderElements(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.color(1F, 1F, 1F, 1F);
-        for (MGuiElementBase element : elements) {
+        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        for (GuiElement element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayZLevel);
                 element.preDraw(mc, mouseX, mouseY, partialTicks);
@@ -285,7 +317,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     public boolean renderOverlayLayer(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         int renderDisplay = -100;
-        for (MGuiElementBase element : actionList) {
+        for (GuiElement element : actionList) {
             if (element.isEnabled() && renderDisplay > -100 && element.displayZLevel < renderDisplay) {
                 return true;
             }
@@ -306,7 +338,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
      * Returns true if the specified area is partially or fully obstructed by another element on a higher zLevel.
      */
     public boolean isAreaUnderElement(int posX, int posY, int xSize, int ySize, int zLevel) {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.isEnabled() && element.displayZLevel >= zLevel && element.getRect().intersects(posX, posY, xSize, ySize)) {
                 return true;
             }
@@ -318,7 +350,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
      * Returns true if the specified point is under another element on a higher zLevel.
      */
     public boolean isPointUnderElement(int posX, int posY, int zLevel) {
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.isEnabled() && element.displayZLevel >= zLevel && element.getRect().contains(posX, posY)) {
                 return true;
             }
@@ -336,7 +368,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
             toRemove.clear();
         }
 
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             if (element.onUpdate()) {
                 break;
             }
@@ -351,7 +383,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         this.mc = mc;
         this.width = width;
         this.height = height;
-        for (MGuiElementBase element : elements) {
+        for (GuiElement element : elements) {
             element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRenderer));
         }
         reloadElements();
@@ -364,13 +396,13 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     /**
      * When rendering elements need to be rendered in order of lowest first so that elements on higher z levels actually render on top.
      */
-    private static Comparator<MGuiElementBase> renderSorter = (o1, o2) -> o1.displayZLevel < o2.displayZLevel ? -1 : o1.displayZLevel > o2.displayZLevel ? 1 : 0;
+    private static Comparator<GuiElement> renderSorter = (o1, o2) -> o1.displayZLevel < o2.displayZLevel ? -1 : o1.displayZLevel > o2.displayZLevel ? 1 : 0;
 
     /**
      * When checking for element clicks we need the reverse of the renderSorter because we want to first check the upper most elements for clicks before
      * passing the click to lower potentially hidden elements.
      */
-    private static Comparator<MGuiElementBase> actionSorter = (o1, o2) -> o1.displayZLevel < o2.displayZLevel ? 1 : o1.displayZLevel > o2.displayZLevel ? -1 : 0;
+    private static Comparator<GuiElement> actionSorter = (o1, o2) -> o1.displayZLevel < o2.displayZLevel ? 1 : o1.displayZLevel > o2.displayZLevel ? -1 : 0;
 
     private void sort() {
         Collections.sort(elements, renderSorter);
@@ -383,7 +415,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return parentGui;
     }
 
-    public void setJeiExclusions(Supplier<List<MGuiElementBase>> exclusions) {
+    public void setJeiExclusions(Supplier<List<GuiElement>> exclusions) {
         this.jeiExclusions = exclusions;
     }
 
@@ -392,6 +424,10 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
             return Collections.emptyList();
         }
         return jeiExclusions.get().stream().map(elementBase -> new Rectangle(elementBase.getRect())).collect(Collectors.toList());
+    }
+
+    public List<JEITargetAdapter> getJeiGhostTargets() {
+        return jeiGhostTargets;
     }
 
     //endregion

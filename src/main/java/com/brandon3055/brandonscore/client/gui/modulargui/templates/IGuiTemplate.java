@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.templates;
 
-import com.brandon3055.brandonscore.client.gui.BCGuiToolkit;
+import com.brandon3055.brandonscore.client.gui.GuiToolkit;
 import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
 
 /**
@@ -8,6 +8,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
  */
 public interface IGuiTemplate {
 
-    void addElements(IGuiParentElement parent, BCGuiToolkit toolkit);
+    void addElements(IGuiParentElement parent, GuiToolkit toolkit);
 
 }

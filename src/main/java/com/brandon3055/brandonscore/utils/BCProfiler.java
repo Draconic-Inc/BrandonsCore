@@ -50,7 +50,7 @@ public class BCProfiler {
 
     @SubscribeEvent
     public void render(RenderGameOverlayEvent.Post event) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         if (!enableProfiler || event.getType() != RenderGameOverlayEvent.ElementType.ALL || mc.gameSettings.showDebugInfo) {
             return;
         }

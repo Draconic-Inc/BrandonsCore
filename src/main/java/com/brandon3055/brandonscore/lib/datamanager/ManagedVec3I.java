@@ -3,9 +3,9 @@ package com.brandon3055.brandonscore.lib.datamanager;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.lib.Vec3I;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -107,8 +107,8 @@ public class ManagedVec3I extends AbstractManagedData<Vec3I> {
     }
 
     @Override
-    public void toNBT(NBTTagCompound compound) {
-        NBTTagList list = new NBTTagList();
+    public void toNBT(CompoundNBT compound) {
+        ListNBT list = new ListNBT();
         list.appendTag(new NBTTagInt(value.x));
         list.appendTag(new NBTTagInt(value.y));
         list.appendTag(new NBTTagInt(value.z));
@@ -116,10 +116,10 @@ public class ManagedVec3I extends AbstractManagedData<Vec3I> {
     }
 
     @Override
-    public void fromNBT(NBTTagCompound compound) {
+    public void fromNBT(CompoundNBT compound) {
         value = new Vec3I();
         if (compound.getTagList(name, 3).tagCount() == 3) {
-            NBTTagList list = compound.getTagList(name, 3);
+            ListNBT list = compound.getTagList(name, 3);
             value.x = list.getIntAt(0);
             value.y = list.getIntAt(1);
             value.z = list.getIntAt(2);

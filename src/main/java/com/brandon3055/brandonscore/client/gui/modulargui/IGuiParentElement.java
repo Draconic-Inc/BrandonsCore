@@ -12,21 +12,21 @@ public interface IGuiParentElement<E> {
      *
      * @return The child element that was added.
      */
-    <C extends MGuiElementBase> C addChild(C child);
+    <C extends GuiElement> C addChild(C child);
 
     /**
      * Adds a new child element to this element at index 0 so it will render behind all other elements previously added.
      *
      * @return The child element that was added.
      */
-    <C extends MGuiElementBase> C addChildFirst(C child);
+    <C extends GuiElement> C addBackGroundChild(C child);
 
     /**
      * Adds a Collection of child elements to this element.
      *
      * @return self
      */
-    E addChildren(Collection<? extends MGuiElementBase> elements);
+    E addChildren(Collection<? extends GuiElement> elements);
 
     /**
      * This schedules a child element to be removed at the start of the next update tick.
@@ -37,7 +37,7 @@ public interface IGuiParentElement<E> {
      * @param child the child element to remove.
      * @return the element that will be removed or null if the element was not a child of this element.
      */
-    <C extends MGuiElementBase> C removeChild(C child);
+    <C extends GuiElement> C removeChild(C child);
 
     /**
      * Remove an element by its 'unique' id.

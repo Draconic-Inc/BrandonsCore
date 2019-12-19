@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.BCConfigOld;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.IProcess;
@@ -92,7 +92,7 @@ public class ThreadFileDownloader extends Thread implements IProcess {
         }
         catch (Exception e) {
             LogHelperBC.dev("ThreadFileDownloader: DL Failed " + e.getMessage());
-            if (BCConfig.devLog) {
+            if (BCConfigOld.devLog) {
                 e.printStackTrace();
             }
             exception = e;

@@ -4,7 +4,6 @@ import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.common.animation.ITimeValue;
@@ -16,17 +15,14 @@ import net.minecraftforge.common.model.animation.IAnimationStateMachine;
 public class SimpleAnimHandler {
 
     public final IAnimationStateMachine asm;
-    private TileEntity tile;
     private final VariableTickValue animPos = new VariableTickValue(0F);
-//    private final TimeValues.VariableValue animSpeed = new TimeValues.VariableValue(0.01F);
     private float position = 0;
     private float speed = 0;
     private float targetSpeed;
     private float transitionRate;
 
-    public SimpleAnimHandler(TileEntity tile, ResourceLocation asm) {
+    public SimpleAnimHandler(ResourceLocation asm) {
         this.asm = BrandonsCore.proxy.loadASM(asm, ImmutableMap.of("anim_pos", animPos));
-        this.tile = tile;
     }
 
     public void setSpeed(float targetSpeed, float transitionRate) {
@@ -35,11 +31,9 @@ public class SimpleAnimHandler {
     }
 
     public void updateAnimation() {
-//        targetSpeed = 0.01F;
         if (speed != targetSpeed) {
             speed = MathHelper.approachLinear(speed, targetSpeed, transitionRate);
         }
-//        LogHelperBC.dev(speed);
         position += speed;
         animPos.setValue(position, speed);
     }

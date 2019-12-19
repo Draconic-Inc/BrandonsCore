@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.capability;
 
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 
@@ -13,26 +13,26 @@ import javax.annotation.Nullable;
  *
  * HANDLER = Handler / Storage / whatever you want to call your capability instance...
  */
-public class CapabilityProviderSerializable<HANDLER> implements ICapabilitySerializable<NBTBase> {
+public class CapabilityProviderSerializable<HANDLER> implements ICapabilitySerializable<INBT> {
 
     public final HANDLER instance;
     public final Capability<HANDLER> capability;
-    public final EnumFacing facing;
+    public final Direction facing;
 
-    public CapabilityProviderSerializable(Capability<HANDLER> capability, HANDLER instance, @Nullable EnumFacing facing) {
+    public CapabilityProviderSerializable(Capability<HANDLER> capability, HANDLER instance, @Nullable Direction facing) {
         this.instance = instance;
         this.capability = capability;
         this.facing = facing;
     }
 
     @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
+    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable Direction facing) {
         return capability == this.capability;
     }
 
     @Nullable
     @Override
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
+    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
         if (capability == this.capability) {
             return this.capability.cast(instance);
         }
@@ -40,12 +40,12 @@ public class CapabilityProviderSerializable<HANDLER> implements ICapabilitySeria
     }
 
     @Override
-    public NBTBase serializeNBT() {
+    public INBT serializeNBT() {
         return capability.writeNBT(instance, facing);
     }
 
     @Override
-    public void deserializeNBT(NBTBase nbt) {
+    public void deserializeNBT(INBT nbt) {
         capability.readNBT(instance, facing, nbt);
     }
 }

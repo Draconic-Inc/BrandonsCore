@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.lib;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.EnumHand;
 
 /**
@@ -10,6 +10,6 @@ import net.minecraft.util.EnumHand;
  */
 public interface IActivatableTile {
 
-    boolean onBlockActivated(IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ);
+    boolean onBlockActivated(IBlockState state, PlayerEntity player, EnumHand hand, Direction side, float hitX, float hitY, float hitZ);
 
 }

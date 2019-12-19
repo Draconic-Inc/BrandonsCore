@@ -2,15 +2,15 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.IContainerListener;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 
 import java.util.LinkedList;
@@ -73,7 +73,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
                 syncPacket.writeByte((byte) data.getIndex());
                 data.toBytes(syncPacket);
 //                syncPacket.sendToChunk(tile);
-                DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
+                DataUtils.forEachMatch(listeners, p -> p instanceof ServerPlayerEntity, p -> syncPacket.sendToPlayer((ServerPlayerEntity) p));
             }
         }
     }
@@ -90,7 +90,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
                     PacketCustom syncPacket = createSyncPacket();
                     syncPacket.writeByte((byte) data.getIndex());
                     data.toBytes(syncPacket);
-                    DataUtils.forEachMatch(listeners, p -> p instanceof EntityPlayerMP, p -> syncPacket.sendToPlayer((EntityPlayerMP) p));
+                    DataUtils.forEachMatch(listeners, p -> p instanceof ServerPlayerEntity, p -> syncPacket.sendToPlayer((ServerPlayerEntity) p));
                 }
             }
         }
@@ -109,7 +109,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
         }
     }
 
-    public void forcePlayerSync(EntityPlayerMP player) {
+    public void forcePlayerSync(ServerPlayerEntity player) {
         if (!tile.getWorld().isRemote) {
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncContainer) {
@@ -133,7 +133,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
 
     @Override
     public PacketCustom createSyncPacket() {
-        PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.C_TILE_DATA_MANAGER);
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.C_TILE_DATA_MANAGER);
         packet.writePos(tile.getPos());
         return packet;
     }
@@ -145,7 +145,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
         if (data != null) {
             data.fromBytes(input);
             if (data.flags().triggerUpdate) {
-                IBlockState state = tile.getWorld().getBlockState(tile.getPos());
+                BlockState state = tile.getWorld().getBlockState(tile.getPos());
                 tile.getWorld().notifyBlockUpdate(tile.getPos(), state, state, 3);
             }
         }
@@ -162,16 +162,16 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound compound) {
-        NBTTagCompound dataTag = new NBTTagCompound();
+    public void writeToNBT(CompoundNBT compound) {
+        CompoundNBT dataTag = new CompoundNBT();
         DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.toNBT(dataTag));
-        compound.setTag(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
+        compound.put(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        if (compound.hasKey(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
-            NBTTagCompound dataTag = compound.getCompoundTag(BlockBCore.BC_MANAGED_DATA_FLAG);
+    public void readFromNBT(CompoundNBT compound) {
+        if (compound.contains(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
+            CompoundNBT dataTag = compound.getCompound(BlockBCore.BC_MANAGED_DATA_FLAG);
             DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.fromNBT(dataTag));
         }
     }
@@ -199,7 +199,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     @Override
     public void sendToServer(IManagedData data) {
         if (tile.getWorld().isRemote && data.flags().allowClientControl) {
-            PacketCustom packet = new PacketCustom(BrandonsCore.NET_CHANNEL, PacketDispatcher.S_TILE_DATA_MANAGER);
+            PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.S_TILE_DATA_MANAGER);
             packet.writePos(tile.getPos());
             packet.writeByte((byte) data.getIndex());
             data.toBytes(packet);
@@ -220,15 +220,15 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     /**
      * Used to sync data via getUpdatePacket and getUpdateTag in TileEntity
      */
-    public void writeSyncNBT(NBTTagCompound compound) {
-        NBTTagCompound dataTag = new NBTTagCompound();
+    public void writeSyncNBT(CompoundNBT compound) {
+        CompoundNBT dataTag = new CompoundNBT();
         DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.toNBT(dataTag));
-        compound.setTag(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
+        compound.put(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
-    public void readSyncNBT(NBTTagCompound compound) {
-        if (compound.hasKey(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
-            NBTTagCompound dataTag = compound.getCompoundTag(BlockBCore.BC_MANAGED_DATA_FLAG);
+    public void readSyncNBT(CompoundNBT compound) {
+        if (compound.contains(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
+            CompoundNBT dataTag = compound.getCompound(BlockBCore.BC_MANAGED_DATA_FLAG);
             DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.fromNBT(dataTag));
         }
     }
@@ -236,17 +236,17 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     /**
      * Used to save data to the itemstack when the tile is broken.
      */
-    public void writeToStackNBT(NBTTagCompound compound) {
-        NBTTagCompound dataTag = new NBTTagCompound();
+    public void writeToStackNBT(CompoundNBT compound) {
+        CompoundNBT dataTag = new CompoundNBT();
         DataUtils.forEachMatch(managedDataList, data -> data.flags().saveItem, data -> data.toNBT(dataTag));
-        if (!dataTag.hasNoTags()) {
-            compound.setTag(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
+        if (!dataTag.isEmpty()) {
+            compound.put(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
         }
     }
 
-    public void readFromStackNBT(NBTTagCompound compound) {
-        if (compound.hasKey(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
-            NBTTagCompound dataTag = compound.getCompoundTag(BlockBCore.BC_MANAGED_DATA_FLAG);
+    public void readFromStackNBT(CompoundNBT compound) {
+        if (compound.contains(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
+            CompoundNBT dataTag = compound.getCompound(BlockBCore.BC_MANAGED_DATA_FLAG);
             DataUtils.forEachMatch(managedDataList, data -> data.flags().saveItem, data -> data.fromNBT(dataTag));
         }
     }

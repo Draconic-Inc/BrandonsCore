@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client.gui.config;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
@@ -29,7 +29,7 @@ public abstract class AbstractModGuiFactory implements IModGuiFactory {
 	}
 
 	@Override
-	public GuiScreen createConfigGui(GuiScreen parentScreen) {
+	public Screen createConfigGui(Screen parentScreen) {
 		ModContainer container = DataUtils.firstMatch(Loader.instance().getActiveModList(), mod -> mod.getModId().equals(getModID()));
 		if (container != null && ModConfigParser.hasConfig(getModID())) {
 			return new BCModConfigGui(parentScreen, container);
@@ -38,7 +38,7 @@ public abstract class AbstractModGuiFactory implements IModGuiFactory {
 	}
 
 //	@Override
-//	public Class<? extends GuiScreen> mainConfigGuiClass() {
+//	public Class<? extends Screen> mainConfigGuiClass() {
 //		return BCModConfigGui.class;
 //	}
 

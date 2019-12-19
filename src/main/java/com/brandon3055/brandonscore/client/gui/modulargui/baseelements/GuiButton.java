@@ -1,19 +1,16 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IButtonListener;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.SoundEvents;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.util.ResourceLocation;
-import scala.Function0;
-import scala.Unit;
+import net.minecraft.util.SoundEvents;
 
-import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -21,13 +18,13 @@ import java.util.function.Supplier;
  * This is the base Modular GUI button class. This should be extended when creating customized modular gui buttons.
  */
 @SuppressWarnings("unchecked")
-public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEventDispatcher*/ {
+public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispatcher*/ {
     protected static ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     protected ResourceLocation textureOverride;
     protected Supplier<ResourceLocation> textureSupplier;
-    //    @Deprecated
-//    protected IGuiEventListener listener = null;
-    protected IButtonListener buttonListener = null;
+
+    protected Consumer<Integer> pressListener = null;
+    protected Consumer<Integer> releaseListener = null;
     protected boolean trim = true;
     protected boolean wrap = false;
     protected boolean disabled = false;
@@ -64,6 +61,8 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     public boolean playClick = true;
     public int textXOffset = 0;
     public int textYOffset = 0;
+    private boolean isPressed = false;
+    private boolean is3dText = false;
 
     //Super Constructors
     public GuiButton() {
@@ -131,24 +130,24 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         this.buttonId = buttonId;
     }
 
-    @Deprecated //Fix Listeners
-    public GuiButton setListener(IButtonListener buttonListener) {
-        this.buttonListener = buttonListener;
+    public GuiButton onPressed(Runnable action) {
+        return onButtonPressed((m) -> action.run());
+    }
+
+    public GuiButton onButtonPressed(Consumer<Integer> action) {
+        pressListener = action;
         return this;
     }
 
-    @Deprecated //Fix Listeners
-    public GuiButton setListener(Runnable action) {
-        return setListener((b, m) -> action.run());
+    public GuiButton onReleased(Runnable action) {
+        return onButtonReleased((m) -> action.run());
     }
 
-    @Deprecated //Fix Listeners
-    public GuiButton setListener(Function0<Unit> action) {
-        return setListener((b, m) -> {
-            //Fixes casting issue.
-            @SuppressWarnings("unused") Object unused = action.apply();
-        });
+    public GuiButton onButtonReleased(Consumer<Integer> action) {
+        releaseListener = action;
+        return this;
     }
+
 
     public boolean isDisabled() {
         return disabledStateSupplier != null ? disabledStateSupplier.get() : disabled;
@@ -162,6 +161,19 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     public GuiButton setDisabledStateSupplier(Supplier<Boolean> disabledStateSupplier) {
         this.disabledStateSupplier = disabledStateSupplier;
         return this;
+    }
+
+    public GuiButton set3dText(boolean is3dText) {
+        this.is3dText = is3dText;
+        return this;
+    }
+
+    public boolean isPressed() {
+        return isPressed || (toggleMode && getToggleState());
+    }
+
+    protected boolean actualPressedState() {
+        return isPressed;
     }
 
     //region Button Identification
@@ -413,8 +425,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     public int getFillColour(boolean hover, boolean disabled) {
         if (rectFillColour != null) {
             return rectFillColour.getColour(hover, disabled);
-        }
-        else if (rectBorderColour != null) {
+        } else if (rectBorderColour != null) {
             return rectBorderColour.getColour(hover, disabled);
         }
         return 0;
@@ -423,8 +434,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     public int getBorderColour(boolean hover, boolean disabled) {
         if (rectBorderColour != null) {
             return rectBorderColour.getColour(hover, disabled);
-        }
-        else if (rectFillColour != null) {
+        } else if (rectFillColour != null) {
             return rectFillColour.getColour(hover, disabled);
         }
         return 0;
@@ -435,45 +445,62 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
     //region Button Action
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
 
         if (isMouseOver(mouseX, mouseY) && !isDisabled()) {
-            onPressed(mouseX, mouseY, mouseButton);
+            onPressed(mouseX, mouseY, button);
+            isPressed = true;
             return true;
         }
         return false;
     }
 
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (isPressed) {
+            playClickEvent(true);
+            if (releaseListener != null) {
+                releaseListener.accept(button);
+            }
+        }
+        isPressed = false;
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
     /**
      * Called when this button is pressed. Can be overriden to implement custom functionality.
      */
-    public void onPressed(int mouseX, int mouseY, int mouseButton) {
+    public void onPressed(double mouseX, double mouseY, int mouseButton) {
         if (toggleMode) {
             toggleActiveState = !getToggleState();
         }
 
         if (playClick) {
-            playClickSound();
+            playClickEvent(false);
         }
 
-//        if (listener != null) {
-//            listener.onMGuiEvent(new GuiEvent.ButtonEvent(this), this);
-//        }
-
-        if (buttonListener != null) {
-            buttonListener.onClick(this, mouseButton);
+        if (pressListener != null) {
+            pressListener.accept(mouseButton);
         }
     }
 
-    public void playClickSound() {
-        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, !toggleMode || toggleActiveState ? 1.0F : 0.9F));
+    public void playClickEvent(boolean released) {
+        if (toggleMode) {
+            if (released) {
+                mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, getToggleState() ? 1F : 0.9F));
+            } else {
+                mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 0.85F));
+            }
+        } else if (!released) {
+            mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        }
     }
 
     public static void playGenericClick(Minecraft mc) {
-        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     /**
@@ -525,8 +552,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
         if (isDisabled()) {
             i = 0;
-        }
-        else if (hovered) {
+        } else if (hovered) {
             i = 2;
         }
 
@@ -559,8 +585,8 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
 
             boolean wrap = this.wrap && fontRenderer.getStringWidth(displayString) > widthLimit;
 
-            int xPos = textXOffset + getInsetRect().x;
-            int yPos = textYOffset + ((getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2));
+            int xPos = textXOffset + getInsetRect().x + (is3dText && actualPressedState() ? 1 : 0);
+            int yPos = textYOffset + ((getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2)) + (is3dText && actualPressedState() ? 1 : 0);
             switch (rotation) {
                 case NORMAL:
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
@@ -579,18 +605,18 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
             }
-            GlStateManager.color(1, 1, 1, 1);
+            GlStateManager.color4f(1, 1, 1, 1);
         }
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
     }
 
     protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {
         bindTexture(textureSupplier != null ? textureSupplier.get() : textureOverride != null ? textureOverride : BUTTON_TEXTURES);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         int texVIndex = getRenderState(hovered);
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         int texHeight = Math.min(20, ySize());
@@ -602,8 +628,7 @@ public class GuiButton extends MGuiElementBase<GuiButton>/* implements IGuiEvent
         if (ySize() < 20) {
             drawTexturedModalRect(xPos(), yPos() + 3, 0, texPos + 20 - ySize() + 3, xSize() % 2 + xSize() / 2, ySize() - 3);
             drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, yPos() + 3, 200 - xSize() / 2, texPos + 20 - ySize() + 3, xSize() / 2, ySize() - 3);
-        }
-        else if (ySize() > 20) {
+        } else if (ySize() > 20) {
             for (int y = yPos() + 17; y + 15 < yPos() + ySize(); y += 15) {
                 drawTexturedModalRect(xPos(), y, 0, texPos + 2, xSize() % 2 + xSize() / 2, 15);
                 drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, y, 200 - xSize() / 2, texPos + 2, xSize() / 2, 15);

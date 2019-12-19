@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
@@ -90,7 +90,7 @@ public class ModularGuiTest extends ModularGuiScreen {
             }
         }
 
-        scrollElement.addElement(new MGuiElementBase().setRelPos(0, 0).setSize(170, 220));
+        scrollElement.addElement(new GuiElement().setRelPos(0, 0).setSize(170, 220));
 
         if (true) return;
 
@@ -130,14 +130,14 @@ public class ModularGuiTest extends ModularGuiScreen {
             public ResourceLocation getLocationSkin() {
                 ResourceLocation resourcelocation;
 
-                Minecraft minecraft = Minecraft.getMinecraft();
+                Minecraft minecraft = Minecraft.getInstance();
                 Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(getGameProfile());
 
                 if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
                     resourcelocation = minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
                 }
                 else {
-                    UUID uuid = EntityPlayer.getUUID(getGameProfile());
+                    UUID uuid = PlayerEntity.getUUID(getGameProfile());
                     resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
                 }
 
@@ -208,7 +208,7 @@ public class ModularGuiTest extends ModularGuiScreen {
                     RenderHelper.enableStandardItemLighting();
                     GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
 //                    GlStateManager.rotate(-((float) Math.atan((double) (100.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-                    RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
+                    RenderManager rendermanager = Minecraft.getInstance().getRenderManager();
                     rendermanager.setPlayerViewY(rotation + 45);
                     rendermanager.setRenderShadow(false);
                     rendermanager.renderEntity(player, 0.0D, 0.0D, 0.0D, 0, 1.0F, false);
@@ -238,7 +238,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         scrollElement.addElement(new GuiButton().setInsetRelPos(0, 125 + yOffset).setSize(130, 20).setText("Vanilla Style Button").setVanillaButtonRender(true).setHoverText("With Hover Text!").setHoverTextDelay(10)); //The parent gui is automatically assigned as the event listener because it is an instance of IGuiEventListener
         scrollElement.addElement(new GuiButton().setInsetRelPos(0, 150 + yOffset).setSize(130, 20).setText("Trim mode enabled on a vanilla button").setVanillaButtonRender(true).setHoverText("With", "A", "Hover", "Text", "Array!", TextFormatting.RED + "[Disclaimer: hover text arrays do not require each word to be on a new line.]"));
         scrollElement.addElement(new GuiButton().setInsetRelPos(0, 175 + yOffset).setSize(130, 40).setText("A vanilla style button with wrapping enabled and left alignment").setVanillaButtonRender(true).setWrap(true).setAlignment(LEFT).setHoverTextArray(e -> {
-            long seconds = Minecraft.getMinecraft().world.getWorldTime() / 20;
+            long seconds = Minecraft.getInstance().world.getWorldTime() / 20;
             long minutes = (int) Math.floor(seconds / 60D) % 24;
             return new String[]{"With a hover text supplier that displays world time!", "World Time: " + (minutes < 10 ? "0" : "") + minutes + ":" + (seconds % 60 < 10 ? "0" : "") + (seconds % 60)};
         }));
@@ -255,7 +255,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         GuiButton pickColour = new GuiButton().setRelPos(0, 220 + yOffset).setSize(200, 30).setWrap(true).setText("This button opens a colour picker that sets the colour of this button.");
         pickColour.setBorderColour(0xFF000000);
         pickColour.setFillColour(0xFFFFFFFF);
-        pickColour.setListener(() -> new GuiPickColourDialog(pickColour).setColour(pickColour.getFillColour(false, false)).setColourChangeListener(pickColour::setFillColour).showCenter());
+        pickColour.onPressed(() -> new GuiPickColourDialog(pickColour).setColour(pickColour.getFillColour(false, false)).setColourChangeListener(pickColour::setFillColour).showCenter());
         scrollElement.addElement(pickColour);
         //endregion
 
@@ -263,7 +263,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         scrollElement.addElement(new GuiLabel().setInsetRelPos(210, 230 + yOffset).setSize(300, 12).setAlignment(CENTER).setLabelText("These are particles rendered with a gui effect renderer!"));
         MGuiEffectRenderer effectRenderer = new MGuiEffectRenderer().setInsetRelPos(210, 230 + +yOffset).setSize(300, 12);
         scrollElement.addElement(effectRenderer);
-        scrollElement.addElement(new MGuiElementBase() {
+        scrollElement.addElement(new GuiElement() {
             @Override
             public boolean onUpdate() {
                 Random rand = mc.world.rand;
@@ -289,7 +289,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         //region Item Stacks and entities
 
         //This demonstrates one way to easily manage relative element positions.
-        MGuiElementBase lastElement;
+        GuiElement lastElement;
         scrollElement.addElement(lastElement = new GuiLabel().setRelPosBottom(pickColour, 5, 5).setSize(0, 10).setLabelText("These are examples implementations of the item and entity renderers.").setTrim(false).setAlignment(LEFT));//In this case i am using left alignment so i can have an x size of 0
         scrollElement.addElement(lastElement = new GuiStackIcon(new StackReference("minecraft:stone")).setRelPosBottom(lastElement, 5, 5));
         scrollElement.addElement(lastElement = new GuiStackIcon(new StackReference("minecraft:enchanted_book")).setRelPosRight(lastElement, 5, 0).setSize(50, 50).setDrawHoverHighlight(true).addSlotBackground());
@@ -304,7 +304,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         GuiButton tfButton = new GuiButton().setRelPosBottom(lastElement, 0, 10).setXPos(scrollElement.getInsetRect().x).setSize(200, 30).setWrap(true).setText("This button opens a popup text field that allows you to alter its text.");
         tfButton.setBorderColour(0xFF000000);
         tfButton.setFillColour(0xFF909090);
-        tfButton.setListener((event, eventSource) -> new GuiTextFieldDialog(tfButton).addTextConfirmCallback(tfButton::setText).setMaxLength(128).setText(tfButton.getDisplayString()).setXSize(400).showCenter(500));
+        tfButton.setButtonListener((event, eventSource) -> new GuiTextFieldDialog(tfButton).addTextConfirmCallback(tfButton::setText).setMaxLength(128).setText(tfButton.getDisplayString()).setXSize(400).showCenter(500));
         scrollElement.addElement(tfButton);
         lastElement = tfButton;
 
@@ -329,7 +329,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         selectDialog.setCloseOnSelection(true);
         selectDialog.setSelectionListener(selectButton::setText);
 
-        selectButton.setListener((event, eventSource) -> selectDialog.showCenter());
+        selectButton.setButtonListener((event, eventSource) -> selectDialog.showCenter());
 
 
         //endregion
@@ -338,7 +338,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         scrollElement.addElement(new GuiLabel().setInsetRelPos(5, 850 + yOffset).setSize(300, 12).setAlignment(LEFT).setLabelText("Yes. This is a scroll element inside a scroll element!"));
         GuiScrollElement scrollElement2 = new GuiScrollElement().setInsetRelPos(5, 865 + yOffset).setSize(510, 200).setStandardScrollBehavior();
         scrollElement.addElement(scrollElement2);
-        scrollElement2.addElement(new MGuiElementBase().setRelPos(0, 0).setSize(500 + 200, 170 + 200));
+        scrollElement2.addElement(new GuiElement().setRelPos(0, 0).setSize(500 + 200, 170 + 200));
         scrollElement2.applyBackgroundElement(new GuiBorderedRect().setColours(0xFF000000, 0xFFFF00FF));
         scrollElement2.addBackgroundChild(new GuiBorderedRect().setBorderColour(0xFF707070).setRelPos(-2, -2).setSize(514, 204));
 

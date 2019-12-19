@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.network;
 
 import com.brandon3055.brandonscore.lib.ModContributorHandler;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -15,12 +15,12 @@ public class PacketContributor implements IMessage {
 
     private String modid;
     private String contributor;
-    private NBTTagCompound data;
+    private CompoundNBT data;
 
     public PacketContributor() {
     }
 
-    public PacketContributor(String modid, String contributor, NBTTagCompound data) {
+    public PacketContributor(String modid, String contributor, CompoundNBT data) {
         this.modid = modid;
         this.contributor = contributor;
         this.data = data;

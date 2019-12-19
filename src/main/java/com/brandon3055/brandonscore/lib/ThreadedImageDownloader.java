@@ -176,7 +176,7 @@ public class ThreadedImageDownloader extends SimpleTexture{
         }
         if (downloadFailed) {
             downloadFailed = false;
-            loadBrokenTexture(Minecraft.getMinecraft().getResourceManager());
+            loadBrokenTexture(Minecraft.getInstance().getResourceManager());
             if (dlLocation != null) {
                 dlLocation.dlFailed = dlLocation.dlFinished = true;
             }
@@ -208,12 +208,12 @@ public class ThreadedImageDownloader extends SimpleTexture{
 
                 try
                 {
-//                    connection = (HttpURLConnection)(new URL(ThreadedImageDownloader.this.resourceUrl)).openConnection(Minecraft.getMinecraft().getProxy());
+//                    connection = (HttpURLConnection)(new URL(ThreadedImageDownloader.this.resourceUrl)).openConnection(Minecraft.getInstance().getProxy());
 //                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 //                    connection.setDoInput(true);
 //                    connection.setDoOutput(false);
 //                    connection.connect();
-                    connection = FileHandler.openConnection(ThreadedImageDownloader.this.resourceUrl, Minecraft.getMinecraft().getProxy());
+                    connection = FileHandler.openConnection(ThreadedImageDownloader.this.resourceUrl, Minecraft.getInstance().getProxy());
                     int response = connection.getResponseCode();
 
                     if (response / 100 == 2)

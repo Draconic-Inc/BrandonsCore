@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MDElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
@@ -19,7 +19,7 @@ import java.util.function.BiConsumer;
  * The only time there should ever be a sub container in this container is as part of a table because each cell
  * in a table is an MDElementContainer.
  */
-public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
+public class MDElementContainer extends GuiElement<MDElementContainer> {
 
     private LinkedList<MDElementBase> elements = new LinkedList<>();
     protected BiConsumer<String, Integer> linkClickCallback = null;
@@ -27,7 +27,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
      * When the user hovers their cursor over a link the link target will be displayed in the bottom left corner of this element.
      * Similar to what most browsers do when you hover over a link.
      */
-    public MGuiElementBase linkDisplayTarget = this;
+    public GuiElement linkDisplayTarget = this;
     public int linkDisplayZOffset = 600;
     public MDElementFactory lastFactory = null;
     public HAlign defaultAlignment = HAlign.LEFT;
@@ -36,7 +36,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     /**
      * @param initializer can be any initialized MGuiElementBase. This is just used for initialize this element before layout occurs.
      */
-    public MDElementContainer(MGuiElementBase initializer) {
+    public MDElementContainer(GuiElement initializer) {
         initializeElementData(initializer);
         reportYSizeChange = true;
     }
@@ -44,7 +44,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     /**
      * @param initializer can be any initialized MGuiElementBase. This is just used for initialize this element before layout occurs.
      */
-    public MDElementContainer(MGuiElementBase initializer, int xPos, int yPos, int xSize) {
+    public MDElementContainer(GuiElement initializer, int xPos, int yPos, int xSize) {
         super(xPos, yPos);
         initializeElementData(initializer);
         setXSize(xSize);
@@ -54,7 +54,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     /**
      * @param initializer can be any initialized MGuiElementBase. This is just used for initialize this element before layout occurs.
      */
-    public MDElementContainer(MGuiElementBase initializer, int xSize) {
+    public MDElementContainer(GuiElement initializer, int xSize) {
         initializeElementData(initializer);
         setXSize(xSize);
         reportYSizeChange = true;
@@ -279,7 +279,7 @@ public class MDElementContainer extends MGuiElementBase<MDElementContainer> {
     }
 
     @Override
-    public void ySizeChanged(MGuiElementBase elementChanged) {
+    public void ySizeChanged(GuiElement elementChanged) {
         //The parent scroll element does not need to be informed when markdown elements have their size assigned.
         if (elementChanged == this) {
             super.ySizeChanged(elementChanged);

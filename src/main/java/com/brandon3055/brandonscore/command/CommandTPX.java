@@ -25,7 +25,7 @@ public class CommandTPX extends CommandBase
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return "bc.commands.tpx.usage";
     }
@@ -48,7 +48,7 @@ public class CommandTPX extends CommandBase
     // /forge tpx [target player] <x> <y> <z> [dimension] [<yaw> <pitch>]   7
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         if (args.length < 1)
         {
@@ -125,7 +125,7 @@ public class CommandTPX extends CommandBase
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, @Nullable BlockPos targetPos)
     {
         if (args.length == 1 || args.length == 2)
         {

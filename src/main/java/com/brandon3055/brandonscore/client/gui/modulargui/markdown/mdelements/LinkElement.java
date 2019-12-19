@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
 import net.minecraft.client.Minecraft;
@@ -84,7 +84,7 @@ public class LinkElement extends MDElementBase<LinkElement> {
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOver(mouseX, mouseY)) {
             if (container.linkDisplayTarget != null) {
-                MGuiElementBase e = container.linkDisplayTarget;
+                GuiElement e = container.linkDisplayTarget;
                 int width = fontRenderer.getStringWidth(linkTarget);
                 int height = fontRenderer.getWordWrappedHeight(linkTarget, e.xSize()) + 4;
                 zOffset += container.linkDisplayZOffset;

@@ -183,9 +183,9 @@ public class BCFontRenderer extends FontRenderer {
 
     public static BCFontRenderer convert(FontRenderer fontRenderer) {
         if (!cashedRenderers.containsKey(fontRenderer)) {
-            BCFontRenderer fr = new BCFontRenderer(Minecraft.getMinecraft().gameSettings, fontRenderer.locationFontTexture, fontRenderer.renderEngine, fontRenderer.getUnicodeFlag());
+            BCFontRenderer fr = new BCFontRenderer(Minecraft.getInstance().gameSettings, fontRenderer.locationFontTexture, fontRenderer.renderEngine, fontRenderer.getUnicodeFlag());
             fr.onResourceManagerReload(null);
-            ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(fr);
+            ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(fr);
             cashedRenderers.put(fontRenderer, fr);
         }
 

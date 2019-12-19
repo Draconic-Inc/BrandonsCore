@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
@@ -36,27 +36,36 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     protected LinkedList<T> filteredItems = new LinkedList<>();
     protected GuiScrollElement scrollElement;
     protected IGuiEventListener listener = null;
-    protected Map<T, MGuiElementBase> sectionElements = new HashMap<>();
+    protected Map<T, GuiElement> sectionElements = new HashMap<>();
     protected Predicate<T> selectionFilter = null;
+    private int listSpacing = 0;
 
     //There is probably a much cleaner wau to do this... But i cant think of it right now.
-    protected Function<T, MGuiElementBase> rendererBuilder = t -> {
-        GuiLabel label = new GuiLabel(String.valueOf(t)).setInsets(0, 2, 0, 2).setWrap(true).setShadow(false).setTextColGetter(hovering -> hovering ? 0x0000FF : 0);
+    protected Function<T, GuiElement> rendererBuilder = t -> {
+        GuiLabel label = new GuiLabel(String.valueOf(t)).setInsets(0, 2, 0, 2).setWrap(true).setShadow(false).setHoverableTextCol(hovering -> hovering ? 0x0000FF : 0);
         label.setYSizeMod((guiLabel, integer) -> guiLabel.fontRenderer.getWordWrappedHeight(label.getLabelText(), Math.max(10, guiLabel.xSize() - label.getInsets().left - label.getInsets().right)) + 6);
         label.addChild(GuiTexture.newVanillaGuiTexture(0, 0).setYSizeMod((guiTexture, integer) -> label.ySize()).setPos(label).bindSize(label, false));
         return label;
     };
 
-    public GuiSelectDialog(MGuiElementBase parent) {
+    public GuiSelectDialog(GuiElement parent) {
         super(parent);
     }
 
-    public GuiSelectDialog(int xPos, int yPos, MGuiElementBase parent) {
+    public GuiSelectDialog(int xPos, int yPos, GuiElement parent) {
         super(xPos, yPos, parent);
     }
 
-    public GuiSelectDialog(int xPos, int yPos, int xSize, int ySize, MGuiElementBase parent) {
+    public GuiSelectDialog(int xPos, int yPos, int xSize, int ySize, GuiElement parent) {
         super(xPos, yPos, xSize, ySize, parent);
+    }
+
+    public GuiSelectDialog setListSpacing(int listSpacing) {
+        this.listSpacing = listSpacing;
+        if (scrollElement != null) {
+            scrollElement.setListSpacing(listSpacing);
+        }
+        return this;
     }
 
     @Override
@@ -78,6 +87,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
         super.addChildElements();
         if (scrollElement == null) {
             addChild(scrollElement = new GuiScrollElement());
+            scrollElement.setListSpacing(listSpacing);
             scrollElement.setPosAndSize(this.getInsetRect()).setStandardScrollBehavior();
             scrollElement.setListMode(GuiScrollElement.ListMode.VERT_LOCK_POS_WIDTH);
             if (noScrollBars) {
@@ -169,7 +179,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      * @param item The item to be added to the list.
      * @param itemRenderer an element to represent this item in the list.
      */
-    public GuiSelectDialog<T> addItem(T item, @Nullable MGuiElementBase itemRenderer) {
+    public GuiSelectDialog<T> addItem(T item, @Nullable GuiElement itemRenderer) {
         if (!sectionItems.contains(item)){
             sectionItems.add(item);
         }
@@ -179,9 +189,9 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     }
 
     /**
-     * @see #addItem(Object, MGuiElementBase)
+     * @see #addItem(Object, GuiElement)
      */
-    public GuiSelectDialog<T> addItems(Map<T, MGuiElementBase> itemMap) {
+    public GuiSelectDialog<T> addItems(Map<T, GuiElement> itemMap) {
         sectionElements.putAll(itemMap);
         reloadSelectionList();
         return this;
@@ -205,7 +215,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      * Adds an item at the specified index.
      * @throws IndexOutOfBoundsException if the index is out of range.
      */
-    public GuiSelectDialog<T> addItemAt(T item, int index, @Nullable MGuiElementBase itemRenderer) {
+    public GuiSelectDialog<T> addItemAt(T item, int index, @Nullable GuiElement itemRenderer) {
         sectionItems.add(index, item);
         sectionElements.put(item, itemRenderer == null ? rendererBuilder.apply(item) : itemRenderer);
         reloadSelectionList();
@@ -225,13 +235,16 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     public GuiSelectDialog<T> clearItems() {
         sectionItems.clear();
         sectionElements.clear();
+        if (scrollElement != null) {
+            scrollElement.resetScrollPositions();
+        }
         reloadSelectionList();
         return this;
     }
 
     /**
      * Convenience method. Adds an item with a null renderer.
-     * @see #addItem(Object, MGuiElementBase)
+     * @see #addItem(Object, GuiElement)
      */
     public GuiSelectDialog<T> addItem(T item) {
         addItem(item, null);
@@ -242,7 +255,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      * This allows you to override the default renderer builder. The renderer builder creates a
      * display element to represent elements that have not been assigned a display element.
      */
-    public GuiSelectDialog<T> setRendererBuilder(Function<T, MGuiElementBase> rendererBuilder) {
+    public GuiSelectDialog<T> setRendererBuilder(Function<T, GuiElement> rendererBuilder) {
         this.rendererBuilder = rendererBuilder;
         return this;
     }
@@ -259,7 +272,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      * @return the map of item to renderer element. This is an immutable copy of the internal map because you are not allowed to
      * directly modify the map.
      */
-    public Map<T, MGuiElementBase> getSectionElements() {
+    public Map<T, GuiElement> getSectionElements() {
         return ImmutableMap.copyOf(sectionElements);
     }
 

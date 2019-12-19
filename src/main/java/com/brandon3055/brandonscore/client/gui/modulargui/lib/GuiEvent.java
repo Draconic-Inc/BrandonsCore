@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiPickColourDialog;
@@ -12,7 +12,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTextFie
  */
 //TODO Add new events as needed
 @Deprecated
-public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
+public class GuiEvent<E extends GuiElement, EVENT extends GuiEvent> {
     private E element;
     /**
      * Added for easier integration with legacy code.
@@ -112,9 +112,9 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
     @Deprecated
     public static class SelectEvent extends GuiEvent<GuiSelectDialog, SelectEvent> {
         private final Object selected;
-        private final MGuiElementBase itemRenderer;
+        private final GuiElement itemRenderer;
 
-        public SelectEvent(GuiSelectDialog element, Object selected, MGuiElementBase itemRenderer) {
+        public SelectEvent(GuiSelectDialog element, Object selected, GuiElement itemRenderer) {
             super(element);
             this.selected = selected;
             this.itemRenderer = itemRenderer;
@@ -124,7 +124,7 @@ public class GuiEvent<E extends MGuiElementBase, EVENT extends GuiEvent> {
             return selected;
         }
 
-        public MGuiElementBase getSelectedItemRenderer() {
+        public GuiElement getSelectedItemRenderer() {
             return itemRenderer;
         }
     }

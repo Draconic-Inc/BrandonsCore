@@ -1,11 +1,12 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 
 import java.util.function.Supplier;
 
@@ -13,7 +14,7 @@ import java.util.function.Supplier;
  * Created by brandon3055 on 30/08/2016.
  * This is a simple label element that allows you to render a label (aka a string) in your GUI.
  */
-public class GuiLabel extends MGuiElementBase<GuiLabel> {
+public class GuiLabel extends GuiElement<GuiLabel> {
 
     protected boolean trim = true;
     protected boolean wrap = false;
@@ -138,23 +139,28 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
      * Allows you to add a color getter callback that will override the default text colour for this label.
      * This also allows you to return different colour values based on whether or not the cursor is over the element.
      */
-    public GuiLabel setTextColGetter(HoverColour<Integer> texColGetter) {
+    public GuiLabel setHoverableTextCol(HoverColour<Integer> texColGetter) {
         this.texColGetter = texColGetter;
         return this;
     }
 
+    public GuiLabel setTextColGetter(GuiColourProvider<Integer> texColGetter) {
+        this.texColGetter = hovering -> texColGetter.getColour();
+        return this;
+    }
+
     public GuiLabel setTextColour(int colour, int colourHover) {
-        setTextColGetter(hovering -> hovering ? colourHover : colour);
+        setHoverableTextCol(hovering -> hovering ? colourHover : colour);
         return this;
     }
 
     public GuiLabel setTextColour(int colour) {
         if (texColGetter != null) {
             int hover = texColGetter.getColour(true);
-            setTextColGetter(hovering -> hovering ? hover : colour);
+            setHoverableTextCol(hovering -> hovering ? hover : colour);
         }
 
-        setTextColGetter(hovering -> colour);
+        setHoverableTextCol(hovering -> colour);
         return this;
     }
 
@@ -201,7 +207,7 @@ public class GuiLabel extends MGuiElementBase<GuiLabel> {
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
                     break;
             }
-            GlStateManager.color(1, 1, 1, 1);
+            GlStateManager.color4f(1, 1, 1, 1);
         }
     }
 

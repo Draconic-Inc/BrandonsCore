@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.lib.StackReference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -8,10 +9,13 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
@@ -19,15 +23,17 @@ import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
 /**
  * Created by brandon3055 on 3/09/2016.
  */
-public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
+public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGui.JEITargetAdapter {
     public static Map<Integer, ItemStack> stackCache = new HashMap<>();
 
     public boolean drawCount = true;
     public boolean drawToolTip = true;
     public boolean drawHoverHighlight = false;
-    private MGuiElementBase background = null;
+    private GuiElement background = null;
     protected List<String> toolTipOverride = null;
     private StackReference stackReference;
+    private Runnable clickListener = null;
+    private Consumer<Object> ingredientDropListener = null;
 
     public GuiStackIcon(StackReference stackReference) {
         this.stackReference = stackReference;
@@ -95,12 +101,26 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
 
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null)) {
+        if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && stackReference != null) {
             List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.player, minecraft.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
             drawHoveringText(list, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             return true;
         }
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if (clickListener != null && isMouseOver(mouseX, mouseY)) {
+            clickListener.run();
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    public void setClickListener(Runnable clickListener) {
+        this.clickListener = clickListener;
     }
 
     public GuiStackIcon setStack(StackReference stackReference) {
@@ -117,7 +137,7 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
      * @param background a MGuiElementBase object.
      * @return the MGuiStackIcon
      */
-    public GuiStackIcon setBackground(MGuiElementBase background) {
+    public GuiStackIcon setBackground(GuiElement background) {
         if (background == null) {
             if (this.background != null) {
                 removeChild(this.background);
@@ -148,6 +168,9 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
     }
 
     public ItemStack getStack() {
+        if (stackReference == null) {
+            return ItemStack.EMPTY;
+        }
         int hash = stackReference.hashCode();
         if (!stackCache.containsKey(hash)) {
             ItemStack stack = stackReference.createStack();
@@ -186,7 +209,23 @@ public class GuiStackIcon extends MGuiElementBase<GuiStackIcon> {
         return this;
     }
 
-    public MGuiElementBase getBackground() {
+    public GuiElement getBackground() {
         return background;
+    }
+
+    @Override
+    public Rectangle getArea() {
+        return getRect();
+    }
+
+    public void setIngredientDropListener(Consumer<Object> ingredientDropListener) {
+        this.ingredientDropListener = ingredientDropListener;
+    }
+
+    @Override
+    public void accept(Object ingredient) {
+        if (ingredientDropListener != null) {
+            ingredientDropListener.accept(ingredient);
+        }
     }
 }

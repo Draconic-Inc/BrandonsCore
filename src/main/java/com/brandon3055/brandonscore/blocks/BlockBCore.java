@@ -15,14 +15,14 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
@@ -80,7 +80,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, PlayerEntity player) {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
 
         if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()) {
@@ -90,7 +90,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile && !BrandonsCore.proxy.isCTRLKeyDown()) {
-            NBTTagCompound tileData = new NBTTagCompound();
+            CompoundNBT tileData = new CompoundNBT();
             ((IDataRetainingTile) tile).writeToItemStack(tileData, false);
             if (!tileData.hasNoTags()) {
                 ItemNBTHelper.getCompound(stack).setTag(BC_TILE_DATA_TAG, tileData);
@@ -155,7 +155,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //IRedstoneEmitter
     @Override
-    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, Direction side) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             return tile instanceof IRedstoneEmitter || canProvidePower;
@@ -170,7 +170,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public boolean shouldCheckWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+    public boolean shouldCheckWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, Direction side) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             return tile instanceof IChangeListener;
@@ -180,7 +180,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, Direction side) {
         if (hasTileEntity(blockState)) {
             TileEntity tile = blockAccess.getTileEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
@@ -191,7 +191,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, Direction side) {
         if (hasTileEntity(blockState)) {
             TileEntity tile = blockAccess.getTileEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
@@ -214,7 +214,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //IActivatableTile
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn, EnumHand hand, Direction facing, float hitX, float hitY, float hitZ) {
         if (hasTileEntity(state)) {
             TileEntity tile = worldIn.getTileEntity(pos);
             if (tile instanceof IActivatableTile) {
@@ -227,7 +227,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //IDataRetainingTile
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, LivingEntity placer, ItemStack stack) {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile) {
@@ -242,11 +242,11 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
+    public void harvestBlock(World world, PlayerEntity player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
         ItemStack stack = null;
 
         if (te instanceof IDataRetainingTile && ((IDataRetainingTile) te).saveToItem()) {
-            NBTTagCompound tileData = new NBTTagCompound();
+            CompoundNBT tileData = new CompoundNBT();
             ((IDataRetainingTile) te).writeToItemStack(tileData, true);
             if (!tileData.hasNoTags()) {
                 stack = new ItemStack(this, 1, damageDropped(state));
@@ -287,7 +287,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
         if (!isMobResistant) {
             return super.canEntityDestroy(state, world, pos, entity);
         }
-        return entity instanceof EntityPlayer;
+        return entity instanceof PlayerEntity;
     }
 
     @Override
@@ -332,7 +332,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public NBTTagCompound getNBTShareTag(ItemStack stack) {
+    public CompoundNBT getNBTShareTag(ItemStack stack) {
         return stack.getTagCompound();
     }
 }

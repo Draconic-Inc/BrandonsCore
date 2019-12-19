@@ -20,7 +20,7 @@ package com.brandon3055.brandonscore.client.gui.config;
 
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -620,7 +620,7 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public void valueButtonPressed(int slotIndex) {
             mc.displayGuiScreen(new GuiEditArray(this.owningScreen, configElement, slotIndex, currentValues, enabled()){
 
-                public GuiScreen getParent() {
+                public Screen getParent() {
                     return parentScreen;
                 }
 
@@ -1175,7 +1175,7 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
      * Provides an entry that consists of a GuiButton for navigating to the child category GuiConfig screen.
      */
     public static class CategoryEntry extends ListEntryBase {
-        protected GuiScreen childScreen;
+        protected Screen childScreen;
         protected final GuiButtonExt btnSelectCategory;
 
         public CategoryEntry(GuiConfig owningScreen, BCGuiConfigEntries owningEntryList, IConfigElement configElement, Property property) {
@@ -1192,7 +1192,7 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         /**
          * This method is called in the constructor and is used to set the childScreen field.
          */
-        protected GuiScreen buildChildScreen() {
+        protected Screen buildChildScreen() {
             return new BCModConfigGui(this.owningScreen, this.configElement.getChildElements(), this.owningScreen.modID, owningScreen.allRequireWorldRestart || this.configElement.requiresWorldRestart(), owningScreen.allRequireMcRestart || this.configElement.requiresMcRestart(), this.owningScreen.title, ((this.owningScreen.titleLine2 == null ? "" : this.owningScreen.titleLine2) + " > " + this.name));
         }
 
@@ -1224,7 +1224,7 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
         public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY) {
             if (this.btnSelectCategory.mousePressed(this.mc, x, y)) {
                 btnSelectCategory.playPressSound(mc.getSoundHandler());
-                Minecraft.getMinecraft().displayGuiScreen(childScreen);
+                Minecraft.getInstance().displayGuiScreen(childScreen);
                 return true;
             }
             else return super.mousePressed(index, x, y, mouseEvent, relativeX, relativeY);
@@ -1337,7 +1337,7 @@ public class BCGuiConfigEntries extends GuiConfigEntries {
             this.owningScreen = owningScreen;
             this.owningEntryList = owningEntryList;
             this.configElement = configElement;
-            this.mc = Minecraft.getMinecraft();
+            this.mc = Minecraft.getInstance();
             String trans = I18n.format(configElement.getLanguageKey());
             if (!trans.equals(configElement.getLanguageKey())) this.name = trans;
             else this.name = configElement.getName();

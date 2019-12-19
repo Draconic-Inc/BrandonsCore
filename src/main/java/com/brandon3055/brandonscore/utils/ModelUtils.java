@@ -1,23 +1,16 @@
 package com.brandon3055.brandonscore.utils;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.IResourceManagerReloadListener;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.resources.IResourceManager;
+import net.minecraft.resources.IResourceManagerReloadListener;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3i;
-import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.obj.OBJModel;
-import net.minecraftforge.common.model.TRSRTransformation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,30 +20,30 @@ import java.util.Map;
  * Used for general rendering stuff
  */
 public class ModelUtils implements IResourceManagerReloadListener {
-    public static Map<IBlockState, List<BakedQuad>> quadCache = new HashMap<IBlockState, List<BakedQuad>>();
+    public static Map<BlockState, List<BakedQuad>> quadCache = new HashMap<BlockState, List<BakedQuad>>();
     public static Map<ResourceLocation, IBakedModel> bakedModelCache = new HashMap<ResourceLocation, IBakedModel>();
 
-    public static List<BakedQuad> getModelQuads(IBlockState state) {
-        if (!quadCache.containsKey(state)) {
-            IBakedModel blockModel = Minecraft.getMinecraft().getBlockRendererDispatcher().getModelForState(state);
-            List<BakedQuad> listQuads = new ArrayList<BakedQuad>();
-
-            if (blockModel instanceof OBJModel.OBJBakedModel) {
-                listQuads.addAll(blockModel.getQuads(state, null, 0));
-            } else {
-                for (EnumFacing face : EnumFacing.VALUES) {
-                    listQuads.addAll(blockModel.getQuads(state, face, 0));
-                }
-            }
-            quadCache.put(state, listQuads);
-        }
-
-        if (quadCache.containsKey(state)) {
-            return quadCache.get(state);
-        }
-
-        return new ArrayList<BakedQuad>();
-    }
+//    public static List<BakedQuad> getModelQuads(BlockState state) {
+//        if (!quadCache.containsKey(state)) {
+//            IBakedModel blockModel = Minecraft.getInstance().getBlockRendererDispatcher().getModelForState(state);
+//            List<BakedQuad> listQuads = new ArrayList<BakedQuad>();
+//
+//            if (blockModel instanceof OBJModel.OBJBakedModel) {
+//                listQuads.addAll(blockModel.getQuads(state, null, 0));
+//            } else {
+//                for (Direction face : Direction.values()) {
+//                    listQuads.addAll(blockModel.getQuads(state, face, 0));
+//                }
+//            }
+//            quadCache.put(state, listQuads);
+//        }
+//
+//        if (quadCache.containsKey(state)) {
+//            return quadCache.get(state);
+//        }
+//
+//        return new ArrayList<BakedQuad>();
+//    }
 
     public static void renderQuads(List<BakedQuad> listQuads) {
         Tessellator tessellator = Tessellator.getInstance();
@@ -105,21 +98,21 @@ public class ModelUtils implements IResourceManagerReloadListener {
         }
     }
 
-    public static IBakedModel loadBakedModel(ResourceLocation modelLocation) {
-        if (!bakedModelCache.containsKey(modelLocation)) {
-            try {
-                IModel model = ModelLoaderRegistry.getModel(modelLocation);
-                IBakedModel bakedModel = model.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, input -> Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(input.toString()));
-                bakedModelCache.put(modelLocation, bakedModel);
-            }
-            catch (Exception e) {
-                LogHelperBC.fatalErrorMessage("Error at ModelUtils.loadBakedModel, Resource: " + modelLocation.toString());
-                throw new RuntimeException(e);
-            }
-        }
-
-        return bakedModelCache.get(modelLocation);
-    }
+//    public static IBakedModel loadBakedModel(ResourceLocation modelLocation) {
+//        if (!bakedModelCache.containsKey(modelLocation)) {
+//            try {
+//                IModel model = ModelLoaderRegistry.getModel(modelLocation);
+//                IBakedModel bakedModel = model.bake(TRSRTransformation.identity(), DefaultVertexFormats.ITEM, input -> Minecraft.getInstance().getTextureMap().getAtlasSprite(input.toString()));
+//                bakedModelCache.put(modelLocation, bakedModel);
+//            }
+//            catch (Exception e) {
+//                LogHelperBC.fatalErrorMessage("Error at ModelUtils.loadBakedModel, Resource: " + modelLocation.toString());
+//                throw new RuntimeException(e);
+//            }
+//        }
+//
+//        return bakedModelCache.get(modelLocation);
+//    }
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {

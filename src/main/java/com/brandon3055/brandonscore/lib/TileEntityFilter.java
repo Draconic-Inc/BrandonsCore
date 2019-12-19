@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.blocks.TileBCBase;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 /**
  * Created by brandon3055 on 23/10/2016.
@@ -22,12 +22,12 @@ public class TileEntityFilter extends EntityFilter {
     }
 
     @Override
-    public void sendConfigToServer(NBTTagCompound compound) {
+    public void sendConfigToServer(CompoundNBT compound) {
         tile.sendPacketToServer(output -> output.writeNBTTagCompound(compound), packetID);
     }
 
     @Override
-    public void receiveConfigFromClient(NBTTagCompound compound) {
+    public void receiveConfigFromClient(CompoundNBT compound) {
         super.receiveConfigFromClient(compound);
         tile.updateBlock();
         tile.markDirty();

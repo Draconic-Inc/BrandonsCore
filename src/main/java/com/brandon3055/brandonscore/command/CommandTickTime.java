@@ -6,8 +6,8 @@ import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.network.PacketTickTime;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.TextComponentString;
@@ -28,12 +28,12 @@ public class CommandTickTime extends CommandBase {
     }
 
     @Override
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(ICommandSource sender) {
         return "/bcore_ticktime";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         String name = sender.getName();
 
         if (listeners.containsKey(name)) {
@@ -77,7 +77,7 @@ public class CommandTickTime extends CommandBase {
 
         @Override
         public void updateProcess() {
-            EntityPlayerMP player = playerList.getPlayerByUsername(username);
+            ServerPlayerEntity player = playerList.getPlayerByUsername(username);
             if (player == null) {
                 timeout++;
                 if (timeout > 100) {

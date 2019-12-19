@@ -1,6 +1,6 @@
 package com.brandon3055.projectintelligence.api;
 
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.util.Collection;
 
@@ -19,7 +19,7 @@ public interface IGuiDocRegistry {
      * @return true if there is a gui handler assigned to this class.
      * @since PI 1.0.0
      */
-    boolean hasGuiHandler(Class<? extends GuiScreen> guiClass);
+    boolean hasGuiHandler(Class<? extends Screen> guiClass);
 
     /**
      * This method can be used to set the GUI handler for the specified class. This will replace any existing handler
@@ -29,7 +29,7 @@ public interface IGuiDocRegistry {
      * @param handler The handler for this gui class.
      * @since PI 1.0.0
      */
-    <T extends GuiScreen> void registerGuiHandler(Class<T> guiClass, IGuiDocHandler<T> handler);
+    <T extends Screen> void registerGuiHandler(Class<T> guiClass, IGuiDocHandler<T> handler);
 
     /**
      * This method allows you to assign documentation pages to a specific gui class. It should be noted
@@ -39,7 +39,7 @@ public interface IGuiDocRegistry {
      * @param pageURIs one or more page uris to assign to the target class.
      * @since PI 1.0.0
      */
-    <T extends GuiScreen> void registerGuiDocPages(Class<T> guiClass, String... pageURIs);
+    <T extends Screen> void registerGuiDocPages(Class<T> guiClass, String... pageURIs);
 
     /**
      * This method allows you to assign documentation pages to a specific gui class. It should be noted
@@ -49,7 +49,7 @@ public interface IGuiDocRegistry {
      * @param pageURIs the page uri's to assign to the target class.
      * @since PI 1.0.0
      */
-    <T extends GuiScreen> void registerGuiDocPages(Class<T> guiClass, Collection<String> pageURIs);
+    <T extends Screen> void registerGuiDocPages(Class<T> guiClass, Collection<String> pageURIs);
 
     /**
      * This method can be used to assign documentation pages go a gui class using an {@link IPageSupplier}.
@@ -62,6 +62,6 @@ public interface IGuiDocRegistry {
      * @param pageSupplier A page supplier for the GUI.
      * @since PI 1.0.0
      */
-    <T extends GuiScreen> void registerGuiDocPages(Class<T> guiClass, IPageSupplier<T> pageSupplier);
+    <T extends Screen> void registerGuiDocPages(Class<T> guiClass, IPageSupplier<T> pageSupplier);
 
 }

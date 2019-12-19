@@ -4,7 +4,7 @@ import cofh.redstoneflux.api.IEnergyHandler;
 import cofh.redstoneflux.api.IEnergyProvider;
 import cofh.redstoneflux.api.IEnergyReceiver;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.energy.IEnergyStorage;
 
 /**
@@ -14,9 +14,9 @@ import net.minecraftforge.energy.IEnergyStorage;
 public class EnergyHandlerWrapper implements IEnergyStorage {
 
     private TileEntity tile;
-    private EnumFacing side;
+    private Direction side;
 
-    public EnergyHandlerWrapper(TileEntity tile, EnumFacing side) {
+    public EnergyHandlerWrapper(TileEntity tile, Direction side) {
         this.tile = tile;
         this.side = side;
     }

@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
 import codechicken.lib.math.MathHelper;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent.SliderMoveEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
@@ -26,7 +26,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.Gu
  * This is the base slider control element. Used ether in its base form or extended by elements such as the GuiScrollBar
  * Note: By default this slider has its insets set to 1 all round so there will be a 1 pixel buffer around the slider element.
  */
-public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements IGuiEventDispatcher {
+public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGuiEventDispatcher {
 
     private int dragStartX = 0;
     private int dragStartY = 0;
@@ -59,8 +59,8 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     protected boolean lockBackgroundWidthAndPos = true;
     protected SliderRotation rotation = HORIZONTAL;
 
-    protected MGuiElementBase<? extends MGuiElementBase> sliderElement;
-    protected MGuiElementBase<? extends MGuiElementBase> backgroundElement;
+    protected GuiElement<? extends GuiElement> sliderElement;
+    protected GuiElement<? extends GuiElement> backgroundElement;
 
     public GuiSlideControl() {
         setInsets(1, 1, 1, 1);
@@ -124,7 +124,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     //region Mouse Input
 
     @Override
-    public boolean handleMouseScroll(int mouseX, int mouseY, int scrollDirection) {
+    public boolean handleMouseScroll(double mouseX, double mouseY, double scrollDirection) {
         //Check if there are any scrolling checks that may restrict scrolling.
         for (TriPredicate<GuiSlideControl, Integer, Integer> check : scrollChecks) {
             if (!check.test(this, mouseX, mouseY)) {
@@ -147,7 +147,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
 
             //Make sure the mouse is not hovering over another slider element before capturing the event.
             List<GuiSlideControl> slidersMouseOver = modularGui.getManager().getElementsAtPosition(mouseX, mouseY, GuiSlideControl.class);
-            if (DataUtils.firstMatch(slidersMouseOver, slider -> slider != this) != null) {
+            if (DataUtils.firstMatch(slidersMouseOver, slider -> slider != this && slider.isEnabled()) != null) {
                 return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
             }
 
@@ -221,7 +221,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
     }
 
     @Override
-    public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         double doubleMouseX = (double) Mouse.getEventX() * (double) modularGui.xSize() / (double) this.mc.displayWidth;
         double doubleMouseY = (double) modularGui.ySize() - (double) Mouse.getEventY() * modularGui.ySize() / (double) this.mc.displayHeight - 1;
 
@@ -295,7 +295,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
             }
             return !isMiddleClickDragging;
         }
-        return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
     }
 
     @Override
@@ -387,7 +387,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      *
      * @param sliderElement an element to be used as the slider element.
      */
-    public void setSliderElement(MGuiElementBase sliderElement) {
+    public GuiSlideControl setSliderElement(GuiElement sliderElement) {
         if (this.sliderElement != null) {
             removeChild(this.sliderElement);
         }
@@ -395,12 +395,13 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         this.sliderElement = sliderElement;
         addChild(sliderElement);
         updateElements();
+        return this;
     }
 
     /**
-     * @see #setSliderElement(MGuiElementBase)
+     * @see #setSliderElement(GuiElement)
      */
-    public MGuiElementBase<? extends MGuiElementBase> getSliderElement() {
+    public GuiElement<? extends GuiElement> getSliderElement() {
         return sliderElement;
     }
 
@@ -410,19 +411,20 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      *
      * @param backgroundElement an element to be used as the background element.
      */
-    public void setBackgroundElement(MGuiElementBase backgroundElement) {
+    public GuiSlideControl setBackgroundElement(GuiElement backgroundElement) {
         if (this.backgroundElement != null) {
             removeChild(this.backgroundElement);
         }
         this.backgroundElement = backgroundElement;
         addChild(backgroundElement);
         updateElements();
+        return this;
     }
 
     /**
-     * @see #setBackgroundElement(MGuiElementBase)
+     * @see #setBackgroundElement(GuiElement)
      */
-    public MGuiElementBase<? extends MGuiElementBase> getBackgroundElement() {
+    public GuiElement<? extends GuiElement> getBackgroundElement() {
         return backgroundElement;
     }
 
@@ -591,7 +593,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      * Note: If the GuiSlideControl is already a child of your window element the you do not need this. Instead
      * you can just use {@link #setParentScroll(boolean)}
      *
-     * @param parentScrollable an {@link IMouseOver} element. By default this Interface is implemented on {@link MGuiElementBase} and {@link IModularGui}
+     * @param parentScrollable an {@link IMouseOver} element. By default this Interface is implemented on {@link GuiElement} and {@link IModularGui}
      * @see #setParentScroll(boolean)
      */
     public GuiSlideControl setParentScrollable(IMouseOver parentScrollable) {
@@ -641,7 +643,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
      * |------------|
      */
     public GuiSlideControl setBarStyleBackground(int colour) {
-        setBackgroundElement(new MGuiElementBase() {
+        setBackgroundElement(new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 if (rotation == HORIZONTAL) {
@@ -719,7 +721,7 @@ public class GuiSlideControl extends MGuiElementBase<GuiSlideControl> implements
         if (backgroundElement != null && backgroundElement.isEnabled()) {
             backgroundElement.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
-        for (MGuiElementBase element : childElements) {
+        for (GuiElement element : childElements) {
             if (element.isEnabled() && element != backgroundElement) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }

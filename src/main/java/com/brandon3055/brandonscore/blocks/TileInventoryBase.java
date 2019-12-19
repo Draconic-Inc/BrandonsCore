@@ -1,13 +1,13 @@
 package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.utils.DataUtils;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -36,7 +36,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
 
     public TileInventoryBase() {
         if (this instanceof ISidedInventory) {
-            for (EnumFacing facing : EnumFacing.values()) {
+            for (Direction facing : Direction.values()) {
                 sidedHandlers[facing.getIndex()] = new SidedInvWrapper((ISidedInventory) this, facing);
             }
         }
@@ -111,7 +111,7 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
+    public boolean isUsableByPlayer(PlayerEntity player) {
         if (world == null) {
             return false;
         }
@@ -122,12 +122,12 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public void openInventory(EntityPlayer player) {
+    public void openInventory(PlayerEntity player) {
 
     }
 
     @Override
-    public void closeInventory(EntityPlayer player) {
+    public void closeInventory(PlayerEntity player) {
 
     }
 
@@ -173,14 +173,14 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
         return new TextComponentTranslation(getName());
     }
 
-    protected void writeInventoryToNBT(NBTTagCompound compound) {
-        NBTTagList nbttaglist = new NBTTagList();
+    protected void writeInventoryToNBT(CompoundNBT compound) {
+        ListNBT nbttaglist = new ListNBT();
 
         for (int i = 0; i < inventoryStacks.size(); ++i) {
             ItemStack itemstack = inventoryStacks.get(i);
 
             if (!itemstack.isEmpty()) {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
+                CompoundNBT nbttagcompound = new CompoundNBT();
                 if (inventoryStacks.size() > 255) {
                     nbttagcompound.setShort("Slot", (short) i);
                 }
@@ -197,12 +197,12 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
         }
     }
 
-    protected void readInventoryFromNBT(NBTTagCompound compound) {
+    protected void readInventoryFromNBT(CompoundNBT compound) {
         inventoryStacks.clear();
-        NBTTagList nbttaglist = compound.getTagList("Items", 10);
+        ListNBT nbttaglist = compound.getTagList("Items", 10);
 
         for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+            CompoundNBT nbttagcompound = nbttaglist.getCompoundTagAt(i);
             int j;
             if (inventoryStacks.size() > 255) {
                 j = nbttagcompound.getShort("Slot");
@@ -218,19 +218,19 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public void writeExtraNBT(NBTTagCompound compound) {
+    public void writeExtraNBT(CompoundNBT compound) {
         super.writeExtraNBT(compound);
         writeInventoryToNBT(compound);
     }
 
     @Override
-    public void readExtraNBT(NBTTagCompound compound) {
+    public void readExtraNBT(CompoundNBT compound) {
         super.readExtraNBT(compound);
         readInventoryFromNBT(compound);
     }
 
     @Override
-    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+    public void writeToItemStack(CompoundNBT compound, boolean willHarvest) {
         super.writeToItemStack(compound, willHarvest);
         if (!isEmpty()){
             writeInventoryToNBT(compound);
@@ -238,13 +238,13 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public void readFromItemStack(NBTTagCompound compound) {
+    public void readFromItemStack(CompoundNBT compound) {
         super.readFromItemStack(compound);
         readInventoryFromNBT(compound);
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+    public boolean hasCapability(Capability<?> capability, Direction facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return true;
         }
@@ -252,14 +252,14 @@ public class TileInventoryBase extends TileBCBase implements IInventory {
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+    public <T> T getCapability(Capability<T> capability, Direction facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return getItemHandler(capability, facing);
         }
         return super.getCapability(capability, facing);
     }
 
-    protected <T> T getItemHandler(Capability<T> capability, EnumFacing facing) {
+    protected <T> T getItemHandler(Capability<T> capability, Direction facing) {
         if (this instanceof ISidedInventory && facing != null) { //TODO Not sure if i want to return a handler for null face?
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(sidedHandlers[facing.getIndex()]);
         }

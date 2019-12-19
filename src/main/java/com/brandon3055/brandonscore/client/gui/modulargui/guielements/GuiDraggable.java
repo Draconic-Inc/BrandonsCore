@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 
 import java.io.IOException;
 import java.util.function.Supplier;
 
-public class GuiDraggable extends MGuiElementBase<GuiDraggable> {
+public class GuiDraggable extends GuiElement<GuiDraggable> {
 
     protected int dragXOffset = 0;
     protected int dragYOffset = 0;
@@ -15,7 +15,7 @@ public class GuiDraggable extends MGuiElementBase<GuiDraggable> {
     protected PositionValidator dragZoneValidator = null;
     protected int dragBarHeight = 20;
     protected Runnable onMovedCallback = null;
-    protected PositionRestraint positionRestraint = MGuiElementBase::normalizePosition;
+    protected PositionRestraint positionRestraint = GuiElement::normalizePosition;
 
     public void setCanDrag(Supplier<Boolean> canDrag) {
         this.canDrag = canDrag;
@@ -51,7 +51,7 @@ public class GuiDraggable extends MGuiElementBase<GuiDraggable> {
     }
 
     @Override
-    public boolean mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         if (dragging) {
             int xMove = (mouseX - dragXOffset) - xPos();
             int yMove = (mouseY - dragYOffset) - yPos();
@@ -63,7 +63,7 @@ public class GuiDraggable extends MGuiElementBase<GuiDraggable> {
                 onMovedCallback.run();
             }
         }
-        return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
     }
 
     @Override

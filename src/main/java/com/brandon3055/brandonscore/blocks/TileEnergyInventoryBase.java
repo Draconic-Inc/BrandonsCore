@@ -5,8 +5,8 @@ import com.brandon3055.brandonscore.lib.EnergyHandlerWrapper;
 import com.brandon3055.brandonscore.lib.datamanager.DataFlags;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedInt;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
@@ -46,28 +46,28 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         energyStorage.setMaxExtract(extract);
     }
 
-    public int getEnergyStored(EnumFacing from) {
+    public int getEnergyStored(Direction from) {
         return energyStorage.getEnergyStored();
     }
 
-    public int getMaxEnergyStored(EnumFacing from) {
+    public int getMaxEnergyStored(Direction from) {
         return energyStorage.getMaxEnergyStored();
     }
 
-    public int extractEnergy(EnumFacing from, int maxExtract, boolean simulate) {
+    public int extractEnergy(Direction from, int maxExtract, boolean simulate) {
         return energyStorage.extractEnergy(maxExtract, simulate);
     }
 
-    public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate) {
+    public int receiveEnergy(Direction from, int maxReceive, boolean simulate) {
         return energyStorage.receiveEnergy(maxReceive, simulate);
     }
 
-    public boolean canConnectEnergy(EnumFacing from) {
+    public boolean canConnectEnergy(Direction from) {
         return true;
     }
 
     @Override
-    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+    public void writeToItemStack(CompoundNBT compound, boolean willHarvest) {
         super.writeToItemStack(compound, willHarvest);
         if (energyStorage.getEnergyStored() > 0) {
             energyStorage.writeToNBT(compound);
@@ -75,19 +75,19 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
     }
 
     @Override
-    public void readFromItemStack(NBTTagCompound compound) {
+    public void readFromItemStack(CompoundNBT compound) {
         super.readFromItemStack(compound);
         energyStorage.readFromNBT(compound);
     }
 
     @Override
-    public void writeExtraNBT(NBTTagCompound compound) {
+    public void writeExtraNBT(CompoundNBT compound) {
         super.writeExtraNBT(compound);
         energyStorage.writeToNBT(compound);
     }
 
     @Override
-    public void readExtraNBT(NBTTagCompound compound) {
+    public void readExtraNBT(CompoundNBT compound) {
         super.readExtraNBT(compound);
         energyStorage.readFromNBT(compound);
     }
@@ -105,13 +105,13 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
             return 0;
         }
         int i = 0;
-        for (EnumFacing direction : EnumFacing.VALUES) {
+        for (Direction direction : Direction.VALUES) {
             i += sendEnergyTo(direction);
         }
         return i;
     }
 
-    public int sendEnergyTo(EnumFacing side) {
+    public int sendEnergyTo(Direction side) {
 //        if (getEnergyStored() == 0) {
 //            return 0;
 //        }
@@ -122,7 +122,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
         return 0;
     }
 
-    public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, EnumFacing side) {
+    public static int sendEnergyTo(IBlockAccess world, BlockPos pos, int maxSend, Direction side) {
 //        TileEntity tile = world.getTileEntity(pos.offset(side));
 //        if (tile != null && EnergyUtils.canReceiveEnergy(tile, side.getOpposite())) {
 //            return EnergyUtils.insertEnergy(tile, maxSend, side.getOpposite(), false);
@@ -132,7 +132,7 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
 
     public static int sendEnergyToAll(IBlockAccess world, BlockPos pos, int maxSend) {
         int i = 0;
-        for (EnumFacing direction : EnumFacing.VALUES) {
+        for (Direction direction : Direction.VALUES) {
             i += sendEnergyTo(world, pos, maxSend - i, direction);
         }
         return i;
@@ -148,12 +148,12 @@ public class TileEnergyInventoryBase extends TileInventoryBase {
     //region Capability
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+    public boolean hasCapability(Capability<?> capability, Direction facing) {
         return capability == CapabilityEnergy.ENERGY || super.hasCapability(capability, facing);
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+    public <T> T getCapability(Capability<T> capability, Direction facing) {
         if (capability == CapabilityEnergy.ENERGY) {
             return CapabilityEnergy.ENERGY.cast(new EnergyHandlerWrapper(this, facing));
         }

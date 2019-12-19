@@ -24,7 +24,7 @@ public class GuiHelper {
     public static final double PXL128 = 0.0078125;
     public static final double PXL256 = 0.00390625;
 
-    public static boolean isInRect(int x, int y, int xSize, int ySize, int mouseX, int mouseY) {
+    public static boolean isInRect(int x, int y, int xSize, int ySize, double mouseX, double mouseY) {
         return ((mouseX >= x && mouseX < x + xSize) && (mouseY >= y && mouseY < y + ySize));
     }
 
@@ -235,7 +235,7 @@ public class GuiHelper {
             list.add(InfoHelper.ITC() + I18n.translateToLocal("gui.de.energyStorage.txt"));
             list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
             list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
-            drawHoveringText(list, mouseX, mouseY, Minecraft.getMinecraft().fontRenderer, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+            drawHoveringText(list, mouseX, mouseY, Minecraft.getInstance().fontRenderer, Minecraft.getInstance().displayWidth, Minecraft.getInstance().displayHeight);
         }
     }
 

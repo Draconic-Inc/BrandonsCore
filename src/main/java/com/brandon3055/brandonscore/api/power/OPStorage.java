@@ -5,9 +5,9 @@ import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.lib.IValueHashable;
 import com.brandon3055.brandonscore.lib.IMCDataSerializable;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NumberNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  * When implementing this capability cap should be provided as both {@link net.minecraftforge.energy.CapabilityEnergy#ENERGY} and {@link CapabilityOP#OP}
  * So any mod that implements FE will find the FE cap and interact with it normally. However any mod that implements OP will fist check for the OP cap before falling back to RF.
  */
-public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable {
+public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable {
 
     protected long energy;
     protected long capacity;
@@ -201,8 +201,8 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound compound = new NBTTagCompound();
+    public CompoundNBT serializeNBT() {
+        CompoundNBT compound = new CompoundNBT();
         smartWrite("energy", energy, compound);
 //        smartWrite("capacity", capacity, compound);  On second thought i think its better if the tile has full control over this.
 //        smartWrite("max_receive", maxReceive, compound);
@@ -211,26 +211,26 @@ public class OPStorage implements IOPStorage, INBTSerializable<NBTTagCompound>, 
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundNBT nbt) {
         energy = smartRead("energy", nbt);
 //        capacity = smartRead("capacity", nbt);
 //        maxReceive = smartRead("max_receive", nbt);
 //        maxExtract = smartRead("max_extract", nbt);
     }
 
-    private void smartWrite(String name, long value, NBTTagCompound compound) {
+    private void smartWrite(String name, long value, CompoundNBT compound) {
         if (value > Integer.MAX_VALUE) {
-            compound.setLong(name, value);
+            compound.putLong(name, value);
         }
         else {
-            compound.setInteger(name, (int) value);
+            compound.putInt(name, (int) value);
         }
     }
 
-    private long smartRead(String name, NBTTagCompound compound) {
-        NBTBase tag = compound.getTag(name);
-        if (tag instanceof NBTPrimitive) {
-            return ((NBTPrimitive) tag).getLong();
+    private long smartRead(String name, CompoundNBT compound) {
+        INBT tag = compound.get(name);
+        if (tag instanceof NumberNBT) {
+            return ((NumberNBT) tag).getLong();
         }
         return 0;
     }

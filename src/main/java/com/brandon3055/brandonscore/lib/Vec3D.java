@@ -4,12 +4,12 @@ import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-import static net.minecraft.util.EnumFacing.Axis.X;
-import static net.minecraft.util.EnumFacing.Axis.Y;
+import static net.minecraft.util.Direction.Axis.X;
+import static net.minecraft.util.Direction.Axis.Y;
 
 /**
  * Created by brandon3055 on 9/4/2016.
@@ -163,7 +163,7 @@ public class Vec3D {
         return ((int) y + (int) z * 31) * 31 + (int) x;
     }
 
-    public Vec3D offset(EnumFacing direction, double offsetDistance) {
+    public Vec3D offset(Direction direction, double offsetDistance) {
         this.x += direction.getFrontOffsetX() * offsetDistance;
         this.y += direction.getFrontOffsetY() * offsetDistance;
         this.z += direction.getFrontOffsetZ() * offsetDistance;
@@ -177,7 +177,7 @@ public class Vec3D {
         return this;
     }
 
-    public Vec3D radialOffset(EnumFacing.Axis axis, double sin, double cos, double offsetAmount) {
+    public Vec3D radialOffset(Direction.Axis axis, double sin, double cos, double offsetAmount) {
         x += ((axis == X ? 0 : axis == Y ? sin : sin) * offsetAmount);
         y += ((axis == X ? sin : axis == Y ? 0 : cos) * offsetAmount);
         z += ((axis == X ? cos : axis == Y ? cos : 0) * offsetAmount);

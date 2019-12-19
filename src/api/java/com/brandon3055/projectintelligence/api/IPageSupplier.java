@@ -1,6 +1,6 @@
 package com.brandon3055.projectintelligence.api;
 
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.util.Collection;
 
@@ -13,7 +13,7 @@ import java.util.Collection;
  * This can be used if for example you register your base GUI class and need to define what pages
  * apply to each instance of that class.
  */
-public interface IPageSupplier<T extends GuiScreen> {
+public interface IPageSupplier<T extends Screen> {
 
     /**
      * Use this to provide a collection of one or more documentation page URIs for the current gui screen instance.

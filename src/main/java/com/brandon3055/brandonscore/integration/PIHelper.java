@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.integration;
 
 import com.brandon3055.projectintelligence.api.PiAPI;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
@@ -30,7 +30,7 @@ public class PIHelper {
     }
 
     @Optional.Method(modid = "projectintelligence")
-    public static void openGui(@Nullable GuiScreen parentScreen, List<String> pageURIs) {
+    public static void openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
         PiAPI.openGui(parentScreen, pageURIs);
     }
 

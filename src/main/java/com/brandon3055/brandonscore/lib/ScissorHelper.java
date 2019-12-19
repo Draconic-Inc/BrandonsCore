@@ -22,7 +22,7 @@ public class ScissorHelper {
     }
 
     public static void pushScissor(int x, int y, int width, int height) {
-        pushScissor(Minecraft.getMinecraft(), x, y, width, height);
+        pushScissor(Minecraft.getInstance(), x, y, width, height);
     }
 
     public static void pushScissor(Minecraft mc, int x, int y, int width, int height) {
@@ -63,7 +63,7 @@ public class ScissorHelper {
             this.y = Math.max(prevState.y, y);
             this.xMax = Math.min(prevState.xMax, xMax);
             this.yMax = Math.min(prevState.yMax, yMax);
-            Minecraft mc = Minecraft.getMinecraft();
+            Minecraft mc = Minecraft.getInstance();
             if (this.x < 0) this.x = 0;
             if (this.y < 0) this.y = 0;
             if (this.xMax > mc.displayWidth) this.xMax = mc.displayWidth;

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui;
 
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
@@ -12,7 +12,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 
@@ -25,7 +25,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
     public BlockPos pos = new BlockPos(0, 0, 0);
     public int dimension = 0;
 
-    public GuiPlayerAccess(EntityPlayer player) {
+    public GuiPlayerAccess(PlayerEntity player) {
         super(new ContainerPlayerAccess(player));
         xSize = 220;
         ySize = 250;
@@ -43,7 +43,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         label.setAlignment(GuiAlign.LEFT);
         bg.addChild(label);
 
-        MGuiElementBase accessSlots = buildSlotElement(bg);
+        GuiElement accessSlots = buildSlotElement(bg);
         accessSlots.setPos(bg.xPos() + (bg.xSize() / 2) - (accessSlots.xSize() / 2), label.maxYPos() + 2);
         LogHelperBC.dev((accessSlots.xPos() - guiLeft)+" "+(accessSlots.yPos() - guiTop));
 
@@ -58,14 +58,14 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         tpToPlayer.setVanillaButtonRender(true);
         tpToPlayer.setSize(accessSlots.xSize(), 14);
         tpToPlayer.setPos(accessSlots.xPos(), posLabel.maxYPos() + 3);
-        tpToPlayer.setListener(() -> PacketDispatcher.sendPlayerAccessButton(0));
+        tpToPlayer.onPressed(() -> PacketDispatcher.sendPlayerAccessButton(0));
         bg.addChild(tpToPlayer);
 
         GuiButton tpPlayerToYou = new GuiButton("Teleport player to your position");
         tpPlayerToYou.setVanillaButtonRender(true);
         tpPlayerToYou.setSize(accessSlots.xSize(), 14);
         tpPlayerToYou.setPos(accessSlots.xPos(), tpToPlayer.maxYPos() + 3);
-        tpPlayerToYou.setListener(() -> PacketDispatcher.sendPlayerAccessButton(1));
+        tpPlayerToYou.onPressed(() -> PacketDispatcher.sendPlayerAccessButton(1));
         bg.addChild(tpPlayerToYou);
 
         GuiButton clearInventory = new GuiButton("C").setTrim(false);
@@ -73,7 +73,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         clearInventory.setVanillaButtonRender(true);
         clearInventory.setSize(18, 18);
         clearInventory.setPos(accessSlots.maxXPos() - 18, accessSlots.yPos());
-        clearInventory.setListener(() -> {
+        clearInventory.onPressed(() -> {
             GuiPopupDialogs.createDialog(clearInventory, GuiPopupDialogs.DialogType.OK_CANCEL_OPTION, TextFormatting.RED + "Are you sure you want to clear " + name + "'s Inventory?\nThis cannot be undone!") //
             .setOkListener((guiButton, pressed) -> PacketDispatcher.sendPlayerAccessButton(2)) //
             .showCenter();
@@ -87,13 +87,13 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         label2.setAlignment(GuiAlign.LEFT);
         bg.addChild(label2);
 
-        MGuiElementBase playerSlots = buildSlotElement(bg);
+        GuiElement playerSlots = buildSlotElement(bg);
         playerSlots.setPos(bg.xPos() + (bg.xSize() / 2) - (playerSlots.xSize() / 2), label2.maxYPos() + 2);
         LogHelperBC.dev((playerSlots.xPos() - guiLeft)+" "+(playerSlots.yPos() - guiTop));
     }
 
-    private MGuiElementBase buildSlotElement(MGuiElementBase bg) {
-        MGuiElementBase slotsElement = new MGuiElementBase();
+    private GuiElement buildSlotElement(GuiElement bg) {
+        GuiElement slotsElement = new GuiElement();
         bg.addChild(slotsElement);
 
         for (int i = 0; i < 4; i++) {

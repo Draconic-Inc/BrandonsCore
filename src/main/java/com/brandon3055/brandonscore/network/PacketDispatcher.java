@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.network;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 import static com.brandon3055.brandonscore.BrandonsCore.NET_CHANNEL;
 
@@ -26,27 +26,27 @@ public class PacketDispatcher {
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
     public static final int S_TILE_DATA_MANAGER = 3;
 
-    public static void sendConfigToClient(EntityPlayerMP player) {
+    public static void sendConfigToClient(ServerPlayerEntity player) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_SERVER_CONFIG_SYNC);
         ModConfigParser.writeConfigForSync(packet);
         packet.sendToPlayer(player);
         LogHelperBC.dev("Sending Config To Client: " + player);
     }
 
-    public static void sendNoClip(EntityPlayerMP player, boolean enabled) {
+    public static void sendNoClip(ServerPlayerEntity player, boolean enabled) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_SERVER_CONFIG_SYNC);
         packet.writeBoolean(enabled);
         packet.sendToPlayer(player);
         LogHelperBC.dev("Sending NoClip update to player: " + player + " Enabled: " + enabled);
     }
 
-    public static void sendOpenPlayerAccessUI(EntityPlayerMP player, int windowID) {
+    public static void sendOpenPlayerAccessUI(ServerPlayerEntity player, int windowID) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PLAYER_ACCESS);
         packet.writeInt(windowID);
         packet.sendToPlayer(player);
     }
 
-    public static void sendPlayerAccessUIUpdate(EntityPlayerMP player, EntityPlayer target) {
+    public static void sendPlayerAccessUIUpdate(ServerPlayerEntity player, PlayerEntity target) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PLAYER_ACCESS_UPDATE);
         packet.writeString(target.getName());
         packet.writePos(target.getPosition());
@@ -60,7 +60,7 @@ public class PacketDispatcher {
         packet.sendToServer();
     }
 
-    public static void sendIndexedLocalizedChat(EntityPlayerMP player, String unlocalizedText, int index) {
+    public static void sendIndexedLocalizedChat(ServerPlayerEntity player, String unlocalizedText, int index) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_INDEXED_LOCALIZED_CHAT);
         packet.writeString(unlocalizedText);
         packet.writeInt(index);

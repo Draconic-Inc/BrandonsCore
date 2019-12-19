@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client;
 
-import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.BCConfigOld;
 import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.util.ResourceLocation;
 
@@ -18,6 +18,6 @@ public class BCTextures {
     public static final ResourceLocation WIDGETS_GENERIC = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/generic/widgets_generic.png");
 
     public static ResourceLocation widgets() {
-        return BCConfig.darkMode ? WIDGETS_DARK : WIDGETS_LIGHT;
+        return BCConfigOld.darkMode ? WIDGETS_DARK : WIDGETS_LIGHT;
     }
 }

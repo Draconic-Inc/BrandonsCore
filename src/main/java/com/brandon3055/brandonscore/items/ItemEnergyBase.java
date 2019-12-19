@@ -9,7 +9,7 @@ import com.brandon3055.brandonscore.utils.MathUtils;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -159,7 +159,7 @@ public class ItemEnergyBase extends ItemBCore {
     //region Capabilities
 
     @Override
-    public ICapabilityProvider initCapabilities(final ItemStack stack, NBTTagCompound nbt) {
+    public ICapabilityProvider initCapabilities(final ItemStack stack, CompoundNBT nbt) {
         return new OPMultiProvider(new OPStorageItem(stack), null);
     }
 

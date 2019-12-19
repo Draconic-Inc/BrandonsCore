@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
@@ -10,7 +10,7 @@ import net.minecraft.util.ResourceLocation;
  * See the Draconic Reactor gui for an example of this in use.
  * Simply allows you to define a texture for a "pointer" that moves between min pos and max pos.
  */
-public class GuiTexturedPointer extends MGuiElementBase<GuiTexturedPointer> {
+public class GuiTexturedPointer extends GuiElement<GuiTexturedPointer> {
 
     private int texPosX;
     private int texPosY;

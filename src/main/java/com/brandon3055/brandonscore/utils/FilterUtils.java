@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.utils;
 
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 
 import javax.annotation.Nullable;
 
@@ -15,7 +15,7 @@ public class FilterUtils {
     {
         public boolean apply(@Nullable Entity entity)
         {
-            return entity instanceof EntityPlayer && entity.isEntityAlive();
+            return entity instanceof PlayerEntity && entity.isEntityAlive();
         }
     };
 

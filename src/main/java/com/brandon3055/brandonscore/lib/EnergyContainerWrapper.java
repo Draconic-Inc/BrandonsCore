@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.lib;
 
 import cofh.redstoneflux.api.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -73,12 +73,12 @@ public class EnergyContainerWrapper implements IEnergyStorage, ICapabilityProvid
     //region ICapabilityProvider
 
     @Override
-    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+    public boolean hasCapability(Capability<?> capability, @Nullable Direction facing) {
         return capability == CapabilityEnergy.ENERGY;
     }
 
     @Override
-    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+    public <T> T getCapability(Capability<T> capability, @Nullable Direction facing) {
         if (capability == CapabilityEnergy.ENERGY) {
             return CapabilityEnergy.ENERGY.cast(this);
         }

@@ -4,8 +4,8 @@ import codechicken.lib.inventory.InventorySimple;
 import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
@@ -30,21 +30,21 @@ import static net.minecraft.util.text.TextFormatting.WHITE;
 public class ContainerPlayerAccess extends Container {
 
     private static final EntityEquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EntityEquipmentSlot[] {HEAD, CHEST, LEGS, FEET};
-    public EntityPlayer player;
-    public EntityPlayer playerAccess;
+    public PlayerEntity player;
+    public PlayerEntity playerAccess;
     private IInventory targetInventory;
     private MinecraftServer server;
     private int tick = 0;
 
     //Client Side Constructor
-    public ContainerPlayerAccess(EntityPlayer player) {
+    public ContainerPlayerAccess(PlayerEntity player) {
         this.player = player;
         playerAccess = null;
         targetInventory = new InventorySimple(41);
         layoutSlots();
     }
 
-    public ContainerPlayerAccess(EntityPlayer player, EntityPlayer playerAccess, MinecraftServer server) {
+    public ContainerPlayerAccess(PlayerEntity player, PlayerEntity playerAccess, MinecraftServer server) {
         this.player = player;
         this.playerAccess = playerAccess;
         targetInventory = playerAccess.inventory;
@@ -71,8 +71,8 @@ public class ContainerPlayerAccess extends Container {
             }
         }
 
-        if (tick++ % 10 == 0 && player instanceof EntityPlayerMP && playerAccess != null) {
-            PacketDispatcher.sendPlayerAccessUIUpdate((EntityPlayerMP) player, playerAccess);
+        if (tick++ % 10 == 0 && player instanceof ServerPlayerEntity && playerAccess != null) {
+            PacketDispatcher.sendPlayerAccessUIUpdate((ServerPlayerEntity) player, playerAccess);
         }
 
         super.detectAndSendChanges();
@@ -118,20 +118,20 @@ public class ContainerPlayerAccess extends Container {
     }
 
     @Override
-    public boolean canInteractWith(EntityPlayer playerIn) {
+    public boolean canInteractWith(PlayerEntity playerIn) {
         return true;
     }
 
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
         return ItemStack.EMPTY;
     }
 
     private static class ArmorSlot extends Slot {
         private final EntityEquipmentSlot eSlot;
-        private final EntityPlayer aPlayer;
+        private final PlayerEntity aPlayer;
 
-        public ArmorSlot(IInventory inventoryIn, int index, int xPosition, int yPosition, EntityEquipmentSlot eSlot, EntityPlayer aPlayer) {
+        public ArmorSlot(IInventory inventoryIn, int index, int xPosition, int yPosition, EntityEquipmentSlot eSlot, PlayerEntity aPlayer) {
             super(inventoryIn, index, xPosition, yPosition);
             this.eSlot = eSlot;
             this.aPlayer = aPlayer;
@@ -145,7 +145,7 @@ public class ContainerPlayerAccess extends Container {
         {
             return true;//stack.getItem().isValidArmor(stack, eSlot, aPlayer);
         }
-        public boolean canTakeStack(EntityPlayer playerIn)
+        public boolean canTakeStack(PlayerEntity playerIn)
         {
             ItemStack itemstack = this.getStack();
             return (itemstack.isEmpty() || playerIn.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.canTakeStack(playerIn);

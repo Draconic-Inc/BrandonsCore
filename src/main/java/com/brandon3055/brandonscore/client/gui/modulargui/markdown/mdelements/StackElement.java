@@ -147,7 +147,7 @@ public class StackElement extends MDElementBase<StackElement> {
     }
 
     @Override
-    protected boolean keyTyped(char typedChar, int keyCode) throws IOException {
+    protected boolean keyPressed(char typedChar, int keyCode) throws IOException {
         int mouseX = Mouse.getX() * screenWidth / this.mc.displayWidth;
         int mouseY = screenHeight - Mouse.getY() * screenHeight / this.mc.displayHeight - 1;
 
@@ -170,6 +170,6 @@ public class StackElement extends MDElementBase<StackElement> {
             }
         }
 
-        return super.keyTyped(typedChar, keyCode);
+        return super.keyPressed(typedChar, keyCode);
     }
 }

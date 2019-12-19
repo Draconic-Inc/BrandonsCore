@@ -1,6 +1,6 @@
 //package com.brandon3055.brandonscore.api.power;
 //
-//import net.minecraft.util.EnumFacing;
+//import net.minecraft.util.Direction;
 //
 ///**
 // * Created by brandon3055 on 9/7/19.
@@ -14,5 +14,5 @@
 //     * @param simulate   If true, the charge will only be simulated.
 //     * @return Amount of energy that was (or would have been, if simulated) received.
 //     */
-//    long receiveOP(EnumFacing from, long maxReceive, PowerDensity density, boolean simulate);
+//    long receiveOP(Direction from, long maxReceive, PowerDensity density, boolean simulate);
 //}

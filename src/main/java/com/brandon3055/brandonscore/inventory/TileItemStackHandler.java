@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.inventory;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemStackHandler;
@@ -78,26 +78,26 @@ public class TileItemStackHandler extends ItemStackHandler {
 
     //I dont want this handler's size to be controlled by NBT
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagList nbtTagList = new NBTTagList();
+    public CompoundNBT serializeNBT() {
+        ListNBT nbtTagList = new ListNBT();
         for (int i = 0; i < stacks.size(); i++) {
             if (!stacks.get(i).isEmpty()) {
-                NBTTagCompound itemTag = new NBTTagCompound();
+                CompoundNBT itemTag = new CompoundNBT();
                 itemTag.setInteger("Slot", i);
                 stacks.get(i).writeToNBT(itemTag);
                 nbtTagList.appendTag(itemTag);
             }
         }
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundNBT nbt = new CompoundNBT();
         nbt.setTag("Items", nbtTagList);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
-        NBTTagList tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
+    public void deserializeNBT(CompoundNBT nbt) {
+        ListNBT tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < tagList.tagCount(); i++) {
-            NBTTagCompound itemTags = tagList.getCompoundTagAt(i);
+            CompoundNBT itemTags = tagList.getCompoundTagAt(i);
             int slot = itemTags.getInteger("Slot");
 
             if (slot >= 0 && slot < stacks.size()) {

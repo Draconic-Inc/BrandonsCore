@@ -11,13 +11,13 @@ import com.brandon3055.brandonscore.lib.datamanager.TileDataManager;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -68,7 +68,7 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
     @Nullable
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound compound = new NBTTagCompound();
+        CompoundNBT compound = new CompoundNBT();
         dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
         return new SPacketUpdateTileEntity(this.pos, 0, compound);
@@ -76,8 +76,8 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
 
     //Used when initially sending chunks to the client... I think
     @Override
-    public NBTTagCompound getUpdateTag() {
-        NBTTagCompound compound = super.getUpdateTag();
+    public CompoundNBT getUpdateTag() {
+        CompoundNBT compound = super.getUpdateTag();
         dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
         return compound;
@@ -107,7 +107,7 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
     /**
      * Override this method to receive data from the server via sendPacketToServer
      */
-    public void receivePacketFromClient(MCDataInput data, EntityPlayerMP client, int id) {}
+    public void receivePacketFromClient(MCDataInput data, ServerPlayerEntity client, int id) {}
 
 
     /**
@@ -121,7 +121,7 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
         return packet;
     }
 
-    public void sendPacketToClient(EntityPlayerMP player, Consumer<MCDataOutput> writer, int id) {
+    public void sendPacketToClient(ServerPlayerEntity player, Consumer<MCDataOutput> writer, int id) {
         sendPacketToClient(writer, id).sendToPlayer(player);
     }
 
@@ -184,8 +184,8 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
      */
     @Deprecated
     //Just a reminder that i nolonger need to do this in the tile because its handled via the packet handler.
-    public boolean verifyPlayerPermission(EntityPlayer player) {
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, EnumFacing.UP, player.getLookVec());
+    public boolean verifyPlayerPermission(PlayerEntity player) {
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, EnumHand.MAIN_HAND, pos, Direction.UP, player.getLookVec());
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }
@@ -203,7 +203,7 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
      * @return the tile data compound so that tiles that override this method can easily write extra data to it.
      */
     @Override
-    public void writeToItemStack(NBTTagCompound compound, boolean willHarvest) {
+    public void writeToItemStack(CompoundNBT compound, boolean willHarvest) {
         dataManager.writeToStackNBT(compound);
     }
 
@@ -212,7 +212,7 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
      */
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void readFromItemStack(NBTTagCompound compound) {
+    public void readFromItemStack(CompoundNBT compound) {
         dataManager.readFromStackNBT(compound);
     }
 
@@ -222,12 +222,12 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
      * Note: This will not save data to the item when the block is harvested.<br>
      * For that you need to override read and writeToStack just be sure to pay attention to the doc for those.
      */
-    public void writeExtraNBT(NBTTagCompound compound) {}
+    public void writeExtraNBT(CompoundNBT compound) {}
 
-    public void readExtraNBT(NBTTagCompound compound) {}
+    public void readExtraNBT(CompoundNBT compound) {}
 
 //    @Override
-//    public final NBTTagCompound writeToNBT(NBTTagCompound compound) {
+//    public final CompoundNBT writeToNBT(CompoundNBT compound) {
 //        super.writeToNBT(compound);
 //
 //        dataManager.writeToNBT(compound);
@@ -237,7 +237,7 @@ public class TileBCBase extends TileBCore implements IDataManagerProvider, IData
 //    }
 //
 //    @Override
-//    public final void readFromNBT(NBTTagCompound compound) {
+//    public final void readFromNBT(CompoundNBT compound) {
 //        super.readFromNBT(compound);
 //
 //        dataManager.readFromNBT(compound);

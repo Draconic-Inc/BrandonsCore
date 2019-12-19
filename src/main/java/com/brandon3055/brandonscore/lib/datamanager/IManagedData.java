@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 /**
  * Created by brandon3055 on 12/06/2017.
@@ -49,12 +49,12 @@ public interface IManagedData {
      * The data manager should create a dedicated compound to save all data to so
      * so you should not have to worry about the tag mame conflicting with some other random tag on the tile/item etc
      */
-    void toNBT(NBTTagCompound compound);
+    void toNBT(CompoundNBT compound);
 
     /**
      * Load this data from nbt.
      */
-    void fromNBT(NBTTagCompound compound);
+    void fromNBT(CompoundNBT compound);
 
     /**
      * Marks this data as 'dirty' meaning it needs to be saved/synchronized

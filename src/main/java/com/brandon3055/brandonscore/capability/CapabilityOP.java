@@ -2,9 +2,9 @@ package com.brandon3055.brandonscore.capability;
 
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.OPStorage;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -24,7 +24,7 @@ public class CapabilityOP {
     public static void register() {
         CapabilityManager.INSTANCE.register(IOPStorage.class, new Capability.IStorage<IOPStorage>() {
             @Override
-            public NBTBase writeNBT(Capability<IOPStorage> capability, IOPStorage instance, EnumFacing side) {
+            public INBT writeNBT(Capability<IOPStorage> capability, IOPStorage instance, Direction side) {
                 if (instance instanceof OPStorage) {
                     return ((INBTSerializable) instance).serializeNBT();
                 }
@@ -34,9 +34,9 @@ public class CapabilityOP {
             }
 
             @Override
-            public void readNBT(Capability<IOPStorage> capability, IOPStorage instance, EnumFacing side, NBTBase nbt) {
+            public void readNBT(Capability<IOPStorage> capability, IOPStorage instance, Direction side, INBT nbt) {
                 if (instance instanceof OPStorage) {
-                    ((OPStorage) instance).deserializeNBT((NBTTagCompound) nbt);
+                    ((OPStorage) instance).deserializeNBT((CompoundNBT) nbt);
                 }
                 else {
                     throw new IllegalArgumentException("Can not serialize to an instance that isn't the default implementation");

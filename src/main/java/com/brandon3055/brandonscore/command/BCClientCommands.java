@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.command;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.gui.config.GuiIncompatibleConfig;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiToolkitTest;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
@@ -16,10 +17,10 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
@@ -64,7 +65,7 @@ public class BCClientCommands extends CommandBase {
     }
 
     @Override
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(ICommandSource sender) {
         return "/bcore_client help";
     }
 
@@ -74,8 +75,8 @@ public class BCClientCommands extends CommandBase {
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        sender = Minecraft.getMinecraft().player;
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
+        sender = Minecraft.getInstance().player;
         if (args.length == 0) {
             help(sender);
             return;
@@ -91,7 +92,10 @@ public class BCClientCommands extends CommandBase {
                 functionNBT(server, sender, args);
             }
             else if (function.equals("testui")) {
-                DelayedTask.run(10, () -> Minecraft.getMinecraft().displayGuiScreen(new ModularGuiTest()));
+                DelayedTask.run(10, () -> Minecraft.getInstance().displayGuiScreen(new ModularGuiTest()));
+            }
+            else if (function.equals("testui2")) {
+                DelayedTask.run(10, () -> Minecraft.getInstance().displayGuiScreen(new GuiToolkitTest()));
             }
             else if (function.equals("profiler")) {
                 BCProfiler.enableProfiler = !BCProfiler.enableProfiler;
@@ -109,7 +113,7 @@ public class BCClientCommands extends CommandBase {
                 BCEffectHandler.effectRenderer.clear();
             }
             else {
-//                help(sender);
+                help(sender);
             }
 
         }
@@ -120,7 +124,7 @@ public class BCClientCommands extends CommandBase {
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, @Nullable BlockPos targetPos) {
         if (args.length == 2 && args[0].equals("set_ui_size")) {
             return getListOfStringsMatchingLastWord(args, RESOLUTIONS.keySet());
         }
@@ -128,24 +132,28 @@ public class BCClientCommands extends CommandBase {
         return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale", "clear_fx", "set_ui_size");
     }
 
-    private void help(ICommandSender sender) {
-        ChatHelper.message(sender, "NO!", TextFormatting.RED);
-//        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
+    private void help(ICommandSource sender) {
+//        ChatHelper.message(sender, "NO!", TextFormatting.RED);
+        ChatHelper.message(sender, "/bcore_client nbt", TextFormatting.BLUE);
 //        ChatHelper.message(sender, "-", TextFormatting.GRAY);
-//        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
+        ChatHelper.message(sender, "/bcore_client dump_event_listeners", TextFormatting.BLUE);
 //        ChatHelper.message(sender, "-", TextFormatting.GRAY);
-//        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
+        ChatHelper.message(sender, "/bcore_client set_ui_scale", TextFormatting.BLUE);
+//        ChatHelper.message(sender, "-", TextFormatting.GRAY);
+        ChatHelper.message(sender, "/bcore_client set_ui_size", TextFormatting.BLUE);
+//        ChatHelper.message(sender, "-", TextFormatting.GRAY);
+        ChatHelper.message(sender, "/bcore_client clear_fx", TextFormatting.BLUE);
 //        ChatHelper.message(sender, "-", TextFormatting.GRAY);
     }
 
-    private void configSync(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void configSync(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         if (!ModConfigParser.propsRequireRestart.isEmpty()) {
-            Minecraft.getMinecraft().displayGuiScreen(new GuiIncompatibleConfig(ModConfigParser.propsRequireRestart));
+            Minecraft.getInstance().displayGuiScreen(new GuiIncompatibleConfig(ModConfigParser.propsRequireRestart));
         }
     }
 
-    private void functionNBT(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayer player = (EntityPlayer) sender;
+    private void functionNBT(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
+        PlayerEntity player = (PlayerEntity) sender;
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException("You are not holding an item!");
@@ -154,7 +162,7 @@ public class BCClientCommands extends CommandBase {
             throw new CommandException("That stack has no NBT tag!");
         }
 
-        NBTTagCompound compound = stack.getTagCompound();
+        CompoundNBT compound = stack.getTagCompound();
         LogHelperBC.logNBT(compound);
 
         String s = compound + "";
@@ -179,19 +187,19 @@ public class BCClientCommands extends CommandBase {
         }
     }
 
-    private void setUiScale(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void setUiScale(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         if (args.length < 2) {
             sender.sendMessage(new TextComponentString("Usage: /bcore_client set_ui_scale <0 to 8>"));
             return;
         }
 
-        Minecraft.getMinecraft().gameSettings.guiScale = parseInt(args[1], 0, 8);
-        Minecraft.getMinecraft().gameSettings.saveOptions();
+        Minecraft.getInstance().gameSettings.guiScale = parseInt(args[1], 0, 8);
+        Minecraft.getInstance().gameSettings.saveOptions();
         sender.sendMessage(new TextComponentString("Gui Scale Updated!"));
     }
 
     //Sometimes i just have too much free time on my hands xD
-    private void setUISize(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void setUISize(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         if ((args.length > 3 || args.length < 2) && !RESOLUTIONS.containsKey(args[1])) {
             sender.sendMessage(new TextComponentString("Usage: /set_ui_size (<width> <height> or <res name>)"));
             return;
@@ -210,7 +218,7 @@ public class BCClientCommands extends CommandBase {
         }
 
 
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         mc.resize(width, height);
         try {
             Display.setDisplayMode(new DisplayMode(mc.displayWidth, mc.displayHeight));

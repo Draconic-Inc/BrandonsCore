@@ -23,7 +23,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 //    }
 //
 //    @Override
-//    public void detectAndSendChanges(TileBCBase tile, EntityPlayer player, boolean forceSync) {
+//    public void detectAndSendChanges(TileBCBase tile, PlayerEntity player, boolean forceSync) {
 //        for (int i = 0; i < bytes.length; i++) {
 //            if (bytes[i] != lastTickBytes[i] || forceSync) {
 //                lastTickBytes[i] = bytes[i];
@@ -31,8 +31,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 //                if (player == null) {
 //                    BrandonsCore.network.sendToAllAround(new PacketSyncableObject(tile, index, bytes[i], (byte) i, updateOnReceived), tile.syncRange());
 //                }
-//                else if (player instanceof EntityPlayerMP) {
-//                    BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, bytes[i], (byte) i, updateOnReceived), (EntityPlayerMP) player);
+//                else if (player instanceof ServerPlayerEntity) {
+//                    BrandonsCore.network.sendTo(new PacketSyncableObject(tile, index, bytes[i], (byte) i, updateOnReceived), (ServerPlayerEntity) player);
 //                }
 //
 //                reCache();
@@ -54,12 +54,12 @@ package com.brandon3055.brandonscore.lib.datamanager;
 //    }
 //
 //    @Override
-//    public void toNBT(NBTTagCompound compound) {
+//    public void toNBT(CompoundNBT compound) {
 //        compound.setByteArray("SyncableBoolArray" + index, bytes);
 //    }
 //
 //    @Override
-//    public void fromNBT(NBTTagCompound compound) {
+//    public void fromNBT(CompoundNBT compound) {
 //        if (compound.hasKey("SyncableBoolArray" + index)) {
 //            bytes = compound.getByteArray("SyncableBoolArray" + index);
 //        }

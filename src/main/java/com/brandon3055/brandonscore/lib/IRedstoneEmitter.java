@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
 /**
  * Created by brandon3055 on 21/10/2016.
@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
  */
 public interface IRedstoneEmitter {
 
-    int getWeakPower(IBlockState blockState, EnumFacing side);
+    int getWeakPower(IBlockState blockState, Direction side);
 
-    int getStrongPower(IBlockState blockState, EnumFacing side);
+    int getStrongPower(IBlockState blockState, Direction side);
 }

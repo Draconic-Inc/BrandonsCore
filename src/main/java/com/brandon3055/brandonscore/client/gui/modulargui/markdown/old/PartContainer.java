@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
 import codechicken.lib.math.MathHelper;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
@@ -34,7 +34,7 @@ import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
  * manages the individual part represented by the line of markdown.
  * An "part" refers to a line of text, a link, an image, an entity renderer or a stack renderer.
  */
-public class PartContainer extends MGuiElementBase<PartContainer> {
+public class PartContainer extends GuiElement<PartContainer> {
     private static final Pattern leftPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "align:left)");
     private static final Pattern centrePat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "align:center)");
     private static final Pattern rightPat = Pattern.compile("(?<=[^\\\\]|^)(" + Utils.SELECT + "align:right)");

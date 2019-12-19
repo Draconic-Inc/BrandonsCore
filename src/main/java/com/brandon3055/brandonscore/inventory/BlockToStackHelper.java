@@ -4,7 +4,7 @@ import codechicken.lib.inventory.InventoryUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -31,7 +31,7 @@ public class BlockToStackHelper {
         return breakAndCollectWithPlayer(world, pos, null, xp);
     }
 
-    public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, EntityPlayer player, int xp) {
+    public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, PlayerEntity player, int xp) {
         List<ItemStack> stacks = new ArrayList<ItemStack>();
 
         if (!(world instanceof WorldServer)) {
@@ -61,7 +61,7 @@ public class BlockToStackHelper {
         breakAndCollectWithPlayer(world, pos, inventoryDynamic, null, xp);
     }
 
-    public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, EntityPlayer player, int xp) {
+    public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, PlayerEntity player, int xp) {
         List<ItemStack> stacks = breakAndCollectWithPlayer(world, pos, player, xp);
         for (ItemStack stack : stacks) {
             if (stack != null && !stack.isEmpty()){

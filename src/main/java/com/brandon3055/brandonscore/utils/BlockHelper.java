@@ -4,7 +4,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -32,8 +32,8 @@ public class BlockHelper {
         ItemStack stack;
 
         try {
-            RayTraceResult result = new RayTraceResult(RayTraceResult.Type.BLOCK, Vec3d.ZERO, EnumFacing.UP, pos);
-            stack = state.getBlock().getPickBlock(state, result, world, pos, Minecraft.getMinecraft().player);
+            RayTraceResult result = new RayTraceResult(RayTraceResult.Type.BLOCK, Vec3d.ZERO, Direction.UP, pos);
+            stack = state.getBlock().getPickBlock(state, result, world, pos, Minecraft.getInstance().player);
         }
         catch (Throwable ignored) {
             stack = state.getBlock().getItem(world, pos, state);

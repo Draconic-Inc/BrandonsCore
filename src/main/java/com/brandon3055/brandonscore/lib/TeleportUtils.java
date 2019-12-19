@@ -4,8 +4,8 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.network.play.server.SPacketRespawn;
@@ -83,16 +83,16 @@ public class TeleportUtils {
         }
 
         if (interDimensional) {
-            if (entity instanceof EntityPlayerMP) {
-                return teleportPlayerInterdimentional((EntityPlayerMP) entity, server, sourceDim, targetDim, xCoord, yCoord, zCoord, yaw, pitch);
+            if (entity instanceof ServerPlayerEntity) {
+                return teleportPlayerInterdimentional((ServerPlayerEntity) entity, server, sourceDim, targetDim, xCoord, yCoord, zCoord, yaw, pitch);
             }
             else {
                 return teleportEntityInterdimentional(entity, server, sourceDim, targetDim, xCoord, yCoord, zCoord, yaw, pitch);
             }
         }
         else {
-            if (entity instanceof EntityPlayerMP) {
-                EntityPlayerMP player = (EntityPlayerMP) entity;
+            if (entity instanceof ServerPlayerEntity) {
+                ServerPlayerEntity player = (ServerPlayerEntity) entity;
                 player.connection.setPlayerLocation(xCoord, yCoord, zCoord, yaw, pitch);
                 player.setRotationYawHead(yaw);
             }
@@ -145,7 +145,7 @@ public class TeleportUtils {
     /**
      * This is the black magic responsible for teleporting players between dimensions!
      */
-    private static EntityPlayer teleportPlayerInterdimentional(EntityPlayerMP player, MinecraftServer server, int sourceDim, int targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
+    private static PlayerEntity teleportPlayerInterdimentional(ServerPlayerEntity player, MinecraftServer server, int sourceDim, int targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
         WorldServer sourceWorld = server.getWorld(sourceDim);
         WorldServer targetWorld = server.getWorld(targetDim);
         PlayerList playerList = server.getPlayerList();
@@ -259,8 +259,8 @@ public class TeleportUtils {
          * This method sends update packets to any players that were teleported with the entity stack.
          */
         public void updateClients() {
-            if (entity instanceof EntityPlayerMP) {
-                updateClient((EntityPlayerMP) entity);
+            if (entity instanceof ServerPlayerEntity) {
+                updateClient((ServerPlayerEntity) entity);
             }
             for (PassengerHelper passenger : passengers) {
                 passenger.updateClients();
@@ -271,7 +271,7 @@ public class TeleportUtils {
          * This is the method that is responsible for actually sending the update to each client.
          * @param playerMP The Player.
          */
-        private void updateClient(EntityPlayerMP playerMP) {
+        private void updateClient(ServerPlayerEntity playerMP) {
             if (entity.isBeingRidden()) {
                 playerMP.connection.sendPacket(new SPacketSetPassengers(entity));
             }

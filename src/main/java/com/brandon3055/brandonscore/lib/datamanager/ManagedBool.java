@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -82,12 +82,12 @@ public class ManagedBool extends AbstractManagedData<Boolean> {
     }
 
     @Override
-    public void toNBT(NBTTagCompound compound) {
+    public void toNBT(CompoundNBT compound) {
         compound.setBoolean(name, value);
     }
 
     @Override
-    public void fromNBT(NBTTagCompound compound) {
+    public void fromNBT(CompoundNBT compound) {
         value = compound.getBoolean(name);
         notifyListeners(value);
     }

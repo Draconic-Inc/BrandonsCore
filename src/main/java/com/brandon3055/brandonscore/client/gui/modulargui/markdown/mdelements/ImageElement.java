@@ -6,7 +6,7 @@ import codechicken.lib.vec.Cuboid6;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.BCTextures;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
 import com.brandon3055.brandonscore.lib.DLRSCache;
@@ -15,7 +15,7 @@ import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
@@ -171,7 +171,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOver(mouseX, mouseY)) {
             if (!linkTo.isEmpty() && container.linkDisplayTarget != null) {
-                MGuiElementBase e = container.linkDisplayTarget;
+                GuiElement e = container.linkDisplayTarget;
                 int width = fontRenderer.getStringWidth(linkTo);
                 int height = fontRenderer.getWordWrappedHeight(linkTo, e.xSize()) + 4;
                 zOffset += container.linkDisplayZOffset;
@@ -203,7 +203,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         if (isMouseOver(mouseX, mouseY)) {
-            if (mouseButton == 0 && GuiScreen.isShiftKeyDown()) {
+            if (mouseButton == 0 && Screen.isShiftKeyDown()) {
                 DLRSCache.clearResourceCache(imageURL);
                 DLRSCache.clearFileCache(imageURL);
                 container.layoutMarkdownElements();

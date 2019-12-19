@@ -11,7 +11,7 @@ import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.GlStateManager;
 
 import java.util.Arrays;
@@ -139,7 +139,7 @@ public class PartBuilderImage extends IPartBuilder {
         MouseIntractable mi = new MouseIntractable() {
             @Override
             public boolean onClick(int mouseX, int mouseY, int button) {
-                if (GuiScreen.isShiftKeyDown()) {
+                if (Screen.isShiftKeyDown()) {
                     DLRSCache.clearFileCache(url);
                     return false;
                 }

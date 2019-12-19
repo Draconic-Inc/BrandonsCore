@@ -16,17 +16,17 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
@@ -76,7 +76,7 @@ public class BCUtilCommands extends CommandBase {
     }
 
     @Override
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(ICommandSource sender) {
         return "/bcore_util help";
     }
 
@@ -86,7 +86,7 @@ public class BCUtilCommands extends CommandBase {
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         if (args.length == 0) {
             help(sender);
             return;
@@ -130,7 +130,7 @@ public class BCUtilCommands extends CommandBase {
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, @Nullable BlockPos targetPos) {
         if (args.length == 2 && args[0].equals("player_access")) {
             PlayerProfileCache cache = server.getPlayerProfileCache();
             List<String> list = new ArrayList<>();
@@ -141,7 +141,7 @@ public class BCUtilCommands extends CommandBase {
         return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners", "eggify");
     }
 
-    private void help(ICommandSender sender) {
+    private void help(ICommandSource sender) {
         ChatHelper.message(sender, "The following are a list of Brandon's Core Utility Commands", new Style().setColor(TextFormatting.AQUA).setUnderlined(true));
         ChatHelper.message(sender, "/bcore_util nbt", TextFormatting.BLUE);
         ChatHelper.message(sender, "-Prints the NBT tag of the stack you are holding to chat and to the console.", TextFormatting.GRAY);
@@ -155,8 +155,8 @@ public class BCUtilCommands extends CommandBase {
 //        ChatHelper.message(sender, "-", TextFormatting.GRAY);
     }
 
-    private void functionNBT(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayer player = getCommandSenderAsPlayer(sender);
+    private void functionNBT(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
+        PlayerEntity player = getCommandSenderAsPlayer(sender);
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException("You are not holding an item!");
@@ -165,7 +165,7 @@ public class BCUtilCommands extends CommandBase {
             throw new CommandException("That stack has no NBT tag!");
         }
 
-        NBTTagCompound compound = stack.getTagCompound();
+        CompoundNBT compound = stack.getTagCompound();
         LogHelperBC.logNBT(compound);
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
@@ -173,7 +173,7 @@ public class BCUtilCommands extends CommandBase {
         DataUtils.forEach(lines, s -> ChatHelper.message(sender, s, TextFormatting.GOLD));
     }
 
-    private void regenChunk(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void regenChunk(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         int rad = 0;
         if (args.length > 1) {
             rad = parseInt(args[1]);
@@ -184,7 +184,7 @@ public class BCUtilCommands extends CommandBase {
         for (int xOffset = -rad; xOffset <= rad; xOffset++) {
             for (int yOffset = -rad; yOffset <= rad; yOffset++) {
                 WorldServer world = (WorldServer) sender.getEntityWorld();
-                EntityPlayer player = getCommandSenderAsPlayer(sender);
+                PlayerEntity player = getCommandSenderAsPlayer(sender);
                 int chunkX = (int) player.chunkCoordX + xOffset;
                 int chunkZ = (int) player.chunkCoordZ + yOffset;
 
@@ -229,9 +229,9 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
-    private void toggleNoClip(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void toggleNoClip(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         String name = sender.getName();
-        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+        ServerPlayerEntity player = getCommandSenderAsPlayer(sender);
         boolean enabled = BCEventHandler.noClipPlayers.contains(name);
 
         if (enabled) {
@@ -246,8 +246,8 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
-    private void getUUID(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+    private void getUUID(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
+        ServerPlayerEntity player = getCommandSenderAsPlayer(sender);
         if (args.length == 2) {
             player = getPlayer(server, sender, args[1]);
         }
@@ -262,7 +262,7 @@ public class BCUtilCommands extends CommandBase {
 
     //region Dump Event Handlers
 
-    public static void dumpEventListeners(ICommandSender sender) throws CommandException {
+    public static void dumpEventListeners(ICommandSource sender) throws CommandException {
         Map<String, Map<Class<?>, List<PairKV<EventPriority, Method>>>> eventListenerMap = new HashMap<>();
         dumpBus("EVENT_BUS", MinecraftForge.EVENT_BUS, eventListenerMap);
         dumpBus("ORE_GEN_BUS", MinecraftForge.ORE_GEN_BUS, eventListenerMap);
@@ -327,8 +327,8 @@ public class BCUtilCommands extends CommandBase {
 
     //endregion
 
-    private void eggify(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+    private void eggify(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
+        ServerPlayerEntity player = getCommandSenderAsPlayer(sender);
         Entity entity = traceEntity(player);
 
         if (entity == null) {
@@ -337,7 +337,7 @@ public class BCUtilCommands extends CommandBase {
         }
 
         ItemStack spawnEgg = new ItemStack(Items.SPAWN_EGG);
-        NBTTagCompound data = entity.writeToNBT(new NBTTagCompound());
+        CompoundNBT data = entity.writeToNBT(new CompoundNBT());
         data.setString("id", String.valueOf(EntityList.getKey(entity)));
         spawnEgg.setTagInfo("EntityTag", data);
 
@@ -357,7 +357,7 @@ public class BCUtilCommands extends CommandBase {
     }
 
     @Nullable
-    protected Entity traceEntity(EntityPlayer player) {
+    protected Entity traceEntity(PlayerEntity player) {
         Entity entity = null;
         List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().grow(20.0D));
         double d0 = 0.0D;
@@ -438,7 +438,7 @@ public class BCUtilCommands extends CommandBase {
 //        private void doLightingMagics() {
 //            HashSet<Chunk> lightChunks = new HashSet<>(modifiedChunks);
 //            for (Chunk chunk : modifiedChunks) {
-//                for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+//                for (Direction facing : Direction.HORIZONTALS) {
 //                    Chunk adjacent = world.getChunkFromChunkCoords(chunk.x + facing.getFrontOffsetX(), chunk.z + facing.getFrontOffsetZ());
 //                    lightChunks.add(adjacent);
 //                }
@@ -556,7 +556,7 @@ public class BCUtilCommands extends CommandBase {
 //            blockLight.put(pos, light);
 //            setBlockLight(pos, light);
 //
-//            for (EnumFacing facing : EnumFacing.values()) {
+//            for (Direction facing : Direction.values()) {
 //                BlockPos adjacent = pos.offset(facing);
 //                propagateBlockLight(adjacent, light - 1, false);
 //            }
@@ -681,7 +681,7 @@ public class BCUtilCommands extends CommandBase {
 
     //region Player Access Command
 
-    private void playerAccess(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    private void playerAccess(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
         if (args.length < 2) {
             throw new CommandException("Please specify a player or use the list option to view all known players.");
         }
@@ -718,7 +718,7 @@ public class BCUtilCommands extends CommandBase {
                 GameProfile profile = playerMap.get(uuid);
 
                 boolean online = false;
-                for (EntityPlayer player : server.getPlayerList().getPlayers()) {
+                for (PlayerEntity player : server.getPlayerList().getPlayers()) {
                     if (player.getGameProfile().getId().equals(uuid)) {
                         online = true;
                         break;
@@ -763,9 +763,9 @@ public class BCUtilCommands extends CommandBase {
         }
 
         //Access Player
-        EntityPlayerMP playerSender = getCommandSenderAsPlayer(sender);
+        ServerPlayerEntity playerSender = getCommandSenderAsPlayer(sender);
 
-        EntityPlayer targetPlayer = server.getPlayerList().getPlayerByUUID(profile.getId());
+        PlayerEntity targetPlayer = server.getPlayerList().getPlayerByUUID(profile.getId());
         //noinspection ConstantConditions
         if (targetPlayer == null) {
             File playerFile = getPlayerFile(server, target);
@@ -794,11 +794,11 @@ public class BCUtilCommands extends CommandBase {
         throw new PlayerNotFoundException("Could not find a data file for the specified player!");
     }
 
-    public static NBTTagCompound readPlayerCompound(File playerData) throws CommandException {
+    public static CompoundNBT readPlayerCompound(File playerData) throws CommandException {
         DataInputStream is = null;
         try {
             is = new DataInputStream(new GZIPInputStream(new FileInputStream(playerData)));
-            NBTTagCompound compound = CompressedStreamTools.read(is);
+            CompoundNBT compound = CompressedStreamTools.read(is);
             IOUtils.closeQuietly(is);
             return compound;
         }
@@ -811,7 +811,7 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
-    public static void writePlayerCompound(File playerFile, NBTTagCompound playerCompound) throws IOException {
+    public static void writePlayerCompound(File playerFile, CompoundNBT playerCompound) throws IOException {
         DataOutputStream os = null;
         try {
             os = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(playerFile)));
@@ -827,7 +827,7 @@ public class BCUtilCommands extends CommandBase {
         }
     }
 
-    public static void openPlayerAccessUI(MinecraftServer server, EntityPlayerMP player, EntityPlayer playerAccess) {
+    public static void openPlayerAccessUI(MinecraftServer server, ServerPlayerEntity player, PlayerEntity playerAccess) {
         player.getNextWindowId();
         player.closeContainer();
         int windowId = player.currentWindowId;
@@ -839,13 +839,13 @@ public class BCUtilCommands extends CommandBase {
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
     }
 
-    public static class OfflinePlayer extends EntityPlayer {
+    public static class OfflinePlayer extends PlayerEntity {
 
-        private final EntityPlayer accessedBy;
+        private final PlayerEntity accessedBy;
         private final File playerFile;
-        private NBTTagCompound playerCompound;
+        private CompoundNBT playerCompound;
 
-        public OfflinePlayer(EntityPlayer accessedBy, World worldIn, GameProfile gameProfileIn, File playerFile) throws CommandException {
+        public OfflinePlayer(PlayerEntity accessedBy, World worldIn, GameProfile gameProfileIn, File playerFile) throws CommandException {
             super(worldIn, gameProfileIn);
             this.accessedBy = accessedBy;
             this.playerFile = playerFile;
@@ -865,7 +865,7 @@ public class BCUtilCommands extends CommandBase {
             readFromNBT(playerCompound);
         }
 
-        public void tpTo(EntityPlayer player) {
+        public void tpTo(PlayerEntity player) {
             posX = player.posX;
             posY = player.posY;
             posZ = player.posZ;

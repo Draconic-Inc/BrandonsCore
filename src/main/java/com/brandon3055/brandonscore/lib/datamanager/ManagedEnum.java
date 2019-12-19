@@ -2,7 +2,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.NBTTagCompound;
+import codechicken.lib.math.MathHelper;
+import net.minecraft.nbt.CompoundNBT;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,18 +85,18 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
 
     @Override
     public void fromBytes(MCDataInput input) {
-        value = indexToValue.get(input.readByte() & 0xFF);
+        value = indexToValue.get(MathHelper.clip(input.readByte() & 0xFF, 0, indexToValue.size() - 1));
         notifyListeners(value);
     }
 
     @Override
-    public void toNBT(NBTTagCompound compound) {
+    public void toNBT(CompoundNBT compound) {
         compound.setByte(name, valueToIndex.get(value).byteValue());
     }
 
     @Override
-    public void fromNBT(NBTTagCompound compound) {
-        value = indexToValue.get(compound.getByte(name) & 0xFF);
+    public void fromNBT(CompoundNBT compound) {
+        value = indexToValue.get(MathHelper.clip(compound.getByte(name) & 0xFF, 0, indexToValue.size() - 1));
         notifyListeners(value);
     }
 

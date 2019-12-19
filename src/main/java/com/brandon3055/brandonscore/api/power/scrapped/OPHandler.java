@@ -1,6 +1,6 @@
 //package com.brandon3055.brandonscore.api.power;
 //
-//import net.minecraft.util.EnumFacing;
+//import net.minecraft.util.Direction;
 //
 ///**
 // * Created by brandon3055 on 9/7/19.
@@ -13,10 +13,10 @@
 //     */
 //    @Deprecated
 //    //Need a better solution for this. I really need to know the power stored AND density...
-//    long getOPStored(EnumFacing from);
+//    long getOPStored(Direction from);
 //
 //    /**
 //     * @return the maximum amount of Operational Potential that can be stored.
 //     */
-//    long getOPCapacity(EnumFacing from);
+//    long getOPCapacity(Direction from);
 //}

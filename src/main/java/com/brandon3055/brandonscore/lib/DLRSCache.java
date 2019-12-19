@@ -34,7 +34,7 @@ public class DLRSCache {
         if (!resourceCache.containsKey(url)) {
 
             DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), url);
-            TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
+            TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
 
             File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");
 

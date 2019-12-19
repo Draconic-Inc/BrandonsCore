@@ -4,12 +4,12 @@ import com.brandon3055.brandonscore.lib.IBCoreBlock;
 import com.brandon3055.brandonscore.lib.ITilePlaceListener;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -56,7 +56,7 @@ public class ItemBlockBCore extends ItemBlock {
     }
 
     @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
+    public boolean placeBlockAt(ItemStack stack, PlayerEntity player, World world, BlockPos pos, Direction side, float hitX, float hitY, float hitZ, IBlockState newState) {
         boolean placed = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
 
         TileEntity tile = world.getTileEntity(pos);
@@ -73,7 +73,7 @@ public class ItemBlockBCore extends ItemBlock {
     }
 
     @Override
-    public NBTTagCompound getNBTShareTag(ItemStack stack) {
+    public CompoundNBT getNBTShareTag(ItemStack stack) {
         if (block instanceof IBCoreBlock && ((IBCoreBlock) block).overrideShareTag()) {
             return ((IBCoreBlock) block).getNBTShareTag(stack);
         }

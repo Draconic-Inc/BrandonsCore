@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public interface IBCoreBlock {
         return false;
     }
 
-    default NBTTagCompound getNBTShareTag(ItemStack stack) {
+    default CompoundNBT getNBTShareTag(ItemStack stack) {
         return stack.getTagCompound();
     }
 }

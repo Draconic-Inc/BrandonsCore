@@ -6,7 +6,7 @@ import cofh.redstoneflux.api.IEnergyProvider;
 import cofh.redstoneflux.api.IEnergyReceiver;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.energy.IEnergyStorage;
 
 /**
@@ -55,9 +55,9 @@ public class OPWrappers {
 
     public static class RF implements IOPStorage {
         private IEnergyHandler handler;
-        private EnumFacing side;
+        private Direction side;
 
-        public RF(IEnergyHandler handler, EnumFacing side) {
+        public RF(IEnergyHandler handler, Direction side) {
             this.handler = handler;
             this.side = side;
         }

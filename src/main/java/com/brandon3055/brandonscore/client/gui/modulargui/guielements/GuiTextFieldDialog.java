@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
@@ -28,12 +28,12 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
     protected Consumer<String> confirmCallBack;
     protected IGuiEventListener listener;
 
-    public GuiTextFieldDialog(MGuiElementBase parent) {
+    public GuiTextFieldDialog(GuiElement parent) {
         super(parent);
         setSize(200, 20);
     }
 
-    public GuiTextFieldDialog(MGuiElementBase parent, String title) {
+    public GuiTextFieldDialog(GuiElement parent, String title) {
         super(parent);
         this.title = title;
         setSize(200, 40);
@@ -41,12 +41,12 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
         setInsets(18, 3, 3, 3);
     }
 
-    public GuiTextFieldDialog(int xPos, int yPos, MGuiElementBase parent) {
+    public GuiTextFieldDialog(int xPos, int yPos, GuiElement parent) {
         super(xPos, yPos, parent);
         setSize(200, 20);
     }
 
-    public GuiTextFieldDialog(int xPos, int yPos, int xSize, int ySize, MGuiElementBase parent) {
+    public GuiTextFieldDialog(int xPos, int yPos, int xSize, int ySize, GuiElement parent) {
         super(xPos, yPos, xSize, ySize, parent);
         setSize(200, 20);
     }
@@ -62,7 +62,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
         }
 
         addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.format("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777));
-        okButton.setListener(() -> {
+        okButton.onPressed(() -> {
             if (confirmCallBack != null) {
                 confirmCallBack.accept(textField.getText());
             }
@@ -75,7 +75,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
     }
 
     @Override
-    public void onMGuiEvent(GuiEvent event, MGuiElementBase eventElement) {
+    public void onMGuiEvent(GuiEvent event, GuiElement eventElement) {
         if (event.isTextFiled()) {
             if (listener != null) {
                 listener.onMGuiEvent(event, eventElement);

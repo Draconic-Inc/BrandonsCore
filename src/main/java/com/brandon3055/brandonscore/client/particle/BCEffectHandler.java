@@ -83,7 +83,7 @@ public class BCEffectHandler {
 //                    return;
 //                }
 //
-//                Minecraft mc = Minecraft.getMinecraft();
+//                Minecraft mc = Minecraft.getInstance();
 //                int particleSetting = mc.gameSettings.particleSetting;
 //
 //                if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)) {
@@ -122,7 +122,7 @@ public class BCEffectHandler {
                     return;
                 }
 
-                Minecraft mc = Minecraft.getMinecraft();
+                Minecraft mc = Minecraft.getInstance();
                 int particleSetting = mc.gameSettings.particleSetting;
 
                 if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) != 0)) {
@@ -158,7 +158,7 @@ public class BCEffectHandler {
         Vec3D pos = particle.getPos();
         if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
 
-            Minecraft mc = Minecraft.getMinecraft();
+            Minecraft mc = Minecraft.getInstance();
             int particleSetting = mc.gameSettings.particleSetting;
 
             if (respectParticleSetting && (particleSetting == 2 || (particleSetting == 1 && particle.getWorld().rand.nextInt(3) != 0))) {
@@ -180,7 +180,7 @@ public class BCEffectHandler {
         Vec3D pos = particle.getPos();
         if (isInRange(pos.x, pos.y, pos.z, viewRange) && effectRenderer != null) {
 
-            Minecraft mc = Minecraft.getMinecraft();
+            Minecraft mc = Minecraft.getInstance();
             int particleSetting = mc.gameSettings.particleSetting;
 
             if (respectParticleSetting && (particleSetting == 2 || (particleSetting == 1 && particle.getWorld().rand.nextInt(3) != 0))) {
@@ -206,7 +206,7 @@ public class BCEffectHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void clientTick(TickEvent.ClientTickEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         if (event.phase != TickEvent.Phase.END || mc.isGamePaused()) {
             return;
         }
@@ -236,9 +236,9 @@ public class BCEffectHandler {
     @SubscribeEvent
     public void renderWorld(RenderWorldLastEvent event) {
         BCProfiler.RENDER.start("bc_effect_renderer_draw");
-        Minecraft.getMinecraft().mcProfiler.startSection("BCParticles");
-        effectRenderer.renderParticles(Minecraft.getMinecraft().player, event.getPartialTicks());
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getInstance().mcProfiler.startSection("BCParticles");
+        effectRenderer.renderParticles(Minecraft.getInstance().player, event.getPartialTicks());
+        Minecraft.getInstance().mcProfiler.endSection();
         BCProfiler.RENDER.stop();
     }
 
@@ -259,7 +259,7 @@ public class BCEffectHandler {
 
     @SideOnly(Side.CLIENT)
     public static boolean isInRange(double x, double y, double z, double vewRange) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
 
         if (mc == null || mc.getRenderViewEntity() == null || mc.effectRenderer == null) return false;
 

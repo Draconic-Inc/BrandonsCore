@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 /**
  * Created by Brandon on 17/09/2014.
  */
+@Deprecated //May keep these for when i need to inject a button onto a vanilla gui. But should not be used for anything else.
 public class GuiButtonAHeight extends GuiButton {
 
 	public GuiButtonAHeight(int id, int xPos, int yPos, int width, int hight, String displayString) {

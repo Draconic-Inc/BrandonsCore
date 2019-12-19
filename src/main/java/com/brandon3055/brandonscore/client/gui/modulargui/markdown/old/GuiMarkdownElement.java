@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.old;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.MGuiElementBase;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.old.builders.*;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Created by brandon3055 on 30/06/2017.
  */
-public class GuiMarkdownElement extends MGuiElementBase<GuiMarkdownElement> {
+public class GuiMarkdownElement extends GuiElement<GuiMarkdownElement> {
 
     public static Pattern obf = Pattern.compile("(?<=[^\\\\]|^)(~\\?~.*~\\?~)");
     public static Pattern bold = Pattern.compile("(?<=[^\\\\]|^)(\\*\\*.*\\*\\*)");
