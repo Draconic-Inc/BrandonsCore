@@ -40,7 +40,7 @@ configFile.withReader {
 }
 
 version = "${config.mc_version}-${config.mod_version}"
-group = "com.brandon3055.brandonscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "com.brandon3055.brandonscore" //  http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BrandonsCore"
 
 sourceCompatibility = "1.8"

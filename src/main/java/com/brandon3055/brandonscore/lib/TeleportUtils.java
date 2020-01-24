@@ -178,6 +178,11 @@ public class TeleportUtils {
         for (PotionEffect potioneffect : player.getActivePotionEffects()) {
             player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), potioneffect));
         }
+
+        net.minecraft.entity.ai.attributes.AttributeMap attributemap = (net.minecraft.entity.ai.attributes.AttributeMap) player.getAttributeMap();
+        java.util.Collection<net.minecraft.entity.ai.attributes.IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
+        if (!watchedAttribs.isEmpty()) player.connection.sendPacket(new net.minecraft.network.play.server.SPacketEntityProperties(player.getEntityId(), watchedAttribs));
+
         net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, sourceDim, targetDim);
         player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
 

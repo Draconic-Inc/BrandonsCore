@@ -352,6 +352,8 @@ public class BCUtilCommands extends CommandBase {
         data.removeTag("Invulnerable");
         data.removeTag("PortalCooldown");
         data.removeTag("UUID");
+        data.removeTag("UUIDLeast");
+        data.removeTag("UUIDMost");
 
         InventoryUtils.givePlayerStack(player, spawnEgg);
     }

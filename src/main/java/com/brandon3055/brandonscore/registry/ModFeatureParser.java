@@ -352,7 +352,7 @@ public class ModFeatureParser {
      * Returns true if feature is enabled. Applies to all mods using a ModFeatureParser instance
      */
     public static boolean isEnabled(Object feature) {
-        return featureStates.getOrDefault(feature, true);
+        return featureStates.getOrDefault(feature, false);
     }
 
     /**
