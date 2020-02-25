@@ -3,15 +3,14 @@ package com.brandon3055.brandonscore.inventory;
 import codechicken.lib.inventory.InventoryUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumHand;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
@@ -34,23 +33,30 @@ public class BlockToStackHelper {
     public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, PlayerEntity player, int xp) {
         List<ItemStack> stacks = new ArrayList<ItemStack>();
 
-        if (!(world instanceof WorldServer)) {
+        if (!(world instanceof ServerWorld)) {
             return stacks;
         }
 
-        IBlockState state = world.getBlockState(pos);
+        BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
         if (player == null) {
-            player = getHarvester((WorldServer) world);
+            player = getHarvester((ServerWorld) world);
         }
         itemCollection = new ArrayList<>();
 
-        TileEntity tile = world.getTileEntity(pos);
-        if (block.removedByPlayer(state, world, pos, player, true)) {
-            block.onBlockDestroyedByPlayer(world, pos, state);
-            block.harvestBlock(world, player, pos, state, tile, player.getHeldItemMainhand());
-//            block.dropXpOnBlockBreak(world, pos, xp);
+//        TileEntity tile = world.getTileEntity(pos);
+//        if (block.removedByPlayer(state, world, pos, player, true, world.getFluidState(pos))) {
+////            block.onPlayerDestroy(world, pos, state);
+//            block.onBlockHarvested(world, pos, state, player);
+//            block.harvestBlock(world, player, pos, state, tile, player.getHeldItemMainhand());
+////            block.dropXpOnBlockBreak(world, pos, xp);
+//        }
+
+        //TODO I think this is good? Needs testing
+        if (state.removedByPlayer(world, pos, player, true, world.getFluidState(pos))){
+            state.getBlock().onPlayerDestroy(world, pos, state);
         }
+
 
         stacks.addAll(itemCollection);
         itemCollection = null;
@@ -71,10 +77,10 @@ public class BlockToStackHelper {
         inventoryDynamic.xp += xp;
     }
 
-    public static FakePlayer getHarvester(WorldServer world) {
+    public static FakePlayer getHarvester(ServerWorld world) {
         if (harvester == null) {
             harvester = FakePlayerFactory.get(world, new GameProfile(UUID.fromString("060e69c4-6aed-11e6-8b77-86f30ca893d3"), "[Brandons-Core]"));
-            harvester.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
+            harvester.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
         }
 
         return harvester;

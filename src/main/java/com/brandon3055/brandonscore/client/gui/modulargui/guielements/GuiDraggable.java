@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 
-import java.io.IOException;
 import java.util.function.Supplier;
 
 public class GuiDraggable extends GuiElement<GuiDraggable> {
@@ -38,24 +37,24 @@ public class GuiDraggable extends GuiElement<GuiDraggable> {
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         boolean captured = super.mouseClicked(mouseX, mouseY, mouseButton);
 
         if (!captured && canDrag.get() && (dragZoneValidator != null ? dragZoneValidator.validate(mouseX, mouseY) : GuiHelper.isInRect(xPos(), yPos(), xSize(), dragBarHeight, mouseX, mouseY))) {
             dragging = true;
-            dragXOffset = mouseX - xPos();
-            dragYOffset = mouseY - yPos();
+            dragXOffset = (int)mouseX - xPos();
+            dragYOffset = (int)mouseY - yPos();
         }
 
         return captured;
     }
 
     @Override
-    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
         if (dragging) {
-            int xMove = (mouseX - dragXOffset) - xPos();
-            int yMove = (mouseY - dragYOffset) - yPos();
-            translate(xMove, yMove);
+            double xMove = (mouseX - dragXOffset) - xPos();
+            double yMove = (mouseY - dragYOffset) - yPos();
+            translate((int)xMove, (int)yMove);
 
             validatePosition();
 
@@ -63,11 +62,11 @@ public class GuiDraggable extends GuiElement<GuiDraggable> {
                 onMovedCallback.run();
             }
         }
-        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
         dragging = false;
         return super.mouseReleased(mouseX, mouseY, state);
     }
@@ -94,6 +93,6 @@ public class GuiDraggable extends GuiElement<GuiDraggable> {
     }
 
     public interface PositionValidator {
-        boolean validate(int x, int y);
+        boolean validate(double x, double y);
     }
 }

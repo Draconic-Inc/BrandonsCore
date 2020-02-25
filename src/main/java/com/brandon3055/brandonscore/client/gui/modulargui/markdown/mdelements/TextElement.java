@@ -2,8 +2,8 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -82,11 +82,11 @@ public class TextElement extends MDElementBase<TextElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        fontRenderer.resetStyles();
+//        fontRenderer.resetStyles(); //TODO font renderer changes
         BCFontRenderer.setStileToggleMode(true);
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         BCFontRenderer.setStileToggleMode(false);
-        fontRenderer.resetStyles();
+//        fontRenderer.resetStyles();
     }
 
     private static class TextElementPart extends MDElementBase<TextElementPart> {
@@ -107,8 +107,8 @@ public class TextElement extends MDElementBase<TextElement> {
 //            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.2, 0, 0xFF00FF00);
             if (scale > 1) {
                 GlStateManager.pushMatrix();
-                GlStateManager.translate(xPos(), yPos(), 0);
-                GlStateManager.scale(scale, scale, 1);
+                GlStateManager.translated(xPos(), yPos(), 0);
+                GlStateManager.scaled(scale, scale, 1);
 //                fontRenderer.drawString(text, 0, 0, colour.get(), shadow);
                 drawString(fontRenderer, text, 0, 0, colour.get(), shadow);
                 GlStateManager.popMatrix();

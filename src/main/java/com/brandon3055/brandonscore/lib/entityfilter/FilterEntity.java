@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 
@@ -43,7 +42,7 @@ public class FilterEntity extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        ResourceLocation res = EntityList.getKey(entity);
+        ResourceLocation res = entity.getType().getRegistryName();
         if (entityName.isEmpty() || res == null) {
             return !whitelistEntity;
         }
@@ -59,8 +58,8 @@ public class FilterEntity extends FilterBase {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = super.serializeNBT();
-        compound.setBoolean("include", whitelistEntity);
-        compound.setString("name", entityName);
+        compound.putBoolean("include", whitelistEntity);
+        compound.putString("name", entityName);
         return compound;
     }
 

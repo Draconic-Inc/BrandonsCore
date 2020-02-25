@@ -89,23 +89,23 @@ public class ManagedNBT extends AbstractManagedData<CompoundNBT> {
 
     @Override
     public void toBytes(MCDataOutput output) {
-        output.writeNBTTagCompound(value);
+        output.writeCompoundNBT(value);
     }
 
     @Override
     public void fromBytes(MCDataInput input) {
-        value = input.readNBTTagCompound();
+        value = input.readCompoundNBT();
         notifyListeners(value);
     }
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setTag(name, value);
+        compound.put(name, value);
     }
 
     @Override
     public void fromNBT(CompoundNBT compound) {
-        value = compound.getCompoundTag(name);
+        value = compound.getCompound(name);
         notifyListeners(value);
     }
 

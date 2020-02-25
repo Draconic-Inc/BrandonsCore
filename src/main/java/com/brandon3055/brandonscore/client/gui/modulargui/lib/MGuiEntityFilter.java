@@ -12,7 +12,7 @@
 //import net.minecraft.entity.Entity;
 //import net.minecraft.entity.EntityList;
 //import net.minecraft.entity.LivingEntity;
-//import net.minecraft.entity.item.EntityItem;
+//import net.minecraft.entity.item.ItemEntity;
 //import net.minecraft.entity.item.EntityMinecart;
 //import net.minecraft.init.Items;
 //import net.minecraft.item.ItemStack;
@@ -327,8 +327,8 @@
 //                    continue;
 //                }
 //
-//                if (entity instanceof EntityItem) {
-//                    ((EntityItem) entity).setEntityItemStack(new ItemStack(Items.APPLE));
+//                if (entity instanceof ItemEntity) {
+//                    ((ItemEntity) entity).setEntityItemStack(new ItemStack(Items.APPLE));
 //                    entity.setCustomNameTag("ItemStack");
 //                }
 //

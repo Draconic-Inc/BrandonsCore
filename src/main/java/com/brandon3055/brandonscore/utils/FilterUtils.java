@@ -15,7 +15,7 @@ public class FilterUtils {
     {
         public boolean apply(@Nullable Entity entity)
         {
-            return entity instanceof PlayerEntity && entity.isEntityAlive();
+            return entity instanceof PlayerEntity && entity.isAlive();
         }
     };
 

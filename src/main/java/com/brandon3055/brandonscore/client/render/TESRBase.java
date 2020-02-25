@@ -1,11 +1,11 @@
 package com.brandon3055.brandonscore.client.render;
 
+import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
@@ -15,18 +15,18 @@ import java.util.Map;
 /**
  * Created by brandon3055 on 6/5/2016.
  */
-public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T> {
+public class TESRBase<T extends TileEntity> extends TileEntityRenderer<T> {
 
     protected static Map<ItemStack, IBakedModel> itemModelCache = new HashMap<>();
 
     @Override
-    public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-
+    public void render(T tileEntityIn, double x, double y, double z, float partialTicks, int destroyStage) {
+        super.render(tileEntityIn, x, y, z, partialTicks, destroyStage);
     }
 
     public void renderItem(ItemStack stack) {
         if (!stack.isEmpty()) {
-            Minecraft.getInstance().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
+            Minecraft.getInstance().getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
         }
     }
 
@@ -35,66 +35,67 @@ public class TESRBase<T extends TileEntity> extends TileEntitySpecialRenderer<T>
             throw new IllegalArgumentException("BrandonsCore:TESRBase#getStackModel Someone attempted to get the model from a null itemstack! ");
         }
 
-        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getInstance().getRenderItem().getItemModelWithOverrides(stack, null, null));
+        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getInstance().getItemRenderer().getItemModelWithOverrides(stack, null, null));
     }
 
     private boolean isLightSet = false;
     private float lastBrightnessX = 0;
     private float lastBrightnessY = 0;
 
+    //TODO Figure out how to fix this.
     public void setLighting(float light) {
         if (!isLightSet) {
-            lastBrightnessX = OpenGlHelper.lastBrightnessX;
-            lastBrightnessY = OpenGlHelper.lastBrightnessY;
+            lastBrightnessX = GLX.lastBrightnessX;
+            lastBrightnessY = GLX.lastBrightnessY;
             isLightSet = true;
         }
         GlStateManager.disableLighting();
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light, light);
+        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, light, light);
     }
 
     public void resetLighting() {
         if (isLightSet) {
             isLightSet = false;
-            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lastBrightnessX, lastBrightnessY);
+            GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, lastBrightnessX, lastBrightnessY);
         }
         GlStateManager.enableLighting();
     }
 
     public void translateScaleTranslate(double translate, double x, double y, double z) {
-        GlStateManager.translate(translate, translate, translate);
-        GlStateManager.scale(x, y, z);
-        GlStateManager.translate(-translate, -translate, -translate);
+        GlStateManager.translated(translate, translate, translate);
+        GlStateManager.scaled(x, y, z);
+        GlStateManager.translated(-translate, -translate, -translate);
     }
 
     public void translateRotateTranslate(double translate, float angle, float x, float y, float z) {
-        GlStateManager.translate(translate, translate, translate);
-        GlStateManager.rotate(angle, x, y, z);
-        GlStateManager.translate(-translate, -translate, -translate);
+        GlStateManager.translated(translate, translate, translate);
+        GlStateManager.rotated(angle, x, y, z);
+        GlStateManager.translated(-translate, -translate, -translate);
     }
 
-    public void preRenderFancy() {
-        GlStateManager.glTexParameteri(3553, 10242, 10497);
-        GlStateManager.glTexParameteri(3553, 10243, 10497);
-        GlStateManager.disableCull();
-        GlStateManager.disableBlend();
-        GlStateManager.depthMask(true);
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-    }
+//    public void preRenderFancy() {
+//        GlStateManager.glTexParameteri(3553, 10242, 10497);
+//        GlStateManager.glTexParameteri(3553, 10243, 10497);
+//        GlStateManager.disableCull();
+//        GlStateManager.disableBlend();
+//        GlStateManager.depthMask(true);
+//        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//    }
 
-    /**
-     * Call before rendering transparent
-     */
-    public void midRenderFancy() {
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.depthMask(false);
-    }
-
-    public void postRenderFancy() {
-        GlStateManager.enableTexture2D();
-        GlStateManager.depthMask(true);
-        GlStateManager.disableBlend();
-    }
+//    /**
+//     * Call before rendering transparent
+//     */
+//    public void midRenderFancy() {
+//        GlStateManager.enableBlend();
+//        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        GlStateManager.depthMask(false);
+//    }
+//
+//    public void postRenderFancy() {
+//        GlStateManager.enableTexture2D();
+//        GlStateManager.depthMask(true);
+//        GlStateManager.disableBlend();
+//    }
 
 
 //    GL_LINES = 0x1,

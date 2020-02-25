@@ -1,53 +1,51 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.widget.button.Button;
 
 /**
  * Created by brandon3055 on 4/07/2016.
  */
 @Deprecated //May keep these for when i need to inject a button onto a vanilla gui. But should not be used for anything else.
-public class ButtonColourRect extends GuiButton{
+public class ButtonColourRect extends Button {
     private final int backColour;
     private final int borderColourInactive;
     private final int borderColourActive;
 
-    public ButtonColourRect(int buttonId, String text, int x, int y, int width, int height, int backColour, int borderColourInactive, int borderColourActive) {
-        super(buttonId, x, y, width, height, text);
+    public ButtonColourRect(int xPos, int yPos, int width, int hight, String displayString, Button.IPressable onPress, int backColour, int borderColourInactive, int borderColourActive) {
+        super(xPos, yPos, width, hight, displayString, onPress);
         this.backColour = backColour;
         this.borderColourInactive = borderColourInactive;
         this.borderColourActive = borderColourActive;
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float pt) {
+    public void renderButton(int mouseX, int mouseY, float pt) {
         if (visible) {
-            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+            this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
 
             GlStateManager.disableLighting();
-            GlStateManager.disableDepth();
+            GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
 
             GuiHelper.drawColouredRect(x + 1, y + 1, width - 2, height - 2, backColour);
-            int border = hovered ? borderColourActive : borderColourInactive;
+            int border = isHovered ? borderColourActive : borderColourInactive;
             GuiHelper.drawColouredRect(x, y, width, 1, border);
             GuiHelper.drawColouredRect(x, y + height - 1, width, 1, border);
             GuiHelper.drawColouredRect(x, y, 1, height, border);
             GuiHelper.drawColouredRect(x + width - 1, y, 1, height, border);
 
-            GuiHelper.drawCenteredString(mc.fontRenderer, displayString, x + width / 2, y + (height / 2) - (mc.fontRenderer.FONT_HEIGHT / 2), 0xFFFFFF, false);
+            FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+            GuiHelper.drawCenteredString(fontRenderer, getMessage(), x + width / 2, y + (height / 2) - (fontRenderer.FONT_HEIGHT / 2), 0xFFFFFF, false);
 
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();
-            GlStateManager.enableDepth();
+            GlStateManager.enableDepthTest();
         }
     }
 
-    @Override
-    public void playPressSound(SoundHandler soundHandlerIn) {
-        super.playPressSound(soundHandlerIn);
-    }
+
 }

@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -281,7 +280,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     //region Selection
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (mouseButton == 0)
         for (T item : filteredItems) {
             if (sectionElements.get(item).isMouseOver(mouseX, mouseY)) {

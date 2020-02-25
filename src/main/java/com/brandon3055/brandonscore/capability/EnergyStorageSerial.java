@@ -31,19 +31,19 @@ public class EnergyStorageSerial extends EnergyStorage implements INBTSerializab
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = new CompoundNBT();
-        compound.setInteger("energy", energy);
-        compound.setInteger("capacity", capacity);
-        compound.setInteger("max_receive", maxReceive);
-        compound.setInteger("max_extract", maxExtract);
+        compound.putInt("energy", energy);
+        compound.putInt("capacity", capacity);
+        compound.putInt("max_receive", maxReceive);
+        compound.putInt("max_extract", maxExtract);
         return compound;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        energy = nbt.getInteger("energy");
-        capacity = nbt.getInteger("capacity");
-        maxReceive = nbt.getInteger("max_receive");
-        maxExtract = nbt.getInteger("max_extract");
+        energy = nbt.getInt("energy");
+        capacity = nbt.getInt("capacity");
+        maxReceive = nbt.getInt("max_receive");
+        maxExtract = nbt.getInt("max_extract");
     }
 
     @Override

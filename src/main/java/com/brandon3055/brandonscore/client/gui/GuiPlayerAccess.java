@@ -12,8 +12,9 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -25,8 +26,8 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
     public BlockPos pos = new BlockPos(0, 0, 0);
     public int dimension = 0;
 
-    public GuiPlayerAccess(PlayerEntity player) {
-        super(new ContainerPlayerAccess(player));
+    public GuiPlayerAccess(ContainerPlayerAccess container,  PlayerInventory player) {
+        super(container, player, new StringTextComponent("Player Access"));
         xSize = 220;
         ySize = 250;
     }
@@ -75,7 +76,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         clearInventory.setPos(accessSlots.maxXPos() - 18, accessSlots.yPos());
         clearInventory.onPressed(() -> {
             GuiPopupDialogs.createDialog(clearInventory, GuiPopupDialogs.DialogType.OK_CANCEL_OPTION, TextFormatting.RED + "Are you sure you want to clear " + name + "'s Inventory?\nThis cannot be undone!") //
-            .setOkListener((guiButton, pressed) -> PacketDispatcher.sendPlayerAccessButton(2)) //
+            .setOkListener(() -> PacketDispatcher.sendPlayerAccessButton(2)) //
             .showCenter();
         });
         bg.addChild(clearInventory);

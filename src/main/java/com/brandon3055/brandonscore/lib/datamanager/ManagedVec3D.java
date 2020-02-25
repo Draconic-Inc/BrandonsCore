@@ -4,7 +4,7 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTTagDouble;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 
 import java.util.Objects;
@@ -109,20 +109,20 @@ public class ManagedVec3D extends AbstractManagedData<Vec3D> {
     @Override
     public void toNBT(CompoundNBT compound) {
         ListNBT list = new ListNBT();
-        list.appendTag(new NBTTagDouble(value.x));
-        list.appendTag(new NBTTagDouble(value.y));
-        list.appendTag(new NBTTagDouble(value.z));
-        compound.setTag(name, list);
+        list.add(new DoubleNBT(value.x));
+        list.add(new DoubleNBT(value.y));
+        list.add(new DoubleNBT(value.z));
+        compound.put(name, list);
     }
 
     @Override
     public void fromNBT(CompoundNBT compound) {
         value = new Vec3D();
-        if (compound.hasKey(name, 9) && compound.getTagList(name, 9).tagCount() == 3) {
-            ListNBT list = compound.getTagList(name, 9);
-            value.x = list.getDoubleAt(0);
-            value.x = list.getDoubleAt(1);
-            value.x = list.getDoubleAt(2);
+        if (compound.contains(name, 9) && compound.getList(name, 9).size() == 3) {
+            ListNBT list = compound.getList(name, 9);
+            value.x = list.getDouble(0);
+            value.x = list.getDouble(1);
+            value.x = list.getDouble(2);
         }
         notifyListeners(value);
     }

@@ -85,7 +85,7 @@ public class ManagedLong extends AbstractManagedData<Long> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setLong(name, value);
+        compound.putLong(name, value);
     }
 
     @Override

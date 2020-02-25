@@ -1,14 +1,13 @@
 package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
 
@@ -55,10 +54,10 @@ public class BCProfiler {
             return;
         }
 
-        ScaledResolution res = event.getResolution();
+//        ScaledResolution res = event.getResolution();
         GlStateManager.pushMatrix();
-        GlStateManager.scale(1D / res.getScaleFactor(), 1D / res.getScaleFactor(), 1);
-        GlStateManager.scale(2, 2, 1);
+        GlStateManager.scaled(1D / mc.mainWindow.getGuiScaleFactor(), 1D / mc.mainWindow.getGuiScaleFactor(), 1);
+        GlStateManager.scaled(2, 2, 1);
 
         int y = 0;
         List<String> debug = new ArrayList<>();

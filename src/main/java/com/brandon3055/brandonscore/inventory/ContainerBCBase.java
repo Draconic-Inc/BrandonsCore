@@ -2,15 +2,25 @@ package com.brandon3055.brandonscore.inventory;
 
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.wrapper.EmptyHandler;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -26,32 +36,28 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
     protected PlayerEntity player;
     protected ContainerSlotLayout slotLayout;
 
-// I want there to ALWAYS be a player
-//    public ContainerBCBase() {
-//    }
-//
-//    public ContainerBCBase(T tile) {
-//        this.tile = tile;
-//    }
-//
-//    public ContainerBCBase(T tile, LayoutFactory<T> factory) {
-//        this(tile);
-//        this.slotLayout = factory.buildLayout(null, tile).retrieveSlotsForContainer(this::addSlotToContainer);
-//    }
+    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerInventory playerInv, PacketBuffer extraData) {
+        super(type, windowId);
+        this.player = playerInv.player;
+    }
 
-    public ContainerBCBase(PlayerEntity player) {
+    @Deprecated
+    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerEntity player) {
+        super(type, windowId);
         this.player = player;
     }
 
-    public ContainerBCBase(PlayerEntity player, T tile) {
-        this(player);
+    @Deprecated
+    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerEntity player, T tile) {
+        this(type, windowId, player);
         this.tile = tile;
         this.tile.onPlayerOpenContainer(player);
     }
 
-    public ContainerBCBase(PlayerEntity player, T tile, LayoutFactory<T> factory) {
-        this(player, tile);
-        this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlotToContainer);
+    @Deprecated
+    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerEntity player, T tile, LayoutFactory<T> factory) {
+        this(type, windowId, player, tile);
+        this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlot);
     }
 
     @Override
@@ -68,12 +74,12 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
 
     public ContainerBCBase addPlayerSlots(int posX, int posY, int hotbarSpacing) {
         for (int x = 0; x < 9; x++) {
-            addSlotToContainer(new SlotCheckValid.IInv(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
+            addSlot(new SlotCheckValid.IInv(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                addSlotToContainer(new SlotCheckValid.IInv(player.inventory, x + y * 9 + 9, posX + 18 * x, posY + y * 18));
+                addSlot(new SlotCheckValid.IInv(player.inventory, x + y * 9 + 9, posX + 18 * x, posY + y * 18));
             }
         }
         return this;
@@ -106,8 +112,9 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
 
     @Override
     public ItemStack transferStackInSlot(PlayerEntity player, int i) {
-        IItemHandler handler = getItemHandler();
-        if (handler != null) {
+        LazyOptional<IItemHandler> optional = getItemHandler();
+        if (optional.isPresent()) {
+            IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
             Slot slot = getSlot(i);
 
             if (slot != null && slot.getHasStack()) {
@@ -161,7 +168,7 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void setAll(List<ItemStack> stacks) {
         for (int i = 0; i < stacks.size(); ++i) {
             Slot slot = getSlot(i);
@@ -174,11 +181,15 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
     /**
      * @return the item handler for the tile entity.
      */
-    public IItemHandler getItemHandler() {
+    public LazyOptional<IItemHandler> getItemHandler() {
         return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
     }
 
     public ContainerSlotLayout getSlotLayout() {
         return slotLayout;
+    }
+
+    protected static <T extends TileEntity> T getClientTile(PacketBuffer extraData) {
+        return (T) Minecraft.getInstance().world.getTileEntity(extraData.readBlockPos());
     }
 }

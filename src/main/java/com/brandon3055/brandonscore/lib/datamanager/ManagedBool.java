@@ -83,7 +83,7 @@ public class ManagedBool extends AbstractManagedData<Boolean> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setBoolean(name, value);
+        compound.putBoolean(name, value);
     }
 
     @Override

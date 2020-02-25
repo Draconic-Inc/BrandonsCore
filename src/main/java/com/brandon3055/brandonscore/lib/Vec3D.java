@@ -164,9 +164,9 @@ public class Vec3D {
     }
 
     public Vec3D offset(Direction direction, double offsetDistance) {
-        this.x += direction.getFrontOffsetX() * offsetDistance;
-        this.y += direction.getFrontOffsetY() * offsetDistance;
-        this.z += direction.getFrontOffsetZ() * offsetDistance;
+        this.x += direction.getXOffset() * offsetDistance;
+        this.y += direction.getYOffset() * offsetDistance;
+        this.z += direction.getZOffset() * offsetDistance;
         return this;
     }
 
@@ -228,6 +228,10 @@ public class Vec3D {
 
     public double distance(Vec3D vec3D) {
         return Utils.getDistanceAtoB(this, vec3D);
+    }
+
+    public double distance(Entity entity) {
+        return Utils.getDistanceAtoB(this, new Vec3D(entity));
     }
 
     public double distanceSq(Vec3D v) {

@@ -3,22 +3,18 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.lib.StackReference;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
-import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -71,26 +67,26 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         double scaledWidth = xSize() / 18D;
         double scaledHeight = ySize() / 18D;
 
-        GlStateManager.translate(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
-        GlStateManager.scale(scaledWidth, scaledHeight, 1);
-        minecraft.getRenderItem().renderItemIntoGUI(getStack(), 0, 0);
+        GlStateManager.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
+        GlStateManager.scaled(scaledWidth, scaledHeight, 1);
+        minecraft.getItemRenderer().renderItemIntoGUI(getStack(), 0, 0);
 
         if (getStack().getItem().showDurabilityBar(getStack())) {
             double health = getStack().getItem().getDurabilityForDisplay(getStack());
             int rgbfordisplay = getStack().getItem().getRGBDurabilityForDisplay(getStack());
             int i = Math.round(13.0F - (float) health * 13.0F);
 
-            GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
+            GlStateManager.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
             drawColouredRect(2, 13, 13, 2, 0xFF000000);
             drawColouredRect(2, 13, i, 1, rgbfordisplay | 0xFF000000);
             zOffset -= 45;
-            GlStateManager.translate(0, 0, (getRenderZLevel() - 80));
+            GlStateManager.translated(0, 0, (getRenderZLevel() - 80));
         }
 
         if (drawCount && getStack().getCount() > 1) {
             String s = getStack().getCount() + "";
-            GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
+            GlStateManager.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
             drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset -= 45;
@@ -102,7 +98,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && stackReference != null) {
-            List<String> list = toolTipOverride != null ? toolTipOverride : getStack().getTooltip(minecraft.player, minecraft.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
+            List<String> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItem(getStack());
             drawHoveringText(list, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             return true;
         }
@@ -110,7 +106,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (clickListener != null && isMouseOver(mouseX, mouseY)) {
             clickListener.run();
             return true;

@@ -5,25 +5,26 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.EnumPlayerModelParts;
-import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.entity.player.PlayerModelPart;
+import net.minecraft.tileentity.SkullTileEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * Created by brandon3055 on 23/10/2016.
@@ -40,7 +41,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
     private boolean rotationLocked = false;
     private boolean trackMouse = false;
     private boolean drawName = false;
-//    private boolean animate = false;
+    //    private boolean animate = false;
     public boolean silentErrors = false;
     public boolean force2dSize = false;
 
@@ -65,7 +66,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
             return this;
         }
 
-        this.entityName = EntityList.getKey(entity);
+        this.entityName = entity.getType().getRegistryName();
         invalidEntity = false;
 
         if (invalidEntities.contains(entityName)) {
@@ -77,7 +78,10 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
 
     public GuiEntityRenderer setEntity(ResourceLocation entity) {
         this.entityName = entity;
-        this.entity = entityCache.computeIfAbsent(entity, resourceLocation -> EntityList.createEntityByIDFromName(entity, mc.world));
+        this.entity = entityCache.computeIfAbsent(entity, resourceLocation -> {
+            EntityType type = ForgeRegistries.ENTITIES.getValue(entity);
+            return type == null ? null : type.create(mc.world);
+        });
         invalidEntity = false;
 
         if (this.entity == null) {
@@ -116,17 +120,16 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         try {
             if (entity != null) {
                 Rectangle rect = getInsetRect();
-                float scale = (float) (force2dSize ? (Math.min(rect.height / entity.height, rect.width / entity.width)) : rect.height / entity.height);
+                float scale = (float) (force2dSize ? (Math.min(rect.height / entity.getHeight(), rect.width / entity.getWidth())) : rect.height / entity.getHeight());
 
                 double zLevel = getRenderZLevel() + 100;
                 double posX = rect.x + (rect.width / 2D);
 
                 float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
                 if (entity instanceof LivingEntity) {
-                    int eyeOffset = (int) ((entity.height - entity.getEyeHeight()) * scale);
+                    int eyeOffset = (int) ((entity.getHeight() - entity.getEyeHeight()) * scale);
                     drawEntityOnScreen(posX, rect.y, scale, (int) posX - mouseX, rect.y - mouseY + eyeOffset, (LivingEntity) entity, trackMouse, rotation, drawName, zLevel);
-                }
-                else {
+                } else {
                     drawEntityOnScreen(posX, rect.y, scale, entity, rotation, zLevel);
                 }
             }
@@ -192,20 +195,20 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         GlStateManager.pushMatrix();
 
 //        GlStateManager.translate((float) posX, (float) posY, 50.0F);
-        GlStateManager.translate((float) posX, (float) posY + (ent.height * scale), zOffset);
+        GlStateManager.translated((float) posX, (float) posY + (ent.getHeight() * scale), zOffset);
 
-        GlStateManager.scale((float) (-scale), (float) scale, (float) scale);
-        GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
+        GlStateManager.rotated(180.0F, 0.0F, 0.0F, 1.0F);
         float f1 = ent.rotationYaw;
         float f2 = ent.rotationPitch;
-        GlStateManager.rotate(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotated(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotated(-135.0F, 0.0F, 1.0F, 0.0F);
 //        GlStateManager.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 //        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
 //        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        GlStateManager.translate(0.0F, 0.0F, 0.0F);
-        RenderManager rendermanager = Minecraft.getInstance().getRenderManager();
+        GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
         rendermanager.setPlayerViewY(180.0F);
         rendermanager.setRenderShadow(false);
         rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
@@ -215,9 +218,9 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         GlStateManager.popMatrix();
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
+        GlStateManager.disableTexture();
+        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
     }
 
     public static void drawEntityOnScreen(double posX, double posY, double scale, double mouseX, double mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName, double zOffset) {
@@ -230,26 +233,26 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         GlStateManager.enableColorMaterial();
         GlStateManager.pushMatrix();
 //        GlStateManager.translate((float) posX, (float) posY, 50.0F);
-        GlStateManager.translate((float) posX, (float) posY + (ent.height * scale), zOffset);
+        GlStateManager.translated(posX, posY + (ent.getHeight() * scale), zOffset);
 
-        GlStateManager.scale((float) (-scale), (float) scale, (float) scale);
-        GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
+        GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
         float f = ent.renderYawOffset;
         float f1 = ent.rotationYaw;
         float f2 = ent.rotationPitch;
         float f3 = ent.prevRotationYawHead;
         float f4 = ent.rotationYawHead;
-        GlStateManager.rotate(135.0F + rotation, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(-((float) Math.atan(mouseY / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotatef(-((float) Math.atan(mouseY / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
         ent.renderYawOffset = (float) Math.atan(mouseX / 40.0F) * 20.0F;
         ent.rotationYaw = (float) Math.atan(mouseX / 40.0F) * 40.0F;
         ent.rotationPitch = -((float) Math.atan(mouseY / 40.0F)) * 20.0F;
         ent.rotationYawHead = ent.rotationYaw;
         ent.prevRotationYawHead = ent.rotationYaw;
-        GlStateManager.translate(0.0F, 0.0F, 0.0F);
-        RenderManager rendermanager = Minecraft.getInstance().getRenderManager();
+        GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
         rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
         rendermanager.setRenderShadow(false);
         rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
@@ -262,13 +265,13 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         GlStateManager.popMatrix();
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
+        GlStateManager.disableTexture();
+        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
     }
 
-    public static PlayerEntity createRenderPlayer(World world, String username) {
-        return new EntityOtherPlayerMP(world, TileEntitySkull.updateGameprofile(new GameProfile(null, username))) {
+    public static PlayerEntity createRenderPlayer(ClientWorld world, String username) {
+        return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameProfile(new GameProfile(null, username))) {
             @Override
             public String getSkinType() {
                 return super.getSkinType();
@@ -283,8 +286,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
 
                 if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
                     resourcelocation = minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-                }
-                else {
+                } else {
                     UUID uuid = PlayerEntity.getUUID(getGameProfile());
                     resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
                 }
@@ -293,13 +295,13 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
             }
 
             @Override
-            public boolean isWearing(EnumPlayerModelParts part) {
+            public boolean isWearing(PlayerModelPart part) {
                 return true;
             }
         };
     }
 
-//    boolean animateBroken = false;
+    //    boolean animateBroken = false;
     @Override
     public boolean onUpdate() {
 //        if (animate && entity != null && !invalidEntity && !animateBroken && entity.ticksExisted != BCClientEventHandler.elapsedTicks) {

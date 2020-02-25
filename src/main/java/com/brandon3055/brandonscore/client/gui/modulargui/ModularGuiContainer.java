@@ -147,6 +147,14 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     }
 
     @Override
+    public boolean charTyped(char charTyped, int charCode) {
+        if (manager.charTyped(charTyped, charCode)) {
+            return true;
+        }
+        return super.charTyped(charTyped, charCode);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollAmount) {
         if (manager.mouseScrolled(mouseX, mouseY, scrollAmount)) {
             return true;

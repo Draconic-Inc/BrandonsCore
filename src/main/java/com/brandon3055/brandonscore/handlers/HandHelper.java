@@ -43,15 +43,15 @@ public class HandHelper {
         return ItemStack.EMPTY;
     }
 
-    public static ItemStack getItemStack(PlayerEntity player, ItemStack itemStack) {
-        if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == itemStack.getItem() && player.getHeldItemMainhand().getItemDamage() == itemStack.getItemDamage()) {
-            return player.getHeldItemMainhand();
-        }
-        else if (!player.getHeldItemOffhand().isEmpty() && player.getHeldItemOffhand().getItem() == itemStack.getItem() && player.getHeldItemOffhand().getItemDamage() == itemStack.getItemDamage()) {
-            return player.getHeldItemOffhand();
-        }
-        return ItemStack.EMPTY;
-    }
+//    public static ItemStack getItemStack(PlayerEntity player, ItemStack itemStack) {
+//        if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == itemStack.getItem() && player.getHeldItemMainhand().getItemDamage() == itemStack.getItemDamage()) {
+//            return player.getHeldItemMainhand();
+//        }
+//        else if (!player.getHeldItemOffhand().isEmpty() && player.getHeldItemOffhand().getItem() == itemStack.getItem() && player.getHeldItemOffhand().getItemDamage() == itemStack.getItemDamage()) {
+//            return player.getHeldItemOffhand();
+//        }
+//        return ItemStack.EMPTY;
+//    }
 
     public static boolean isHoldingItemEther(PlayerEntity player, Item item) {
         if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == item) {

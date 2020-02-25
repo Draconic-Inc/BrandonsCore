@@ -2,10 +2,7 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.util.ItemUtils;
 import codechicken.lib.vec.Vector3;
-import com.brandon3055.brandonscore.registry.ModFeatureParser;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
@@ -18,8 +15,9 @@ public class FeatureUtils {
     /**
      * Safely spawns an ItemStack in the world after checking that the item/block is enabled.
      * Also safe to use with any item/block that is not handled by a {@link ModFeatureParser}
-     * @param stack The stack to spawn in the world
-     * @param world The world
+     *
+     * @param stack        The stack to spawn in the world
+     * @param world        The world
      * @param dropLocation The location
      */
     public static void dropItem(ItemStack stack, World world, Vector3 dropLocation) {
@@ -27,12 +25,13 @@ public class FeatureUtils {
             return;
         }
 
-        Item item = stack.getItem();
-        Object object = item instanceof ItemBlock ? ((ItemBlock) item).getBlock() : item;
-
-        if (ModFeatureParser.isFeature(object) && !ModFeatureParser.isEnabled(object)){
-            return;
-        }
+//        Item item = stack.getItem();
+//        Object object = item instanceof BlockItem ? ((BlockItem) item).getBlock() : item;
+//
+//        TODO features?
+//        if (ModFeatureParser.isFeature(object) && !ModFeatureParser.isEnabled(object)){
+//            return;
+//        }
 
         ItemUtils.dropItem(stack, world, dropLocation);
     }
@@ -42,19 +41,17 @@ public class FeatureUtils {
             return;
         }
 
-        Item item = stack.getItem();
-        Object object = item instanceof ItemBlock ? ((ItemBlock) item).getBlock() : item;
+//        Item item = stack.getItem();
+//        Object object = item instanceof BlockItem ? ((BlockItem) item).getBlock() : item;
+//
+//        if (ModFeatureParser.isFeature(object) && !ModFeatureParser.isEnabled(object)){
+//            return;
+//        }
 
-        if (ModFeatureParser.isFeature(object) && !ModFeatureParser.isEnabled(object)){
-            return;
-        }
-
-        EntityItem entityItem = new EntityItem(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
-        entityItem.motionX = world.rand.nextGaussian() * 0.05;
-        entityItem.motionY = world.rand.nextGaussian() * 0.05 + 0.2F;
-        entityItem.motionZ = world.rand.nextGaussian() * 0.05;
+        ItemEntity entityItem = new ItemEntity(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
+        entityItem.setMotion(world.rand.nextGaussian() * 0.05, world.rand.nextGaussian() * 0.05 + 0.2F, world.rand.nextGaussian() * 0.05);
         entityItem.setNoPickupDelay();
-        world.spawnEntity(entityItem);
+        world.addEntity(entityItem);
     }
 
 }

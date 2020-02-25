@@ -7,14 +7,16 @@ import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,17 +31,19 @@ public class ItemEnergyBase extends ItemBCore {
     private long receive;
     private long extract;
 
-    public ItemEnergyBase(){}
+    public ItemEnergyBase(Properties properties) {
+        super(properties);
+    }
 
     //region Item
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> subItems) {
-        if (isInCreativeTab(tab)) {
-            subItems.add(new ItemStack(this));
+    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+        if (this.isInGroup(group)) {
+            items.add(new ItemStack(this));
             ItemStack stack = new ItemStack(this);
             setEnergy(stack, getCapacity(stack));
-            subItems.add(stack);
+            items.add(stack);
         }
     }
 
@@ -148,9 +152,10 @@ public class ItemEnergyBase extends ItemBCore {
         return 1D - ((double)es / (double)mes);
     }
 
-    @SideOnly(Side.CLIENT)
+
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced) {
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         InfoHelper.addEnergyInfo(stack, tooltip);
     }
 
@@ -160,7 +165,8 @@ public class ItemEnergyBase extends ItemBCore {
 
     @Override
     public ICapabilityProvider initCapabilities(final ItemStack stack, CompoundNBT nbt) {
-        return new OPMultiProvider(new OPStorageItem(stack), null);
+        //TODO Check this out
+        return new OPMultiProvider(LazyOptional.of(() -> new OPStorageItem(stack)), null);
     }
 
     private class OPStorageItem implements IOPStorage {

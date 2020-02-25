@@ -1,6 +1,5 @@
-package com.brandon3055.brandonscore.config;
+package com.brandon3055.brandonscore;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

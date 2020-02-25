@@ -11,10 +11,8 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
 import com.brandon3055.brandonscore.lib.functions.TriPredicate;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.input.Mouse;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,20 +26,20 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.Gu
  */
 public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGuiEventDispatcher {
 
-    private int dragStartX = 0;
-    private int dragStartY = 0;
-    private int dragStartElementX = 0;
-    private int dragStartElementY = 0;
+    private double dragStartX = 0;
+    private double dragStartY = 0;
+    private double dragStartElementX = 0;
+    private double dragStartElementY = 0;
     private boolean parentScroll = false;
     private IMouseOver parentScrollable = null;
-    private List<TriPredicate<GuiSlideControl, Integer, Integer>> scrollChecks = new ArrayList<>();
+    private List<TriPredicate<GuiSlideControl, Double, Double>> scrollChecks = new ArrayList<>();
 
     public IGuiEventListener listener;
     public Consumer<GuiSlideControl> inputListener;
 
     protected int sliderSize = 10;
-    protected int mouseDragOffset = 0;
-    protected int dragOutResetThreshold = 100;
+    protected double mouseDragOffset = 0;
+    protected double dragOutResetThreshold = 100;
 
     protected double position = 0;
     protected double scrollSpeed = 0.04;
@@ -126,7 +124,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
     @Override
     public boolean handleMouseScroll(double mouseX, double mouseY, double scrollDirection) {
         //Check if there are any scrolling checks that may restrict scrolling.
-        for (TriPredicate<GuiSlideControl, Integer, Integer> check : scrollChecks) {
+        for (TriPredicate<GuiSlideControl, Double, Double> check : scrollChecks) {
             if (!check.test(this, mouseX, mouseY)) {
                 return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
             }
@@ -162,7 +160,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (((isMouseOver(mouseX, mouseY) && !isHidden()) || (mouseButton == 2 && allowMiddleClickDrag && getParentScrollable() != null && getParentScrollable().isMouseOver(mouseX, mouseY))) && sliderElement != null && !isDragging && !isMiddleClickDragging) {
             if (mouseButton == 2 && getParent() != null) {
                 List<GuiSlideControl> list = getParent().findChildElementsByClass(GuiSlideControl.class, new ArrayList());
@@ -191,7 +189,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
             else if (mouseButton == 0) {
                 mouseDragOffset = sliderSize / 2;
                 if (rotation == HORIZONTAL) {
-                    sliderElement.setXPos(mouseX - (sliderElement.xSize() / 2));
+                    sliderElement.setXPos((int)mouseX - (sliderElement.xSize() / 2));
                     double maxXOffset = getInsetRect().width - sliderElement.xSize();
                     double xOffset = sliderElement.xPos() - getInsetRect().x;
                     updateRawPos(xOffset / maxXOffset);
@@ -200,7 +198,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                     }
                 }
                 else {
-                    sliderElement.setYPos(mouseY - (sliderElement.ySize() / 2));
+                    sliderElement.setYPos((int)mouseY - (sliderElement.ySize() / 2));
                     double maxYOffset = getInsetRect().height - sliderElement.ySize();
                     double yOffset = sliderElement.yPos() - getInsetRect().y;
                     updateRawPos(yOffset / maxYOffset);
@@ -220,10 +218,11 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
+
     @Override
-    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        double doubleMouseX = (double) Mouse.getEventX() * (double) modularGui.xSize() / (double) this.mc.displayWidth;
-        double doubleMouseY = (double) modularGui.ySize() - (double) Mouse.getEventY() * modularGui.ySize() / (double) this.mc.displayHeight - 1;
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
+//        double doubleMouseX = (double) Mouse.getEventX() * (double) modularGui.xSize() / (double) this.mc.displayWidth;
+//        double doubleMouseY = (double) modularGui.ySize() - (double) Mouse.getEventY() * modularGui.ySize() / (double) this.mc.displayHeight - 1;
 
 //        if (isDragging || isMiddleClickDragging) { //TODO figure out why this is borked
 //            if (distFromElement(mouseX, mouseY) > dragOutResetThreshold && isDragging) {
@@ -267,10 +266,10 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
 
             if (rotation == HORIZONTAL) {
                 if (isMiddleClickDragging) {
-                    sliderElement.setXPos(dragStartElementX - (int) ((mouseX - dragStartX) * scrollSpeed * 2));
+                    sliderElement.setXPos((int)dragStartElementX - (int) ((mouseX - dragStartX) * scrollSpeed * 2));
                 }
                 else {
-                    sliderElement.setXPos(mouseX - mouseDragOffset);
+                    sliderElement.setXPos((int) (mouseX - mouseDragOffset));
                 }
                 double maxXOffset = getInsetRect().width - sliderElement.xSize();
                 double xOffset = sliderElement.xPos() - getInsetRect().x;
@@ -281,10 +280,10 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
             }
             else {
                 if (isMiddleClickDragging) {
-                    sliderElement.setYPos(dragStartElementY - (int) ((mouseY - dragStartY) * scrollSpeed * 2));
+                    sliderElement.setYPos((int)dragStartElementY - (int) ((mouseY - dragStartY) * scrollSpeed * 2));
                 }
                 else {
-                    sliderElement.setYPos(mouseY - mouseDragOffset);
+                    sliderElement.setYPos((int) (mouseY - mouseDragOffset));
                 }
                 double maxYOffset = getInsetRect().height - sliderElement.ySize();
                 double yOffset = sliderElement.yPos() - getInsetRect().y;
@@ -295,11 +294,11 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
             }
             return !isMiddleClickDragging;
         }
-        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
         if (isDragging || isMiddleClickDragging) {
             isDragging = false;
             isMiddleClickDragging = false;
@@ -566,7 +565,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      * This can be used for example to only allow scrolling when a certain key is or isnt pressed.
      * The values passed into the predicate are the slide control, mouseX and mouseY
      */
-    public GuiSlideControl addScrollCheck(TriPredicate<GuiSlideControl, Integer, Integer> predicate) {
+    public GuiSlideControl addScrollCheck(TriPredicate<GuiSlideControl, Double, Double> predicate) {
         scrollChecks.add(predicate);
         return this;
     }

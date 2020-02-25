@@ -48,10 +48,11 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 }
                 break;
             case PacketDispatcher.C_PLAYER_ACCESS:
-                int windowID = packet.readInt();
-                GuiPlayerAccess guiPlayerAccess = new GuiPlayerAccess(mc.player);
-                mc.displayGuiScreen(guiPlayerAccess);
-                mc.player.openContainer.windowId = windowID;
+                //I dont think i need this any more?
+//                int windowID = packet.readInt();
+//                GuiPlayerAccess guiPlayerAccess = new GuiPlayerAccess(mc.player);
+//                mc.displayGuiScreen(guiPlayerAccess);
+//                mc.player.openContainer.windowId = windowID;
                 break;
             case PacketDispatcher.C_PLAYER_ACCESS_UPDATE:
                 GuiPlayerAccess gui = mc.currentScreen instanceof GuiPlayerAccess ? (GuiPlayerAccess) mc.currentScreen : null;
@@ -68,7 +69,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 BlockPos pos = packet.readPos();
                 TileEntity tile = Minecraft.getInstance().world.getTileEntity(pos);
                 if (tile instanceof TileBCore) {
-                    ((TileBCore) tile).receiveCapSyncData(packet);
+                    ((TileBCore) tile).getCapManager().receiveCapSyncData(packet);
                 }
                 break;
         }

@@ -1,10 +1,12 @@
 package com.brandon3055.brandonscore.utils;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * Created by brandon3055 on 1/4/2016.
@@ -15,22 +17,22 @@ public class MultiBlockHelper {
     public String expectedBlock = null;
 
     public boolean checkBlock(String name, World world, BlockPos pos) {
-        IBlockState state = world.getBlockState(pos);
+        BlockState state = world.getBlockState(pos);
         if (name.equals("")) {
             return true;
         } else if (name.equals("air")) {
             return state.getBlock().isAir(state, world, pos);
         } else {
-            return Block.REGISTRY.getNameForObject(state.getBlock()).toString().equals(name);
+            return ForgeRegistries.BLOCKS.getKey(state.getBlock()).toString().equals(name);
         }
     }
 
     public void setBlock(String name, World world, BlockPos pos) {
-        Block block = Block.REGISTRY.getObject(new ResourceLocation(name));
+        Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name));
         if (block != null) {
             world.setBlockState(pos, block.getDefaultState());
         } else {
-            world.setBlockToAir(pos);
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
         }
 
     }

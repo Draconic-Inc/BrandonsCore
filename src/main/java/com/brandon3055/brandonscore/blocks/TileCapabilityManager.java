@@ -47,7 +47,10 @@ public class TileCapabilityManager implements ICapabilityProvider {
      * @param capInstance The capability instance.
      * @param sides       The sides to bind to. (Leave empty to bind to all sides including null)
      */
-    public <T> void set(@Nonnull Capability<T> cap, @Nonnull T capInstance, Direction... sides) {
+    public <T> void set(@Nonnull Capability cap, @Nonnull T capInstance, Direction... sides) {
+        if (sides == null) {
+            return;
+        }
         if (sides.length == 0) {
             sides = Direction.values();
             setSide(cap, capInstance, null);
@@ -70,8 +73,19 @@ public class TileCapabilityManager implements ICapabilityProvider {
      * @return The modifiable serialization flags. By default set to 'save to tile' and 'save to item'
      * @see #set(Capability, Object, Direction...)
      */
-    public <T extends INBTSerializable<CompoundNBT>> SerializationFlags setManaged(String tagName, @Nonnull Capability<T> cap, @Nonnull T capInstance, Direction... sides) {
+    public <T extends INBTSerializable<CompoundNBT>> SerializationFlags setManaged(String tagName, @Nonnull Capability cap, @Nonnull T capInstance, Direction... sides) {
         set(cap, capInstance, sides);
+        SerializationFlags<T> flags = new SerializationFlags<>(tagName, capInstance);
+        serializableMap.put(capInstance, flags);
+        indexedDataList.add(flags);
+        return flags;
+    }
+
+    /**
+     * The same as setManaged except the capability will not be exposes at all via getCapability. Used in cases where you need a "private" internal capability
+     * @see #setManaged(String, Capability, INBTSerializable, Direction...)
+     */
+    public <T extends INBTSerializable<CompoundNBT>> SerializationFlags setInternalManaged(String tagName, @Nonnull Capability cap, @Nonnull T capInstance) {
         SerializationFlags<T> flags = new SerializationFlags<>(tagName, capInstance);
         serializableMap.put(capInstance, flags);
         indexedDataList.add(flags);
@@ -103,7 +117,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
      * @param capInstance The capability instance.
      * @param side        The side to bind to. (can be null)
      */
-    public <T> void setSide(@Nonnull Capability<T> cap, @Nonnull T capInstance, @Nullable Direction side) {
+    public <T> void setSide(@Nonnull Capability cap, @Nonnull T capInstance, @Nullable Direction side) {
         Map<Direction, LazyOptional> map = capabilityMap.computeIfAbsent(cap, c -> new HashMap<>());
         LazyOptional previous = map.get(side);
         map.put(side, LazyOptional.of(() -> capInstance));
@@ -177,7 +191,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
     @SuppressWarnings("unchecked")
     public void deserialize(CompoundNBT compound) {
         for (SerializationFlags helper : serializableMap.values()) {
-            if (compound.hasUniqueId(helper.tagName)) {
+            if (compound.contains(helper.tagName)) {
                 helper.getData().deserializeNBT(compound.getCompound(helper.tagName));
             }
         }

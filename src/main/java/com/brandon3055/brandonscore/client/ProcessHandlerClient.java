@@ -3,9 +3,9 @@ package com.brandon3055.brandonscore.client;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;

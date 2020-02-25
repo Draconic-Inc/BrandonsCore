@@ -1,13 +1,17 @@
 package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -116,13 +120,6 @@ public class Utils {
         double dx = x1 - x2;
         double dz = z1 - z2;
         return dx * dx + dz * dz;
-    }
-
-    /**
-     * Returns true if this is a client connected to a remote server.
-     */
-    public static boolean isConnectedToDedicatedServer() {
-        return FMLCommonHandler.instance().getMinecraftServerInstance() == null;
     }
 
 //    /**
@@ -248,12 +245,13 @@ public class Utils {
 
 
     @Nullable
+    @Deprecated //Check the world method
     public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
         double d0 = -1.0D;
         PlayerEntity closestPlayer = null;
 
-        for (int i = 0; i < world.playerEntities.size(); ++i) {
-            PlayerEntity player = world.playerEntities.get(i);
+        for (int i = 0; i < world.getPlayers().size(); ++i) {
+            PlayerEntity player = world.getPlayers().get(i);
 
             if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators)) {
                 double d1 = player.getDistanceSq(posX, posY, posZ);
@@ -358,12 +356,23 @@ public class Utils {
         }
     }
 
-    public static boolean isServerSide() {
-        return FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER;
-    }
-
-    public static boolean isClientSide() {
-        return FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
+    private static BiMap<Block, Fluid> fluidBlocks = null;
+    public static Fluid lookupFluidForBlock(Block block)
+    {
+        if (fluidBlocks == null)
+        {
+            BiMap<Block, Fluid> tmp = HashBiMap.create();
+            for (Fluid fluid : ForgeRegistries.FLUIDS.getValues())
+            {
+                Block fluidBlock = fluid.getDefaultState().getBlockState().getBlock();
+                if (fluidBlock != Blocks.AIR)
+                {
+                    tmp.put(fluidBlock, fluid);
+                }
+            }
+            fluidBlocks = tmp;
+        }
+        return fluidBlocks.get(block);
     }
 }
 

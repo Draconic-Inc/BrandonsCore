@@ -5,7 +5,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.text.ITextComponent;
 
 import java.util.LinkedList;
 import java.util.function.Predicate;
@@ -60,7 +59,7 @@ public class InventoryDynamic implements IInventory {
             if (itemstack.getCount() <= count) {
                 setInventorySlotContents(index, ItemStack.EMPTY);
             } else {
-                itemstack = itemstack.splitStack(count);
+                itemstack = itemstack.split(count);
                 if (itemstack.getCount() == 0) {
                     setInventorySlotContents(index, ItemStack.EMPTY);
                 }
@@ -110,40 +109,14 @@ public class InventoryDynamic implements IInventory {
         return true;
     }
 
-    @Override
-    public int getField(int id) {
-        return 0;
-    }
 
-    @Override
-    public void setField(int id, int value) {
-
-    }
-
-    @Override
-    public int getFieldCount() {
-        return 0;
-    }
 
     @Override
     public void clear() {
         stacks.clear();
     }
 
-    @Override
-    public String getName() {
-        return null;
-    }
 
-    @Override
-    public boolean hasCustomName() {
-        return false;
-    }
-
-    @Override
-    public ITextComponent getDisplayName() {
-        return null;
-    }
 
     public void writeToNBT(CompoundNBT compound) {
         ListNBT list = new ListNBT();
@@ -151,20 +124,20 @@ public class InventoryDynamic implements IInventory {
         for (ItemStack stack : stacks) {
             if (!stack.isEmpty() && stack.getCount() > 0) {
                 CompoundNBT tag = new CompoundNBT();
-                stack.writeToNBT(tag);
-                list.appendTag(tag);
+                stack.write(tag);
+                list.add(tag);
             }
         }
 
-        compound.setTag("InvItems", list);
+        compound.put("InvItems", list);
     }
 
     public void readFromNBT(CompoundNBT compound) {
-        ListNBT list = compound.getTagList("InvItems", 10);
+        ListNBT list = compound.getList("InvItems", 10);
         stacks.clear();
 
-        for (int i = 0; i < list.tagCount(); i++) {
-            stacks.add(new ItemStack(list.getCompoundTagAt(i)));
+        for (int i = 0; i < list.size(); i++) {
+            stacks.add(ItemStack.read(list.getCompound(i)));
         }
     }
 

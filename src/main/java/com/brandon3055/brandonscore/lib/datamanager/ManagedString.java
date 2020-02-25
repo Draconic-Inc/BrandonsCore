@@ -85,7 +85,7 @@ public class ManagedString extends AbstractManagedData<String> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setString(name, value);
+        compound.putString(name, value);
     }
 
     @Override

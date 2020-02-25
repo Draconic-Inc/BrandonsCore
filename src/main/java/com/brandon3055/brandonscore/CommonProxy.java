@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore;
 
+import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
@@ -7,6 +8,7 @@ import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
@@ -15,6 +17,7 @@ import net.minecraftforge.common.model.animation.IAnimationStateMachine;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Created by Brandon on 14/5/2015.
@@ -36,9 +39,9 @@ public class CommonProxy {
 
     }
 
-//    public MinecraftServer getMCServer() {
-//        return FMLCommonHandler.instance().getMinecraftServerInstance();
-//    }
+    public MinecraftServer getMCServer() {
+        return ServerLifecycleHooks.getCurrentServer();
+    }
 
     public World getClientWorld() {
         return null;
@@ -97,5 +100,9 @@ public class CommonProxy {
 
     public IAnimationStateMachine loadASM(ResourceLocation location, ImmutableMap<String, ITimeValue> customParameters) {
         return null;
+    }
+
+    public int tickTimer() {
+        return TimeKeeper.getServerTick();
     }
 }

@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.api.power;
 
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 /**
  * Created by brandon3055 on 16/10/19.
@@ -63,7 +62,7 @@ public class IOTracker implements IOInfo, Runnable {
 
     @Override
     public long currentInput() {
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
+        if (EffectiveSide.get().isClient()) {
             return inputPerTick;
         }
         else {
@@ -77,7 +76,7 @@ public class IOTracker implements IOInfo, Runnable {
 
     @Override
     public long currentOutput() {
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
+        if (EffectiveSide.get().isClient()) {
             return outputPerTick;
         }
         else {

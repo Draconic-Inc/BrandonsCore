@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 
 /**
@@ -10,7 +10,7 @@ import net.minecraft.util.Direction;
  */
 public interface IRedstoneEmitter {
 
-    int getWeakPower(IBlockState blockState, Direction side);
+    int getWeakPower(BlockState blockState, Direction side);
 
-    int getStrongPower(IBlockState blockState, Direction side);
+    int getStrongPower(BlockState blockState, Direction side);
 }

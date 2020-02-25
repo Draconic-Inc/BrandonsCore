@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
-import com.brandon3055.brandonscore.utils.Utils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
@@ -97,7 +96,7 @@ public class EntityFilter extends FilterGroup {
     }
 
     protected void filterChanged() {
-        if (serverPacketProvider != null && Utils.isServerSide()) {
+        if (serverPacketProvider != null && EffectiveSide.get().isServer()) {
             MCDataOutput output = serverPacketProvider.get();
             output.writeByte(0);
             serializeMCD(output);
@@ -106,7 +105,7 @@ public class EntityFilter extends FilterGroup {
     }
 
     private void serverModifiedNode(FilterBase node) {
-        if (serverPacketProvider != null && Utils.isServerSide()) {
+        if (serverPacketProvider != null && EffectiveSide.get().isServer()) {
             MCDataOutput output = serverPacketProvider.get();
             output.writeByte(1);
             output.writeVarInt(node.nodeID);
@@ -206,7 +205,7 @@ public class EntityFilter extends FilterGroup {
      * Node modified by unknown side
      */
     public void nodeModified(FilterBase node) {
-        if (Utils.isClientSide()) {
+        if (EffectiveSide.get().isClient()) {
             clientModifiedNode(node);
         } else {
             serverModifiedNode(node);

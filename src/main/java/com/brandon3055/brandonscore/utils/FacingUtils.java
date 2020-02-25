@@ -72,7 +72,7 @@ public class FacingUtils {
         List<Direction> y = new ArrayList<Direction>();
         List<Direction> z = new ArrayList<Direction>();
 
-        for (Direction facing : Direction.VALUES) {
+        for (Direction facing : Direction.values()) {
             if (facing.getAxis() != Direction.Axis.X) {
                 x.add(facing);
             }

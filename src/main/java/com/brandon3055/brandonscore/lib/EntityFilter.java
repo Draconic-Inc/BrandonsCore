@@ -1,16 +1,12 @@
 package com.brandon3055.brandonscore.lib;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.IAnimals;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTTagString;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -65,12 +61,12 @@ public abstract class EntityFilter {
      * @return Returns true if the given entity matches this filter.
      */
     public boolean isMatch(Entity entity) {
-        if ((entity instanceof EntityAnimal || (entity instanceof IAnimals && !(entity instanceof IMob))) && !detectPassive) {
+        if ((entity instanceof AnimalEntity && !(entity instanceof IMob)) && !detectPassive) {
             return false;
         }
 
         if (isTypeSelectionEnabled()) {
-            if ((entity instanceof EntityMob || entity instanceof IMob) && !detectHostile) {
+            if ((entity instanceof MobEntity || entity instanceof IMob) && !detectHostile) {
                 return false;
             }
 
@@ -79,7 +75,7 @@ public abstract class EntityFilter {
             }
         }
 
-        if (!(entity instanceof EntityAnimal || (entity instanceof IAnimals && !(entity instanceof IMob))) && !(entity instanceof EntityMob || entity instanceof IMob) && !(entity instanceof PlayerEntity) && (!detectOther || !isOtherSelectorEnabled())) {
+        if (!(entity instanceof MobEntity || entity instanceof IMob) && !(entity instanceof PlayerEntity) && (!detectOther || !isOtherSelectorEnabled())) {
             return false;
         }
 
@@ -91,25 +87,25 @@ public abstract class EntityFilter {
             return isWhiteList;
         }
 
-        if (entityList.contains(EntityList.getEntityString(entity)) || (entity instanceof EntityItem && entityList.contains("Item"))) {
-            return isWhiteList;
-        }
+//        if (entityList.contains(EntityList.getEntityString(entity)) || (entity instanceof ItemEntity && entityList.contains("Item"))) {
+//            return isWhiteList;
+//        }
 
         return !isWhiteList;
     }
 
     public CompoundNBT writeToNBT(CompoundNBT compound) {
-        compound.setBoolean("detectPassive", detectPassive);
-        compound.setBoolean("detectHostile", detectHostile);
-        compound.setBoolean("detectPlayer", detectPlayer);
-        compound.setBoolean("detectOther", detectOther);
-        compound.setBoolean("isWhiteList", isWhiteList);
+        compound.putBoolean("detectPassive", detectPassive);
+        compound.putBoolean("detectHostile", detectHostile);
+        compound.putBoolean("detectPlayer", detectPlayer);
+        compound.putBoolean("detectOther", detectOther);
+        compound.putBoolean("isWhiteList", isWhiteList);
 
         ListNBT list = new ListNBT();
         for (String entity : entityList) {
-            list.appendTag(new NBTTagString(entity));
+//            list.appendTag(new NBTTagString(entity));
         }
-        compound.setTag("entityList", list);
+        compound.put("entityList", list);
 
         return compound;
     }
@@ -120,31 +116,31 @@ public abstract class EntityFilter {
         detectPlayer = compound.getBoolean("detectPlayer");
         detectOther = compound.getBoolean("detectOther");
         isWhiteList = compound.getBoolean("isWhiteList");
-
-        if (compound.hasKey("entityList")) {
-            entityList.clear();
-            ListNBT list = compound.getTagList("entityList", 8);
-            for (int i = 0; i < list.tagCount(); i++) {
-                entityList.add(list.getStringTagAt(i));
-            }
-        }
+//
+//        if (compound.hasKey("entityList")) {
+//            entityList.clear();
+//            ListNBT list = compound.getTagList("entityList", 8);
+//            for (int i = 0; i < list.tagCount(); i++) {
+//                entityList.add(list.getStringTagAt(i));
+//            }
+//        }
 
         return compound;
     }
 
     public void sendConfigToServer() {
         CompoundNBT compound = new CompoundNBT();
-        compound.setBoolean("detectPassive", detectPassive);
-        compound.setBoolean("detectHostile", detectHostile);
-        compound.setBoolean("detectPlayer", detectPlayer);
-        compound.setBoolean("detectOther", detectOther);
-        compound.setBoolean("isWhiteList", isWhiteList);
+        compound.putBoolean("detectPassive", detectPassive);
+        compound.putBoolean("detectHostile", detectHostile);
+        compound.putBoolean("detectPlayer", detectPlayer);
+        compound.putBoolean("detectOther", detectOther);
+        compound.putBoolean("isWhiteList", isWhiteList);
 
         ListNBT list = new ListNBT();
         for (String entity : entityList) {
-            list.appendTag(new NBTTagString(entity));
+//            list.appendTag(new NBTTagString(entity));
         }
-        compound.setTag("entityList", list);
+        compound.put("entityList", list);
 
         sendConfigToServer(compound);
     }
@@ -167,13 +163,13 @@ public abstract class EntityFilter {
         if (isListEnabled()) {
             isWhiteList = compound.getBoolean("isWhiteList");
 
-            if (compound.hasKey("entityList")) {
-                entityList.clear();
-                ListNBT list = compound.getTagList("entityList", 8);
-                for (int i = 0; i < list.tagCount(); i++) {
-                    entityList.add(list.getStringTagAt(i));
-                }
-            }
+//            if (compound.hasKey("entityList")) {
+//                entityList.clear();
+//                ListNBT list = compound.getTagList("entityList", 8);
+//                for (int i = 0; i < list.tagCount(); i++) {
+//                    entityList.add(list.getStringTagAt(i));
+//                }
+//            }
         }
     }
 

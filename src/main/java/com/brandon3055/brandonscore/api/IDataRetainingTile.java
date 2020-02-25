@@ -13,7 +13,7 @@ public interface IDataRetainingTile {
     void readFromItemStack(CompoundNBT tileCompound);
 
     /**
-     * @return false to completely disable tile data saving and restore default harvest logic. Deeded because IDataRetainingTile is now implemented on {@link com.brandon3055.brandonscore.blocks.TileBCBase}
+     * @return false to completely disable tile data saving and restore default harvest logic. Needed because IDataRetainingTile is now implemented on {@link com.brandon3055.brandonscore.blocks.TileBCBase}
      */
     default boolean saveToItem() { return true; }
 }

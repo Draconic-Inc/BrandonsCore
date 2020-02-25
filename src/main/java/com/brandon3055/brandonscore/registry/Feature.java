@@ -120,7 +120,7 @@
 //    }
 //
 //    /**
-//     * Allows you to prevent the registration of an ItemBlock.
+//     * Allows you to prevent the registration of an BlockItem.
 //     * Used For Blocks.
 //     */
 //    public boolean hasItemBlock() {
@@ -128,10 +128,10 @@
 //    }
 //
 //    /**
-//     * Allows you to override the ItemBlock used if this feature is a block.<br><br>
+//     * Allows you to override the BlockItem used if this feature is a block.<br><br>
 //     * Used for Blocks.
 //     */
-//    public Class<? extends ItemBlock> itemBlock() {
+//    public Class<? extends BlockItem> itemBlock() {
 //        return itemBlockClass;
 //    }
 //

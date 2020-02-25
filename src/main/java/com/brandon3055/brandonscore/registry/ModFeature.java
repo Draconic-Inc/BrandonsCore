@@ -1,6 +1,6 @@
 //package com.brandon3055.brandonscore.registry;
 //
-//import net.minecraft.item.ItemBlock;
+//import net.minecraft.item.BlockItem;
 //import net.minecraft.tileentity.TileEntity;
 //
 //import java.lang.annotation.ElementType;
@@ -36,7 +36,7 @@
 //     * Example variant map:<br>
 //     * {"0:type=normal", "1:type=nether", "2:type=end"}<br><br>
 //     * Used for both Items and ItemBlocks.<br>
-//     * In the case of blocks this applies to the ItemBlock.
+//     * In the case of blocks this applies to the BlockItem.
 //     */
 //    String[] variantMap() default {};
 //
@@ -53,16 +53,16 @@
 //    String stateOverride() default "";
 //
 //    /**
-//     * Allows you to prevent the registration of an ItemBlock.
+//     * Allows you to prevent the registration of an BlockItem.
 //     * Used For Blocks.
 //     */
 //    boolean hasItemBlock() default true;
 //
 //    /**
-//     * Allows you to override the ItemBlock used if this feature is a block.<br><br>
+//     * Allows you to override the BlockItem used if this feature is a block.<br><br>
 //     * Used for Blocks.
 //     */
-//    Class<? extends ItemBlock> itemBlock() default ItemBlock.class;
+//    Class<? extends BlockItem> itemBlock() default BlockItem.class;
 //
 //    /**
 //     * Used to register a tile entity for this block if it has one.

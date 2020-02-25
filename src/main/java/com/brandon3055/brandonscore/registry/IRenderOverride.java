@@ -17,7 +17,7 @@
 //     * Override registerNormal to change this.
 //     * Remember to add SideOnly to this or you WILL crash servers.
 //     */
-//    @SideOnly(Side.CLIENT)
+//    @OnlyIn(Dist.CLIENT)
 //    void registerRenderer(Feature feature);
 //
 //    /**

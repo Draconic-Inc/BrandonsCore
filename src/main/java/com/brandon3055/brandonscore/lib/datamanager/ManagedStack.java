@@ -102,12 +102,12 @@ public class ManagedStack extends AbstractManagedData<ItemStack> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setTag(name, value.writeToNBT(new CompoundNBT()));
+        compound.put(name, value.write(new CompoundNBT()));
     }
 
     @Override
     public void fromNBT(CompoundNBT compound) {
-        value = new ItemStack(compound.getCompoundTag(name));
+        value = ItemStack.read(compound.getCompound(name));
         notifyListeners(value);
     }
 

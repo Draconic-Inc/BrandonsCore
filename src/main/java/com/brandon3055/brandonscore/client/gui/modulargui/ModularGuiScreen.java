@@ -2,9 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.ScaledResolution;
-
-import java.io.IOException;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Created by brandon3055 on 30/08/2016.
@@ -16,29 +14,29 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     protected GuiElementManager manager = new GuiElementManager(this);
     protected int zLevel = 0;
 
-    public ModularGuiScreen() {
-        this(0, 0);
+    public ModularGuiScreen(ITextComponent titleIn) {
+        this(titleIn, 0, 0);
     }
 
-    public ModularGuiScreen(int xSize, int ySize) {
+    public ModularGuiScreen(ITextComponent titleIn, int xSize, int ySize) {
+        super(titleIn);
         this.xSize = xSize;
         this.ySize = ySize;
-        this.mc = Minecraft.getInstance();
-        ScaledResolution scaledresolution = new ScaledResolution(mc);
-        this.itemRender = mc.getRenderItem();
-        this.fontRenderer = mc.fontRenderer;
-        this.width = scaledresolution.getScaledWidth();
-        this.height = scaledresolution.getScaledHeight();
-        manager.setWorldAndResolution(mc, width, height);
+        this.minecraft = Minecraft.getInstance();
+        this.itemRenderer = minecraft.getItemRenderer();
+        this.font = minecraft.fontRenderer;
+        this.width = minecraft.mainWindow.getScaledWidth();
+        this.height = minecraft.mainWindow.getScaledHeight();
+        manager.setWorldAndResolution(minecraft, width, height);
     }
 
     /**
      * If you need to do anything in init use the reloadGui method, Remember you should no longer be adding elements during init as it may be called more than once.
      */
     @Override
-    public final void initGui() {
-        super.initGui();
-        manager.onGuiInit(mc, width, height);
+    public final void init() {
+        super.init();
+        manager.onGuiInit(minecraft, width, height);
         reloadGui();
     }
 
@@ -98,57 +96,67 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     //region Mouse & Key
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (manager.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return;
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (manager.mouseClicked(mouseX, mouseY, button)) {
+            return true;
         }
 
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    protected void mouseReleased(int mouseX, int mouseY, int state) {
-        if (manager.mouseReleased(mouseX, mouseY, state)) {
-            return;
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (manager.mouseReleased(mouseX, mouseY, button)) {
+            return true;
         }
 
-        super.mouseReleased(mouseX, mouseY, state);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        if (manager.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
-            return;
-        }
-
-        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+    public void mouseMoved(double mouseX, double mouseY) {
+        manager.mouseMoved(mouseX, mouseY);
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (manager.keyPressed(typedChar, keyCode)) {
-            return;
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
+        if (manager.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
+            return true;
         }
 
-        if (keyCode == 1)
-        {
-            this.mc.player.closeScreen();
-            this.mc.displayGuiScreen((Screen)null);
-
-            if (this.mc.currentScreen == null)
-            {
-                this.mc.setIngameFocus();
-            }
-        }
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY);
     }
 
     @Override
-    public void handleMouseInput() throws IOException {
-        if (manager.handleMouseInput()) {
-            return;
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (manager.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
         }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
-        super.handleMouseInput();
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (manager.keyReleased(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char charTyped, int charCode) {
+        if (manager.charTyped(charTyped, charCode)) {
+            return true;
+        }
+        return super.charTyped(charTyped, charCode);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollAmount) {
+        if (manager.mouseScrolled(mouseX, mouseY, scrollAmount)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollAmount);
     }
 
     //endregion
@@ -156,18 +164,18 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     //region Render
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         renderElements(mouseX, mouseY, partialTicks);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
         renderOverlayLayer(mouseX, mouseY, partialTicks);
     }
 
     public void renderElements(int mouseX, int mouseY, float partialTicks) {
-        manager.renderElements(mc, mouseX, mouseY, partialTicks);
+        manager.renderElements(minecraft, mouseX, mouseY, partialTicks);
     }
 
     public void renderOverlayLayer(int mouseX, int mouseY, float partialTicks) {
-        manager.renderOverlayLayer(mc, mouseX, mouseY, partialTicks);
+        manager.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
     //endregion
@@ -175,21 +183,22 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     //region Update
 
     @Override
-    public void updateScreen() {
-        super.updateScreen();
+    public void tick() {
+        super.tick();
         manager.onUpdate();
     }
 
     @Override
-    public void setWorldAndResolution(Minecraft mc, int width, int height) {
-        super.setWorldAndResolution(mc, width, height);
+    public void init(Minecraft mc, int width, int height) {
+        super.init(mc, width, height);
         manager.setWorldAndResolution(mc, width, height);
     }
 
     //endregion
 
+
     @Override
-    public boolean doesGuiPauseGame() {
+    public boolean isPauseScreen() {
         return false;
     }
 }

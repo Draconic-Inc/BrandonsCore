@@ -85,7 +85,7 @@ public class ManagedShort extends AbstractManagedData<Short> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setShort(name, value);
+        compound.putShort(name, value);
     }
 
     @Override

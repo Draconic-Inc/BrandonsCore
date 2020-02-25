@@ -1,10 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItemUseContext;
 
 /**
  * Created by brandon3055 on 23/11/2016.
@@ -12,5 +9,5 @@ import net.minecraft.world.World;
  */
 public interface ITilePlaceListener {
 
-    void onTilePlaced(World world, BlockPos pos, Direction placedAgainst, float hitX, float hitY, float hitZ, PlayerEntity placer, ItemStack stack);
+    void onTilePlaced(BlockItemUseContext context, BlockState state);
 }

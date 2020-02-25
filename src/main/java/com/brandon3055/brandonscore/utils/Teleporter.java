@@ -3,6 +3,8 @@ package com.brandon3055.brandonscore.utils;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.dimension.DimensionType;
 
 public class Teleporter
 {
@@ -10,7 +12,7 @@ public class Teleporter
         protected double xCoord;
         protected double yCoord;
         protected double zCoord;
-        protected int dimension;
+        protected DimensionType dimension;
         protected float pitch;
         protected float yaw;
         protected String name;
@@ -21,7 +23,7 @@ public class Teleporter
 
         }
 
-        public TeleportLocation(double x, double y, double z, int dimension) {
+        public TeleportLocation(double x, double y, double z, DimensionType dimension) {
             this.xCoord = x;
             this.yCoord = y;
             this.zCoord = z;
@@ -30,7 +32,7 @@ public class Teleporter
             this.yaw = 0;
         }
 
-        public TeleportLocation(double x, double y, double z, int dimension, float pitch, float yaw) {
+        public TeleportLocation(double x, double y, double z, DimensionType dimension, float pitch, float yaw) {
             this.xCoord = x;
             this.yCoord = y;
             this.zCoord = z;
@@ -39,7 +41,7 @@ public class Teleporter
             this.yaw = yaw;
         }
 
-        public TeleportLocation(double x, double y, double z, int dimension, float pitch, float yaw, String name) {
+        public TeleportLocation(double x, double y, double z, DimensionType dimension, float pitch, float yaw, String name) {
             this.xCoord = x;
             this.yCoord = y;
             this.zCoord = z;
@@ -61,7 +63,7 @@ public class Teleporter
             return zCoord;
         }
 
-        public int getDimension() {
+        public DimensionType getDimension() {
             return dimension;
         }
 
@@ -97,7 +99,7 @@ public class Teleporter
             zCoord = z;
         }
 
-        public void setDimension(int d) {
+        public void setDimension(DimensionType d) {
             dimension = d;
         }
 
@@ -118,22 +120,22 @@ public class Teleporter
         }
 
         public void writeToNBT(CompoundNBT compound) {
-            compound.setDouble("X", xCoord);
-            compound.setDouble("Y", yCoord);
-            compound.setDouble("Z", zCoord);
-            compound.setInteger("Dimension", dimension);
-            compound.setFloat("Pitch", pitch);
-            compound.setFloat("Yaw", yaw);
-            compound.setString("Name", name);
-            compound.setString("DimentionName", dimensionName);
-            compound.setBoolean("WP", writeProtected);
+            compound.putDouble("X", xCoord);
+            compound.putDouble("Y", yCoord);
+            compound.putDouble("Z", zCoord);
+            compound.putString("Dimension", dimension.getRegistryName().toString());
+            compound.putFloat("Pitch", pitch);
+            compound.putFloat("Yaw", yaw);
+            compound.putString("Name", name);
+            compound.putString("DimentionName", dimensionName);
+            compound.putBoolean("WP", writeProtected);
         }
 
         public void readFromNBT(CompoundNBT compound) {
             xCoord = compound.getDouble("X");
             yCoord = compound.getDouble("Y");
             zCoord = compound.getDouble("Z");
-            dimension = compound.getInteger("Dimension");
+            dimension = DimensionType.byName(new ResourceLocation(compound.getString("Dimension")));
             pitch = compound.getFloat("Pitch");
             yaw = compound.getFloat("Yaw");
             name = compound.getString("Name");

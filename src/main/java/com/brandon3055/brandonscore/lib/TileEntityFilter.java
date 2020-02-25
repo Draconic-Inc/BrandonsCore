@@ -23,7 +23,7 @@ public class TileEntityFilter extends EntityFilter {
 
     @Override
     public void sendConfigToServer(CompoundNBT compound) {
-        tile.sendPacketToServer(output -> output.writeNBTTagCompound(compound), packetID);
+        tile.sendPacketToServer(output -> output.writeCompoundNBT(compound), packetID);
     }
 
     @Override

@@ -1,32 +1,30 @@
 package com.brandon3055.brandonscore.client;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
-import com.brandon3055.brandonscore.network.PacketTickTime;
-import com.brandon3055.brandonscore.network.PacketUpdateMount;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.MathUtils;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.DimensionType;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 17/07/2016.
@@ -88,37 +86,37 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void joinWorld(EntityJoinWorldEvent event) {
-        if (event.getEntity() instanceof EntityPlayerSP) {
-            BrandonsCore.network.sendToServer(new PacketUpdateMount(0));
-        }
+//        if (event.getEntity() instanceof ServerPlayerEntity) {
+//TODO            BrandonsCore.network.sendToServer(new PacketUpdateMount(0));
+//        }
     }
 
     @SubscribeEvent
     public void renderScreen(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().currentScreen instanceof GuiChat) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().currentScreen instanceof ChatScreen) {
             return;
         }
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(0, 0, 600);
+        GlStateManager.translated(0, 0, 600);
 
-        renderGraph(220, 0, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight(), overallTickTime, "Overall");
+        renderGraph(220, 0, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), overallTickTime, "Overall");
 
         int i = 0;
         for (Integer dim : sortingOrder) {
-            if (dimTickTimes.get(dim) == null || !DimensionManager.isDimensionRegistered(dim)) {
+            if (dimTickTimes.get(dim) == null || DimensionType.getById(dim) == null) {
                 continue;
             }
 
-            DimensionType dimensionType = DimensionManager.getProviderType(dim);
-            renderGraph(0, i, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight(), dimTickTimes.get(dim), dimensionType == null ? dim.toString() : dimensionType.getName());
+            DimensionType dimensionType = DimensionType.getById(dim);
+            renderGraph(0, i, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), dimTickTimes.get(dim), dimensionType == null ? dim.toString() : DimensionType.getKey(dimensionType).toString());
             i++;
         }
 
         if (debugTimeout < 190) {
             FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-            fontRenderer.drawString("Server Stopped Sending Updates!", 0, event.getResolution().getScaledHeight() - 21, 0xFF0000, true);
-            fontRenderer.drawString("Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getResolution().getScaledHeight() - 11, 0xFF0000, true);
+            fontRenderer.drawStringWithShadow("Server Stopped Sending Updates!", 0, event.getWindow().getScaledHeight() - 21, 0xFF0000);
+            fontRenderer.drawStringWithShadow("Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getScaledHeight() - 11, 0xFF0000);
         }
 
         GlStateManager.popMatrix();
@@ -133,18 +131,18 @@ public class BCClientEventHandler {
         int slotIndex = 2;
         for (ItemStack stack : player.inventory.armorInventory) {
             if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
-                newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.values()[slotIndex]);
+                newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.values()[slotIndex]);
             }
             slotIndex++;
         }
 
         ItemStack stack = player.getHeldItemOffhand();
         if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
-            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.OFFHAND);
+            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.OFFHAND);
         }
         stack = player.getHeldItemMainhand();
         if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
-            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EntityEquipmentSlot.MAINHAND);
+            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.MAINHAND);
         }
 
         if (newFOV != originalFOV) {
@@ -202,7 +200,7 @@ public class BCClientEventHandler {
             remountTicksRemaining--;
             if (remountTicksRemaining == 0) {
                 LogHelperBC.error("Unable to locate player mount after 500 ticks! Aborting");
-                BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
+//TODO                BrandonsCore.network.sendToServer(new PacketUpdateMount(-1));
             }
         }
     }
@@ -219,7 +217,7 @@ public class BCClientEventHandler {
 
         GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
         FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-        fontRenderer.drawString(name, x + 2, yHeight - 43, 0xFFFFFF, true);
+        fontRenderer.drawStringWithShadow(name, x + 2, yHeight - 43, 0xFFFFFF);
         GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
         GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
         fontRenderer.drawString("50ms", x + 2, yHeight - 16, 0xFFFFFF);
@@ -233,46 +231,46 @@ public class BCClientEventHandler {
         }
     }
 
-    public static void handleTickPacket(PacketTickTime packet) {
-        debugTimeout = 200;
-        renderIndex++;
-
-        overallTickTime[renderIndex % 200] = packet.overall;
-
-        LinkedList<Integer> dims = new LinkedList<>();
-        dims.addAll(dimTickTimes.keySet());
-
-        for (Integer dim : packet.tickTimes.keySet()) {
-            if (!dimTickTimes.containsKey(dim)) {
-                Integer[] ints = new Integer[200];
-                for (int i = 0; i < ints.length; i++) {
-                    ints[i] = 0;
-                }
-                dimTickTimes.put(dim, ints);
-            }
-
-            dimTickTimes.get(dim)[renderIndex % 200] = packet.tickTimes.get(dim);
-            if (dims.contains(dim)) {
-                dims.remove(dim);
-            }
-        }
-
-        if (!dims.isEmpty()) {
-            while (dims.size() > 0) {
-                for (Integer i : dimTickTimes.keySet()) {
-                    if (dims.get(0).equals(i)) {
-                        dimTickTimes.remove(i);
-                        dims.remove(0);
-                        break;
-                    }
-                }
-            }
-
-            sortingOrder.clear();
-            sortingOrder.addAll(dimTickTimes.keySet());
-            Collections.sort(sortingOrder, sorter);
-        }
-    }
+//TODO    public static void handleTickPacket(PacketTickTime packet) {
+//        debugTimeout = 200;
+//        renderIndex++;
+//
+//        overallTickTime[renderIndex % 200] = packet.overall;
+//
+//        LinkedList<Integer> dims = new LinkedList<>();
+//        dims.addAll(dimTickTimes.keySet());
+//
+//        for (Integer dim : packet.tickTimes.keySet()) {
+//            if (!dimTickTimes.containsKey(dim)) {
+//                Integer[] ints = new Integer[200];
+//                for (int i = 0; i < ints.length; i++) {
+//                    ints[i] = 0;
+//                }
+//                dimTickTimes.put(dim, ints);
+//            }
+//
+//            dimTickTimes.get(dim)[renderIndex % 200] = packet.tickTimes.get(dim);
+//            if (dims.contains(dim)) {
+//                dims.remove(dim);
+//            }
+//        }
+//
+//        if (!dims.isEmpty()) {
+//            while (dims.size() > 0) {
+//                for (Integer i : dimTickTimes.keySet()) {
+//                    if (dims.get(0).equals(i)) {
+//                        dimTickTimes.remove(i);
+//                        dims.remove(0);
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            sortingOrder.clear();
+//            sortingOrder.addAll(dimTickTimes.keySet());
+//            Collections.sort(sortingOrder, sorter);
+//        }
+//    }
 
     public static int getFrameColor(int input, int min, int mid, int max) {
         return input < mid ? blendColors(-16711936, -256, (float) input / (float) mid) : blendColors(-256, -65536, (float) (input - mid) / (float) (max - mid));

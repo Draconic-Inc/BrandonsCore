@@ -2,28 +2,26 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.BCTextures;
+import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.Utils;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.Tag;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.client.config.GuiUtils;
-import net.minecraftforge.oredict.OreDictionary;
-import org.lwjgl.input.Mouse;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
-import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
+import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 5/31/2018.
@@ -37,12 +35,15 @@ public class StackElement extends MDElementBase<StackElement> {
         this.enableTooltip = true;
         this.size = 16;
 
-        boolean isOre = OreDictionary.doesOreNameExist(stackString);
+        //TODO Fix ore dictionary stuff
+//        May need to fix the PI editor first...
+        Tag<Item> tag = null;////ItemTags.getCollection().get(ResourceHelperBC.getResourceRAW(stackString));
+        boolean isOre = tag != null;
 
         List<ItemStack> baseStacks = new ArrayList<>();
 
         if (isOre) {
-            baseStacks.addAll(OreDictionary.getOres(stackString));
+            baseStacks.addAll(tag.getAllElements().stream().map(ItemStack::new).collect(Collectors.toList()));
         }
         else {
             StackReference stackRef = StackReference.fromString(stackString);
@@ -55,16 +56,17 @@ public class StackElement extends MDElementBase<StackElement> {
         }
 
         NonNullList<ItemStack> finalStacks = NonNullList.create();
-        for (ItemStack stack : baseStacks) {
-            if (stack.getMetadata() == OreDictionary.WILDCARD_VALUE && stack.getHasSubtypes()) {
-                stack.getItem().getSubItems(CreativeTabs.SEARCH, finalStacks);
-            }
-            else {
-                finalStacks.add(stack);
-            }
-        }
+//        for (ItemStack stack : baseStacks) {
+//            if (stack.getDamage() == OreDictionary.WILDCARD_VALUE && stack.getHasSubtypes()) {
+//                stack.getItem().getSubItems(CreativeTabs.SEARCH, finalStacks);
+//            }
+//            else {
+//                finalStacks.add(stack);
+//            }
+//        }
+        finalStacks.addAll(baseStacks);
 
-        stacks = finalStacks.toArray(new ItemStack[finalStacks.size()]);
+        stacks = finalStacks.toArray(new ItemStack[0]);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class StackElement extends MDElementBase<StackElement> {
 
         if (drawSlot) {
             bindTexture(BCTextures.MODULAR_GUI);
-            GlStateManager.color(1F, 1F, 1F, 1F);
+            GlStateManager.color4f(1F, 1F, 1F, 1F);
             drawScaledCustomSizeModalRect(xPos(), yPos(), 0, 0, 18, 18, xSize(), ySize(), 255, 255);
         }
 
@@ -89,19 +91,20 @@ public class StackElement extends MDElementBase<StackElement> {
         ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
 
         RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.translate(xPos() + scale, yPos() + scale, getRenderZLevel() - 80);
-        GlStateManager.scale(scale, scale, 1);
-        minecraft.getRenderItem().renderItemIntoGUI(stack, 0, 0);
+        GlStateManager.translated(xPos() + scale, yPos() + scale, getRenderZLevel() - 80);
+        GlStateManager.scaled(scale, scale, 1);
+        minecraft.getItemRenderer().renderItemIntoGUI(stack, 0, 0);
 
         if (stack.getCount() > 1) {
             String s = "" + Utils.SELECT + "f" + stack.getCount() + "" + Utils.SELECT + "f";
-            GlStateManager.translate(0, 0, -(getRenderZLevel() - 80));
+            GlStateManager.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
             drawString(fontRenderer, s, 18 - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset -= 45;
         }
 
-        GlStateManager.color(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
+        //TODO com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer
+//        GlStateManager.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
         RenderHelper.disableStandardItemLighting();
         GlStateManager.popMatrix();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
@@ -112,11 +115,11 @@ public class StackElement extends MDElementBase<StackElement> {
         if (enableTooltip && isMouseOver(mouseX, mouseY)) {
             if (tooltip.isEmpty()) {
                 ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
-                List<String> list = stack.getTooltip(this.mc.player, this.mc.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
+                List<String> list = getTooltipFromItem(stack);
 
                 for (int i = 0; i < list.size(); ++i) {
                     if (i == 0) {
-                        list.set(i, stack.getRarity().rarityColor + list.get(i));
+                        list.set(i, stack.getRarity().color + list.get(i));
                     }
                     else {
                         list.set(i, TextFormatting.GRAY + list.get(i));
@@ -136,7 +139,7 @@ public class StackElement extends MDElementBase<StackElement> {
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (isMouseOver(mouseX, mouseY) && (mouseButton == 0 || mouseButton == 1)) {
             ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
             JeiHelper.openJEIRecipe(stack, mouseButton == 1);
@@ -147,9 +150,9 @@ public class StackElement extends MDElementBase<StackElement> {
     }
 
     @Override
-    protected boolean keyPressed(char typedChar, int keyCode) throws IOException {
-        int mouseX = Mouse.getX() * screenWidth / this.mc.displayWidth;
-        int mouseY = screenHeight - Mouse.getY() * screenHeight / this.mc.displayHeight - 1;
+    protected boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        double mouseX = getMouseX();
+        double mouseY = getMouseY();
 
         if (isMouseOver(mouseX, mouseY)) {
             ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
@@ -161,7 +164,8 @@ public class StackElement extends MDElementBase<StackElement> {
                 JeiHelper.openJEIRecipe(stack, true);
                 return true;
             }
-            else if (PIHelper.isInstalled() && keyCode == PIHelper.getETGuiKey().getKeyCode()) {
+            //TODO Test
+            else if (PIHelper.isInstalled() && PIHelper.getETGuiKey().matchesKey(keyCode, scanCode)) {
                 List<String> pages = PIHelper.getRelatedPages(stack);
                 if (!pages.isEmpty()) {
                     PIHelper.openGui(modularGui.getScreen(), pages);
@@ -170,6 +174,6 @@ public class StackElement extends MDElementBase<StackElement> {
             }
         }
 
-        return super.keyPressed(typedChar, keyCode);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.api.power.IOPStorage;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.annotation.Nonnull;
@@ -16,28 +17,24 @@ import javax.annotation.Nullable;
  */
 public class OPMultiProvider implements ICapabilityProvider {
 
-    public final IOPStorage instance;
+    public final LazyOptional<IOPStorage> instance;
     public final Direction facing;
 
-    public OPMultiProvider(IOPStorage instance, @Nullable Direction facing) {
+    public OPMultiProvider(LazyOptional<IOPStorage> instance, @Nullable Direction facing) {
         this.instance = instance;
         this.facing = facing;
     }
 
+    @Nonnull
     @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable Direction facing) {
-        return capability == CapabilityOP.OP || capability == CapabilityEnergy.ENERGY;
-    }
-
-    @Nullable
-    @Override
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        if (capability == CapabilityOP.OP) {
-            return CapabilityOP.OP.cast(instance);
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (facing == null || facing == side) {
+            if (cap == CapabilityOP.OP) {
+                return instance.cast();
+            } else if (cap == CapabilityEnergy.ENERGY) {
+                return instance.cast();
+            }
         }
-        else if (capability == CapabilityEnergy.ENERGY) {
-            return CapabilityEnergy.ENERGY.cast(instance);
-        }
-        return null;
+        return LazyOptional.empty();
     }
 }

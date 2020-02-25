@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.nbt.CompoundNBT;
 
 /**
@@ -42,9 +42,9 @@ public class FilterTamed extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        boolean isTamable = entity instanceof IEntityOwnable;
+        boolean isTamable = entity instanceof TameableEntity;
         if (isTamable) {
-            IEntityOwnable ownable = (IEntityOwnable) entity;
+            TameableEntity ownable = (TameableEntity) entity;
             if (ownable.getOwnerId() != null) {
                 return whitelistTamed;
             }
@@ -61,8 +61,8 @@ public class FilterTamed extends FilterBase {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = super.serializeNBT();
-        compound.setBoolean("include", whitelistTamed);
-        compound.setBoolean("tamable", includeTamable);
+        compound.putBoolean("include", whitelistTamed);
+        compound.putBoolean("tamable", includeTamable);
         return compound;
     }
 

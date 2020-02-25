@@ -1,16 +1,15 @@
 package com.brandon3055.brandonscore.integration;
 
-import mezz.jei.api.IRecipeRegistry;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.recipe.IFocus;
-import mezz.jei.api.recipe.IRecipeCategory;
-import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.api.recipe.IRecipeManager;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.config.KeyBindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
-import net.minecraftforge.fml.common.Optional;
+
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class JeiHelper {
         return checkJEIRuntime();
     }
 
-    @Optional.Method(modid = "jei")
+    //    @Optional.Method(modid = "jei")
     public static boolean checkJEIRuntime() {
         return BCJEIPlugin.jeiRuntime != null;
     }
@@ -49,18 +48,18 @@ public class JeiHelper {
         return getRenderers(result);
     }
 
-    @Optional.Method(modid = "jei")
+    //    @Optional.Method(modid = "jei")
     private static List<IRecipeRenderer> getRenderers(ItemStack result) {
         List<IRecipeRenderer> renderers = new ArrayList<>();
 
-        IRecipeRegistry registry = BCJEIPlugin.jeiRuntime.getRecipeRegistry();
+        IRecipeManager registry = BCJEIPlugin.jeiRuntime.getRecipeManager();
         List<IRecipeCategory> categories = new LinkedList<>(registry.getRecipeCategories(registry.createFocus(IFocus.Mode.OUTPUT, result)));
 
         for (IRecipeCategory category : categories) {
-            List wrappers = registry.getRecipeWrappers(category, registry.createFocus(IFocus.Mode.OUTPUT, result));
+            List wrappers = registry.getRecipes(category, registry.createFocus(IFocus.Mode.OUTPUT, result));
             for (Object wrapper : wrappers) {
                 try {
-                    renderers.add(new RecipeRenderer(category, (IRecipeWrapper) wrapper, result));
+                    renderers.add(new RecipeRenderer(category, wrapper, result));
                 }
                 catch (Throwable t) {
                     t.printStackTrace();
@@ -77,10 +76,10 @@ public class JeiHelper {
         }
     }
 
-    @Optional.Method(modid = "jei")
+    //    @Optional.Method(modid = "jei")
     private static void openJEIRecipeInternal(ItemStack stack, boolean usage) {
         if (checkJEIRuntime()) {
-            IFocus f = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, stack);
+            IFocus f = BCJEIPlugin.jeiRuntime.getRecipeManager().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, stack);
             BCJEIPlugin.jeiRuntime.getRecipesGui().show(f);
         }
     }
@@ -92,10 +91,10 @@ public class JeiHelper {
         return -1;
     }
 
-    @Optional.Method(modid = "jei")
+    //    @Optional.Method(modid = "jei")
     private static int getRecipeKeyInternal(boolean usage) {
         try {
-            return usage ? KeyBindings.showUses.getKeyCode() : KeyBindings.showRecipe.getKeyCode();
+            return usage ? KeyBindings.showUses.getKey().getKeyCode() : KeyBindings.showRecipe.getKey().getKeyCode();
         }
         catch (Throwable e) {
             e.printStackTrace();
@@ -118,9 +117,9 @@ public class JeiHelper {
             return null;
         }
 
-        IIngredientHelper helper = BCJEIPlugin.ingredientRegistry.getIngredientHelper(ingredient);
+        IIngredientHelper helper = BCJEIPlugin.jeiRuntime.getIngredientManager().getIngredientHelper(ingredient);
 
-        return helper.cheatIngredient(ingredient, false);
+        return helper.getCheatItemStack(ingredient);
     }
 
     //region IRecipeRenderer
@@ -134,9 +133,9 @@ public class JeiHelper {
         private int yPos = 0;
         private String title;
 
-        public RecipeRenderer(IRecipeCategory category, IRecipeWrapper wrapper, ItemStack result) {
-            IFocus<?> f = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createFocus(IFocus.Mode.OUTPUT, result);//new Focus<Object>(result);
-            this.recipeLayout = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createRecipeLayoutDrawable(category, wrapper, f);
+        public RecipeRenderer(IRecipeCategory category, Object wrapper, ItemStack result) {
+            IFocus<?> f = BCJEIPlugin.jeiRuntime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, result);//new Focus<Object>(result);
+            this.recipeLayout = BCJEIPlugin.jeiRuntime.getRecipeManager().createRecipeLayoutDrawable(category, wrapper, f);
             this.width = category.getBackground().getWidth();
             this.height = category.getBackground().getHeight();
             this.title = category.getTitle();
@@ -163,35 +162,35 @@ public class JeiHelper {
                 recipeLayout.setPosition(xPos, yPos);
             }
 
-            recipeLayout.drawRecipe(mc, mouseX, mouseY);
+            recipeLayout.drawRecipe(mouseX, mouseY);
         }
 
         @Override
         public void renderOverlay(Minecraft mc, int mouseX, int mouseY) {
-            recipeLayout.drawOverlays(mc, mouseX, mouseY);
+            recipeLayout.drawOverlays(mouseX, mouseY);
         }
 
         @Override
-        public boolean handleRecipeClick(Minecraft minecraft, int mouseX, int mouseY, boolean usage) {
-            Object clicked = recipeLayout.getIngredientUnderMouse(mouseX, mouseY);
+        public boolean handleRecipeClick(Minecraft minecraft, double mouseX, double mouseY, boolean usage) {
+            Object clicked = recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY);
 
             if (clicked != null) {
-                IFocus f = BCJEIPlugin.jeiRuntime.getRecipeRegistry().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, clicked);
+                IFocus f = BCJEIPlugin.jeiRuntime.getRecipeManager().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, clicked);
                 BCJEIPlugin.jeiRuntime.getRecipesGui().show(f);
             }
 
             return false;//layout.handleRecipeClick(minecraft, mouseX, mouseY, mouseButton);
         }
 
+        @Nullable
+        @Override
+        public Object getIngredientUnderMouse(double mouseX, double mouseY) {
+            return recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY);
+        }
+
         @Override
         public String getTitle() {
             return title;
-        }
-
-        @Nullable
-        @Override
-        public Object getIngredientUnderMouse(int mouseX, int mouseY) {
-            return recipeLayout.getIngredientUnderMouse(mouseX, mouseY);
         }
     }
 

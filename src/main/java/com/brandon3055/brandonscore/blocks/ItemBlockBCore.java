@@ -3,52 +3,41 @@ package com.brandon3055.brandonscore.blocks;
 import com.brandon3055.brandonscore.lib.IBCoreBlock;
 import com.brandon3055.brandonscore.lib.ITilePlaceListener;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 /**
  * Created by brandon3055 on 18/3/2016.
  * This is the base item block for all custom item blocks.
  */
-public class ItemBlockBCore extends ItemBlock {
+public class ItemBlockBCore extends BlockItem {
 
     private String registryDomain = null;
 
-    public ItemBlockBCore(Block block) {
-        super(block);
-        if (block instanceof IBCoreBlock) {
-            setHasSubtypes(((IBCoreBlock) block).hasSubItemTypes());
-        }
+    public ItemBlockBCore(Block block, Item.Properties builder) {
+        super(block, builder);
     }
 
-    @Override
-    public String getUnlocalizedName(ItemStack stack) {
-        if (block instanceof IBCoreBlock && ((IBCoreBlock) block).getNameOverrides().containsKey(stack.getItemDamage())) {
-            return "tile." + getRegistryDomain() + ":" +((IBCoreBlock) block).getNameOverrides().get(stack.getItemDamage());
-        }
-
-        return super.getUnlocalizedName(stack);
-    }
-
-    @Override
-    public int getMetadata(int damage) {
-        return getHasSubtypes() ? damage : 0;
-    }
+//    @Override
+//    public String getUnlocalizedName(ItemStack stack) {
+//        if (block instanceof IBCoreBlock && ((IBCoreBlock) block).getNameOverrides().containsKey(stack.getItemDamage())) {
+//            return "tile." + getRegistryDomain() + ":" + ((IBCoreBlock) block).getNameOverrides().get(stack.getItemDamage());
+//        }
+//
+//        return super.getUnlocalizedName(stack);
+//    }
 
     public String getRegistryDomain() {
         if (registryDomain == null) {
             if (getRegistryName() == null) {
                 return "null";
-            }
-            else {
-                registryDomain = getRegistryName().getResourceDomain();
+            } else {
+                registryDomain = getRegistryName().getNamespace();
             }
         }
 
@@ -56,27 +45,22 @@ public class ItemBlockBCore extends ItemBlock {
     }
 
     @Override
-    public boolean placeBlockAt(ItemStack stack, PlayerEntity player, World world, BlockPos pos, Direction side, float hitX, float hitY, float hitZ, IBlockState newState) {
-        boolean placed = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
+    protected boolean placeBlock(BlockItemUseContext context, BlockState state) {
+        boolean placed = super.placeBlock(context, state);
 
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = context.getWorld().getTileEntity(context.getPos());
         if (placed && tile instanceof ITilePlaceListener) {
-            ((ITilePlaceListener) tile).onTilePlaced(world, pos, side, hitX, hitY, hitZ, player, stack);
+            ((ITilePlaceListener) tile).onTilePlaced(context, state);
         }
 
         return placed;
     }
 
     @Override
-    public boolean getShareTag() {
-        return super.getShareTag();
-    }
-
-    @Override
-    public CompoundNBT getNBTShareTag(ItemStack stack) {
-        if (block instanceof IBCoreBlock && ((IBCoreBlock) block).overrideShareTag()) {
-            return ((IBCoreBlock) block).getNBTShareTag(stack);
+    public CompoundNBT getShareTag(ItemStack stack) {
+        if (getBlock() instanceof IBCoreBlock && ((IBCoreBlock) getBlock()).overrideShareTag()) {
+            return ((IBCoreBlock) getBlock()).getNBTShareTag(stack);
         }
-        return super.getNBTShareTag(stack);
+        return super.getShareTag(stack);
     }
 }

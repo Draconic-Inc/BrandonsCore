@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.effects;
 
-import net.minecraft.client.renderer.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;

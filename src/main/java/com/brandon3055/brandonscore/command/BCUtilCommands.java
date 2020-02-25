@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.command;
 
-import codechicken.lib.reflect.ObfMapping;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
@@ -13,44 +12,50 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.CommandBase;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.command.PlayerNotFoundException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.play.server.SPacketChunkData;
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerChunkMap;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.eventhandler.*;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.eventbus.EventBus;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventListener;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nullable;
@@ -66,207 +71,197 @@ import static net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT;
 /**
  * Created by brandon3055 on 23/06/2017.
  */
-public class BCUtilCommands extends CommandBase {
+//TODO Test all these commands!
+public class BCUtilCommands {
 
     private static Random rand = new Random();
 
-    @Override
-    public String getName() {
-        return "bcore_util";
+    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+        dispatcher.register(
+                Commands.literal("bcore_util")
+                        .then(registerNBT())
+                        .then(registerRegenChunk())
+                        .then(registerNoClip())
+                        .then(registerUUID())
+                        .then(registerPlayerAccess())
+                        .then(registerDumpEvents())
+                        .then(registerEggify())
+        );
     }
 
-    @Override
-    public String getUsage(ICommandSource sender) {
-        return "/bcore_util help";
+
+    private static ArgumentBuilder<CommandSource, ?> registerNBT() {
+        return Commands.literal("nbt")
+                .requires(cs -> cs.hasPermissionLevel(0))
+                .executes(context -> functionNBT(context.getSource()));
     }
 
-    @Override
-    public int getRequiredPermissionLevel() {
-        return 3;
+    private static ArgumentBuilder<CommandSource, ?> registerRegenChunk() {
+        return Commands.literal("regenchunk")
+                .requires(cs -> cs.hasPermissionLevel(3))
+                .then(Commands.argument("radius", IntegerArgumentType.integer(1, 32))
+                        .executes(ctx -> regenChunk(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "radius")))
+                );
     }
 
-    @Override
-    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        if (args.length == 0) {
-            help(sender);
-            return;
-        }
-
-        try {
-            String function = args[0];
-
-            if (function.toLowerCase().equals("nbt")) {
-                functionNBT(server, sender, args);
-            }
-            else if (function.equals("regenchunk")) {
-                regenChunk(server, sender, args);
-            }
-            else if (function.equals("noclip")) {
-                toggleNoClip(server, sender, args);
-            }
-            else if (function.equals("uuid")) {
-                getUUID(server, sender, args);
-            }
-            else if (function.equals("player_access")) {
-                playerAccess(server, sender, args);
-            }
-            else if (function.equals("dump_event_listeners")) {
-                dumpEventListeners(sender);
-            }
-            else if (function.equals("light") && !ObfMapping.obfuscated) {
-//                new LightTest((WorldServer) sender.getEntityWorld()).runTest(new BlockPos(getCommandSenderAsPlayer(sender)));
-            }
-            else if (function.equals("eggify")) {
-                eggify(server, sender, args);
-            }
-            else {
-                help(sender);
-            }
-        }
-        catch (Throwable e) {
-            e.printStackTrace();
-            throw new CommandException(e.getMessage());
-        }
+    private static ArgumentBuilder<CommandSource, ?> registerNoClip() {
+        return Commands.literal("noclip")
+                .requires(cs -> cs.hasPermissionLevel(3))
+                .executes(context -> toggleNoClip(context.getSource()));
     }
 
-    @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSource sender, String[] args, @Nullable BlockPos targetPos) {
-        if (args.length == 2 && args[0].equals("player_access")) {
-            PlayerProfileCache cache = server.getPlayerProfileCache();
-            List<String> list = new ArrayList<>();
-            list.add("list");
-            list.addAll(Lists.newArrayList(cache.getUsernames()));
-            return getListOfStringsMatchingLastWord(args, list);
-        }
-        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners", "eggify");
+    private static ArgumentBuilder<CommandSource, ?> registerUUID() {
+        return Commands.literal("uuid")
+                .requires(cs -> cs.hasPermissionLevel(0))
+                .then(Commands.argument("target", EntityArgument.player())
+                        .executes(ctx -> getUUID(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))
+                )
+                .executes(ctx -> getUUID(ctx.getSource(), ctx.getSource().asPlayer()));
     }
 
-    private void help(ICommandSource sender) {
-        ChatHelper.message(sender, "The following are a list of Brandon's Core Utility Commands", new Style().setColor(TextFormatting.AQUA).setUnderlined(true));
-        ChatHelper.message(sender, "/bcore_util nbt", TextFormatting.BLUE);
-        ChatHelper.message(sender, "-Prints the NBT tag of the stack you are holding to chat and to the console.", TextFormatting.GRAY);
-        ChatHelper.message(sender, "/bcore_util regenchunk [radius]", TextFormatting.BLUE);
-        ChatHelper.message(sender, "-Regenerates the chunk(s) at your position.", TextFormatting.GRAY);
-        ChatHelper.message(sender, "/bcore_util noclip", TextFormatting.BLUE);
-        ChatHelper.message(sender, "-Toggles noclip allowing you to fly through blocks as if in spectator mode... Or fall into the void if you dont have flight", TextFormatting.GRAY);
-//        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
-//        ChatHelper.message(sender, "-", TextFormatting.GRAY);
-//        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
-//        ChatHelper.message(sender, "-", TextFormatting.GRAY);
+    private static ArgumentBuilder<CommandSource, ?> registerPlayerAccess() {
+        return Commands.literal("player_access")
+                .requires(cs -> cs.hasPermissionLevel(3))
+                .then(Commands.argument("target", reader -> StringArgumentType.string())
+                        .suggests((context, builder) -> ISuggestionProvider.suggest(accessiblePlayers(context.getSource()).values().stream().map(GameProfile::getName), builder))
+                        .executes(context -> playerAccess(context.getSource(), context.getArgument("target", String.class)))
+                )
+                .then(Commands.literal("list")
+                        .executes(context -> playerAccess(context.getSource(), null))
+                );
     }
 
-    private void functionNBT(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        PlayerEntity player = getCommandSenderAsPlayer(sender);
+    private static ArgumentBuilder<CommandSource, ?> registerDumpEvents() {
+        return Commands.literal("dump_event_listeners")
+                .requires(cs -> cs.hasPermissionLevel(0))
+                .executes(ctx -> dumpEventListeners(ctx.getSource()));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> registerEggify() {
+        return Commands.literal("eggify")
+                .requires(cs -> cs.hasPermissionLevel(3));
+    }
+
+//    private void help(ICommandSource sender) {
+//        ChatHelper.message(sender, "The following are a list of Brandon's Core Utility Commands", new Style().setColor(TextFormatting.AQUA).setUnderlined(true));
+//        ChatHelper.message(sender, "/bcore_util nbt", TextFormatting.BLUE);
+//        ChatHelper.message(sender, "-Prints the NBT tag of the stack you are holding to chat and to the console.", TextFormatting.GRAY);
+//        ChatHelper.message(sender, "/bcore_util regenchunk [radius]", TextFormatting.BLUE);
+//        ChatHelper.message(sender, "-Regenerates the chunk(s) at your position.", TextFormatting.GRAY);
+//        ChatHelper.message(sender, "/bcore_util noclip", TextFormatting.BLUE);
+//        ChatHelper.message(sender, "-Toggles noclip allowing you to fly through blocks as if in spectator mode... Or fall into the void if you dont have flight", TextFormatting.GRAY);
+////        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
+////        ChatHelper.message(sender, "-", TextFormatting.GRAY);
+////        ChatHelper.message(sender, "/bcore_util", TextFormatting.BLUE);
+////        ChatHelper.message(sender, "-", TextFormatting.GRAY);
+//    }
+
+    private static int functionNBT(CommandSource source) throws CommandException, CommandSyntaxException {
+        PlayerEntity player = source.asPlayer();
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
-            throw new CommandException("You are not holding an item!");
-        }
-        else if (!stack.hasTagCompound()) {
-            throw new CommandException("That stack has no NBT tag!");
+            throw new CommandException(new StringTextComponent("You are not holding an item!"));
+        } else if (!stack.hasTag()) {
+            throw new CommandException(new StringTextComponent("That stack has no NBT tag!"));
         }
 
-        CompoundNBT compound = stack.getTagCompound();
+        CompoundNBT compound = stack.getTag();
         LogHelperBC.logNBT(compound);
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.message(sender, s, TextFormatting.GOLD));
+        DataUtils.forEach(lines, s -> ChatHelper.message(player, s, TextFormatting.GOLD));
+        return 0;
     }
 
-    private void regenChunk(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        int rad = 0;
-        if (args.length > 1) {
-            rad = parseInt(args[1]);
-        }
-
+    private static int regenChunk(CommandSource source, int rad) throws CommandException, CommandSyntaxException {
         LogHelperBC.dev(rad);
 
         for (int xOffset = -rad; xOffset <= rad; xOffset++) {
             for (int yOffset = -rad; yOffset <= rad; yOffset++) {
-                WorldServer world = (WorldServer) sender.getEntityWorld();
-                PlayerEntity player = getCommandSenderAsPlayer(sender);
+                ServerWorld world = (ServerWorld) source.getWorld();
+                PlayerEntity player = source.asPlayer();
                 int chunkX = (int) player.chunkCoordX + xOffset;
                 int chunkZ = (int) player.chunkCoordZ + yOffset;
 
-                Chunk oldChunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
-                ChunkProviderServer chunkProviderServer = world.getChunkProvider();
-                IChunkGenerator chunkGenerate = chunkProviderServer.chunkGenerator;
+                Chunk oldChunk = world.getChunk(chunkX, chunkZ);
+                ServerChunkProvider chunkProviderServer = world.getChunkProvider();
+                ChunkGenerator chunkGenerate = chunkProviderServer.getChunkGenerator();
 
-                Chunk newChunk = chunkGenerate.generateChunk(chunkX, chunkZ);
-
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        for (int y = 0; y < world.getHeight(); y++) {
-                            BlockPos chunkPos = new BlockPos(x, y, z);
-                            BlockPos absPos = new BlockPos(x + (chunkX * 16), y, z + (chunkZ * 16));
-                            IBlockState newState = newChunk.getBlockState(chunkPos);
-                            world.setBlockState(absPos, newState);
-
-                            TileEntity tileEntity = newChunk.getTileEntity(chunkPos, Chunk.EnumCreateEntityType.IMMEDIATE);
-                            if (tileEntity != null) {
-                                world.setTileEntity(absPos, tileEntity);
-                            }
-                        }
-                    }
-                }
-
-                oldChunk.setTerrainPopulated(false);
-                oldChunk.populate(chunkProviderServer, chunkGenerate);
-
-                PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
-                if (playerChunkMap == null) {
-                    return;
-                }
-
-                oldChunk.setModified(true);
-                oldChunk.generateSkylightMap();
-
-                PlayerChunkMapEntry watcher = playerChunkMap.getEntry(oldChunk.x, oldChunk.z);
-                if (watcher != null) {
-                    watcher.sendPacket(new SPacketChunkData(oldChunk, 65535));
-                }
+                chunkGenerate.generateSurface(oldChunk);
+                chunkGenerate.generateBiomes(oldChunk);
+                chunkGenerate.generateStructureStarts(world, oldChunk);
+//                Chunk newChunk = chunkGenerate.generateChunk(chunkX, chunkZ);
+//
+//                for (int x = 0; x < 16; x++) {
+//                    for (int z = 0; z < 16; z++) {
+//                        for (int y = 0; y < world.getHeight(); y++) {
+//                            BlockPos chunkPos = new BlockPos(x, y, z);
+//                            BlockPos absPos = new BlockPos(x + (chunkX * 16), y, z + (chunkZ * 16));
+//                            BlockState newState = newChunk.getBlockState(chunkPos);
+//                            world.setBlockState(absPos, newState);
+//
+//                            TileEntity tileEntity = newChunk.getTileEntity(chunkPos, Chunk.CreateEntityType.IMMEDIATE);
+//                            if (tileEntity != null) {
+//                                world.setTileEntity(absPos, tileEntity);
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                oldChunk.setTerrainPopulated(false);
+//                oldChunk.populate(chunkProviderServer, chunkGenerate);
+//
+//                PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
+//                if (playerChunkMap == null) {
+//                    return;
+//                }
+//
+//                oldChunk.setModified(true);
+//                oldChunk.generateSkylightMap();
+//
+//                PlayerChunkMapEntry watcher = playerChunkMap.getEntry(oldChunk.x, oldChunk.z);
+//                if (watcher != null) {
+//                    watcher.sendPacket(new SPacketChunkData(oldChunk, 65535));
+//                }
             }
         }
+        return 0;
     }
 
-    private void toggleNoClip(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        String name = sender.getName();
-        ServerPlayerEntity player = getCommandSenderAsPlayer(sender);
-        boolean enabled = BCEventHandler.noClipPlayers.contains(name);
+    private static int toggleNoClip(CommandSource source) throws CommandException, CommandSyntaxException {
+        ServerPlayerEntity player = source.asPlayer();
+        boolean enabled = BCEventHandler.noClipPlayers.contains(player.getUniqueID());
 
         if (enabled) {
-            BCEventHandler.noClipPlayers.remove(name);
+            BCEventHandler.noClipPlayers.remove(player.getUniqueID());
             PacketDispatcher.sendNoClip(player, false);
-            sender.sendMessage(new TextComponentString("NoClip Disabled!"));
-        }
-        else {
-            BCEventHandler.noClipPlayers.add(name);
+            source.sendFeedback(new StringTextComponent("NoClip Disabled!"), true);
+        } else {
+            BCEventHandler.noClipPlayers.add(player.getUniqueID());
             PacketDispatcher.sendNoClip(player, true);
-            sender.sendMessage(new TextComponentString("NoClip Enabled!"));
+            source.sendFeedback(new StringTextComponent("NoClip Enabled!"), true);
         }
+        return 0;
     }
 
-    private void getUUID(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        ServerPlayerEntity player = getCommandSenderAsPlayer(sender);
-        if (args.length == 2) {
-            player = getPlayer(server, sender, args[1]);
-        }
-
-        TextComponentString comp = new TextComponentString(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUniqueID());
+    private static int getUUID(CommandSource source, ServerPlayerEntity player) throws CommandException {
+        StringTextComponent comp = new StringTextComponent(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUniqueID());
         Style style = new Style();
         style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, player.getUniqueID().toString()));
-        style.setHoverEvent(new HoverEvent(SHOW_TEXT, new TextComponentString("Click to get text")));
+        style.setHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to get text")));
         comp.setStyle(style);
-        sender.sendMessage(comp);
+        source.sendFeedback(comp, true);
+        return 0;
     }
 
     //region Dump Event Handlers
 
-    public static void dumpEventListeners(ICommandSource sender) throws CommandException {
+    public static int dumpEventListeners(CommandSource source) throws CommandException {
         Map<String, Map<Class<?>, List<PairKV<EventPriority, Method>>>> eventListenerMap = new HashMap<>();
-        dumpBus("EVENT_BUS", MinecraftForge.EVENT_BUS, eventListenerMap);
-        dumpBus("ORE_GEN_BUS", MinecraftForge.ORE_GEN_BUS, eventListenerMap);
-        dumpBus("TERRAIN_GEN_BUS", MinecraftForge.TERRAIN_GEN_BUS, eventListenerMap);
+        dumpBus("EVENT_BUS", (EventBus) MinecraftForge.EVENT_BUS, eventListenerMap);
+//        dumpBus("ORE_GEN_BUS", MinecraftForge.ORE_GEN_BUS, eventListenerMap);
+//        dumpBus("TERRAIN_GEN_BUS", MinecraftForge.TERRAIN_GEN_BUS, eventListenerMap);
 
         StringBuilder builder = new StringBuilder("\n");
         for (String bus : eventListenerMap.keySet()) {
@@ -288,8 +283,9 @@ public class BCUtilCommands extends CommandBase {
 
         LogHelperBC.info(builder.toString());
         for (String s : builder.toString().split("\n")) {
-            sender.sendMessage(new TextComponentString(s));
+            source.sendFeedback(new StringTextComponent(s), true);
         }
+        return 0;
     }
 
     private static String separateWithCommas(Class<?>[] types) {
@@ -305,7 +301,7 @@ public class BCUtilCommands extends CommandBase {
         Map<Class<?>, List<PairKV<EventPriority, Method>>> map = baseMap.computeIfAbsent(name, eventBus -> new HashMap<>());
 
         try {
-            ConcurrentHashMap<Object, ArrayList<IEventListener>> listeners = ReflectionHelper.getPrivateValue(EventBus.class, bus, "listeners");
+            ConcurrentHashMap<Object, ArrayList<IEventListener>> listeners = ObfuscationReflectionHelper.getPrivateValue(EventBus.class, bus, "listeners");
             for (Object obj : listeners.keySet()) {
                 for (Method method : obj.getClass().getMethods()) {
                     SubscribeEvent anno;
@@ -321,37 +317,37 @@ public class BCUtilCommands extends CommandBase {
         }
         catch (Throwable e) {
             e.printStackTrace();
-            throw new CommandException(e.getMessage());
+            throw new CommandException(new StringTextComponent(e.getMessage()));
         }
     }
 
     //endregion
 
-    private void eggify(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        ServerPlayerEntity player = getCommandSenderAsPlayer(sender);
+    private void eggify(CommandSource source) throws CommandException, CommandSyntaxException {
+        ServerPlayerEntity player = source.asPlayer();
         Entity entity = traceEntity(player);
 
         if (entity == null) {
-            player.sendMessage(new TextComponentString("You must be looking at an entity!"));
+            player.sendMessage(new StringTextComponent("You must be looking at an entity!"));
             return;
         }
 
-        ItemStack spawnEgg = new ItemStack(Items.SPAWN_EGG);
-        CompoundNBT data = entity.writeToNBT(new CompoundNBT());
-        data.setString("id", String.valueOf(EntityList.getKey(entity)));
+        ItemStack spawnEgg = new ItemStack(SpawnEggItem.getEgg(entity.getType()));
+        CompoundNBT data = entity.serializeNBT();
+//        data.putString("id", String.valueOf(EntityList.getKey(entity)));
         spawnEgg.setTagInfo("EntityTag", data);
 
-        data.removeTag("Pos");
-        data.removeTag("Motion");
-        data.removeTag("Rotation");
-        data.removeTag("FallDistance");
-        data.removeTag("Fire");
-        data.removeTag("Air");
-        data.removeTag("OnGround");
-        data.removeTag("Dimension");
-        data.removeTag("Invulnerable");
-        data.removeTag("PortalCooldown");
-        data.removeTag("UUID");
+        data.remove("Pos");
+        data.remove("Motion");
+        data.remove("Rotation");
+        data.remove("FallDistance");
+        data.remove("Fire");
+        data.remove("Air");
+        data.remove("OnGround");
+        data.remove("Dimension");
+        data.remove("Invulnerable");
+        data.remove("PortalCooldown");
+        data.remove("UUID");
 
         InventoryUtils.givePlayerStack(player, spawnEgg);
     }
@@ -359,7 +355,7 @@ public class BCUtilCommands extends CommandBase {
     @Nullable
     protected Entity traceEntity(PlayerEntity player) {
         Entity entity = null;
-        List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().grow(20.0D));
+        List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getBoundingBox().grow(20.0D));
         double d0 = 0.0D;
 
         Vec3d start = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
@@ -368,11 +364,11 @@ public class BCUtilCommands extends CommandBase {
 
         for (int i = 0; i < list.size(); ++i) {
             Entity entity1 = list.get(i);
-            AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(0.2);
-            RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(start, end);
+            AxisAlignedBB axisalignedbb = entity1.getBoundingBox().grow(0.2);
+            RayTraceResult raytraceresult = AxisAlignedBB.rayTrace(Collections.singleton(axisalignedbb), start, end, player.getPosition());//axisalignedbb.calculateIntercept(start, end);
 
             if (raytraceresult != null) {
-                double d1 = start.squareDistanceTo(raytraceresult.hitVec);
+                double d1 = start.squareDistanceTo(raytraceresult.getHitVec());
 
                 if (d1 < d0 || d0 == 0.0D) {
                     entity = entity1;
@@ -384,315 +380,16 @@ public class BCUtilCommands extends CommandBase {
         return entity;
     }
 
-//    private static class LightTest {
-//        private HashSet<Chunk> modifiedChunks = new HashSet<>();
-//        private WorldServer world;
-//
-//        private Object2IntMap<BlockPos> skyLight = new Object2IntOpenHashMap<>();
-//        private Object2IntMap<BlockPos> blockLight = new Object2IntOpenHashMap<>();
-//        private Object2IntMap<BlockPos> LEBs = new Object2IntOpenHashMap<>();
-//
-//
-//        private LightTest(WorldServer serverWorld) {
-//            this.world = serverWorld;
-//        }
-//
-//        private void runTest(BlockPos origin) {
-//            IBlockState[] randStates = new IBlockState[]{Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), Blocks.GLASS.getDefaultState()};
-//            Map<BlockPos, IBlockState> blockList = new HashMap<>();
-//
-//            origin = new BlockPos(origin.getX(), 90, origin.getZ());
-//            Iterable<BlockPos> blocks = BlockPos.getAllInBox(origin.add(-80, -40, -80), origin.add(80, 40, 80));
-//
-//            LogHelperBC.dev("Calc Blocks");
-//            int i = 0;
-//            for (BlockPos blockPos : blocks) {
-//                i++;
-//                IBlockState randState = randStates[rand.nextInt(randStates.length)];
-//                if (rand.nextInt(100) == 0) {
-//                    randState = Blocks.GLOWSTONE.getDefaultState();
-//                }
-//                blockList.put(blockPos, randState);
-//            }
-//
-//            LogHelperBC.dev("Place " + i + " Blocks");
-//            long start = System.currentTimeMillis();
-//
-//            for (BlockPos pos : blockList.keySet()) {
-////                world.setBlockState(pos, blockList.get(pos), 0);
-//                changeBlock(pos, blockList.get(pos));
-////                world.setBlockToAir(pos);
-//            }
-//
-//            LogHelperBC.dev("Blocks Placed in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-//
-//            start = System.currentTimeMillis();
-//            doLightingMagics();
-//            LogHelperBC.dev("Light Calculated in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-//
-//            start = System.currentTimeMillis();
-//            sendChanges();
-//            LogHelperBC.dev("Changes Sent in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-//        }
-//
-//        private void doLightingMagics() {
-//            HashSet<Chunk> lightChunks = new HashSet<>(modifiedChunks);
-//            for (Chunk chunk : modifiedChunks) {
-//                for (Direction facing : Direction.HORIZONTALS) {
-//                    Chunk adjacent = world.getChunkFromChunkCoords(chunk.x + facing.getFrontOffsetX(), chunk.z + facing.getFrontOffsetZ());
-//                    lightChunks.add(adjacent);
-//                }
-//            }
-//
-//            long start = System.currentTimeMillis();
-//            for (Chunk chunk : lightChunks) {
-//                runPreCalculation(chunk); //Light in .88 before block search
-//            }
-//
-//            LogHelperBC.dev(" - Pre-calculation Completed in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-//            start = System.currentTimeMillis();
-//
-//            for (BlockPos pos : LEBs.keySet()) {
-//                //Around ~7 seconds with vanilla calc and is a little broken.
-////                world.checkLightFor(EnumSkyBlock.BLOCK, pos);
-//                propagateBlockLight(pos, LEBs.get(pos), true);
-//            }
-//
-//            LogHelperBC.dev(" - Block Light Calculated in " + ((System.currentTimeMillis() - start) / 1000D) + " seconds");
-//        }
-//
-//        //Generates sky light map and finds all light emitting blocks
-//        private void runPreCalculation(Chunk chunk) {
-//            int topFilled = chunk.getTopFilledSegment();
-////            chunk.heightMapMinimum = Integer.MAX_VALUE;
-//
-//            for (int x = 0; x < 16; ++x) {
-//                for (int z = 0; z < 16; ++z) {
-//                    chunk.precipitationHeightMap[x + (z << 4)] = -999;
-//
-//                    for (int y = topFilled + 16; y > 0; --y) {
-//                        if (getBlockLightOpacity(chunk, x, y - 1, z) != 0) {
-//                            chunk.heightMap[z << 4 | x] = y;
-//
-////                            if (y < chunk.heightMapMinimum)
-////                            {
-////                                chunk.heightMapMinimum = y;
-////                            }
-//
-//                            break;
-//                        }
-//                    }
-//
-//                    if (chunk.getWorld().provider.hasSkyLight()) {
-//                        //Start at the top "Empty block" where the light level will always ne 15
-//                        //Go down block by block and subtract each blocks opacity from the light level then apply the remaining light
-//                        //once the light level reaches 0 stop (essentially a ray trace)
-//                        int lightLevel = 15;
-//                        int offsetYPos = topFilled + 16 - 1;
-//
-//                        while (true) {
-//                            ExtendedBlockStorage storage = chunk.storageArrays[offsetYPos >> 4];
-//                            if (lightLevel > 0) {
-//                                int opacityAtOffset = getBlockLightOpacity(chunk, x, offsetYPos, z);
-//
-//                                if (opacityAtOffset == 0 && lightLevel != 15) {
-//                                    opacityAtOffset = 1;
-//                                }
-//
-//                                lightLevel -= opacityAtOffset;
-//
-//                                if (lightLevel > 0) {
-//                                    if (storage != NULL_BLOCK_STORAGE) {
-//                                        skyLight.put(new BlockPos((chunk.x << 4) + x, offsetYPos, (chunk.z << 4) + z), lightLevel);
-//                                        storage.setSkyLight(x, offsetYPos & 15, z, lightLevel);
-////                                        chunk.getWorld().notifyLightSet(new BlockPos((chunk.x << 4) + x, offsetYPos, (chunk.z << 4) + z)); //Dont need this because it just sends changes to clients. We already do this with chunk packets
-//                                    }
-//                                }
-//                            }
-//
-//                            if (storage != null) {
-//                                int blockEmittedLight = getBlockLightLevel(chunk, x, offsetYPos, z);
-//                                if (blockEmittedLight > 0) {
-//                                    LEBs.put(new BlockPos(chunk.x << 4 | x & 15, offsetYPos, chunk.z << 4 | z & 15), blockEmittedLight);
-//                                }
-//
-//                                storage.setBlockLight(x, offsetYPos & 15, z, blockEmittedLight); //This way i don't have to worry about updating blocks when a light source is removed. Though may cause other issues... Actually it will... Fuck this is hard!
-//                            }
-//
-//
-//                            --offsetYPos;
-//
-//                            if (offsetYPos <= 0) {
-//                                break;
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        private void propagateBlockLight(BlockPos pos, int light, boolean source) {
-//            if (!world.isValid(pos)) return;
-//
-//            int opacity = getBlockLightOpacity(pos);
-//            if (opacity == 0 && light != 15) {
-//                opacity = 1;
-//            }
-//
-//            if (!source){
-//                light -= opacity;
-//            }
-//
-//            if (light <= 0) {
-//                return;
-//            }
-//
-//            Integer current = blockLight.get(pos);
-//
-//            if (current != null && current >= light) {
-//                return;
-//            }
-//
-//            blockLight.put(pos, light);
-//            setBlockLight(pos, light);
-//
-//            for (Direction facing : Direction.values()) {
-//                BlockPos adjacent = pos.offset(facing);
-//                propagateBlockLight(adjacent, light - 1, false);
-//            }
-//        }
-//
-//        private int getBlockLightOpacity(Chunk chunk, int x, int y, int z) {
-//            IBlockState state = chunk.getBlockState(x, y, z);
-//            return !chunk.loaded ? state.getLightOpacity() : state.getLightOpacity(world, new BlockPos(chunk.x << 4 | x & 15, y, chunk.z << 4 | z & 15));
-//        }
-//
-//        private int getBlockLightOpacity(BlockPos pos) {
-//            Chunk chunk = world.getChunkFromBlockCoords(pos);
-//            IBlockState state = chunk.getBlockState(pos);
-//            return !chunk.loaded ? state.getLightOpacity() : state.getLightOpacity(world, pos);
-//        }
-//
-//
-//        private int getBlockLightLevel(Chunk chunk, int x, int y, int z) {
-//            IBlockState state = chunk.getBlockState(x, y, z);
-//            return !chunk.loaded ? state.getLightValue() : state.getLightValue(world, new BlockPos(chunk.x << 4 | x & 15, y, chunk.z << 4 | z & 15));
-//        }
-//
-//        private void setBlockLight(BlockPos pos, int light) {
-//            ExtendedBlockStorage storage = getBlockStorage(pos);
-//            if (storage != null) {
-//                storage.setBlockLight(pos.getX() & 0xf, pos.getY() & 0xf, pos.getZ() & 0xf, light);
-//            }
-//        }
-//
-////        public void setBlockLight(BlockPos pos, int value) {
-////            if (!world.isValid(pos)) return;
-////            Chunk chunk = world.getChunkFromBlockCoords(pos);
-////            int i = pos.getX() & 15;
-////            int j = pos.getY();
-////            int k = pos.getZ() & 15;
-////            ExtendedBlockStorage extendedblockstorage = chunk.storageArrays[j >> 4];
-////
-////            if (extendedblockstorage == NULL_BLOCK_STORAGE) {
-////                return;
-////                extendedblockstorage = new ExtendedBlockStorage(j >> 4 << 4, this.world.provider.hasSkyLight());
-////                chunk.storageArrays[j >> 4] = extendedblockstorage;
-////                chunk.generateSkylightMap();
-////            }
-////
-////            extendedblockstorage.setBlockLight(i, j & 15, k, value);
-////        }
-//
-//        private void changeBlock(BlockPos pos, IBlockState state) {
-//            Chunk chunk = getChunk(pos);
-//            IBlockState oldState = chunk.getBlockState(pos);
-//
-//            if (oldState.getBlock().hasTileEntity(oldState)) {
-//                world.setBlockToAir(pos);
-//
-//                PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
-//                if (playerChunkMap != null) {
-//                    PlayerChunkMapEntry watcher = playerChunkMap.getEntry(pos.getX() >> 4, pos.getZ() >> 4);
-//                    if (watcher != null) {
-//                        watcher.sendPacket(new SPacketBlockChange(world, pos));
-//                    }
-//                }
-//
-//                return;
-//            }
-//
-//            ExtendedBlockStorage storage = getBlockStorage(pos);
-//            if (storage != null) {
-//                storage.set(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15, state);
-//            }
-//            setChunkModified(pos);
-//        }
-//
-//        private ExtendedBlockStorage getBlockStorage(BlockPos pos) {
-//            Chunk chunk = getChunk(pos);
-//            ExtendedBlockStorage storage = chunk.storageArrays[pos.getY() >> 4];
-//            if (storage == null) {
-//                storage = new ExtendedBlockStorage(pos.getY() >> 4 << 4, world.provider.hasSkyLight());
-//                chunk.storageArrays[pos.getY() >> 4] = storage;
-//            }
-//            return storage;
-//        }
-//
-//        private HashMap<ChunkPos, Chunk> chunkCache = new HashMap<>();
-//
-//        private Chunk getChunk(BlockPos pos) {
-//            ChunkPos cp = new ChunkPos(pos);
-//            if (!chunkCache.containsKey(cp)) {
-//                chunkCache.put(cp, world.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4));
-//            }
-//
-//            return chunkCache.get(cp);
-//        }
-//
-//        public void setChunkModified(BlockPos blockPos) {
-//            Chunk chunk = getChunk(blockPos);
-//            setChunkModified(chunk);
-//        }
-//
-//        public void setChunkModified(Chunk chunk) {
-//            modifiedChunks.add(chunk);
-//        }
-//
-//        public void sendChanges() {
-//            PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
-//            if (playerChunkMap == null) {
-//                return;
-//            }
-//
-//            for (Chunk chunk : modifiedChunks) {
-//                chunk.setModified(true);
-////                chunk.runPreCalculation(); //This is where this falls short. It can calculate basic sky lighting for blocks exposed to the sky but thats it.
-//
-//                PlayerChunkMapEntry watcher = playerChunkMap.getEntry(chunk.x, chunk.z);
-//                if (watcher != null) {//TODO Change chunk mask to only the sub chunks changed.
-//                    watcher.sendPacket(new SPacketChunkData(chunk, 65535));
-//                }
-//            }
-//
-//            modifiedChunks.clear();
-//        }
-//    }
 
     //region Player Access Command
 
-    private void playerAccess(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException {
-        if (args.length < 2) {
-            throw new CommandException("Please specify a player or use the list option to view all known players.");
-        }
+    private static Map<UUID, GameProfile> accessiblePlayers(CommandSource source) throws CommandException {
+        PlayerProfileCache cache = source.getServer().getPlayerProfileCache();
 
-        String target = args[1];
-        PlayerProfileCache cache = server.getPlayerProfileCache();
-
-        File playersFolder = new File(server.getEntityWorld().getSaveHandler().getWorldDirectory(), "playerdata");
+        File playersFolder = new File(source.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
         File[] playerArray = playersFolder.listFiles((dir, name) -> name.endsWith(".dat"));
         if (playerArray == null) {
-            throw new PlayerNotFoundException("There are no players in the playerdata folder");
+            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
         }
 
         Map<String, File> playerFiles = new HashMap<>();
@@ -708,49 +405,78 @@ public class BCUtilCommands extends CommandBase {
                 playerMap.put(uuid, profile);
             }
             catch (Throwable e) {
-                sender.sendMessage(new TextComponentString("Detected possible non-playerdata file in playerdata folder: " + playerFiles.get(stringId) + ". Skipping").setStyle(new Style().setColor(TextFormatting.RED)));
+                source.sendErrorMessage(new StringTextComponent("Detected possible non-playerdata file in playerdata folder: " + playerFiles.get(stringId) + ". Skipping").setStyle(new Style().setColor(TextFormatting.RED)));
             }
         }
+        return playerMap;
+    }
 
-        if (target.equals("list")) {
-            sender.sendMessage(new TextComponentString("################## All Known Players ##################"));
+
+    private static int playerAccess(CommandSource source, String target) throws CommandException, CommandSyntaxException {
+        PlayerProfileCache cache = source.getServer().getPlayerProfileCache();
+//
+//        File playersFolder = new File(source.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
+//        File[] playerArray = playersFolder.listFiles((dir, name) -> name.endsWith(".dat"));
+//        if (playerArray == null) {
+//            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
+//        }
+//
+//        Map<String, File> playerFiles = new HashMap<>();
+//        for (File file : playerArray) {
+//            playerFiles.put(file.getName().replace(".dat", ""), file);
+//        }
+
+        Map<UUID, GameProfile> playerMap = accessiblePlayers(source);//new HashMap<>();
+//        for (String stringId : playerFiles.keySet()) {
+//            try {
+//                UUID uuid = UUID.fromString(stringId);
+//                GameProfile profile = cache.getProfileByUUID(uuid);
+//                playerMap.put(uuid, profile);
+//            }
+//            catch (Throwable e) {
+//                source.sendErrorMessage(new StringTextComponent("Detected possible non-playerdata file in playerdata folder: " + playerFiles.get(stringId) + ". Skipping").setStyle(new Style().setColor(TextFormatting.RED)));
+//            }
+//        }
+
+        if (target == null) {
+            source.sendFeedback(new StringTextComponent("################## All Known Players ##################"), false);
             for (UUID uuid : playerMap.keySet()) {
                 GameProfile profile = playerMap.get(uuid);
 
                 boolean online = false;
-                for (PlayerEntity player : server.getPlayerList().getPlayers()) {
+                for (PlayerEntity player : source.getServer().getPlayerList().getPlayers()) {
                     if (player.getGameProfile().getId().equals(uuid)) {
                         online = true;
                         break;
                     }
                 }
 
-                ITextComponent message = new TextComponentString((online ? TextFormatting.GREEN + "[Online]: " : TextFormatting.GRAY + "[Offline]: ") + profile.getName());
+                ITextComponent message = new StringTextComponent((online ? TextFormatting.GREEN + "[Online]: " : TextFormatting.GRAY + "[Offline]: ") + profile.getName());
 
                 boolean offline = UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)).equals(uuid);
                 if (offline) {
-                    message.appendSibling(new TextComponentString(" (Offline Account)").setStyle(new Style().setColor(TextFormatting.RED)));
+                    message.appendSibling(new StringTextComponent(" (Offline Account)").setStyle(new Style().setColor(TextFormatting.RED)));
                 }
 
-                ITextComponent messageHover = new TextComponentString("Last Seen: " + "\n") //
-                        .appendSibling(new TextComponentString(TextFormatting.GRAY + "UUID: " + uuid + "\n")) //
-                        .appendSibling(new TextComponentString(TextFormatting.GOLD + "-Click to access player."));
+                ITextComponent messageHover = new StringTextComponent("Last Seen: " + "\n") //
+                        .appendSibling(new StringTextComponent(TextFormatting.GRAY + "UUID: " + uuid + "\n")) //
+                        .appendSibling(new StringTextComponent(TextFormatting.GOLD + "-Click to access player."));
 
                 Style msgStyle = new Style();
                 msgStyle.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
                 msgStyle.setHoverEvent(new HoverEvent(SHOW_TEXT, messageHover));
                 message.setStyle(msgStyle);
-                sender.sendMessage(message);
+                source.sendFeedback(message, false);
             }
-            return;
+            return 0;
         }
+        target = target.toLowerCase();
 
         GameProfile profile = null;
         if (cache.usernameToProfileEntryMap.containsKey(target)) {
             profile = cache.getGameProfileForUsername(target);
             target = profile.getId().toString();
-        }
-        else {
+        } else {
             try {
                 profile = cache.getProfileByUUID(UUID.fromString(target));
             }
@@ -758,31 +484,30 @@ public class BCUtilCommands extends CommandBase {
             }
 
             if (profile == null) {
-                throw new CommandException("Could not find the specified player name or uuid!");
+                throw new CommandException(new StringTextComponent("Could not find the specified player name or uuid!"));
             }
         }
 
         //Access Player
-        ServerPlayerEntity playerSender = getCommandSenderAsPlayer(sender);
-
-        PlayerEntity targetPlayer = server.getPlayerList().getPlayerByUUID(profile.getId());
-        //noinspection ConstantConditions
+        ServerPlayerEntity playerSender = source.asPlayer();
+        PlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayerByUUID(profile.getId());
         if (targetPlayer == null) {
-            File playerFile = getPlayerFile(server, target);
-            targetPlayer = new OfflinePlayer(playerSender, server.getWorld(0), profile, playerFile);
+            File playerFile = getPlayerFile(source.getServer(), target);
+            targetPlayer = new OfflinePlayer(playerSender, source.getServer().getWorld(DimensionType.OVERWORLD), profile, playerFile);
         }
 
         if (playerSender == targetPlayer) {
-            throw new CommandException("This command only works on other players!");
+            throw new CommandException(new StringTextComponent("This command only works on other players!"));
         }
-        openPlayerAccessUI(server, playerSender, targetPlayer);
+        openPlayerAccessUI(source.getServer(), playerSender, targetPlayer);
+        return 0;
     }
 
     public static File getPlayerFile(MinecraftServer server, String uuid) throws CommandException {
-        File playerFolder = new File(server.getEntityWorld().getSaveHandler().getWorldDirectory(), "playerdata");
+        File playerFolder = new File(server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
         File[] playerArray = playerFolder.listFiles();
         if (playerArray == null) {
-            throw new PlayerNotFoundException("There are no players in the playerdata folder");
+            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
         }
 
         for (File file : playerArray) {
@@ -791,7 +516,7 @@ public class BCUtilCommands extends CommandBase {
             }
         }
 
-        throw new PlayerNotFoundException("Could not find a data file for the specified player!");
+        throw new CommandException(new StringTextComponent("Could not find a data file for the specified player!"));
     }
 
     public static CompoundNBT readPlayerCompound(File playerData) throws CommandException {
@@ -804,7 +529,7 @@ public class BCUtilCommands extends CommandBase {
         }
         catch (Exception e) {
             e.printStackTrace();
-            throw new CommandException(e.toString());
+            throw new CommandException(new StringTextComponent(e.toString()));
         }
         finally {
             IOUtils.closeQuietly(is);
@@ -833,9 +558,22 @@ public class BCUtilCommands extends CommandBase {
         int windowId = player.currentWindowId;
         PacketDispatcher.sendOpenPlayerAccessUI(player, windowId);
         PacketDispatcher.sendPlayerAccessUIUpdate(player, playerAccess);
-        player.openContainer = new ContainerPlayerAccess(player, playerAccess, server);
-        player.openContainer.windowId = windowId;
-        player.openContainer.addListener(player);
+        player.openContainer(new INamedContainerProvider() {
+            @Override
+            public ITextComponent getDisplayName() {
+                return new StringTextComponent("Player Access");
+            }
+
+            @Nullable
+            @Override
+            public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+                ContainerPlayerAccess access = new ContainerPlayerAccess(id, playerInventory, playerAccess, server);
+                return access;
+            }
+        });
+//        player.openContainer = new ContainerPlayerAccess(player, playerAccess, server);
+//        player.openContainer.windowId = windowId;
+//        player.openContainer.addListener(player);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
     }
 
@@ -849,7 +587,7 @@ public class BCUtilCommands extends CommandBase {
             super(worldIn, gameProfileIn);
             this.accessedBy = accessedBy;
             this.playerFile = playerFile;
-            inventory = new InventoryPlayer(this) {
+            inventory = new PlayerInventory(this) {
                 @Override
                 public void markDirty() {
                     saveOfflinePlayer();
@@ -862,7 +600,7 @@ public class BCUtilCommands extends CommandBase {
                 }
             };
             playerCompound = readPlayerCompound(playerFile);
-            readFromNBT(playerCompound);
+            read(playerCompound);
         }
 
         public void tpTo(PlayerEntity player) {
@@ -884,13 +622,13 @@ public class BCUtilCommands extends CommandBase {
         }
 
         public void saveOfflinePlayer() {
-            writeToNBT(playerCompound);
+            playerCompound = serializeNBT();
             try {
                 writePlayerCompound(playerFile, playerCompound);
             }
             catch (IOException e) {
                 e.printStackTrace();
-                accessedBy.sendMessage(new TextComponentString("An error occurred while saving the player's inventory!\n" + e.toString() + "\nFull error is in server console."));
+                accessedBy.sendMessage(new StringTextComponent("An error occurred while saving the player's inventory!\n" + e.toString() + "\nFull error is in server console."));
             }
         }
     }

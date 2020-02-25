@@ -6,33 +6,31 @@ import com.brandon3055.brandonscore.lib.IActivatableTile;
 import com.brandon3055.brandonscore.lib.IBCoreBlock;
 import com.brandon3055.brandonscore.lib.IChangeListener;
 import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
-import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.stats.StatList;
+import net.minecraft.stats.Stats;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.Hand;
+import net.minecraft.util.INameable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.IWorldNameable;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -54,51 +52,38 @@ public class BlockBCore extends Block implements IBCoreBlock {
     protected boolean isMobResistant = false;
     public Map<Integer, String> nameOverrides = new HashMap<>();
 
-    public BlockBCore() {
-        this(Material.ROCK);
-    }
-
-    public BlockBCore(Material material) {
-        super(material);
-        this.setHardness(5F);
-        this.setResistance(10F);
-    }
-
-    //region Sub Types and Names
-
-    @Override
-    public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
-        super.getSubBlocks(tab, list);
+    public BlockBCore(Block.Properties properties) {
+        super(properties);
     }
 
     //endregion
 
     //region Setters & Getters
     public BlockBCore setHarvestTool(String toolClass, int level) {
-        this.setHarvestLevel(toolClass, level);
+        this.setHarvestTool(toolClass, level);
         return this;
     }
 
     @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, PlayerEntity player) {
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
 
-        if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()) {
-            stack.setItemDamage(getMetaFromState(state));
-        }
+//        if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()) {
+//            stack.setItemDamage(getMetaFromState(state));
+//        }
 
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile && !BrandonsCore.proxy.isCTRLKeyDown()) {
             CompoundNBT tileData = new CompoundNBT();
             ((IDataRetainingTile) tile).writeToItemStack(tileData, false);
-            if (!tileData.hasNoTags()) {
-                ItemNBTHelper.getCompound(stack).setTag(BC_TILE_DATA_TAG, tileData);
+            if (!tileData.isEmpty()) {
+                ItemNBTHelper.getCompound(stack).put(BC_TILE_DATA_TAG, tileData);
             }
         }
 
-        if (tile instanceof IWorldNameable && ((IWorldNameable) tile).hasCustomName()) {
-            stack.setStackDisplayName(((IWorldNameable) tile).getName());
+        if (tile instanceof INameable && ((INameable) tile).hasCustomName()) {
+            stack.setDisplayName(((INameable) tile).getName());
         }
 
         return stack;
@@ -145,8 +130,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
     /**
      * @return false if this block has been disabled via the mod config.
      */
+    @Deprecated
     public boolean isBlockEnabled() {
-        return ModFeatureParser.isEnabled(this);
+        return true;//ModFeatureParser.isEnabled(this);
     }
 
     //endregion
@@ -154,23 +140,24 @@ public class BlockBCore extends Block implements IBCoreBlock {
     //region Interfaces
 
     //IRedstoneEmitter
+
     @Override
-    public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, Direction side) {
+    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
-            return tile instanceof IRedstoneEmitter || canProvidePower;
+            return tile instanceof IRedstoneEmitter;
         }
 
-        return super.canConnectRedstone(state, world, pos, side);
+        return canProvidePower || super.canConnectRedstone(state, world, pos, side);
     }
 
     @Override
-    public boolean canProvidePower(IBlockState state) {
+    public boolean canProvidePower(BlockState state) {
         return canProvidePower;
     }
 
     @Override
-    public boolean shouldCheckWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, Direction side) {
+    public boolean shouldCheckWeakPower(BlockState state, IWorldReader world, BlockPos pos, Direction side) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             return tile instanceof IChangeListener;
@@ -180,7 +167,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, Direction side) {
+    public int getWeakPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side) {
         if (hasTileEntity(blockState)) {
             TileEntity tile = blockAccess.getTileEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
@@ -191,7 +178,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, Direction side) {
+    public int getStrongPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side) {
         if (hasTileEntity(blockState)) {
             TileEntity tile = blockAccess.getTileEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
@@ -202,67 +189,68 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if (tile instanceof IChangeListener) {
-                ((IChangeListener) tile).onNeighborChange(fromPos);
+                ((IChangeListener) tile).onNeighborChange(neighbor);
             }
         }
-        super.neighborChanged(state, world, pos, blockIn, fromPos);
+        super.onNeighborChange(state, world, pos, neighbor);
     }
 
     //IActivatableTile
+
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, PlayerEntity playerIn, EnumHand hand, Direction facing, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (hasTileEntity(state)) {
             TileEntity tile = worldIn.getTileEntity(pos);
             if (tile instanceof IActivatableTile) {
-                return ((IActivatableTile) tile).onBlockActivated(state, playerIn, hand, facing, hitX, hitY, hitZ);
+                return ((IActivatableTile) tile).onBlockActivated(state, player, handIn, hit);
             }
         }
 
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
     }
 
     //IDataRetainingTile
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, LivingEntity placer, ItemStack stack) {
+    public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         TileEntity tile = world.getTileEntity(pos);
 
         if (tile instanceof IDataRetainingTile) {
-            if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BC_TILE_DATA_TAG)) {
-                ((IDataRetainingTile) tile).readFromItemStack(stack.getSubCompound(BC_TILE_DATA_TAG));
+            if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
+                ((IDataRetainingTile) tile).readFromItemStack(stack.getChildTag(BC_TILE_DATA_TAG));
             }
         }
 
         if (tile instanceof TileBCore && stack.hasDisplayName()) {
-            ((TileBCore) tile).setCustomName(stack.getDisplayName());
+            ((TileBCore) tile).setCustomName(stack.getDisplayName().getFormattedText());
         }
     }
 
     @Override
-    public void harvestBlock(World world, PlayerEntity player, BlockPos pos, IBlockState state, TileEntity te, ItemStack heldStack) {
+    public void harvestBlock(World world, PlayerEntity player, BlockPos pos, BlockState state, TileEntity te, ItemStack heldStack) {
         ItemStack stack = null;
 
         if (te instanceof IDataRetainingTile && ((IDataRetainingTile) te).saveToItem()) {
             CompoundNBT tileData = new CompoundNBT();
             ((IDataRetainingTile) te).writeToItemStack(tileData, true);
-            if (!tileData.hasNoTags()) {
-                stack = new ItemStack(this, 1, damageDropped(state));
-                ItemNBTHelper.getCompound(stack).setTag(BC_TILE_DATA_TAG, tileData);
+            if (!tileData.isEmpty()) {
+                stack = new ItemStack(this, 1);//, damageDropped(state));
+                ItemNBTHelper.getCompound(stack).put(BC_TILE_DATA_TAG, tileData);
             }
         }
 
-        if (te instanceof IWorldNameable && ((IWorldNameable) te).hasCustomName()) {
+        if (te instanceof INameable && ((INameable) te).hasCustomName()) {
             if (stack == null) {
-                stack = new ItemStack(this, 1, damageDropped(state));
+                stack = new ItemStack(this, 1);//, damageDropped(state));
             }
-            stack.setStackDisplayName(((IWorldNameable) te).getName());
+            stack.setDisplayName(((INameable) te).getName());
         }
 
         if (stack != null) {
-            player.addStat(StatList.getBlockStats(this));
+            player.addStat(Stats.BLOCK_MINED.get(this));
             player.addExhaustion(0.005F);
 
             spawnAsEntity(world, pos, stack);
@@ -283,17 +271,18 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity) {
+    public boolean canEntityDestroy(BlockState state, IBlockReader world, BlockPos pos, Entity entity) {
         if (!isMobResistant) {
             return super.canEntityDestroy(state, world, pos, entity);
         }
         return entity instanceof PlayerEntity;
     }
 
+
     @Override
-    public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+    public void onBlockExploded(BlockState state, World world, BlockPos pos, Explosion explosion) {
         if (!isMobResistant) {
-            super.onBlockExploded(world, pos, explosion);
+            super.onBlockExploded(state, world, pos, explosion);
         }
     }
 
@@ -307,22 +296,76 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //endregion
 
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return uberIsBlockFullCube();
+//    @Override
+//    public boolean isFullCube(BlockState state) {
+//        return uberIsBlockFullCube();
+//    }
+//
+//    @Override
+//    public boolean isOpaqueCube(BlockState state) {
+//        return uberIsBlockFullCube();
+//    }
+
+    //Utils
+    public static int getRedstonePower(IWorldReader world, BlockPos pos, Direction facing) {
+        BlockState blockstate = world.getBlockState(pos);
+        return blockstate.shouldCheckWeakPower(world, pos, facing) ? getStrongPower(world, pos) : blockstate.getWeakPower(world, pos, facing);
     }
 
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return uberIsBlockFullCube();
+    public static int getStrongPower(IWorldReader world, BlockPos pos) {
+        int i = 0;
+        i = Math.max(i, world.getStrongPower(pos.down(), Direction.DOWN));
+        if (i >= 15) {
+            return i;
+        } else {
+            i = Math.max(i, world.getStrongPower(pos.up(), Direction.UP));
+            if (i >= 15) {
+                return i;
+            } else {
+                i = Math.max(i, world.getStrongPower(pos.north(), Direction.NORTH));
+                if (i >= 15) {
+                    return i;
+                } else {
+                    i = Math.max(i, world.getStrongPower(pos.south(), Direction.SOUTH));
+                    if (i >= 15) {
+                        return i;
+                    } else {
+                        i = Math.max(i, world.getStrongPower(pos.west(), Direction.WEST));
+                        if (i >= 15) {
+                            return i;
+                        } else {
+                            i = Math.max(i, world.getStrongPower(pos.east(), Direction.EAST));
+                            return i >= 15 ? i : i;
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    @SideOnly(Side.CLIENT)
+    public static boolean isBlockPowered(IWorldReader world, BlockPos pos) {
+        if (getRedstonePower(world, pos.down(), Direction.DOWN) > 0) {
+            return true;
+        } else if (getRedstonePower(world, pos.up(), Direction.UP) > 0) {
+            return true;
+        } else if (getRedstonePower(world, pos.north(), Direction.NORTH) > 0) {
+            return true;
+        } else if (getRedstonePower(world, pos.south(), Direction.SOUTH) > 0) {
+            return true;
+        } else if (getRedstonePower(world, pos.west(), Direction.WEST) > 0) {
+            return true;
+        } else {
+            return getRedstonePower(world, pos.east(), Direction.EAST) > 0;
+        }
+    }
+    //
+
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag advanced) {
-        super.addInformation(stack, world, tooltip, advanced);
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(BC_TILE_DATA_TAG)) {
-            tooltip.add(I18n.format("info.de.hasSavedData.txt"));
+    public void addInformation(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
+            tooltip.add(new TranslationTextComponent("info.de.hasSavedData.txt"));
         }
     }
 
@@ -333,7 +376,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public CompoundNBT getNBTShareTag(ItemStack stack) {
-        return stack.getTagCompound();
+        return stack.getTag();
     }
 }
 

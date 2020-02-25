@@ -1,9 +1,9 @@
 package com.brandon3055.brandonscore.client.render;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 
 /**
  * Created by brandon3055 on 16/10/18.
@@ -19,18 +19,18 @@ public class RenderUtils {
         int strCenter = strWidth / 2;
         int yOffset = -4;
 
-        RenderManager renderManager = mc.getRenderManager();
+        EntityRendererManager renderManager = mc.getRenderManager();
         GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, z);
-        GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(-renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scale(-0.025F * scale, -0.025F * scale, 0.025F * scale);
+        GlStateManager.translated(x, y, z);
+        GlStateManager.normal3f(0.0F, 1.0F, 0.0F);
+        GlStateManager.rotatef(-renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotatef(renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+        GlStateManager.scalef(-0.025F * scale, -0.025F * scale, 0.025F * scale);
         GlStateManager.disableLighting();
         GlStateManager.depthMask(false);
-        GlStateManager.disableDepth();
+        GlStateManager.disableDepthTest();
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
         GuiHelper.drawColouredRect(-strCenter - 1, yOffset - 1, strWidth + 1, 9, backgroundColour);
 
@@ -38,7 +38,7 @@ public class RenderUtils {
         mc.fontRenderer.drawString(text, -strCenter, yOffset, color);
         GlStateManager.enableLighting();
         GlStateManager.disableBlend();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
     }
 

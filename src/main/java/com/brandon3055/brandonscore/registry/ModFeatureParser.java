@@ -8,7 +8,7 @@
 //import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 //import net.minecraft.creativetab.CreativeTabs;
 //import net.minecraft.item.Item;
-//import net.minecraft.item.ItemBlock;
+//import net.minecraft.item.BlockItem;
 //import net.minecraft.item.ItemStack;
 //import net.minecraft.tileentity.TileEntity;
 //import net.minecraftforge.client.model.ModelLoader;
@@ -231,15 +231,15 @@
 //
 //        if (feature.hasItemBlock()) {
 //            try {
-//                Constructor<? extends ItemBlock> constructor = feature.itemBlock().getConstructor(Block.class);
-//                ItemBlock itemBlock = constructor.newInstance(block);
+//                Constructor<? extends BlockItem> constructor = feature.itemBlock().getConstructor(Block.class);
+//                BlockItem itemBlock = constructor.newInstance(block);
 //                itemBlock.setRegistryName(feature.getRegistryName());
 //                if (!(itemBlock instanceof IRegistryListener) || ((IRegistryListener) itemBlock).featureParsed(feature)) {
 //                    ForgeRegistries.ITEMS.register(itemBlock);
 //                }
 //            }
 //            catch (Throwable e) {
-//                LogHelperBC.error("An error occurred while trying to create the ItemBlock for feature: " + feature.getRegistryName());
+//                LogHelperBC.error("An error occurred while trying to create the BlockItem for feature: " + feature.getRegistryName());
 //                Throwables.propagate(e);
 //            }
 //        }
@@ -270,7 +270,7 @@
 //
 //    //region Client Registration
 //
-//    @SideOnly(Side.CLIENT)
+//    @OnlyIn(Dist.CLIENT)
 //    public static void registerModRendering(String modid) {
 //        LogHelperBC.info("Registering feature renderers for mod: " + modid);
 //
@@ -307,7 +307,7 @@
 //    /**
 //     * Registers Item Block Rendering.
 //     */
-//    @SideOnly(Side.CLIENT)
+//    @OnlyIn(Dist.CLIENT)
 //    private static void registerBlockRendering(Feature feature, Block block) {
 //        //Register itemBlock rendering
 //        if (feature.variantMap().size() > 0) {
@@ -320,7 +320,7 @@
 //    /**
 //     * Registers item variants.
 //     */
-//    @SideOnly(Side.CLIENT)
+//    @OnlyIn(Dist.CLIENT)
 //    private static void registerItemVariants(Feature feature, Item item) {
 //        //Register Default ModelResourceLocation
 //        if (feature.variantMap().isEmpty() && feature.stateOverride().isEmpty()) {

@@ -4,8 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IButtonListener;
-import net.minecraft.client.renderer.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -23,29 +22,29 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
         super(parent);
     }
 
-    public GuiPopupDialogs setYesListener(IButtonListener yesListener) {
-        if (yesButton != null) yesButton.setButtonListener(yesListener);
+    public GuiPopupDialogs setYesListener(Runnable yesListener) {
+        if (yesButton != null) yesButton.onPressed(yesListener);
         return this;
     }
 
-    public GuiPopupDialogs setNoListener(IButtonListener noListener) {
-        if (noButton != null) noButton.setButtonListener(noListener);
+    public GuiPopupDialogs setNoListener(Runnable noListener) {
+        if (noButton != null) noButton.onPressed(noListener);
         return this;
     }
 
-    public GuiPopupDialogs setOkListener(IButtonListener okListener) {
-        if (okButton != null) okButton.setButtonListener(okListener);
+    public GuiPopupDialogs setOkListener(Runnable okListener) {
+        if (okButton != null) okButton.onPressed(okListener);
         return this;
     }
 
-    public GuiPopupDialogs setCancelListener(IButtonListener cancelListener) {
-        if (cancelButton != null) cancelButton.setButtonListener(cancelListener);
+    public GuiPopupDialogs setCancelListener(Runnable cancelListener) {
+        if (cancelButton != null) cancelButton.onPressed(cancelListener);
         return this;
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize, GuiElement background, boolean vanillaButtons, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
         GuiPopupDialogs dialog = new GuiPopupDialogs(parent);
-        dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> GlStateManager.color(1, 1, 1, 1));
+        dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> GlStateManager.color4f(1, 1, 1, 1));
         dialog.setXSize(xSize);
         dialog.setDragBar(12);
         dialog.addChild(background);

@@ -53,7 +53,7 @@ public class ManagedNBTSerializableMap extends AbstractManagedData {
     @Override
     public void toBytes(MCDataOutput output) {
         output.writeVarInt(valueMap.size());
-        valueMap.forEach((name, serializable) -> output.writeString(name).writeNBTTagCompound(serializable.serializeNBT()));
+        valueMap.forEach((name, serializable) -> output.writeString(name).writeCompoundNBT(serializable.serializeNBT()));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ManagedNBTSerializableMap extends AbstractManagedData {
         int c = input.readVarInt();
         for (int i = 0; i < c; i++) {
             String name = input.readString();
-            CompoundNBT nbt = input.readNBTTagCompound();
+            CompoundNBT nbt = input.readCompoundNBT();
             if (valueMap.containsKey(name)) {
                 valueMap.get(name).deserializeNBT(nbt);
             }
@@ -73,16 +73,16 @@ public class ManagedNBTSerializableMap extends AbstractManagedData {
     @Override
     public void toNBT(CompoundNBT compound) {
         CompoundNBT tags = new CompoundNBT();
-        valueMap.forEach((name, serializable) -> tags.setTag(name, serializable.serializeNBT()));
-        compound.setTag(name, tags);
+        valueMap.forEach((name, serializable) -> tags.put(name, serializable.serializeNBT()));
+        compound.put(name, tags);
     }
 
     @Override
     public void fromNBT(CompoundNBT compound) {
-        CompoundNBT tags = compound.getCompoundTag(name);
+        CompoundNBT tags = compound.getCompound(name);
         for (String name : new ArrayList<>(valueMap.keySet())) {
-            if (tags.hasKey(name)) {
-                valueMap.get(name).deserializeNBT(tags.getCompoundTag(name));
+            if (tags.contains(name)) {
+                valueMap.get(name).deserializeNBT(tags.getCompound(name));
             }
         }
         lastValueMap.clear();

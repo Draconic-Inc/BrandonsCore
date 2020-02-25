@@ -8,13 +8,21 @@ import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 import org.apache.commons.io.IOUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.net.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -25,8 +33,8 @@ public class FileHandler {
     public static File brandon3055Folder;
     public static File mcDirectory;
 
-    public static void init(FMLPreInitializationEvent event) {
-        rootConfigFolder = event.getModConfigurationDirectory();
+    public static void init() {
+        rootConfigFolder = new File("./config");
         brandon3055Folder = new File(rootConfigFolder, "brandon3055");
 
         if (!brandon3055Folder.exists() && !brandon3055Folder.mkdirs()) {
@@ -84,8 +92,7 @@ public class FileHandler {
 //            }
             if (proxy != null) {
                 conn = (HttpURLConnection) resourceUrl.openConnection(proxy);
-            }
-            else {
+            } else {
                 conn = (HttpURLConnection) resourceUrl.openConnection();
             }
 
@@ -131,10 +138,70 @@ public class FileHandler {
     }
 
     public static void writeJson(JsonObject obj, File file) throws IOException {
-        try(JsonWriter writer = new JsonWriter(new FileWriter(file))) {
+        try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
             writer.setIndent("  ");
             Streams.write(obj, writer);
             writer.flush();
         }
+    }
+
+    //Adapted from 1.12 CraftingHandler
+    public static boolean findFiles(String modid, String base, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor, boolean defaultUnfoundRoot, boolean visitAllFiles) {
+        Path source = ModList.get().getModFileById(modid).getFile().getFilePath();
+
+        FileSystem fs = null;
+        boolean success = true;
+
+        try {
+            Path root = null;
+
+            if (source.toFile().isFile()) {
+                try {
+                    fs = FileSystems.newFileSystem(source, null);
+                    root = fs.getPath("/" + base);
+                }
+                catch (IOException e) {
+                    LogHelperBC.error("Error loading FileSystem from jar: ", e);
+                    return false;
+                }
+            } else if (source.toFile().isDirectory()) {
+                root = source.resolve(base);
+            }
+
+            if (root == null || !Files.exists(root))
+                return defaultUnfoundRoot;
+
+            if (preprocessor != null) {
+                Boolean cont = preprocessor.apply(root);
+                if (cont == null || !cont.booleanValue())
+                    return false;
+            }
+
+            if (processor != null) {
+                Iterator<Path> itr = null;
+                try {
+                    itr = Files.walk(root).iterator();
+                }
+                catch (IOException e) {
+                    LogHelperBC.error("Error iterating filesystem for: {}", modid, e);
+                    return false;
+                }
+
+                while (itr != null && itr.hasNext()) {
+                    Boolean cont = processor.apply(root, itr.next());
+
+                    if (visitAllFiles) {
+                        success &= cont != null && cont;
+                    } else if (cont == null || !cont) {
+                        return false;
+                    }
+                }
+            }
+        }
+        finally {
+            IOUtils.closeQuietly(fs);
+        }
+
+        return success;
     }
 }

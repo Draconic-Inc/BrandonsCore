@@ -15,7 +15,7 @@ import java.util.function.Predicate;
  * Created by brandon3055 on 23/10/2016.
  * This is a simple popup text field with an ok button that allows the user to specify a string
  */
-public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> implements IGuiEventListener {
+public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
 
     private String title = "";
     public int titleColour = 0xFFFFFF;
@@ -26,7 +26,6 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
     protected Predicate<String> validator = null;
     protected Consumer<String> changeCallBack;
     protected Consumer<String> confirmCallBack;
-    protected IGuiEventListener listener;
 
     public GuiTextFieldDialog(GuiElement parent) {
         super(parent);
@@ -53,7 +52,12 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
 
     @Override
     public void addChildElements() {
-        addChild(textField = new GuiTextField().setPosAndSize(getInsetRect()).setXSize(getInsetRect().width - 20).setListener(this));
+        addChild(textField = new GuiTextField().setPosAndSize(getInsetRect()).setXSize(getInsetRect().width - 20));
+        textField.setChangeListener(text -> {if (changeCallBack != null) changeCallBack.accept(text);});
+        textField.setReturnListener(text -> {
+            if (confirmCallBack != null) confirmCallBack.accept(text);
+            close();
+        });
         textField.setMaxStringLength(maxLength);
         textField.setText(defaultText);
 
@@ -66,30 +70,9 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
             if (confirmCallBack != null) {
                 confirmCallBack.accept(textField.getText());
             }
-            if (listener != null) {
-                listener.onMGuiEvent(new GuiEvent.TextFieldEvent(textField, textField.getText(), false, true), textField);
-            }
             close();
         });
         super.addChildElements();
-    }
-
-    @Override
-    public void onMGuiEvent(GuiEvent event, GuiElement eventElement) {
-        if (event.isTextFiled()) {
-            if (listener != null) {
-                listener.onMGuiEvent(event, eventElement);
-            }
-            if (event.asTextField().textChanged() && changeCallBack != null) {
-                changeCallBack.accept(textField.getText());
-            }
-            else if (event.asTextField().textEnterPressed() && confirmCallBack != null) {
-                confirmCallBack.accept(textField.getText());
-            }
-            if (event.asTextField().textEnterPressed()) {
-                close();
-            }
-        }
     }
 
     /**
@@ -124,16 +107,6 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> i
      */
     public GuiTextFieldDialog addTextConfirmCallback(Consumer<String> confirmCallBack) {
         this.confirmCallBack = confirmCallBack;
-        return this;
-    }
-
-    /**
-     * Apply a listener to which all text field events will be forwarded. The OK button will be forwarded as
-     * a text field "Enter Pressed" event.
-     * Unlike other event dispatcher elements this element will not have its listener automatically assigned to its parent.
-     */
-    public GuiTextFieldDialog setListener(IGuiEventListener listener) {
-        this.listener = listener;
         return this;
     }
 

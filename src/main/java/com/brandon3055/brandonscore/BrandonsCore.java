@@ -1,19 +1,22 @@
 package com.brandon3055.brandonscore;
 
 import com.brandon3055.brandonscore.client.ClientProxy;
-import com.brandon3055.brandonscore.config.BCConfig;
+import com.brandon3055.brandonscore.command.BCUtilCommands;
+import com.brandon3055.brandonscore.command.CommandTPX;
+import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,15 +27,17 @@ import org.apache.logging.log4j.Logger;
 //        guiFactory = "com.brandon3055.brandonscore.BCGuiFactory",
 //        dependencies = "required-after:codechickenlib@[" + CodeChickenLib.MOD_VERSION + ",);required-after:redstoneflux;")
 @Mod(BrandonsCore.MODID)
-@EventBusSubscriber(modid = BrandonsCore.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
     public static final String VERSION = "${mod_version}";
-    public static final String NET_CHANNEL = "BCPCChannel";
     public static CommonProxy proxy;
+    public static boolean inDev;
 
     public BrandonsCore() {
+        inDev = VERSION.equals("${mod_version}");
+        FileHandler.init();
+
         Logger deLog = LogManager.getLogger("draconicevolution");
         LogHelperBC.info("Brandon's Core online! Waiting for Draconic Evolution to join the party....");
         if (ModList.get().isLoaded("draconicevolution")) {
@@ -46,7 +51,8 @@ public class BrandonsCore {
         }
 
         proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
-//        FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        FMLJavaModLoadingContext.get().getModEventBus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
 //        FMLJavaModLoadingContext.get().getModEventBus().register(new BCConfig());
 
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
@@ -70,13 +76,13 @@ public class BrandonsCore {
 
     @SubscribeEvent
     public void onServerSetup(FMLDedicatedServerSetupEvent event) {
-
         proxy.serverSetup(event);
     }
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-//        event.
+        BCUtilCommands.register(event.getCommandDispatcher());
+        CommandTPX.register(event.getCommandDispatcher());
     }
 
 //

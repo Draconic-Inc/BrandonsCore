@@ -62,7 +62,9 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         int xSize = xSize();
         int ySize = ySize();
 
-        addChild(hexField = new GuiTextField(xPos + 4, yPos + 4, xSize - 8, 12).setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb())).setListener(this));
+        addChild(hexField = new GuiTextField(xPos + 4, yPos + 4, xSize - 8, 12).setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb())));
+        hexField.setChangeListener(this::onTextFieldChanged);
+
         hexField.setMaxStringLength(includeAlpha ? 8 : 6);
         hexField.setValidator(input -> {
             try {
@@ -153,28 +155,36 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
             colourChanged = true;
         }
         else if (eventElement == hexField) {
-            try {
-                int pos = hexField.getCursorPosition();
-                colour.set(Utils.parseHex(hexField.getText()));
-                redSlider.updateRawPos((colour.r & 0xFF) / 255D);
-                greenSlider.updateRawPos((colour.g & 0xFF) / 255D);
-                blueSlider.updateRawPos((colour.b & 0xFF) / 255D);
-                if (!includeAlpha) {
-                    colour.a = (byte) 0xFF;
-                }
-                else {
-                    alphaSlider.updateRawPos((colour.a & 0xFF) / 255D);
-                }
-                hexField.setCursorPosition(pos);
-                colourChanged = true;
-            }
-            catch (Exception e) {}
+
         }
 
         if (colourChanged) {
-            if (colourChangeListener != null) {
-                colourChangeListener.accept(colour.copy());
+            onColourChangeInternal();
+        }
+    }
+
+    private void onTextFieldChanged() {
+        try {
+            int pos = hexField.getCursorPosition();
+            colour.set(Utils.parseHex(hexField.getText()));
+            redSlider.updateRawPos((colour.r & 0xFF) / 255D);
+            greenSlider.updateRawPos((colour.g & 0xFF) / 255D);
+            blueSlider.updateRawPos((colour.b & 0xFF) / 255D);
+            if (!includeAlpha) {
+                colour.a = (byte) 0xFF;
             }
+            else {
+                alphaSlider.updateRawPos((colour.a & 0xFF) / 255D);
+            }
+            hexField.setCursorPosition(pos);
+            onColourChangeInternal();
+        }
+        catch (Exception ignored) {}
+    }
+
+    private void onColourChangeInternal() {
+        if (colourChangeListener != null) {
+            colourChangeListener.accept(colour.copy());
         }
     }
 

@@ -65,6 +65,11 @@ public class ItemHandlerIOControl implements IItemHandler {
         return itemHandler.getSlotLimit(slot);
     }
 
+    @Override
+    public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        return itemHandler.isItemValid(slot, stack);
+    }
+
     public interface InsertCheck {
         boolean canInsert(int slot, ItemStack stack);
     }

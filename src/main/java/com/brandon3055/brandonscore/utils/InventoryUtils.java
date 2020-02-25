@@ -3,13 +3,14 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.lib.functions.TriPredicate;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 /**
  * Created by brandon3055 on 31/05/2016.
@@ -25,7 +26,8 @@ public class InventoryUtils {
         for (int i = 0; i < inventory.getSizeInventory(); i++) {
             ItemStack s = inventory.getStackInSlot(i);
 
-            if (ItemStack.areItemsEqual(stack, s) && stack.getItemDamage() == s.getItemDamage() && s.getCount() >= stack.getCount()) {
+            //TODO Do i still need to check damage?
+            if (ItemStack.areItemsEqual(stack, s) && stack.getDamage() == s.getDamage() && s.getCount() >= stack.getCount()) {
                 return true;
             }
         }
@@ -44,7 +46,8 @@ public class InventoryUtils {
                 continue;
             }
 
-            if (ItemStack.areItemsEqual(stack, s) && stack.getItemDamage() == s.getItemDamage() && s.getCount() >= stack.getCount()) {
+            //TODO Do i still need to check damage?
+            if (ItemStack.areItemsEqual(stack, s) && stack.getDamage() == s.getDamage() && s.getCount() >= stack.getCount()) {
                 s.shrink(stack.getCount());
                 inventory.markDirty();
                 return true;
@@ -70,15 +73,13 @@ public class InventoryUtils {
 
         if (!inventory.getStackInSlot(slot).isEmpty()) {
             if (player.getHeldItemMainhand().isEmpty()) {
-                player.setHeldItem(EnumHand.MAIN_HAND, inventory.getStackInSlot(slot));
-            }
-            else {
+                player.setHeldItem(Hand.MAIN_HAND, inventory.getStackInSlot(slot));
+            } else {
                 givePlayerStack(player, inventory.getStackInSlot(slot));
             }
             inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
-        }
-        else {
-            DataUtils.forEach(EnumHand.values(), enumHand -> {
+        } else {
+            DataUtils.forEach(Hand.values(), enumHand -> {
                 ItemStack stack = player.getHeldItem(enumHand);
                 if (!stack.isEmpty() && inventory.isItemValidForSlot(slot, stack) && inventory.getStackInSlot(slot).isEmpty()) {
                     inventory.setInventorySlotContents(slot, stack);
@@ -88,7 +89,30 @@ public class InventoryUtils {
         }
     }
 
-    public static void consumeHeldItem(PlayerEntity player, ItemStack stack, EnumHand hand) {
+    public static void handleHeldStackTransfer(int slot, IItemHandlerModifiable inventory, PlayerEntity player) {
+        if (player.world.isRemote) {
+            return;
+        }
+
+        if (!inventory.getStackInSlot(slot).isEmpty()) {
+            if (player.getHeldItemMainhand().isEmpty()) {
+                player.setHeldItem(Hand.MAIN_HAND, inventory.getStackInSlot(slot));
+            } else {
+                givePlayerStack(player, inventory.getStackInSlot(slot));
+            }
+            inventory.setStackInSlot(slot, ItemStack.EMPTY);
+        } else {
+            DataUtils.forEach(Hand.values(), enumHand -> {
+                ItemStack stack = player.getHeldItem(enumHand);
+                if (!stack.isEmpty() && inventory.isItemValid(slot, stack) && inventory.getStackInSlot(slot).isEmpty()) {
+                    inventory.setStackInSlot(slot, stack);
+                    player.setHeldItem(enumHand, ItemStack.EMPTY);
+                }
+            });
+        }
+    }
+
+    public static void consumeHeldItem(PlayerEntity player, ItemStack stack, Hand hand) {
         stack.shrink(1);
         player.setHeldItem(hand, stack.getCount() > 0 ? stack.copy() : ItemStack.EMPTY);
     }
@@ -104,11 +128,9 @@ public class InventoryUtils {
     }
 
     public static void dropItemNoDelay(ItemStack stack, World world, Vector3 dropLocation) {
-        EntityItem item = new EntityItem(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
-        item.motionX = world.rand.nextGaussian() * 0.05;
-        item.motionY = world.rand.nextGaussian() * 0.05 + 0.2F;
-        item.motionZ = world.rand.nextGaussian() * 0.05;
-        world.spawnEntity(item);
+        ItemEntity item = new ItemEntity(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
+        item.setMotion(world.rand.nextGaussian() * 0.05, world.rand.nextGaussian() * 0.05 + 0.2F, world.rand.nextGaussian() * 0.05);
+        world.addEntity(item);
         item.setPickupDelay(0);
     }
 

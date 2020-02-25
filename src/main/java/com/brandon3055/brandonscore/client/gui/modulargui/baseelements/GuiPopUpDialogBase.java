@@ -4,7 +4,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * Created by brandon3055 on 10/09/2016. <br>
@@ -68,7 +67,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (closeOnOutsideClick && !isMouseOver(mouseX, mouseY)) {
             close();
             return true;
@@ -81,8 +80,8 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
 
         if (!captured && dragZone != null && dragZone.contains(mouseX - xPos(), mouseY - yPos())) {
             dragging = true;
-            dragXOffset = mouseX - xPos();
-            dragYOffset = mouseY - yPos();
+            dragXOffset = (int)mouseX - xPos();
+            dragYOffset = (int)mouseY - yPos();
         }
 
         return captured || blockOutsideClicks;
@@ -94,18 +93,18 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
     }
 
     @Override
-    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
         if (dragging) {
-            int xMove = (mouseX - dragXOffset) - xPos();
-            int yMove = (mouseY - dragYOffset) - yPos();
-            translate(xMove, yMove);
+            double xMove = (mouseX - dragXOffset) - xPos();
+            double yMove = (mouseY - dragYOffset) - yPos();
+            translate((int)xMove, (int)yMove);
         }
 
-        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) || blockOutsideClicks;
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY) || blockOutsideClicks;
     }
 
     @Override
-    public boolean mouseReleased(int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(double mouseX, double mouseY, int state) {
         dragging = false;
         return super.mouseReleased(mouseX, mouseY, state) || blockOutsideClicks;
     }
@@ -119,7 +118,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
     }
 
     @Override
-    protected boolean keyPressed(char typedChar, int keyCode) throws IOException {
+    protected boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 1) {
             close();
             if (escapeCallback != null) {
@@ -127,7 +126,17 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
             }
             return true;
         }
-        return super.keyPressed(typedChar, keyCode);
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    protected boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char charTyped, int charCode) {
+        return super.charTyped(charTyped, charCode);
     }
 
     /**

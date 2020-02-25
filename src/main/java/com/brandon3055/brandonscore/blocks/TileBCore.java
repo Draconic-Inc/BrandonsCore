@@ -57,7 +57,6 @@ import static com.brandon3055.brandonscore.lib.datamanager.DataFlags.*;
  */
 public class TileBCore extends TileEntity implements IDataManagerProvider, IDataRetainingTile, INameable {
 
-    //    protected boolean shouldRefreshOnState = true;
     protected boolean playerAccessTracking = false;
     protected TileCapabilityManager capManager = new TileCapabilityManager(this);
     protected TileDataManager<TileBCore> dataManager = new TileDataManager<>(this);
@@ -66,12 +65,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     protected Map<String, INBTSerializable<CompoundNBT>> savedDataObjects = new HashMap<>();
     private Map<Integer, Consumer<MCDataInput>> clientPacketHandlers = new HashMap<>();
 
-    //    private Map<Direction, LazyOptional<IEnergyStorage>> energyCaps = new HashMap<>();
-    //    private Map<Direction, LazyOptional<IOPStorage>> opEnergyCaps = new HashMap<>();
-    //    private Map<Direction, LazyOptional<IItemHandler>> invCaps = new HashMap<>();
-    //    private Map<EnumFacing, IEnergyStorage> energyCaps = new HashMap<>();
-    //    private Map<EnumFacing, IOPStorage> opEnergyCaps = new HashMap<>();
-    //    private Map<EnumFacing, IItemHandler> invCaps = new HashMap<>();
     private List<Runnable> tickables = new ArrayList<>();
     private ManagedEnum<RSMode> rsControlMode = this instanceof IRSSwitchable ? register(new ManagedEnum<>("rs_mode", RSMode.ALWAYS_ACTIVE, SAVE_BOTH_SYNC_TILE, CLIENT_CONTROL)) : null;
     private ManagedBool rsPowered = this instanceof IRSSwitchable ? register(new ManagedBool("rs_powered", false, SAVE_NBT_SYNC_TILE, TRIGGER_UPDATE)) : null;
@@ -88,6 +81,10 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     @Override
     public TileDataManager getDataManager() {
         return dataManager;
+    }
+
+    public TileCapabilityManager getCapManager() {
+        return capManager;
     }
 
     /**
@@ -334,7 +331,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     public void readFromItemStack(CompoundNBT compound) {
         dataManager.readFromStackNBT(compound);
         savedItemDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(compound.getCompound(tagName)));
-        if (compound.hasUniqueId("bc_caps")) {
+        if (compound.contains("bc_caps")) {
             capManager.deserialize(compound.getCompound("bc_caps"));
         }
     }
@@ -359,7 +356,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     public void readExtraNBT(CompoundNBT compound) {
-        if (compound.hasUniqueId("bc_caps")) {
+        if (compound.contains("bc_caps")) {
             capManager.deserialize(compound.getCompound("bc_caps"));
         }
 

@@ -8,13 +8,13 @@ import net.minecraftforge.common.util.INBTSerializable;
 /**
  * Created by brandon3055 on 18/12/19.
  */
-class SerializationFlags<D extends INBTSerializable<CompoundNBT>> {
+public class SerializationFlags<D extends INBTSerializable<CompoundNBT>> {
     protected final String tagName;
     protected final D serializableInstance;
     protected Object lastData;
 
-    protected boolean saveTile = true;
-    protected boolean saveItem = true;
+    protected boolean saveTile = false;
+    protected boolean saveItem = false;
     protected boolean syncTile = false;
     protected boolean syncContainer = false;
 
@@ -35,36 +35,46 @@ class SerializationFlags<D extends INBTSerializable<CompoundNBT>> {
     }
 
     /**
-     * Default: true
+     * Enable saving to item when broken.
      */
-    public SerializationFlags<D> saveItem(boolean saveItem) {
-        this.saveItem = saveItem;
+    public SerializationFlags<D> saveItem() {
+        this.saveItem = true;
         return this;
     }
 
     /**
-     * Default: true
+     * Enable saving to tile data.
      */
-    public SerializationFlags<D> saveTile(boolean saveTile) {
-        this.saveTile = saveTile;
+    public SerializationFlags<D> saveTile() {
+        this.saveTile = true;
         return this;
     }
 
     /**
-     * Default: false
+     * Enable saving to both item and tile data.
+     * */
+    public SerializationFlags<D> saveBoth() {
+        saveItem();
+        saveTile();
+        return this;
+    }
+
+    /**
+     * Enable syncing via tile entity.
      * You can also implement {@link IMCDataSerializable} on your data instance to improve sync efficiency.
      */
-    public SerializationFlags<D> syncTile(boolean syncTile) {
-        this.syncTile = syncTile;
+    public SerializationFlags<D> syncTile() {
+        this.syncTile = true;
         return this;
     }
 
     /**
-     * Defaults to true for any serializable that also implements {@link IValueHashable}
+     * Enable syncing via container.
+     * Is automatically enabled for any serializable that also implements {@link IValueHashable}
      * You can also implement {@link IMCDataSerializable} on your data instance to improve sync efficiency.
      */
-    public SerializationFlags<D> syncContainer(boolean syncContainer) {
-        this.syncContainer = syncContainer;
+    public SerializationFlags<D> syncContainer() {
+        this.syncContainer = true;
         return this;
     }
 

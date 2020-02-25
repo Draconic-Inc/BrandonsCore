@@ -42,7 +42,7 @@ public class FilterHostile extends FilterBase {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = super.serializeNBT();
-        compound.setBoolean("include", whitelistHostile);
+        compound.putBoolean("include", whitelistHostile);
         return compound;
     }
 

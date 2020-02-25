@@ -13,22 +13,21 @@ import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED;
 
 /**
  * Created by brandon3055 on 5/31/2018.
@@ -36,7 +35,7 @@ import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.Tra
 public class ImageElement extends MDElementBase<ImageElement> {
 
     private static final Random rand = new Random();
-    private static final List<Block> LOADING_BLOCKS = Lists.newArrayList(Blocks.STONE, Blocks.SAND, Blocks.GRASS, Blocks.COBBLESTONE, Blocks.LOG, Blocks.GLASS, Blocks.MYCELIUM, Blocks.CHEST, Blocks.ENCHANTING_TABLE, Blocks.CRAFTING_TABLE, Blocks.ANVIL, Blocks.BEACON, Blocks.BOOKSHELF, Blocks.DIAMOND_ORE, Blocks.OBSIDIAN, Blocks.DIRT, Blocks.DISPENSER, Blocks.FURNACE, Blocks.HAY_BLOCK);
+    private static final List<Block> LOADING_BLOCKS = Lists.newArrayList(Blocks.STONE, Blocks.SAND, Blocks.GRASS, Blocks.COBBLESTONE, Blocks.OAK_LOG, Blocks.GLASS, Blocks.MYCELIUM, Blocks.CHEST, Blocks.ENCHANTING_TABLE, Blocks.CRAFTING_TABLE, Blocks.ANVIL, Blocks.BEACON, Blocks.BOOKSHELF, Blocks.DIAMOND_ORE, Blocks.OBSIDIAN, Blocks.DIRT, Blocks.DISPENSER, Blocks.FURNACE, Blocks.HAY_BLOCK);
     private ItemStack renderLoadingStack = ItemStack.EMPTY;
     private int loadingTime = 0;
     private int maxLoadTime = 40;
@@ -97,7 +96,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.color4f(1, 1, 1, 1);
         if (downloading) {
             renderDownloading(partialTicks);
         }
@@ -133,37 +132,38 @@ public class ImageElement extends MDElementBase<ImageElement> {
         double texX = xPos() + (xSize() / 2D) - 20;
         double texY = Math.max(yPos() - 48 + ((48 - texAnim) * 2), yPos());
         GlStateManager.pushMatrix();
-        GlStateManager.translate(0, 0, getRenderZLevel() + 200);
+        GlStateManager.translated(0, 0, getRenderZLevel() + 200);
         drawScaledCustomSizeModalRect(texX, texY + 1, failed ? 20 : 0, 18 + (24 - Math.min(24, 48 - texAnim)), 20, Math.min(Math.min(24, 48 - texAnim), texAnim), 40, Math.min(Math.min(48, (48 - texAnim) * 2), texAnim * 2), 256, 256);
 
-        GlStateManager.translate(xPos() + xSize() / 2D, yPos() + ySize() - 32, 0);
-        GlStateManager.rotate((BCClientEventHandler.elapsedTicks + partialTicks) * 3F, 0, 1, 0);
-        GlStateManager.scale(-64, -64, -64);
-        GlStateManager.rotate(-30, 1, 0, 0);
-        GlStateManager.rotate(45, 0, 1, 0);
+        GlStateManager.translated(xPos() + xSize() / 2D, yPos() + ySize() - 32, 0);
+        GlStateManager.rotatef((BCClientEventHandler.elapsedTicks + partialTicks) * 3F, 0, 1, 0);
+        GlStateManager.scaled(-64, -64, -64);
+        GlStateManager.rotated(-30, 1, 0, 0);
+        GlStateManager.rotated(45, 0, 1, 0);
         ScissorHelper.pushGuiScissor(mc, xPos(), maxYPos() - anim, xSize(), anim, screenWidth, screenHeight);
         RenderHelper.enableStandardItemLighting();
         GlStateManager.pushMatrix();
         double shrink = 1 - MathHelper.clip((anim - 64) / 10D, 0, 1);
-        GlStateManager.scale(shrink, shrink, shrink);
-        mc.getRenderItem().renderItem(renderLoadingStack, FIXED);
+        GlStateManager.scaled(shrink, shrink, shrink);
+        mc.getItemRenderer().renderItem(renderLoadingStack, ItemCameraTransforms.TransformType.FIXED);
         GlStateManager.popMatrix();
         RenderHelper.disableStandardItemLighting();
         ScissorHelper.popScissor();
 
         Cuboid6 cuboid6 = new Cuboid6(-0.251, -0.251, -0.251, 0.251, 0.251, 0.251);
-        GlStateManager.disableTexture2D();
+        GlStateManager.disableTexture();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         if (failed) {
-            GlStateManager.color(0, 0, 0, 1);
+            GlStateManager.color4f(0, 0, 0, 1);
         }
         else {
-            GlStateManager.color(1, 1, 1, 1);
+            GlStateManager.color4f(1, 1, 1, 1);
         }
         RenderUtils.drawCuboidOutline(cuboid6);
-        GlStateManager.enableTexture2D();
+        GlStateManager.enableTexture();
 
-        GlStateManager.color(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
+        //TODO font renderer changes
+//        GlStateManager.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
         GlStateManager.popMatrix();
     }
 
@@ -201,9 +201,9 @@ public class ImageElement extends MDElementBase<ImageElement> {
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (isMouseOver(mouseX, mouseY)) {
-            if (mouseButton == 0 && Screen.isShiftKeyDown()) {
+            if (mouseButton == 0 && Screen.hasShiftDown()) {
                 DLRSCache.clearResourceCache(imageURL);
                 DLRSCache.clearFileCache(imageURL);
                 container.layoutMarkdownElements();

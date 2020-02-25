@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.LinkedList;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement.ListMode.DISABLED;
@@ -173,11 +172,11 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         verticalScrollBar.setParentScroll(true);
         verticalScrollBar.allowMiddleClickDrag(true);
         verticalScrollBar.clearScrollChecks();
-        verticalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || !Screen.isShiftKeyDown());
+        verticalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || !Screen.hasShiftDown());
         horizontalScrollBar.setParentScroll(true);
         horizontalScrollBar.allowMiddleClickDrag(true);
         horizontalScrollBar.clearScrollChecks();
-        horizontalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || Screen.isShiftKeyDown());
+        horizontalScrollBar.addScrollCheck((slider, mouseX, mouseY) -> slider.isMouseOver(mouseX, mouseY) || Screen.hasShiftDown());
         return this;
     }
 
@@ -487,7 +486,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (getInsetRect().contains(mouseX, mouseY)) {
             for (GuiElement element: scrollingElements) {
                 if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
@@ -505,15 +504,15 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     }
 
     @Override
-    public boolean mouseDragged(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
         for (GuiElement element: scrollingElements) {
-            if (element.isEnabled() && element.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+            if (element.isEnabled() && element.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
                 return true;
             }
         }
 
         for (GuiElement element: foregroundElements) {
-            if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseDragged(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)) {
+            if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
                 return true;
             }
         }
@@ -633,12 +632,12 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         double xSize = getInsetRect().width;
         double ySize = getInsetRect().height;
 
-        double yResScale = (double) minecraft.displayHeight / (screenHeight);
-        double xResScale = (double) minecraft.displayWidth / (screenWidth);
+        double yResScale = (double) displayHeight() / (screenHeight);
+        double xResScale = (double) displayWidth() / (screenWidth);
         double scaledWidth = xSize * xResScale;
         double scaledHeight = ySize * yResScale;
         int x = (int) (xPos * xResScale);
-        int y = (int) (minecraft.displayHeight - (yPos * yResScale) - scaledHeight);
+        int y = (int) (displayHeight() - (yPos * yResScale) - scaledHeight);
 
         ScissorHelper.pushScissor(x, y, (int) scaledWidth, (int) scaledHeight);
 

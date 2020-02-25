@@ -13,7 +13,7 @@
 //import net.minecraft.client.Minecraft;
 //import net.minecraft.util.text.ITextComponent;
 //import net.minecraft.util.text.Style;
-//import net.minecraft.util.text.TextComponentString;
+//import net.minecraft.util.text.StringTextComponent;
 //import net.minecraft.util.text.TextFormatting;
 //import net.minecraft.util.text.event.ClickEvent;
 //import net.minecraft.util.text.event.HoverEvent;
@@ -195,7 +195,7 @@
 //        modPropertyHelpers.forEach((s, props) -> DataUtils.forEachMatch(props, prop -> prop.requiresSync || prop.autoSync, prop -> prop.writeToBytes(output)));
 //    }
 //
-//    @SideOnly(Side.CLIENT)
+//    @OnlyIn(Dist.CLIENT)
 //    public static void readConfigForSync(MCDataInput input) {
 //        boolean disableGui = input.readBoolean();
 //
@@ -236,10 +236,10 @@
 //
 //        if (propsRequireRestart.size() > 0) {
 //            if (disableGui){
-//                ITextComponent message = new TextComponentString(TextFormatting.RED + "[Warning] " + TextFormatting.GOLD + "" + //
+//                ITextComponent message = new StringTextComponent(TextFormatting.RED + "[Warning] " + TextFormatting.GOLD + "" + //
 //                        "Brandon's core has detected a config mismatch between your client and this server!");
-//                ITextComponent button = new TextComponentString(TextFormatting.BLUE + "[Click here to lean more]");
-//                ITextComponent buttonHover = new TextComponentString("Click here to open the config conflict gui that better explains this issue and gives you options to easily resolve this issue.");
+//                ITextComponent button = new StringTextComponent(TextFormatting.BLUE + "[Click here to lean more]");
+//                ITextComponent buttonHover = new StringTextComponent("Click here to open the config conflict gui that better explains this issue and gives you options to easily resolve this issue.");
 //                button.setStyle(new Style().setColor(TextFormatting.BLUE).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bcore_client config_sync_gui")).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, buttonHover)));
 //
 //                Minecraft.getInstance().player.sendMessage(message);

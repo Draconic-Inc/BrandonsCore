@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Created by brandon3055 on 13/09/2016.
@@ -23,6 +24,7 @@ public class DLRSCache {
     }
     private static Map<String, DLResourceLocation> resourceCache = new HashMap<String, DLResourceLocation>();
     private static File cacheFolder;
+    private static Pattern urlStripper = Pattern.compile("([^a-zA-Z0-9]*)");
 
     public static void initialize() {
         cacheFolder = new File(FileHandler.brandon3055Folder, "ResourceCache");
@@ -31,9 +33,10 @@ public class DLRSCache {
 
 
     public static DLResourceLocation getResource(String url) {
-        if (!resourceCache.containsKey(url)) {
+        String key = urlStripper.matcher(url).replaceAll("_").toLowerCase();
 
-            DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), url);
+        if (!resourceCache.containsKey(key)) {
+            DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), key);
             TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
 
             File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");
@@ -42,10 +45,10 @@ public class DLRSCache {
             downloader.setDlLocation(resourceLocation);
             texturemanager.loadTexture(resourceLocation, downloader);
 
-            resourceCache.put(url, resourceLocation);
+            resourceCache.put(key, resourceLocation);
         }
 
-        return resourceCache.get(url);
+        return resourceCache.get(key);
     }
 
     public static void clearResourceCache() {

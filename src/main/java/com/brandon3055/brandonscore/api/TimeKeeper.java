@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.api;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
  * Created by brandon3055 on 12/10/19.

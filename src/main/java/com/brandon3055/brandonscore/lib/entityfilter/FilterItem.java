@@ -3,12 +3,14 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ResourceLocation;
 
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -69,6 +71,9 @@ public class FilterItem extends FilterBase {
 
     public void setNbt(CompoundNBT nbt) {
         this.nbt = nbt;
+        if (nbt != null && nbt.isEmpty()) {
+            this.nbt = null;
+        }
         getFilter().nodeModified(this);
     }
 
@@ -98,8 +103,8 @@ public class FilterItem extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        if (entity instanceof EntityItem) {
-            ItemStack stack = ((EntityItem) entity).getItem();
+        if (entity instanceof ItemEntity) {
+            ItemStack stack = ((ItemEntity) entity).getItem();
             if (stack.isEmpty()) {
                 return !whitelistItem;
             }
@@ -113,10 +118,12 @@ public class FilterItem extends FilterBase {
                     match = name.equals(itemName);
                 }
                 else {
-                    int[] ids = OreDictionary.getOreIDs(stack);
+                    //TODO Test This
+                    Collection<ResourceLocation> tags = ItemTags.getCollection().getOwningTags(stack.getItem());
+//                    int[] ids = OreDictionary.getOreIDs(stack);
                     match = false;
-                    for (int id : ids) {
-                        if (OreDictionary.getOreName(id).equals(itemName)) {
+                    for (ResourceLocation tag : tags) {
+                        if (tag.toString().equals(itemName)) {
                             match = true;
                             break;
                         }
@@ -127,19 +134,18 @@ public class FilterItem extends FilterBase {
                 match = stack.getCount() == count;
             }
             if (match && damage != -1) {
-                match = stack.getItemDamage() == damage;
+                match = stack.getDamage() == damage;
             }
             if (match && nbt != null) {
-                //noinspection ConstantConditions
-                match = nbt.equals(stack.getTagCompound());
+                match = nbt.equals(stack.getTag());
             }
 
             if (itemName.isEmpty()) {
                 if (filterBlocks) {
-                    match = stack.getItem() instanceof ItemBlock;
+                    match = stack.getItem() instanceof BlockItem;
                 }
                 else if (filterItems) {
-                    match = !(stack.getItem() instanceof ItemBlock);
+                    match = !(stack.getItem() instanceof BlockItem);
                 }
             }
 
@@ -156,14 +162,14 @@ public class FilterItem extends FilterBase {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = super.serializeNBT();
-        compound.setBoolean("include", whitelistItem);
-        compound.setString("name", itemName);
-        compound.setShort("count", (short) count);
-        compound.setShort("damage", (short) count);
-        compound.setBoolean("items", filterItems);
-        compound.setBoolean("blocks", filterBlocks);
+        compound.putBoolean("include", whitelistItem);
+        compound.putString("name", itemName);
+        compound.putShort("count", (short) count);
+        compound.putShort("damage", (short) count);
+        compound.putBoolean("items", filterItems);
+        compound.putBoolean("blocks", filterBlocks);
         if (nbt != null) {
-            compound.setTag("nbt", nbt);
+            compound.put("nbt", nbt);
         }
         return compound;
     }
@@ -178,8 +184,8 @@ public class FilterItem extends FilterBase {
         filterItems = compound.getBoolean("items");
         filterBlocks = compound.getBoolean("blocks");
         nbt = null;
-        if (compound.hasKey("nbt", 10)) {
-            nbt = compound.getCompoundTag("nbt");
+        if (compound.contains("nbt", 10)) {
+            nbt = compound.getCompound("nbt");
         }
     }
 
@@ -192,7 +198,7 @@ public class FilterItem extends FilterBase {
         output.writeVarInt(damage);
         output.writeBoolean(filterItems);
         output.writeBoolean(filterBlocks);
-        output.writeNBTTagCompound(nbt);
+        output.writeCompoundNBT(nbt);
     }
 
     @Override
@@ -204,7 +210,7 @@ public class FilterItem extends FilterBase {
         damage = input.readVarInt();
         filterItems = input.readBoolean();
         filterBlocks = input.readBoolean();
-        nbt = input.readNBTTagCompound();
+        nbt = input.readCompoundNBT();
         dataChanged = true;
     }
 }

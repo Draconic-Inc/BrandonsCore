@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBordere
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.TBasicMachine;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
 
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.EXTRA_WIDE_EXTRA_TALL;
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.*;
@@ -21,11 +22,13 @@ public class GuiToolkitTest extends ModularGuiScreen {
 
     protected GuiToolkit<GuiToolkitTest> toolkit = new GuiToolkit<>(this, EXTRA_WIDE_EXTRA_TALL);
 
-    public GuiToolkitTest() {}
+    public GuiToolkitTest(ITextComponent titleIn) {
+        super(titleIn);
+    }
 
     @Override
     public void addElements(GuiElementManager manager) {
-        manager.addChild(new GuiButton("Reload").setSize(50, 16).setVanillaButtonRender(true).onPressed(() -> mc.displayGuiScreen(new GuiToolkitTest())));
+        manager.addChild(new GuiButton("Reload").setSize(50, 16).setVanillaButtonRender(true).onPressed(() -> minecraft.displayGuiScreen(new GuiToolkitTest(title))));
 
         TBasicMachine template = toolkit.loadTemplate(new TBasicMachine(null));
         template.title.setLabelText("Colour Palette Test UI");

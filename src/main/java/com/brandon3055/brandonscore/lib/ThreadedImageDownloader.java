@@ -1,57 +1,53 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.mojang.blaze3d.platform.TextureUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.data.TextureMetadataSection;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.IResourceManager;
+import net.minecraft.util.DefaultUncaughtExceptionHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by brandon3055 on 13/09/2016.
  */
-public class ThreadedImageDownloader extends SimpleTexture{
+public class ThreadedImageDownloader extends SimpleTexture {
 
-    private static final ResourceLocation RESOURCE_BROKEN_DOWNLOAD = new ResourceLocation(BrandonsCore.MODID.toLowerCase() + ":textures/loading_texture_failed.png");
+    private static final Logger LOGGER = LogHelperBC.logger;
+    private DLResourceLocation dlLocation = null;
     private static final AtomicInteger TEXTURE_DOWNLOADER_THREAD_ID = new AtomicInteger(0);
+    @Nullable
     private final File cacheFile;
-    private final String resourceUrl;
+    private final String imageUrl;
     @Nullable
     private final IImageBuffer imageBuffer;
     @Nullable
-    private Thread downloadThread;
-    @Nullable
-    private BufferedImage bufferedImage;
-    private boolean textureUploadedToGPU;
-    private volatile boolean downloadFailed = false;
-    private DLResourceLocation dlLocation = null;
+    private Thread imageThread;
+    private volatile boolean textureUploaded;
 
     /**
-     * @param cacheFile The location to cache the downloaded image. If this file already exists it will not be re-downloaded.
-     * @param imageUrl The image URL.
+     * @param cacheFile       The location to cache the downloaded image. If this file already exists it will not be re-downloaded.
+     * @param imageUrl        The image URL.
      * @param textureLocation This should be a new resource location linked to some "Loading" texture. Once the image is downloaded this location will be rebound to the downloaded image automatically.
-     * @param imageBuffer Optional image buffer used to process a downloaded image.
+     * @param imageBuffer     Optional image buffer used to process a downloaded image.
      */
-    public ThreadedImageDownloader(File cacheFile, String imageUrl, ResourceLocation textureLocation, @Nullable IImageBuffer imageBuffer)
-    {
+    public ThreadedImageDownloader(File cacheFile, String imageUrl, DLResourceLocation textureLocation, @Nullable IImageBuffer imageBuffer) {
         super(textureLocation);
         this.cacheFile = cacheFile;
-        this.resourceUrl = imageUrl;
+        this.imageUrl = imageUrl;
         this.imageBuffer = imageBuffer;
     }
 
@@ -62,218 +58,137 @@ public class ThreadedImageDownloader extends SimpleTexture{
         this.dlLocation = dlLocation;
     }
 
-    @Override
-    public void loadTexture(IResourceManager resourceManager) throws IOException {
-        if (this.bufferedImage == null && this.textureLocation != null)
-        {
-            if (dlLocation != null && textureLocation instanceof DLResourceLocation && ((DLResourceLocation) textureLocation).sizeSet) {
-                dlLocation.sizeSet = ((DLResourceLocation) textureLocation).sizeSet;
-                dlLocation.width = ((DLResourceLocation) textureLocation).width;
-                dlLocation.height = ((DLResourceLocation) textureLocation).height;
-                dlLocation.dlFailed = false;
-                dlLocation.dlFinished = false;
-            }
-            super.loadTexture(resourceManager);
-        }
-
-        if (this.downloadThread == null)
-        {
-            if (this.cacheFile != null && this.cacheFile.isFile())
-            {
-                LogHelperBC.debug("Loading texture from local cache (%s)", this.cacheFile);
-                try
-                {
-                    this.bufferedImage = ImageIO.read(this.cacheFile);
-
-                    if (this.imageBuffer != null)
-                    {
-                        this.setBufferedImage(this.imageBuffer.parseUserSkin(this.bufferedImage));
-                    }
-                    if (dlLocation != null) {
-                        dlLocation.width = bufferedImage.getWidth();
-                        dlLocation.height = bufferedImage.getHeight();
-                        dlLocation.sizeSet = true;
-                        dlLocation.dlFailed = false;
-                        dlLocation.dlFinished = true;
-                    }
-                }
-                catch (IOException ioexception)
-                {
-                    LogHelperBC.error("Couldn\'t load texture %s %s", this.cacheFile, ioexception);
-                    this.downloadTextureFromURL();
-                }
-            }
-            else
-            {
-                this.downloadTextureFromURL();
-            }
-        }
-        else if (downloadFailed) {
-            loadBrokenTexture(resourceManager);
-        }
+    private void uploadImage(NativeImage nativeImageIn) {
+        TextureUtil.prepareImage(this.getGlTextureId(), nativeImageIn.getWidth(), nativeImageIn.getHeight());
+        nativeImageIn.uploadTextureSub(0, 0, 0, false);
     }
 
-    private void loadBrokenTexture(IResourceManager resourceManager) {
-        this.deleteGlTexture();
-        IResource iresource = null;
-
-        try
-        {
-            iresource = resourceManager.getResource(RESOURCE_BROKEN_DOWNLOAD);
-            BufferedImage bufferedimage = TextureUtil.readBufferedImage(iresource.getInputStream());
-            boolean flag = false;
-            boolean flag1 = false;
-
-            if (iresource.hasMetadata())
-            {
-                try
-                {
-                    TextureMetadataSection texturemetadatasection = iresource.getMetadata("texture");
-
-                    if (texturemetadatasection != null)
-                    {
-                        flag = texturemetadatasection.getTextureBlur();
-                        flag1 = texturemetadatasection.getTextureClamp();
-                    }
-                }
-                catch (RuntimeException runtimeexception)
-                {
-                    LogHelperBC.warn("Failed reading metadata of: %s %a", RESOURCE_BROKEN_DOWNLOAD, runtimeexception);
-                }
-            }
-
-            TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), bufferedimage, flag, flag1);
-            LogHelperBC.warn("Unable to load resource from URL: " + resourceUrl);
-            if (dlLocation != null) {
-                dlLocation.width = bufferedimage.getWidth();
-                dlLocation.height = bufferedimage.getHeight();
-                dlLocation.sizeSet = true;
-            }
-        }
-        catch (Exception e) {
-            LogHelperBC.error("Failed to load broken texture");
-            e.printStackTrace();
-        }
-        finally
-        {
-            IOUtils.closeQuietly(iresource);
-        }
-    }
-
-    private void checkTextureUploadedToGPU() {
-        if (!this.textureUploadedToGPU)
-        {
-            if (this.bufferedImage != null)
-            {
-                if (this.textureLocation != null)
-                {
-                    this.deleteGlTexture();
-                }
-
-                TextureUtil.uploadTextureImage(super.getGlTextureId(), this.bufferedImage);
-                this.textureUploadedToGPU = true;
-            }
-        }
-        if (downloadFailed) {
-            downloadFailed = false;
-            loadBrokenTexture(Minecraft.getInstance().getResourceManager());
-            if (dlLocation != null) {
-                dlLocation.dlFailed = dlLocation.dlFinished = true;
-            }
-        }
-    }
-
-    public int getGlTextureId() {
-        this.checkTextureUploadedToGPU();
-        return super.getGlTextureId();
-    }
-
-    public void setBufferedImage(BufferedImage bufferedImageIn) {
-        this.bufferedImage = bufferedImageIn;
-
-        if (this.imageBuffer != null)
-        {
+    public void setImage(NativeImage nativeImageIn) {
+        if (this.imageBuffer != null) {
             this.imageBuffer.skinAvailable();
         }
+
+        synchronized (this) {
+            this.uploadImage(nativeImageIn);
+            this.textureUploaded = true;
+        }
     }
 
-    protected void downloadTextureFromURL()
-    {
-        this.downloadThread = new Thread("Texture Downloader #" + TEXTURE_DOWNLOADER_THREAD_ID.incrementAndGet())
-        {
-            public void run()
-            {
-                HttpURLConnection connection = null;
-                LogHelperBC.debug("Downloading http texture from %s to %s", ThreadedImageDownloader.this.resourceUrl, ThreadedImageDownloader.this.cacheFile);
 
-                try
-                {
-//                    connection = (HttpURLConnection)(new URL(ThreadedImageDownloader.this.resourceUrl)).openConnection(Minecraft.getInstance().getProxy());
-//                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-//                    connection.setDoInput(true);
-//                    connection.setDoOutput(false);
-//                    connection.connect();
-                    connection = FileHandler.openConnection(ThreadedImageDownloader.this.resourceUrl, Minecraft.getInstance().getProxy());
-                    int response = connection.getResponseCode();
+    @Override
+    public void loadTexture(IResourceManager manager) throws IOException {
+        if (!this.textureUploaded) {
+            synchronized (this) {
+                super.loadTexture(manager);
+                this.textureUploaded = true;
+            }
+        }
 
-                    if (response / 100 == 2)
-                    {
-                        BufferedImage bufferedimage;
+        if (this.imageThread == null) {
+            if (this.cacheFile != null && this.cacheFile.isFile()) {
+                LogHelperBC.debug("Loading http texture from local cache ({})", (Object) this.cacheFile);
+                NativeImage nativeimage = null;
 
-                        if (ThreadedImageDownloader.this.cacheFile != null)
-                        {
-                            FileUtils.copyInputStreamToFile(connection.getInputStream(), ThreadedImageDownloader.this.cacheFile);
-                            bufferedimage = ImageIO.read(ThreadedImageDownloader.this.cacheFile);
-                        }
-                        else
-                        {
-                            bufferedimage = TextureUtil.readBufferedImage(connection.getInputStream());
-                        }
-
-                        if (ThreadedImageDownloader.this.imageBuffer != null)
-                        {
-                            bufferedimage = ThreadedImageDownloader.this.imageBuffer.parseUserSkin(bufferedimage);
-                        }
-
-                        if (dlLocation != null) {
-                            dlLocation.width = bufferedimage.getWidth();
-                            dlLocation.height = bufferedimage.getHeight();
-                            dlLocation.sizeSet = true;
-                            dlLocation.dlFailed = false;
-                            dlLocation.dlFinished = true;
-                        }
-
-                        ThreadedImageDownloader.this.setBufferedImage(bufferedimage);
-
-                        return;
+                try {
+                    nativeimage = NativeImage.read(new FileInputStream(this.cacheFile));
+                    if (this.imageBuffer != null) {
+                        nativeimage = this.imageBuffer.parseUserSkin(nativeimage);
                     }
-                    else {
-                        LogHelperBC.error("Could not download resource. Server returned response code " + connection.getResponseCode());
-                        ThreadedImageDownloader.this.downloadFailed = true;
-                        if (ThreadedImageDownloader.this.dlLocation != null) {
-                            ThreadedImageDownloader.this.dlLocation.dlFailed =  ThreadedImageDownloader.this.dlLocation.dlFinished = true;
-                        }
+
+                    this.setImage(nativeimage);
+                    dlLocation.width = nativeimage.getWidth();
+                    dlLocation.height = nativeimage.getHeight();
+                    dlLocation.sizeSet = true;
+                    dlLocation.dlFailed = false;
+                    dlLocation.dlFinished = true;
+
+                }
+                catch (IOException ioexception) {
+                    LOGGER.error("Couldn't load skin {}", this.cacheFile, ioexception);
+                    this.loadTextureFromServer();
+                }
+                finally {
+                    if (nativeimage != null) {
+                        nativeimage.close();
                     }
                 }
-                catch (Exception exception)
-                {
+            } else {
+                this.loadTextureFromServer();
+            }
+        }
+    }
+
+    protected void loadTextureFromServer() {
+        this.imageThread = new Thread("Texture Downloader #" + TEXTURE_DOWNLOADER_THREAD_ID.incrementAndGet()) {
+            public void run() {
+                HttpURLConnection connection = null;
+                LogHelperBC.debug("Downloading http texture from %s to %s", ThreadedImageDownloader.this.imageUrl, ThreadedImageDownloader.this.cacheFile);
+
+                try {
+                    connection = FileHandler.openConnection(ThreadedImageDownloader.this.imageUrl, Minecraft.getInstance().getProxy());
+                    int response = connection.getResponseCode();
+
+                    if (response / 100 == 2) {
+                        InputStream inputstream;
+                        if (ThreadedImageDownloader.this.cacheFile != null) {
+                            FileUtils.copyInputStreamToFile(connection.getInputStream(), ThreadedImageDownloader.this.cacheFile);
+                            inputstream = new FileInputStream(ThreadedImageDownloader.this.cacheFile);
+                        } else {
+                            inputstream = connection.getInputStream();
+                        }
+
+                        Minecraft.getInstance().execute(() -> {
+                            NativeImage nativeimage = null;
+
+                            try {
+                                nativeimage = NativeImage.read(inputstream);
+                                if (ThreadedImageDownloader.this.imageBuffer != null) {
+                                    nativeimage = ThreadedImageDownloader.this.imageBuffer.parseUserSkin(nativeimage);
+                                }
+
+                                ThreadedImageDownloader.this.setImage(nativeimage);
+                                dlLocation.width = nativeimage.getWidth();
+                                dlLocation.height = nativeimage.getHeight();
+                                dlLocation.sizeSet = true;
+                                dlLocation.dlFailed = false;
+                                dlLocation.dlFinished = true;
+                            }
+                            catch (IOException ioexception) {
+                                LogHelperBC.warn("Error while loading texture", (Throwable) ioexception);
+                            }
+                            finally {
+                                if (nativeimage != null) {
+                                    nativeimage.close();
+                                }
+
+                                IOUtils.closeQuietly(inputstream);
+                            }
+
+                        });
+                        return;
+                    }
+                }
+                catch (Exception exception) {
                     LogHelperBC.error("Couldn\'t download http texture " + exception);
-                    ThreadedImageDownloader.this.downloadFailed = true;
                     if (ThreadedImageDownloader.this.dlLocation != null) {
-                        ThreadedImageDownloader.this.dlLocation.dlFailed =  ThreadedImageDownloader.this.dlLocation.dlFinished = true;
+                        ThreadedImageDownloader.this.dlLocation.dlFailed = ThreadedImageDownloader.this.dlLocation.dlFinished = true;
                     }
                     return;
                 }
-                finally
-                {
-                    if (connection != null)
-                    {
+                finally {
+                    if (connection != null) {
                         connection.disconnect();
                     }
                 }
             }
         };
-        this.downloadThread.setDaemon(true);
-        this.downloadThread.start();
+        this.imageThread.setDaemon(true);
+        this.imageThread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+        this.imageThread.start();
+    }
+
+    @Override
+    protected SimpleTexture.TextureData func_215246_b(IResourceManager resourceManager) {
+        return SimpleTexture.TextureData.func_217799_a(resourceManager, this.textureLocation);
     }
 }

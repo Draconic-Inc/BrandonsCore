@@ -84,7 +84,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setByte(name, value);
+        compound.putByte(name, value);
     }
 
     @Override

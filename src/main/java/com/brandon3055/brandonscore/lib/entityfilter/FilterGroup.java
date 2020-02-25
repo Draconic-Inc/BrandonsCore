@@ -3,13 +3,13 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.brandon3055.brandonscore.utils.Utils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class FilterGroup extends FilterBase {
     }
 
     protected void addNode(FilterBase node) {
-        if (Utils.isClientSide()) {
+        if (EffectiveSide.get().isClient()) {
             throw new IllegalStateException("Filter notes can be edited client side but must be added and removed server side!");
         }
 
@@ -41,7 +41,7 @@ public class FilterGroup extends FilterBase {
     }
 
     protected void removeNode(FilterBase node) {
-        if (Utils.isClientSide()) {
+        if (EffectiveSide.get().isClient()) {
             throw new IllegalStateException("Filter notes can be edited client side but must be added and removed server side!");
         }
 
@@ -104,7 +104,7 @@ public class FilterGroup extends FilterBase {
         super.deserializeNBT(nbt);
         andGroup = nbt.getBoolean("and_group");
         subNodeMap.clear();
-        if (nbt.hasUniqueId("sub_nodes")) {
+        if (nbt.contains("sub_nodes")) {
             ListNBT tagList = nbt.getList("sub_nodes", 10);
             for (INBT tag : tagList) {
                 FilterType type = FilterType.filterTypeMap[((CompoundNBT) tag).getByte("filter_type")];

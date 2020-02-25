@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.api;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -33,5 +33,5 @@ public interface IFOVModifierItem {
      *
      * Note: 0.1 is the min allowed FOV and 1.5 is the max. Anything outside this range will have no effect.
      */
-    float getNewFOV(PlayerEntity player, ItemStack stack, float currentFOV, float originalFOV, EntityEquipmentSlot slot);
+    float getNewFOV(PlayerEntity player, ItemStack stack, float currentFOV, float originalFOV, EquipmentSlotType slot);
 }

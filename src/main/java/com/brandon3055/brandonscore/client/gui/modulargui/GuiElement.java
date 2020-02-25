@@ -7,17 +7,21 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.GL11;
@@ -33,6 +37,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 30/08/2016. <br>
@@ -771,6 +776,15 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     protected boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         for (GuiElement element : childElements) {
             if (element.isEnabled() && element.keyReleased(keyCode, scanCode, modifiers)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean charTyped(char charTyped, int charCode) {
+        for (GuiElement element : childElements) {
+            if (element.isEnabled() && element.charTyped(charTyped, charCode)) {
                 return true;
             }
         }
@@ -1588,14 +1602,14 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Returns how far from this element the given point is.
      */
-    public int distFromElement(int x, int y) {
+    public int distFromElement(double x, double y) {
         if (x >= xPos() && x <= xPos() + xSize() && y >= yPos() && y <= yPos() + ySize()) {
             return 0;
         }
 
-        int xDist = x < xPos() ? xPos() - x : x - (xPos() + xSize());
-        int yDist = y < yPos() ? yPos() - y : y - (yPos() + ySize());
-        return Math.max(xDist, yDist);
+        double xDist = x < xPos() ? xPos() - x : x - (xPos() + xSize());
+        double yDist = y < yPos() ? yPos() - y : y - (yPos() + ySize());
+        return (int) Math.max(xDist, yDist);
     }
 
     /**
@@ -1607,7 +1621,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * @param list The list of elements.
      * @return the list of elements.
      */
-    public List<GuiElement> getElementsAtPosition(int posX, int posY, List<GuiElement> list) {
+    public List<GuiElement> getElementsAtPosition(double posX, double posY, List<GuiElement> list) {
         if (isMouseOver(posX, posY)) {
             list.add(this);
         }
@@ -1680,6 +1694,17 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     public double getMouseY() {
         return screenHeight - mc.mouseHelper.getMouseY() * screenHeight / displayHeight() - 1;
+    }
+
+    public List<String> getTooltipFromItem(ItemStack stack) {
+        List<ITextComponent> list = stack.getTooltip(mc.player, mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+        List<String> list1 = Lists.newArrayList();
+
+        for(ITextComponent itextcomponent : list) {
+            list1.add(itextcomponent.getFormattedText());
+        }
+
+        return list1;
     }
 
     //endregion
@@ -1962,14 +1987,14 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Draws a string with the given colour and optional shadow.
      */
-    public int drawString(BCFontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
         GlStateManager.pushMatrix();
         GlStateManager.translated(0, 0, getRenderZLevel() + 1);
         int i;
         if (dropShadow) {
-            i = fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2F, y, colour);
+            i = fontRenderer.drawStringWithShadow(text, x, y, colour);
         } else {
-            i = fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2F, y, colour);
+            i = fontRenderer.drawString(text, x, y, colour);
         }
         GlStateManager.popMatrix();
         return i;
@@ -2096,7 +2121,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * This is almost an exact copy of forges code except it respects zLevel.
      */
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
+    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
+        font = mc.fontRenderer;
         if (!textLines.isEmpty()) {
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
@@ -2526,6 +2552,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     @SuppressWarnings("unchecked")
     public E setHoverText(List<String> textLines) {
         setHoverTextList(element -> textLines);
+        return (E) this;
+    }
+
+    //TODO I can probably expend on this. Maybe re write things to use text components or some custom system that supports text components.
+    public E setComponentHoverText(List<ITextComponent> textLines) {
+        setHoverTextList(element -> textLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()));
         return (E) this;
     }
 

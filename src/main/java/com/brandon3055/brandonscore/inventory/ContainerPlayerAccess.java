@@ -1,26 +1,28 @@
 package com.brandon3055.brandonscore.inventory;
 
 import codechicken.lib.inventory.InventorySimple;
+import com.brandon3055.brandonscore.BCContent;
 import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
 import com.brandon3055.brandonscore.network.PacketDispatcher;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemArmor;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
-import static net.minecraft.inventory.EntityEquipmentSlot.*;
+import static net.minecraft.inventory.EquipmentSlotType.*;
 import static net.minecraft.util.text.TextFormatting.RED;
 import static net.minecraft.util.text.TextFormatting.WHITE;
 
@@ -29,7 +31,7 @@ import static net.minecraft.util.text.TextFormatting.WHITE;
  */
 public class ContainerPlayerAccess extends Container {
 
-    private static final EntityEquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EntityEquipmentSlot[] {HEAD, CHEST, LEGS, FEET};
+    private static final EquipmentSlotType[] VALID_EQUIPMENT_SLOTS = new EquipmentSlotType[]{HEAD, CHEST, LEGS, FEET};
     public PlayerEntity player;
     public PlayerEntity playerAccess;
     private IInventory targetInventory;
@@ -37,36 +39,37 @@ public class ContainerPlayerAccess extends Container {
     private int tick = 0;
 
     //Client Side Constructor
-    public ContainerPlayerAccess(PlayerEntity player) {
-        this.player = player;
+    public ContainerPlayerAccess(int id, PlayerInventory playerInv) {
+        super(BCContent.containerPlayerAccess, id);
+        this.player = playerInv.player;
         playerAccess = null;
         targetInventory = new InventorySimple(41);
         layoutSlots();
     }
 
-    public ContainerPlayerAccess(PlayerEntity player, PlayerEntity playerAccess, MinecraftServer server) {
-        this.player = player;
+    public ContainerPlayerAccess(int id, PlayerInventory playerInv, PlayerEntity playerAccess, MinecraftServer server) {
+        super(BCContent.containerPlayerAccess, id);
+        this.player = playerInv.player;
         this.playerAccess = playerAccess;
         targetInventory = playerAccess.inventory;
         this.server = server;
         layoutSlots();
     }
 
-    @SideOnly(Side.SERVER)
+    //    @OnlyIn(Dist.DEDICATED_SERVER)
     @Override
     public void detectAndSendChanges() {
         if (playerAccess != null && !(playerAccess instanceof OfflinePlayer)) {
-            if (playerAccess.isDead) {
+            if (!playerAccess.isAlive()) {
                 player.closeScreen();
-                player.sendMessage(new TextComponentString("Target player died or disconnected.").setStyle(new Style().setColor(RED)).appendSibling(new TextComponentString("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
+                player.sendMessage(new StringTextComponent("Target player died or disconnected.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
                 return;
             }
-        }
-        else if (playerAccess != null) {
+        } else if (playerAccess != null) {
             //noinspection ConstantConditions
             if (server.getPlayerList().getPlayerByUUID(playerAccess.getGameProfile().getId()) != null) {
                 player.closeScreen();
-                player.sendMessage(new TextComponentString("Target player is now online.").setStyle(new Style().setColor(RED)).appendSibling(new TextComponentString("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
+                player.sendMessage(new StringTextComponent("Target player is now online.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
                 return;
             }
         }
@@ -83,38 +86,38 @@ public class ContainerPlayerAccess extends Container {
         int yPos = 21;
 
         for (int x = 0; x < 9; x++) {
-            addSlotToContainer(new Slot(targetInventory, x, xPos + 21 + 18 * x, yPos + 54 + 3));
+            addSlot(new Slot(targetInventory, x, xPos + 21 + 18 * x, yPos + 54 + 3));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                addSlotToContainer(new Slot(targetInventory, x + y * 9 + 9, xPos + 21 + 18 * x, yPos + y * 18));
+                addSlot(new Slot(targetInventory, x + y * 9 + 9, xPos + 21 + 18 * x, yPos + y * 18));
             }
         }
 
         for (int i = 0; i < 4; i++) {
-            this.addSlotToContainer(new ArmorSlot(targetInventory, 36 + (3 - i), xPos, yPos + i * 19, VALID_EQUIPMENT_SLOTS[i], player));
+            this.addSlot(new ArmorSlot(targetInventory, 36 + (3 - i), xPos, yPos + i * 19, VALID_EQUIPMENT_SLOTS[i], player));
         }
 
-        this.addSlotToContainer(new OffhandSlot(targetInventory, 40, xPos + 186, yPos + 54 + 3));
+        this.addSlot(new OffhandSlot(targetInventory, 40, xPos + 186, yPos + 54 + 3));
 
         xPos = 9;
         yPos = 168;
         for (int x = 0; x < 9; x++) {
-            addSlotToContainer(new Slot(player.inventory, x, xPos + 21 + 18 * x, yPos + 54 + 3));
+            addSlot(new Slot(player.inventory, x, xPos + 21 + 18 * x, yPos + 54 + 3));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                addSlotToContainer(new Slot(player.inventory, x + y * 9 + 9, xPos + 21 + 18 * x, yPos + y * 18));
+                addSlot(new Slot(player.inventory, x + y * 9 + 9, xPos + 21 + 18 * x, yPos + y * 18));
             }
         }
 
         for (int i = 0; i < 4; i++) {
-            this.addSlotToContainer(new ArmorSlot(player.inventory, 36 + (3 - i), xPos, yPos + i * 19, VALID_EQUIPMENT_SLOTS[i], player));
+            this.addSlot(new ArmorSlot(player.inventory, 36 + (3 - i), xPos, yPos + i * 19, VALID_EQUIPMENT_SLOTS[i], player));
         }
 
-        this.addSlotToContainer(new OffhandSlot(player.inventory, 40, xPos + 186, yPos + 54 + 3));
+        this.addSlot(new OffhandSlot(player.inventory, 40, xPos + 186, yPos + 54 + 3));
     }
 
     @Override
@@ -128,33 +131,32 @@ public class ContainerPlayerAccess extends Container {
     }
 
     private static class ArmorSlot extends Slot {
-        private final EntityEquipmentSlot eSlot;
+        private final EquipmentSlotType eSlot;
         private final PlayerEntity aPlayer;
 
-        public ArmorSlot(IInventory inventoryIn, int index, int xPosition, int yPosition, EntityEquipmentSlot eSlot, PlayerEntity aPlayer) {
+        public ArmorSlot(IInventory inventoryIn, int index, int xPosition, int yPosition, EquipmentSlotType eSlot, PlayerEntity aPlayer) {
             super(inventoryIn, index, xPosition, yPosition);
             this.eSlot = eSlot;
             this.aPlayer = aPlayer;
         }
 
-        public int getSlotStackLimit()
-        {
+        public int getSlotStackLimit() {
             return 64;
         }
-        public boolean isItemValid(ItemStack stack)
-        {
+
+        public boolean isItemValid(ItemStack stack) {
             return true;//stack.getItem().isValidArmor(stack, eSlot, aPlayer);
         }
-        public boolean canTakeStack(PlayerEntity playerIn)
-        {
+
+        public boolean canTakeStack(PlayerEntity playerIn) {
             ItemStack itemstack = this.getStack();
             return (itemstack.isEmpty() || playerIn.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.canTakeStack(playerIn);
         }
+
         @Nullable
-        @SideOnly(Side.CLIENT)
-        public String getSlotTexture()
-        {
-            return ItemArmor.EMPTY_SLOT_NAMES[eSlot.getIndex()];
+        @OnlyIn(Dist.CLIENT)
+        public String getSlotTexture() {
+            return PlayerContainer.ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
         }
     }
 
@@ -164,9 +166,8 @@ public class ContainerPlayerAccess extends Container {
         }
 
         @Nullable
-        @SideOnly(Side.CLIENT)
-        public String getSlotTexture()
-        {
+        @OnlyIn(Dist.CLIENT)
+        public String getSlotTexture() {
             return "minecraft:items/empty_armor_slot_shield";
         }
     }

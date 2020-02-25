@@ -8,11 +8,13 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
+import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Created by brandon3055 on 13/9/19.
@@ -23,6 +25,8 @@ public class TileItemStackHandler extends ItemStackHandler {
     private Runnable loadListener = null;
     private Consumer<Integer> contentsChangeListener = null;
     private Map<Integer, Predicate<ItemStack>> slotValidators = new HashMap<>();
+    private ItemStack prevStack = ItemStack.EMPTY;
+    private Supplier<Integer> stackLimit = null;
 
 
     public TileItemStackHandler() {
@@ -52,9 +56,14 @@ public class TileItemStackHandler extends ItemStackHandler {
         this.contentsChangeListener = contentsChangeListener;
     }
 
+    public void setStackLimit(Supplier<Integer> stackLimit) {
+        this.stackLimit = stackLimit;
+    }
+
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+        prevStack = getStackInSlot(slot);
         if (!isItemValid(slot, stack)) {
             return stack;
         }
@@ -64,9 +73,9 @@ public class TileItemStackHandler extends ItemStackHandler {
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        prevStack = getStackInSlot(slot);
         return super.extractItem(slot, amount, simulate);
     }
-
 
     @Override
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
@@ -83,25 +92,25 @@ public class TileItemStackHandler extends ItemStackHandler {
         for (int i = 0; i < stacks.size(); i++) {
             if (!stacks.get(i).isEmpty()) {
                 CompoundNBT itemTag = new CompoundNBT();
-                itemTag.setInteger("Slot", i);
-                stacks.get(i).writeToNBT(itemTag);
-                nbtTagList.appendTag(itemTag);
+                itemTag.putInt("Slot", i);
+                stacks.get(i).write(itemTag);
+                nbtTagList.add(itemTag);
             }
         }
         CompoundNBT nbt = new CompoundNBT();
-        nbt.setTag("Items", nbtTagList);
+        nbt.put("Items", nbtTagList);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        ListNBT tagList = nbt.getTagList("Items", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < tagList.tagCount(); i++) {
-            CompoundNBT itemTags = tagList.getCompoundTagAt(i);
-            int slot = itemTags.getInteger("Slot");
+        ListNBT tagList = nbt.getList("Items", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < tagList.size(); i++) {
+            CompoundNBT itemTags = tagList.getCompound(i);
+            int slot = itemTags.getInt("Slot");
 
             if (slot >= 0 && slot < stacks.size()) {
-                stacks.set(slot, new ItemStack(itemTags));
+                stacks.set(slot, ItemStack.read(itemTags));
             }
         }
         onLoad();
@@ -121,6 +130,15 @@ public class TileItemStackHandler extends ItemStackHandler {
         if (loadListener != null) {
             loadListener.run();
         }
+    }
+
+    public ItemStack getListenerPrevStack() {
+        return prevStack;
+    }
+
+    @Override
+    public int getSlotLimit(int slot) {
+        return stackLimit == null ? super.getSlotLimit(slot) : stackLimit.get();
     }
 }
 

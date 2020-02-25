@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.api.IJEIClearance;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.Rectangle2d;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.awt.*;
@@ -51,12 +52,12 @@ public interface IModularGui<T extends Screen> extends IMouseOver, IJEIClearance
     }
 
     @Override
-    default boolean isMouseOver(int mouseX, int mouseY) {
+    default boolean isMouseOver(double mouseX, double mouseY) {
         return GuiHelper.isInRect(guiLeft(), guiTop(), xSize(), ySize(), mouseX, mouseY);
     }
 
     @Override
-    default List<Rectangle> getGuiExtraAreas() {
+    default List<Rectangle2d> getGuiExtraAreas() {
         return getManager().getJeiExclusions();
     }
 
@@ -67,6 +68,11 @@ public interface IModularGui<T extends Screen> extends IMouseOver, IJEIClearance
     interface JEITargetAdapter extends Consumer<Object> {
 
         Rectangle getArea();
+
+        default Rectangle2d getMCRect() {
+            Rectangle rect = getArea();
+            return new Rectangle2d(rect.x, rect.y, rect.width, rect.height);
+        }
 
         @Override
         void accept(Object ingredient);

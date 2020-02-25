@@ -19,6 +19,6 @@ public interface IBCoreBlock {
     }
 
     default CompoundNBT getNBTShareTag(ItemStack stack) {
-        return stack.getTagCompound();
+        return stack.getTag();
     }
 }

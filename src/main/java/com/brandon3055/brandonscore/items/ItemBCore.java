@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.items;
 
-import com.brandon3055.brandonscore.registry.ModFeatureParser;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -12,25 +11,33 @@ import java.util.Map;
  */
 public class ItemBCore extends Item {
 
-    public Map<Integer, String> nameMap = new HashMap<Integer, String>();
+    public Map<Integer, String> nameMap = new HashMap<>();
 
-    public ItemBCore addName(int damage, String name){
+    public ItemBCore(Properties properties) {
+        super(properties);
+    }
+
+    public ItemBCore addName(int damage, String name) {
         nameMap.put(damage, name);
         return this;
     }
 
-    @Override
-    public String getUnlocalizedName(ItemStack stack) {
-        if (getHasSubtypes() && nameMap.containsKey(stack.getItemDamage())) {
-            return super.getUnlocalizedName(stack) + "." + nameMap.get(stack.getItemDamage());
-        }
-        else return super.getUnlocalizedName(stack);
-    }
+    //TODO getTranslationKey
+//    @Override
+//    public String getTranslationKey(ItemStack stack) {
+////        if (getHasSubtypes() && nameMap.containsKey(stack.getItemDamage())) {
+////            return super.getTranslationKey(stack) + "." + nameMap.get(stack.getItemDamage());
+////        }
+////        else
+//            return super.getTranslationKey(stack);
+//    }
 
     /**
      * @return false if this item has been disabled via the mod config.
      */
+    //TODO isItemEnabled
     public boolean isItemEnabled() {
-        return ModFeatureParser.isEnabled(this);
+//        return ModFeatureParser.isEnabled(this);
+        return true;
     }
 }

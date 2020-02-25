@@ -28,7 +28,7 @@ public class FakeWorld {//extends World {
 //    }
 //
 //    @Override
-//    public IBlockState getBlockState(BlockPos pos) {
+//    public BlockState getBlockState(BlockPos pos) {
 //        return Blocks.AIR.getDefaultState();
 //    }
 //

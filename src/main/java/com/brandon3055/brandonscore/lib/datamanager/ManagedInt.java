@@ -85,12 +85,12 @@ public class ManagedInt extends AbstractManagedData<Integer> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setInteger(name, value);
+        compound.putInt(name, value);
     }
 
     @Override
     public void fromNBT(CompoundNBT compound) {
-        value = compound.getInteger(name);
+        value = compound.getInt(name);
         notifyListeners(value);
     }
 

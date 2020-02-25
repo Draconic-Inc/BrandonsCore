@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.CommonProxy;
-import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
+import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.BCProfiler;
@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
@@ -21,6 +22,8 @@ import net.minecraftforge.common.model.animation.IAnimationStateMachine;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
+import java.sql.Time;
+
 /**
  * Created by Brandon on 14/5/2015.
  */
@@ -29,14 +32,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void commonSetup(FMLCommonSetupEvent event) {
         super.commonSetup(event);
-        BCEffectHandler.iniEffectRenderer();
         ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new ModelUtils());
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
         DLRSCache.initialize();
         ProcessHandlerClient.init();
         BCProfiler.init();
-
-//        ClientCommandHandler.instance.registerCommand(new BCClientCommands());
     }
 
     @Override
@@ -44,11 +44,11 @@ public class ClientProxy extends CommonProxy {
 
     }
 
-//
-//    @Override
-//    public MinecraftServer getMCServer() {
-//        return super.getMCServer();
-//    }
+
+    @Override
+    public MinecraftServer getMCServer() {
+        return super.getMCServer();
+    }
 
     @Override
     public World getClientWorld() {
@@ -107,11 +107,16 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void resetEffectRenderer(World world) {
-        BCEffectHandler.effectRenderer.clearEffects(world);
+//        BCEffectHandler.effectRenderer.clearEffects(world);
     }
 
     @Override
     public IAnimationStateMachine loadASM(ResourceLocation location, ImmutableMap<String, ITimeValue> customParameters) {
         return ModelLoaderRegistry.loadASM(location, customParameters);
+    }
+
+    @Override
+    public int tickTimer() {
+        return TimeKeeper.getClientTick();
     }
 }

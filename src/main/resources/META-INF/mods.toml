@@ -1,0 +1,22 @@
+modLoader="javafml"
+loaderVersion="[28,)"
+
+[[mods]]
+	modId="brandonscore"
+	displayName="Brandon's Core"
+	version="3.0.0"
+	authors="brandon3055"
+	description=''''''
+[[dependencies.brandonscore]]
+	modId="forge"
+	mandatory=true
+	versionRange="[28,)"
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.brandonscore]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14.4]"
+    ordering="NONE"
+    side="BOTH"
+

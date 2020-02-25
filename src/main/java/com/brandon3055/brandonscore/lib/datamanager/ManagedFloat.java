@@ -84,7 +84,7 @@ public class ManagedFloat extends AbstractManagedData<Float> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setFloat(name, value);
+        compound.putFloat(name, value);
     }
 
     @Override

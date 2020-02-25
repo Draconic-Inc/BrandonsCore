@@ -13,7 +13,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
-import com.brandon3055.brandonscore.config.BCConfig;
+import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.inventory.ContainerBCBase;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotData;
@@ -35,7 +35,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
-import static com.brandon3055.brandonscore.config.BCConfig.darkMode;
+import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.PLAYER_INV;
 
 /**

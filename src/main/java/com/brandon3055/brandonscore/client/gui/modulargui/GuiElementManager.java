@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Rectangle2d;
 
 import java.awt.*;
 import java.util.List;
@@ -252,6 +253,15 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return false;
     }
 
+    public boolean charTyped(char charTyped, int charCode) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled() && element.charTyped(charTyped, charCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollAmount) {
         for (GuiElement element : actionList) {
             if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollAmount)) {
@@ -278,7 +288,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
      * @param posY The y position.
      * @return a list of elements who's {@link GuiElement#isMouseOver} method returns true with the given position.
      */
-    public List<GuiElement> getElementsAtPosition(int posX, int posY) {
+    public List<GuiElement> getElementsAtPosition(double posX, double posY) {
         List<GuiElement> list = new LinkedList<>();
 
         for (GuiElement element : elements) {
@@ -289,10 +299,10 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     }
 
     /**
-     * Similar to {@link #getElementsAtPosition(int, int)} except only returns elements that are an instance of the specified class.
+     * Similar to {@link #getElementsAtPosition(double, double)} except only returns elements that are an instance of the specified class.
      * Note: This method is a little inefficient so probably not something you want to be doing say every render frame.
      */
-    public <C extends GuiElement> List<C> getElementsAtPosition(int posX, int posY, Class<C> clazz) {
+    public <C extends GuiElement> List<C> getElementsAtPosition(double posX, double posY, Class<C> clazz) {
         List<GuiElement> list = getElementsAtPosition(posX, posY);
         List<C> matches = new LinkedList<>();
         DataUtils.forEachMatch(list, element -> clazz.isAssignableFrom(element.getClass()), element -> matches.add(clazz.cast(element)));
@@ -419,11 +429,14 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         this.jeiExclusions = exclusions;
     }
 
-    public List<Rectangle> getJeiExclusions() {
+    public List<Rectangle2d> getJeiExclusions() {
         if (jeiExclusions == null) {
             return Collections.emptyList();
         }
-        return jeiExclusions.get().stream().map(elementBase -> new Rectangle(elementBase.getRect())).collect(Collectors.toList());
+        return jeiExclusions.get().stream().map(elementBase -> {
+            Rectangle rect = elementBase.getRect();
+            return new Rectangle2d(rect.x, rect.y, rect.width, rect.height);
+        }).collect(Collectors.toList());
     }
 
     public List<JEITargetAdapter> getJeiGhostTargets() {

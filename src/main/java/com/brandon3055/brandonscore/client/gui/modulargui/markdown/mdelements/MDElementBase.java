@@ -120,7 +120,7 @@ public abstract class MDElementBase<E extends GuiElement<E>> extends GuiElement<
             BCFontRenderer.setStileToggleMode(true);
             drawHoveringText(list, xPos() - 8, yPos() + 15, fontRenderer, screenWidth, screenHeight);
             BCFontRenderer.setStileToggleMode(false);
-            fontRenderer.resetStyles();
+//            fontRenderer.resetStyles();//TODO Font Renderer
             zOffset -= 100;
         }
 

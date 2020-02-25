@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
@@ -48,14 +49,13 @@ public class EnergyUtils {
      * This is only public to allow for other ICapabilityProvider's
      */
     public static IOPStorage getStorageFromProvider(ICapabilityProvider provider, Direction side) {
-        if (provider.hasCapability(CapabilityOP.OP, side)) {
-            return provider.getCapability(CapabilityOP.OP, side);
+        LazyOptional<IOPStorage> op = provider.getCapability(CapabilityOP.OP, side);
+        if (op.isPresent()) {
+            return op.orElseThrow(ImpossibleException::new);
         }
-        else if (provider.hasCapability(CapabilityEnergy.ENERGY, side)) {
-            IEnergyStorage storage = provider.getCapability(CapabilityEnergy.ENERGY, side);
-            if (storage != null) {
-                return new OPWrappers.FE(storage);
-            }
+        LazyOptional<IEnergyStorage> fe = provider.getCapability(CapabilityEnergy.ENERGY, side);
+        if (fe.isPresent()) {
+            return new OPWrappers.FE(fe.orElseThrow(ImpossibleException::new));
         }
         return null;
     }
@@ -227,5 +227,11 @@ public class EnergyUtils {
         IOPStorage storage = getStorage(stack);
         if (storage == null) return true;
         return storage.getOPStored() == 0;
+    }
+
+    private static class ImpossibleException extends RuntimeException {
+        public ImpossibleException() {
+            super("This exception is impossible. If your seeing this in a crash report then... shit...");
+        }
     }
 }

@@ -3,12 +3,13 @@ package com.brandon3055.brandonscore.lib;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * Created by brandon3055 on 9/09/2016.
@@ -45,7 +46,7 @@ public class StackReference {
     }
 
     public StackReference(ItemStack stack) {
-        this(stack.getItem().getRegistryName().toString(), stack.getCount(), stack.getItemDamage(), stack.getTagCompound());
+        this(stack.getItem().getRegistryName().toString(), stack.getCount(), stack.getDamage(), stack.getTag());
     }
 
     private StackReference() {
@@ -57,22 +58,23 @@ public class StackReference {
     }
 
     public ItemStack createStack() {
-        Item item = Item.REGISTRY.getObject(stack);
-        Block block = Block.REGISTRY.getObject(stack);
+        Item item = ForgeRegistries.ITEMS.getValue(stack);
+        Block block = ForgeRegistries.BLOCKS.getValue(stack);
         if (item == null && block == Blocks.AIR) {
             return ItemStack.EMPTY;
         }
         else {
             ItemStack itemStack;
             if (item != null) {
-                itemStack = new ItemStack(item, stackSize, metadata);
+                itemStack = new ItemStack(item, stackSize);
             }
             else {
-                itemStack = new ItemStack(block, stackSize, metadata);
+                itemStack = new ItemStack(block, stackSize);
             }
+            itemStack.setDamage(metadata);
 
             if (nbt != null) {
-                itemStack.setTagCompound(nbt.copy());
+                itemStack.setTag(nbt.copy());
             }
             return itemStack;
         }
@@ -228,6 +230,7 @@ public class StackReference {
         return new StackReference(stackString, count, meta, compound);
     }
 
+    @Deprecated //TODO Make sure this isn't being used by any PI doc (i dont think it is) then remove it.
     private static StackReference fromStringOld(String string) {
         if (!string.contains("name:") || !string.contains("size:") || !string.contains(",meta:") || !string.contains(",nbt:")) {
             return null;
@@ -239,7 +242,7 @@ public class StackReference {
             int meta = Integer.parseInt(string.substring(string.indexOf(",meta:") + 6, string.indexOf(",nbt:")));
             CompoundNBT compound = JsonToNBT.getTagFromJson(string.substring(string.indexOf(",nbt:") + 5, string.length()));
 
-            return new StackReference(name, size, meta, compound.hasNoTags() ? null : compound);
+            return new StackReference(name, size, meta, compound.isEmpty() ? null : compound);
         }
         catch (Exception e) {
             LogHelperBC.error("An error occurred while generating a StackReference from a string");

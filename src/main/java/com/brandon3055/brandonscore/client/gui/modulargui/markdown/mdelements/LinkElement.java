@@ -6,7 +6,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementCont
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextFormatting;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -102,7 +101,7 @@ public class LinkElement extends MDElementBase<LinkElement> {
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (isMouseOver(mouseX, mouseY)) {
             container.handleLinkClick(linkTarget, mouseButton);
             return true;

@@ -85,7 +85,7 @@ public class ManagedDouble extends AbstractManagedData<Double> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setDouble(name, value);
+        compound.putDouble(name, value);
     }
 
     @Override

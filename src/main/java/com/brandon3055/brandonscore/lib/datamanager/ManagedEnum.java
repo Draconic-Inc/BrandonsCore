@@ -91,7 +91,7 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        compound.setByte(name, valueToIndex.get(value).byteValue());
+        compound.putByte(name, valueToIndex.get(value).byteValue());
     }
 
     @Override

@@ -12,12 +12,12 @@ public class ScissorHelper {
     private static ScissorState currentState = null;
 
     public static void pushGuiScissor(Minecraft mc, double x, double y, double width, double height, int screenWidth, int screenHeight) {
-        double yResScale = (double) mc.displayHeight / (screenHeight);
-        double xResScale = (double) mc.displayWidth / (screenWidth);
+        double yResScale = (double) mc.mainWindow.getHeight() / (screenHeight);
+        double xResScale = (double) mc.mainWindow.getScaledWidth() / (screenWidth);
         double scaledWidth = (double) width * xResScale;
         double scaledHeight = (double) height * yResScale;
         int screenX = (int) (x * xResScale);
-        int screenY = (int) (mc.displayHeight - (y * yResScale) - scaledHeight);
+        int screenY = (int) (mc.mainWindow.getHeight() - (y * yResScale) - scaledHeight);
         ScissorHelper.pushScissor(mc, screenX, screenY, (int) scaledWidth, (int) scaledHeight);
     }
 
@@ -29,7 +29,7 @@ public class ScissorHelper {
         int xMax = x + width;
         int yMax = y + height;
         if (currentState == null) {
-            prevStates.add(currentState = new ScissorState(false, 0, 0, mc.displayWidth, mc.displayHeight));
+            prevStates.add(currentState = new ScissorState(false, 0, 0, mc.mainWindow.getWidth(), mc.mainWindow.getHeight()));
         }
         else {
             prevStates.add(currentState);
@@ -66,8 +66,8 @@ public class ScissorHelper {
             Minecraft mc = Minecraft.getInstance();
             if (this.x < 0) this.x = 0;
             if (this.y < 0) this.y = 0;
-            if (this.xMax > mc.displayWidth) this.xMax = mc.displayWidth;
-            if (this.yMax > mc.displayHeight) this.yMax = mc.displayHeight;
+            if (this.xMax > mc.mainWindow.getWidth()) this.xMax = mc.mainWindow.getWidth();
+            if (this.yMax > mc.mainWindow.getHeight()) this.yMax = mc.mainWindow.getHeight();
             if (this.xMax < this.x) this.xMax = this.x;
             if (this.yMax < this.y) this.yMax = this.y;
         }

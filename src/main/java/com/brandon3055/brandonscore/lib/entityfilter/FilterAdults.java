@@ -2,8 +2,9 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
+
 import net.minecraft.nbt.CompoundNBT;
 
 /**
@@ -42,9 +43,9 @@ public class FilterAdults extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        boolean isAgeable = entity instanceof EntityAgeable;
+        boolean isAgeable = entity instanceof AgeableEntity;
         if (isAgeable) {
-            EntityAgeable ageable = (EntityAgeable) entity;
+            AgeableEntity ageable = (AgeableEntity) entity;
             return whitelistAdults == !ageable.isChild();
         }
         return includeNonAgeable;
@@ -58,8 +59,8 @@ public class FilterAdults extends FilterBase {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT compound = super.serializeNBT();
-        compound.setBoolean("include", whitelistAdults);
-        compound.setBoolean("tamable", includeNonAgeable);
+        compound.putBoolean("include", whitelistAdults);
+        compound.putBoolean("tamable", includeNonAgeable);
         return compound;
     }
 
