@@ -13,11 +13,9 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
+import net.minecraft.command.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -119,6 +117,9 @@ public class BCUtilCommands extends CommandBase {
             else if (function.equals("eggify")) {
                 eggify(server, sender, args);
             }
+            else if (function.equals("pingblock")) {
+                pingBlock(server, sender, args);
+            }
             else {
                 help(sender);
             }
@@ -138,7 +139,10 @@ public class BCUtilCommands extends CommandBase {
             list.addAll(Lists.newArrayList(cache.getUsernames()));
             return getListOfStringsMatchingLastWord(args, list);
         }
-        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners", "eggify");
+        else if (args.length == 2 && args[0].equals("pingblock")) {
+            return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
+        }
+        return getListOfStringsMatchingLastWord(args, "nbt", "regenchunk", "noclip", "uuid", "player_access", "dump_event_listeners", "eggify", "pingblock");
     }
 
     private void help(ICommandSender sender) {
@@ -356,6 +360,32 @@ public class BCUtilCommands extends CommandBase {
         data.removeTag("UUIDMost");
 
         InventoryUtils.givePlayerStack(player, spawnEgg);
+    }
+
+    private void pingBlock(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        if (args.length < 2)
+        {
+            throw new WrongUsageException("Usage: /bcore_util pingblock <block> [meta] [rad]");
+        }
+        Block block = CommandBase.getBlockByText(sender, args[1]);
+        int meta = args.length > 2 ? parseInt(args[2], 0, 15) : -1;
+        int range = args.length > 3 ? parseInt(args[3], 3, 128) : 32;
+
+        sender.sendMessage(new TextComponentString("Searching for first " + args[1] + " within " + range + " Blocks"));
+        Iterable<BlockPos> positions = BlockPos.getAllInBox(sender.getPosition().add(-range, -range, -range), sender.getPosition().add(+range, +range, +range));
+
+        List<BlockPos> found = new ArrayList<>();
+        for (BlockPos pos : positions) {
+            IBlockState state = sender.getEntityWorld().getBlockState(pos);
+            if (state.getBlock() == block && (meta == -1 || meta == block.getMetaFromState(state))) {
+                found.add(pos);
+            }
+        }
+
+        sender.sendMessage(new TextComponentString("Found " + found.size() + " matches"));
+        found.forEach(blockPos -> {
+            sender.sendMessage(new TextComponentString("Match At " + blockPos));
+        });
     }
 
     @Nullable

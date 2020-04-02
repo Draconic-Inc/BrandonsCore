@@ -37,7 +37,7 @@ public class DLRSCache {
             DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH), url);
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
 
-            File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");
+            File cache = new File(cacheFolder, "Cache-" + url.hashCode() + ".png");
 
             ThreadedImageDownloader downloader = new ThreadedImageDownloader(cache, url, DOWNLOADING_TEXTURE, null);
             downloader.setDlLocation(resourceLocation);
@@ -59,7 +59,7 @@ public class DLRSCache {
 
         if (files != null) {
             for (File file : files) {
-                if (file.getName().startsWith("Cache#")) {
+                if (file.getName().startsWith("Cache-") || file.getName().startsWith("Cache#")) {
                     file.delete();
                 }
             }
@@ -76,7 +76,7 @@ public class DLRSCache {
 
         if (files != null) {
             for (File file : files) {
-                if (file.getName().equals("Cache#" + url.hashCode() + ".png")) {
+                if (file.getName().equals("Cache-" + url.hashCode() + ".png") || file.getName().equals("Cache#" + url.hashCode() + ".png")) {
                     file.delete();
                     return;
                 }

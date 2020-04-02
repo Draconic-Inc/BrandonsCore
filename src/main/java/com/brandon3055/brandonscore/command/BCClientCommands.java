@@ -1,26 +1,29 @@
 package com.brandon3055.brandonscore.command;
 
+import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.gui.config.GuiIncompatibleConfig;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
 import com.brandon3055.brandonscore.client.particle.BCEffectHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
-import com.brandon3055.brandonscore.lib.ChatHelper;
-import com.brandon3055.brandonscore.lib.DelayedTask;
-import com.brandon3055.brandonscore.lib.PairKV;
-import com.brandon3055.brandonscore.lib.StackReference;
+import com.brandon3055.brandonscore.lib.*;
 import com.brandon3055.brandonscore.registry.ModConfigParser;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -32,6 +35,7 @@ import org.lwjgl.opengl.DisplayMode;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,29 +90,23 @@ public class BCClientCommands extends CommandBase {
 
             if (function.equals("config_sync_gui")) {
                 configSync(server, sender, args);
-            }
-            else if (function.equals("nbt")) {
+            } else if (function.equals("nbt")) {
                 functionNBT(server, sender, args);
-            }
-            else if (function.equals("testui")) {
+            } else if (function.equals("testui")) {
                 DelayedTask.run(10, () -> Minecraft.getMinecraft().displayGuiScreen(new ModularGuiTest()));
-            }
-            else if (function.equals("profiler")) {
+            } else if (function.equals("profiler")) {
                 BCProfiler.enableProfiler = !BCProfiler.enableProfiler;
-            }
-            else if (function.equals("dump_event_listeners")) {
+            } else if (function.equals("dump_event_listeners")) {
                 BCUtilCommands.dumpEventListeners(sender);
-            }
-            else if (function.equals("set_ui_scale")) {
+            } else if (function.equals("set_ui_scale")) {
                 setUiScale(server, sender, args);
-            }
-            else if (function.equals("set_ui_size")) {
+            } else if (function.equals("set_ui_size")) {
                 setUISize(server, sender, args);
-            }
-            else if (function.equals("clear_fx")) {
+            } else if (function.equals("clear_fx")) {
                 BCEffectHandler.effectRenderer.clear();
-            }
-            else {
+            } else if (function.equals("pingblock")) {
+                pingBlock(server, sender, args);
+            } else {
 //                help(sender);
             }
 
@@ -123,6 +121,9 @@ public class BCClientCommands extends CommandBase {
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         if (args.length == 2 && args[0].equals("set_ui_size")) {
             return getListOfStringsMatchingLastWord(args, RESOLUTIONS.keySet());
+        }
+        else if (args.length == 2 && args[0].equals("pingblock")) {
+            return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
         }
 
         return getListOfStringsMatchingLastWord(args, "nbt", "profiler", "dump_event_listeners", "set_ui_scale", "clear_fx", "set_ui_size");
@@ -149,8 +150,7 @@ public class BCClientCommands extends CommandBase {
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException("You are not holding an item!");
-        }
-        else if (!stack.hasTagCompound()) {
+        } else if (!stack.hasTagCompound()) {
             throw new CommandException("That stack has no NBT tag!");
         }
 
@@ -203,8 +203,7 @@ public class BCClientCommands extends CommandBase {
         if (args.length == 2) {
             width = RESOLUTIONS.get(args[1]).getKey();
             height = RESOLUTIONS.get(args[1]).getValue();
-        }
-        else {
+        } else {
             width = parseInt(args[1], 64, 7680);
             height = parseInt(args[2], 64, 4320);
         }
@@ -218,6 +217,49 @@ public class BCClientCommands extends CommandBase {
         catch (LWJGLException e) {
             e.printStackTrace();
             throw new CommandException(e.getMessage());
+        }
+    }
+
+    //TODO Remove before next release
+    private void pingBlock(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        if (!sender.getName().equals("brandon3055")) {
+            return; //Just in case i forget to remove this
+        }
+        if (args.length < 2) {
+            throw new WrongUsageException("Usage: /bcore_util pingblock <block> [meta] [rad] [trail]");
+        }
+        Block block = CommandBase.getBlockByText(sender, args[1]);
+        int meta = args.length > 2 ? parseInt(args[2], 0, 15) : -1;
+        int range = args.length > 3 ? parseInt(args[3], 3, 128) : 32;
+        boolean trail = args.length > 4 && parseBoolean(args[4]);
+
+
+        sender.sendMessage(new TextComponentString("Searching for first " + args[1] + " within " + range + " Blocks"));
+        Iterable<BlockPos> positions = BlockPos.getAllInBox(sender.getPosition().add(-range, -range, -range), sender.getPosition().add(+range, +range, +range));
+
+        List<BlockPos> found = new ArrayList<>();
+        for (BlockPos pos : positions) {
+            IBlockState state = sender.getEntityWorld().getBlockState(pos);
+            if (state.getBlock() == block && (meta == -1 || meta == block.getMetaFromState(state))) {
+                found.add(pos);
+            }
+        }
+
+        sender.sendMessage(new TextComponentString("Found " + found.size() + " matches"));
+        for (BlockPos blockPos : found) {
+            sender.sendMessage(new TextComponentString("Match At " + blockPos));
+            if (trail) {
+                Vec3D playerPos = new Vec3D((EntityPlayer) sender).add(0, 1.4, 0);
+                Vec3D targetPos = Vec3D.getCenter(blockPos);
+                double dist = Utils.getDistanceAtoB(playerPos, targetPos);
+
+                for (int i = 0; i < dist * 3; i++) {
+                    Vec3D dirVec = Vec3D.getDirectionVec(playerPos, targetPos);
+                    double mult = dist * (i / (dist * 3D));
+                    Vec3D partPos = playerPos.copy().add(dirVec.multiply(mult, mult, mult));
+                    Minecraft.getMinecraft().world.spawnParticle(EnumParticleTypes.DRAGON_BREATH, true, partPos.x, partPos.y, partPos.z, 0, 0, 0);
+                }
+            }
         }
     }
 }
