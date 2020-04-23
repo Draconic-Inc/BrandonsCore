@@ -9,20 +9,20 @@ import java.util.Map;
 /**
  * Created by brandon3055 on 18/3/2016.
  */
+@Deprecated //Unless i find a use for it while porting DE
 public class ItemBCore extends Item {
 
-    public Map<Integer, String> nameMap = new HashMap<>();
+//    public Map<Integer, String> nameMap = new HashMap<>();
 
     public ItemBCore(Properties properties) {
         super(properties);
     }
 
-    public ItemBCore addName(int damage, String name) {
-        nameMap.put(damage, name);
-        return this;
-    }
+//    public ItemBCore addName(int damage, String name) {
+//        nameMap.put(damage, name);
+//        return this;
+//    }
 
-    //TODO getTranslationKey
 //    @Override
 //    public String getTranslationKey(ItemStack stack) {
 ////        if (getHasSubtypes() && nameMap.containsKey(stack.getItemDamage())) {
@@ -32,12 +32,12 @@ public class ItemBCore extends Item {
 //            return super.getTranslationKey(stack);
 //    }
 
-    /**
-     * @return false if this item has been disabled via the mod config.
-     */
-    //TODO isItemEnabled
-    public boolean isItemEnabled() {
-//        return ModFeatureParser.isEnabled(this);
-        return true;
-    }
+//    /**
+//     * @return false if this item has been disabled via the mod config.
+//     */
+//    //TODO isItemEnabled
+//    public boolean isItemEnabled() {
+////        return ModFeatureParser.isEnabled(this);
+//        return true;
+//    }
 }

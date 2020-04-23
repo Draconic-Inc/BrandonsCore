@@ -14,6 +14,7 @@ import net.minecraft.world.World;
  * I wanted this for a thing... I dont actually remember what it is now but...
  * Im just going to add it so when i remember the thing it is here!
  */
+@Deprecated //I dont think i need this anymore
 public class BCParticle extends Particle {
     protected float texturesPerRow = 16F;
     protected float airResistance = 0;

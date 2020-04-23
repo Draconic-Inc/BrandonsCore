@@ -31,6 +31,33 @@ public class DataUtils {
         return lowercaseArray;
     }
 
+    public static String[] arrayToString(byte[] array) {
+        String[] lowercaseArray = new String[array.length];
+        for (int i = 0; i < array.length; i++) {
+            lowercaseArray[i] = String.valueOf(array[i]);
+        }
+        return lowercaseArray;
+    }
+
+    public static String[] arrayToString(int[] array) {
+        String[] lowercaseArray = new String[array.length];
+        for (int i = 0; i < array.length; i++) {
+            lowercaseArray[i] = String.valueOf(array[i]);
+        }
+        return lowercaseArray;
+    }
+
+    public static String stringArrayConcat(String[] array, String separator) {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            s.append(array[i]);
+            if (i + 1 < array.length) {
+                s.append(separator);
+            }
+        }
+        return s.toString();
+    }
+
     /**
      * Shift all objects in an array by the number of places specified.
      * <p/>

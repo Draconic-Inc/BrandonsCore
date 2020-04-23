@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.PairKV;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.InventoryUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -235,11 +235,11 @@ public class BCUtilCommands {
 
         if (enabled) {
             BCEventHandler.noClipPlayers.remove(player.getUniqueID());
-            PacketDispatcher.sendNoClip(player, false);
+            BCoreNetwork.sendNoClip(player, false);
             source.sendFeedback(new StringTextComponent("NoClip Disabled!"), true);
         } else {
             BCEventHandler.noClipPlayers.add(player.getUniqueID());
-            PacketDispatcher.sendNoClip(player, true);
+            BCoreNetwork.sendNoClip(player, true);
             source.sendFeedback(new StringTextComponent("NoClip Enabled!"), true);
         }
         return 0;
@@ -556,8 +556,8 @@ public class BCUtilCommands {
         player.getNextWindowId();
         player.closeContainer();
         int windowId = player.currentWindowId;
-        PacketDispatcher.sendOpenPlayerAccessUI(player, windowId);
-        PacketDispatcher.sendPlayerAccessUIUpdate(player, playerAccess);
+        BCoreNetwork.sendOpenPlayerAccessUI(player, windowId);
+        BCoreNetwork.sendPlayerAccessUIUpdate(player, playerAccess);
         player.openContainer(new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {

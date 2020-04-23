@@ -17,31 +17,8 @@ import net.minecraft.tileentity.TileEntity;
  */
 public class ItemBlockBCore extends BlockItem {
 
-    private String registryDomain = null;
-
     public ItemBlockBCore(Block block, Item.Properties builder) {
         super(block, builder);
-    }
-
-//    @Override
-//    public String getUnlocalizedName(ItemStack stack) {
-//        if (block instanceof IBCoreBlock && ((IBCoreBlock) block).getNameOverrides().containsKey(stack.getItemDamage())) {
-//            return "tile." + getRegistryDomain() + ":" + ((IBCoreBlock) block).getNameOverrides().get(stack.getItemDamage());
-//        }
-//
-//        return super.getUnlocalizedName(stack);
-//    }
-
-    public String getRegistryDomain() {
-        if (registryDomain == null) {
-            if (getRegistryName() == null) {
-                return "null";
-            } else {
-                registryDomain = getRegistryName().getNamespace();
-            }
-        }
-
-        return registryDomain;
     }
 
     @Override

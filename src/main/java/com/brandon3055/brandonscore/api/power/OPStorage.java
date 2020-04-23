@@ -28,6 +28,8 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
     protected long maxReceive;
     protected long maxExtract;
     protected IOTracker ioTracker;
+    protected boolean allowExtract = true;
+    protected boolean allowReceive = true;
 
     public OPStorage(long capacity) {
         this(capacity, capacity);
@@ -46,6 +48,27 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
         this.maxReceive = maxReceive;
         this.maxExtract = maxExtract;
         this.energy = energy;
+    }
+
+    public OPStorage setIOMode(boolean allowExtract, boolean allowReceive) {
+        this.allowExtract = allowExtract;
+        this.allowReceive = allowReceive;
+        return this;
+    }
+
+    public OPStorage setExtractOnly() {
+        return setIOMode(true, false);
+    }
+
+    public OPStorage setReceiveOnly() {
+        return setIOMode(false, true);
+    }
+
+    /**
+     * @param inputOutput true = Input Only, false = Output Only.
+     */
+    public OPStorage setIOMode(boolean inputOutput) {
+        return setIOMode(!inputOutput, inputOutput);
     }
 
     @Override
@@ -92,12 +115,12 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
 
     @Override
     public boolean canExtract() {
-        return maxExtract > 0;
+        return allowExtract && maxExtract > 0;
     }
 
     @Override
     public boolean canReceive() {
-        return maxReceive > 0;
+        return allowReceive && maxReceive > 0;
     }
 
     /**
@@ -111,11 +134,10 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
         return this;
     }
 
-    public OPStorage modifyEnergyStored(long amount) {
+    public long modifyEnergyStored(long amount) {
         if (amount > capacity - energy) {
             amount = capacity - energy;
-        }
-        else if (amount < -energy) {
+        } else if (amount < -energy) {
             amount = -energy;
         }
 
@@ -123,7 +145,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
         if (ioTracker != null) {
             ioTracker.energyModified(amount);
         }
-        return this;
+        return Math.abs(amount);
     }
 
     /**
@@ -221,8 +243,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
     private void smartWrite(String name, long value, CompoundNBT compound) {
         if (value > Integer.MAX_VALUE) {
             compound.putLong(name, value);
-        }
-        else {
+        } else {
             compound.putInt(name, (int) value);
         }
     }
@@ -259,8 +280,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
                 ioTracker = new IOTrackerSelfTimed();
             }
             ioTracker.syncClientValues(input.readVarLong(), input.readVarLong());
-        }
-        else if (ioTracker != null) {
+        } else if (ioTracker != null) {
             ioTracker = null;
         }
     }

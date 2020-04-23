@@ -7,13 +7,13 @@ import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
 import com.brandon3055.brandonscore.api.power.OPStorage;
-import com.brandon3055.brandonscore.inventory.ContainerBCBase;
+import com.brandon3055.brandonscore.inventory.ContainerBCTile;
+import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.inventory.TileItemStackHandler;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.lib.IRSSwitchable.RSMode;
 import com.brandon3055.brandonscore.lib.datamanager.*;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -117,6 +117,9 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         }
     }
 
+    public int getAccessDistanceSq() {
+        return 64;
+    }
 
     //endregion
 
@@ -140,13 +143,19 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
+    public void handleUpdateTag(CompoundNBT tag) {
+        dataManager.readSyncNBT(tag);
+        readExtraNBT(tag);
+    }
+
+    @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
         dataManager.readSyncNBT(pkt.getNbtCompound());
         readExtraNBT(pkt.getNbtCompound());
     }
 
     public PacketCustom createServerBoundPacket(int id) {
-        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.S_TILE_MESSAGE);
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_MESSAGE);
         packet.writePos(pos);
         packet.writeByte((byte) id);
         return packet;
@@ -171,7 +180,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     public PacketCustom createClientBoundPacket(int id) {
-        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.C_TILE_MESSAGE);
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.C_TILE_MESSAGE);
         packet.writePos(pos);
         packet.writeByte((byte) id);
         return packet;
@@ -746,6 +755,16 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         return !customName.isEmpty();
     }
 
+    @Nullable
+    @Override
+    public ITextComponent getCustomName() {
+        return customName.isEmpty() ? null : getName();
+    }
+
+    public ITextComponent getDisplayName() {
+        return getName();
+    }
+
     public void setCustomName(String customName) {
         this.customName = customName;
     }
@@ -770,7 +789,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * playerAccessTracking must be enabled in this tile's constructor in order for this to work.
      */
     public Set<PlayerEntity> getAccessingPlayers() {
-        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCBase) || ((ContainerBCBase) e.openContainer).tile != this); //Clean up set
+        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCore) || ((ContainerBCTile) e.openContainer).tile != this); //Clean up set
         return accessingPlayers;
     }
 
@@ -780,7 +799,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     public void onPlayerCloseContainer(PlayerEntity player) {
         accessingPlayers.remove(player);
-        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCBase) || ((ContainerBCBase) e.openContainer).tile != this); //Clean up set
+        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCore) || ((ContainerBCTile) e.openContainer).tile != this); //Clean up set
     }
 
 }

@@ -1,22 +1,17 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
 
@@ -27,52 +22,44 @@ import java.util.List;
  * Created by brandon3055 on 28/3/2016.
  * Base class for all containers. Handles syncing on syncable objects inside an attached TileBCBase.
  */
-public class ContainerBCBase<T extends TileBCore> extends Container {
+public class ContainerBCore<D> extends Container {
 
-    /**
-     * A reference to the attached tile. This may be null if the container is not attached to a tile
-     */
-    public T tile;
     protected PlayerEntity player;
+    protected LayoutFactory<D> factory;
     protected ContainerSlotLayout slotLayout;
 
-    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerInventory playerInv, PacketBuffer extraData) {
+    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory playerInv, PacketBuffer extraData) {
         super(type, windowId);
         this.player = playerInv.player;
     }
 
-    @Deprecated
-    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerEntity player) {
+    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, PacketBuffer extraData, LayoutFactory<D> factory) {
+        this(type, windowId, player, extraData);
+        this.factory = factory;
+        this.buildSlotLayout();
+    }
+
+    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory player) {
         super(type, windowId);
-        this.player = player;
+        this.player = player.player;
     }
 
-    @Deprecated
-    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerEntity player, T tile) {
+    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, LayoutFactory<D> factory) {
         this(type, windowId, player);
-        this.tile = tile;
-        this.tile.onPlayerOpenContainer(player);
+        this.player = player.player;
+        this.factory = factory;
+        this.buildSlotLayout();
     }
 
-    @Deprecated
-    public ContainerBCBase(@Nullable ContainerType<?> type, int windowId, PlayerEntity player, T tile, LayoutFactory<T> factory) {
-        this(type, windowId, player, tile);
-        this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlot);
+    protected void buildSlotLayout() {
+        this.slotLayout = factory.buildLayout(player, null).retrieveSlotsForContainer(this::addSlot);
     }
 
-    @Override
-    public void onContainerClosed(PlayerEntity playerIn) {
-        super.onContainerClosed(playerIn);
-        if (tile != null) {
-            tile.onPlayerCloseContainer(playerIn);
-        }
-    }
-
-    public ContainerBCBase addPlayerSlots(int posX, int posY) {
+    public ContainerBCore addPlayerSlots(int posX, int posY) {
         return addPlayerSlots(posX, posY, 4);
     }
 
-    public ContainerBCBase addPlayerSlots(int posX, int posY, int hotbarSpacing) {
+    public ContainerBCore addPlayerSlots(int posX, int posY, int hotbarSpacing) {
         for (int x = 0; x < 9; x++) {
             addSlot(new SlotCheckValid.IInv(player.inventory, x, posX + 18 * x, posY + 54 + hotbarSpacing));
         }
@@ -86,29 +73,14 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
     }
 
     @Override
-    public void detectAndSendChanges() {
-        super.detectAndSendChanges();
-        tile.detectAndSendChangesToListeners(listeners);
-    }
-
-    @Override
     public void addListener(IContainerListener listener) {
         super.addListener(listener);
-        if (listener instanceof ServerPlayerEntity && tile != null) {
-            tile.getDataManager().forcePlayerSync((ServerPlayerEntity) listener);
-        }
     }
 
     @Override
     public boolean canInteractWith(PlayerEntity playerIn) {
-        if (tile.getWorld().getTileEntity(tile.getPos()) != tile) {
-            return false;
-        }
-        else {
-            return player.getDistanceSq((double) tile.getPos().getX() + 0.5D, (double) tile.getPos().getY() + 0.5D, (double) tile.getPos().getZ() + 0.5D) <= 64.0D;
-        }
+        return true;
     }
-
 
     @Override
     public ItemStack transferStackInSlot(PlayerEntity player, int i) {
@@ -182,14 +154,10 @@ public class ContainerBCBase<T extends TileBCore> extends Container {
      * @return the item handler for the tile entity.
      */
     public LazyOptional<IItemHandler> getItemHandler() {
-        return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        return LazyOptional.empty();
     }
 
     public ContainerSlotLayout getSlotLayout() {
         return slotLayout;
-    }
-
-    protected static <T extends TileEntity> T getClientTile(PacketBuffer extraData) {
-        return (T) Minecraft.getInstance().world.getTileEntity(extraData.readBlockPos());
     }
 }

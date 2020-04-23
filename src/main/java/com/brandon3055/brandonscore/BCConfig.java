@@ -152,6 +152,7 @@ public class BCConfig {
      */
     @SubscribeEvent
     public static void onModConfigEvent(final ModConfig.ModConfigEvent event) {
+//        LogHelperBC.dev("Config");
         final ModConfig config = event.getConfig();
         // Reassign the configs when they change
         if (config.getSpec() == CLIENT_SPEC) {

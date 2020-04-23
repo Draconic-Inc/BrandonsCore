@@ -14,10 +14,11 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
 import com.brandon3055.brandonscore.BCConfig;
-import com.brandon3055.brandonscore.inventory.ContainerBCBase;
+import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotData;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -41,6 +42,7 @@ import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotTyp
 /**
  * Created by brandon3055 on 5/7/19.
  */
+@SuppressWarnings("rawtypes")
 public class GuiToolkit<T extends Screen & IModularGui> {
 
     private static Map<String, ResourceLocation> resourceCache = new HashMap<>();
@@ -63,8 +65,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         this.layout = CUSTOM;
         this.gui.setUISize(xSize, ySize);
         gui.getManager().setJeiExclusions(() -> jeiExclusions);
-        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer) gui).getContainer() instanceof ContainerBCBase) {
-            setSlotLayout(((ContainerBCBase) ((ModularGuiContainer) gui).getContainer()).getSlotLayout());
+        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer) gui).getContainer() instanceof ContainerBCore) {
+            setSlotLayout(((ContainerBCore) ((ModularGuiContainer) gui).getContainer()).getSlotLayout());
         }
     }
 
@@ -89,7 +91,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         button.addChild(icon);
         button.setHoverText(element -> darkMode ? I18n.format("bc.guitoolkit.theme.set.light") : I18n.format("bc.guitoolkit.theme.set.dark"));
         button.onPressed(() -> {
-            BCConfig.CLIENT.dark_mode.set(!darkMode); //TODO check if this auto saves
+            BCConfig.CLIENT.dark_mode.set(!darkMode); //TODO check if this auto saves.
+            darkMode = BCConfig.CLIENT.dark_mode.get(); //it seems ModConfigEvent sometimes fails to fire. This is a workaround.
         });
         return button;
     }
@@ -140,7 +143,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             gui.getManager().addChild(texture);
         }
         if (center) {
-            texture.addAndFireReloadCallback(guiTex -> guiTex.setPos(gui.guiLeft(), gui.guiTop()));
+            texture.onReload(guiTex -> guiTex.setPos(gui.guiLeft(), gui.guiTop()));
         }
         return texture;
     }
@@ -497,13 +500,13 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     //TODO add additional standard layouts as needed.
 
-    private static final int DEFAULT_WIDTH = 176;
-    private static final int WIDE_WIDTH = 200;
-    private static final int EXTRA_WIDE_WIDTH = 250;
+    public static final int DEFAULT_WIDTH = 176;
+    public static final int WIDE_WIDTH = 200;
+    public static final int EXTRA_WIDE_WIDTH = 250;
 
-    private static final int DEFAULT_HEIGHT = 166;
-    private static final int TALL_HEIGHT = 200;
-    private static final int EXTRA_TALL_HEIGHT = 250;
+    public static final int DEFAULT_HEIGHT = 166;
+    public static final int TALL_HEIGHT = 200;
+    public static final int EXTRA_TALL_HEIGHT = 250;
 
     public enum GuiLayout {
         FULL_SCREEN(-1, -1, true, true),
@@ -546,6 +549,24 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         public boolean isWide() {
             return wide;
         }
+
+        public static GuiLayout getBestFit(int width, int height) {
+            GuiLayout bestFit = EXTRA_WIDE_EXTRA_TALL;
+            int widthDeviation = bestFit.xSize - width;
+            int heightDeviation = bestFit.ySize - height;
+            for (GuiLayout layout : values()) {
+                if (layout == FULL_SCREEN || layout == CUSTOM) continue;
+                int newXD = layout.xSize - width;
+                int newYD = layout.ySize - height;
+                if (newXD >= 0 && (newXD <= widthDeviation || widthDeviation < 0) && newYD >= 0 && (newYD <= heightDeviation || heightDeviation < 0)) {
+                    bestFit = layout;
+                    widthDeviation = newXD;
+                    heightDeviation = newYD;
+                }
+            }
+
+            return bestFit;
+        }
     }
 
     public enum LayoutPos {
@@ -553,10 +574,10 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         TOP_CENTER,
         TOP_RIGHT,
         MIDDLE_RIGHT,
+        MIDDLE_LEFT,
         BOTTOM_RIGHT,
         BOTTOM_CENTER,
-        BOTTOM_LEFT,
-        MIDDLE_LEFT
+        BOTTOM_LEFT
     }
 
     public static class SpriteData {
@@ -773,7 +794,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
     }
 
-    public static class  Palette {
+    public static class Palette {
         /**
          * Background colours. These match the colours used in the default background textures.
          */

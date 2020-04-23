@@ -30,7 +30,7 @@ public class GuiToolkitTest extends ModularGuiScreen {
     public void addElements(GuiElementManager manager) {
         manager.addChild(new GuiButton("Reload").setSize(50, 16).setVanillaButtonRender(true).onPressed(() -> minecraft.displayGuiScreen(new GuiToolkitTest(title))));
 
-        TBasicMachine template = toolkit.loadTemplate(new TBasicMachine(null));
+        TBasicMachine template = toolkit.loadTemplate(new TBasicMachine(this, null));
         template.title.setLabelText("Colour Palette Test UI");
         GuiElement bg = template.background;
 

@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.client.ClientProxy;
 import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTPX;
 import com.brandon3055.brandonscore.handlers.FileHandler;
+import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -16,6 +17,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -85,17 +87,17 @@ public class BrandonsCore {
         CommandTPX.register(event.getCommandDispatcher());
     }
 
+    @SubscribeEvent
+    public void onServerStop(FMLServerStoppedEvent event) {
+        ProcessHandler.clearHandler();
+    }
+
 //
 //    @Mod.EventHandler
 //    public void serverStart(FMLServerStartingEvent event) {
 //        event.registerServerCommand(new CommandTickTime());
 //        event.registerServerCommand(new BCUtilCommands());
 //        event.registerServerCommand(new CommandTPX());
-//    }
-//
-//    @Mod.EventHandler
-//    public void serverStop(FMLServerStoppingEvent event) {
-//        ProcessHandler.clearHandler();
 //    }
 //
 //    @Mod.EventHandler

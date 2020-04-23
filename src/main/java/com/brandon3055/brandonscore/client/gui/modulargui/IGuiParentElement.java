@@ -15,6 +15,11 @@ public interface IGuiParentElement<E> {
     <C extends GuiElement> C addChild(C child);
 
     /**
+     * @return true if this {@link IGuiParentElement} contains the specified child.
+     */
+    <C extends GuiElement> boolean hasChild(C child);
+
+    /**
      * Adds a new child element to this element at index 0 so it will render behind all other elements previously added.
      *
      * @return The child element that was added.

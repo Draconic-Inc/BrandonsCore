@@ -24,13 +24,13 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     @Override
     public void handlePacket(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         switch (packet.getType()) {
-            case PacketDispatcher.S_TILE_MESSAGE:
+            case BCoreNetwork.S_TILE_MESSAGE:
                 handleTileMessage(packet, sender, handler);
                 break;
-            case PacketDispatcher.S_PLAYER_ACCESS_BUTTON:
+            case BCoreNetwork.S_PLAYER_ACCESS_BUTTON:
                 handlePlayerAccess(packet, sender, handler);
                 break;
-            case PacketDispatcher.S_TILE_DATA_MANAGER:
+            case BCoreNetwork.S_TILE_DATA_MANAGER:
                 handleTileDataManager(packet, sender, handler);
                 break;
         }

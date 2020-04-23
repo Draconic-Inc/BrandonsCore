@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
@@ -227,7 +228,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Its worth remembering that reload is also called when the element is added to its parent.
      */
     @SuppressWarnings("unchecked")
-    @Deprecated
+    @Deprecated //Use onReload
     public E addReloadCallback(Consumer<E> callBack) {
         onReload = onReload != null ? onReload.andThen(callBack) : callBack;
         return (E) this;
@@ -237,7 +238,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * This is the same as {@link #addReloadCallback(Consumer)} except this method also immediately fires the callback.
      * This is useful for situations where the callback sets critical values such as the size and pos which need to be set before child elements are added.
      */
-    @Deprecated
+    @Deprecated //Use onReload
     public E addAndFireReloadCallback(Consumer<E> callBack) {
         onReload = onReload != null ? onReload.andThen(callBack) : callBack;
         onReload.accept((E) this);
@@ -292,6 +293,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         childElements.add(child);
         onChildAdded(child);
         return child;
+    }
+
+    @Override
+    public <C extends GuiElement> boolean hasChild(C child) {
+        return childElements.contains(child);
     }
 
     /**
@@ -630,8 +636,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Called whenever the mouse is clicked regardless of weather or not the mouse is over this element.
      *
-     * @param mouseX      Mouse x position
-     * @param mouseY      Mouse y position
+     * @param mouseX Mouse x position
+     * @param mouseY Mouse y position
      * @param button Mouse mutton pressed
      * @return Return true to prevent any further processing for this mouse action.
      * @throws IOException
@@ -650,8 +656,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Called whenever the mouse is released regardless of weather or not the mouse is over this element.
      *
-     * @param mouseX      Mouse x position
-     * @param mouseY      Mouse y position
+     * @param mouseX Mouse x position
+     * @param mouseY Mouse y position
      * @param button the mouse state.
      * @return Return true to prevent any further processing for this mouse action.
      */
@@ -820,10 +826,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             return true;
         }
 
-
-        //TODO Check This (mouse pos)
-        int mouseX = (int) (mc.mouseHelper.getMouseX() * screenWidth / this.mc.mainWindow.getWidth());
-        int mouseY = (int) (screenHeight - mc.mouseHelper.getMouseY() * screenHeight / this.mc.mainWindow.getHeight() - 1);
+        int mouseX = (int) getMouseX();//int) (mc.mouseHelper.getMouseX() * screenWidth / this.mc.mainWindow.getWidth());
+        int mouseY = (int) getMouseY();//int) (screenHeight - mc.mouseHelper.getMouseY() * screenHeight / this.mc.mainWindow.getHeight() - 1);
         if (isMouseOver(mouseX, mouseY)) {
             hoverTime++;
         } else {
@@ -1677,30 +1681,34 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     //TODO verify this is correct
-    /**The 'Actual' width in 'real' pixels of the Minecraft window*/
+
+    /**
+     * The 'Actual' width in 'real' pixels of the Minecraft window
+     */
     public int displayWidth() {
         return mc.mainWindow.getWidth();
     }
 
-    /**The 'Actual' height in 'real' pixels of the Minecraft window*/
+    /**
+     * The 'Actual' height in 'real' pixels of the Minecraft window
+     */
     public int displayHeight() {
         return mc.mainWindow.getHeight();
     }
 
-    //TODO verify this is correct
     public double getMouseX() {
-        return mc.mouseHelper.getMouseX() * screenWidth / displayWidth();
+        return this.mc.mouseHelper.getMouseX() * (double) this.mc.mainWindow.getScaledWidth() / (double) this.mc.mainWindow.getWidth();
     }
 
     public double getMouseY() {
-        return screenHeight - mc.mouseHelper.getMouseY() * screenHeight / displayHeight() - 1;
+        return this.mc.mouseHelper.getMouseY() * (double) this.mc.mainWindow.getScaledHeight() / (double) this.mc.mainWindow.getHeight();
     }
 
     public List<String> getTooltipFromItem(ItemStack stack) {
         List<ITextComponent> list = stack.getTooltip(mc.player, mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
         List<String> list1 = Lists.newArrayList();
 
-        for(ITextComponent itextcomponent : list) {
+        for (ITextComponent itextcomponent : list) {
             list1.add(itextcomponent.getFormattedText());
         }
 

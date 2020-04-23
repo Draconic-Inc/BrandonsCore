@@ -103,6 +103,11 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return element;
     }
 
+    @Override
+    public <C extends GuiElement> boolean hasChild(C child) {
+        return elements.contains(child);
+    }
+
     /**
      * Adds a new element to the manager with a display level of 0.<br>
      * Note: Adding an element automatically calls that element's addElements method.

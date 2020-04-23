@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.inventory;
 import codechicken.lib.inventory.InventorySimple;
 import com.brandon3055.brandonscore.BCContent;
 import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -75,7 +75,7 @@ public class ContainerPlayerAccess extends Container {
         }
 
         if (tick++ % 10 == 0 && player instanceof ServerPlayerEntity && playerAccess != null) {
-            PacketDispatcher.sendPlayerAccessUIUpdate((ServerPlayerEntity) player, playerAccess);
+            BCoreNetwork.sendPlayerAccessUIUpdate((ServerPlayerEntity) player, playerAccess);
         }
 
         super.detectAndSendChanges();

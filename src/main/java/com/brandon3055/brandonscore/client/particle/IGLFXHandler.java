@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 /**
  * Created by brandon3055 on 30/11/2016.
  */
+@Deprecated
 public interface IGLFXHandler {
 
     /**

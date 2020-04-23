@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.handlers;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.inventory.BlockToStackHelper;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -58,7 +58,7 @@ public class BCEventHandler {
     @SubscribeEvent
     public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getPlayer() instanceof ServerPlayerEntity && event.getPlayer().getServer() != null && event.getPlayer().getServer().isDedicatedServer()) {
-            PacketDispatcher.sendConfigToClient((ServerPlayerEntity) event.getPlayer());
+            BCoreNetwork.sendConfigToClient((ServerPlayerEntity) event.getPlayer());
         }
     }
 

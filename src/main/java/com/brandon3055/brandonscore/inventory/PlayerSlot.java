@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 
 /**
  * Created by brandon3055 on 7/06/2016.
@@ -18,6 +19,17 @@ public class PlayerSlot {
     public PlayerSlot(int slot, EnumInvCategory category) {
         this.slot = slot;
         this.category = category;
+    }
+
+    public PlayerSlot(PlayerEntity player, Hand hand) {
+        if (hand == Hand.OFF_HAND) {
+            this.slot = 0;
+            this.category = EnumInvCategory.OFF_HAND;
+        }
+        else {
+            this.slot = player.inventory.currentItem;
+            this.category = EnumInvCategory.MAIN;
+        }
     }
 
     public void toBuff(ByteBuf buf) {

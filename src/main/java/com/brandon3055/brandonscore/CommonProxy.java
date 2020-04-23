@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.animation.ITimeValue;
 import net.minecraftforge.common.model.animation.IAnimationStateMachine;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -29,6 +30,7 @@ public class CommonProxy {
         //Switched to annotation
 //        MinecraftForge.EVENT_BUS.register(new BCEventHandler());
 //        MinecraftForge.EVENT_BUS.register(new ModFeatureParser());
+        MinecraftForge.EVENT_BUS.register(new ProcessHandler());
         ModHelperBC.init();
         CapabilityOP.register();
     }

@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 /**
  * Created by brandon3055 on 23/4/2016.
  */
+@Deprecated
 public interface IBCParticleFactory {
 
     Particle getEntityFX(int particleID, World world, Vec3D pos, Vec3D speed, int... args);

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.Style;
@@ -70,7 +70,7 @@ public class ChatHelper {
             BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(unlocalizedMessage, args), index);
         }
         else if (player instanceof ServerPlayerEntity){
-            PacketDispatcher.sendIndexedLocalizedChat((ServerPlayerEntity) player, unlocalizedMessage, index);
+            BCoreNetwork.sendIndexedLocalizedChat((ServerPlayerEntity) player, unlocalizedMessage, index);
         }
     }
 

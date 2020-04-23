@@ -10,7 +10,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSlotRen
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.math.BlockPos;
@@ -59,14 +59,14 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         tpToPlayer.setVanillaButtonRender(true);
         tpToPlayer.setSize(accessSlots.xSize(), 14);
         tpToPlayer.setPos(accessSlots.xPos(), posLabel.maxYPos() + 3);
-        tpToPlayer.onPressed(() -> PacketDispatcher.sendPlayerAccessButton(0));
+        tpToPlayer.onPressed(() -> BCoreNetwork.sendPlayerAccessButton(0));
         bg.addChild(tpToPlayer);
 
         GuiButton tpPlayerToYou = new GuiButton("Teleport player to your position");
         tpPlayerToYou.setVanillaButtonRender(true);
         tpPlayerToYou.setSize(accessSlots.xSize(), 14);
         tpPlayerToYou.setPos(accessSlots.xPos(), tpToPlayer.maxYPos() + 3);
-        tpPlayerToYou.onPressed(() -> PacketDispatcher.sendPlayerAccessButton(1));
+        tpPlayerToYou.onPressed(() -> BCoreNetwork.sendPlayerAccessButton(1));
         bg.addChild(tpPlayerToYou);
 
         GuiButton clearInventory = new GuiButton("C").setTrim(false);
@@ -76,7 +76,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         clearInventory.setPos(accessSlots.maxXPos() - 18, accessSlots.yPos());
         clearInventory.onPressed(() -> {
             GuiPopupDialogs.createDialog(clearInventory, GuiPopupDialogs.DialogType.OK_CANCEL_OPTION, TextFormatting.RED + "Are you sure you want to clear " + name + "'s Inventory?\nThis cannot be undone!") //
-            .setOkListener(() -> PacketDispatcher.sendPlayerAccessButton(2)) //
+            .setOkListener(() -> BCoreNetwork.sendPlayerAccessButton(2)) //
             .showCenter();
         });
         bg.addChild(clearInventory);

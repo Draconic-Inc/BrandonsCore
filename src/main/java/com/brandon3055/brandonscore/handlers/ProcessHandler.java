@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.handlers;
 
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -20,10 +22,6 @@ public class ProcessHandler {
 
     private static List<IProcess> processes = new ArrayList<IProcess>();
     private static List<IProcess> newProcesses = new ArrayList<IProcess>();
-
-    public static void init() {
-        MinecraftForge.EVENT_BUS.register(new ProcessHandler());
-    }
 
     @SubscribeEvent
     public void onServerTick(TickEvent.ServerTickEvent event) {
@@ -46,16 +44,6 @@ public class ProcessHandler {
             }
         }
     }
-
-//    @SubscribeEvent
-//    public void onWorldClose(WorldEvent.Unload event) {
-//        if (event.getWorld().isRemote) {
-//            return;
-//        }
-//        processes.clear();
-//        newProcesses.clear();
-//        BCLogHelper.info("Clear Handler " + event.getWorld());
-//    }
 
     public static void clearHandler() {
         processes.clear();

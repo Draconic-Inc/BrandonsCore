@@ -610,6 +610,11 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
     }
 
+    @Override
+    public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
+    }
+
     protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {
         bindTexture(textureSupplier != null ? textureSupplier.get() : textureOverride != null ? textureOverride : BUTTON_TEXTURES);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);

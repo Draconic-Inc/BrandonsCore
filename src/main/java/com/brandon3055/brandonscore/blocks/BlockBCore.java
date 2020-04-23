@@ -2,10 +2,7 @@ package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
-import com.brandon3055.brandonscore.lib.IActivatableTile;
-import com.brandon3055.brandonscore.lib.IBCoreBlock;
-import com.brandon3055.brandonscore.lib.IChangeListener;
-import com.brandon3055.brandonscore.lib.IRedstoneEmitter;
+import com.brandon3055.brandonscore.lib.*;
 import com.brandon3055.brandonscore.utils.ItemNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -45,8 +42,6 @@ public class BlockBCore extends Block implements IBCoreBlock {
     public static final String BC_TILE_DATA_TAG = "bc_tile_data";
     public static final String BC_MANAGED_DATA_FLAG = "bc_managed_data"; //Seemed like as good a place as any to put this.
 
-    protected boolean isFullCube = true;
-    private boolean ifcSet = false;
     protected boolean canProvidePower = false;
     protected boolean hasSubItemTypes = false;
     protected boolean isMobResistant = false;
@@ -59,10 +54,6 @@ public class BlockBCore extends Block implements IBCoreBlock {
     //endregion
 
     //region Setters & Getters
-    public BlockBCore setHarvestTool(String toolClass, int level) {
-        this.setHarvestTool(toolClass, level);
-        return this;
-    }
 
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
@@ -89,15 +80,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
         return stack;
     }
 
-    @Deprecated //override uberIsBlockFullCube
-    public BlockBCore setIsFullCube(boolean value) {
-        isFullCube = value;
-        ifcSet = true;
-        return this;
-    }
-
-    public boolean uberIsBlockFullCube() {
-        return !ifcSet || isFullCube;
+    /**An uber function that returns all the correct values in all the correct places to make this a partial/transparent block*/
+    public boolean isBlockFullCube() {
+        return false;
     }
 
     /**
@@ -189,14 +174,14 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
+    public void neighborChanged(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (hasTileEntity(state)) {
             TileEntity tile = world.getTileEntity(pos);
             if (tile instanceof IChangeListener) {
-                ((IChangeListener) tile).onNeighborChange(neighbor);
+                ((IChangeListener) tile).onNeighborChange(fromPos);
             }
         }
-        super.onNeighborChange(state, world, pos, neighbor);
+        super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
     }
 
     //IActivatableTile
@@ -256,8 +241,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
             spawnAsEntity(world, pos, stack);
             //Remove tile to make sure no one else can mess with it and dupe its contents.
             world.removeTileEntity(pos);
-        }
-        else {
+        } else {
             super.harvestBlock(world, player, pos, state, te, heldStack);
         }
     }
@@ -296,15 +280,17 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //endregion
 
-//    @Override
-//    public boolean isFullCube(BlockState state) {
-//        return uberIsBlockFullCube();
-//    }
-//
-//    @Override
-//    public boolean isOpaqueCube(BlockState state) {
-//        return uberIsBlockFullCube();
-//    }
+    public boolean propagatesSkylightDown(BlockState state, IBlockReader reader, BlockPos pos) {
+        return !isBlockFullCube();
+    }
+
+    public boolean causesSuffocation(BlockState state, IBlockReader worldIn, BlockPos pos) {
+        return isBlockFullCube();
+    }
+
+    public boolean isNormalCube(BlockState state, IBlockReader worldIn, BlockPos pos) {
+        return isBlockFullCube();
+    }
 
     //Utils
     public static int getRedstonePower(IWorldReader world, BlockPos pos, Direction facing) {

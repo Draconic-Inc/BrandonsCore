@@ -4,7 +4,6 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.lib.IMCDataSerializable;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.IContainerListener;
@@ -41,7 +40,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
 
     /**
      * Bind the given capability instance to the specified sides while also invalidating and replacing
-     * any existing capabilities of this type.
+     * any existing capabilities of this type on the specified side.
      *
      * @param cap         The capability type.
      * @param capInstance The capability instance.
@@ -220,7 +219,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
     }
 
     private PacketCustom createCapPacket(SerializationFlags helper, int index) {
-        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.C_TILE_CAP_DATA);
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.C_TILE_CAP_DATA);
         packet.writePos(tile.getPos());
         packet.writeInt(index);
         if (helper.getData() instanceof IMCDataSerializable) {

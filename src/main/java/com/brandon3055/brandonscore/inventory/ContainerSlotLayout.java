@@ -128,7 +128,7 @@ public class ContainerSlotLayout {
         }
     }
 
-    public interface LayoutFactory<T extends TileEntity> {
+    public interface LayoutFactory<T> {
         ContainerSlotLayout buildLayout(PlayerEntity player, T data);
     }
 }

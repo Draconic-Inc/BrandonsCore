@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib.datamanager;
 
-import com.brandon3055.brandonscore.inventory.ContainerBCBase;
+import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.google.common.annotations.Beta;
 
 /**
@@ -29,7 +29,7 @@ public class DataFlags {
 
     /**
      * Sync this data via container.
-     * This will only sync the data when the client is accessing a {@link ContainerBCBase} linked to this tile.
+     * This will only sync the data when the client is accessing a {@link ContainerBCore} linked to this tile.
      * Useful if data is only needed inside a GUI.
      * TODO I think this will have issues if multiple players have a container open. I need to look into this if its still an issue in 1.14+
      */

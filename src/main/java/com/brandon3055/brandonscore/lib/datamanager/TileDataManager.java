@@ -4,8 +4,8 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
-import com.brandon3055.brandonscore.network.PacketDispatcher;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -62,7 +62,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     }
 
     /**
-     * This method is called each tick by {@link com.brandon3055.brandonscore.inventory.ContainerBCBase} to sent updates to container listeners.
+     * This method is called each tick by {@link ContainerBCore} to sent updates to container listeners.
      *
      * @param listeners The list of container listeners.
      */
@@ -133,7 +133,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
 
     @Override
     public PacketCustom createSyncPacket() {
-        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.C_TILE_DATA_MANAGER);
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.C_TILE_DATA_MANAGER);
         packet.writePos(tile.getPos());
         return packet;
     }
@@ -199,7 +199,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     @Override
     public void sendToServer(IManagedData data) {
         if (tile.getWorld().isRemote && data.flags().allowClientControl) {
-            PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, PacketDispatcher.S_TILE_DATA_MANAGER);
+            PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_DATA_MANAGER);
             packet.writePos(tile.getPos());
             packet.writeByte((byte) data.getIndex());
             data.toBytes(packet);

@@ -58,8 +58,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
 
         if (texSizeOverride) {
             drawScaledCustomSizeModalRect(xPos(), yPos(), getTexU(), getTexV(), texUSize, texVSize, xSize(), ySize(), textSheetSizeX, textSheetSizeY);
-        }
-        else {
+        } else {
             drawModalRectWithCustomSizedTexture(xPos(), yPos(), getTexU(), getTexV(), xSize(), ySize(), textSheetSizeX, textSheetSizeY);
         }
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
@@ -144,11 +143,12 @@ public class GuiTexture extends GuiElement<GuiTexture> {
      * Creates a new GuiTexture with the specified size and the BrandonsCore default gui background texture.
      * This is the background used in a lot of Draconic Evolution's Gui's
      */
+    @Deprecated //No longer used in 1.14+
     public static GuiTexture newBCTexture(int xSize, int ySize) {
-        return new GuiTexture(0, 0, xSize, ySize, ResourceHelperBC.getResourceRAW("brandonscore:textures/gui/base_gui.png")){
+        return new GuiTexture(0, 0, xSize, ySize, ResourceHelperBC.getResourceRAW("brandonscore:textures/gui/base_gui.png")) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                ResourceHelperBC.bindTexture(texture);
+                ResourceHelperBC.bindTexture(getTexture());
                 drawTexturedModalRect(xPos(), yPos(), 0, 0, xSize() / 2, ySize() / 2);
                 drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 256 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
 
@@ -167,11 +167,12 @@ public class GuiTexture extends GuiElement<GuiTexture> {
     /**
      * Creates a new GuiTexture with the specified size and the normal vanilla gui background texture.
      */
+    @Deprecated //No longer used in 1.14+
     public static GuiTexture newVanillaGuiTexture(int xSize, int ySize) {
-        return new GuiTexture(0, 0, xSize, ySize, ResourceHelperBC.getResourceRAW("brandonscore:textures/gui/base_vanilla_gui.png")){
+        return new GuiTexture(0, 0, xSize, ySize, ResourceHelperBC.getResourceRAW("brandonscore:textures/gui/base_vanilla_gui.png")) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                ResourceHelperBC.bindTexture(texture);
+                ResourceHelperBC.bindTexture(getTexture());
                 drawTexturedModalRect(xPos(), yPos(), 0, 0, xSize() / 2, ySize() / 2);
                 drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 256 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
 
@@ -185,6 +186,26 @@ public class GuiTexture extends GuiElement<GuiTexture> {
                 }
             }
         };
+    }
+
+    public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<ResourceLocation> textureSupplier) {
+        return new GuiTexture(textureSupplier) {
+            @Override
+            public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+                ResourceHelperBC.bindTexture(getTexture());
+                drawTexturedModalRect(xPos(), yPos(), 0, 0, xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos() + (xSize() / 2), yPos(), 256 - (xSize() / 2), 0, xSize() / 2, ySize() / 2);
+
+                drawTexturedModalRect(xPos(), yPos() + (ySize() / 2), 0, 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
+                drawTexturedModalRect(xPos() + (xSize() / 2), yPos() + (ySize() / 2), 256 - (xSize() / 2), 256 - (ySize() / 2), xSize() / 2, ySize() / 2);
+
+                for (GuiElement element : childElements) {
+                    if (element.isEnabled()) {
+                        element.renderElement(minecraft, mouseX, mouseY, partialTicks);
+                    }
+                }
+            }
+        }.setSize(xSize, ySize);
     }
 
 }
