@@ -297,6 +297,8 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
                 GlStateManager.enableLighting();
                 GlStateManager.enableDepthTest();
             }
+
+            drawSlotOverlay(slot);
         }
 
         RenderHelper.disableStandardItemLighting();
@@ -394,7 +396,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
         if (!flag1) {
             if (flag) {
-                fill(xPos, yPos, xPos + 16, yPos + 16, -2130706433);
+                fill(xPos, yPos, xPos + 16, yPos + 16, 0x80ffffff);
             }
 
             GlStateManager.enableDepthTest();
@@ -404,6 +406,10 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
         this.itemRenderer.zLevel = 0.0F;
         this.blitOffset = 0;
+    }
+
+    protected void drawSlotOverlay(Slot slot) {
+
     }
 
 

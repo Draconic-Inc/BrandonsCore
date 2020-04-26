@@ -9,6 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -499,8 +501,14 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         }
     }
 
+    @Deprecated
     public static void playGenericClick(Minecraft mc) {
-        mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        playGenericClick();
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void playGenericClick() {
+        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     /**

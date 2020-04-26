@@ -716,10 +716,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 prefBounds.height += dim.height;
             }
 
-//            Dimension available = new Dimension();
-//            available.height = parent.screenHeight - parent.yPos() - (leftSide && hasPI ? 25 : 0);
-//            available.width = leftSide ? parent.xPos() - 10 : parent.screenWidth - parent.maxXPos() - 10;
-            Dimension actSize = prefBounds;//new Dimension(Math.min(available.width, prefBounds.width), Math.min(available.height, prefBounds.height));
+            Dimension actSize = prefBounds;
             int xPos = leftSide ? parent.xPos() - xSize() - 2 : parent.maxXPos() + 2;
             int yPos = parent.yPos() + (leftSide && hasPI ? 25 : 0);
             Rectangle bounds = /*new Rectangle(xPos, yPos, prefBounds.width + 6, prefBounds.height + 6);*/new Rectangle(xPos, yPos, actSize.width + 8, actSize.height + 8);
@@ -791,6 +788,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             }
 
             return super.onUpdate();
+        }
+
+        public void clear() {
+            elementsDimMap.keySet().forEach(this::removeChild);
+            elementsDimMap.clear();
         }
     }
 

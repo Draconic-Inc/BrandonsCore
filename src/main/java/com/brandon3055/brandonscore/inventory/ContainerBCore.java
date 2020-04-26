@@ -82,6 +82,8 @@ public class ContainerBCore<D> extends Container {
         return true;
     }
 
+    //Note to self: This is called from a loop. As long as this does not return an empty stack the loop will continue.
+    //Returning an empty stack essentially indicates that no more items can be transferred.
     @Override
     public ItemStack transferStackInSlot(PlayerEntity player, int i) {
         LazyOptional<IItemHandler> optional = getItemHandler();
