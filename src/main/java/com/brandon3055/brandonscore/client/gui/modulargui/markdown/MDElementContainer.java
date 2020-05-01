@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MDElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -273,7 +273,7 @@ public class MDElementContainer extends GuiElement<MDElementContainer> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        GlStateManager.color4f(1, 1, 1, 1);
+        RenderSystem.color4f(1, 1, 1, 1);
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
 //        drawBorderedRect(getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height, 1, 0, 0x8000FF00);
     }

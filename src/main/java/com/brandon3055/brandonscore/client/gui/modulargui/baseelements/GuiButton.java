@@ -5,10 +5,13 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -499,8 +502,14 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         }
     }
 
+    @Deprecated
     public static void playGenericClick(Minecraft mc) {
-        mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        playGenericClick();
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void playGenericClick() {
+        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     /**
@@ -605,7 +614,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
             }
-            GlStateManager.color4f(1, 1, 1, 1);
+            RenderSystem.color4f(1, 1, 1, 1);
         }
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
     }
@@ -617,12 +626,12 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
     protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {
         bindTexture(textureSupplier != null ? textureSupplier.get() : textureOverride != null ? textureOverride : BUTTON_TEXTURES);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         int texVIndex = getRenderState(hovered);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         int texHeight = Math.min(20, ySize());
         int texPos = 46 + texVIndex * 20;

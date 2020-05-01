@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.effects;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -34,16 +34,16 @@ public class GuiEffectRenderer {
         for (GuiEffect effect : effects){
 
             if (effect.isTransparent()){
-                GlStateManager.enableBlend();
-                GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
+                RenderSystem.enableBlend();
+                RenderSystem.alphaFunc(GL11.GL_GREATER, 0F);
             }
 
-            GlStateManager.disableLighting();
+            RenderSystem.disableLighting();
 
             effect.renderParticle(partialTick);
 
             if (effect.isTransparent()){
-                GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
+                RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
             }
         }
     }

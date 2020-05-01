@@ -124,7 +124,7 @@ public class FilterGroup extends FilterBase {
     public void serializeMCD(MCDataOutput output) {
         super.serializeMCD(output);
         output.writeBoolean(andGroup);
-        output.writeVarShort(subNodeMap.size());
+        output.writeVarInt(subNodeMap.size());
         if (!subNodeMap.isEmpty()) {
             subNodeMap.values().forEach(node -> {
                 output.writeByte(node.getType().index);
@@ -138,7 +138,7 @@ public class FilterGroup extends FilterBase {
         super.deSerializeMCD(input);
         andGroup = input.readBoolean();
         subNodeMap.clear();
-        int subCount = input.readVarShort();
+        int subCount = input.readVarInt();
         for (int i = 0; i < subCount; i++) {
             FilterType type = FilterType.filterTypeMap[input.readByte()];
             if (getFilter().isFilterAllowed(type)) {

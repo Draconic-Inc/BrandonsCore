@@ -9,16 +9,22 @@ import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
+import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -96,7 +102,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.color4f(1, 1, 1, 1);
+        RenderSystem.color4f(1, 1, 1, 1);
         if (downloading) {
             renderDownloading(partialTicks);
         }
@@ -113,9 +119,9 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
             int w = xSize() - rightPad - leftPad;
             int h = ySize() - bottomPad - topPad;
-            GlStateManager.enableBlend();
+            RenderSystem.enableBlend();
             container.drawModalRectWithCustomSizedTexture(xPos() + leftPad, yPos() + topPad, 0, 0, w, h, w, h);
-            GlStateManager.disableBlend();
+            RenderSystem.disableBlend();
         }
 
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
@@ -125,46 +131,46 @@ public class ImageElement extends MDElementBase<ImageElement> {
         boolean failed = resourceLocation.dlFailed;
         float failTicks = failed ? 0 : partialTicks;
         drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
-        double anim = (64 + 10) * ((loadingTime + failTicks) / (double) maxLoadTime);
+        float anim = (64 + 10) * ((loadingTime + failTicks) / (float) maxLoadTime);
 
         bindTexture(BCTextures.MODULAR_GUI);
-        double texAnim = Math.max(0, (1 - (anim / 64)) * 48);
-        double texX = xPos() + (xSize() / 2D) - 20;
-        double texY = Math.max(yPos() - 48 + ((48 - texAnim) * 2), yPos());
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(0, 0, getRenderZLevel() + 200);
+        float texAnim = Math.max(0F, (1 - (anim / 64)) * 48);
+        float texX = xPos() + (xSize() / 2F) - 20;
+        float texY = Math.max(yPos() - 48 + ((48 - texAnim) * 2), yPos());
+        RenderSystem.pushMatrix();
+        RenderSystem.translated(0, 0, getRenderZLevel() + 200);
         drawScaledCustomSizeModalRect(texX, texY + 1, failed ? 20 : 0, 18 + (24 - Math.min(24, 48 - texAnim)), 20, Math.min(Math.min(24, 48 - texAnim), texAnim), 40, Math.min(Math.min(48, (48 - texAnim) * 2), texAnim * 2), 256, 256);
 
-        GlStateManager.translated(xPos() + xSize() / 2D, yPos() + ySize() - 32, 0);
-        GlStateManager.rotatef((BCClientEventHandler.elapsedTicks + partialTicks) * 3F, 0, 1, 0);
-        GlStateManager.scaled(-64, -64, -64);
-        GlStateManager.rotated(-30, 1, 0, 0);
-        GlStateManager.rotated(45, 0, 1, 0);
+        RenderSystem.translated(xPos() + xSize() / 2D, yPos() + ySize() - 32, 0);
+        RenderSystem.rotatef((BCClientEventHandler.elapsedTicks + partialTicks) * 3F, 0, 1, 0);
+        RenderSystem.scaled(-64, -64, -64);
+        RenderSystem.rotatef(-30, 1, 0, 0);
+        RenderSystem.rotatef(45, 0, 1, 0);
         ScissorHelper.pushGuiScissor(mc, xPos(), maxYPos() - anim, xSize(), anim, screenWidth, screenHeight);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         double shrink = 1 - MathHelper.clip((anim - 64) / 10D, 0, 1);
-        GlStateManager.scaled(shrink, shrink, shrink);
-        mc.getItemRenderer().renderItem(renderLoadingStack, ItemCameraTransforms.TransformType.FIXED);
-        GlStateManager.popMatrix();
+        RenderSystem.scaled(shrink, shrink, shrink);
+        mc.getItemRenderer().renderItemIntoGUI(renderLoadingStack, 0, 0);//, ItemCameraTransforms.TransformType.FIXED);
+        RenderSystem.popMatrix();
         RenderHelper.disableStandardItemLighting();
         ScissorHelper.popScissor();
 
         Cuboid6 cuboid6 = new Cuboid6(-0.251, -0.251, -0.251, 0.251, 0.251, 0.251);
-        GlStateManager.disableTexture();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.disableTexture();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        float r = 1, g = 1, b = 1;
         if (failed) {
-            GlStateManager.color4f(0, 0, 0, 1);
+            r = 0; g = 0; b = 0;
         }
-        else {
-            GlStateManager.color4f(1, 1, 1, 1);
-        }
-        RenderUtils.drawCuboidOutline(cuboid6);
-        GlStateManager.enableTexture();
+
+        GuiHelper.renderCuboid(cuboid6, r, g, b, 1);
+
+        RenderSystem.enableTexture();
 
         //TODO font renderer changes
-//        GlStateManager.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
-        GlStateManager.popMatrix();
+//        RenderSystem.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
+        RenderSystem.popMatrix();
     }
 
     @Override

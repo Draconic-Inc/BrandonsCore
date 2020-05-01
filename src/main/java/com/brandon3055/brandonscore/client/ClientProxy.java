@@ -2,19 +2,32 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.api.TimeKeeper;
+import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import com.brandon3055.brandonscore.utils.ModelUtils;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.particle.IParticleRenderType;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.animation.ITimeValue;
@@ -28,6 +41,25 @@ import java.sql.Time;
  * Created by Brandon on 14/5/2015.
  */
 public class ClientProxy extends CommonProxy {
+
+    public static final IParticleRenderType PARTICLE_SHEET_NO_DEPTH = new IParticleRenderType() {
+        public void beginRender(BufferBuilder p_217600_1_, TextureManager p_217600_2_) {
+            RenderSystem.depthMask(false);
+            p_217600_2_.bindTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.alphaFunc(516, 0.003921569F);
+            p_217600_1_.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
+        }
+
+        public void finishRender(Tessellator p_217599_1_) {
+            p_217599_1_.draw();
+        }
+
+        public String toString() {
+            return "PARTICLE_SHEET_NO_DEPTH";
+        }
+    };
 
     @Override
     public void commonSetup(FMLCommonSetupEvent event) {
@@ -110,10 +142,10 @@ public class ClientProxy extends CommonProxy {
 //        BCEffectHandler.effectRenderer.clearEffects(world);
     }
 
-    @Override
-    public IAnimationStateMachine loadASM(ResourceLocation location, ImmutableMap<String, ITimeValue> customParameters) {
-        return ModelLoaderRegistry.loadASM(location, customParameters);
-    }
+//    @Override
+//    public IAnimationStateMachine loadASM(ResourceLocation location, ImmutableMap<String, ITimeValue> customParameters) {
+//        return ModelLoaderRegistry.loadASM(location, customParameters);
+//    }
 
     @Override
     public int tickTimer() {

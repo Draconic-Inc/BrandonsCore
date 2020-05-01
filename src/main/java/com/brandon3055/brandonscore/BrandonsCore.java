@@ -23,11 +23,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-//@Mod(modid = BrandonsCore.MODID,
-//        version = BrandonsCore.VERSION,
-//        name = BrandonsCore.MODNAME,
-//        guiFactory = "com.brandon3055.brandonscore.BCGuiFactory",
-//        dependencies = "required-after:codechickenlib@[" + CodeChickenLib.MOD_VERSION + ",);required-after:redstoneflux;")
+
 @Mod(BrandonsCore.MODID)
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";

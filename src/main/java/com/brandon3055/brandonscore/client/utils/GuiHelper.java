@@ -1,20 +1,26 @@
 package com.brandon3055.brandonscore.client.utils;
 
+import codechicken.lib.render.RenderUtils;
+import codechicken.lib.render.buffer.TransformingVertexBuilder;
+import codechicken.lib.vec.Cuboid6;
+import codechicken.lib.vec.Matrix4;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.utils.InfoHelper;
 import com.brandon3055.brandonscore.utils.Utils;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
@@ -25,8 +31,8 @@ import java.util.List;
  * Created by Brandon on 28/06/2014.
  */
 public class GuiHelper {
-    public static final double PXL128 = 0.0078125;
-    public static final double PXL256 = 0.00390625;
+    public static final float PXL128 = 0.0078125F;
+    public static final float PXL256 = 0.00390625F;
 
     public static boolean isInRect(int x, int y, int xSize, int ySize, double mouseX, double mouseY) {
         return ((mouseX >= x && mouseX < x + xSize) && (mouseY >= y && mouseY < y + ySize));
@@ -36,7 +42,7 @@ public class GuiHelper {
         drawTexturedRect(x, y, width, height, u, v, width, height, 0, PXL256);
     }
 
-    public static void drawTexturedRect(double x, double y, double width, double height, int u, int v, int uSize, int vSize, double zLevel, double pxl) {
+    public static void drawTexturedRect(float x, float y, float width, float height, int u, int v, int uSize, int vSize, float zLevel, float pxl) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexBuffer = tessellator.getBuffer();
         vertexBuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
@@ -87,24 +93,24 @@ public class GuiHelper {
     }
 
     private static void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height, double zLevel) {
-        buffer.pos((double) (x), (double) (y + height), zLevel).tex((double) ((float) (textureX) * 0.00390625F), (double) ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x + width), (double) (y + height), zLevel).tex((double) ((float) (textureX + width) * 0.00390625F), (double) ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x + width), (double) (y), zLevel).tex((double) ((float) (textureX + width) * 0.00390625F), (double) ((float) (textureY) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x), (double) (y), zLevel).tex((double) ((float) (textureX) * 0.00390625F), (double) ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.pos(x, y + height, zLevel).tex( ((float) (textureX) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.pos(x + width, y + height, zLevel).tex( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.pos(x + width, y, zLevel).tex( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.pos(x, y, zLevel).tex( ((float) (textureX) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
     }
 
-    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
-        net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
-    }
+//    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
+//        net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
+//    }
 
     public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
         if (!list.isEmpty()) {
-            GlStateManager.pushMatrix();
-            GlStateManager.disableRescaleNormal();
+            RenderSystem.pushMatrix();
+            RenderSystem.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
-            GlStateManager.scaled(scale, scale, 1);
+            RenderSystem.disableLighting();
+            RenderSystem.disableDepthTest();
+            RenderSystem.scaled(scale, scale, 1);
             mouseX = (int) (mouseX / scale);
             mouseY = (int) (mouseY / scale);
 
@@ -151,20 +157,20 @@ public class GuiHelper {
             int i2 = 0;
             while (i2 < list.size()) {
                 String s1 = (String) list.get(i2);
-                GlStateManager.enableBlend();
-                GlStateManager.disableAlphaTest();
-                GLX.glBlendFuncSeparate(770, 771, 1, 0);
+                RenderSystem.enableBlend();
+                RenderSystem.disableAlphaTest();
+                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
                 font.drawStringWithShadow(s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
-                GlStateManager.enableAlphaTest();
+                RenderSystem.enableAlphaTest();
                 tooltipY += 10;
                 ++i2;
             }
 
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
+            RenderSystem.enableLighting();
+            RenderSystem.enableDepthTest();
             RenderHelper.enableStandardItemLighting();
-            GlStateManager.enableRescaleNormal();
-            GlStateManager.popMatrix();
+            RenderSystem.enableRescaleNormal();
+            RenderSystem.popMatrix();
         }
     }
 
@@ -177,75 +183,75 @@ public class GuiHelper {
         float f5 = (float) (colour2 >> 16 & 255) / 255.0F;
         float f6 = (float) (colour2 >> 8 & 255) / 255.0F;
         float f7 = (float) (colour2 & 255) / 255.0F;
-        GlStateManager.disableTexture();
-        GlStateManager.enableBlend();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.shadeModel(GL11.GL_SMOOTH);
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexbuffer = tessellator.getBuffer();
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        vertexbuffer.pos((double) right, (double) top, zLevel).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.pos((double) left, (double) top, zLevel).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.pos((double) left, (double) bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        vertexbuffer.pos((double) right, (double) bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        vertexbuffer.pos(right, top, zLevel).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.pos(left, top, zLevel).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.pos(left, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        vertexbuffer.pos(right, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
         tessellator.draw();
-        GlStateManager.shadeModel(GL11.GL_FLAT);
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.enableTexture();
+        RenderSystem.shadeModel(GL11.GL_FLAT);
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.enableTexture();
     }
 
-    /**
-     * Draws a simple vertical energy bar with no tool tip
-     */
-    public static void drawEnergyBar(AbstractGui gui, int posX, int posZ, int size, long energy, long maxEnergy) {
-        drawEnergyBar(gui, posX, posZ, size, false, energy, maxEnergy, false, 0, 0);
-    }
+//    /**
+//     * Draws a simple vertical energy bar with no tool tip
+//     */
+//    public static void drawEnergyBar(AbstractGui gui, int posX, int posZ, int size, long energy, long maxEnergy) {
+//        drawEnergyBar(gui, posX, posZ, size, false, energy, maxEnergy, false, 0, 0);
+//    }
 
-    /**
-     * Draws an energy bar in a gui at the given position
-     *
-     * @param size       is the length of the energy bar.
-     * @param horizontal will rotate the bar clockwise 90 degrees.
-     */
-    @SuppressWarnings("all")
-    public static void drawEnergyBar(AbstractGui gui, int posX, int posY, int size, boolean horizontal, long energy, long maxEnergy, boolean toolTip, int mouseX, int mouseY) {
-        ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
-        int draw = (int) ((double) energy / (double) maxEnergy * (size - 2));
-
-        boolean inRect = isInRect(posX, posY, size, 14, mouseX, mouseY);
-
-        if (horizontal) {
-            int x = posY;
-            posY = posX;
-            posX = x;
-            GlStateManager.pushMatrix();
-            GlStateManager.translated(size + (posY * 2), 0, 0);
-            GlStateManager.rotated(90, 0, 0, 1);
-        }
-
-        GlStateManager.color3f(1F, 1F, 1F);
-        gui.blit(posX, posY, 0, 0, 14, size);
-        gui.blit(posX, posY + size - 1, 0, 255, 14, 1);
-        gui.blit(posX + 1, posY + size - draw - 1, 14, size - draw, 12, draw);
-
-        if (horizontal) {
-            GlStateManager.popMatrix();
-        }
-
-        if (toolTip && inRect) {
-            List<String> list = new ArrayList<String>();
-            list.add(InfoHelper.ITC() + I18n.format("gui.de.energyStorage.txt"));
-            list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
-            list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
-            drawHoveringText(list, mouseX, mouseY, Minecraft.getInstance().fontRenderer, Minecraft.getInstance().mainWindow.getWidth(), Minecraft.getInstance().mainWindow.getHeight());
-        }
-    }
+//    /**
+//     * Draws an energy bar in a gui at the given position
+//     *
+//     * @param size       is the length of the energy bar.
+//     * @param horizontal will rotate the bar clockwise 90 degrees.
+//     */
+//    @SuppressWarnings("all")
+//    public static void drawEnergyBar(AbstractGui gui, int posX, int posY, int size, boolean horizontal, long energy, long maxEnergy, boolean toolTip, int mouseX, int mouseY) {
+//        ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
+//        int draw = (int) ((double) energy / (double) maxEnergy * (size - 2));
+//
+//        boolean inRect = isInRect(posX, posY, size, 14, mouseX, mouseY);
+//
+//        if (horizontal) {
+//            int x = posY;
+//            posY = posX;
+//            posX = x;
+//            RenderSystem.pushMatrix();
+//            RenderSystem.translated(size + (posY * 2), 0, 0);
+//            RenderSystem.rotated(90, 0, 0, 1);
+//        }
+//
+//        RenderSystem.color3f(1F, 1F, 1F);
+//        gui.blit(posX, posY, 0, 0, 14, size);
+//        gui.blit(posX, posY + size - 1, 0, 255, 14, 1);
+//        gui.blit(posX + 1, posY + size - draw - 1, 14, size - draw, 12, draw);
+//
+//        if (horizontal) {
+//            RenderSystem.popMatrix();
+//        }
+//
+//        if (toolTip && inRect) {
+//            List<String> list = new ArrayList<String>();
+//            list.add(InfoHelper.ITC() + I18n.format("gui.de.energyStorage.txt"));
+//            list.add(InfoHelper.HITC() + Utils.formatNumber(energy) + " / " + Utils.formatNumber(maxEnergy));
+//            list.add(TextFormatting.GRAY + "[" + Utils.addCommas(energy) + " RF]");
+//            drawHoveringText(list, mouseX, mouseY, Minecraft.getInstance().fontRenderer, Minecraft.getInstance().getMainWindow().getWidth(), Minecraft.getInstance().getMainWindow().getHeight());
+//        }
+//    }
 
     public static void drawGuiBaseBackground(AbstractGui gui, int posX, int posY, int xSize, int ySize) {
         ResourceHelperBC.bindTexture("textures/gui/base_gui.png");
-        GlStateManager.color3f(1F, 1F, 1F);
+        RenderSystem.color3f(1F, 1F, 1F);
         gui.blit(posX, posY, 0, 0, xSize - 3, ySize - 3);
         gui.blit(posX + xSize - 3, posY, 253, 0, 3, ySize - 3);
         gui.blit(posX, posY + ySize - 3, 0, 253, xSize - 3, 3);
@@ -282,42 +288,42 @@ public class GuiHelper {
         }
     }
 
-    public static void drawCenteredSplitString(FontRenderer fontRenderer, String str, int x, int y, int wrapWidth, int color, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
-            drawCenteredString(fontRenderer, s, x, y, color, dropShadow);
-            y += fontRenderer.FONT_HEIGHT;
-        }
-    }
+//    public static void drawCenteredSplitString(FontRenderer fontRenderer, String str, int x, int y, int wrapWidth, int color, boolean dropShadow) {
+//        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
+//            drawCenteredString(fontRenderer, s, x, y, color, dropShadow);
+//            y += fontRenderer.FONT_HEIGHT;
+//        }
+//    }
+//
+//    public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale) {
+//        if (stack.isEmpty()) {
+//            return;
+//        }
+////        RenderHelper.enableGUIStandardItemLighting();
+//        RenderSystem.translatef(0.0F, 0.0F, 32.0F);
+//        //this.zLevel = 200.0F;
+//        mc.getItemRenderer().zLevel = 200.0F;
+//        FontRenderer font = mc.fontRenderer;
+//        mc.getItemRenderer().renderItemAndEffectIntoGUI(stack, x, y);
+//        String count = stack.getCount() > 1 ? String.valueOf(stack.getCount()) : "";
+//        mc.getItemRenderer().renderItemOverlayIntoGUI(font, stack, x, y, count);
+//        //this.zLevel = 0.0F;
+//        mc.getItemRenderer().zLevel = 0.0F;
+//    }
 
-    public static void drawStack2D(ItemStack stack, Minecraft mc, int x, int y, float scale) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.translatef(0.0F, 0.0F, 32.0F);
-        //this.zLevel = 200.0F;
-        mc.getItemRenderer().zLevel = 200.0F;
-        FontRenderer font = mc.fontRenderer;
-        mc.getItemRenderer().renderItemAndEffectIntoGUI(stack, x, y);
-        String count = stack.getCount() > 1 ? String.valueOf(stack.getCount()) : "";
-        mc.getItemRenderer().renderItemOverlayIntoGUI(font, stack, x, y, count);
-        //this.zLevel = 0.0F;
-        mc.getItemRenderer().zLevel = 0.0F;
-    }
-
-    public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(x, y, 300);
-        GlStateManager.scaled(scale, scale, scale);
-        GlStateManager.rotated(180, 1, 0, 0);
-
-        mc.getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.NONE);
-
-        GlStateManager.popMatrix();
-    }
+//    public static void drawStack(ItemStack stack, Minecraft mc, int x, int y, float scale) {
+//        if (stack.isEmpty()) {
+//            return;
+//        }
+//        RenderSystem.pushMatrix();
+//        RenderSystem.translated(x, y, 300);
+//        RenderSystem.scaled(scale, scale, scale);
+//        RenderSystem.rotated(180, 1, 0, 0);
+//
+//        mc.getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.NONE);
+//
+//        RenderSystem.popMatrix();
+//    }
 
     public static void drawGradientRect(int posX, int posY, int xSize, int ySize, int colour, int colour2) {
         drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour2, 1F, 0);
@@ -335,5 +341,13 @@ public class GuiHelper {
         drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
 
         drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), fillColour);
+    }
+
+    public static void renderCuboid(Cuboid6 cuboid, float r, float g, float b, float a) {
+        MatrixStack stack = new MatrixStack();
+        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+        Matrix4 mat = new Matrix4(stack);
+        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(RenderType.getLines()), mat);
+        RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);
     }
 }

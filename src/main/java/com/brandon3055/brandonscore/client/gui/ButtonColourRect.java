@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
@@ -27,9 +27,9 @@ public class ButtonColourRect extends Button {
         if (visible) {
             this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
 
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
-            GlStateManager.colorMask(true, true, true, false);
+            RenderSystem.disableLighting();
+            RenderSystem.disableDepthTest();
+            RenderSystem.colorMask(true, true, true, false);
 
             GuiHelper.drawColouredRect(x + 1, y + 1, width - 2, height - 2, backColour);
             int border = isHovered ? borderColourActive : borderColourInactive;
@@ -41,9 +41,9 @@ public class ButtonColourRect extends Button {
             FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
             GuiHelper.drawCenteredString(fontRenderer, getMessage(), x + width / 2, y + (height / 2) - (fontRenderer.FONT_HEIGHT / 2), 0xFFFFFF, false);
 
-            GlStateManager.colorMask(true, true, true, true);
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
+            RenderSystem.colorMask(true, true, true, true);
+            RenderSystem.enableLighting();
+            RenderSystem.enableDepthTest();
         }
     }
 

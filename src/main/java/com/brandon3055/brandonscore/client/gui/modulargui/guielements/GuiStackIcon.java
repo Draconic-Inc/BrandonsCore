@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.lib.StackReference;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
@@ -55,20 +55,20 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             drawColouredRect(xPos(), yPos(), xSize(), ySize(), -2130706433);
         }
 
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         renderStack(minecraft);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
 
     private void renderStack(Minecraft minecraft) {
-        RenderHelper.enableGUIStandardItemLighting();
+//        RenderHelper.enableGUIStandardItemLighting();
 
         double scaledWidth = xSize() / 18D;
         double scaledHeight = ySize() / 18D;
 
-        GlStateManager.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
-        GlStateManager.scaled(scaledWidth, scaledHeight, 1);
+        RenderSystem.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
+        RenderSystem.scaled(scaledWidth, scaledHeight, 1);
         minecraft.getItemRenderer().renderItemIntoGUI(getStack(), 0, 0);
 
         if (getStack().getItem().showDurabilityBar(getStack())) {
@@ -76,17 +76,17 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             int rgbfordisplay = getStack().getItem().getRGBDurabilityForDisplay(getStack());
             int i = Math.round(13.0F - (float) health * 13.0F);
 
-            GlStateManager.translated(0, 0, -(getRenderZLevel() - 80));
+            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
             drawColouredRect(2, 13, 13, 2, 0xFF000000);
             drawColouredRect(2, 13, i, 1, rgbfordisplay | 0xFF000000);
             zOffset -= 45;
-            GlStateManager.translated(0, 0, (getRenderZLevel() - 80));
+            RenderSystem.translated(0, 0, (getRenderZLevel() - 80));
         }
 
         if (drawCount && getStack().getCount() > 1) {
             String s = getStack().getCount() + "";
-            GlStateManager.translated(0, 0, -(getRenderZLevel() - 80));
+            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
             drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset -= 45;

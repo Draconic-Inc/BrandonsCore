@@ -304,7 +304,7 @@ public class EntityFilter extends FilterGroup {
     @Override
     public void serializeMCD(MCDataOutput output) {
         output.writeBoolean(fixedAndLogic);
-        output.writeVarShort(allowedFilters.size());
+        output.writeVarInt(allowedFilters.size());
         if (!allowedFilters.isEmpty()) {
             allowedFilters.forEach(type -> {
                 output.writeByte(type.index);
@@ -336,7 +336,7 @@ public class EntityFilter extends FilterGroup {
 //            fixedFilters.clear();
         }
 
-        int allowedCount = input.readVarShort();
+        int allowedCount = input.readVarInt();
         for (int i = 0; i < allowedCount; i++) {
             FilterType type = FilterType.filterTypeMap[input.readByte()];
             //Because the client is not allowed to modify the allowed filters.

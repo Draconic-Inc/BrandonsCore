@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
 import net.minecraft.client.renderer.RenderHelper;
@@ -97,9 +97,9 @@ public class EntityElement extends MDElementBase<EntityElement> {
 
             renderEntity.ticksExisted = BCClientEventHandler.elapsedTicks;
 
-            GlStateManager.pushMatrix();
-            GlStateManager.translated(0, 0, 25 + getRenderZLevel() + scale);
-            GlStateManager.color4f(1, 1, 1, 1);
+            RenderSystem.pushMatrix();
+            RenderSystem.translated(0, 0, 25 + getRenderZLevel() + scale);
+            RenderSystem.color4f(1, 1, 1, 1);
 
             int eyeOffset = (int) ((renderEntity.getHeight() - renderEntity.getEyeHeight()) * scale);
             if (renderEntity instanceof LivingEntity) {
@@ -109,7 +109,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 drawEntityOnScreen((int) posX, yPos + ySize(), scale, renderEntity, entityRotation);
             }
 
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
         catch (Throwable e) {
             LogHelperBC.error("Something went wrong while attempting to render an entity on the screen!");
@@ -145,34 +145,35 @@ public class EntityElement extends MDElementBase<EntityElement> {
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
+    //TODO this also needs to be re written
     public static void drawEntityOnScreen(int posX, int posY, int scale, Entity ent, double rotation) {
-        GlStateManager.enableColorMaterial();
-        GlStateManager.pushMatrix();
-        GlStateManager.translated((float) posX, (float) posY, 50.0F);
-        GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
-        GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.pushMatrix();
+        RenderSystem.translated((float) posX, (float) posY, 50.0F);
+        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
+        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
         float f1 = ent.rotationYaw;
         float f2 = ent.rotationPitch;
-        GlStateManager.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-//        GlStateManager.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+//        RenderSystem.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 //        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
 //        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
         EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
-        rendermanager.setPlayerViewY(180.0F);
-        rendermanager.setRenderShadow(false);
-        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-        rendermanager.setRenderShadow(true);
+//        rendermanager.setPlayerViewY(180.0F);
+//        rendermanager.setRenderShadow(false);
+//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+//        rendermanager.setRenderShadow(true);
         ent.rotationYaw = f1;
         ent.rotationPitch = f2;
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-        GlStateManager.disableTexture();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+        RenderSystem.disableRescaleNormal();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
+//        RenderSystem.disableTexture();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
     }
 
     public static void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName) {
@@ -186,20 +187,20 @@ public class EntityElement extends MDElementBase<EntityElement> {
             mouseY += scale * 16;
         }
 
-        GlStateManager.enableColorMaterial();
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float) posX, (float) posY, 50.0F);
-        GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
-        GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float) posX, (float) posY, 50.0F);
+        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
+        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
         float f = ent.renderYawOffset;
         float f1 = ent.rotationYaw;
         float f2 = ent.rotationPitch;
         float f3 = ent.prevRotationYawHead;
         float f4 = ent.rotationYawHead;
-        GlStateManager.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotatef(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
         ent.renderYawOffset = (float) Math.atan((double) (mouseX / 40.0F)) * 20.0F;
         ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
         ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
@@ -207,27 +208,27 @@ public class EntityElement extends MDElementBase<EntityElement> {
         ent.prevRotationYawHead = ent.rotationYaw;
 
         if (ent instanceof EnderDragonEntity) {
-            GlStateManager.rotated(ent.rotationPitch, 1, 0, 0);
-            GlStateManager.rotated(-ent.rotationYawHead + 180, 0, 1, 0);
+            RenderSystem.rotatef(ent.rotationPitch, 1, 0, 0);
+            RenderSystem.rotatef(-ent.rotationYawHead + 180, 0, 1, 0);
         }
 
-        GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
         EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
-        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
-        rendermanager.setRenderShadow(false);
-        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-        rendermanager.setRenderShadow(true);
+//        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
+//        rendermanager.setRenderShadow(false);
+//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+//        rendermanager.setRenderShadow(true);
         ent.renderYawOffset = f;
         ent.rotationYaw = f1;
         ent.rotationPitch = f2;
         ent.prevRotationYawHead = f3;
         ent.rotationYawHead = f4;
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-        GlStateManager.disableTexture();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+        RenderSystem.disableRescaleNormal();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
+//        RenderSystem.disableTexture();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
     }
 
     public Entity getRenderEntity(ClientWorld world, String entityString, EquipmentHelper helper) {

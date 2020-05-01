@@ -109,9 +109,9 @@ public class ManagedVec3I extends AbstractManagedData<Vec3I> {
     @Override
     public void toNBT(CompoundNBT compound) {
         ListNBT list = new ListNBT();
-        list.add(new IntNBT(value.x));
-        list.add(new IntNBT(value.y));
-        list.add(new IntNBT(value.z));
+        list.add(IntNBT.valueOf(value.x));
+        list.add(IntNBT.valueOf(value.y));
+        list.add(IntNBT.valueOf(value.z));
         compound.put(name, list);
     }
 

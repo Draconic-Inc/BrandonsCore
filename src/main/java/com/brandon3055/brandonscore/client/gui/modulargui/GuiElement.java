@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import codechicken.lib.colour.Colour;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
@@ -7,15 +8,16 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.ITooltipFlag;
@@ -64,6 +66,16 @@ import java.util.stream.Collectors;
  */
 public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiParentElement<E> {
     protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
+    protected static final RenderType transColourType = RenderType.makeType("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .alpha(RenderState.ZERO_ALPHA)
+            .build(false)
+    );
+    protected static final RenderType widgetsType = RenderType.makeType("widgets", DefaultVertexFormats.POSITION_TEX_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+            .texture(new RenderState.TextureState(WIDGETS_TEXTURES, false, false))
+            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .build(false)
+    );
 
     /*
      * Idea for new position system when i get around to re writing modular gui. On the front end everything would still use absolute positioning
@@ -826,8 +838,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             return true;
         }
 
-        int mouseX = (int) getMouseX();//int) (mc.mouseHelper.getMouseX() * screenWidth / this.mc.mainWindow.getWidth());
-        int mouseY = (int) getMouseY();//int) (screenHeight - mc.mouseHelper.getMouseY() * screenHeight / this.mc.mainWindow.getHeight() - 1);
+        int mouseX = (int) getMouseX();//int) (mc.mouseHelper.getMouseX() * screenWidth / this.mc.getMainWindow().getWidth());
+        int mouseY = (int) getMouseY();//int) (screenHeight - mc.mouseHelper.getMouseY() * screenHeight / this.mc.getMainWindow().getHeight() - 1);
         if (isMouseOver(mouseX, mouseY)) {
             hoverTime++;
         } else {
@@ -870,10 +882,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (frameAnimation) {
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             double x = ((double) lastTickXPos - xPos) * partialTicks;
             double y = ((double) lastTickYPos - yPos) * partialTicks;
-            GlStateManager.translated(x, y, 0);
+            RenderSystem.translated(x, y, 0);
         }
 
 //        if (y != 0) LogHelperBC.dev(y);
@@ -887,7 +899,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
 
         if (frameAnimation) {
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.5, 0, 0xFF00FF00);
     }
@@ -1686,22 +1698,22 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * The 'Actual' width in 'real' pixels of the Minecraft window
      */
     public int displayWidth() {
-        return mc.mainWindow.getWidth();
+        return mc.getMainWindow().getWidth();
     }
 
     /**
      * The 'Actual' height in 'real' pixels of the Minecraft window
      */
     public int displayHeight() {
-        return mc.mainWindow.getHeight();
+        return mc.getMainWindow().getHeight();
     }
 
     public double getMouseX() {
-        return this.mc.mouseHelper.getMouseX() * (double) this.mc.mainWindow.getScaledWidth() / (double) this.mc.mainWindow.getWidth();
+        return this.mc.mouseHelper.getMouseX() * (double) this.mc.getMainWindow().getScaledWidth() / (double) this.mc.getMainWindow().getWidth();
     }
 
     public double getMouseY() {
-        return this.mc.mouseHelper.getMouseY() * (double) this.mc.mainWindow.getScaledHeight() / (double) this.mc.mainWindow.getHeight();
+        return this.mc.mouseHelper.getMouseY() * (double) this.mc.getMainWindow().getScaledHeight() / (double) this.mc.getMainWindow().getHeight();
     }
 
     public List<String> getTooltipFromItem(ItemStack stack) {
@@ -1717,34 +1729,15 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     //endregion
 
-    //# GUI Render Helper ports
+    //# GUI Render Helpers
     //region //############################################################################
 
     //TODO change to render depth
-    public double getRenderZLevel() {
-        return modularGui.getZLevel() + zOffset;// + (parentElement == null ? 0 : parentElement.getRenderZLevel());
+    public float getRenderZLevel() {
+        return (float) (modularGui.getZLevel() + zOffset);// + (parentElement == null ? 0 : parentElement.getRenderZLevel());
     }
 
-    public void drawHorizontalLine(double startX, double endX, double y, int color) {
-        if (endX < startX) {
-            double i = startX;
-            startX = endX;
-            endX = i;
-        }
-
-        drawRect(startX, y, endX + 1, y + 1, color);
-    }
-
-    public void drawVerticalLine(double x, double startY, double endY, int color) {
-        if (endY < startY) {
-            double i = startY;
-            startY = endY;
-            endY = i;
-        }
-
-        drawRect(x, startY + 1, x + 1, endY, color);
-    }
-
+    @Deprecated
     public void drawRect(double left, double top, double right, double bottom, int color) {
         double zLevel = getRenderZLevel();
         if (left < right) {
@@ -1765,82 +1758,817 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         float f2 = (float) (color & 255) / 255.0F;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        GlStateManager.enableBlend();
-        GlStateManager.disableTexture();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.color4f(f, f1, f2, f3);
+        RenderSystem.enableBlend();
+        RenderSystem.disableTexture();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.color4f(f, f1, f2, f3);
         buffer.begin(7, DefaultVertexFormats.POSITION);
         buffer.pos(left, bottom, zLevel).endVertex();
         buffer.pos(right, bottom, zLevel).endVertex();
         buffer.pos(right, top, zLevel).endVertex();
         buffer.pos(left, top, zLevel).endVertex();
         tessellator.draw();
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
     }
 
+    @Deprecated
     public void drawTexturedModalRect(int x, int y, int textureX, int textureY, int width, int height) {
         double zLevel = getRenderZLevel();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.defaultBlendFunc();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos((double) (x), (double) (y + height), zLevel).tex((double) ((float) (textureX) * 0.00390625F), (double) ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x + width), (double) (y + height), zLevel).tex((double) ((float) (textureX + width) * 0.00390625F), (double) ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x + width), (double) (y), zLevel).tex((double) ((float) (textureX + width) * 0.00390625F), (double) ((float) (textureY) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x), (double) (y), zLevel).tex((double) ((float) (textureX) * 0.00390625F), (double) ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.pos(x, y + height, zLevel).tex(textureX * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
+        buffer.pos(x + width, y + height, zLevel).tex((textureX + width) * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
+        buffer.pos(x + width, y, zLevel).tex((textureX + width) * 0.00390625F, textureY * 0.00390625F).endVertex();
+        buffer.pos(x, y, zLevel).tex(textureX * 0.00390625F, textureY * 0.00390625F).endVertex();
         tessellator.draw();
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
     }
 
+    @Deprecated
     public void drawTexturedModalRect(double xCoord, double yCoord, int minU, int minV, int maxU, int maxV) {
         double zLevel = getRenderZLevel();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.defaultBlendFunc();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos((xCoord + 0.0F), (yCoord + (float) maxV), zLevel).tex((double) ((float) (minU) * 0.00390625F), (double) ((float) (minV + maxV) * 0.00390625F)).endVertex();
-        buffer.pos((xCoord + (float) maxU), (yCoord + (float) maxV), zLevel).tex((double) ((float) (minU + maxU) * 0.00390625F), (double) ((float) (minV + maxV) * 0.00390625F)).endVertex();
-        buffer.pos((xCoord + (float) maxU), (yCoord + 0.0F), zLevel).tex((double) ((float) (minU + maxU) * 0.00390625F), (double) ((float) (minV) * 0.00390625F)).endVertex();
-        buffer.pos((xCoord + 0.0F), (yCoord + 0.0F), zLevel).tex((double) ((float) (minU) * 0.00390625F), (double) ((float) (minV) * 0.00390625F)).endVertex();
+        buffer.pos(xCoord + 0.0F, yCoord + (float) maxV, zLevel).tex(((float) minU * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).endVertex();
+        buffer.pos(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).endVertex();
+        buffer.pos(xCoord + (float) maxU, yCoord + 0.0F, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) minV * 0.00390625F)).endVertex();
+        buffer.pos(xCoord + 0.0F, yCoord + 0.0F, zLevel).tex(((float) minU * 0.00390625F), ((float) minV * 0.00390625F)).endVertex();
         tessellator.draw();
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
     }
 
+    @Deprecated
     public void drawTexturedModalRect(int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn) {
         double zLevel = getRenderZLevel();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.defaultBlendFunc();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos((double) (xCoord), (double) (yCoord + heightIn), zLevel).tex((double) textureSprite.getMinU(), (double) textureSprite.getMaxV()).endVertex();
-        buffer.pos((double) (xCoord + widthIn), (double) (yCoord + heightIn), zLevel).tex((double) textureSprite.getMaxU(), (double) textureSprite.getMaxV()).endVertex();
-        buffer.pos((double) (xCoord + widthIn), (double) (yCoord), zLevel).tex((double) textureSprite.getMaxU(), (double) textureSprite.getMinV()).endVertex();
-        buffer.pos((double) (xCoord), (double) (yCoord), zLevel).tex((double) textureSprite.getMinU(), (double) textureSprite.getMinV()).endVertex();
+        buffer.pos(xCoord, yCoord + heightIn, zLevel).tex(textureSprite.getMinU(), textureSprite.getMaxV()).endVertex();
+        buffer.pos(xCoord + widthIn, yCoord + heightIn, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMaxV()).endVertex();
+        buffer.pos(xCoord + widthIn, yCoord, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMinV()).endVertex();
+        buffer.pos(xCoord, yCoord, zLevel).tex(textureSprite.getMinU(), textureSprite.getMinV()).endVertex();
+        tessellator.draw();
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+    }
+
+    @Deprecated
+    public void drawModalRectWithCustomSizedTexture(float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
+        float zLevel = getRenderZLevel();
+        float f = 1.0F / textureWidth;
+        float f1 = 1.0F / textureHeight;
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.defaultBlendFunc();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
+        buffer.pos(x, y + height, zLevel).tex((u * f), (v + height) * f1).endVertex();
+        buffer.pos(x + width, y + height, zLevel).tex((u + width) * f, (v + height) * f1).endVertex();
+        buffer.pos(x + width, y, zLevel).tex((u + width) * f, v * f1).endVertex();
+        buffer.pos(x, y, zLevel).tex(u * f, v * f1).endVertex();
+        tessellator.draw();
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+    }
+
+    @Deprecated
+    public void drawScaledCustomSizeModalRect(float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight) {
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.defaultBlendFunc();
+        float zLevel = getRenderZLevel();
+        float f = 1.0F / textureSheetWidth;
+        float f1 = 1.0F / testureSheetHeight;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
+        buffer.pos(xPos, yPos + height, zLevel).tex(u * f, (v + vHeight) * f1).endVertex();
+        buffer.pos(xPos + width, yPos + height, zLevel).tex((u + uWidth) * f, (v + vHeight) * f1).endVertex();
+        buffer.pos(xPos + width, yPos, zLevel).tex((u + uWidth) * f, v * f1).endVertex();
+        buffer.pos(xPos, yPos, zLevel).tex(u * f, v * f1).endVertex();
+        tessellator.draw();
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+    }
+
+    @Deprecated
+    public void drawGradientRect(double left, double top, double right, double bottom, int startColor, int endColor) {
+        if (startColor == endColor && endColor == 0) return;
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
+        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
+        float startBlue  = (float)(startColor       & 255) / 255.0F;
+        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
+        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
+        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
+        float endBlue    = (float)(endColor         & 255) / 255.0F;
+
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.shadeModel(GL11.GL_SMOOTH);
+
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        buffer.pos( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        buffer.pos( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        buffer.pos(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        tessellator.draw();
+
+        RenderSystem.shadeModel(GL11.GL_FLAT);
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.enableTexture();
+
+        //@formatter:on
+    }
+
+    @Deprecated
+    public void drawMultiPassGradientRect(double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
+        if (colour1 == colour2 && colour2 == 0) return;
+        double zLevel = getRenderZLevel();
+        float alpha1 = (colour1 >> 24 & 255) / 255.0F;
+        float red1 = (float) (colour1 >> 16 & 255) / 255.0F;
+        float green1 = (float) (colour1 >> 8 & 255) / 255.0F;
+        float blue1 = (float) (colour1 & 255) / 255.0F;
+        float alpha2 = (colour2 >> 24 & 255) / 255.0F;
+        float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
+        float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
+        float blue2 = (float) (colour2 & 255) / 255.0F;
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.shadeModel(GL11.GL_SMOOTH);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        for (int i = 0; i < layers; i++) {
+            buffer.pos(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
+            buffer.pos(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
+            buffer.pos(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+            buffer.pos(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+        }
+        tessellator.draw();
+        RenderSystem.shadeModel(GL11.GL_FLAT);
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.enableTexture();
+    }
+
+    @Deprecated
+    public void drawColouredRect(double posX, double posY, double xSize, double ySize, int colour) {
+        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour);
+    }
+
+    @Deprecated
+    public void drawBorderedRect(double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour) {
+        drawColouredRect(posX, posY, xSize, borderWidth, borderColour);
+        drawColouredRect(posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
+        drawColouredRect(posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour);
+        drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour);
+        drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour);
+    }
+
+    @Deprecated
+    public void drawShadedRect(double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
+        //Fill
+        drawColouredRect(x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill);
+        //Top
+        drawColouredRect(x, y, width - borderWidth, borderWidth, topLeftColour);
+        //Left
+        drawColouredRect(x, y + borderWidth, borderWidth, height - borderWidth * 2, topLeftColour);
+        //Bottom
+        drawColouredRect(x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour);
+        //Right
+        drawColouredRect(x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, bottomRightColour);
+        //Top Right Corner
+        drawColouredRect(x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour);
+        //Bottom Left Corner
+        drawColouredRect(x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
+    }
+
+    @Deprecated
+    public void renderVanillaButtonTexture(int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
+        ResourceHelperBC.bindTexture(WIDGETS_TEXTURES);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+        int k = 1;
+        if (disabled) {
+            k = 0;
+        } else if (hovered) {
+            k = 2;
+        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
+        int texHeight = Math.min(20, ySize);
+        int texPos = 46 + k * 20;
+
+        drawTexturedModalRect(xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight);
+        drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight);
+
+        if (ySize < 20) {
+            drawTexturedModalRect(xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
+            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3);
+        } else if (ySize > 20) {
+            for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
+                drawTexturedModalRect(xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15);
+                drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15);
+            }
+
+            drawTexturedModalRect(xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15);
+            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15);
+        }
+    }
+
+    @Deprecated
+    public void drawTiledTextureRectWithTrim(int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight) {
+        int trimWidth = texWidth - leftTrim - rightTrim;
+        int trimHeight = texHeight - topTrim - bottomTrim;
+        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
+
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
+
+        for (int x = 0; x < xSize; ) {
+            int rWidth = Math.min(xSize - x, trimWidth);
+            int trimU;
+            if (x == 0) {
+                trimU = texU;
+            } else if (x + trimWidth <= xSize) {
+                trimU = texU + leftTrim;
+            } else {
+                trimU = texU + texWidth - (xSize - x);
+            }
+
+            //Top & Bottom trim
+            bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim);
+            bufferTexturedModalRect(buffer, xPos + x, yPos + ySize - bottomTrim, trimU, texV + texHeight - bottomTrim, rWidth, bottomTrim);
+
+
+            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
+            for (int y = 0; y < ySize; ) {
+                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
+                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + texHeight - (ySize - y);
+
+                //Left & Right trim
+                if (x == 0) {
+                    bufferTexturedModalRect(buffer, xPos, yPos + y + topTrim, texU, trimV, leftTrim, rHeight);
+                    bufferTexturedModalRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight);
+                }
+
+                //Core
+                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
+                y += trimHeight;
+            }
+            x += trimWidth;
+        }
+
         tessellator.draw();
     }
 
-    public void drawModalRectWithCustomSizedTexture(double x, double y, double u, double v, double width, double height, double textureWidth, double textureHeight) {
+    //New render system
+    public void drawRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int color) {
         double zLevel = getRenderZLevel();
-        double f = 1.0D / textureWidth;
-        double f1 = 1.0D / textureHeight;
+        if (left < right) {
+            double i = left;
+            left = right;
+            right = i;
+        }
+
+        if (top < bottom) {
+            double j = top;
+            top = bottom;
+            bottom = j;
+        }
+
+        float a = (float) (color >> 24 & 255) / 255.0F;
+        float r = (float) (color >> 16 & 255) / 255.0F;
+        float g = (float) (color >> 8 & 255) / 255.0F;
+        float b = (float) (color & 255) / 255.0F;
+
+
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableTexture();
+//        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        RenderSystem.color4f(f, f1, f2, f3);
+        IVertexBuilder builder = getter.getBuffer(transColourType);
+        builder.pos(left, bottom, zLevel).color(r, g, b, a).endVertex();
+        builder.pos(right, bottom, zLevel).color(r, g, b, a).endVertex();
+        builder.pos(right, top, zLevel).color(r, g, b, a).endVertex();
+        builder.pos(left, top, zLevel).color(r, g, b, a).endVertex();
+
+//        RenderSystem.enableTexture();
+//        RenderSystem.disableBlend();
+    }
+
+//    public void drawTexture(IVertexBuilder builder, int x, int y, int width, int height) {
+//        double zLevel = getRenderZLevel();
+//        builder.pos(x, y + height, zLevel).tex(0, 1).endVertex();
+//        builder.pos(x + width, y + height, zLevel).tex(1, 1).endVertex();
+//        builder.pos(x + width, y, zLevel).tex(1, 0).endVertex();
+//        builder.pos(x, y, zLevel).tex(0, 0).endVertex();
+//    }
+//
+//    public void drawTexture(IVertexBuilder builder, int x, int y, int width, int height, int colour) {
+//        double zLevel = getRenderZLevel();
+//        int[] colours = Colour.unpack(colour);
+//        builder.pos(x, y + height, zLevel).tex(0, 1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(x + width, y + height, zLevel).tex(1, 1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(x + width, y, zLevel).tex(1, 0).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(x, y, zLevel).tex(0, 0).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//    }
+
+    public void drawTexturedModalRect(IVertexBuilder builder, int x, int y, int textureX, int textureY, int width, int height, int colour) {
+        double zLevel = getRenderZLevel();
+        int[] colours = Colour.unpack(colour);
+        builder.pos(x, y + height, zLevel).tex(textureX * 0.00390625F, (textureY + height) * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(x + width, y + height, zLevel).tex((textureX + width) * 0.00390625F, (textureY + height) * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(x + width, y, zLevel).tex((textureX + width) * 0.00390625F, textureY * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(x, y, zLevel).tex(textureX * 0.00390625F, textureY * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+    }
+
+    public void drawTexturedModalRect(IVertexBuilder builder, double xCoord, double yCoord, int minU, int minV, int maxU, int maxV, int colour) {
+        double zLevel = getRenderZLevel();
+        int[] colours = Colour.unpack(colour);
+        builder.pos(xCoord + 0.0F, yCoord + (float) maxV, zLevel).tex(((float) minU * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xCoord + (float) maxU, yCoord + 0.0F, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) minV * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xCoord + 0.0F, yCoord + 0.0F, zLevel).tex(((float) minU * 0.00390625F), ((float) minV * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+    }
+
+    public void drawTexturedModalRect(IVertexBuilder builder, int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn, int colour) {
+        double zLevel = getRenderZLevel();
+        int[] colours = Colour.unpack(colour);
+        builder.pos(xCoord, yCoord + heightIn, zLevel).tex(textureSprite.getMinU(), textureSprite.getMaxV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xCoord + widthIn, yCoord + heightIn, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMaxV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xCoord + widthIn, yCoord, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMinV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xCoord, yCoord, zLevel).tex(textureSprite.getMinU(), textureSprite.getMinV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+    }
+
+    public void drawModalRectWithCustomSizedTexture(IVertexBuilder builder, float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight, int colour) {
+        float zLevel = getRenderZLevel();
+        float f = 1.0F / textureWidth;
+        float f1 = 1.0F / textureHeight;
+        int[] colours = Colour.unpack(colour);
+        builder.pos(x, y + height, zLevel).tex((u * f), (v + height) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(x + width, y + height, zLevel).tex((u + width) * f, (v + height) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(x + width, y, zLevel).tex((u + width) * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(x, y, zLevel).tex(u * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+    }
+
+    public void drawScaledCustomSizeModalRect(IVertexBuilder builder, float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight, int colour) {
+        float zLevel = getRenderZLevel();
+        float f = 1.0F / textureSheetWidth;
+        float f1 = 1.0F / testureSheetHeight;
+        int[] colours = Colour.unpack(colour);
+        builder.pos(xPos, yPos + height, zLevel).tex(u * f, (v + vHeight) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xPos + width, yPos + height, zLevel).tex((u + uWidth) * f, (v + vHeight) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xPos + width, yPos, zLevel).tex((u + uWidth) * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        builder.pos(xPos, yPos, zLevel).tex(u * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+    }
+
+    public void drawGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int startColor, int endColor) {
+        if (startColor == endColor && endColor == 0) return;
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
+        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
+        float startBlue  = (float)(startColor       & 255) / 255.0F;
+        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
+        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
+        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
+        float endBlue    = (float)(endColor         & 255) / 255.0F;
+        IVertexBuilder builder = getter.getBuffer(transColourType);
+        builder.pos(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.pos( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.pos( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.pos(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        //@formatter:on
+    }
+
+    public void drawMultiPassGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
+        if (colour1 == colour2 && colour2 == 0) return;
+        double zLevel = getRenderZLevel();
+        float alpha1 = (colour1 >> 24 & 255) / 255.0F;
+        float red1 = (float) (colour1 >> 16 & 255) / 255.0F;
+        float green1 = (float) (colour1 >> 8 & 255) / 255.0F;
+        float blue1 = (float) (colour1 & 255) / 255.0F;
+        float alpha2 = (colour2 >> 24 & 255) / 255.0F;
+        float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
+        float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
+        float blue2 = (float) (colour2 & 255) / 255.0F;
+        IVertexBuilder builder = getter.getBuffer(transColourType);
+        for (int i = 0; i < layers; i++) {
+            builder.pos(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
+            builder.pos(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
+            builder.pos(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+            builder.pos(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
+        }
+    }
+
+    public void drawColouredRect(IRenderTypeBuffer getter, double posX, double posY, double xSize, double ySize, int colour) {
+        drawGradientRect(getter, posX, posY, posX + xSize, posY + ySize, colour, colour);
+    }
+
+    public void drawBorderedRect(IRenderTypeBuffer getter, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour) {
+        drawColouredRect(getter, posX, posY, xSize, borderWidth, borderColour);
+        drawColouredRect(getter, posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
+        drawColouredRect(getter, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour);
+        drawColouredRect(getter, posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour);
+        drawColouredRect(getter, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour);
+    }
+
+    public void drawShadedRect(IRenderTypeBuffer getter, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
+        //Fill
+        drawColouredRect(getter, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill);
+        //Top
+        drawColouredRect(getter, x, y, width - borderWidth, borderWidth, topLeftColour);
+        //Left
+        drawColouredRect(getter, x, y + borderWidth, borderWidth, height - borderWidth * 2, topLeftColour);
+        //Bottom
+        drawColouredRect(getter, x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour);
+        //Right
+        drawColouredRect(getter, x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, bottomRightColour);
+        //Top Right Corner
+        drawColouredRect(getter, x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour);
+        //Bottom Left Corner
+        drawColouredRect(getter, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
+    }
+
+    public void renderVanillaButtonTexture(IRenderTypeBuffer getter, int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
+        int k = 1;
+        if (disabled) {
+            k = 0;
+        } else if (hovered) {
+            k = 2;
+        }
+
+        int texHeight = Math.min(20, ySize);
+        int texPos = 46 + k * 20;
+
+        IVertexBuilder builder = getter.getBuffer(widgetsType);
+        drawTexturedModalRect(builder, xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight, 0xFFFFFFFF);
+        drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight, 0xFFFFFFFF);
+
+        if (ySize < 20) {
+            drawTexturedModalRect(builder, xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3, 0xFFFFFFFF);
+            drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3, 0xFFFFFFFF);
+        } else if (ySize > 20) {
+            for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
+                drawTexturedModalRect(builder, xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15, 0xFFFFFFFF);
+                drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15, 0xFFFFFFFF);
+            }
+
+            drawTexturedModalRect(builder, xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15, 0xFFFFFFFF);
+            drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15, 0xFFFFFFFF);
+        }
+    }
+
+    public void drawTiledTextureRectWithTrim(IRenderTypeBuffer getter, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight) {
+        int trimWidth = texWidth - leftTrim - rightTrim;
+        int trimHeight = texHeight - topTrim - bottomTrim;
+        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
+
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(x, (y + height), zLevel).tex((u * f), ((v + height) * f1)).endVertex();
-        buffer.pos((x + width), (y + height), zLevel).tex(((u + width) * f), ((v + height) * f1)).endVertex();
-        buffer.pos((x + width), y, zLevel).tex(((u + width) * f), (v * f1)).endVertex();
-        buffer.pos(x, y, zLevel).tex((u * f), (v * f1)).endVertex();
+        buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
+
+        for (int x = 0; x < xSize; ) {
+            int rWidth = Math.min(xSize - x, trimWidth);
+            int trimU;
+            if (x == 0) {
+                trimU = texU;
+            } else if (x + trimWidth <= xSize) {
+                trimU = texU + leftTrim;
+            } else {
+                trimU = texU + texWidth - (xSize - x);
+            }
+
+            //Top & Bottom trim
+            bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim);
+            bufferTexturedModalRect(buffer, xPos + x, yPos + ySize - bottomTrim, trimU, texV + texHeight - bottomTrim, rWidth, bottomTrim);
+
+
+            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
+            for (int y = 0; y < ySize; ) {
+                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
+                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + texHeight - (ySize - y);
+
+                //Left & Right trim
+                if (x == 0) {
+                    bufferTexturedModalRect(buffer, xPos, yPos + y + topTrim, texU, trimV, leftTrim, rHeight);
+                    bufferTexturedModalRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight);
+                }
+
+                //Core
+                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
+                y += trimHeight;
+            }
+            x += trimWidth;
+        }
+
         tessellator.draw();
     }
 
-    public void drawScaledCustomSizeModalRect(double xPos, double yPos, double u, double v, double uWidth, double vHeight, double width, double height, double textureSheetWidth, double testureSheetHeight) {
+    private void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height) {
         double zLevel = getRenderZLevel();
-        double f = 1.0F / textureSheetWidth;
-        double f1 = 1.0F / testureSheetHeight;
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(xPos, (yPos + height), zLevel).tex((u * f), ((v + vHeight) * f1)).endVertex();
-        buffer.pos((xPos + width), (yPos + height), zLevel).tex(((u + uWidth) * f), ((v + vHeight) * f1)).endVertex();
-        buffer.pos((xPos + width), yPos, zLevel).tex(((u + uWidth) * f), (v * f1)).endVertex();
-        buffer.pos(xPos, yPos, zLevel).tex((u * f), (v * f1)).endVertex();
-        tessellator.draw();
+        buffer.pos(x, y + height, zLevel).tex(((float) textureX * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.pos(x + width, y + height, zLevel).tex(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.pos(x + width, y, zLevel).tex(((float) (textureX + width) * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
+        buffer.pos(x, y, zLevel).tex(((float) textureX * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
+    }
+
+    //endregion
+
+    //# Custom Render Helpers
+    //region //############################################################################
+
+    /**
+     * Simply draws a string with the given colour and no shadow.
+     */
+    public int drawString(BCFontRenderer fontRenderer, String text, float x, float y, int colour) {
+        return drawString(fontRenderer, text, x, y, colour, false);
+    }
+
+    /**
+     * Draws a string with the given colour and optional shadow.
+     */
+    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+        IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+        MatrixStack textStack = new MatrixStack();
+        textStack.translate(0.0D, 0.0D, getRenderZLevel() + 1);
+        Matrix4f textLocation = textStack.getLast().getMatrix();
+        int i = fontRenderer.renderString(text, x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
+        renderType.finish();
+        return i;
+    }
+
+    /**
+     * Draws a centered string
+     */
+    public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+        IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+        MatrixStack textStack = new MatrixStack();
+        textStack.translate(0.0D, 0.0D, getRenderZLevel() + 1);
+        Matrix4f textLocation = textStack.getLast().getMatrix();
+        fontRenderer.renderString(text, x - fontRenderer.getStringWidth(text) / 2F, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
+        renderType.finish();
+    }
+
+    /**
+     * Draws a split string (multi line string)
+     */
+    public void drawSplitString(FontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
+        for (String s : fontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
+            drawString(fontRenderer, s, x, y, colour, dropShadow);
+            y += fontRenderer.FONT_HEIGHT;
+        }
+    }
+
+    /**
+     * Draws a centered split string
+     */
+    public void drawCenteredSplitString(FontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
+        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
+            drawCenteredString(fontRenderer, s, x, y, colour, dropShadow);
+            y += fontRenderer.FONT_HEIGHT;
+        }
+    }
+
+    /**
+     * This is an advanced draw string method with all sorts of built in fancy stuff.
+     *
+     * @param width     This xSize is used for alignment, Wrapping and trimming. (or technically ySize if at a 90 degree rotation)
+     * @param alignment Allows you to align the text ether to the left, in the middle or to the right ("right" is defined by x + xSize)
+     * @param rotation  Allows you to rotate the text
+     * @param wrap      if true the text will wrap (milty line text) if the text is longer than xSize. (Not compatible with trim)
+     * @param trim      if true the text will be trimmed to xSize if it is too long. When trimmed "..." will be appended to the end of the string.
+     */
+    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
+        if (width <= 0) return;
+        if (trim && fr.getStringWidth(text) > width) {
+            text = fr.trimStringToWidth(text, width - 8) + "..";
+        }
+
+        if (rotation == TextRotation.NORMAL) {
+            if (wrap) {
+                drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
+            } else {
+                drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
+            }
+        } else {
+            RenderSystem.pushMatrix();
+            if (rotation == TextRotation.ROT_C) {
+                RenderSystem.translated(x, y, 0);
+                RenderSystem.rotatef(90, 0, 0, 1);
+            } else if (rotation == TextRotation.ROT_CC) {
+                RenderSystem.translated(x, y + width, 0);
+                RenderSystem.rotatef(-90, 0, 0, 1);
+            } else if (rotation == TextRotation.ROT_180) {
+                RenderSystem.translated(x + width, y + fr.getWordWrappedHeight(text, width), 0);
+                RenderSystem.rotatef(180, 0, 0, 1);
+            }
+
+            if (wrap) {
+                drawAlignedSplitString(fr, text, 0, 0, width, alignment, colour, dropShadow);
+            } else {
+                drawAlignedString(fr, text, 0, 0, width, alignment, colour, dropShadow, trim);
+            }
+
+            RenderSystem.popMatrix();
+        }
+    }
+
+    /**
+     * Allows you to draw a split string aligned to the left, middle or right of the specified area.
+     */
+    public void drawAlignedSplitString(FontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
+        for (String s : fontRenderer.listFormattedStringToWidth(text, width)) {
+            drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
+            y += fontRenderer.FONT_HEIGHT;
+        }
+    }
+
+    /**
+     * Allows you to draw a string aligned to the left, middle or right of the specified area.
+     */
+    public void drawAlignedString(FontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
+        if (trim && fr.getStringWidth(text) > width) {
+            text = fr.trimStringToWidth(text, width - 8) + "..";
+        }
+
+        int stringWidth = fr.getStringWidth(text);
+        switch (alignment) {
+            case LEFT:
+                drawString(fontRenderer, text, x, y, colour, dropShadow);
+                break;
+            case CENTER:
+                drawString(fontRenderer, text, x + (width - stringWidth) / 2, y, colour, dropShadow);
+                break;
+            case RIGHT:
+                drawString(fontRenderer, text, x + (width - stringWidth), y, colour, dropShadow);
+                break;
+        }
+//        drawString(fontRenderer, s, x, y, colour, dropShadow);
+    }
+
+    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight) {
+        drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
+    }
+
+    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font) {
+        drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX));
+    }
+
+        /**
+         * This is almost an exact copy of forges code except it respects zLevel.
+         */
+    @Deprecated
+    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
+        font = mc.fontRenderer;
+        if (!textLines.isEmpty()) {
+            RenderSystem.disableRescaleNormal();
+//            RenderHelper.disableStandardItemLighting();
+//            RenderSystem.disableLighting();
+            RenderSystem.disableDepthTest();
+            int tooltipTextWidth = 0;
+
+            for (String textLine : textLines) {
+                int textLineWidth = font.getStringWidth(textLine);
+
+                if (textLineWidth > tooltipTextWidth) {
+                    tooltipTextWidth = textLineWidth;
+                }
+            }
+
+            boolean needsWrap = false;
+
+            int titleLinesCount = 1;
+            int tooltipX = mouseX + 12;
+            if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+                tooltipX = mouseX - 16 - tooltipTextWidth;
+                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+                {
+                    if (mouseX > screenWidth / 2) {
+                        tooltipTextWidth = mouseX - 12 - 8;
+                    } else {
+                        tooltipTextWidth = screenWidth - 16 - mouseX;
+                    }
+                    needsWrap = true;
+                }
+            }
+
+            if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
+                tooltipTextWidth = maxTextWidth;
+                needsWrap = true;
+            }
+
+            if (needsWrap) {
+                int wrappedTooltipWidth = 0;
+                List<String> wrappedTextLines = new ArrayList<>();
+                for (int i = 0; i < textLines.size(); i++) {
+                    String textLine = textLines.get(i);
+                    List<String> wrappedLine = font.listFormattedStringToWidth(textLine, tooltipTextWidth);
+                    if (i == 0) {
+                        titleLinesCount = wrappedLine.size();
+                    }
+
+                    for (String line : wrappedLine) {
+                        int lineWidth = font.getStringWidth(line);
+                        if (lineWidth > wrappedTooltipWidth) {
+                            wrappedTooltipWidth = lineWidth;
+                        }
+                        wrappedTextLines.add(line);
+                    }
+                }
+                tooltipTextWidth = wrappedTooltipWidth;
+                textLines = wrappedTextLines;
+
+                if (mouseX > screenWidth / 2) {
+                    tooltipX = mouseX - 16 - tooltipTextWidth;
+                } else {
+                    tooltipX = mouseX + 12;
+                }
+            }
+
+            int tooltipY = mouseY - 12;
+
+            int tooltipHeight = 8;
+
+            if (textLines.size() > 1) {
+                tooltipHeight += (textLines.size() - 1) * 10;
+                if (textLines.size() > titleLinesCount) {
+                    tooltipHeight += 2; // gap between title lines and next lines
+                }
+            }
+
+            if (tooltipY + tooltipHeight + 6 > screenHeight) {
+                tooltipY = screenHeight - tooltipHeight - 6;
+            }
+
+            if (tooltipY < 4) {
+                tooltipY = 4;
+            }
+
+            zOffset += 300;
+            final int backgroundColor = 0xF0100010;
+            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
+            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
+            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+            final int borderColorStart = 0x505000FF;
+            final int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
+            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
+            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
+
+            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
+                String line = textLines.get(lineNumber);
+                drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
+
+                if (lineNumber + 1 == titleLinesCount) {
+                    tooltipY += 2;
+                }
+
+                tooltipY += 10;
+            }
+            zOffset -= 300;
+
+//            RenderSystem.enableLighting();
+            RenderSystem.enableDepthTest();
+//            RenderHelper.enableStandardItemLighting();
+            RenderSystem.enableRescaleNormal();
+        }
     }
 
     /**
@@ -1861,10 +2589,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             maxTextWidth = event.getMaxWidth();
             font = event.getFontRenderer() == font ? font : BCFontRenderer.convert(event.getFontRenderer());
 
-            GlStateManager.disableRescaleNormal();
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
+            RenderSystem.disableRescaleNormal();
+//            RenderHelper.disableStandardItemLighting();
+//            RenderSystem.disableLighting();
+            RenderSystem.disableDepthTest();
             int tooltipTextWidth = 0;
 
             for (String textLine : textLines) {
@@ -1958,7 +2686,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
             for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
                 String line = textLines.get(lineNumber);
-//                font.drawStringWithShadow(line, (float) tooltipX, (float) tooltipY, -1);
                 drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
 
                 if (lineNumber + 1 == titleLinesCount) {
@@ -1972,371 +2699,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
             MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
 
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
-            RenderHelper.enableStandardItemLighting();
-            GlStateManager.enableRescaleNormal();
+//            RenderSystem.enableLighting();
+            RenderSystem.enableDepthTest();
+//            RenderHelper.enableStandardItemLighting();
+            RenderSystem.enableRescaleNormal();
         }
-    }
-
-
-    //endregion
-
-    //# Custom Render Helpers
-    //region //############################################################################
-
-    /**
-     * Simply draws a string with the given colour and no shadow.
-     */
-    public int drawString(BCFontRenderer fontRenderer, String text, float x, float y, int colour) {
-        return drawString(fontRenderer, text, x, y, colour, false);
-    }
-
-    /**
-     * Draws a string with the given colour and optional shadow.
-     */
-    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(0, 0, getRenderZLevel() + 1);
-        int i;
-        if (dropShadow) {
-            i = fontRenderer.drawStringWithShadow(text, x, y, colour);
-        } else {
-            i = fontRenderer.drawString(text, x, y, colour);
-        }
-        GlStateManager.popMatrix();
-        return i;
-    }
-
-    /**
-     * Draws a centered string
-     */
-    public void drawCenteredString(BCFontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(0, 0, getRenderZLevel() + 1);
-        if (dropShadow) {
-            fontRenderer.drawStringWithShadow(text, x - fontRenderer.getStringWidth(text) / 2F, y, colour);
-        } else {
-            fontRenderer.drawString(text, x - fontRenderer.getStringWidth(text) / 2F, y, colour);
-        }
-        GlStateManager.popMatrix();
-    }
-
-    /**
-     * Draws a split string (multi line string)
-     */
-    public void drawSplitString(BCFontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
-            drawString(fontRenderer, s, x, y, colour, dropShadow);
-            y += fontRenderer.FONT_HEIGHT;
-        }
-    }
-
-    /**
-     * Draws a centered split string
-     */
-    public void drawCenteredSplitString(BCFontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
-            drawCenteredString(fontRenderer, s, x, y, colour, dropShadow);
-            y += fontRenderer.FONT_HEIGHT;
-        }
-    }
-
-    /**
-     * This is an advanced draw string method with all sorts of built in fancy stuff.
-     *
-     * @param width     This xSize is used for alignment, Wrapping and trimming. (or technically ySize if at a 90 degree rotation)
-     * @param alignment Allows you to align the text ether to the left, in the middle or to the right ("right" is defined by x + xSize)
-     * @param rotation  Allows you to rotate the text
-     * @param wrap      if true the text will wrap (milty line text) if the text is longer than xSize. (Not compatible with trim)
-     * @param trim      if true the text will be trimmed to xSize if it is too long. When trimmed "..." will be appended to the end of the string.
-     */
-    public void drawCustomString(BCFontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
-        if (width <= 0) return;
-        if (trim && fr.getStringWidth(text) > width) {
-            text = fr.trimStringToWidth(text, width - 8) + "..";
-        }
-
-        if (rotation == TextRotation.NORMAL) {
-            if (wrap) {
-                drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
-            } else {
-                drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
-            }
-        } else {
-            GlStateManager.pushMatrix();
-            if (rotation == TextRotation.ROT_C) {
-                GlStateManager.translated(x, y, 0);
-                GlStateManager.rotated(90, 0, 0, 1);
-            } else if (rotation == TextRotation.ROT_CC) {
-                GlStateManager.translated(x, y + width, 0);
-                GlStateManager.rotated(-90, 0, 0, 1);
-            } else if (rotation == TextRotation.ROT_180) {
-                GlStateManager.translated(x + width, y + fr.getWordWrappedHeight(text, width), 0);
-                GlStateManager.rotated(180, 0, 0, 1);
-            }
-
-            if (wrap) {
-                drawAlignedSplitString(fr, text, 0, 0, width, alignment, colour, dropShadow);
-            } else {
-                drawAlignedString(fr, text, 0, 0, width, alignment, colour, dropShadow, trim);
-            }
-
-            GlStateManager.popMatrix();
-        }
-    }
-
-    /**
-     * Allows you to draw a split string aligned to the left, middle or right of the specified area.
-     */
-    public void drawAlignedSplitString(BCFontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(text, width)) {
-            drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
-            y += fontRenderer.FONT_HEIGHT;
-        }
-    }
-
-    /**
-     * Allows you to draw a string aligned to the left, middle or right of the specified area.
-     */
-    public void drawAlignedString(BCFontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
-        if (trim && fr.getStringWidth(text) > width) {
-            text = fr.trimStringToWidth(text, width - 8) + "..";
-        }
-
-        int stringWidth = fr.getStringWidth(text);
-        switch (alignment) {
-            case LEFT:
-                drawString(fontRenderer, text, x, y, colour, dropShadow);
-                break;
-            case CENTER:
-                drawString(fontRenderer, text, x + ((width - stringWidth) / 2), y, colour, dropShadow);
-                break;
-            case RIGHT:
-                drawString(fontRenderer, text, x + (width - stringWidth), y, colour, dropShadow);
-                break;
-        }
-//        drawString(fontRenderer, s, x, y, colour, dropShadow);
-    }
-
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight) {
-//        double oldOffset = zOffset;
-//        zOffset = 190;
-        drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
-//        zOffset = oldOffset;
-    }
-
-    /**
-     * This is almost an exact copy of forges code except it respects zLevel.
-     */
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
-        font = mc.fontRenderer;
-        if (!textLines.isEmpty()) {
-            GlStateManager.disableRescaleNormal();
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
-            int tooltipTextWidth = 0;
-
-            for (String textLine : textLines) {
-                int textLineWidth = font.getStringWidth(textLine);
-
-                if (textLineWidth > tooltipTextWidth) {
-                    tooltipTextWidth = textLineWidth;
-                }
-            }
-
-            boolean needsWrap = false;
-
-            int titleLinesCount = 1;
-            int tooltipX = mouseX + 12;
-            if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
-                tooltipX = mouseX - 16 - tooltipTextWidth;
-                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
-                {
-                    if (mouseX > screenWidth / 2) {
-                        tooltipTextWidth = mouseX - 12 - 8;
-                    } else {
-                        tooltipTextWidth = screenWidth - 16 - mouseX;
-                    }
-                    needsWrap = true;
-                }
-            }
-
-            if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
-                tooltipTextWidth = maxTextWidth;
-                needsWrap = true;
-            }
-
-            if (needsWrap) {
-                int wrappedTooltipWidth = 0;
-                List<String> wrappedTextLines = new ArrayList<>();
-                for (int i = 0; i < textLines.size(); i++) {
-                    String textLine = textLines.get(i);
-                    List<String> wrappedLine = font.listFormattedStringToWidth(textLine, tooltipTextWidth);
-                    if (i == 0) {
-                        titleLinesCount = wrappedLine.size();
-                    }
-
-                    for (String line : wrappedLine) {
-                        int lineWidth = font.getStringWidth(line);
-                        if (lineWidth > wrappedTooltipWidth) {
-                            wrappedTooltipWidth = lineWidth;
-                        }
-                        wrappedTextLines.add(line);
-                    }
-                }
-                tooltipTextWidth = wrappedTooltipWidth;
-                textLines = wrappedTextLines;
-
-                if (mouseX > screenWidth / 2) {
-                    tooltipX = mouseX - 16 - tooltipTextWidth;
-                } else {
-                    tooltipX = mouseX + 12;
-                }
-            }
-
-            int tooltipY = mouseY - 12;
-
-            int tooltipHeight = 8;
-
-            if (textLines.size() > 1) {
-                tooltipHeight += (textLines.size() - 1) * 10;
-                if (textLines.size() > titleLinesCount) {
-                    tooltipHeight += 2; // gap between title lines and next lines
-                }
-            }
-
-            if (tooltipY + tooltipHeight + 6 > screenHeight) {
-                tooltipY = screenHeight - tooltipHeight - 6;
-            }
-
-            if (tooltipY < 4) {
-                tooltipY = 4;
-            }
-
-            zOffset += 1;
-            final int backgroundColor = 0xF0100010;
-            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            final int borderColorStart = 0x505000FF;
-            final int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
-            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
-
-            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
-                String line = textLines.get(lineNumber);
-                drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
-
-                if (lineNumber + 1 == titleLinesCount) {
-                    tooltipY += 2;
-                }
-
-                tooltipY += 10;
-            }
-            zOffset -= 1;
-
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
-            RenderHelper.enableStandardItemLighting();
-            GlStateManager.enableRescaleNormal();
-        }
-    }
-
-    public void drawGradientRect(double left, double top, double right, double bottom, int colour1, int colour2) {
-        if (colour1 == colour2 && colour2 == 0) return;
-        double zLevel = getRenderZLevel();
-        float alpha1 = ((colour1 >> 24 & 255) / 255.0F);
-        float red1 = (float) (colour1 >> 16 & 255) / 255.0F;
-        float green1 = (float) (colour1 >> 8 & 255) / 255.0F;
-        float blue1 = (float) (colour1 & 255) / 255.0F;
-        float alpha2 = ((colour2 >> 24 & 255) / 255.0F);
-        float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
-        float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
-        float blue2 = (float) (colour2 & 255) / 255.0F;
-        GlStateManager.disableTexture();
-        GlStateManager.enableBlend();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.shadeModel(GL11.GL_SMOOTH);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
-        buffer.pos(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
-        buffer.pos(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
-        buffer.pos(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
-        tessellator.draw();
-        GlStateManager.shadeModel(GL11.GL_FLAT);
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.enableTexture();
-    }
-
-    public void drawMultiPassGradientRect(double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
-        if (colour1 == colour2 && colour2 == 0) return;
-        double zLevel = getRenderZLevel();
-        float alpha1 = ((colour1 >> 24 & 255) / 255.0F);
-        float red1 = (float) (colour1 >> 16 & 255) / 255.0F;
-        float green1 = (float) (colour1 >> 8 & 255) / 255.0F;
-        float blue1 = (float) (colour1 & 255) / 255.0F;
-        float alpha2 = ((colour2 >> 24 & 255) / 255.0F);
-        float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
-        float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
-        float blue2 = (float) (colour2 & 255) / 255.0F;
-        GlStateManager.disableTexture();
-        GlStateManager.enableBlend();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.shadeModel(GL11.GL_SMOOTH);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        for (int i = 0; i < layers; i++) {
-            buffer.pos(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
-            buffer.pos(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
-            buffer.pos(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
-            buffer.pos(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
-        }
-        tessellator.draw();
-        GlStateManager.shadeModel(GL11.GL_FLAT);
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.enableTexture();
-    }
-
-    public void drawColouredRect(double posX, double posY, double xSize, double ySize, int colour) {
-        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour);
-    }
-
-    public void drawBorderedRect(double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour) {
-        drawColouredRect(posX, posY, xSize, borderWidth, borderColour);
-        drawColouredRect(posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
-        drawColouredRect(posX, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
-        drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
-        drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), fillColour);
-    }
-
-    public void drawShadedRect(double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
-        //Fill
-        drawColouredRect(x + borderWidth, y + borderWidth, width - (borderWidth * 2), height - (borderWidth * 2), fill);
-        //Top
-        drawColouredRect(x, y, width - borderWidth, borderWidth, topLeftColour);
-        //Left
-        drawColouredRect(x, y + borderWidth, borderWidth, height - (borderWidth * 2), topLeftColour);
-        //Bottom
-        drawColouredRect(x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour);
-        //Right
-        drawColouredRect(x + width - borderWidth, y + borderWidth, borderWidth, height - (borderWidth * 2), bottomRightColour);
-        //Top Right Corner
-        drawColouredRect(x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour);
-        //Bottom Left Corner
-        drawColouredRect(x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
     }
 
     public static int mixColours(int colour1, int colour2) {
@@ -2358,7 +2725,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         int green = MathHelper.clamp(green1 + (subtract ? -green2 : green2), 0, 255);
         int blue = MathHelper.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
 
-        return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | (blue & 0xFF);
+        return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | blue & 0xFF;
     }
 
     public static int midColour(int colour1, int colour2) {
@@ -2370,97 +2737,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         int green2 = colour2 >> 8 & 255;
         int blue1 = colour1 & 255;
         int blue2 = colour2 & 255;
-        return (alpha2 + ((alpha1 - alpha2) / 2) & 0xFF) << 24 | (red2 + ((red1 - red2) / 2) & 0xFF) << 16 | (green2 + ((green1 - green2) / 2) & 0xFF) << 8 | (blue2 + ((blue1 - blue2) / 2) & 0xFF);
-    }
-
-    public void renderVanillaButtonTexture(int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
-        ResourceHelperBC.bindTexture(WIDGETS_TEXTURES);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-        int k = 1;
-        if (disabled) {
-            k = 0;
-        } else if (hovered) {
-            k = 2;
-        }
-
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-        int texHeight = Math.min(20, ySize);
-        int texPos = 46 + k * 20;
-
-        drawTexturedModalRect(xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight);
-        drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight);
-
-        if (ySize < 20) {
-            drawTexturedModalRect(xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
-            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3);
-        } else if (ySize > 20) {
-            for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
-                drawTexturedModalRect(xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15);
-                drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15);
-            }
-
-            drawTexturedModalRect(xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15);
-            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15);
-        }
-    }
-
-    public void drawTiledTextureRectWithTrim(int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight) {
-        int trimWidth = texWidth - leftTrim - rightTrim;
-        int trimHeight = texHeight - topTrim - bottomTrim;
-        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
-        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
-
-        for (int x = 0; x < xSize; ) {
-            int rWidth = Math.min(xSize - x, trimWidth);
-            int trimU;
-            if (x == 0) {
-                trimU = texU;
-            } else if (x + trimWidth <= xSize) {
-                trimU = texU + leftTrim;
-            } else {
-                trimU = texU + (texWidth - (xSize - x));
-            }
-
-            //Top & Bottom trim
-            bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim);
-            bufferTexturedModalRect(buffer, xPos + x, yPos + ySize - bottomTrim, trimU, texV + texHeight - bottomTrim, rWidth, bottomTrim);
-
-
-            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
-            for (int y = 0; y < ySize; ) {
-                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
-                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + (texHeight - (ySize - y));
-
-                //Left & Right trim
-                if (x == 0) {
-                    bufferTexturedModalRect(buffer, xPos, yPos + y + topTrim, texU, trimV, leftTrim, rHeight);
-                    bufferTexturedModalRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight);
-                }
-
-                //Core
-                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
-                y += trimHeight;
-            }
-            x += trimWidth;
-        }
-
-        tessellator.draw();
-    }
-
-    private void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height) {
-        double zLevel = getRenderZLevel();
-        buffer.pos((double) (x), (double) (y + height), zLevel).tex((double) ((float) (textureX) * 0.00390625F), (double) ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x + width), (double) (y + height), zLevel).tex((double) ((float) (textureX + width) * 0.00390625F), (double) ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x + width), (double) (y), zLevel).tex((double) ((float) (textureX + width) * 0.00390625F), (double) ((float) (textureY) * 0.00390625F)).endVertex();
-        buffer.pos((double) (x), (double) (y), zLevel).tex((double) ((float) (textureX) * 0.00390625F), (double) ((float) (textureY) * 0.00390625F)).endVertex();
+        return (alpha2 + (alpha1 - alpha2) / 2 & 0xFF) << 24 | (red2 + (red1 - red2) / 2 & 0xFF) << 16 | (green2 + (green1 - green2) / 2 & 0xFF) << 8 | blue2 + (blue1 - blue2) / 2 & 0xFF;
     }
 
     private Vector3 colourRatio = new Vector3();
@@ -2469,20 +2746,20 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Lightens or darkens a colour by the given amount.
      */
     public int changeShade(int colour, double shade) {
-        double r = ((colour >> 16) & 0xFF) / 255D;
-        double g = ((colour >> 8) & 0xFF) / 255D;
+        double r = (colour >> 16 & 0xFF) / 255D;
+        double g = (colour >> 8 & 0xFF) / 255D;
         double b = (colour & 0xFF) / 255D;
-        double a = ((colour >> 24) & 0xFF) / 255D;
+        double a = (colour >> 24 & 0xFF) / 255D;
 
         colourRatio.set(r, g, b);
         if (colourRatio.magSquared() == 0) colourRatio.set(1);
         colourRatio.normalize();
 
-        r = codechicken.lib.math.MathHelper.clip(r + (colourRatio.x * shade), 0, 1);
-        g = codechicken.lib.math.MathHelper.clip(g + (colourRatio.y * shade), 0, 1);
-        b = codechicken.lib.math.MathHelper.clip(b + (colourRatio.z * shade), 0, 1);
+        r = codechicken.lib.math.MathHelper.clip(r + colourRatio.x * shade, 0, 1);
+        g = codechicken.lib.math.MathHelper.clip(g + colourRatio.y * shade, 0, 1);
+        b = codechicken.lib.math.MathHelper.clip(b + colourRatio.z * shade, 0, 1);
 
-        return ((int) (a * 0xFF) & 0xFF) << 24 | ((int) (r * 0xFF) & 0xFF) << 16 | ((int) (g * 0xFF) & 0xFF) << 8 | ((int) (b * 0xFF) & 0xFF);
+        return ((int) (a * 0xFF) & 0xFF) << 24 | ((int) (r * 0xFF) & 0xFF) << 16 | ((int) (g * 0xFF) & 0xFF) << 8 | (int) (b * 0xFF) & 0xFF;
     }
 
     //endregion
@@ -2584,7 +2861,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         void call(Minecraft minecraft, int mouseX, int mouseY, float partialTicks, boolean mouseOver);
 
         static void resetColour(Minecraft minecraft, int mouseX, int mouseY, float partialTicks, boolean mouseOver) {
-            GlStateManager.color4f(1F, 1F, 1F, 1F);
+            RenderSystem.color4f(1F, 1F, 1F, 1F);
         }
     }
 

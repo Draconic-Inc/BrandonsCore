@@ -56,7 +56,7 @@ public class BCProfiler {
 
 //        ScaledResolution res = event.getResolution();
         GlStateManager.pushMatrix();
-        GlStateManager.scaled(1D / mc.mainWindow.getGuiScaleFactor(), 1D / mc.mainWindow.getGuiScaleFactor(), 1);
+        GlStateManager.scaled(1D / mc.getMainWindow().getGuiScaleFactor(), 1D / mc.getMainWindow().getGuiScaleFactor(), 1);
         GlStateManager.scaled(2, 2, 1);
 
         int y = 0;

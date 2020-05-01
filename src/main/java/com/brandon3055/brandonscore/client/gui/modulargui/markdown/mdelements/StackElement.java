@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.Utils;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.Item;
@@ -17,7 +17,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,34 +79,34 @@ public class StackElement extends MDElementBase<StackElement> {
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (stacks.length == 0) return;
 
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
 
         if (drawSlot) {
             bindTexture(BCTextures.MODULAR_GUI);
-            GlStateManager.color4f(1F, 1F, 1F, 1F);
+            RenderSystem.color4f(1F, 1F, 1F, 1F);
             drawScaledCustomSizeModalRect(xPos(), yPos(), 0, 0, 18, 18, xSize(), ySize(), 255, 255);
         }
 
         double scale = size / 18D;
         ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
 
-        RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.translated(xPos() + scale, yPos() + scale, getRenderZLevel() - 80);
-        GlStateManager.scaled(scale, scale, 1);
+        RenderHelper.enableStandardItemLighting();
+        RenderSystem.translated(xPos() + scale, yPos() + scale, getRenderZLevel() - 80);
+        RenderSystem.scaled(scale, scale, 1);
         minecraft.getItemRenderer().renderItemIntoGUI(stack, 0, 0);
 
         if (stack.getCount() > 1) {
             String s = "" + Utils.SELECT + "f" + stack.getCount() + "" + Utils.SELECT + "f";
-            GlStateManager.translated(0, 0, -(getRenderZLevel() - 80));
+            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
             drawString(fontRenderer, s, 18 - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
             zOffset -= 45;
         }
 
         //TODO com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer
-//        GlStateManager.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
+//        RenderSystem.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 

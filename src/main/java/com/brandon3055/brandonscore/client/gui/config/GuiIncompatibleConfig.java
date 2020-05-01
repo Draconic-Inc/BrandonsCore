@@ -12,7 +12,7 @@
 //import net.minecraft.client.gui.GuiButton;
 //import net.minecraft.client.gui.GuiMainMenu;
 //import net.minecraft.client.gui.GuiMultiplayer;
-//import net.minecraft.client.renderer.GlStateManager;
+//import net.minecraft.client.renderer.RenderSystem;
 //import net.minecraft.util.text.Style;
 //import net.minecraft.util.text.StringTextComponent;
 //import net.minecraft.util.text.TextFormatting;
@@ -62,11 +62,11 @@
 //        int cx = width / 2;
 //        int cy = height / 2;
 //
-//        GlStateManager.pushMatrix();
-//        GlStateManager.translate(cx, cy - 140, 0);
-//        GlStateManager.scale(2, 2, 2);
+//        RenderSystem.pushMatrix();
+//        RenderSystem.translate(cx, cy - 140, 0);
+//        RenderSystem.scale(2, 2, 2);
 //        GuiHelper.drawCenteredSplitString(fontRenderer, "Incompatible client config detected!", 0, 0, 300, 0xFF0000, false);
-//        GlStateManager.popMatrix();
+//        RenderSystem.popMatrix();
 //
 //        GuiHelper.drawCenteredSplitString(fontRenderer,
 //                "Brandon's Core has detected that some critical configs in your client do not match the server" + //

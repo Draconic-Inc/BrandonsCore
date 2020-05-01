@@ -156,7 +156,8 @@ public class ContainerPlayerAccess extends Container {
         @Nullable
         @OnlyIn(Dist.CLIENT)
         public String getSlotTexture() {
-            return PlayerContainer.ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
+//            return PlayerContainer.ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
+            return PlayerContainer.EMPTY_ARMOR_SLOT_BOOTS.toString();//TODO ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
         }
     }
 

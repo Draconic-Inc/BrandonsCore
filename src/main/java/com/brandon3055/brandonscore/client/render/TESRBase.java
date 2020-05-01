@@ -1,11 +1,13 @@
 package com.brandon3055.brandonscore.client.render;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
@@ -15,86 +17,72 @@ import java.util.Map;
 /**
  * Created by brandon3055 on 6/5/2016.
  */
+@Deprecated //I probably dont need thsi any more
 public class TESRBase<T extends TileEntity> extends TileEntityRenderer<T> {
 
     protected static Map<ItemStack, IBakedModel> itemModelCache = new HashMap<>();
 
+    public TESRBase(TileEntityRendererDispatcher rendererDispatcherIn) {
+        super(rendererDispatcherIn);
+    }
+
     @Override
-    public void render(T tileEntityIn, double x, double y, double z, float partialTicks, int destroyStage) {
-        super.render(tileEntityIn, x, y, z, partialTicks, destroyStage);
+    public void render(T tileEntityIn, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
+
     }
 
-    public void renderItem(ItemStack stack) {
-        if (!stack.isEmpty()) {
-            Minecraft.getInstance().getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
-        }
-    }
+//    public void renderItem(ItemStack stack) {
+//        if (!stack.isEmpty()) {
+//            Minecraft.getInstance().getItemRenderer().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
+//        }
+//    }
 
-    public static IBakedModel getStackModel(ItemStack stack) {
-        if (stack.isEmpty()) {
-            throw new IllegalArgumentException("BrandonsCore:TESRBase#getStackModel Someone attempted to get the model from a null itemstack! ");
-        }
-
-        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getInstance().getItemRenderer().getItemModelWithOverrides(stack, null, null));
-    }
+//    public static IBakedModel getStackModel(ItemStack stack) {
+//        if (stack.isEmpty()) {
+//            throw new IllegalArgumentException("BrandonsCore:TESRBase#getStackModel Someone attempted to get the model from a null itemstack! ");
+//        }
+//
+//        return itemModelCache.computeIfAbsent(stack, stack1 -> Minecraft.getInstance().getItemRenderer().getItemModelWithOverrides(stack, null, null));
+//    }
 
     private boolean isLightSet = false;
     private float lastBrightnessX = 0;
     private float lastBrightnessY = 0;
-
-    //TODO Figure out how to fix this.
-    public void setLighting(float light) {
-        if (!isLightSet) {
-            lastBrightnessX = GLX.lastBrightnessX;
-            lastBrightnessY = GLX.lastBrightnessY;
-            isLightSet = true;
-        }
-        GlStateManager.disableLighting();
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, light, light);
-    }
-
-    public void resetLighting() {
-        if (isLightSet) {
-            isLightSet = false;
-            GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, lastBrightnessX, lastBrightnessY);
-        }
-        GlStateManager.enableLighting();
-    }
-
-    public void translateScaleTranslate(double translate, double x, double y, double z) {
-        GlStateManager.translated(translate, translate, translate);
-        GlStateManager.scaled(x, y, z);
-        GlStateManager.translated(-translate, -translate, -translate);
-    }
-
-    public void translateRotateTranslate(double translate, float angle, float x, float y, float z) {
-        GlStateManager.translated(translate, translate, translate);
-        GlStateManager.rotated(angle, x, y, z);
-        GlStateManager.translated(-translate, -translate, -translate);
-    }
+    
+//    public void translateScaleTranslate(double translate, double x, double y, double z) {
+//        RenderSystem.translated(translate, translate, translate);
+//        RenderSystem.scaled(x, y, z);
+//        RenderSystem.translated(-translate, -translate, -translate);
+//    }
+//
+//    public void translateRotateTranslate(double translate, float angle, float x, float y, float z) {
+//        RenderSystem.translated(translate, translate, translate);
+//        RenderSystem.rotatef(angle, x, y, z);
+//        RenderSystem.translated(-translate, -translate, -translate);
+//    }
 
 //    public void preRenderFancy() {
-//        GlStateManager.glTexParameteri(3553, 10242, 10497);
-//        GlStateManager.glTexParameteri(3553, 10243, 10497);
-//        GlStateManager.disableCull();
-//        GlStateManager.disableBlend();
-//        GlStateManager.depthMask(true);
-//        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        RenderSystem.glTexParameteri(3553, 10242, 10497);
+//        RenderSystem.glTexParameteri(3553, 10243, 10497);
+//        RenderSystem.disableCull();
+//        RenderSystem.disableBlend();
+//        RenderSystem.depthMask(true);
+//        RenderSystem.tryBlendFuncSeparate(RenderSystem.SourceFactor.SRC_ALPHA, RenderSystem.DestFactor.ONE, RenderSystem.SourceFactor.ONE, RenderSystem.DestFactor.ZERO);
 //    }
 
 //    /**
 //     * Call before rendering transparent
 //     */
 //    public void midRenderFancy() {
-//        GlStateManager.enableBlend();
-//        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-//        GlStateManager.depthMask(false);
+//        RenderSystem.enableBlend();
+//        RenderSystem.tryBlendFuncSeparate(RenderSystem.SourceFactor.SRC_ALPHA, RenderSystem.DestFactor.ONE_MINUS_SRC_ALPHA, RenderSystem.SourceFactor.ONE, RenderSystem.DestFactor.ZERO);
+//        RenderSystem.depthMask(false);
 //    }
 //
 //    public void postRenderFancy() {
-//        GlStateManager.enableTexture2D();
-//        GlStateManager.depthMask(true);
-//        GlStateManager.disableBlend();
+//        RenderSystem.enableTexture2D();
+//        RenderSystem.depthMask(true);
+//        RenderSystem.disableBlend();
 //    }
 
 

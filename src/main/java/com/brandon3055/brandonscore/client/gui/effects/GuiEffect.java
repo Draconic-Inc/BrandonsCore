@@ -126,10 +126,10 @@ public class GuiEffect {
         float renderX = (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) partialTicks);
         float renderY = (float) (this.prevPosY + (this.posY - this.prevPosY) * (double) partialTicks);
 
-        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY - 1 * scale), zLevel).tex((double) maxU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
-        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY + 1 * scale), zLevel).tex((double) maxU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
-        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY + 1 * scale), zLevel).tex((double) minU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
-        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY - 1 * scale), zLevel).tex((double) minU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY - 1 * scale), zLevel).tex( maxU,  maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY + 1 * scale), zLevel).tex( maxU,  minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY + 1 * scale), zLevel).tex( minU,  minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY - 1 * scale), zLevel).tex( minU,  maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
 
         tessellator.draw();
     }

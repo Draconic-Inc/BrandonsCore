@@ -14,9 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.stats.Stats;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.INameable;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
@@ -187,11 +185,11 @@ public class BlockBCore extends Block implements IBCoreBlock {
     //IActivatableTile
 
     @Override
-    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (hasTileEntity(state)) {
             TileEntity tile = worldIn.getTileEntity(pos);
             if (tile instanceof IActivatableTile) {
-                return ((IActivatableTile) tile).onBlockActivated(state, player, handIn, hit);
+                return ((IActivatableTile) tile).onBlockActivated(state, player, handIn, hit) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
             }
         }
 

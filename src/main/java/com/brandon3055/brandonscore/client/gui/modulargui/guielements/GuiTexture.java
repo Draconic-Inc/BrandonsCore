@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
@@ -53,7 +53,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         bindTexture(getTexture());
         if (preDrawCallback == null) {
-            GlStateManager.color4f(1, 1, 1, 1);
+            RenderSystem.color4f(1, 1, 1, 1);
         }
 
         if (texSizeOverride) {

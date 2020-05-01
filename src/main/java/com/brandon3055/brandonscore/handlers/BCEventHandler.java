@@ -15,8 +15,8 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class BCEventHandler {
     }
 
     @SubscribeEvent
-    public void onConfigChanges(ConfigChangedEvent.OnConfigChangedEvent event) {
+    public void onConfigChanges(ModConfig.ModConfigEvent event) {
 //        if (ModConfigParser.hasConfig(event.getModID())) {
 //            ModConfigParser.onConfigChanged(event.getModID());
 //        }

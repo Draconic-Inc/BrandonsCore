@@ -41,7 +41,7 @@ public class DLRSCache {
 
             File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");
 
-            ThreadedImageDownloader downloader = new ThreadedImageDownloader(cache, url, DOWNLOADING_TEXTURE, null);
+            ThreadedImageDownloader downloader = new ThreadedImageDownloader(cache, url, DOWNLOADING_TEXTURE);
             downloader.setDlLocation(resourceLocation);
             texturemanager.loadTexture(resourceLocation, downloader);
 

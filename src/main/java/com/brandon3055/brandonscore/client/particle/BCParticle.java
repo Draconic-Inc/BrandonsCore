@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -14,7 +15,7 @@ import net.minecraft.world.World;
  * I wanted this for a thing... I dont actually remember what it is now but...
  * Im just going to add it so when i remember the thing it is here!
  */
-@Deprecated //I dont think i need this anymore
+@Deprecated //I dont need this anymore
 public class BCParticle extends Particle {
     protected float texturesPerRow = 16F;
     protected float airResistance = 0;
@@ -107,31 +108,11 @@ public class BCParticle extends Particle {
         this.resetPositionToBB();
     }
 
+
+
     @Override
-    public void renderParticle(BufferBuilder buffer, ActiveRenderInfo entityIn, float partialTicks, float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
-//        float minU = (float) this.particleTextureIndexX / texturesPerRow;
-//        float maxU = minU + 1F / texturesPerRow;//0.0624375F;
-//        float minV = (float) this.particleTextureIndexY / texturesPerRow;
-//        float maxV = minV + 1F / texturesPerRow;//0.0624375F;
-//        float scale = 0.1F * this.baseScale;
-//
-//        if (this.particleTexture != null) {
-//            minU = this.particleTexture.getMinU();
-//            maxU = this.particleTexture.getMaxU();
-//            minV = this.particleTexture.getMinV();
-//            maxV = this.particleTexture.getMaxV();
-//        }
-//
-//        float renderX = (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) partialTicks - interpPosX);
-//        float renderY = (float) (this.prevPosY + (this.posY - this.prevPosY) * (double) partialTicks - interpPosY);
-//        float renderZ = (float) (this.prevPosZ + (this.posZ - this.prevPosZ) * (double) partialTicks - interpPosZ);
-//        int brightnessForRender = this.getBrightnessForRender(partialTicks);
-//        int j = brightnessForRender >> 16 & 65535;
-//        int k = brightnessForRender & 65535;
-//        buffer.pos((double) (renderX - rotationX * scale - rotationXY * scale), (double) (renderY - rotationZ * scale), (double) (renderZ - rotationYZ * scale - rotationXZ * scale)).tex((double) maxU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-//        buffer.pos((double) (renderX - rotationX * scale + rotationXY * scale), (double) (renderY + rotationZ * scale), (double) (renderZ - rotationYZ * scale + rotationXZ * scale)).tex((double) maxU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-//        buffer.pos((double) (renderX + rotationX * scale + rotationXY * scale), (double) (renderY + rotationZ * scale), (double) (renderZ + rotationYZ * scale + rotationXZ * scale)).tex((double) minU, (double) minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
-//        buffer.pos((double) (renderX + rotationX * scale - rotationXY * scale), (double) (renderY - rotationZ * scale), (double) (renderZ + rotationYZ * scale - rotationXZ * scale)).tex((double) minU, (double) maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).lightmap(j, k).endVertex();
+    public void renderParticle(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
+
     }
 
     @Override

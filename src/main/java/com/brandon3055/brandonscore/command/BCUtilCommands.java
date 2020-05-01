@@ -188,7 +188,7 @@ public class BCUtilCommands {
                 ServerChunkProvider chunkProviderServer = world.getChunkProvider();
                 ChunkGenerator chunkGenerate = chunkProviderServer.getChunkGenerator();
 
-                chunkGenerate.generateSurface(oldChunk);
+//                chunkGenerate.generateSurface(oldChunk);
                 chunkGenerate.generateBiomes(oldChunk);
                 chunkGenerate.generateStructureStarts(world, oldChunk);
 //                Chunk newChunk = chunkGenerate.generateChunk(chunkX, chunkZ);

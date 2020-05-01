@@ -5,10 +5,12 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -190,39 +192,54 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         return rotationSpeed;
     }
 
+    //TODO This no needs to be re written
     public static void drawEntityOnScreen(double posX, double posY, double scale, Entity ent, double rotation, double zOffset) {
-        GlStateManager.enableColorMaterial();
-        GlStateManager.pushMatrix();
+        RenderSystem.enableColorMaterial();
+        RenderSystem.pushMatrix();
 
-//        GlStateManager.translate((float) posX, (float) posY, 50.0F);
-        GlStateManager.translated((float) posX, (float) posY + (ent.getHeight() * scale), zOffset);
+//        RenderSystem.translate((float) posX, (float) posY, 50.0F);
+        RenderSystem.translated((float) posX, (float) posY + (ent.getHeight() * scale), zOffset);
 
-        GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
-        GlStateManager.rotated(180.0F, 0.0F, 0.0F, 1.0F);
+        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
+        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
         float f1 = ent.rotationYaw;
         float f2 = ent.rotationPitch;
-        GlStateManager.rotated(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotated(-135.0F, 0.0F, 1.0F, 0.0F);
-//        GlStateManager.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+//        RenderSystem.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 //        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
 //        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
         EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
-        rendermanager.setPlayerViewY(180.0F);
-        rendermanager.setRenderShadow(false);
-        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-        rendermanager.setRenderShadow(true);
+//        rendermanager.setPlayerViewY(180.0F);
+//        rendermanager.setRenderShadow(false);
+//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+//        rendermanager.setRenderShadow(true);
+
+        MatrixStack matrixstack = new MatrixStack();
+        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getRenderManager();
+//        quaternion1.conjugate();
+//        entityrenderermanager.setCameraOrientation(quaternion1);
+        entityrenderermanager.setRenderShadow(false);
+        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+        entityrenderermanager.renderEntityStatic(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880);
+        irendertypebuffer$impl.finish();
+        entityrenderermanager.setRenderShadow(true);
+
+
+
         ent.rotationYaw = f1;
         ent.rotationPitch = f2;
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-        GlStateManager.disableTexture();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+        RenderSystem.disableRescaleNormal();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
+//        RenderSystem.disableTexture();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
     }
 
+    //TODO so does this
     public static void drawEntityOnScreen(double posX, double posY, double scale, double mouseX, double mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName, double zOffset) {
         float rotation = trackMouse ? 0 : (float) noTrackRotation;
         if (!trackMouse) {
@@ -230,44 +247,44 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
             mouseY = 0;
         }
 
-        GlStateManager.enableColorMaterial();
-        GlStateManager.pushMatrix();
-//        GlStateManager.translate((float) posX, (float) posY, 50.0F);
-        GlStateManager.translated(posX, posY + (ent.getHeight() * scale), zOffset);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.pushMatrix();
+//        RenderSystem.translate((float) posX, (float) posY, 50.0F);
+        RenderSystem.translated(posX, posY + (ent.getHeight() * scale), zOffset);
 
-        GlStateManager.scalef((float) (-scale), (float) scale, (float) scale);
-        GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
+        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
         float f = ent.renderYawOffset;
         float f1 = ent.rotationYaw;
         float f2 = ent.rotationPitch;
         float f3 = ent.prevRotationYawHead;
         float f4 = ent.rotationYawHead;
-        GlStateManager.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotatef(-((float) Math.atan(mouseY / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
+        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(-((float) Math.atan(mouseY / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
         ent.renderYawOffset = (float) Math.atan(mouseX / 40.0F) * 20.0F;
         ent.rotationYaw = (float) Math.atan(mouseX / 40.0F) * 40.0F;
         ent.rotationPitch = -((float) Math.atan(mouseY / 40.0F)) * 20.0F;
         ent.rotationYawHead = ent.rotationYaw;
         ent.prevRotationYawHead = ent.rotationYaw;
-        GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
         EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
-        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
+//        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
         rendermanager.setRenderShadow(false);
-        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
         rendermanager.setRenderShadow(true);
         ent.renderYawOffset = f;
         ent.rotationYaw = f1;
         ent.rotationPitch = f2;
         ent.prevRotationYawHead = f3;
         ent.rotationYawHead = f4;
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-        GlStateManager.disableTexture();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+        RenderSystem.disableRescaleNormal();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
+//        RenderSystem.disableTexture();
+//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
     }
 
     public static PlayerEntity createRenderPlayer(ClientWorld world, String username) {

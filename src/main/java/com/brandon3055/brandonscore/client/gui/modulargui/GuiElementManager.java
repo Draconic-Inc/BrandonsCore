@@ -6,7 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatche
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
 
@@ -319,7 +319,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     //region Render
 
     public void renderElements(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        RenderSystem.color4f(1F, 1F, 1F, 1F);
         for (GuiElement element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayZLevel);

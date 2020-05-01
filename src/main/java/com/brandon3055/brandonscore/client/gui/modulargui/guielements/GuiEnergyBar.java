@@ -10,7 +10,7 @@ import com.brandon3055.brandonscore.client.render.BCShaders;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
@@ -126,12 +126,12 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             int x = posY;
             posY = posX;
             posX = x;
-            GlStateManager.pushMatrix();
-            GlStateManager.translated(size + (posY * 2), 0, 0);
-            GlStateManager.rotated(90, 0, 0, 1);
+            RenderSystem.pushMatrix();
+            RenderSystem.translated(size + (posY * 2), 0, 0);
+            RenderSystem.rotatef(90, 0, 0, 1);
         }
 
-        GlStateManager.color3f(1F, 1F, 1F);
+        RenderSystem.color3f(1F, 1F, 1F);
         drawTexturedModalRect(posX, posY, 0, 0, 14, size);
         drawTexturedModalRect(posX, posY + size - 1, 0, 255, 14, 1);
 
@@ -144,7 +144,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
 
         if (horizontal) {
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 

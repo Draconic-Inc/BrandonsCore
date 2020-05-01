@@ -34,23 +34,23 @@ public class CommandTPX {
         dispatcher.register(
                 Commands.literal("tpx")
                         .requires((p_198816_0_) -> p_198816_0_.hasPermissionLevel(2))
+                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
+                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                .then(Commands.argument("location", Vec3Argument.vec3())
+                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
+                                )
+                        )
                         .then(Commands.argument("destination", EntityArgument.entity())
                                 .executes(ctx -> teleportToEntity(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), EntityArgument.getEntity(ctx, "destination")))
-                        )
-                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.func_212592_a(ctx, "dimension")), new EntityLocation(ctx.getSource().assertIsEntity()), null))
-                                .then(Commands.argument("location", Vec3Argument.vec3())
-                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.func_212592_a(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
-                                )
                         )
                         .then(Commands.argument("targets", EntityArgument.entities())
                                 .then(Commands.argument("destination", EntityArgument.entity())
                                         .executes(ctx -> teleportToEntity(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), EntityArgument.getEntity(ctx, "destination")))
                                 )
                                 .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.func_212592_a(ctx, "dimension")), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), new EntityLocation(ctx.getSource().assertIsEntity()), null))
                                         .then(Commands.argument("location", Vec3Argument.vec3())
-                                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.func_212592_a(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
+                                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
                                         )
                                 )
 //                                .then(Commands.argument("location", Vec3Argument.vec3())
@@ -132,10 +132,10 @@ public class CommandTPX {
     private static void teleport(CommandSource source, Entity entityIn, ServerWorld worldIn, double x, double y, double z, Set<SPlayerPositionLookPacket.Flags> relativeList, float yaw, float pitch) {
         if (entityIn instanceof ServerPlayerEntity) {
             ChunkPos chunkpos = new ChunkPos(new BlockPos(x, y, z));
-            worldIn.getChunkProvider().func_217228_a(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getEntityId());
+            worldIn.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getEntityId());
             entityIn.stopRiding();
             if (((ServerPlayerEntity) entityIn).isSleeping()) {
-                ((ServerPlayerEntity) entityIn).wakeUpPlayer(true, true, false);
+                ((ServerPlayerEntity) entityIn).wakeUp();
             }
 
             if (worldIn == entityIn.world) {

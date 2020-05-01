@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
 import com.brandon3055.brandonscore.lib.StackReference;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -108,9 +108,9 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | parent.colourBorderHover);
             }
 
-            GlStateManager.translated(0, 0, getRenderZLevel());
+            RenderSystem.translated(0, 0, getRenderZLevel());
             renderer.render(minecraft, xPos() + parent.leftPad + 4, yPos() + parent.topPad + 4, mouseX, mouseY);
-            GlStateManager.translated(0, 0, -getRenderZLevel());
+            RenderSystem.translated(0, 0, -getRenderZLevel());
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 

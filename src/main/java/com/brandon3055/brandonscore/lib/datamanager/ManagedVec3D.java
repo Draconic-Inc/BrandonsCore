@@ -109,9 +109,9 @@ public class ManagedVec3D extends AbstractManagedData<Vec3D> {
     @Override
     public void toNBT(CompoundNBT compound) {
         ListNBT list = new ListNBT();
-        list.add(new DoubleNBT(value.x));
-        list.add(new DoubleNBT(value.y));
-        list.add(new DoubleNBT(value.z));
+        list.add(DoubleNBT.valueOf(value.x));
+        list.add(DoubleNBT.valueOf(value.y));
+        list.add(DoubleNBT.valueOf(value.z));
         compound.put(name, list);
     }
 

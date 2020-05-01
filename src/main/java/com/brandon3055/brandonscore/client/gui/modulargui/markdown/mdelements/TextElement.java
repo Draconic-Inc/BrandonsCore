@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 
 import java.util.List;
@@ -106,12 +106,12 @@ public class TextElement extends MDElementBase<TextElement> {
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
 //            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.2, 0, 0xFF00FF00);
             if (scale > 1) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translated(xPos(), yPos(), 0);
-                GlStateManager.scaled(scale, scale, 1);
+                RenderSystem.pushMatrix();
+                RenderSystem.translated(xPos(), yPos(), 0);
+                RenderSystem.scaled(scale, scale, 1);
 //                fontRenderer.drawString(text, 0, 0, colour.get(), shadow);
                 drawString(fontRenderer, text, 0, 0, colour.get(), shadow);
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
             }
             else {
 //                fontRenderer.drawString(text, xPos(), yPos(), colour.get(), shadow);

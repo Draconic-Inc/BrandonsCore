@@ -160,7 +160,7 @@ public class ModularGuiTest extends ModularGuiScreen {
 //                drawCustomString(fontRenderer, "This is a long test string meant to test the CC-Rotated split string function where a string is split over multiple lines if necessary.", xPos() + 340, yPos() + 5, 100, 0xFF0000, LEFT, ROT_CC, true, false, false);
 //                drawCustomString(fontRenderer, "This is a long test string meant to test the C-Rotated split string function where a string is split over multiple lines if necessary.", xPos() + 480, yPos() + 5, 100, 0xFF0000, LEFT, GuiAlign.TextRotation.ROT_C, true, false, false);
 //
-//                GlStateManager.color(1, 1, 1, 1);
+//                RenderSystem.color(1, 1, 1, 1);
 //                try {
 //                    float scale = ySize() / player.height;
 //
@@ -168,8 +168,8 @@ public class ModularGuiTest extends ModularGuiScreen {
 //                    double posX = xPos() + (xSize() / 2D);
 //
 //
-//                    GlStateManager.enableColorMaterial();
-//                    GlStateManager.pushMatrix();
+//                    RenderSystem.enableColorMaterial();
+//                    RenderSystem.pushMatrix();
 //
 //                    player.ticksExisted = BCClientEventHandler.elapsedTicks;
 //
@@ -177,25 +177,25 @@ public class ModularGuiTest extends ModularGuiScreen {
 //                    float rotation = 130;//(BCClientEventHandler.elapsedTicks + partialTicks) * -1.2F;
 ////                    player.rotationYawHead  = (BCClientEventHandler.elapsedTicks + partialTicks) * -1.2F;
 //
-//                    GlStateManager.translate((float) posX, (float) yPos() + (player.height * scale) - 100, zLevel);
-//                    GlStateManager.scale(-scale, scale, scale);
-//                    GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
-//                    GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
+//                    RenderSystem.translate((float) posX, (float) yPos() + (player.height * scale) - 100, zLevel);
+//                    RenderSystem.scale(-scale, scale, scale);
+//                    RenderSystem.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+//                    RenderSystem.rotate(rotation, 0.0F, 1.0F, 0.0F);
 //                    RenderHelper.enableStandardItemLighting();
-//                    GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
-////                    GlStateManager.rotate(-((float) Math.atan((double) (100.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+//                    RenderSystem.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
+////                    RenderSystem.rotate(-((float) Math.atan((double) (100.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 //                    RenderManager rendermanager = Minecraft.getInstance().getRenderManager();
 //                    rendermanager.setPlayerViewY(rotation + 45);
 //                    rendermanager.setRenderShadow(false);
 //                    rendermanager.renderEntity(player, 0.0D, 0.0D, 0.0D, 0, 1.0F, false);
 //                    rendermanager.setRenderShadow(true);
 //
-//                    GlStateManager.popMatrix();
+//                    RenderSystem.popMatrix();
 //                    RenderHelper.disableStandardItemLighting();
-//                    GlStateManager.disableRescaleNormal();
-//                    GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-//                    GlStateManager.disableTexture2D();
-//                    GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+//                    RenderSystem.disableRescaleNormal();
+//                    RenderSystem.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+//                    RenderSystem.disableTexture2D();
+//                    RenderSystem.setActiveTexture(OpenGlHelper.defaultTexUnit);
 //
 //
 //                }
