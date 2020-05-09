@@ -1,10 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import codechicken.lib.math.MathHelper;
-import codechicken.lib.render.RenderUtils;
 import codechicken.lib.vec.Cuboid6;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
-import com.brandon3055.brandonscore.client.BCTextures;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
@@ -14,18 +13,13 @@ import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
@@ -133,7 +127,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
         drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
         float anim = (64 + 10) * ((loadingTime + failTicks) / (float) maxLoadTime);
 
-        bindTexture(BCTextures.MODULAR_GUI);
+        bindTexture(BCSprites.MODULAR_GUI);
         float texAnim = Math.max(0F, (1 - (anim / 64)) * 48);
         float texX = xPos() + (xSize() / 2F) - 20;
         float texY = Math.max(yPos() - 48 + ((48 - texAnim) * 2), yPos());

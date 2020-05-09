@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
-import com.brandon3055.brandonscore.client.BCTextures;
-import com.brandon3055.brandonscore.client.ResourceHelperBC;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
@@ -10,10 +9,11 @@ import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.model.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
@@ -82,9 +82,12 @@ public class StackElement extends MDElementBase<StackElement> {
         RenderSystem.pushMatrix();
 
         if (drawSlot) {
-            bindTexture(BCTextures.MODULAR_GUI);
+            Material mat = BCSprites.get("light/slot");
+            bindTexture(mat.getAtlasLocation());
             RenderSystem.color4f(1F, 1F, 1F, 1F);
-            drawScaledCustomSizeModalRect(xPos(), yPos(), 0, 0, 18, 18, xSize(), ySize(), 255, 255);
+            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.getSprite());
+            getter.finish();
         }
 
         double scale = size / 18D;

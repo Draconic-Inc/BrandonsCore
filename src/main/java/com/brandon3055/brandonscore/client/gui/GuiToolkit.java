@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.client.gui;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.client.BCTextures;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
@@ -18,14 +17,13 @@ import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotData;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.MathUtils;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
@@ -38,7 +36,7 @@ import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
-import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.PLAYER_INV;
+import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.*;
 
 /**
  * Created by brandon3055 on 5/7/19.
@@ -79,48 +77,15 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         this.slotLayout = slotLayout;
     }
 
-    //Create Theme Button
-    public GuiButton createThemeButton() {
-        GuiButton button = new GuiButton();
-        addButtonHoverHighlight(button);
-        button.setHoverTextDelay(10);
-        button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, BCTextures.WIDGETS_GENERIC);
-        icon.setTexXGetter(() -> darkMode ? 12 : 0);
-//        icon.setTexYGetter(() -> button.getHoverTime() > 0 ? 12 : 0);
-        icon.setTexYGetter(() -> 0);
-        button.addChild(icon);
-        button.setHoverText(element -> darkMode ? I18n.format("bc.guitoolkit.theme.set.light") : I18n.format("bc.guitoolkit.theme.set.dark"));
-        button.onPressed(() -> {
-            BCConfig.CLIENT.dark_mode.set(!darkMode); //TODO check if this auto saves.
-            darkMode = BCConfig.CLIENT.dark_mode.get(); //it seems ModConfigEvent sometimes fails to fire. This is a workaround.
-        });
-        return button;
-    }
-
-    public GuiButton createThemeButton(GuiElement parent) {
-        return createThemeButton(parent, false);
-    }
-
-    public GuiButton createThemeButton(GuiElement parent, boolean jeiExclude) {
-        GuiButton button = createThemeButton();
-        parent.addChild(button);
-        if (jeiExclude) {
-            jeiExclude(button);
-        }
-        return button;
-    }
-
     public GuiButton createRSSwitch(IRSSwitchable switchable) {
         GuiButton button = new GuiButton();
         addButtonHoverHighlight(button);
         button.setHoverTextDelay(10);
         button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, BCTextures.WIDGETS_GENERIC);
-        icon.setTexXGetter(() -> 36 + (switchable.getRSMode().index * 12));
+        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase()));
         button.addChild(icon);
         icon.setYPosMod(button::yPos);
-        button.setHoverText(element -> I18n.format("bc.guitoolkit.rs_mode." + switchable.getRSMode().name().toLowerCase()));
+        button.setHoverText(element -> I18n.format("gui.brandonscore.rs_mode." + switchable.getRSMode().name().toLowerCase()));
         button.onButtonPressed((pressed) -> switchable.setRSMode(switchable.getRSMode().next(Screen.hasShiftDown() || pressed == 1)));
         return button;
     }
@@ -138,7 +103,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
 
         //TODO move to a function in BCTextures?
-        GuiTexture texture = new GuiTexture(() -> getRS(BrandonsCore.MODID + ":textures/gui/" + (darkMode ? "dark" : "light") + "/" + layout.texture()));
+        GuiTexture texture = new GuiTexture(() -> BCSprites.getThemed(layout.textureName()));
         texture.setSize(layout.xSize, layout.ySize);
         if (addToManager) {
             gui.getManager().addChild(texture);
@@ -157,11 +122,176 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createBackground(false);
     }
 
-    //Create Themed Button
+    //UI Heading
+    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent, boolean layout) {
+        GuiLabel heading = new GuiLabel(I18n.format(unlocalizedHeading));
+        heading.setHoverableTextCol(hovering -> Palette.BG.text());
+        heading.setShadowStateSupplier(() -> darkMode);
+        if (parent != null) {
+            parent.addChild(heading);
+            if (layout) {
+                heading.setSize(parent.xSize(), 8).setAlignment(GuiAlign.CENTER).setRelPos(parent, 0, 4);
+            }
+        }
+        return heading;
+    }
+
+    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent) {
+        return createHeading(unlocalizedHeading, parent, false);
+    }
+
+    public GuiLabel createHeading(String unlocalizedHeading) {
+        return createHeading(unlocalizedHeading, null, false);
+    }
+
+    /**
+     * Creates a generic set of inventory slots with the specified dimensions.
+     * background is an optional 16x16 sprite that will be used as the slot background.
+     */
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, Material background) {
+        GuiElement element = new GuiElement() {
+            @Override
+            public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+                super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+                Material slot = BCSprites.getThemed("slot");
+                IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+                IVertexBuilder buffer = getter.getBuffer(BCSprites.guiType);
+
+                for (int x = 0; x < columns; x++) {
+                    for (int y = 0; y < rows; y++) {
+                        drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, slot.getSprite());
+                    }
+                }
+
+                if (background != null) {
+                    for (int x = 0; x < columns; x++) {
+                        for (int y = 0; y < rows; y++) {
+                            if (slotMapper != null) {
+                                SlotData data = slotMapper.apply(x, y);
+                                if (data != null && data.slot.getHasStack()) {
+                                    continue;
+                                }
+                            }
+                            drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, background.getSprite());
+                        }
+                    }
+                }
+
+                getter.finish();
+            }
+
+            @Override
+            public GuiElement translate(int xAmount, int yAmount) {
+                GuiElement ret = super.translate(xAmount, yAmount);
+                if (slotMapper != null) {
+                    for (int x = 0; x < columns; x++) {
+                        for (int y = 0; y < rows; y++) {
+                            SlotData data = slotMapper.apply(x, y);
+                            if (data != null) {
+                                data.setPos((xPos() + (x * (18 + spacing))) - gui.guiLeft() + 1, (yPos() + (y * (18 + spacing))) - gui.guiTop() + 1);
+                            }
+                        }
+                    }
+                }
+                return ret;
+            }
+
+            public void quad(BufferBuilder buffer, int x, int y, int width, int height) {
+                double zLevel = getRenderZLevel();
+                buffer.pos(x, y + height, zLevel).tex(0, 1).endVertex();
+                buffer.pos(x + width, y + height, zLevel).tex(1, 1).endVertex();
+                buffer.pos(x + width, y, zLevel).tex(1, (float) 0).endVertex();
+                buffer.pos(x, y, zLevel).tex(0, 0).endVertex();
+            }
+        };
+        element.setSize((columns * 18) + ((columns - 1) * spacing), (rows * 18) + ((rows - 1) * spacing));
+        if (parent != null) {
+            parent.addChild(element);
+        }
+
+        return element;
+    }
+
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing) {
+        return createSlots(parent, columns, rows, spacing, null, null);
+    }
+
+    public GuiElement createSlots(GuiElement parent, int columns, int rows) {
+        return createSlots(parent, columns, rows, 0);
+    }
+
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, Material slotTexture) {
+        return createSlots(parent, columns, rows, spacing, null, slotTexture);
+    }
+
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, Material slotTexture) {
+        return createSlots(parent, columns, rows, 0, null, slotTexture);
+    }
+
+    public GuiElement createSlots(int columns, int rows) {
+        return createSlots(null, columns, rows, 0);
+    }
+
+    /**
+     * Creates the standard player inventory slot layout.
+     */
+    public GuiElement createPlayerSlots(GuiElement parent, boolean title) {
+        return createPlayerSlots(parent, title, false, false);
+    }
+
+    public GuiElement createPlayerSlots(GuiElement parent, boolean title, boolean addArmor, boolean addOffHand) {
+        GuiElement container = new GuiElement();
+        GuiElement main = createSlots(container, 9, 3, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column + row * 9 + 9), null);
+        GuiElement bar = createSlots(container, 9, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column), null);
+        bar.setYPos(main.maxYPos() + 3);
+
+        if (title) {
+            GuiLabel invTitle = new GuiLabel(I18n.format("gui.brandonscore.your_inventory"));
+            invTitle.setAlignment(GuiAlign.LEFT).setHoverableTextCol(hovering -> Palette.BG.text());
+            invTitle.setShadowStateSupplier(() -> darkMode);
+            container.addChild(invTitle);
+            invTitle.setSize(main.xSize(), 8);
+            main.translate(0, 10);
+            bar.translate(0, 10);
+        }
+
+        if (addArmor) {
+            for (int i = 0; i < 4; i++) {
+                int finalI = 3 - i;
+                GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_ARMOR, finalI), BCSprites.getArmorSlot(finalI));
+                element.setMaxXPos(main.xPos() - 3, false);
+                element.setYPos(main.yPos() + (i * 19));
+            }
+        }
+
+        if (addOffHand) {
+            GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_OFF_HAND, 4), BCSprites.get("slots/armor_shield"));
+            element.setXPos(main.maxXPos() + 3);
+            element.setMaxYPos(bar.maxYPos(), false);
+        }
+
+        Rectangle rect = container.getEnclosingRect();
+        container.setRawPos(rect.x, rect.y);
+        container.setSize(rect);
+
+
+        if (parent != null) {
+            parent.addChild(container);
+        }
+
+        return container;
+    }
+
+    public GuiElement createPlayerSlots() {
+        return createPlayerSlots(null, true);
+    }
+
+    //region  Buttons
+    //####################################################################################################
+
     public GuiButton createVanillaButton(String unlocalizedText, @Nullable GuiElement parent) {
         GuiButton button = new GuiButton(I18n.format(unlocalizedText));
         button.setHoverTextDelay(10);
-        button.setTextureSupplier(BCTextures::widgets);
         button.enableVanillaRender();
         if (parent != null) {
             parent.addChild(button);
@@ -211,186 +341,97 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createButton(unlocalizedText, null, true);
     }
 
-    //UI Heading
-    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent, boolean layout) {
-        GuiLabel heading = new GuiLabel(I18n.format(unlocalizedHeading));
-        heading.setHoverableTextCol(hovering -> Palette.BG.text());
-        heading.setShadowStateSupplier(() -> darkMode);
-        if (parent != null) {
-            parent.addChild(heading);
-            if (layout) {
-                heading.setSize(parent.xSize(), 8).setAlignment(GuiAlign.CENTER).setRelPos(parent, 0, 4);
-            }
-        }
-        return heading;
+    public GuiButton createThemeButton(GuiElement<?> parent) {
+        GuiButton button = createThemedIconButton(parent, "theme");
+        button.setHoverText(element -> darkMode ? I18n.format("gui.brandonscore.theme.light") : I18n.format("gui.brandonscore.theme.dark"));
+        button.onPressed(() -> {
+            BCConfig.CLIENT.dark_mode.set(!darkMode); //TODO check if this auto saves.
+            darkMode = BCConfig.CLIENT.dark_mode.get(); //it seems ModConfigEvent sometimes fails to fire. This is a workaround.
+        });
+        return button;
     }
 
-    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent) {
-        return createHeading(unlocalizedHeading, parent, false);
+    public GuiButton createThemeButton() {
+        return createThemeButton(null);
     }
 
-    public GuiLabel createHeading(String unlocalizedHeading) {
-        return createHeading(unlocalizedHeading, null, false);
+    public GuiButton createResizeButton() {
+        return createResizeButton(null);
     }
 
-    /**
-     * Creates a generic set of inventory slots with the specified dimensions.
-     */
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, SpriteData spriteData) {
-        GuiElement element = new GuiElement() {
-            @Override
-            public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                RenderSystem.enableBlend();
-                RenderSystem.disableAlphaTest();
-                RenderSystem.defaultBlendFunc();
-
-                bindTexture(BCTextures.widgets());
-
-                Tessellator tessellator = Tessellator.getInstance();
-                BufferBuilder buffer = tessellator.getBuffer();
-                buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-
-                for (int x = 0; x < columns; x++) {
-                    for (int y = 0; y < rows; y++) {
-                        quad(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 0, 0, 18, 18);
-                    }
-                }
-
-                tessellator.draw();
-
-                if (spriteData != null) {
-                    buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-                    bindTexture(spriteData.texture);
-
-                    for (int x = 0; x < columns; x++) {
-                        for (int y = 0; y < rows; y++) {
-                            if (slotMapper != null) {
-                                SlotData data = slotMapper.apply(x, y);
-                                if (data != null && data.slot.getHasStack()) {
-                                    continue;
-                                }
-                            }
-                            quad(buffer, xPos() + (x * (18 + spacing)) + 1, yPos() + (y * (18 + spacing)) + 1, spriteData.x, spriteData.y, spriteData.width, spriteData.height);
-                        }
-                    }
-
-                    tessellator.draw();
-                }
-
-                RenderSystem.disableBlend();
-                RenderSystem.enableAlphaTest();
-            }
-
-            @Override
-            public GuiElement translate(int xAmount, int yAmount) {
-                GuiElement ret = super.translate(xAmount, yAmount);
-                if (slotMapper != null) {
-                    for (int x = 0; x < columns; x++) {
-                        for (int y = 0; y < rows; y++) {
-                            SlotData data = slotMapper.apply(x, y);
-                            if (data != null) {
-                                data.setPos((xPos() + (x * (18 + spacing))) - gui.guiLeft() + 1, (yPos() + (y * (18 + spacing))) - gui.guiTop() + 1);
-                            }
-                        }
-                    }
-                }
-                return ret;
-            }
-
-            public void quad(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height) {
-                double zLevel = getRenderZLevel();
-                buffer.pos(x, y + height, zLevel).tex((float) (textureX) * 0.00390625F, (float) (textureY + height) * 0.00390625F).endVertex();
-                buffer.pos(x + width, y + height, zLevel).tex((float) (textureX + width) * 0.00390625F, (float) (textureY + height) * 0.00390625F).endVertex();
-                buffer.pos(x + width, y, zLevel).tex((float) (textureX + width) * 0.00390625F, (float) (textureY) * 0.00390625F).endVertex();
-                buffer.pos(x, y, zLevel).tex((float) (textureX) * 0.00390625F, (float) (textureY) * 0.00390625F).endVertex();
-            }
-        };
-        element.setSize((columns * 18) + ((columns - 1) * spacing), (rows * 18) + ((rows - 1) * spacing));
-        if (parent != null) {
-            parent.addChild(element);
-        }
-
-        return element;
+    public GuiButton createResizeButton(GuiElement<?> parent) {
+        GuiButton button = createThemedIconButton(parent, "resize");
+        button.setHoverText(element -> I18n.format("gui.brandonscore.large_view"));
+        return button;
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing) {
-        return createSlots(parent, columns, rows, spacing, null, null);
+    public GuiButton createGearButton() {
+        return createGearButton(null);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows) {
-        return createSlots(parent, columns, rows, 0);
+    public GuiButton createGearButton(GuiElement<?> parent) {
+        GuiButton button = createThemedIconButton(parent, "gear");
+        return button;
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, SpriteData sprite) {
-        return createSlots(parent, columns, rows, spacing, null, sprite);
+    public GuiButton createAdvancedButton() {
+        return createAdvancedButton(null);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, SpriteData sprite) {
-        return createSlots(parent, columns, rows, 0, null, sprite);
+    public GuiButton createAdvancedButton(GuiElement<?> parent) {
+        GuiButton button = createThemedIconButton(parent, "advanced");
+        return button;
     }
 
-    public GuiElement createSlots(int columns, int rows) {
-        return createSlots(null, columns, rows, 0);
-    }
-
-    /**
-     * Creates the standard player inventory slot layout.
-     */
-    public GuiElement createPlayerSlots(GuiElement parent, int hotBarSpacing, boolean title) {
-        GuiElement container = new GuiElement();
-        GuiElement main = createSlots(container, 9, 3, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column + row * 9 + 9), null);
-        GuiElement bar = createSlots(container, 9, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column), null);
-        bar.setYPos(main.maxYPos() + hotBarSpacing);
-
-        if (title) {
-            GuiLabel invTitle = new GuiLabel(I18n.format("bc.guitoolkit.your_inventory"));
-            invTitle.setAlignment(GuiAlign.LEFT).setHoverableTextCol(hovering -> Palette.BG.text());
-            invTitle.setShadowStateSupplier(() -> darkMode);
-            container.addChild(invTitle);
-            invTitle.setSize(main.xSize(), 8);
-            main.translate(0, 10);
-            bar.translate(0, 10);
-        }
-
-        container.setSize(container.getEnclosingRect());
-        if (parent != null) {
-            parent.addChild(container);
-        }
-
-        return container;
-    }
-
-    public GuiElement createPlayerSlots(int hotBarSpacing) {
-        return createPlayerSlots(null, hotBarSpacing, true);
-    }
-
-    public GuiElement createPlayerSlots() {
-        return createPlayerSlots(4);
-    }
-
-    public GuiButton createLargeViewButton() {
+    public GuiButton createThemedIconButton(GuiElement<?> parent, String iconString) {
         GuiButton button = new GuiButton();
         addButtonHoverHighlight(button);
         button.setHoverTextDelay(10);
-        button.setSize(10, 10);
-        GuiTexture icon = new GuiTexture(BCTextures::widgets).setSize(10, 10);
-        icon.setTexturePos(1, 19);
+        button.setSize(12, 12);
+        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.getThemed(iconString));
         button.addChild(icon);
-        button.setHoverText(element -> I18n.format("bc.guitoolkit.large_view"));
+        if (parent != null) {
+            parent.addChild(button);
+        }
+        return button;
+    }
+
+    public GuiButton createIconButton(GuiElement<?> parent, String iconString) {
+        GuiButton button = new GuiButton();
+        addButtonHoverHighlight(button);
+        button.setHoverTextDelay(10);
+        button.setSize(12, 12);
+        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get(iconString));
+        button.addChild(icon);
+        if (parent != null) {
+            parent.addChild(button);
+        }
+        return button;
+    }
+
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, String iconString) {
+        GuiButton button = new GuiButton();
+        button.setHoverTextDelay(10);
+        button.setSize(buttonSize, buttonSize);
+        addButtonHoverHighlight(button);
+        GuiTexture icon = new GuiTexture(iconSize, iconSize, () -> BCSprites.get(iconString));
+        button.addChild(icon.setPos(-((iconSize - buttonSize) / 2), -((iconSize - buttonSize) / 2)));
+        if (parent != null) {
+            parent.addChild(button);
+        }
         return button;
     }
 
     private void addButtonHoverHighlight(GuiButton button) {
         GuiBorderedRect rect = new GuiBorderedRect();
-        rect.setBorderColourL(hovering -> Palette.Ctrl.fill(hovering));
+        rect.setBorderColourL(Palette.Ctrl::fill);
         rect.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
         rect.setEnabledCallback(() -> button.getHoverTime() > 0);
         button.addBackGroundChild(rect);
     }
 
-    //Create Slot
-    // - Slot Ghost Images
+    //endregion
+
 
     //Create Progress Bar..
 
@@ -517,7 +558,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     public static final int EXTRA_TALL_HEIGHT = 250;
 
     public enum GuiLayout {
-        FULL_SCREEN(-1, -1, true, true),
+        //        FULL_SCREEN(-1, -1, true, true),
         DEFAULT(DEFAULT_WIDTH, DEFAULT_HEIGHT, false, false),
 
         WIDE(WIDE_WIDTH, DEFAULT_HEIGHT, true, false),
@@ -546,8 +587,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             this.tall = tall;
         }
 
-        public String texture() {
-            return "background-" + xSize + "x" + ySize + ".png";
+        public String textureName() {
+            return "background-" + xSize + "x" + ySize;
         }
 
         public boolean isTall() {
@@ -563,7 +604,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             int widthDeviation = bestFit.xSize - width;
             int heightDeviation = bestFit.ySize - height;
             for (GuiLayout layout : values()) {
-                if (layout == FULL_SCREEN || layout == CUSTOM) continue;
+                if (/*layout == FULL_SCREEN || */layout == CUSTOM) continue;
                 int newXD = layout.xSize - width;
                 int newYD = layout.ySize - height;
                 if (newXD >= 0 && (newXD <= widthDeviation || widthDeviation < 0) && newYD >= 0 && (newYD <= heightDeviation || heightDeviation < 0)) {
@@ -588,21 +629,21 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         BOTTOM_LEFT
     }
 
-    public static class SpriteData {
-        private final ResourceLocation texture;
-        private final int x;
-        private final int y;
-        private final int width;
-        private final int height;
-
-        public SpriteData(ResourceLocation texture, int x, int y, int width, int height) {
-            this.texture = texture;
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-    }
+//    public static class SpriteData {
+//        private final ResourceLocation texture;
+////        private final int x;
+////        private final int y;
+////        private final int width;
+////        private final int height;
+//
+//        public SpriteData(ResourceLocation texture, int x, int y, int width, int height) {
+//            this.texture = texture;
+//            this.x = x;
+//            this.y = y;
+//            this.width = width;
+//            this.height = height;
+//        }
+//    }
 
     public static class InfoPanel extends GuiElement<InfoPanel> {
         private Map<GuiElement, Dimension> elementsDimMap = new LinkedHashMap<>();
@@ -612,7 +653,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         public static boolean expanded = false;
         public static double animState = 0;
         public Supplier<Point> origin;
-        public String hoverText = I18n.format("bc.guitoolkit.uiinfo");
+        public String hoverText = I18n.format("gui.brandonscore.info_panel.name");
 
         public InfoPanel(GuiElement parent, boolean leftSide) {
             this.parent = parent;
@@ -762,22 +803,24 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
             int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
+            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
 
             if (animState < 0 && hoverTime > 0) {
-                drawColouredRect(xPos(), yPos(), xSize(), ySize(), Palette.Ctrl.fill(true));
+                drawColouredRect(getter, xPos(), yPos(), xSize(), ySize(), Palette.Ctrl.fill(true));
             }
 
             if (fadeAlpha < 1) {
-                bindTexture(BCTextures.WIDGETS_GENERIC);
-                drawTexturedModalRect(xPos(), yPos(), 24, 0, 12, 12);
+                Material mat = BCSprites.get("info_panel");
+                drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), 12, 12, mat.getSprite());
             }
 
-            drawColouredRect(xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
-            drawColouredRect(xPos() + 1, yPos(), xSize() - 2, ySize(), col1);
+            drawColouredRect(getter, xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
+            drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 2, ySize(), col1);
 
-            drawGradientRect(xPos() + 1, yPos() + 1, xPos() + xSize() - 1, yPos() + ySize() - 1, col2, col3);
-            drawColouredRect(xPos() + 2, yPos() + 2, xSize() - 4, ySize() - 4, col1);
+            drawGradientRect(getter, xPos() + 1, yPos() + 1, xPos() + xSize() - 1, yPos() + ySize() - 1, col2, col3);
+            drawColouredRect(getter, xPos() + 2, yPos() + 2, xSize() - 4, ySize() - 4, col1);
 
+            getter.finish();
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 

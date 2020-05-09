@@ -14,7 +14,6 @@ import java.util.function.Function;
  * Created by brandon3055 on 12/06/2017.
  */
 public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
-
     private T value;
     public Map<Integer, T> indexToValue = new HashMap<>();
     public Map<T, Integer> valueToIndex = new HashMap<>();

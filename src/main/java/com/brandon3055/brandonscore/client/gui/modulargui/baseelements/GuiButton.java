@@ -1,15 +1,23 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -279,6 +287,10 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         return this;
     }
 
+    public GuiButton setTextColour(TextFormatting colour, TextFormatting colourHover) {
+        return setTextColour(colour.getColor(), colourHover.getColor());
+    }
+
     public GuiButton setTextColour(int colour, int colourHover) {
         if (texColGetter != null) {
             int dis = texColGetter.getColour(false, true);
@@ -287,6 +299,10 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
         setTextColGetter((hovering, disabled1) -> hovering ? colourHover : colour);
         return this;
+    }
+
+    public GuiButton setTextColour(TextFormatting colour) {
+        return setTextColour(colour.getColor());
     }
 
     public GuiButton setTextColour(int colour) {
@@ -624,33 +640,13 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
-    protected void renderVanillaButton(Minecraft mc, int mouseX, int mouseY) {
-        bindTexture(textureSupplier != null ? textureSupplier.get() : textureOverride != null ? textureOverride : BUTTON_TEXTURES);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+    protected void renderVanillaButton(Minecraft minecraft, int mouseX, int mouseY) {
+        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
-        int texVIndex = getRenderState(hovered);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-        int texHeight = Math.min(20, ySize());
-        int texPos = 46 + texVIndex * 20;
-
-        drawTexturedModalRect(xPos(), yPos(), 0, texPos, xSize() % 2 + xSize() / 2, texHeight);
-        drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, yPos(), 200 - xSize() / 2, texPos, xSize() / 2, texHeight);
-
-        if (ySize() < 20) {
-            drawTexturedModalRect(xPos(), yPos() + 3, 0, texPos + 20 - ySize() + 3, xSize() % 2 + xSize() / 2, ySize() - 3);
-            drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, yPos() + 3, 200 - xSize() / 2, texPos + 20 - ySize() + 3, xSize() / 2, ySize() - 3);
-        } else if (ySize() > 20) {
-            for (int y = yPos() + 17; y + 15 < yPos() + ySize(); y += 15) {
-                drawTexturedModalRect(xPos(), y, 0, texPos + 2, xSize() % 2 + xSize() / 2, 15);
-                drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, y, 200 - xSize() / 2, texPos + 2, xSize() / 2, 15);
-            }
-
-            drawTexturedModalRect(xPos(), yPos() + ySize() - 15, 0, texPos + 5, xSize() % 2 + xSize() / 2, 15);
-            drawTexturedModalRect(xSize() % 2 + xPos() + xSize() / 2, yPos() + ySize() - 15, 200 - xSize() / 2, texPos + 5, xSize() / 2, 15);
-        }
+        Material mat = BCSprites.getButton(getRenderState(hovered));
+        IVertexBuilder builder = mat.getBuffer(getter, location -> BCSprites.guiType);
+        drawDynamicSprite(builder, xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2, mat.getSprite());
+        getter.finish();
     }
 
     //Must match the vanilla button texture

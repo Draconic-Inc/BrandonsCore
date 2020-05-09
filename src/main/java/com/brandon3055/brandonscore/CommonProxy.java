@@ -13,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.animation.ITimeValue;
 import net.minecraftforge.common.model.animation.IAnimationStateMachine;
@@ -41,6 +42,8 @@ public class CommonProxy {
     public void serverSetup(FMLDedicatedServerSetupEvent event) {
 
     }
+
+    public void onColourSetup(ColorHandlerEvent.Block event) {}
 
     public MinecraftServer getMCServer() {
         return ServerLifecycleHooks.getCurrentServer();

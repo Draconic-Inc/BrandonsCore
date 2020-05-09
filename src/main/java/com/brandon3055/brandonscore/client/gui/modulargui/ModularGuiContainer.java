@@ -322,97 +322,6 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
         RenderSystem.popMatrix();
         RenderSystem.enableDepthTest();
-
-
-//        int i = this.guiLeft;
-//        int j = this.guiTop;
-//        this.drawGuiContainerBackgroundLayer(partialRenderTick, mouseX, mouseY);
-//        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawBackground(this, mouseX, mouseY));
-//        RenderSystem.disableRescaleNormal();
-//        RenderHelper.disableStandardItemLighting();
-//        RenderSystem.disableLighting();
-//        RenderSystem.disableDepthTest();
-//
-//        for (int b = 0; b < this.buttons.size(); ++b) {
-//            this.buttons.get(b).render(mouseX, mouseX, partialRenderTick);
-//        }
-//
-//        RenderHelper.enableGUIStandardItemLighting();
-//        RenderSystem.pushMatrix();
-//        RenderSystem.translatef((float) i, (float) j, 0.0F);
-//        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//        RenderSystem.enableRescaleNormal();
-//        this.hoveredSlot = null;
-//        int k = 240;
-//        int l = 240;
-//        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, 240.0F, 240.0F);
-//        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//
-//        for (int i1 = 0; i1 < this.container.inventorySlots.size(); ++i1) {
-//            Slot slot = this.container.inventorySlots.get(i1);
-//            if (slot.isEnabled()) {
-//                this.drawSlot(slot);
-//            }
-//
-//            if (this.isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled() && !manager.isAreaUnderElement(slot.xPos + guiLeft(), slot.yPos + guiTop(), 16, 16, 100)) {
-//                this.hoveredSlot = slot;
-//                RenderSystem.disableLighting();
-//                RenderSystem.disableDepthTest();
-//                int j1 = slot.xPos;
-//                int k1 = slot.yPos;
-//                RenderSystem.colorMask(true, true, true, false);
-//                int slotColor = this.getSlotColor(i1);
-//                this.fillGradient(j1, k1, j1 + 16, k1 + 16, slotColor, slotColor);
-//                RenderSystem.colorMask(true, true, true, true);
-//                RenderSystem.enableLighting();
-//                RenderSystem.enableDepthTest();
-//            }
-//
-//            drawSlotOverlay(slot);
-//        }
-//
-//        RenderHelper.disableStandardItemLighting();
-//        this.drawGuiContainerForegroundLayer(mouseX, mouseY);
-//        RenderHelper.enableGUIStandardItemLighting();
-//        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawForeground(this, mouseX, mouseY));
-//        PlayerInventory playerinventory = this.minecraft.player.inventory;
-//        ItemStack itemstack = this.draggedStack.isEmpty() ? playerinventory.getItemStack() : this.draggedStack;
-//        if (!itemstack.isEmpty()) {
-//            int j2 = 8;
-//            int k2 = this.draggedStack.isEmpty() ? 8 : 16;
-//            String s = null;
-//            if (!this.draggedStack.isEmpty() && this.isRightMouseClick) {
-//                itemstack = itemstack.copy();
-//                itemstack.setCount(MathHelper.ceil((float) itemstack.getCount() / 2.0F));
-//            } else if (this.dragSplitting && this.dragSplittingSlots.size() > 1) {
-//                itemstack = itemstack.copy();
-//                itemstack.setCount(this.dragSplittingRemnant);
-//                if (itemstack.isEmpty()) {
-//                    s = "" + TextFormatting.YELLOW + "0";
-//                }
-//            }
-//
-//            this.drawItemStack(itemstack, mouseX - i - 8, mouseY - j - k2, s);
-//        }
-//
-//        if (!this.returningStack.isEmpty()) {
-//            float f = (float) (Util.milliTime() - this.returningStackTime) / 100.0F;
-//            if (f >= 1.0F) {
-//                f = 1.0F;
-//                this.returningStack = ItemStack.EMPTY;
-//            }
-//
-//            int l2 = this.returningStackDestSlot.xPos - this.touchUpX;
-//            int i3 = this.returningStackDestSlot.yPos - this.touchUpY;
-//            int l1 = this.touchUpX + (int) ((float) l2 * f);
-//            int i2 = this.touchUpY + (int) ((float) i3 * f);
-//            this.drawItemStack(this.returningStack, l1, i2, null);
-//        }
-//
-//        RenderSystem.popMatrix();
-//        RenderSystem.enableLighting();
-//        RenderSystem.enableDepthTest();
-//        RenderHelper.enableStandardItemLighting();
     }
 
     private void drawSlot(Slot slotIn) {
@@ -475,70 +384,12 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
         this.itemRenderer.zLevel = 0.0F;
         this.setBlitOffset(0);
-
-//        int xPos = slotIn.xPos;
-//        int yPos = slotIn.yPos;
-//
-//        if (manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100)) {
-//            return;
-//        }
-//
-//        ItemStack itemstack = slotIn.getStack();
-//        boolean flag = false;
-//        boolean flag1 = slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && !this.isRightMouseClick;
-//        ItemStack itemstack1 = this.minecraft.player.inventory.getItemStack();
-//        String s = null;
-//        if (slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && this.isRightMouseClick && !itemstack.isEmpty()) {
-//            itemstack = itemstack.copy();
-//            itemstack.setCount(itemstack.getCount() / 2);
-//        } else if (this.dragSplitting && this.dragSplittingSlots.contains(slotIn) && !itemstack1.isEmpty()) {
-//            if (this.dragSplittingSlots.size() == 1) {
-//                return;
-//            }
-//
-//            if (Container.canAddItemToSlot(slotIn, itemstack1, true) && this.container.canDragIntoSlot(slotIn)) {
-//                itemstack = itemstack1.copy();
-//                flag = true;
-//                Container.computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack, slotIn.getStack().isEmpty() ? 0 : slotIn.getStack().getCount());
-//                int k = Math.min(itemstack.getMaxStackSize(), slotIn.getItemStackLimit(itemstack));
-//                if (itemstack.getCount() > k) {
-//                    s = TextFormatting.YELLOW.toString() + k;
-//                    itemstack.setCount(k);
-//                }
-//            } else {
-//                this.dragSplittingSlots.remove(slotIn);
-//                this.updateDragSplitting();
-//            }
-//        }
-//
-//        this.blitOffset = 100;
-//        this.itemRenderer.zLevel = 100.0F;
-//        if (itemstack.isEmpty() && slotIn.isEnabled()) {
-//            TextureAtlasSprite textureatlassprite = slotIn.getBackgroundSprite();
-//            if (textureatlassprite != null) {
-//                RenderSystem.disableLighting();
-//                this.minecraft.getTextureManager().bindTexture(slotIn.getBackgroundLocation());
-//                blit(xPos, yPos, this.blitOffset, 16, 16, textureatlassprite);
-//                RenderSystem.enableLighting();
-//                flag1 = true;
-//            }
-//        }
-//
-//        if (!flag1) {
-//            if (flag) {
-//                fill(xPos, yPos, xPos + 16, yPos + 16, 0x80ffffff);
-//            }
-//
-//            RenderSystem.enableDepthTest();
-//            this.itemRenderer.renderItemAndEffectIntoGUI(this.minecraft.player, itemstack, xPos, yPos);
-//            this.itemRenderer.renderItemOverlayIntoGUI(this.font, itemstack, xPos, yPos, s);
-//        }
-//
-//        this.itemRenderer.zLevel = 0.0F;
-//        this.blitOffset = 0;
     }
 
-    protected void drawSlotOverlay(Slot slot) {
+    protected void drawSlotOverlay(Slot slot) {}
 
-    }
+    public int getGuiLeft() { return guiLeft(); }
+    public int getGuiTop() { return guiTop(); }
+    public int getXSize() { return xSize(); }
+    public int getYSize() { return ySize(); }
 }

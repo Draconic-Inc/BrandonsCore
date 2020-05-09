@@ -8,6 +8,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
  */
 public interface IGuiTemplate {
 
-    void addElements(IGuiParentElement parent, GuiToolkit toolkit);
+    void addElements(IGuiParentElement<?> parent, GuiToolkit<?> toolkit);
 
 }

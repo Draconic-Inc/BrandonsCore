@@ -2,13 +2,11 @@ package com.brandon3055.brandonscore.client.utils;
 
 import codechicken.lib.render.RenderUtils;
 import codechicken.lib.render.buffer.TransformingVertexBuilder;
+import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Matrix4;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
-import com.brandon3055.brandonscore.utils.InfoHelper;
-import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -16,21 +14,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Brandon on 28/06/2014.
  */
 public class GuiHelper {
+    public static final RenderType TRANS_TYPE = RenderType.makeType("gui_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .alpha(RenderState.ZERO_ALPHA)
+            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+            .build(false)
+    );
+
     public static final float PXL128 = 0.0078125F;
     public static final float PXL256 = 0.00390625F;
 
@@ -174,6 +173,7 @@ public class GuiHelper {
         }
     }
 
+    @Deprecated
     public static void drawGradientRect(int left, int top, int right, int bottom, int colour1, int colour2, float fade, double zLevel) {
         float f = ((colour1 >> 24 & 255) / 255.0F) * fade;
         float f1 = (float) (colour1 >> 16 & 255) / 255.0F;
@@ -329,10 +329,12 @@ public class GuiHelper {
         drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour2, 1F, 0);
     }
 
+    @Deprecated
     public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour) {
         drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour, 1F, 0);
     }
 
+    @Deprecated
     public static void drawBorderedRect(int posX, int posY, int xSize, int ySize, int borderWidth, int fillColour, int borderColour) {
         drawColouredRect(posX, posY, xSize, borderWidth, borderColour);
         drawColouredRect(posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
@@ -349,5 +351,59 @@ public class GuiHelper {
         Matrix4 mat = new Matrix4(stack);
         IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(RenderType.getLines()), mat);
         RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);
+    }
+
+
+
+
+
+
+    //New Stuff
+
+    public static void drawShadedRect(IVertexBuilder builder, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour, double zLevel) {
+        //Fill
+        drawColouredRect(builder, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill, zLevel);
+        //Top
+        drawColouredRect(builder, x, y, width - borderWidth, borderWidth, topLeftColour, zLevel);
+        //Left
+        drawColouredRect(builder, x, y + borderWidth, borderWidth, height - borderWidth * 2, topLeftColour, zLevel);
+        //Bottom
+        drawColouredRect(builder, x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour, zLevel);
+        //Right
+        drawColouredRect(builder, x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, bottomRightColour, zLevel);
+        //Top Right Corner
+        drawColouredRect(builder, x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour, zLevel);
+        //Bottom Left Corner
+        drawColouredRect(builder, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour, zLevel);
+    }
+
+    public static void drawColouredRect(IVertexBuilder builder, double posX, double posY, double xSize, double ySize, int colour, double zLevel) {
+        drawGradientRect(builder, posX, posY, posX + xSize, posY + ySize, colour, colour, zLevel);
+    }
+
+    public static void drawGradientRect(IVertexBuilder builder, double left, double top, double right, double bottom, int startColor, int endColor, double zLevel) {
+        if (startColor == endColor && endColor == 0) return;
+        //@formatter:off
+        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
+        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
+        float startBlue  = (float)(startColor       & 255) / 255.0F;
+        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
+        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
+        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
+        float endBlue    = (float)(endColor         & 255) / 255.0F;
+        builder.pos(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.pos( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.pos( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.pos(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        //@formatter:on
+    }
+
+    public static void drawBorderedRect(IVertexBuilder builder, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour, double zLevel) {
+        drawColouredRect(builder, posX, posY, xSize, borderWidth, borderColour, zLevel);
+        drawColouredRect(builder, posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour, zLevel);
+        drawColouredRect(builder, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
+        drawColouredRect(builder, posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
+        drawColouredRect(builder, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour, zLevel);
     }
 }

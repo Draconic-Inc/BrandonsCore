@@ -1,6 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponent;
 
 import java.util.*;
 
@@ -8,12 +10,12 @@ import java.util.*;
  * Created by brandon3055 on 5/07/2017.
  * Used to supply hover text for an element. Accepted types for T are String, String[] and List<String>
  */
-public interface HoverTextSupplier<T, E extends GuiElement> {
+public interface HoverTextSupplier<E extends GuiElement<?>> {
 
-    T getText(E element);
+    Object getText(E element);
 
     default List<String> getHoverText(E element) {
-        T hoverText = getText(element);
+        Object hoverText = getText(element);
         if (hoverText instanceof String) {
             if (((String) hoverText).contains("\\n")) {
                 return Arrays.asList(((String) hoverText).split("\\\\n"));
@@ -25,6 +27,9 @@ public interface HoverTextSupplier<T, E extends GuiElement> {
         }
         else if (hoverText instanceof List) {
             return splitNewLines((List<String>) hoverText);
+        }
+        else if (hoverText instanceof ITextComponent) {
+            return Collections.singletonList(((ITextComponent) hoverText).getFormattedText());
         }
         return null;
     }

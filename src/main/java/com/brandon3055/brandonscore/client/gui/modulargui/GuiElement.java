@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import codechicken.lib.colour.Colour;
+import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
@@ -69,13 +70,15 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     protected static final RenderType transColourType = RenderType.makeType("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
             .alpha(RenderState.ZERO_ALPHA)
+            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
             .build(false)
     );
-    protected static final RenderType widgetsType = RenderType.makeType("widgets", DefaultVertexFormats.POSITION_TEX_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-            .texture(new RenderState.TextureState(WIDGETS_TEXTURES, false, false))
-            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .build(false)
-    );
+//    protected static final RenderType widgetsType = RenderType.makeType("widgets", DefaultVertexFormats.POSITION_TEX_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+//            .texture(new RenderState.TextureState(WIDGETS_TEXTURES, false, false))
+//            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+//            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+//            .build(false)
+//    );
 
     /*
      * Idea for new position system when i get around to re writing modular gui. On the front end everything would still use absolute positioning
@@ -172,12 +175,13 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     //Lambdas!
     protected Consumer<E> onReload = null;
     protected Consumer<E> onInit = null;
-    protected HoverTextSupplier<?, E> hoverText = null;
+    protected HoverTextSupplier<E> hoverText = null;
     protected BiFunction<E, Integer, Integer> xPosModifier = null;
     protected BiFunction<E, Integer, Integer> yPosModifier = null;
     protected BiFunction<E, Integer, Integer> xSizeModifier = null;
     protected BiFunction<E, Integer, Integer> ySizeModifier = null;
     protected BiConsumer<Integer, Integer> posChangeListener = null;
+    private Runnable onSizeChanged;
 
     public GuiElement() {
     }
@@ -262,6 +266,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     public E onReload(Consumer<E> callBack) {
         return onReload(callBack, true);
+    }
+
+    public E onReload(Runnable callBack) {
+        return onReload(e -> callBack.run(), true);
     }
 
     /**
@@ -1410,6 +1418,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Informs the parent when the xSize of this element changes. Used by things like GuiScrollElement
      */
     public void xSizeChanged(GuiElement elementChanged) {
+        if (onSizeChanged != null) {
+            onSizeChanged.run();
+        }
         if (getParent() != null) {
             getParent().xSizeChanged(this);
         }
@@ -1419,10 +1430,23 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Informs the parent when the ySize of this element changes. Used by things like GuiScrollElement
      */
     public void ySizeChanged(GuiElement elementChanged) {
+        if (onSizeChanged != null) {
+            onSizeChanged.run();
+        }
         if (getParent() != null) {
             getParent().ySizeChanged(this);
         }
     }
+
+    public Runnable addSizeListener(Runnable newListener) {
+        if (this.onSizeChanged != null) {
+            this.onSizeChanged = SneakyUtils.combine(onSizeChanged, newListener);
+        } else {
+            this.onSizeChanged = newListener;
+        }
+        return this.onSizeChanged;
+    }
+
 
     //endregion
 
@@ -1799,10 +1823,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(xCoord + 0.0F, yCoord + (float) maxV, zLevel).tex(((float) minU * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).endVertex();
-        buffer.pos(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).endVertex();
-        buffer.pos(xCoord + (float) maxU, yCoord + 0.0F, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) minV * 0.00390625F)).endVertex();
-        buffer.pos(xCoord + 0.0F, yCoord + 0.0F, zLevel).tex(((float) minU * 0.00390625F), ((float) minV * 0.00390625F)).endVertex();
+        buffer.pos(xCoord + 0.0F, yCoord + (float) maxV, zLevel).tex((float) minU * 0.00390625F, (float) (minV + maxV) * 0.00390625F).endVertex();
+        buffer.pos(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).tex((float) (minU + maxU) * 0.00390625F, (float) (minV + maxV) * 0.00390625F).endVertex();
+        buffer.pos(xCoord + (float) maxU, yCoord + 0.0F, zLevel).tex((float) (minU + maxU) * 0.00390625F, (float) minV * 0.00390625F).endVertex();
+        buffer.pos(xCoord + 0.0F, yCoord + 0.0F, zLevel).tex((float) minU * 0.00390625F, (float) minV * 0.00390625F).endVertex();
         tessellator.draw();
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -1837,7 +1861,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(x, y + height, zLevel).tex((u * f), (v + height) * f1).endVertex();
+        buffer.pos(x, y + height, zLevel).tex(u * f, (v + height) * f1).endVertex();
         buffer.pos(x + width, y + height, zLevel).tex((u + width) * f, (v + height) * f1).endVertex();
         buffer.pos(x + width, y, zLevel).tex((u + width) * f, v * f1).endVertex();
         buffer.pos(x, y, zLevel).tex(u * f, v * f1).endVertex();
@@ -1845,6 +1869,13 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
     }
+
+//    @Deprecated
+//    public void drawSprite(float xPos, float yPos, float width, float height, TextureAtlasSprite sprite) {
+//        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+//        drawSprite(getter.getBuffer(BCSprites.ge), xPos(), yPos(), xSize(), ySize(), mat.getSprite());
+//        getter.finish();
+//    }
 
     @Deprecated
     public void drawScaledCustomSizeModalRect(float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight) {
@@ -2023,7 +2054,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             } else if (x + trimWidth <= xSize) {
                 trimU = texU + leftTrim;
             } else {
-                trimU = texU + texWidth - (xSize - x);
+                trimU = texU + (texWidth - (xSize - x));
             }
 
             //Top & Bottom trim
@@ -2034,7 +2065,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
             for (int y = 0; y < ySize; ) {
                 int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
-                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + texHeight - (ySize - y);
+                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + (texHeight - (ySize - y));
 
                 //Left & Right trim
                 if (x == 0) {
@@ -2043,7 +2074,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 }
 
                 //Core
-                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
+                if (y < ySize - bottomTrim && x < xSize - rightTrim) {
+                    bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
+                }
                 y += trimHeight;
             }
             x += trimWidth;
@@ -2104,54 +2137,187 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //        builder.pos(x, y, zLevel).tex(0, 0).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
 //    }
 
-    public void drawTexturedModalRect(IVertexBuilder builder, int x, int y, int textureX, int textureY, int width, int height, int colour) {
+    public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite) {
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        builder.pos(x,          y + height, zLevel).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y + height, zLevel).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y,          zLevel).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y,          zLevel).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        //@formatter:on
+    }
+
+    public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite, int colour) {
         double zLevel = getRenderZLevel();
         int[] colours = Colour.unpack(colour);
-        builder.pos(x, y + height, zLevel).tex(textureX * 0.00390625F, (textureY + height) * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(x + width, y + height, zLevel).tex((textureX + width) * 0.00390625F, (textureY + height) * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(x + width, y, zLevel).tex((textureX + width) * 0.00390625F, textureY * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(x, y, zLevel).tex(textureX * 0.00390625F, textureY * 0.00390625F).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        //@formatter:off
+        builder.pos(x,          y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        //@formatter:on
     }
 
-    public void drawTexturedModalRect(IVertexBuilder builder, double xCoord, double yCoord, int minU, int minV, int maxU, int maxV, int colour) {
+    public void drawSprite(IVertexBuilder builder, float x, float y, TextureAtlasSprite sprite) {
+        double zLevel = getRenderZLevel();
+        float width = sprite.getWidth();
+        float height = sprite.getHeight();
+        //@formatter:off
+        builder.pos(x,          y + height, zLevel).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y + height, zLevel).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y,          zLevel).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y,          zLevel).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        //@formatter:on
+    }
+
+    public void drawSprite(IVertexBuilder builder, float x, float y, TextureAtlasSprite sprite, int colour) {
         double zLevel = getRenderZLevel();
         int[] colours = Colour.unpack(colour);
-        builder.pos(xCoord + 0.0F, yCoord + (float) maxV, zLevel).tex(((float) minU * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xCoord + (float) maxU, yCoord + 0.0F, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) minV * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xCoord + 0.0F, yCoord + 0.0F, zLevel).tex(((float) minU * 0.00390625F), ((float) minV * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        float width = sprite.getWidth();
+        float height = sprite.getHeight();
+        //@formatter:off
+        builder.pos(x,          y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        //@formatter:on
     }
 
-    public void drawTexturedModalRect(IVertexBuilder builder, int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn, int colour) {
+    public void drawQuarterDynamicSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, TextureAtlasSprite sprite) {
+        float texU = sprite.getMinU();
+        float texV = sprite.getMinV();
+        int texWidth = sprite.getWidth();
+        int texHeight = sprite.getHeight();
+        float uScale = (sprite.getMaxU() - texU) / texWidth;
+        float vScale = (sprite.getMaxV() - texV) / texHeight;
+
+        bufferRect(buffer, xPos, yPos, xSize / 2F, ySize / 2F, sprite.getMinU(), sprite.getMinV(), (xSize / 2F) * uScale, (ySize / 2F) * vScale);
+        bufferRect(buffer, xPos + (xSize / 2F), yPos, xSize / 2F, ySize / 2F, sprite.getMaxU() - (xSize / 2F) * uScale, sprite.getMinV(), (xSize / 2F) * uScale, (ySize / 2F) * vScale);
+
+        bufferRect(buffer, xPos, yPos + (ySize / 2F), xSize / 2F, ySize / 2F, sprite.getMinU(), sprite.getMaxV() - (ySize / 2F) * vScale, (xSize / 2F) * uScale, (ySize / 2F) * vScale);
+        bufferRect(buffer, xPos + (xSize / 2F), yPos + (ySize / 2F), xSize / 2F, ySize / 2F, sprite.getMaxU() - (xSize / 2F) * uScale, sprite.getMaxV() - (ySize / 2F) * vScale, (xSize / 2F) * uScale, (ySize / 2F) * vScale);
+    }
+
+    public void drawDynamicSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, float topTrim, float leftTrim, float bottomTrim, float rightTrim, TextureAtlasSprite sprite) {
+        float texU = sprite.getMinU();
+        float texV = sprite.getMinV();
+        float uu = sprite.getMaxU() - texU;
+        float vv = sprite.getMaxV() - texV;
+        int texWidth = sprite.getWidth();
+        int texHeight = sprite.getHeight();
+        float uScale = uu / texWidth;
+        float vScale = vv / texHeight;
+
+        float trimmedWidth = texWidth - leftTrim - rightTrim;
+        float trimmedHeight = texHeight - topTrim - bottomTrim;
+        if (xSize <= texWidth) trimmedWidth = Math.min(trimmedWidth, xSize - rightTrim);
+        if (xSize <= 0 || ySize <= 0 || trimmedWidth <= 0 || trimmedHeight <= 0) return;
+
+        for (float x = 0; x < xSize; ) {
+            float segmentWidth = Math.min(xSize - x, trimmedWidth);
+            float trimU = 0; //Texture Space X Pos
+            if (x == 0) {
+                trimU = texU;
+            } else if (x + trimmedWidth <= xSize) {
+                trimU = texU + (leftTrim * uScale);
+            } else {
+                trimU = texU + (texWidth - (xSize - x)) * uScale;
+            }
+
+            //Top & Bottom trim
+            bufferRect(buffer, xPos + x, yPos, segmentWidth, topTrim, trimU, texV, segmentWidth * uScale, topTrim * vScale);
+            bufferRect(buffer, xPos + x, yPos + ySize - bottomTrim, segmentWidth, bottomTrim, trimU, texV + (texHeight - bottomTrim) * vScale, segmentWidth * uScale, bottomTrim * vScale);
+
+            segmentWidth = Math.min(xSize - x - leftTrim - rightTrim, trimmedWidth);
+            for (float y = 0; y < ySize; ) {
+                float segmentHeight = Math.min(ySize - y - topTrim - bottomTrim, trimmedHeight);
+                float trimV = y + texHeight <= ySize ? texV + topTrim * vScale : texV + (texHeight - (ySize - y)) * vScale;
+
+                //Left & Right trim
+                if (x == 0) {
+                    bufferRect(buffer, xPos, yPos + y + topTrim, leftTrim, segmentHeight, texU, trimV, leftTrim * uScale, segmentHeight * vScale);
+                    bufferRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, rightTrim, segmentHeight, trimU + (texWidth - rightTrim) * uScale, trimV, rightTrim * uScale, segmentHeight * vScale);
+                }
+
+                //Core
+                if (y < ySize - bottomTrim && x < xSize - rightTrim) {
+                    bufferRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, segmentWidth, segmentHeight, texU + (leftTrim * uScale), texV + (topTrim * vScale), segmentWidth * uScale, segmentHeight * vScale);
+                }
+                y += trimmedHeight;
+            }
+            x += trimmedWidth;
+        }
+    }
+
+    private void bufferRect(IVertexBuilder buffer, float x, float y, float width, float height, float minU, float minV, float tWidth, float tHeight) {
         double zLevel = getRenderZLevel();
-        int[] colours = Colour.unpack(colour);
-        builder.pos(xCoord, yCoord + heightIn, zLevel).tex(textureSprite.getMinU(), textureSprite.getMaxV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xCoord + widthIn, yCoord + heightIn, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMaxV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xCoord + widthIn, yCoord, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMinV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xCoord, yCoord, zLevel).tex(textureSprite.getMinU(), textureSprite.getMinV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+        //@formatter:off
+        buffer.pos(x,           y + height, zLevel).tex(minU, minV + tHeight).endVertex();
+        buffer.pos(x + width,   y + height, zLevel).tex(minU + tWidth, minV + tHeight).endVertex();
+        buffer.pos(x + width,   y,          zLevel).tex(minU + tWidth, minV).endVertex();
+        buffer.pos(x,           y,          zLevel).tex(minU, minV).endVertex();
+        //@formatter:on
     }
 
-    public void drawModalRectWithCustomSizedTexture(IVertexBuilder builder, float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight, int colour) {
-        float zLevel = getRenderZLevel();
-        float f = 1.0F / textureWidth;
-        float f1 = 1.0F / textureHeight;
-        int[] colours = Colour.unpack(colour);
-        builder.pos(x, y + height, zLevel).tex((u * f), (v + height) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(x + width, y + height, zLevel).tex((u + width) * f, (v + height) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(x + width, y, zLevel).tex((u + width) * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(x, y, zLevel).tex(u * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-    }
 
-    public void drawScaledCustomSizeModalRect(IVertexBuilder builder, float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight, int colour) {
-        float zLevel = getRenderZLevel();
-        float f = 1.0F / textureSheetWidth;
-        float f1 = 1.0F / testureSheetHeight;
-        int[] colours = Colour.unpack(colour);
-        builder.pos(xPos, yPos + height, zLevel).tex(u * f, (v + vHeight) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xPos + width, yPos + height, zLevel).tex((u + uWidth) * f, (v + vHeight) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xPos + width, yPos, zLevel).tex((u + uWidth) * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-        builder.pos(xPos, yPos, zLevel).tex(u * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
-    }
+//    public void drawTexturedModalRect(IVertexBuilder builder, int x, int y, int textureX, int textureY, int width, int height, int colour) {
+//        double zLevel = getRenderZLevel();
+//        int[] colours = Colour.unpack(colour);
+//        //@formatter:off
+//        builder.pos(x,          y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(textureX * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
+//        builder.pos(x + width,  y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex((textureX + width) * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
+//        builder.pos(x + width,  y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex((textureX + width) * 0.00390625F, textureY * 0.00390625F).endVertex();
+//        builder.pos(x,          y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(textureX * 0.00390625F, textureY * 0.00390625F).endVertex();
+//        //@formatter:on
+//    }
+//
+//    public void drawTexturedModalRect(IVertexBuilder builder, double xCoord, double yCoord, int minU, int minV, int maxU, int maxV, int colour) {
+//        double zLevel = getRenderZLevel();
+//        int[] colours = Colour.unpack(colour);
+//        //@formatter:off
+//        builder.pos(xCoord + 0.0F, yCoord + (float) maxV, zLevel).tex(((float) minU * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) (minV + maxV) * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xCoord + (float) maxU, yCoord + 0.0F, zLevel).tex(((float) (minU + maxU) * 0.00390625F), ((float) minV * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xCoord + 0.0F, yCoord + 0.0F, zLevel).tex(((float) minU * 0.00390625F), ((float) minV * 0.00390625F)).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        //@formatter:on
+//    }
+//
+//    public void drawTexturedModalRect(IVertexBuilder builder, int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn, int colour) {
+//        double zLevel = getRenderZLevel();
+//        int[] colours = Colour.unpack(colour);
+//        //@formatter:off
+//        builder.pos(xCoord, yCoord + heightIn, zLevel).tex(textureSprite.getMinU(), textureSprite.getMaxV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xCoord + widthIn, yCoord + heightIn, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMaxV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xCoord + widthIn, yCoord, zLevel).tex(textureSprite.getMaxU(), textureSprite.getMinV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xCoord, yCoord, zLevel).tex(textureSprite.getMinU(), textureSprite.getMinV()).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        //@formatter:on
+//    }
+//
+//    public void drawModalRectWithCustomSizedTexture(IVertexBuilder builder, float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight, int colour) {
+//        float zLevel = getRenderZLevel();
+//        float f = 1.0F / textureWidth;
+//        float f1 = 1.0F / textureHeight;
+//        int[] colours = Colour.unpack(colour);
+//        //@formatter:off
+//        builder.pos(x, y + height, zLevel).tex((u * f), (v + height) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(x + width, y + height, zLevel).tex((u + width) * f, (v + height) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(x + width, y, zLevel).tex((u + width) * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(x, y, zLevel).tex(u * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        //@formatter:on
+//    }
+//
+//    public void drawScaledCustomSizeModalRect(IVertexBuilder builder, float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight, int colour) {
+//        float zLevel = getRenderZLevel();
+//        float f = 1.0F / textureSheetWidth;
+//        float f1 = 1.0F / testureSheetHeight;
+//        int[] colours = Colour.unpack(colour);
+//        //@formatter:off
+//        builder.pos(xPos, yPos + height, zLevel).tex(u * f, (v + vHeight) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xPos + width, yPos + height, zLevel).tex((u + uWidth) * f, (v + vHeight) * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xPos + width, yPos, zLevel).tex((u + uWidth) * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        builder.pos(xPos, yPos, zLevel).tex(u * f, v * f1).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
+//        //@formatter:on
+//    }
 
     public void drawGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int startColor, int endColor) {
         if (startColor == endColor && endColor == 0) return;
@@ -2233,21 +2399,21 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         int texHeight = Math.min(20, ySize);
         int texPos = 46 + k * 20;
 
-        IVertexBuilder builder = getter.getBuffer(widgetsType);
-        drawTexturedModalRect(builder, xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight, 0xFFFFFFFF);
-        drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight, 0xFFFFFFFF);
+//        IVertexBuilder builder = getter.getBuffer(widgetsType);
+//        drawTexturedModalRect(builder, xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight, 0xFFFFFFFF);
+//        drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight, 0xFFFFFFFF);
 
         if (ySize < 20) {
-            drawTexturedModalRect(builder, xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3, 0xFFFFFFFF);
-            drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3, 0xFFFFFFFF);
+//            drawTexturedModalRect(builder, xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3, 0xFFFFFFFF);
+//            drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3, 0xFFFFFFFF);
         } else if (ySize > 20) {
             for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
-                drawTexturedModalRect(builder, xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15, 0xFFFFFFFF);
-                drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15, 0xFFFFFFFF);
+//                drawTexturedModalRect(builder, xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15, 0xFFFFFFFF);
+//                drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15, 0xFFFFFFFF);
             }
 
-            drawTexturedModalRect(builder, xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15, 0xFFFFFFFF);
-            drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15, 0xFFFFFFFF);
+//            drawTexturedModalRect(builder, xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15, 0xFFFFFFFF);
+//            drawTexturedModalRect(builder, xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15, 0xFFFFFFFF);
         }
     }
 
@@ -2289,7 +2455,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 }
 
                 //Core
-                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
+                if (y < ySize - bottomTrim && x < xSize - rightTrim) {
+                    bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight);
+                }
                 y += trimHeight;
             }
             x += trimWidth;
@@ -2298,12 +2466,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         tessellator.draw();
     }
 
-    private void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height) {
+    private void bufferTexturedModalRect(IVertexBuilder buffer, int x, int y, float textureX, float textureY, int width, int height) {
         double zLevel = getRenderZLevel();
-        buffer.pos(x, y + height, zLevel).tex(((float) textureX * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos(x + width, y + height, zLevel).tex(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos(x + width, y, zLevel).tex(((float) (textureX + width) * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
-        buffer.pos(x, y, zLevel).tex(((float) textureX * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
+        buffer.pos(x, y + height, zLevel).tex((textureX * 0.00390625F), ((textureY + height) * 0.00390625F)).endVertex();
+        buffer.pos(x + width, y + height, zLevel).tex(((textureX + width) * 0.00390625F), ((textureY + height) * 0.00390625F)).endVertex();
+        buffer.pos(x + width, y, zLevel).tex(((textureX + width) * 0.00390625F), (textureY * 0.00390625F)).endVertex();
+        buffer.pos(x, y, zLevel).tex((textureX * 0.00390625F), (textureY * 0.00390625F)).endVertex();
     }
 
     //endregion
@@ -2448,9 +2616,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX));
     }
 
-        /**
-         * This is almost an exact copy of forges code except it respects zLevel.
-         */
+    /**
+     * This is almost an exact copy of forges code except it respects zLevel.
+     */
     @Deprecated
     public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
         font = mc.fontRenderer;
@@ -2802,25 +2970,25 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * @return
      */
     @SuppressWarnings("unchecked")
-    public E setHoverTextList(HoverTextSupplier<List<String>, E> hoverText) {
+    public E setHoverText(HoverTextSupplier<E> hoverText) {
         this.hoverText = hoverText;
         setHoverTextEnabled(true);
         return (E) this;
     }
-
-    @SuppressWarnings("unchecked")
-    public E setHoverTextArray(HoverTextSupplier<String[], E> hoverText) {
-        this.hoverText = hoverText;
-        setHoverTextEnabled(true);
-        return (E) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public E setHoverText(HoverTextSupplier<String, E> hoverText) {
-        this.hoverText = hoverText;
-        setHoverTextEnabled(true);
-        return (E) this;
-    }
+//
+//    @SuppressWarnings("unchecked")
+//    public E setHoverTextArray(HoverTextSupplier<String[], E> hoverText) {
+//        this.hoverText = hoverText;
+//        setHoverTextEnabled(true);
+//        return (E) this;
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    public E setHoverText(HoverTextSupplier<E> hoverText) {
+//        this.hoverText = hoverText;
+//        setHoverTextEnabled(true);
+//        return (E) this;
+//    }
 
     @SuppressWarnings("unchecked")
     public E setHoverText(String singleLine) {
@@ -2830,25 +2998,25 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @SuppressWarnings("unchecked")
     public E setHoverText(String... textLines) {
-        setHoverTextArray(element -> textLines);
+        setHoverText(element -> textLines);
         return (E) this;
     }
 
     @SuppressWarnings("unchecked")
     public E setHoverText(List<String> textLines) {
-        setHoverTextList(element -> textLines);
+        setHoverText(element -> textLines);
         return (E) this;
     }
 
     //TODO I can probably expend on this. Maybe re write things to use text components or some custom system that supports text components.
     public E setComponentHoverText(List<ITextComponent> textLines) {
-        setHoverTextList(element -> textLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()));
+        setHoverText(element -> textLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()));
         return (E) this;
     }
 
     @SuppressWarnings("unchecked")
     public List<String> getHoverText() {
-        return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E) this);
+        return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E)this);
     }
 
     public int getHoverTime() {

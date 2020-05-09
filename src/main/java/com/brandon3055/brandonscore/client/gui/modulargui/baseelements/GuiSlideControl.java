@@ -737,6 +737,10 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
         return this;
     }
 
+    public double getScrollSpeed() {
+        return scrollSpeed;
+    }
+
     public enum SliderRotation {
         HORIZONTAL, VERTICAL
     }

@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.templates;
 
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.blocks.TileBCore;
-import com.brandon3055.brandonscore.client.BCTextures;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.InfoPanel;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -14,7 +13,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSlotRen
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotData;
-import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedBool;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.gui.screen.Screen;
@@ -22,6 +20,7 @@ import net.minecraft.client.resources.I18n;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.stream.Stream;
 
 /**
  * Created by brandon3055 on 9/7/19.
@@ -37,7 +36,7 @@ import java.awt.*;
 public class TGuiBase implements IGuiTemplate {
 
     private boolean isInitialized = false;
-    public GuiTexture background;
+    public GuiElement<?> background;
     public GuiLabel title;
     public GuiButton themeButton;
     public GuiElement<?> playerSlots;
@@ -46,7 +45,7 @@ public class TGuiBase implements IGuiTemplate {
     public InfoPanel infoPanel;
 
     protected Screen gui;
-    protected GuiToolkit toolkit;
+    protected GuiToolkit<?> toolkit;
     protected ContainerSlotLayout slotLayout;
 
     public TGuiBase(Screen gui) {this.gui = gui;}
@@ -56,13 +55,12 @@ public class TGuiBase implements IGuiTemplate {
     }
 
     @Override
-    public void addElements(IGuiParentElement parent, GuiToolkit toolkit) {
+    public void addElements(IGuiParentElement<?> parent, GuiToolkit<?> toolkit) {
         this.toolkit = toolkit;
         //Background
         if (background == null) {
             parent.addChild(background = toolkit.createBackground(true));
-        }
-        else if (!parent.hasChild(background)) {
+        } else if (!parent.hasChild(background)) {
             parent.addChild(background);
         }
 
@@ -70,7 +68,7 @@ public class TGuiBase implements IGuiTemplate {
         title = toolkit.createHeading(getTitle(), background, true);//setEnabled(false);
 
         //Theme Button
-        themeButton = toolkit.createThemeButton(background, true);
+        themeButton = toolkit.createThemeButton(background);
         themeButton.setRelPosRight(background, -15, 3);
 
 //        //Player Slots
@@ -86,7 +84,11 @@ public class TGuiBase implements IGuiTemplate {
     }
 
     public void addPlayerSlots() {
-        playerSlots = toolkit.createPlayerSlots(background, 4, true);
+        addPlayerSlots(true, false, false);
+    }
+
+    public void addPlayerSlots(boolean title, boolean armor, boolean offHand) {
+        playerSlots = toolkit.createPlayerSlots(background, title, armor, offHand);
         toolkit.placeInside(playerSlots, background, GuiToolkit.LayoutPos.BOTTOM_CENTER, 0, -7);
     }
 
@@ -110,6 +112,9 @@ public class TGuiBase implements IGuiTemplate {
         }
 
         background.addChild(powerSlot = new GuiSlotRender());
+        GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slot_energy")).setPos(1, 1);
+        powerSlot.addChild(bgTexture);
+
         if (slotData != null) {
             powerSlot.addPosChangeListener((x, y) -> slotData.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
         }
@@ -120,8 +125,7 @@ public class TGuiBase implements IGuiTemplate {
         }
         powerToggle.setSize(14, 14);
         powerToggle.setHoverText(element -> I18n.format("gui.bc." + (chargeItem.get() ? "charging" : "discharging") + "_item.txt"));
-        GuiTexture toggleTex = new GuiTexture(14, 14, BCTextures.WIDGETS_GENERIC);
-        toggleTex.texV = bellowBar ? 1 : 13;
+        GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get(bellowBar ? "vertical_discharge" : "right_discharge"));
         toggleTex.setPos(powerToggle);
 
         if (bellowBar) {
@@ -129,20 +133,18 @@ public class TGuiBase implements IGuiTemplate {
             toggleTex.setSize(12, 10);
             powerToggle.setSize(12, 10);
             powerSlot.setPos(energyBar.xPos() - 2, playerSlots.yPos() - powerSlot.ySize() - 6);
-        }
-        else {
+        } else {
             powerSlot.setPos(energyBar.maxXPos() + 2, energyBar.maxYPos() - powerSlot.ySize());
         }
 
         if (chargeItem != null) {
-            toggleTex.setTexXGetter(() -> !chargeItem.get() ? bellowBar ? 84 : 33 : bellowBar ? 96 : 49);
+            toggleTex.setMaterialSupplier(() -> BCSprites.get(!chargeItem.get() ? bellowBar ? "btn_vertical_discharge" : "btn_right_discharge" : bellowBar ? "btn_vertical_charge" : "btn_right_charge"));
             powerToggle.addChild(toggleTex);
 
             if (bellowBar) {
                 powerToggle.setPos(powerSlot.xPos() + 3, powerSlot.yPos() - toggleTex.ySize() - 1);
                 energyBar.setMaxYPos(toggleTex.yPos() - 1, true);
-            }
-            else {
+            } else {
                 powerToggle.setPos(powerSlot.xPos() + 2, powerSlot.yPos() - powerToggle.ySize() - 2);
             }
             background.addChild(powerToggle);
@@ -167,34 +169,26 @@ public class TGuiBase implements IGuiTemplate {
         }
 
         background.addChild(powerSlot = new GuiSlotRender());
-        GuiTexture bgTexture = new GuiTexture(16, 16, BCTextures.WIDGETS_GENERIC).setTexturePos(112, 12).setPos(1, 1);
+        GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slots/energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 
         if (slotData != null) {
             bgTexture.setEnabledCallback(() -> !slotData.slot.getHasStack());
             powerSlot.addPosChangeListener((x, y) -> slotData.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
         }
-        GuiTexture toggleTex = new GuiTexture(14, 14, BCTextures.WIDGETS_GENERIC);
+        GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get("item_charge/" + ((bellowBar ? "vertical" : "right") + "_" + (chargeItem ? "charge" : "discharge"))));
 
         if (bellowBar) {
             energyBar.translate(2, 0);
             toggleTex.setSize(12, 10);
             powerSlot.setPos(energyBar.xPos() - 2, playerSlots.yPos() - powerSlot.ySize() - 2);
-            if (chargeItem)
-                toggleTex.setTexturePos(132, 1);
-            else
-                toggleTex.setTexturePos(120, 1);
             toggleTex.setPos(powerSlot.xPos() + 3, powerSlot.yPos() - toggleTex.ySize() - 1);
             energyBar.setMaxYPos(toggleTex.yPos() - 1, true);
-        }
-        else {
+        } else {
             powerSlot.setPos(energyBar.maxXPos() + 2, energyBar.maxYPos() - powerSlot.ySize());
             if (chargeItem) {
-                toggleTex.setTexturePos(97, 13);
                 toggleTex.setPos(powerSlot.xPos(), powerSlot.yPos() - toggleTex.ySize() - 2);
-            }
-            else {
-                toggleTex.setTexturePos(81, 13);
+            } else {
                 toggleTex.setPos(powerSlot.xPos() + 1, powerSlot.yPos() - toggleTex.ySize());
             }
         }

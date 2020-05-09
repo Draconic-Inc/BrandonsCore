@@ -1,9 +1,12 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.BCTextures;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.Material;
+
 /**
  * Created by brandon3055 on 3/09/2016.
  * Renders a simple inventory slot background
@@ -25,9 +28,12 @@ public class GuiSlotRender extends GuiElement<GuiSlotRender> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        bindTexture(BCTextures.widgets());
         RenderSystem.color4f(1F, 1F, 1F, 1F);
-        drawScaledCustomSizeModalRect(getInsetRect().x, getInsetRect().y, 0, 0, 18, 18, getInsetRect().width, getInsetRect().height, 255, 255);
+        Material mat = BCSprites.getThemed("slot");
+        bindTexture(mat.getAtlasLocation());
+        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        drawSprite(mat.getBuffer(getter, BCSprites::makeType), getInsetRect().x, getInsetRect().y, 18, 18, mat.getSprite());
+        getter.finish();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 }

@@ -13,11 +13,13 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.resources.I18n;
 
 import java.awt.*;
 import java.util.function.Supplier;
 
+import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static net.minecraft.util.text.TextFormatting.*;
 
 /**
@@ -114,7 +116,8 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
+//        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+//        ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
 
         int size = horizontal ? xSize() : ySize();
         int draw = (int) ((double) getEnergy() / (double) getCapacity() * (size - 2));
@@ -132,14 +135,23 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
         }
 
         RenderSystem.color3f(1F, 1F, 1F);
-        drawTexturedModalRect(posX, posY, 0, 0, 14, size);
-        drawTexturedModalRect(posX, posY + size - 1, 0, 255, 14, 1);
+//        drawTexturedModalRect(posX, posY, 0, 0, 14, size);
 
-        drawTexturedModalRect(posX + 1, posY + size - draw - 1, 14, size - draw, 12, draw);
+        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        int light = darkMode ? 0xFFFFFFFF : 0xFFFFFFFF;
+        int dark = darkMode ? 0xFF808080 : 0xFF505050;
+//        drawShadedRect(getter, xPos() - 2, yPos() - 2, xSize() + 4, ySize() + 4, 1, 0, light, dark, midColour(light, dark));
+        drawShadedRect(getter, posX, posY, 14, size, 1, 0, dark, light, midColour(light, dark));
+        getter.finish();;
 
+//        drawTexturedModalRect(posX, posY + size - 1, 0, 255, 14, 1);
+
+//        drawTexturedModalRect(posX + 1, posY + size - draw - 1, 14, size - draw, 12, draw);
+
+        //TODO re implement proper fall back energy bar.
         bindShader();
-        drawColouredRect(posX + 1, posY + 1, 14 - 2, size - 2, 0x00FFFF);
-//        drawColouredRect(screenWidth - 10, 0, 10, screenHeight, 0xFF00FFFF);
+        drawColouredRect(posX + 1, posY + 1, 14 - 2, size - 2, 0xFF000000);
+        drawColouredRect(posX + 1, posY +size - draw - 1, 14 - 2, draw, 0xFFFF0000);
         releaseShader();
 
 

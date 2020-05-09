@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.function.Supplier;
 
@@ -149,6 +150,10 @@ public class GuiLabel extends GuiElement<GuiLabel> {
         return this;
     }
 
+    public GuiLabel setTextColour(TextFormatting colour, TextFormatting colourHover) {
+        return setTextColour(colour.getColor(), colourHover.getColor());
+    }
+
     public GuiLabel setTextColour(int colour, int colourHover) {
         setHoverableTextCol(hovering -> hovering ? colourHover : colour);
         return this;
@@ -161,6 +166,11 @@ public class GuiLabel extends GuiElement<GuiLabel> {
         }
 
         setHoverableTextCol(hovering -> colour);
+        return this;
+    }
+
+    public GuiLabel setTextColour(TextFormatting colour) {
+        setTextColour(colour.getColor());
         return this;
     }
 
@@ -209,6 +219,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
             }
             RenderSystem.color4f(1, 1, 1, 1);
         }
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
     }
 
     //endregion

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
+
 @Mod(BrandonsCore.MODID)
 public class BrandonsCore {
     public static final String MODNAME = "Brandon's Core";
@@ -42,8 +43,7 @@ public class BrandonsCore {
             deLog.log(Level.INFO, "Draconic Evolution online!");
             LogHelperBC.info("Hay! There you are! Now lets destroy some worlds!!");
             deLog.log(Level.INFO, "Sounds like fun! Lets get to it!");
-        }
-        else {
+        } else {
             deLog.log(Level.INFO, "...");
             LogHelperBC.info("Aww... Im sad now...");
         }
@@ -70,6 +70,13 @@ public class BrandonsCore {
     @SubscribeEvent
     public void onClientSetup(FMLClientSetupEvent event) {
         proxy.clientSetup(event);
+    }
+
+
+
+    @SubscribeEvent
+    public void onColourSetup(ColorHandlerEvent.Block event) {
+        proxy.onColourSetup(event);
     }
 
     @SubscribeEvent

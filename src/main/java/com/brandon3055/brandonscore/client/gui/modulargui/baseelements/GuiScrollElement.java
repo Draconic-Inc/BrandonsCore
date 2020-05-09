@@ -36,6 +36,8 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     protected int animSpeed = 1;
     protected Insets defaultInsets = new Insets(0, 0, 0, 0);
     protected boolean smoothScroll = false;
+    protected boolean insetScrollBars = false;
+    protected boolean reloadOnUpdate = false;
     protected boolean enableVerticalScroll = true;
     protected boolean useAbsoluteElementSize = false;
     protected boolean enableHorizontalScroll = true;
@@ -72,6 +74,10 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
 
     //region Scroll Bar Configuration
 
+    public GuiScrollElement setInsetScrollBars(boolean insetScrollBars) {
+        this.insetScrollBars = insetScrollBars;
+        return this;
+    }
 
     public GuiScrollElement setDisableOffScreenElements(boolean disableOffScreenElements) {
         this.disableOffScreenElements = disableOffScreenElements;
@@ -295,7 +301,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     public void updateScrollElement() {
         if (listMode != DISABLED) {
             int lastPos = listMode.horizontal() ? getInsetRect().x : getInsetRect().y;
-            for (GuiElement element: scrollingElements) {
+            for (GuiElement element : scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 if (listMode.horizontal()) {
                     if (listMode.lockPos()) {
@@ -306,8 +312,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
                     }
                     element.setXPos(lastPos);
                     lastPos += elementXSize(element) + listSpacing;
-                }
-                else {
+                } else {
                     if (listMode.lockPos()) {
                         element.setXPos(getInsetRect().x);
                     }
@@ -316,6 +321,9 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
                     }
                     element.setYPos(lastPos);
                     lastPos += elementYSize(element) + listSpacing;
+                }
+                if (reloadOnUpdate) {
+                    element.reloadElement();
                 }
             }
         }
@@ -342,9 +350,8 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
             xMax = maxXPos();
             yMin = yPos();
             yMax = maxYPos();
-        }
-        else {
-            for (GuiElement element: scrollingElements) {
+        } else {
+            for (GuiElement element : scrollingElements) {
                 if (!element.isEnabled() || element == backgroundElement) continue;
                 Rectangle rect = element.getEnclosingRect();
                 if (rect.x < xMin) xMin = (int) rect.x;
@@ -402,17 +409,40 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         updateScrollbarExclusion();
 
         if ((!verticalScrollBar.isEnabled() || verticalScrollBar.isHidden()) && horizontalScrollBar.isEnabled() && horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            horizontalScrollBar.setXSize(xSize()).setYPos(maxYPos() - horizontalScrollBar.ySize()).updateElements();
-        }
-        else if (horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            horizontalScrollBar.setXSize(xSize() - verticalScrollBar.xSize()).setYPos(maxYPos() - horizontalScrollBar.ySize()).updateElements();
+            horizontalScrollBar
+                    .setXSize(insetScrollBars ? getActualInsetRect().width : xSize())
+                    .setYPos(maxYPos() - (horizontalScrollBar.ySize() + (insetScrollBars ? defaultInsets.bottom : 0)))
+                    .updateElements();
+        } else if (horizontalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
+            if (insetScrollBars) {
+                horizontalScrollBar
+                        .setXPos(getActualInsetRect().x)
+                        .setXSize(xSize() - verticalScrollBar.xSize())
+                        .setYPos(getActualInsetRect().y + getActualInsetRect().height - horizontalScrollBar.ySize())
+                        .updateElements();
+            } else {
+                horizontalScrollBar
+                        .setXSize(xSize() - verticalScrollBar.xSize())
+                        .setYPos(maxYPos() - horizontalScrollBar.ySize())
+                        .updateElements();
+            }
         }
 
         if ((!horizontalScrollBar.isEnabled() || horizontalScrollBar.isHidden()) && verticalScrollBar.isEnabled() && verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            verticalScrollBar.setYSize(ySize()).setXPos(maxXPos() - verticalScrollBar.xSize()).updateElements();
-        }
-        else if (verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
-            verticalScrollBar.setYSize(ySize() - horizontalScrollBar.ySize()).setXPos(maxXPos() - verticalScrollBar.xSize()).updateElements();
+            verticalScrollBar
+                    .setYSize(insetScrollBars ? getActualInsetRect().height : ySize())
+                    .setXPos(maxXPos() - (verticalScrollBar.xSize() + (insetScrollBars ? defaultInsets.right : 0)))
+                    .updateElements();
+        } else if (verticalScrollBar.isInGroup(DEFAULT_SCROLL_BAR_GROUP)) {
+            if (insetScrollBars) {
+                verticalScrollBar
+                        .setYPos(getActualInsetRect().y)
+                        .setYSize(getActualInsetRect().height - horizontalScrollBar.ySize())
+                        .setXPos(getActualInsetRect().x + getActualInsetRect().width - verticalScrollBar.xSize())
+                        .updateElements();
+            } else {
+                verticalScrollBar.setYSize(ySize() - horizontalScrollBar.ySize()).setXPos(maxXPos() - verticalScrollBar.xSize()).updateElements();
+            }
         }
 
         double contentHeight = Math.abs(verticalMinScroll) + getInsetRect().height + Math.abs(verticalMaxScroll);
@@ -428,6 +458,12 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         return scrollStateChange;
     }
 
+    private Rectangle getActualInsetRect() {
+        return new Rectangle(xPos() + defaultInsets.left,
+                yPos() + defaultInsets.top,
+                xSize() - defaultInsets.left - defaultInsets.right,
+                ySize() - defaultInsets.top - defaultInsets.bottom);
+    }
 
     protected void updateScrollbarExclusion() {
         if (scrollBarExclusionMode) {
@@ -437,8 +473,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
                     if (getInsetRect().getMaxX() > verticalScrollBar.xPos()) {
                         getInsets().right = maxXPos() - verticalScrollBar.xPos();
                     }
-                }
-                else {
+                } else {
                     if (getInsetRect().getX() < verticalScrollBar.maxXPos()) {
                         getInsets().left = verticalScrollBar.maxXPos() - xPos();
                     }
@@ -450,8 +485,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
                     if (getInsetRect().getMaxY() > horizontalScrollBar.yPos()) {
                         getInsets().bottom = maxYPos() - horizontalScrollBar.yPos();
                     }
-                }
-                else {
+                } else {
                     if (getInsetRect().getY() < horizontalScrollBar.maxYPos()) {
                         getInsets().top = horizontalScrollBar.maxYPos() - yPos();
                     }
@@ -467,11 +501,19 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
      */
     private void validateScrollBarExistence() {
         if (verticalScrollBar == null) {
-            setVerticalScrollBar(new GuiSlideControl(VERTICAL).setPos(maxXPos() - 10, yPos()).setSize(10, ySize() - 10).setDefaultBackground(0xFF000000, 0xFFFFFFFF).setDefaultSlider(0xFFA0A0A0, 0xFF707070));
+            setVerticalScrollBar(new GuiSlideControl(VERTICAL)
+                    .setPos(maxXPos() - (10 + (insetScrollBars ? getInsets().right : 0)), yPos() + (insetScrollBars ? getInsets().top : 0))
+                    .setSize(10, (insetScrollBars ? getInsetRect().height : ySize()) - 10)
+                    .setDefaultBackground(0xFF000000, 0xFFFFFFFF)
+                    .setDefaultSlider(0xFFA0A0A0, 0xFF707070));
             verticalScrollBar.addToGroup(DEFAULT_SCROLL_BAR_GROUP);
         }
         if (horizontalScrollBar == null) {
-            setHorizontalScrollBar(new GuiSlideControl().setPos(xPos(), maxYPos() - 10).setSize(xSize() - 10, 10).setDefaultBackground(0xFF000000, 0xFFFFFFFF).setDefaultSlider(0xFFA0A0A0, 0xFF707070));
+            setHorizontalScrollBar(new GuiSlideControl()
+                    .setPos(xPos(), maxYPos() - 10)
+                    .setSize(xSize() - 10, 10)
+                    .setDefaultBackground(0xFF000000, 0xFFFFFFFF)
+                    .setDefaultSlider(0xFFA0A0A0, 0xFF707070));
             horizontalScrollBar.addToGroup(DEFAULT_SCROLL_BAR_GROUP);
         }
     }
@@ -488,14 +530,14 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (getInsetRect().contains(mouseX, mouseY)) {
-            for (GuiElement element: scrollingElements) {
+            for (GuiElement element : scrollingElements) {
                 if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                     return true;
                 }
             }
         }
 
-        for (GuiElement element: foregroundElements) {
+        for (GuiElement element : foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseClicked(mouseX, mouseY, mouseButton)) {
                 return true;
             }
@@ -505,13 +547,13 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
-        for (GuiElement element: scrollingElements) {
+        for (GuiElement element : scrollingElements) {
             if (element.isEnabled() && element.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
                 return true;
             }
         }
 
-        for (GuiElement element: foregroundElements) {
+        for (GuiElement element : foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
                 return true;
             }
@@ -521,13 +563,13 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
 
     @Override
     public boolean handleMouseScroll(double mouseX, double mouseY, double scrollDirection) {
-        for (GuiElement element: scrollingElements) {
+        for (GuiElement element : scrollingElements) {
             if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
         }
 
-        for (GuiElement element: foregroundElements) {
+        for (GuiElement element : foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element) && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
                 return true;
             }
@@ -542,24 +584,27 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         if (eventSource == verticalScrollBar) {
             yAdjustment = verticalScrollPos - (int) verticalScrollBar.getPosition();
             verticalScrollPos = (int) verticalScrollBar.getPosition();
-        }
-        else if (eventSource == horizontalScrollBar) {
+        } else if (eventSource == horizontalScrollBar) {
             xAdjustment = horizontalScrollPos - (int) horizontalScrollBar.getPosition();
             horizontalScrollPos = (int) horizontalScrollBar.getPosition();
         }
 
-        for (GuiElement scrollableElement: scrollingElements) {
+        for (GuiElement scrollableElement : scrollingElements) {
 //            scrollableElement.animateMoveFrames();
             if (smoothScroll) {
                 scrollableElement.translateAnim(xAdjustment, yAdjustment, animSpeed);
-            }
-            else {
+            } else {
                 scrollableElement.translate(xAdjustment, yAdjustment);
             }
             if (disableOffScreenElements) {
                 scrollingElements.forEach(e -> e.setEnabled(getInsetRect().intersects(e.getRect())));
             }
         }
+    }
+
+    public GuiScrollElement setReloadOnUpdate(boolean reloadOnUpdate) {
+        this.reloadOnUpdate = reloadOnUpdate;
+        return this;
     }
 
     //endregion
@@ -621,7 +666,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        for (GuiElement element: backgroundElements) {
+        for (GuiElement element : backgroundElements) {
             if (element.isEnabled()) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -645,14 +690,14 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
             backgroundElement.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 
-        for (GuiElement element: scrollingElements) {
+        for (GuiElement element : scrollingElements) {
             if (element.isEnabled() && element != backgroundElement) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }
 
         ScissorHelper.popScissor();
-        for (GuiElement element: foregroundElements) {
+        for (GuiElement element : foregroundElements) {
             if (element.isEnabled() && !scrollingElements.contains(element)) {
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
@@ -669,8 +714,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         if (childElement instanceof IGuiEventDispatcher && ((IGuiEventDispatcher) childElement).getListener() == null) {
             if (getParent() instanceof IGuiEventListener) {
                 ((IGuiEventDispatcher) childElement).setListener((IGuiEventListener) getParent());
-            }
-            else if (modularGui instanceof IGuiEventListener) {
+            } else if (modularGui instanceof IGuiEventListener) {
                 ((IGuiEventDispatcher) childElement).setListener((IGuiEventListener) modularGui);
             }
         }
@@ -697,7 +741,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
             enclosingRect.height = (int) getRect().getMaxY() - enclosingRect.y;
         }
 
-        for (GuiElement element: childElements) {
+        for (GuiElement element : childElements) {
             if (!scrollingElements.contains(element)) {
                 element.addBoundsToRect(enclosingRect);
             }
@@ -745,7 +789,6 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     public Rectangle getScrollBounds() {
         return scrollBounds;
     }
-
 
 
     //endregion

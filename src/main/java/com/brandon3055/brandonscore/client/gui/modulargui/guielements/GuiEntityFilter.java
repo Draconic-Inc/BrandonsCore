@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.BCTextures;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
@@ -158,8 +158,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             trash = new GuiButton().setSize(10, 10);
             trash.setHoverText(I18n.format("gui.bc.entity_filter.delete." + (nodeID == 0 ? "all" : "node")));
-            GuiTexture icon = new GuiTexture(10, 10, BCTextures.WIDGETS_GENERIC);
-            icon.setTexturePos(nodeID == 0 ? 157 : 145, 1);
+            GuiTexture icon = new GuiTexture(10, 10, () -> BCSprites.get(nodeID == 0 ? "delete_all" : "delete"));
             trash.onPressed(() -> {
                 trashClicks++;
                 if (trashClicks == 3 && nodeID == 0) gui.entityFilter.clientClearFilter();
@@ -219,8 +218,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton addButton = new GuiButton().setSize(10, 10);
             addButton.setHoverText(I18n.format("gui.bc.entity_filter.add_filter"));
-            GuiTexture addIcon = new GuiTexture(10, 10, BCTextures.WIDGETS_GENERIC);
-            addIcon.setTexturePos(169, 1);
+            GuiTexture addIcon = new GuiTexture(10, 10, BCSprites.get("add"));
             addButton.onPressed(() -> {
                 GuiSelectDialog<FilterType> dialog = new GuiSelectDialog<>(gui);
                 dialog.setCloseOnSelection(true);
