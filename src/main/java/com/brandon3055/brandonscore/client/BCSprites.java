@@ -11,12 +11,14 @@ import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.brandon3055.brandonscore.BrandonsCore.MODID;
@@ -32,7 +34,15 @@ public class BCSprites {
     private static final Set<ResourceLocation> registeredSprites = new HashSet<>();
     private static final Map<String, Material> matCache = new HashMap<>();
 
-    public static final RenderType guiType = RenderType.makeType("gui", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+//    public static final RenderType guiType = RenderType.makeType("gui", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+//            .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
+//            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+//            .cull(RenderState.CULL_DISABLED)
+//            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+//            .build(false)
+//    );
+
+    public static final RenderType guiTexType = RenderType.makeType("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
             .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
             .cull(RenderState.CULL_DISABLED)
@@ -40,37 +50,42 @@ public class BCSprites {
             .build(false)
     );
 
-    public static final RenderType guiColorType = RenderType.makeType("gui_color", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-            .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
-            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .cull(RenderState.CULL_DISABLED)
-            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .build(false)
-    );
 
-    public static void register() {
+    public static void initialize(ColorHandlerEvent.Block event) {
         guiSpriteUploader = new GuiSpriteUploader(registeredSprites);
 
         //Gui Backgrounds
         Stream.of(GuiLayout.values()).filter(e -> e.xSize != -1).forEach(layout -> registerThemed(MODID, layout.textureName()));
         registerThemed(MODID, "background_dynamic");
+        registerThemed(MODID, "bg_dynamic_small");
+        registerThemed(MODID, "borderless_bg_dynamic_small");
 
         //Gui Sprites
         registerThemed(MODID, "button");
         registerThemed(MODID, "button_highlight");
         registerThemed(MODID, "button_disabled");
+        registerThemed(MODID, "button_borderless");
+        registerThemed(MODID, "button_borderless_invert");
         registerThemed(MODID, "slot");
         registerThemed(MODID, "resize");
+        registerThemed(MODID, "reposition");
         registerThemed(MODID, "theme");
         registerThemed(MODID, "gear");
         registerThemed(MODID, "advanced");
         registerThemed(MODID, "arrow_left");
         registerThemed(MODID, "arrow_right");
+        registerThemed(MODID, "expand_content");
+        registerThemed(MODID, "collapse_content");
+        registerThemed(MODID, "preset_icon");
+        registerThemed(MODID, "global_icon");
+        registerThemed(MODID, "global_icon_inactive");
 
         register(MODID, "add");
         register(MODID, "delete");
         register(MODID, "delete_all");
         register(MODID, "info_panel");
+        register(MODID, "reposition_gray");
+        register(MODID, "new_group");
 
         register(MODID, "redstone/always_active");
         register(MODID, "redstone/active_high");
@@ -129,6 +144,27 @@ public class BCSprites {
     public static Material get(String location) {
         return get(MODID, location);
     }
+
+
+    public static Supplier<Material> themedGetter(String modid, String location) {
+        return () -> get(modid, (BCConfig.darkMode ? "dark/" : "light/") + location);
+    }
+
+    public static Supplier<Material> themedGetter(String location) {
+        return () -> get(MODID, (BCConfig.darkMode ? "dark/" : "light/") + location);
+    }
+
+    public static Supplier<Material> getter(String modid, String location) {
+        return () -> matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
+    }
+
+    public static Supplier<Material> getter(String location) {
+        return () -> get(MODID, location);
+    }
+
+
+
+
 
     public static Material getButton(int state) {
         return getThemed(state == 1 ? "button" : state == 2 ? "button_highlight" : "button_disabled");

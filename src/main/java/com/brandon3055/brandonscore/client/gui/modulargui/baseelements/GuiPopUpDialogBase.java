@@ -100,13 +100,13 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
             translate((int)xMove, (int)yMove);
         }
 
-        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY) || blockOutsideClicks;
+        return super.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int state) {
         dragging = false;
-        return super.mouseReleased(mouseX, mouseY, state) || blockOutsideClicks;
+        return super.mouseReleased(mouseX, mouseY, state);
     }
 
     @Override
@@ -259,6 +259,9 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
      */
     public void close() {
         modularGui.getManager().removeChild(this);
+        if (getParent() != null && getParent().hasChild(this)) {
+            getParent().removeChild(this);
+        }
         isVisible = false;
         if (closeCallback != null) {
             closeCallback.run();

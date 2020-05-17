@@ -17,8 +17,8 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
     default List<String> getHoverText(E element) {
         Object hoverText = getText(element);
         if (hoverText instanceof String) {
-            if (((String) hoverText).contains("\\n")) {
-                return Arrays.asList(((String) hoverText).split("\\\\n"));
+            if (((String) hoverText).contains("\n")) {
+                return Arrays.asList(((String) hoverText).split("\n"));
             }
             return Collections.singletonList((String) hoverText);
         }
@@ -37,8 +37,8 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
     static List<String> splitNewLines(Collection<String> collection) {
         List<String> list = new ArrayList<>();
         for (String s : collection) {
-            if (s.contains("\\n")) {
-                list.addAll(Arrays.asList(s.split("\\\\n")));
+            if (s.contains("\n")) {
+                list.addAll(Arrays.asList(s.split("\n")));
             }
             else {
                 list.add(s);

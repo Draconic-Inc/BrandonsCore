@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl.SliderRotation.HORIZONTAL;
 
@@ -31,6 +32,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
     private double dragStartElementX = 0;
     private double dragStartElementY = 0;
     private boolean parentScroll = false;
+    private boolean reverseScrollDir = false;
     private IMouseOver parentScrollable = null;
     private List<TriPredicate<GuiSlideControl, Double, Double>> scrollChecks = new ArrayList<>();
 
@@ -62,33 +64,39 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
 
     public GuiSlideControl() {
         setInsets(1, 1, 1, 1);
+        this.disableOnRemove = true;
     }
 
     public GuiSlideControl(int xPos, int yPos) {
         super(xPos, yPos);
         setInsets(1, 1, 1, 1);
+        this.disableOnRemove = true;
     }
 
     public GuiSlideControl(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
         setInsets(1, 1, 1, 1);
+        this.disableOnRemove = true;
     }
 
     public GuiSlideControl(SliderRotation rotation) {
         this.rotation = rotation;
         setInsets(1, 1, 1, 1);
+        this.disableOnRemove = true;
     }
 
     public GuiSlideControl(SliderRotation rotation, int xPos, int yPos) {
         super(xPos, yPos);
         this.rotation = rotation;
         setInsets(1, 1, 1, 1);
+        this.disableOnRemove = true;
     }
 
     public GuiSlideControl(SliderRotation rotation, int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
         this.rotation = rotation;
         setInsets(1, 1, 1, 1);
+        this.disableOnRemove = true;
     }
 
     //region Events
@@ -107,6 +115,11 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
         return this;
     }
 
+    public GuiSlideControl setReverseScrollDir(boolean reverseScrollDir) {
+        this.reverseScrollDir = reverseScrollDir;
+        return this;
+    }
+
     public Consumer<GuiSlideControl> getInputListener() {
         return inputListener;
     }
@@ -121,35 +134,41 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
 
     //region Mouse Input
 
+    private boolean acceptsScrollInput(double mouseX, double mouseY) {
+        for (TriPredicate<GuiSlideControl, Double, Double> check : scrollChecks) {
+            if (!check.test(this, mouseX, mouseY)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean handleMouseScroll(double mouseX, double mouseY, double scrollDirection) {
         //Check if there are any scrolling checks that may restrict scrolling.
-        for (TriPredicate<GuiSlideControl, Double, Double> check : scrollChecks) {
-            if (!check.test(this, mouseX, mouseY)) {
-                return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
-            }
+        if (!acceptsScrollInput(mouseX, mouseY)) {
+            return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
         }
 
         //If the mouse is actually over this element then we want to
         if (isMouseOver(mouseX, mouseY)) {
-            updateRawPos(position + (scrollDirection > 0 ? -scrollSpeed : scrollSpeed));
+            updateRawPos(position + (scrollDirection > 0 != reverseScrollDir ? -scrollSpeed : scrollSpeed));
             if (inputListener != null) {
                 inputListener.accept(this);
             }
             return true;
-        }
-        else if (parentScroll) {
+        } else if (parentScroll) {
             if ((parentScrollable == null || !parentScrollable.isMouseOver(mouseX, mouseY)) && (getParent() == null || !getParent().isMouseOver(mouseX, mouseY))) {
                 return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
             }
 
             //Make sure the mouse is not hovering over another slider element before capturing the event.
             List<GuiSlideControl> slidersMouseOver = modularGui.getManager().getElementsAtPosition(mouseX, mouseY, GuiSlideControl.class);
-            if (DataUtils.firstMatch(slidersMouseOver, slider -> slider != this && slider.isEnabled()) != null) {
+            if (DataUtils.firstMatch(slidersMouseOver, slider -> slider != this && slider.isEnabled() && slider.acceptsScrollInput(mouseX, mouseY)) != null) {
                 return super.handleMouseScroll(mouseX, mouseY, scrollDirection);
             }
 
-            updateRawPos(position + (scrollDirection > 0 ? -scrollSpeed : scrollSpeed));
+            updateRawPos(position + (scrollDirection > 0 != reverseScrollDir  ? -scrollSpeed : scrollSpeed));
             if (inputListener != null) {
                 inputListener.accept(this);
             }
@@ -169,36 +188,37 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                 }
             }
 
+            isDragging = true;
+
             prevPosition = getRawPos();
             if ((sliderElement.isMouseOver(mouseX, mouseY) && mouseButton == 0) || mouseButton == 2) {
                 if (rotation == HORIZONTAL) {
                     mouseDragOffset = mouseX - sliderElement.xPos();
-                }
-                else {
+                } else {
                     mouseDragOffset = mouseY - sliderElement.yPos();
                 }
                 if (mouseButton == 2) {
                     isMiddleClickDragging = true;
+                    isDragging = false;
                     dragStartX = mouseX;
                     dragStartY = mouseY;
                     dragStartElementX = sliderElement.xPos();
                     dragStartElementY = sliderElement.yPos();
                     return false;
                 }
-            }
-            else if (mouseButton == 0) {
+
+            } else if (mouseButton == 0) {
                 mouseDragOffset = sliderSize / 2;
                 if (rotation == HORIZONTAL) {
-                    sliderElement.setXPos((int)mouseX - (sliderElement.xSize() / 2));
+                    sliderElement.setXPos((int) mouseX - (sliderElement.xSize() / 2));
                     double maxXOffset = getInsetRect().width - sliderElement.xSize();
                     double xOffset = sliderElement.xPos() - getInsetRect().x;
                     updateRawPos(xOffset / maxXOffset);
                     if (inputListener != null) {
                         inputListener.accept(this);
                     }
-                }
-                else {
-                    sliderElement.setYPos((int)mouseY - (sliderElement.ySize() / 2));
+                } else {
+                    sliderElement.setYPos((int) mouseY - (sliderElement.ySize() / 2));
                     double maxYOffset = getInsetRect().height - sliderElement.ySize();
                     double yOffset = sliderElement.yPos() - getInsetRect().y;
                     updateRawPos(yOffset / maxYOffset);
@@ -206,12 +226,11 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                         inputListener.accept(this);
                     }
                 }
-            }
-            else {
+            } else {
+                isDragging = false;
                 return super.mouseClicked(mouseX, mouseY, mouseButton);
             }
 
-            isDragging = true;
             return true;
         }
 
@@ -221,40 +240,6 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
-//        double doubleMouseX = (double) Mouse.getEventX() * (double) modularGui.xSize() / (double) this.mc.displayWidth;
-//        double doubleMouseY = (double) modularGui.ySize() - (double) Mouse.getEventY() * modularGui.ySize() / (double) this.mc.displayHeight - 1;
-
-//        if (isDragging || isMiddleClickDragging) { //TODO figure out why this is borked
-//            if (distFromElement(mouseX, mouseY) > dragOutResetThreshold && isDragging) {
-//                updateRawPos(prevPosition);
-//                return true;
-//            }
-//
-//            if (rotation == HORIZONTAL) {
-//                if (isMiddleClickDragging) {
-//                    sliderElement.setXPos(dragStartElementX - (int) ((mouseX - dragStartX) * scrollSpeed * 2));
-//                }
-//                else {
-//                    sliderElement.setXPos((int) (doubleMouseX - mouseDragOffset));
-//                }
-//                double maxXOffset = getInsetRect().width - sliderElement.xSize();
-//                double xOffset = (doubleMouseX - mouseDragOffset) - getInsetRect().x;//sliderElement.xPos() - getInsetRect().x;
-//                updateRawPos(xOffset / maxXOffset);
-//            }
-//            else {
-//                if (isMiddleClickDragging) {
-//                    sliderElement.setYPos(dragStartElementY - (int) ((doubleMouseY - dragStartY) * scrollSpeed * 2));
-//                }
-//                else {
-//                    sliderElement.setYPos((int) (doubleMouseY - mouseDragOffset));
-//                }
-//                double maxYOffset = getInsetRect().height - sliderElement.ySize();
-//                double yOffset = (doubleMouseY - mouseDragOffset) - getInsetRect().y;//sliderElement.yPos() - getInsetRect().y;
-//                updateRawPos(yOffset / maxYOffset);
-//            }
-//            return !isMiddleClickDragging;
-//        }
-
         if (isDragging || isMiddleClickDragging) {
             if (distFromElement(mouseX, mouseY) > dragOutResetThreshold && isDragging) {
                 updateRawPos(prevPosition);
@@ -266,9 +251,8 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
 
             if (rotation == HORIZONTAL) {
                 if (isMiddleClickDragging) {
-                    sliderElement.setXPos((int)dragStartElementX - (int) ((mouseX - dragStartX) * scrollSpeed * 2));
-                }
-                else {
+                    sliderElement.setXPos((int) dragStartElementX + (int) ((mouseX - dragStartX) * scrollSpeed * 2));
+                } else {
                     sliderElement.setXPos((int) (mouseX - mouseDragOffset));
                 }
                 double maxXOffset = getInsetRect().width - sliderElement.xSize();
@@ -277,12 +261,10 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                 if (inputListener != null) {
                     inputListener.accept(this);
                 }
-            }
-            else {
+            } else {
                 if (isMiddleClickDragging) {
-                    sliderElement.setYPos((int)dragStartElementY - (int) ((mouseY - dragStartY) * scrollSpeed * 2));
-                }
-                else {
+                    sliderElement.setYPos((int) dragStartElementY + (int) ((mouseY - dragStartY) * scrollSpeed * 2));
+                } else {
                     sliderElement.setYPos((int) (mouseY - mouseDragOffset));
                 }
                 double maxYOffset = getInsetRect().height - sliderElement.ySize();
@@ -502,7 +484,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      */
     public GuiSlideControl setDefaultBackground(int fillColour, int borderColour) {
         lockBackgroundWidthPos(true);
-        setBackgroundElement(new GuiBorderedRect().setColours(fillColour, borderColour));
+        setBackgroundElement(new GuiBorderedRect().setShadeColours(fillColour, borderColour));
         return this;
     }
 
@@ -522,7 +504,15 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      */
     public GuiSlideControl setDefaultSlider(int fillColour, int hoverFillColour, int borderColour, int hoverBorderColour) {
         lockSliderWidthPos(true);
-        setSliderElement(new GuiBorderedRect().setColours(fillColour, hoverFillColour, borderColour, hoverBorderColour));
+        setSliderElement(new GuiBorderedRect().setShadeColours(fillColour, hoverFillColour, borderColour, hoverBorderColour));
+        return this;
+    }
+
+    public GuiSlideControl setDefaultSlider(Supplier<Integer> fillColour, Supplier<Integer> hoverFillColour, Supplier<Integer> borderColour, Supplier<Integer> hoverBorderColour) {
+        lockSliderWidthPos(true);
+        setSliderElement(new GuiBorderedRect()
+                .setFillColourL(hovering -> hovering ? hoverFillColour.get() : fillColour.get())
+                .setBorderColourL(hovering -> hovering ? hoverBorderColour.get() : borderColour.get()));
         return this;
     }
 
@@ -534,7 +524,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      */
     public GuiSlideControl setDefaultSlider(int fillColour, int borderColour) {
         lockSliderWidthPos(true);
-        setSliderElement(new GuiBorderedRect().setColours(fillColour, borderColour));
+        setSliderElement(new GuiBorderedRect().setShadeColours(fillColour, borderColour));
         return this;
     }
 
@@ -649,8 +639,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                     drawColouredRect(xPos(), yPos() + ySize() / 2, xSize(), 1, colour);
                     drawColouredRect(xPos(), yPos(), 1, ySize(), colour);
                     drawColouredRect(xPos() + xSize() - 1, yPos(), 1, ySize(), colour);
-                }
-                else {
+                } else {
                     drawColouredRect(xPos() + xSize() / 2, yPos(), 1, ySize(), colour);
                     drawColouredRect(xPos(), yPos(), xSize(), 1, colour);
                     drawColouredRect(xPos(), yPos() + ySize() - 1, xSize(), 1, colour);
@@ -663,7 +652,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
     }
 
     public boolean isDragging() {
-        return isDragging;
+        return isDragging || isMiddleClickDragging;
     }
 
     //endregion
@@ -681,8 +670,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
             if (rotation == HORIZONTAL) {
                 sliderElement.setYSize(getInsetRect().height);
                 sliderElement.setYPos(getInsetRect().y);
-            }
-            else {
+            } else {
                 sliderElement.setXSize(getInsetRect().width);
                 sliderElement.setXPos(getInsetRect().x);
             }
@@ -699,8 +687,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                 sliderElement.setXSize(sliderSize);
                 int maxMove = getInsetRect().width - sliderElement.xSize();
                 sliderElement.setXPos(getInsetRect().x + (int) (maxMove * getRawPos()));
-            }
-            else {
+            } else {
                 sliderElement.setYSize(sliderSize);
                 int maxMove = getInsetRect().height - sliderElement.ySize();
                 sliderElement.setYPos(getInsetRect().y + (int) (maxMove * getRawPos()));
@@ -742,6 +729,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
     }
 
     public enum SliderRotation {
-        HORIZONTAL, VERTICAL
+        HORIZONTAL,
+        VERTICAL
     }
 }

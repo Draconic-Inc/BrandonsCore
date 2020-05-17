@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import codechicken.lib.colour.Colour;
+import codechicken.lib.colour.ColourARGB;
 import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
@@ -69,7 +70,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     protected static final RenderType transColourType = RenderType.makeType("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .alpha(RenderState.ZERO_ALPHA)
+            .cull(RenderState.CULL_DISABLED)
+            .shadeModel(RenderState.SHADE_ENABLED)
             .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
             .build(false)
     );
@@ -140,6 +142,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * When true child elements will be disabled when they are removed.
      * This is useful for edge cases where the 1 tick delay in removing an element can cause issues.
      */
+    //TODO make this true by default when i re write the gui system
     protected boolean disableOnRemove = false;
     protected boolean animatedTranslating = false;
     protected List<GuiElement> toRemove = new ArrayList<>();
@@ -212,8 +215,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         if (onInit != null) {
             onInit.accept((E) this);
         }
-
-        elementInitialized = true;
     }
 
     /**
@@ -307,6 +308,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     @Override
     public <C extends GuiElement> C addChild(C child) {
         if (child == this) throw new InvalidParameterException("Attempted to add element to itself as a child element.");
+        toRemove.remove(child);
         if (childElements.contains(child)) {
             return child;
         }
@@ -360,6 +362,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         childElement.setParent(this);
         if (!childElement.elementInitialized) {
             childElement.addChildElements();
+            childElement.elementInitialized = true;
         }
         childElement.reloadElement();
         addDefaultListener(childElement);
@@ -384,6 +387,20 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             } else if (modularGui instanceof IGuiEventListener) {
                 ((IGuiEventDispatcher) childElement).setListener((IGuiEventListener) modularGui);
             }
+        }
+    }
+
+    public void bringToForeground(GuiElement childElement) {
+        if (childElements.contains(childElement)) {
+            childElements.remove(childElement);
+            childElements.add(childElement);
+        }
+    }
+
+    public void sendToBackground(GuiElement childElement) {
+        if (childElements.contains(childElement)) {
+            childElements.remove(childElement);
+            childElements.addFirst(childElement);
         }
     }
 
@@ -494,6 +511,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     @Nullable
     public GuiElement getParent() {
         return parentElement;
+    }
+
+    public void ifParent(Consumer<GuiElement> action) {
+        if (parentElement != null) action.accept(parentElement);
     }
 
     /**
@@ -665,12 +686,25 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     //TODO in re write: Add some sort of click result enum. PASS, CONSUMED, BLOCKED (Or maybe just passed and consumed)
     // Certain things still need the call even if something else has consumed it. e.g text fields still need to get the click in order to un-focus
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        for (GuiElement element : childElements) {
+        for (GuiElement element : Lists.reverse(childElements)) {
             if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             }
         }
         return isMouseOver(mouseX, mouseY) && capturesClicks;
+    }
+
+    /**
+     * This is similar to {@link #mouseClicked(double, double, int)} except it can not be blocked.
+     * This is for those rare instances when an element needs to receive click events regardless
+     * of weather or not they were consumed by another element.
+     */
+    public void globalClick(double mouseX, double mouseY, int button) {
+        for (GuiElement element : Lists.reverse(childElements)) {
+            if (element.isEnabled()) {
+                element.globalClick(mouseX, mouseY, button);
+            }
+        }
     }
 
     /**
@@ -682,7 +716,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * @return Return true to prevent any further processing for this mouse action.
      */
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        for (GuiElement element : childElements) {
+        for (GuiElement element : Lists.reverse(childElements)) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, button)) {
                 return true;
             }
@@ -697,7 +731,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * @return Return true to prevent any further processing for this mouse action.
      */
     public boolean mouseDragged(double mouseX, double mouseY, int clickedMouseButton, double dragX, double dragY) {
-        for (GuiElement element : childElements) {
+        for (GuiElement element : Lists.reverse(childElements)) {
             if (element.isEnabled() && element.mouseDragged(mouseX, mouseY, clickedMouseButton, dragX, dragY)) {
                 return true;
             }
@@ -706,7 +740,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     public boolean mouseMoved(double mouseX, double mouseY) {
-        for (GuiElement element : childElements) {
+        for (GuiElement element : Lists.reverse(childElements)) {
             if (element.isEnabled() && element.mouseMoved(mouseX, mouseY)) {
                 return true;
             }
@@ -1037,6 +1071,16 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return (E) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public E setXPos(int x, boolean reshape) {
+        int maxX = maxXPos();
+        translate(x - xPos(), 0);
+        if (reshape) {
+            setMaxXPos(maxX, true);
+        }
+        return (E) this;
+    }
+
     /**
      * Sets the y position of this element and also moves all of this elements children along with it.
      *
@@ -1045,6 +1089,16 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     @SuppressWarnings("unchecked")
     public E setYPos(int y) {
         translate(0, y - yPos());
+        return (E) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public E setYPos(int y, boolean reshape) {
+        int maxY = maxYPos();
+        translate(0, y - yPos());
+        if (reshape) {
+            setMaxYPos(maxY, true);
+        }
         return (E) this;
     }
 
@@ -1057,6 +1111,17 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     @SuppressWarnings("unchecked")
     public E setPos(int x, int y) {
         translate(x - xPos(), y - yPos());
+        return (E) this;
+    }
+
+    public E setPos(int x, int y, boolean reshape) {
+        int maxX = maxXPos();
+        int maxY = maxYPos();
+        translate(x - xPos(), y - yPos());
+        if (reshape) {
+            setMaxXPos(maxX, true);
+            setMaxYPos(maxY, true);
+        }
         return (E) this;
     }
 
@@ -1318,6 +1383,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     @SuppressWarnings("unchecked")
+    public E setSize(Dimension rect) {
+        setSize(rect.width, rect.height);
+        return (E) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public E addToXSize(int x) {
         setXSize(xSize() + x);
         return (E) this;
@@ -1440,7 +1511,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     public Runnable addSizeListener(Runnable newListener) {
         if (this.onSizeChanged != null) {
-            this.onSizeChanged = SneakyUtils.combine(onSizeChanged, newListener);
+            this.onSizeChanged = SneakyUtils.concat(onSizeChanged, newListener);
         } else {
             this.onSizeChanged = newListener;
         }
@@ -1639,6 +1710,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return elementInitialized;
     }
 
+    public void setElementInitialized() {
+        elementInitialized = true;
+    }
+
     /**
      * Returns how far from this element the given point is.
      */
@@ -1700,10 +1775,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Override
     public String toString() {
-        return String.format("%s:[x=%s,y=%s,w=%s,h=%s|ix=%s,iy=%s,iw=%s,ih=%s]", //
-                getClass().getSimpleName(), //
-                xPos(), yPos(), xSize(), ySize(), //
-                getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height);
+        return String.format("%s:[x=%s,y=%s,w=%s,h=%s|ix=%s,iy=%s,iw=%s,ih=%s|children:%s]", //
+                getClass().getSimpleName(),
+                xPos(), yPos(), xSize(), ySize(),
+                getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height,
+                childElements.size());
     }
 
     public E modifyZOffset(double zOffset) {
@@ -2140,10 +2216,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite) {
         double zLevel = getRenderZLevel();
         //@formatter:off
-        builder.pos(x,          y + height, zLevel).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
-        builder.pos(x + width,  y + height, zLevel).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
-        builder.pos(x + width,  y,          zLevel).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
-        builder.pos(x,          y,          zLevel).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y,          zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
         //@formatter:on
     }
 
@@ -2159,15 +2235,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     public void drawSprite(IVertexBuilder builder, float x, float y, TextureAtlasSprite sprite) {
-        double zLevel = getRenderZLevel();
-        float width = sprite.getWidth();
-        float height = sprite.getHeight();
-        //@formatter:off
-        builder.pos(x,          y + height, zLevel).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
-        builder.pos(x + width,  y + height, zLevel).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
-        builder.pos(x + width,  y,          zLevel).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
-        builder.pos(x,          y,          zLevel).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
-        //@formatter:on
+        drawSprite(builder, x, y, sprite, 0xFFFFFFFF);
     }
 
     public void drawSprite(IVertexBuilder builder, float x, float y, TextureAtlasSprite sprite, int colour) {
@@ -2198,64 +2266,133 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         bufferRect(buffer, xPos + (xSize / 2F), yPos + (ySize / 2F), xSize / 2F, ySize / 2F, sprite.getMaxU() - (xSize / 2F) * uScale, sprite.getMaxV() - (ySize / 2F) * vScale, (xSize / 2F) * uScale, (ySize / 2F) * vScale);
     }
 
-    public void drawDynamicSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, float topTrim, float leftTrim, float bottomTrim, float rightTrim, TextureAtlasSprite sprite) {
-        float texU = sprite.getMinU();
-        float texV = sprite.getMinV();
-        float uu = sprite.getMaxU() - texU;
-        float vv = sprite.getMaxV() - texV;
-        int texWidth = sprite.getWidth();
-        int texHeight = sprite.getHeight();
-        float uScale = uu / texWidth;
-        float vScale = vv / texHeight;
+    public void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim) {
+        drawDynamicSprite(builder, tex, xPos, yPos, xSize, ySize, topTrim, leftTrim, bottomTrim, rightTrim, 0xFFFFFFFF);
+    }
 
-        float trimmedWidth = texWidth - leftTrim - rightTrim;
-        float trimmedHeight = texHeight - topTrim - bottomTrim;
-        if (xSize <= texWidth) trimmedWidth = Math.min(trimmedWidth, xSize - rightTrim);
-        if (xSize <= 0 || ySize <= 0 || trimmedWidth <= 0 || trimmedHeight <= 0) return;
 
-        for (float x = 0; x < xSize; ) {
-            float segmentWidth = Math.min(xSize - x, trimmedWidth);
-            float trimU = 0; //Texture Space X Pos
-            if (x == 0) {
-                trimU = texU;
-            } else if (x + trimmedWidth <= xSize) {
-                trimU = texU + (leftTrim * uScale);
-            } else {
-                trimU = texU + (texWidth - (xSize - x)) * uScale;
+    public void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour) {
+        int texWidth = tex.getWidth();
+        int texHeight = tex.getHeight();
+        int trimWidth = texWidth - leftTrim - rightTrim;
+        int trimHeight = texHeight - topTrim - bottomTrim;
+        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
+
+        for (int x = 0; x < xSize; ) {
+            int rWidth = Math.min(xSize - x, trimWidth);
+            int trimU = 0;
+            if (x != 0) {
+                if (x + leftTrim + trimWidth <= xSize) {
+                    trimU = leftTrim;
+                } else {
+                    trimU = (texWidth - (xSize - x));
+                }
             }
 
             //Top & Bottom trim
-            bufferRect(buffer, xPos + x, yPos, segmentWidth, topTrim, trimU, texV, segmentWidth * uScale, topTrim * vScale);
-            bufferRect(buffer, xPos + x, yPos + ySize - bottomTrim, segmentWidth, bottomTrim, trimU, texV + (texHeight - bottomTrim) * vScale, segmentWidth * uScale, bottomTrim * vScale);
+            bufferTexturedModalRect(builder, tex, xPos + x, yPos, trimU, 0, rWidth, topTrim, colour);
+            bufferTexturedModalRect(builder, tex, xPos + x, yPos + ySize - bottomTrim, trimU, texHeight - bottomTrim, rWidth, bottomTrim, colour);
 
-            segmentWidth = Math.min(xSize - x - leftTrim - rightTrim, trimmedWidth);
-            for (float y = 0; y < ySize; ) {
-                float segmentHeight = Math.min(ySize - y - topTrim - bottomTrim, trimmedHeight);
-                float trimV = y + texHeight <= ySize ? texV + topTrim * vScale : texV + (texHeight - (ySize - y)) * vScale;
+
+            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
+            for (int y = 0; y < ySize; ) {
+                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
+                int trimV;
+                if (y + (texHeight - topTrim - bottomTrim) <= ySize) {
+                    trimV = topTrim;
+                } else {
+                    trimV = texHeight - (ySize - y);
+                }
 
                 //Left & Right trim
-                if (x == 0) {
-                    bufferRect(buffer, xPos, yPos + y + topTrim, leftTrim, segmentHeight, texU, trimV, leftTrim * uScale, segmentHeight * vScale);
-                    bufferRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, rightTrim, segmentHeight, trimU + (texWidth - rightTrim) * uScale, trimV, rightTrim * uScale, segmentHeight * vScale);
+                if (x == 0 && y + topTrim < ySize - bottomTrim) {
+                    bufferTexturedModalRect(builder, tex, xPos, yPos + y + topTrim, 0, trimV, leftTrim, rHeight, colour);
+                    bufferTexturedModalRect(builder, tex, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight, colour);
                 }
 
                 //Core
-                if (y < ySize - bottomTrim && x < xSize - rightTrim) {
-                    bufferRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, segmentWidth, segmentHeight, texU + (leftTrim * uScale), texV + (topTrim * vScale), segmentWidth * uScale, segmentHeight * vScale);
+                if (y + topTrim < ySize - bottomTrim && x + leftTrim < xSize - rightTrim) {
+                    bufferTexturedModalRect(builder, tex, xPos + x + leftTrim, yPos + y + topTrim, leftTrim, topTrim, rWidth, rHeight, colour);
                 }
-                y += trimmedHeight;
+                y += trimHeight;
             }
-            x += trimmedWidth;
+            x += trimWidth;
         }
     }
 
+    private void bufferTexturedModalRect(IVertexBuilder builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour) {
+        double zLevel = getRenderZLevel();
+        int w = tex.getWidth();
+        int h = tex.getHeight();
+        int[] colours = ColourARGB.unpack(colour);
+        //@formatter:off
+        builder.pos(x,         y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU((textureX / w) * 16D),          tex.getInterpolatedV(((textureY + height) / h) * 16)).endVertex();
+        builder.pos(x + width, y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU(((textureX + width) / w) * 16), tex.getInterpolatedV(((textureY + height) / h) * 16)).endVertex();
+        builder.pos(x + width, y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU(((textureX + width) / w) * 16), tex.getInterpolatedV(((textureY) / h) * 16)).endVertex();
+        builder.pos(x,         y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU((textureX / w) * 16),           tex.getInterpolatedV(((textureY) / h) * 16)).endVertex();
+        //@formatter:on
+    }
+
+    //    public void drawDynamicSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, float topTrim, float leftTrim, float bottomTrim, float rightTrim, TextureAtlasSprite sprite) {
+//        float texU = sprite.getMinU();
+//        float texV = sprite.getMinV();
+//        float uu = sprite.getMaxU() - texU;
+//        float vv = sprite.getMaxV() - texV;
+//        int texWidth = sprite.getWidth();
+//        int texHeight = sprite.getHeight();
+//        float uScale = uu / texWidth;
+//        float vScale = vv / texHeight;
+//
+//        float trimmedWidth = texWidth - leftTrim - rightTrim;
+//        float trimmedHeight = texHeight - topTrim - bottomTrim;
+//        if (xSize <= texWidth) trimmedWidth = Math.min(trimmedWidth, xSize - rightTrim);
+//        if (xSize <= 0 || ySize <= 0 || trimmedWidth <= 0 || trimmedHeight <= 0) return;
+//
+//        for (float x = 0; x < xSize; ) {
+//            float segmentWidth = Math.min(xSize - x, trimmedWidth);
+//            float trimU = 0; //Texture Space X Pos
+//            if (x == 0) {
+//                trimU = texU;
+//            } else if (x + trimmedWidth <= xSize) {
+//                trimU = texU + (leftTrim * uScale);
+//            } else {
+//                trimU = texU + (texWidth - (xSize - x)) * uScale;
+//            }
+//
+//            //Top & Bottom trim
+//            bufferRect(buffer, xPos + x, yPos, segmentWidth, topTrim, trimU, texV, segmentWidth * uScale, topTrim * vScale);
+//            bufferRect(buffer, xPos + x, yPos + ySize - bottomTrim, segmentWidth, bottomTrim, trimU, texV + (texHeight - bottomTrim) * vScale, segmentWidth * uScale, bottomTrim * vScale);
+//
+//            segmentWidth = Math.min(xSize - x - leftTrim - rightTrim, trimmedWidth);
+//            for (float y = 0; y < ySize; ) {
+//                float segmentHeight = Math.min(ySize - y - topTrim - bottomTrim, trimmedHeight);
+//                float trimV = y + texHeight <= ySize ? texV + topTrim * vScale : texV + (texHeight - (ySize - y)) * vScale;
+//
+//                //Left & Right trim
+//                if (x == 0) {
+//                    bufferRect(buffer, xPos, yPos + y + topTrim, leftTrim, segmentHeight, texU, trimV, leftTrim * uScale, segmentHeight * vScale);
+//                    bufferRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, rightTrim, segmentHeight, trimU + (texWidth - rightTrim) * uScale, trimV, rightTrim * uScale, segmentHeight * vScale);
+//                }
+//
+//                //Core
+//                if (y < ySize - bottomTrim && x < xSize - rightTrim) {
+//                    bufferRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, segmentWidth, segmentHeight, texU + (leftTrim * uScale), texV + (topTrim * vScale), segmentWidth * uScale, segmentHeight * vScale);
+//                }
+//                y += trimmedHeight;
+//            }
+//            x += trimmedWidth;
+//        }
+//    }
+//
+    @Deprecated
     private void bufferRect(IVertexBuilder buffer, float x, float y, float width, float height, float minU, float minV, float tWidth, float tHeight) {
         double zLevel = getRenderZLevel();
         //@formatter:off
-        buffer.pos(x,           y + height, zLevel).tex(minU, minV + tHeight).endVertex();
-        buffer.pos(x + width,   y + height, zLevel).tex(minU + tWidth, minV + tHeight).endVertex();
-        buffer.pos(x + width,   y,          zLevel).tex(minU + tWidth, minV).endVertex();
-        buffer.pos(x,           y,          zLevel).tex(minU, minV).endVertex();
+        buffer.pos(x,           y + height, zLevel).color(1F, 1F, 1F, 1F).tex(minU, minV + tHeight).endVertex();
+        buffer.pos(x + width,   y + height, zLevel).color(1F, 1F, 1F, 1F).tex(minU + tWidth, minV + tHeight).endVertex();
+        buffer.pos(x + width,   y,          zLevel).color(1F, 1F, 1F, 1F).tex(minU + tWidth, minV).endVertex();
+        buffer.pos(x,           y,          zLevel).color(1F, 1F, 1F, 1F).tex(minU, minV).endVertex();
         //@formatter:on
     }
 
@@ -2319,6 +2456,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //        //@formatter:on
 //    }
 
+    public void drawGradient(IRenderTypeBuffer getter, double xPos, double yPos, double xSize, double ySize, int startColor, int endColor) {
+        drawGradientRect(getter, xPos, yPos, xPos + xSize, yPos + ySize, startColor, endColor);
+    }
+
     public void drawGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int startColor, int endColor) {
         if (startColor == endColor && endColor == 0) return;
         double zLevel = getRenderZLevel();
@@ -2331,6 +2472,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
         float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(endColor         & 255) / 255.0F;
+
         IVertexBuilder builder = getter.getBuffer(transColourType);
         builder.pos(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
         builder.pos( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
@@ -2492,7 +2634,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
         IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
         MatrixStack textStack = new MatrixStack();
-        textStack.translate(0.0D, 0.0D, getRenderZLevel() + 1);
+        textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.getLast().getMatrix();
         int i = fontRenderer.renderString(text, x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
         renderType.finish();
@@ -2505,7 +2647,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
         IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
         MatrixStack textStack = new MatrixStack();
-        textStack.translate(0.0D, 0.0D, getRenderZLevel() + 1);
+        textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.getLast().getMatrix();
         fontRenderer.renderString(text, x - fontRenderer.getStringWidth(text) / 2F, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
         renderType.finish();
@@ -2531,6 +2673,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
+    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
+        drawCustomString(fr, text, x, y, width, colour, alignment, rotation, wrap, trim, false, dropShadow);
+    }
+
     /**
      * This is an advanced draw string method with all sorts of built in fancy stuff.
      *
@@ -2540,10 +2686,15 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * @param wrap      if true the text will wrap (milty line text) if the text is longer than xSize. (Not compatible with trim)
      * @param trim      if true the text will be trimmed to xSize if it is too long. When trimmed "..." will be appended to the end of the string.
      */
-    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
+    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean midTrim, boolean dropShadow) {
         if (width <= 0) return;
         if (trim && fr.getStringWidth(text) > width) {
-            text = fr.trimStringToWidth(text, width - 8) + "..";
+            int dotW = fr.getStringWidth("..");
+            if (midTrim) {
+                text = fr.trimStringToWidth(text, (width / 2) - (dotW / 2)) + ".." + fr.trimStringToWidth(text, (width / 2) - (dotW / 2), true);
+            } else {
+                text = fr.trimStringToWidth(text, width - dotW) + "..";
+            }
         }
 
         if (rotation == TextRotation.NORMAL) {
@@ -3016,7 +3167,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @SuppressWarnings("unchecked")
     public List<String> getHoverText() {
-        return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E)this);
+        return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E) this);
     }
 
     public int getHoverTime() {

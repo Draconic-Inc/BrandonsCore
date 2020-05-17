@@ -5,11 +5,12 @@ import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
+import com.brandon3055.brandonscore.client.gui.modulargui.ThemedElements;
+import com.brandon3055.brandonscore.client.gui.modulargui.ThemedElements.DialogBackground;
+import com.brandon3055.brandonscore.client.gui.modulargui.ThemedElements.DialogBar;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
+import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
 import com.brandon3055.brandonscore.BCConfig;
@@ -32,11 +33,15 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
+import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LEFT;
 import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.*;
+import static net.minecraft.util.text.TextFormatting.GRAY;
+import static net.minecraft.util.text.TextFormatting.YELLOW;
 
 /**
  * Created by brandon3055 on 5/7/19.
@@ -79,7 +84,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     public GuiButton createRSSwitch(IRSSwitchable switchable) {
         GuiButton button = new GuiButton();
-        addButtonHoverHighlight(button);
+        addHoverHighlight(button);
         button.setHoverTextDelay(10);
         button.setSize(12, 12);
         GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase()));
@@ -155,7 +160,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 Material slot = BCSprites.getThemed("slot");
                 IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-                IVertexBuilder buffer = getter.getBuffer(BCSprites.guiType);
+                IVertexBuilder buffer = getter.getBuffer(BCSprites.guiTexType);
 
                 for (int x = 0; x < columns; x++) {
                     for (int y = 0; y < rows; y++) {
@@ -384,37 +389,23 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createThemedIconButton(GuiElement<?> parent, String iconString) {
-        GuiButton button = new GuiButton();
-        addButtonHoverHighlight(button);
-        button.setHoverTextDelay(10);
-        button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.getThemed(iconString));
-        button.addChild(icon);
-        if (parent != null) {
-            parent.addChild(button);
-        }
-        return button;
+        return createIconButton(parent, 12, BCSprites.themedGetter(iconString));
     }
 
-    public GuiButton createIconButton(GuiElement<?> parent, String iconString) {
-        GuiButton button = new GuiButton();
-        addButtonHoverHighlight(button);
-        button.setHoverTextDelay(10);
-        button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get(iconString));
-        button.addChild(icon);
-        if (parent != null) {
-            parent.addChild(button);
-        }
-        return button;
+    public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<Material> iconSupplier) {
+        return createIconButton(parent, size, size, iconSupplier);
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, String iconString) {
+        return createIconButton(parent, buttonSize, iconSize, BCSprites.getter(iconString));
+    }
+
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
         GuiButton button = new GuiButton();
         button.setHoverTextDelay(10);
         button.setSize(buttonSize, buttonSize);
-        addButtonHoverHighlight(button);
-        GuiTexture icon = new GuiTexture(iconSize, iconSize, () -> BCSprites.get(iconString));
+        addHoverHighlight(button);
+        GuiTexture icon = new GuiTexture(iconSize, iconSize, iconSupplier);
         button.addChild(icon.setPos(-((iconSize - buttonSize) / 2), -((iconSize - buttonSize) / 2)));
         if (parent != null) {
             parent.addChild(button);
@@ -422,13 +413,50 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return button;
     }
 
-    private void addButtonHoverHighlight(GuiButton button) {
-        GuiBorderedRect rect = new GuiBorderedRect();
-        rect.setBorderColourL(Palette.Ctrl::fill);
-        rect.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
-        rect.setEnabledCallback(() -> button.getHoverTime() > 0);
-        button.addBackGroundChild(rect);
+    public static GuiBorderedRect addHoverHighlight(GuiElement button) {
+        return addHoverHighlight(button, 0, 0);
     }
+
+    public static GuiBorderedRect addHoverHighlight(GuiElement button, int xOversize, int yOversize) {
+        return addHoverHighlight(button, xOversize, yOversize, false);
+    }
+
+    public static GuiBorderedRect addHoverHighlight(GuiElement button, int xOversize, int yOversize, boolean transparent) {
+        return addHoverHighlight(button, xOversize, xOversize, yOversize, yOversize, transparent);
+    }
+
+    public static GuiBorderedRect addHoverHighlight(GuiElement button, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
+        GuiBorderedRect rect = new GuiBorderedRect();
+        rect.setBorderColourL(hovering -> Palette.Ctrl.fill(hovering) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF));
+        rect.setPosModifiers(() -> button.xPos() - leftOversize, () -> button.yPos() - topOversize);
+        rect.setSizeModifiers(() -> button.xSize() + leftOversize + rightOversize, () -> button.ySize() + topOversize + bottomOversize);
+        rect.setEnabledCallback(() -> button.getHoverTime() > 0);
+        if (transparent) {
+            button.addChild(rect);
+        } else {
+            button.addBackGroundChild(rect);
+        }
+        return rect;
+    }
+
+    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier) {
+        GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
+        GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
+        addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> base.getHoverTime() > 0);
+        base.addChild(icon);
+        parent.addChild(base);
+        return base;
+    }
+
+    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier, Function<GuiElement, Boolean> highlight) {
+        GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
+        GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
+        addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> highlight.apply(base));
+        base.addChild(icon);
+        parent.addChild(base);
+        return base;
+    }
+
 
     //endregion
 
@@ -473,12 +501,79 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return panel;
     }
 
+    //Dialogs
+
+    public static <T> GuiSelectDialog<T> createStandardDialog(GuiElement<?> parent, @Nullable String heading) {
+        GuiSelectDialog<T> dialog = new GuiSelectDialog<>(parent);
+        if (heading != null) {
+            GuiLabel headingLabel = new GuiLabel(heading);
+            headingLabel.setPos(4, 4); //Default element position is 0, 0 so these dont need to be relative at this point.
+            headingLabel.setYSize(8);
+            headingLabel.setXSizeMod(() -> dialog.xSize() - 8);
+            headingLabel.setAlignment(LEFT);
+            dialog.addChild(headingLabel);
+        }
+        dialog.setInsets(heading == null ? 3 : 14, 3, 3, 3);
+        dialog.addBackGroundChild(new DialogBackground(heading != null).bindSize(dialog, false));
+        GuiSlideControl scrollBar = dialog.getScrollElement().getVerticalScrollBar();
+        scrollBar.setBackgroundElement(new DialogBar(true));
+        scrollBar.setSliderElement(new DialogBar(false));
+        scrollBar.setXSize(5).setInsets(0, 0, 0, 0);
+        scrollBar.updateElements();
+        return dialog;
+    }
+
+    public static <T> GuiSelectDialog<T> createStandardDialog(GuiElement<?> parent, @Nullable String heading, Function<T, String> nameSupplier) {
+        GuiSelectDialog<T> dialog = createStandardDialog(parent, heading);
+        dialog.setRendererBuilder(e -> {
+            GuiLabel label = new GuiLabel(() -> nameSupplier.apply(e));
+            label.setInsets(0, 2, 0, 2);
+            label.setYSize(10);
+            label.setTextColour(GRAY, YELLOW);
+            label.setAlignment(LEFT);
+            GuiToolkit.addHoverHighlight(label, 0, 0, 0, 0, false);
+            return label;
+        });
+
+        dialog.onReload(d -> {
+            int height = (d.getItems().size() * 10) + (heading == null ? 6 : 17);
+            int width = d.getItems().stream()
+                    .map(nameSupplier)
+                    .mapToInt(e -> parent.fontRenderer.getStringWidth(e))
+                    .max().orElse(50);
+            width = Math.max(width, heading == null ? 0 : parent.fontRenderer.getStringWidth(heading)) + (height > d.ySize() ? 15 : 10);
+            d.setXSize(width);
+        });
+
+        return dialog;
+    }
+
+    public static <T> GuiSelectDialog<T> createStandardDialog(GuiElement<?> parent, @Nullable String heading, Function<T, String> nameSupplier, Collection<T> items) {
+        GuiSelectDialog<T> dialog = createStandardDialog(parent, heading, nameSupplier);
+        int height = (items.size() * 10) + (heading == null ? 6 : 17);
+        dialog.setYSize(height);
+        dialog.addItems(items);
+        return dialog;
+    }
+
+    public static <T> GuiSelectDialog<T> createStandardDialog(GuiElement<?> parent, @Nullable String heading, Function<T, String> nameSupplier, Collection<T> items, int maxWidth, int maxHeight) {
+        GuiSelectDialog<T> dialog = createStandardDialog(parent, heading, nameSupplier, items);
+        dialog.onReload(e -> e.setSize(Math.min(e.xSize(), maxWidth), Math.min(e.ySize(), maxHeight)));
+        return dialog;
+    }
+
+
     //etc...
 
     //LayoutUtils
     public void center(GuiElement element, GuiElement centerOn, int xOffset, int yOffset) {
         element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2));
         element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2));
+    }
+
+    public void center(GuiElement element, int xPos, int yPos) {
+        element.setXPos(xPos - (element.xSize() / 2));
+        element.setYPos(yPos - (element.ySize() / 2));
     }
 
     public void centerX(GuiElement element, GuiElement centerOn, int xOffset) {

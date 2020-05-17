@@ -117,9 +117,9 @@ public abstract class MDElementBase<E extends GuiElement<E>> extends GuiElement<
             invalidProps.forEach(s -> list.add(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c"));
             errors.forEach(s -> list.add(S + "c" + s + S + "c"));
             zOffset += 100;
-            BCFontRenderer.setStileToggleMode(true);
+//            BCFontRenderer.setStileToggleMode(true);
             drawHoveringText(list, xPos() - 8, yPos() + 15, fontRenderer, screenWidth, screenHeight);
-            BCFontRenderer.setStileToggleMode(false);
+//            BCFontRenderer.setStileToggleMode(false);
 //            fontRenderer.resetStyles();//TODO Font Renderer
             zOffset -= 100;
         }

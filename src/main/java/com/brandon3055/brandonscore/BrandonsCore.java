@@ -6,6 +6,12 @@ import com.brandon3055.brandonscore.command.CommandTPX;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -22,7 +28,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.lwjgl.glfw.GLFW;
 
 
 @Mod(BrandonsCore.MODID)
@@ -38,17 +44,16 @@ public class BrandonsCore {
         FileHandler.init();
 
         Logger deLog = LogManager.getLogger("draconicevolution");
-        LogHelperBC.info("Brandon's Core online! Waiting for Draconic Evolution to join the party....");
         if (ModList.get().isLoaded("draconicevolution")) {
-            deLog.log(Level.INFO, "Draconic Evolution online!");
-            LogHelperBC.info("Hay! There you are! Now lets destroy some worlds!!");
-            deLog.log(Level.INFO, "Sounds like fun! Lets get to it!");
+            deLog.log(Level.WARN, "Warning! Reactor detonation imminent!");
+            LogHelperBC.info("Oh no... Not again...");
         } else {
-            deLog.log(Level.INFO, "...");
-            LogHelperBC.info("Aww... Im sad now...");
+            LogHelperBC.info("Hay! Where's DE?");
+            LogHelperBC.info("Oh well.. At least we dont have to worry about getting blown up now...");
         }
 
         proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
+        proxy.construct();
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
         MinecraftForge.EVENT_BUS.register(this);
 //        FMLJavaModLoadingContext.get().getModEventBus().register(new BCConfig());
@@ -57,26 +62,42 @@ public class BrandonsCore {
         modLoadingContext.registerConfig(ModConfig.Type.CLIENT, BCConfig.CLIENT_SPEC);
         modLoadingContext.registerConfig(ModConfig.Type.SERVER, BCConfig.SERVER_SPEC);
         modLoadingContext.registerConfig(ModConfig.Type.COMMON, BCConfig.COMMON_SPEC);
+
+//        MainWindow window = Minecraft.getInstance().getMainWindow();
+//        GLFW.glfwSetWindowPos(window.getHandle(), 0, 1080);
+//        GLFW.glfwMaximizeWindow(window.getHandle());
     }
 
     @SubscribeEvent
     public void onCommonSetup(FMLCommonSetupEvent event) {
         proxy.commonSetup(event);
-
-//        ModList.get().getModContainerById(MODID).get().addConfig();
-//        ModList.get().getAllScanData()
     }
 
     @SubscribeEvent
     public void onClientSetup(FMLClientSetupEvent event) {
         proxy.clientSetup(event);
+        posWindow();
     }
 
+    @OnlyIn(Dist.CLIENT)
+    private void posWindow() {
+        MainWindow window = Minecraft.getInstance().getMainWindow();
+        GLFW.glfwSetWindowPos(window.getHandle(), 0, 1080);
+        GLFW.glfwMaximizeWindow(window.getHandle());
+    }
 
-
+    private boolean autoConnected = false;
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public void onColourSetup(ColorHandlerEvent.Block event) {
-        proxy.onColourSetup(event);
+    public void initGui(GuiScreenEvent.InitGuiEvent.Post event) {
+        if (event.getGui() instanceof MainMenuScreen && !autoConnected) {
+            autoConnected = true;
+            new Thread(() -> {
+//                SneakyUtils.sneak(() -> Thread.sleep(500)).run();
+                Minecraft mc = Minecraft.getInstance();
+                mc.deferTask(() -> mc.launchIntegratedServer("New World", "Main Test World", null));
+            }).start();
+        }
     }
 
     @SubscribeEvent

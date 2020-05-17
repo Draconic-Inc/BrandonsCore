@@ -61,8 +61,8 @@ public final class ItemNBTHelper {
         else return stack.getTag().contains(tag);
     }
 
-    public static byte getByte(ItemStack stack, String tag, byte defaultExpected) {
-        return verifyExistance(stack, tag) ? stack.getTag().getByte(tag) : defaultExpected;
+    public static byte getByte(ItemStack stack, String tag, int defaultExpected) {
+        return verifyExistance(stack, tag) ? stack.getTag().getByte(tag) : (byte) defaultExpected;
     }
 
     public static boolean getBoolean(ItemStack stack, String tag, boolean defaultExpected) {

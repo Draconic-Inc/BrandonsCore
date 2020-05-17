@@ -2,6 +2,9 @@ package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.fonts.Font;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.texture.TextureManager;
 
 import java.util.HashMap;
@@ -23,6 +26,27 @@ public class BCFontRenderer extends FontRenderer {
     }
 
     int recurs = 0;
+
+    //This is a temporary hack that wont be needed once i re write my gui system
+    @Override
+    public int renderStringAt(String text, float x, float y, int color, boolean dropShadow, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparentIn, int colorBackgroundIn, int packedLight) {
+        if (this.bidiFlag) {
+            text = this.bidiReorder(text);
+        }
+
+        if ((color & -67108864) == 0) {
+            color |= -16777216;
+        }
+
+        if (dropShadow) {
+            this.renderStringAtPos(text, x, y, color, true, matrix, buffer, transparentIn, colorBackgroundIn, packedLight);
+        }
+
+        Matrix4f matrix4f = matrix.copy();
+//        matrix4f.translate(new Vector3f(0.0F, 0.0F, 0.001F));
+        x = this.renderStringAtPos(text, x, y, color, false, matrix4f, buffer, transparentIn, colorBackgroundIn, packedLight);
+        return (int)x + (dropShadow ? 1 : 0);
+    }
 
 //    @Override
 //    public String wrapFormattedStringToWidth(String str, int wrapWidth) {
@@ -345,64 +369,64 @@ public class BCFontRenderer extends FontRenderer {
 //        return index != totalLength && lastWord != -1 && lastWord < index ? lastWord : index;
 //    }
 
-    /**
-     * This should be enabled before you start drawing and disabled immediately after.
-     */
-    public static void setStileToggleMode(boolean enabled) {
-        styleToggleMode = enabled;
-        colourSet = false;
-    }
-
-    public FontState getState() {
-        return new FontState(this);
-    }
-
-    public void loadState(FontState state) {
-        state.apply(this);
-    }
-
-    public static class FontState {
-        public boolean unicodeFlag;
-        public boolean bidiFlag;
-        public float red;
-        public float blue;
-        public float green;
-        public float alpha;
-        public int textColor;
-        public boolean randomStyle;
-        public boolean boldStyle;
-        public boolean italicStyle;
-        public boolean underlineStyle;
-        public boolean strikethroughStyle;
-
-        protected FontState(BCFontRenderer font) {
-//            unicodeFlag = font.unicodeFlag;
-//            bidiFlag = font.bidiFlag;
-//            red = font.red;
-//            blue = font.blue;
-//            green = font.green;
-//            alpha = font.alpha;
-//            textColor = font.textColor;
-//            boldStyle = font.boldStyle;
-//            italicStyle = font.italicStyle;
-//            underlineStyle = font.underlineStyle;
-//            strikethroughStyle = font.strikethroughStyle;
-        }
-
-        private void apply(BCFontRenderer font) {
-//            font.unicodeFlag = unicodeFlag;
-//            font.bidiFlag = bidiFlag;
-//            font.red = red;
-//            font.blue = blue;
-//            font.green = green;
-//            font.alpha = alpha;
-//            font.textColor = textColor;
-//            font.boldStyle = boldStyle;
-//            font.italicStyle = italicStyle;
-//            font.underlineStyle = underlineStyle;
-//            font.strikethroughStyle = strikethroughStyle;
-//            font.setColor(red, green, blue, alpha);
-        }
-
-    }
+//    /**
+//     * This should be enabled before you start drawing and disabled immediately after.
+//     */
+//    public static void setStileToggleMode(boolean enabled) {
+//        styleToggleMode = enabled;
+//        colourSet = false;
+//    }
+//
+//    public FontState getState() {
+//        return new FontState(this);
+//    }
+//
+//    public void loadState(FontState state) {
+//        state.apply(this);
+//    }
+//
+//    public static class FontState {
+//        public boolean unicodeFlag;
+//        public boolean bidiFlag;
+//        public float red;
+//        public float blue;
+//        public float green;
+//        public float alpha;
+//        public int textColor;
+//        public boolean randomStyle;
+//        public boolean boldStyle;
+//        public boolean italicStyle;
+//        public boolean underlineStyle;
+//        public boolean strikethroughStyle;
+//
+//        protected FontState(BCFontRenderer font) {
+////            unicodeFlag = font.unicodeFlag;
+////            bidiFlag = font.bidiFlag;
+////            red = font.red;
+////            blue = font.blue;
+////            green = font.green;
+////            alpha = font.alpha;
+////            textColor = font.textColor;
+////            boldStyle = font.boldStyle;
+////            italicStyle = font.italicStyle;
+////            underlineStyle = font.underlineStyle;
+////            strikethroughStyle = font.strikethroughStyle;
+//        }
+//
+//        private void apply(BCFontRenderer font) {
+////            font.unicodeFlag = unicodeFlag;
+////            font.bidiFlag = bidiFlag;
+////            font.red = red;
+////            font.blue = blue;
+////            font.green = green;
+////            font.alpha = alpha;
+////            font.textColor = textColor;
+////            font.boldStyle = boldStyle;
+////            font.italicStyle = italicStyle;
+////            font.underlineStyle = underlineStyle;
+////            font.strikethroughStyle = strikethroughStyle;
+////            font.setColor(red, green, blue, alpha);
+//        }
+//
+//    }
 }

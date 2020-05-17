@@ -174,7 +174,7 @@ public class GuiHelper {
     }
 
     @Deprecated
-    public static void drawGradientRect(int left, int top, int right, int bottom, int colour1, int colour2, float fade, double zLevel) {
+    public static void drawGradientRect(float left, float top, float right, float bottom, int colour1, int colour2, float fade, double zLevel) {
         float f = ((colour1 >> 24 & 255) / 255.0F) * fade;
         float f1 = (float) (colour1 >> 16 & 255) / 255.0F;
         float f2 = (float) (colour1 >> 8 & 255) / 255.0F;

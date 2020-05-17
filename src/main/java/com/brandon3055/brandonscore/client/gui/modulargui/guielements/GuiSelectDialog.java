@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatche
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.client.Minecraft;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -281,17 +282,18 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (mouseButton == 0)
-        for (T item : filteredItems) {
-            if (sectionElements.get(item).isMouseOver(mouseX, mouseY)) {
-                if (listener != null) {
-                    listener.onMGuiEvent(new GuiEvent.SelectEvent(this, item, sectionElements.get(item)), this);
+        if (mouseButton == 0) {
+            for (T item : filteredItems) {
+                if (sectionElements.get(item).isMouseOver(mouseX, mouseY)) {
+                    if (listener != null) {
+                        listener.onMGuiEvent(new GuiEvent.SelectEvent(this, item, sectionElements.get(item)), this);
+                    }
+                    if (selectionListener != null) {
+                        selectionListener.accept(item);
+                    }
+                    if (closeOnSelection) close();
+                    return true;
                 }
-                if (selectionListener != null) {
-                    selectionListener.accept(item);
-                }
-                if (closeOnSelection) close();
-                return true;
             }
         }
 

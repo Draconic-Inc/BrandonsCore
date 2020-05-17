@@ -83,9 +83,9 @@ public class TextElement extends MDElementBase<TextElement> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
 //        fontRenderer.resetStyles(); //TODO font renderer changes
-        BCFontRenderer.setStileToggleMode(true);
+//        BCFontRenderer.setStileToggleMode(true);
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        BCFontRenderer.setStileToggleMode(false);
+//        BCFontRenderer.setStileToggleMode(false);
 //        fontRenderer.resetStyles();
     }
 

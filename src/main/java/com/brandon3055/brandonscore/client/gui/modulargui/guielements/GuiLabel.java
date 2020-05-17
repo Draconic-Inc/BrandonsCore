@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 public class GuiLabel extends GuiElement<GuiLabel> {
 
     protected boolean trim = true;
+    protected boolean midTrim = false;
     protected boolean wrap = false;
     protected boolean dropShadow = true;
     protected GuiAlign alignment = GuiAlign.CENTER;
@@ -41,6 +42,10 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
     public GuiLabel(String labelText) {
         this.labelText = labelText;
+    }
+
+    public GuiLabel(Supplier<String> displayStringSupplier) {
+        this.setDisplaySupplier(displayStringSupplier);
     }
 
     public GuiLabel(int xPos, int yPos, String labelText) {
@@ -88,6 +93,11 @@ public class GuiLabel extends GuiElement<GuiLabel> {
     public GuiLabel setTrim(boolean trim) {
         this.trim = trim;
         if (trim) wrap = false;
+        return this;
+    }
+
+    public GuiLabel setMidTrim(boolean midTrim) {
+        this.midTrim = midTrim;
         return this;
     }
 
@@ -201,20 +211,20 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
             switch (rotation) {
                 case NORMAL:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
+                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
                     break;
                 case ROT_CC:
                     xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
                     yPos = getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
+                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
                     break;
                 case ROT_C:
                     xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
                     yPos = getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
+                    drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
                     break;
                 case ROT_180:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, hasShadow());
+                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
                     break;
             }
             RenderSystem.color4f(1, 1, 1, 1);

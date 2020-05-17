@@ -233,6 +233,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
     public <C extends GuiElement> C removeChild(C child) {
         scrollingElements.remove(child);
         backgroundElements.remove(child);
+        foregroundElements.remove(child);
         return super.removeChild(child);
     }
 
@@ -387,8 +388,8 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         horizontalMaxScroll = Math.max(0, scrollBounds.getMaxX() - getInsetRect().getMaxX());
         boolean hozExc = Math.abs(horizontalMinScroll) + Math.abs(horizontalMaxScroll) <= 0;
 
-        boolean canDisVert = vertExc || !enableVerticalScroll; //If true then will be disabled regardless
-        boolean canDisHoz = hozExc || !enableHorizontalScroll;   //If true then will be disabled regardless
+        boolean canDisVert = vertExc || !enableVerticalScroll || scrollingElements.isEmpty(); //If true then will be disabled regardless
+        boolean canDisHoz = hozExc || !enableHorizontalScroll || scrollingElements.isEmpty();   //If true then will be disabled regardless
 
         if (!canDisVert && vertNoExc) {
             canDisVert = canDisHoz || hozNoExc;
@@ -682,7 +683,7 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
         double scaledWidth = xSize * xResScale;
         double scaledHeight = ySize * yResScale;
         int x = (int) (xPos * xResScale);
-        int y = (int) (displayHeight() - (yPos * yResScale) - scaledHeight);
+        int y = (int) (displayHeight() - (yPos * yResScale) - scaledHeight + 1);
 
         ScissorHelper.pushScissor(x, y, (int) scaledWidth, (int) scaledHeight);
 

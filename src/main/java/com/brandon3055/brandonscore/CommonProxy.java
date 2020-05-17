@@ -27,8 +27,12 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
  */
 public class CommonProxy {
 
-    public void commonSetup(FMLCommonSetupEvent event) {
+    public void construct() {
         BCoreNetwork.init();
+    }
+
+    public void commonSetup(FMLCommonSetupEvent event) {
+
         //Switched to annotation
 //        MinecraftForge.EVENT_BUS.register(new BCEventHandler());
 //        MinecraftForge.EVENT_BUS.register(new ModFeatureParser());
@@ -42,8 +46,6 @@ public class CommonProxy {
     public void serverSetup(FMLDedicatedServerSetupEvent event) {
 
     }
-
-    public void onColourSetup(ColorHandlerEvent.Block event) {}
 
     public MinecraftServer getMCServer() {
         return ServerLifecycleHooks.getCurrentServer();
@@ -111,4 +113,5 @@ public class CommonProxy {
     public int tickTimer() {
         return TimeKeeper.getServerTick();
     }
+
 }

@@ -10,7 +10,9 @@ import net.minecraft.client.gui.IHasContainer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -30,6 +32,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     protected T container;
     protected boolean itemTooltipsEnabled = true;
     public boolean enableDefaultBackground = true;
+    private boolean experimentalSlotOcclusion = false;
     @Deprecated
     protected boolean dumbGui = false;
 
@@ -145,8 +148,30 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!dumbGui && manager.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
+        } else {
+            InputMappings.Input mouseKey = InputMappings.getInputByCode(keyCode, scanCode);
+            if (keyCode == 256 || this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(mouseKey)) {
+                this.minecraft.player.closeScreen();
+                onClose();
+                return true; // Forge MC-146650: Needs to return true when the key is handled.
+            }
+
+            if (this.func_195363_d(keyCode, scanCode))
+                return true; // Forge MC-146650: Needs to return true when the key is handled.
+            if (this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
+                if (this.minecraft.gameSettings.keyBindPickBlock.isActiveAndMatches(mouseKey)) {
+                    this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, 0, ClickType.CLONE);
+                    return true; // Forge MC-146650: Needs to return true when the key is handled.
+                } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
+                    this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, hasControlDown() ? 1 : 0, ClickType.THROW);
+                    return true; // Forge MC-146650: Needs to return true when the key is handled.
+                }
+            } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
+                return true; // Forge MC-146650: Emulate MC bug, so we don't drop from hotbar when pressing drop without hovering over a item.
+            }
+
+            return false; // Forge MC-146650: Needs to return false when the key is not handled.
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -208,7 +233,9 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         renderOverlayLayer(mouseX, mouseY, partialTicks);
 
         if (itemTooltipsEnabled) {
+//            RenderSystem.translated(0, 0, 300);
             renderHoveredToolTip(mouseX, mouseY);
+//            RenderSystem.translated(0, 0, -300);
         }
     }
 
@@ -268,8 +295,9 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
                 this.drawSlot(slot);
             }
 
-            if (!manager.isAreaUnderElement(slot.xPos + guiLeft(), slot.yPos + guiTop(), 16, 16, 100)) {
-                if (this.isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+            boolean occluded = manager.isAreaUnderElement(slot.xPos + guiLeft(), slot.yPos + guiTop(), 16, 16, 100);
+            if (!occluded || experimentalSlotOcclusion) {
+                if (!occluded && this.isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
                     this.hoveredSlot = slot;
                     RenderSystem.disableDepthTest();
                     int j1 = slot.xPos;
@@ -280,7 +308,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
                     RenderSystem.colorMask(true, true, true, true);
                     RenderSystem.enableDepthTest();
                 }
-                drawSlotOverlay(slot);
+                drawSlotOverlay(slot, occluded);
             }
         }
 
@@ -328,7 +356,8 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         int yPos = slotIn.yPos;
         int xPos = slotIn.xPos;
 
-        if (manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100)) {
+        boolean occluded = manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100);
+        if (occluded && !experimentalSlotOcclusion) {
             return;
         }
 
@@ -379,17 +408,26 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
             RenderSystem.enableDepthTest();
             this.itemRenderer.renderItemAndEffectIntoGUI(this.minecraft.player, itemstack, xPos, yPos);
-            this.itemRenderer.renderItemOverlayIntoGUI(this.font, itemstack, xPos, yPos, s);
+            if (!occluded) {
+                this.itemRenderer.renderItemOverlayIntoGUI(this.font, itemstack, xPos, yPos, s);
+            }
         }
 
         this.itemRenderer.zLevel = 0.0F;
         this.setBlitOffset(0);
     }
 
-    protected void drawSlotOverlay(Slot slot) {}
+    protected void drawSlotOverlay(Slot slot, boolean occluded) {}
+
+    public void setExperimentalSlotOcclusion(boolean experimentalSlotOcclusion) {
+        this.experimentalSlotOcclusion = experimentalSlotOcclusion;
+    }
 
     public int getGuiLeft() { return guiLeft(); }
+
     public int getGuiTop() { return guiTop(); }
+
     public int getXSize() { return xSize(); }
+
     public int getYSize() { return ySize(); }
 }

@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -34,40 +35,41 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         boolean hovering = isMouseOver(mouseX, mouseY);
-
+        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
         if (is3dEffect) {
             int fill = getFillColour(hovering);
             int topLeft = getBorderTopLeft(hovering);
             int bottomRight = getBorderBottomRight(hovering);
             if (doubleBorder > 0) {
                 int border = getBorderColour(hovering);
-                drawBorderedRect(xPos(), yPos(), xSize(), ySize(), doubleBorder, fill, border);
+                drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), doubleBorder, fill, border);
             }
-            drawShadedRect(xPos() + doubleBorder, yPos() + doubleBorder, xSize() - (2 * doubleBorder), ySize() - (2 * doubleBorder), borderWidth, fill, topLeft, bottomRight, midColour(topLeft, bottomRight));
+            drawShadedRect(getter, xPos() + doubleBorder, yPos() + doubleBorder, xSize() - (2 * doubleBorder), ySize() - (2 * doubleBorder), borderWidth, fill, topLeft, bottomRight, midColour(topLeft, bottomRight));
         } else {
-            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), borderWidth, getFillColour(hovering), getBorderColour(hovering));
+            drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), borderWidth, getFillColour(hovering), getBorderColour(hovering));
         }
+        getter.finish();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 
     //region Colour setters and getters
 
-    public GuiBorderedRect setColours(int fill, int fillHover, int border, int borderHover) {
+    public GuiBorderedRect setShadeColours(int fill, int fillHover, int border, int borderHover) {
         setFillColours(fill, fillHover);
         setBorderColours(border, borderHover);
         return this;
     }
 
-    public GuiBorderedRect setColours(int fill, int border) {
+    public GuiBorderedRect setShadeColours(int fill, int border) {
         setFillColour(fill);
         setBorderColour(border);
         return this;
     }
 
-    public GuiBorderedRect setColours(int fill, int border, int shade) {
+    public GuiBorderedRect setShadeColours(int fill, int topLeft, int bottomRight) {
         setFillColour(fill);
-        setBorderColour(border);
-        set3dBottomRightColour(shade);
+        set3dTopLeftColour(topLeft);
+        set3dBottomRightColour(bottomRight);
         return this;
     }
 

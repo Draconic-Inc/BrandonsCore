@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.client.CursorHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui.JEITargetAdapter;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatcher;
@@ -9,6 +10,7 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.List;
@@ -32,6 +34,9 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     private List<GuiElement> toRemove = new ArrayList<GuiElement>();
     private Supplier<List<GuiElement>> jeiExclusions = null;
     private List<JEITargetAdapter> jeiGhostTargets = new ArrayList<>();
+    private ResourceLocation newCursor = null;
+    private boolean mousePressed = false;
+//    private boolean passClick = false;
 
     public GuiElementManager(IModularGui parentGui) {
         this.parentGui = parentGui;
@@ -63,6 +68,10 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return initialized;
     }
 
+    public void setCursor(ResourceLocation cursor) {
+        this.newCursor = cursor;
+    }
+
     //region Elements
 
     /**
@@ -82,6 +91,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         if (displayZLevel >= 950) {
             LogHelperBC.error("ModularGui Display Level Out Of Bounds! Can not be greater than 950 " + displayZLevel);
         }
+        toRemove.remove(element);
         element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRenderer));
         element.displayZLevel = displayZLevel;
         if (first) {
@@ -91,6 +101,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         }
         if (!element.isElementInitialized()) {
             element.addChildElements();
+            element.setElementInitialized();
         }
         requiresReSort = true;
 
@@ -197,10 +208,11 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     //region Mouse & Key
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        mousePressed = true;
         int clickedDisplay = -100;
         for (GuiElement element : actionList) {
             if (element.isEnabled() && clickedDisplay > -100 && element.displayZLevel < clickedDisplay) {
-                return true;
+                continue;
             }
 
             if (element.isEnabled() && element.isMouseOver(mouseX, mouseY)) {
@@ -208,13 +220,24 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
             }
 
             if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, button)) {
+                globalClick(mouseX, mouseY, button);
                 return true;
             }
         }
+        globalClick(mouseX, mouseY, button);
         return false;
     }
 
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public void globalClick(double mouseX, double mouseY, int button) {
+        for (GuiElement element : actionList) {
+            if (element.isEnabled()) {
+                element.globalClick(mouseX, mouseY, button);
+            }
+        }
+    }
+
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        mousePressed = false;
         for (GuiElement element : actionList) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, button)) {
                 return true;
@@ -314,6 +337,10 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return matches;
     }
 
+//    public void passClick() {
+//        this.passClick = true;
+//    }
+
     //endregion
 
     //region Render
@@ -378,6 +405,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     //region Update
 
     public void onUpdate() {
+        newCursor = null;
         if (!toRemove.isEmpty()) {
             elements.removeAll(toRemove);
             toRemove.clear();
@@ -391,6 +419,10 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
         if (requiresReSort) {
             sort();
+        }
+
+        if (!mousePressed) {
+            CursorHelper.setCursor(newCursor);
         }
     }
 

@@ -10,6 +10,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.resources.I18n;
 
 import java.util.function.Consumer;
@@ -77,23 +78,27 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         });
 
         addChild(redSlider = new GuiSlideControl(xPos + 4, hexField.yPos() + 14, xSize - 8, 8));
-        redSlider.setSliderElement(new GuiBorderedRect().setColours(0xFFFF0000, 0xFF000000).setBorderWidth(0.5));
+        redSlider.setReverseScrollDir(true);
+        redSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFFFF0000, 0xFF000000).setBorderWidth(0.5));
         redSlider.updatePos((colour.r & 0xFF) / 255D, false);
         redSlider.setBarStyleBackground(0xFF000000).setSliderSize(3);
 
         addChild(greenSlider = new GuiSlideControl(xPos + 4, redSlider.yPos() + 10, xSize - 8, 8));
-        greenSlider.setSliderElement(new GuiBorderedRect().setColours(0xFF00FF00, 0xFF000000).setBorderWidth(0.5));
+        greenSlider.setReverseScrollDir(true);
+        greenSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFF00FF00, 0xFF000000).setBorderWidth(0.5));
         greenSlider.updatePos((colour.g & 0xFF) / 255D, false);
         greenSlider.setBarStyleBackground(0xFF000000).setSliderSize(3);
 
         addChild(blueSlider = new GuiSlideControl(xPos + 4, greenSlider.yPos() + 10, xSize - 8, 8));
-        blueSlider.setSliderElement(new GuiBorderedRect().setColours(0xFF0000FF, 0xFF000000).setBorderWidth(0.5));
+        blueSlider.setReverseScrollDir(true);
+        blueSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFF0000FF, 0xFF000000).setBorderWidth(0.5));
         blueSlider.updatePos((colour.b & 0xFF) / 255D, false);
         blueSlider.setBarStyleBackground(0xFF000000).setSliderSize(3);
 
         if (includeAlpha) {
             addChild(alphaSlider = new GuiSlideControl(xPos + 4,blueSlider.yPos() + 10, xSize - 8, 8));
-            alphaSlider.setSliderElement(new GuiBorderedRect().setColours(0xFFFFFFFF, 0xFF000000).setBorderWidth(0.5));
+            alphaSlider.setReverseScrollDir(true);
+            alphaSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFFFFFFFF, 0xFF000000).setBorderWidth(0.5));
             alphaSlider.updatePos((colour.a & 0xFF) / 255D, false);
             alphaSlider.setBarStyleBackground(0xFF000000).setSliderSize(3);
         }
@@ -124,10 +129,19 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-//        zOffset = 50;
-        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0xFFFFFFFF, 0xFF000000);
-        drawBorderedRect(xPos() + 4, yPos() + ySize() - 22, xSize() - 8, 6, 0.5, includeAlpha ? colour.argb() : mixColours(0xFF000000, colour.argb()), 0xFF000000);
+        zOffset -= 1;
+        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, 0xFFFFFFFF, 0xFF000000);
 
+        int i = 0;
+        for (double x = 0; x < xSize() - 8; x += 3) {
+            i++;
+            drawColouredRect(getter, xPos() + 4 + x, yPos() + ySize() - 22 + ((i % 2) * 3), 3, 3, 0xFF000000);
+        }
+
+        drawBorderedRect(getter, xPos() + 4, yPos() + ySize() - 22, xSize() - 8, 6, 0.5, includeAlpha ? colour.argb() : mixColours(0xFF000000, colour.argb()), 0xFF000000);
+        getter.finish();
+        zOffset += 1;
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 

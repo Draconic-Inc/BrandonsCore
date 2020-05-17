@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
@@ -35,7 +36,11 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     private int cursorPosition;
     private int selectionEnd;
     private int enabledColor = 14737632;
+    private int cursorColor = 0xffd0d0d0;
+    private Supplier<Integer> textColourSupplier;
     private int disabledColor = 7368816;
+    private boolean shadow = true;
+    private Supplier<Boolean> shadowSupplier;
 
     private Consumer<String> changeListener;
     private Consumer<String> returnListener;
@@ -53,6 +58,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     private BiFunction<String, Integer, String> textFormatter = (p_195610_0_, p_195610_1_) -> {
         return p_195610_0_;
     };
+    private Runnable onFinishEdit;
 
     public GuiTextField() {}
 
@@ -62,6 +68,16 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     public GuiTextField(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
+    }
+
+    @Override
+    public void reloadElement() {
+        super.reloadElement();
+        lineScrollOffset = 0;
+        this.updateCursor(0);
+        if (!this.shiftCache) {
+            this.setSelectionPos(this.cursorPosition);
+        }
     }
 
     //Listeners
@@ -115,7 +131,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         if (newText.length() > this.maxStringLength) {
             this.text(newText.substring(0, this.maxStringLength));
         } else {
-            this.text( newText);
+            this.text(newText);
         }
 
         this.setCursorPositionEnd();
@@ -271,7 +287,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             this.setSelectionPos(this.cursorPosition);
         }
 
-        this.notifyListeners(this.text());
+//        this.notifyListeners(this.text());//No this should not be a thing
     }
 
     public void updateCursor(int pos) {
@@ -287,92 +303,97 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-//        if (!this.isEditing()) {
-//            return false;
-//        } else {
-        this.shiftCache = Screen.hasShiftDown();
-        if (Screen.isSelectAll(keyCode)) {
-            this.setCursorPositionEnd();
-            this.setSelectionPos(0);
-            return true;
-        } else if (Screen.isCopy(keyCode)) {
-            Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
-            return true;
-        } else if (Screen.isPaste(keyCode)) {
-            if (this.isFieldEnabled) {
-                this.writeText(Minecraft.getInstance().keyboardListener.getClipboardString());
-            }
-
-            return true;
-        } else if (Screen.isCut(keyCode)) {
-            Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
-            if (this.isFieldEnabled) {
-                this.writeText("");
-            }
-
-            return true;
+        if (!this.isEditing()) {
+            return false;
         } else {
-            switch (keyCode) {
-                case 257:
-                    if (returnListener != null) {
-                        returnListener.accept(getText());
+            this.shiftCache = Screen.hasShiftDown();
+            if (Screen.isSelectAll(keyCode)) {
+                this.setCursorPositionEnd();
+                this.setSelectionPos(0);
+                return true;
+            } else if (Screen.isCopy(keyCode)) {
+                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
+                return true;
+            } else if (Screen.isPaste(keyCode)) {
+                if (this.isFieldEnabled) {
+                    this.writeText(Minecraft.getInstance().keyboardListener.getClipboardString());
+                }
+
+                return true;
+            } else if (Screen.isCut(keyCode)) {
+                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
+                if (this.isFieldEnabled) {
+                    this.writeText("");
+                }
+
+                return true;
+            } else {
+                switch (keyCode) {
+                    case 257:
+                        if (onFinishEdit != null) {
+                            onFinishEdit.run();
+                        }
+                        if (returnListener != null) {
+                            returnListener.accept(getText());
+                            return true;
+                        }
+                        return false;
+                    case 259:
+                        if (this.isFieldEnabled) {
+                            this.shiftCache = false;
+                            this.delete(-1);
+                            this.shiftCache = Screen.hasShiftDown();
+                        }
+
                         return true;
-                    }
-                    return false;
-                case 259:
-                    if (this.isFieldEnabled) {
-                        this.shiftCache = false;
-                        this.delete(-1);
-                        this.shiftCache = Screen.hasShiftDown();
-                    }
+                    case 260:
+                    case 264:
+                    case 265:
+                    case 266:
+                    case 267:
+                    default:
+                        //Consume key presses when we are typing so we dont do something dumb like close the screen when you type e
+                        return keyCode != GLFW.GLFW_KEY_ESCAPE;
+                    case 261:
+                        if (this.isFieldEnabled) {
+                            this.shiftCache = false;
+                            this.delete(1);
+                            this.shiftCache = Screen.hasShiftDown();
+                        }
 
-                    return true;
-                case 260:
-                case 264:
-                case 265:
-                case 266:
-                case 267:
-                default:
-                    return false;
-                case 261:
-                    if (this.isFieldEnabled) {
-                        this.shiftCache = false;
-                        this.delete(1);
-                        this.shiftCache = Screen.hasShiftDown();
-                    }
+                        return true;
+                    case 262:
+                        if (Screen.hasControlDown()) {
+                            this.setCursorPosition(this.getNthWordFromCursor(1));
+                        } else {
+                            this.moveCursorBy(1);
+                        }
 
-                    return true;
-                case 262:
-                    if (Screen.hasControlDown()) {
-                        this.setCursorPosition(this.getNthWordFromCursor(1));
-                    } else {
-                        this.moveCursorBy(1);
-                    }
+                        return true;
+                    case 263:
+                        if (Screen.hasControlDown()) {
+                            this.setCursorPosition(this.getNthWordFromCursor(-1));
+                        } else {
+                            this.moveCursorBy(-1);
+                        }
 
-                    return true;
-                case 263:
-                    if (Screen.hasControlDown()) {
-                        this.setCursorPosition(this.getNthWordFromCursor(-1));
-                    } else {
-                        this.moveCursorBy(-1);
-                    }
-
-                    return true;
-                case 268:
-                    this.setCursorPositionZero();
-                    return true;
-                case 269:
-                    this.setCursorPositionEnd();
-                    return true;
+                        return true;
+                    case 268:
+                        this.setCursorPositionZero();
+                        return true;
+                    case 269:
+                        this.setCursorPositionEnd();
+                        return true;
+                }
             }
         }
-//        }
     }
 
     public boolean isEditing() {
         return /*this.isEnabled() && */this.isFocused() && this.isFieldEnabled;
     }
 
+    @Override
     public boolean charTyped(char charType, int charCode) {
         if (!this.isEditing()) {
             return false;
@@ -386,17 +407,15 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         }
     }
 
-    public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-//        if (!this.isEnabled()) {
-//            return false;
-//        } else {
-        boolean flag = p_mouseClicked_1_ >= (double) this.xPos() && p_mouseClicked_1_ < (double) (this.xPos() + this.xSize()) && p_mouseClicked_3_ >= (double) this.yPos() && p_mouseClicked_3_ < (double) (this.yPos() + this.ySize());
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean mouseOver = isMouseOver(mouseX, mouseY);
         if (this.canLoseFocus) {
-            this.setFocused2(flag);
+            this.setFocused(mouseOver);
         }
 
-        if (this.isFocused() && flag && p_mouseClicked_5_ == 0) {
-            int i = MathHelper.floor(p_mouseClicked_1_) - this.xPos();
+        if (this.isFocused() && mouseOver && button == 0) {
+            int i = MathHelper.floor(mouseX) - this.xPos();
             if (this.enableBackgroundDrawing) {
                 i -= 4;
             }
@@ -407,12 +426,24 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         } else {
             return false;
         }
-//        }
     }
 
-    public void setFocused2(boolean isFocused) {
-        this.isFocused = isFocused;
+    //Ensure that focus is removed even if the normal click event is consumed by another element.
+    @Override
+    public void globalClick(double mouseX, double mouseY, int button) {
+        super.globalClick(mouseX, mouseY, button);
+        if (isFocused() && canLoseFocus && !isMouseOver(mouseX, mouseY)) {
+            setFocused(false);
+        }
     }
+
+//    public void setFocused(boolean isFocused) {
+//        if (this.isFocused && !isFocused && onFinishEdit != null) {
+//            onFinishEdit.run();
+//        }
+//        this.isFocused = isFocused;
+////        if (!isFocused) setCursorPosition(0);
+//    }
 
     public void drawTextBox() {
 //        if (this.isEnabled()) {
@@ -420,12 +451,15 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, fillColour, borderColour);
         }
 
-        int i = this.isFieldEnabled ? this.enabledColor : this.disabledColor;
+        double zLevel = getRenderZLevel();
+        RenderSystem.translated(0, 0, zLevel);
+
+        int i = this.isFieldEnabled ? getTextColor() : this.disabledColor;
         int j = this.cursorPosition - this.lineScrollOffset;
         int k = this.selectionEnd - this.lineScrollOffset;
         String s = this.fontRenderer.trimStringToWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
         boolean flag = j >= 0 && j <= s.length();
-        boolean flag1 = this.isFocused() && this.cursorCounter / 6 % 2 == 0 && flag;
+        boolean flag1 = this.isFocused() && this.cursorCounter / 10 % 2 == 0 && flag;
         int l = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
         int i1 = this.enableBackgroundDrawing ? this.yPos() + (this.ySize() - 8) / 2 : this.yPos();
         int j1 = l;
@@ -435,7 +469,11 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
-            j1 = this.fontRenderer.drawStringWithShadow(this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+            if (getShadow()) {
+                j1 = this.fontRenderer.drawStringWithShadow(this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+            } else {
+                j1 = this.fontRenderer.drawString(this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+            }
         }
 
         boolean flag2 = this.cursorPosition < this.text().length() || this.text().length() >= this.getMaxStringLength();
@@ -444,22 +482,36 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             k1 = j > 0 ? l + this.xSize() : l;
         } else if (flag2) {
             k1 = j1 - 1;
-            --j1;
+            if (getShadow()) {
+                --j1;
+            }
         }
 
         if (!s.isEmpty() && flag && j < s.length()) {
-            this.fontRenderer.drawStringWithShadow(this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+            if (getShadow()) {
+                this.fontRenderer.drawStringWithShadow(this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+            } else {
+                this.fontRenderer.drawString(this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+            }
         }
 
         if (!flag2 && this.suggestion != null) {
-            this.fontRenderer.drawStringWithShadow(this.suggestion, (float) (k1 - 1), (float) i1, -8355712);
+            if (getShadow()) {
+                this.fontRenderer.drawStringWithShadow(this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
+            } else {
+                this.fontRenderer.drawString(this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
+            }
         }
 
         if (flag1) {
             if (flag2) {
-                AbstractGui.fill(k1, i1 - 1, k1 + 1, i1 + 1 + 9, -3092272);
+                AbstractGui.fill(k1, i1 - 1, k1 + 1, i1 + 1 + 9, cursorColor);
             } else {
-                this.fontRenderer.drawStringWithShadow("_", (float) k1, (float) i1, i);
+                if (getShadow()) {
+                    this.fontRenderer.drawStringWithShadow("_", (float) k1, (float) i1, i);
+                } else {
+                    this.fontRenderer.drawString("_", (float) k1, (float) i1, i);
+                }
             }
         }
 
@@ -467,6 +519,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             int l1 = l + this.fontRenderer.getStringWidth(s.substring(0, k));
             this.drawSelectionBox(k1, i1 - 1, l1 - 1, i1 + 1 + 9);
         }
+
+        RenderSystem.translated(0, 0, -zLevel);
 
 //        }
     }
@@ -541,6 +595,34 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         return this;
     }
 
+    public GuiTextField setTextColor(Supplier<Integer> color) {
+        this.textColourSupplier = color;
+        return this;
+    }
+
+    public GuiTextField setCursorColor(int cursorColor) {
+        this.cursorColor = cursorColor;
+        return this;
+    }
+
+    public GuiTextField setShadow(boolean shadow) {
+        this.shadow = shadow;
+        return this;
+    }
+
+    public GuiTextField setShadowSupplier(Supplier<Boolean> shadowSupplier) {
+        this.shadowSupplier = shadowSupplier;
+        return this;
+    }
+
+    public boolean getShadow() {
+        return shadowSupplier == null ? shadow : shadowSupplier.get();
+    }
+
+    public int getTextColor() {
+        return textColourSupplier == null ? enabledColor : textColourSupplier.get();
+    }
+
     public GuiTextField setDisabledTextColour(int color) {
         this.disabledColor = color;
         return this;
@@ -562,6 +644,9 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         }
         if (focusListener != null) {
             focusListener.accept(newFocus);
+        }
+        if (!newFocus && onFinishEdit != null) {
+            onFinishEdit.run();
         }
     }
 
@@ -668,6 +753,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     private String defaultTextStorage = "";
+
     private String text() {
         return linkedGetter == null ? defaultTextStorage : linkedGetter.get();
     }
@@ -675,9 +761,12 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     private void text(String text) {
         if (linkedSetter != null) {
             linkedSetter.accept(text);
-        }
-        else {
+        } else {
             this.defaultTextStorage = text;
         }
+    }
+
+    public void onFinishEdit(Runnable onFinishEdit) {
+        this.onFinishEdit = onFinishEdit;
     }
 }

@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -610,19 +611,22 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
             boolean wrap = this.wrap && fontRenderer.getStringWidth(displayString) > widthLimit;
 
-            int xPos = textXOffset + getInsetRect().x + (is3dText && actualPressedState() ? 1 : 0);
-            int yPos = textYOffset + ((getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2)) + (is3dText && actualPressedState() ? 1 : 0);
+            float xp = (float) screenWidth / displayWidth();
+            float yp = (float) screenHeight / displayHeight();
+
+            float xPos = textXOffset + getInsetRect().x + (is3dText && !actualPressedState() ? -xp : 0);
+            float yPos = (int) (textYOffset + ((getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2))) + (is3dText && !actualPressedState() ? -yp : 0);
             switch (rotation) {
                 case NORMAL:
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
                 case ROT_CC:
-                    xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2));
+                    xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2F)) - (ySize / 2F));
                     yPos = textYOffset + getInsetRect().y;
                     drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
                 case ROT_C:
-                    xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2));
+                    xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2F)) - (ySize / 2F));
                     yPos = textYOffset + getInsetRect().y;
                     drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
                     break;
@@ -644,8 +648,8 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         Material mat = BCSprites.getButton(getRenderState(hovered));
-        IVertexBuilder builder = mat.getBuffer(getter, location -> BCSprites.guiType);
-        drawDynamicSprite(builder, xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2, mat.getSprite());
+        IVertexBuilder builder = mat.getBuffer(getter, location -> BCSprites.guiTexType);
+        drawDynamicSprite(builder, mat.getSprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
         getter.finish();
     }
 
