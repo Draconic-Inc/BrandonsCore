@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.ChatHelper;
-import com.brandon3055.brandonscore.lib.PairKV;
+import com.brandon3055.brandonscore.lib.Pair;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.InventoryUtils;
@@ -258,7 +258,7 @@ public class BCUtilCommands {
     //region Dump Event Handlers
 
     public static int dumpEventListeners(CommandSource source) throws CommandException {
-        Map<String, Map<Class<?>, List<PairKV<EventPriority, Method>>>> eventListenerMap = new HashMap<>();
+        Map<String, Map<Class<?>, List<Pair<EventPriority, Method>>>> eventListenerMap = new HashMap<>();
         dumpBus("EVENT_BUS", (EventBus) MinecraftForge.EVENT_BUS, eventListenerMap);
 //        dumpBus("ORE_GEN_BUS", MinecraftForge.ORE_GEN_BUS, eventListenerMap);
 //        dumpBus("TERRAIN_GEN_BUS", MinecraftForge.TERRAIN_GEN_BUS, eventListenerMap);
@@ -266,16 +266,16 @@ public class BCUtilCommands {
         StringBuilder builder = new StringBuilder("\n");
         for (String bus : eventListenerMap.keySet()) {
             builder.append("Dumping listeners for bus: ").append(bus).append("\n");
-            Map<Class<?>, List<PairKV<EventPriority, Method>>> busListeners = eventListenerMap.get(bus);
+            Map<Class<?>, List<Pair<EventPriority, Method>>> busListeners = eventListenerMap.get(bus);
             List<Class<?>> sortedClasses = Lists.newArrayList(busListeners.keySet());
             sortedClasses.sort(Comparator.comparing(Class::getName));
             for (Class<?> eventClass : sortedClasses) {
-                List<PairKV<EventPriority, Method>> listenerList = busListeners.get(eventClass);
-                listenerList.sort(Comparator.comparingInt(value -> value.getKey().ordinal()));
+                List<Pair<EventPriority, Method>> listenerList = busListeners.get(eventClass);
+                listenerList.sort(Comparator.comparingInt(value -> value.key().ordinal()));
                 builder.append("    Handlers for event: ").append(eventClass).append("\n");
-                for (PairKV<EventPriority, Method> listener : listenerList) {
-                    Method m = listener.getValue();
-                    builder.append("        ").append(listener.getKey()).append(" ").append(m.getDeclaringClass().getName()).append(" ").append(m.getName()).append("(").append(separateWithCommas(m.getParameterTypes())).append(")\n");
+                for (Pair<EventPriority, Method> listener : listenerList) {
+                    Method m = listener.value();
+                    builder.append("        ").append(listener.key()).append(" ").append(m.getDeclaringClass().getName()).append(" ").append(m.getName()).append("(").append(separateWithCommas(m.getParameterTypes())).append(")\n");
                 }
                 builder.append("\n");
             }
@@ -297,8 +297,8 @@ public class BCUtilCommands {
         return sb.toString();
     }
 
-    private static void dumpBus(String name, EventBus bus, Map<String, Map<Class<?>, List<PairKV<EventPriority, Method>>>> baseMap) throws CommandException {
-        Map<Class<?>, List<PairKV<EventPriority, Method>>> map = baseMap.computeIfAbsent(name, eventBus -> new HashMap<>());
+    private static void dumpBus(String name, EventBus bus, Map<String, Map<Class<?>, List<Pair<EventPriority, Method>>>> baseMap) throws CommandException {
+        Map<Class<?>, List<Pair<EventPriority, Method>>> map = baseMap.computeIfAbsent(name, eventBus -> new HashMap<>());
 
         try {
             ConcurrentHashMap<Object, ArrayList<IEventListener>> listeners = ObfuscationReflectionHelper.getPrivateValue(EventBus.class, bus, "listeners");
@@ -308,7 +308,7 @@ public class BCUtilCommands {
                     if ((anno = method.getAnnotation(SubscribeEvent.class)) != null) {
                         for (Class<?> parameter : method.getParameterTypes()) {
                             if (Event.class.isAssignableFrom(parameter)) {
-                                map.computeIfAbsent(parameter, aClass -> new ArrayList<>()).add(new PairKV<>(anno.priority(), method));
+                                map.computeIfAbsent(parameter, aClass -> new ArrayList<>()).add(new Pair<>(anno.priority(), method));
                             }
                         }
                     }

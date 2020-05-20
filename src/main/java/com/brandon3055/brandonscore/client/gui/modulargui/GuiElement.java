@@ -120,7 +120,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     private Rectangle rectangle = new Rectangle();
 
     protected int hoverTime = 0;
-    protected int hoverTextDelay = 0;
+    protected int hoverTextDelay = 10;
     protected IDrawCallback preDrawCallback = null;
     protected IDrawCallback postDrawCallback = null;
 
@@ -143,7 +143,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * This is useful for edge cases where the 1 tick delay in removing an element can cause issues.
      */
     //TODO make this true by default when i re write the gui system
+    // Or figure out an efficient way to prevent the element from being rendered if it is in the remove list.
     protected boolean disableOnRemove = false;
+    protected boolean resetHoverOnClick = false;
     protected boolean animatedTranslating = false;
     protected List<GuiElement> toRemove = new ArrayList<>();
     protected List<GuiElement> boundSizeElements = new ArrayList<>();
@@ -164,6 +166,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Can simply be used to store an object reference on this element. Use for whatever you like.
      */
+    @Deprecated //I dont think i really need this any mode.
     public Object linkedObject = null;
     public boolean reportXSizeChange = false;
     public boolean reportYSizeChange = false;
@@ -691,7 +694,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 return true;
             }
         }
-        return isMouseOver(mouseX, mouseY) && capturesClicks;
+        boolean mouseOver = isMouseOver(mouseX, mouseY);
+        if (mouseOver && resetHoverOnClick) {
+            hoverTime = 0;
+        }
+
+        return mouseOver && capturesClicks;
     }
 
     /**
@@ -2266,6 +2274,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         bufferRect(buffer, xPos + (xSize / 2F), yPos + (ySize / 2F), xSize / 2F, ySize / 2F, sprite.getMaxU() - (xSize / 2F) * uScale, sprite.getMaxV() - (ySize / 2F) * vScale, (xSize / 2F) * uScale, (ySize / 2F) * vScale);
     }
 
+    //TODO look at adapting forge's version of this because its mutch cleaner than mine
     public void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim) {
         drawDynamicSprite(builder, tex, xPos, yPos, xSize, ySize, topTrim, leftTrim, bottomTrim, rightTrim, 0xFFFFFFFF);
     }
@@ -2857,7 +2866,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 tooltipY = 4;
             }
 
-            zOffset += 300;
+            double renderOffset = 800 - getRenderZLevel();
+            zOffset += renderOffset;
             final int backgroundColor = 0xF0100010;
             drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
             drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
@@ -2881,7 +2891,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
                 tooltipY += 10;
             }
-            zOffset -= 300;
+            zOffset -= renderOffset;
 
 //            RenderSystem.enableLighting();
             RenderSystem.enableDepthTest();
@@ -3172,6 +3182,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     public int getHoverTime() {
         return hoverTime;
+    }
+
+    public E setResetHoverOnClick(boolean resetHoverOnClick) {
+        this.resetHoverOnClick = resetHoverOnClick;
+        return (E) this;
     }
 
     //endregion

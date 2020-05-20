@@ -199,11 +199,11 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     }
 
     public double getMouseX() {
-        return minecraft.mouseHelper.getMouseX() * this.width / this.minecraft.getMainWindow().getWidth();
+        return minecraft.mouseHelper.getMouseX() * (double) minecraft.getMainWindow().getScaledWidth() / (double) minecraft.getMainWindow().getWidth();
     }
 
     public double getMouseY() {
-        return this.height - minecraft.mouseHelper.getMouseY() * this.height / this.minecraft.getMainWindow().getHeight() - 1;
+        return minecraft.mouseHelper.getMouseY() * (double) minecraft.getMainWindow().getScaledHeight() / (double) minecraft.getMainWindow().getHeight();
     }
 
     //endregion
@@ -233,9 +233,9 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         renderOverlayLayer(mouseX, mouseY, partialTicks);
 
         if (itemTooltipsEnabled) {
-//            RenderSystem.translated(0, 0, 300);
+            RenderSystem.translated(0, 0, 400);
             renderHoveredToolTip(mouseX, mouseY);
-//            RenderSystem.translated(0, 0, -300);
+            RenderSystem.translated(0, 0, -400);
         }
     }
 

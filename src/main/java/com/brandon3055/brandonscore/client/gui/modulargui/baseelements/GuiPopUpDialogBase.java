@@ -19,6 +19,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
 
     protected int dragXOffset = 0;
     protected int dragYOffset = 0;
+    protected int defaultDisplayZ = 500;
     protected boolean dragging = false;
     protected boolean closeOnOutsideClick = true;
     protected boolean closeOnScroll = false;
@@ -213,8 +214,8 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
      * Display this popup with the given zOffset.
      */
     public void show(int displayZLevel) {
-        modularGui.getManager().addChild(this, displayZLevel, false);
         isVisible = true;
+        modularGui.getManager().addChild(this, displayZLevel, false);
     }
 
     /**
@@ -222,7 +223,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
      */
     public void show() {
         int pz = getParent() == null ? 100 : getParent().displayZLevel;
-        show(pz >= 500 ? pz + 50 : 500);
+        show(pz >= defaultDisplayZ ? pz + 50 : defaultDisplayZ);
     }
 
     /**
@@ -236,7 +237,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
 
     public void showCenter() {
         int pz = getParent() == null ? 100 : getParent().displayZLevel;
-        showCenter(pz >= 500 ? pz + 50 : 500);
+        showCenter(pz >= defaultDisplayZ ? pz + 50 : defaultDisplayZ);
     }
 
 
@@ -251,7 +252,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
 
     public void showCenter(GuiElement centerOn) {
         int pz = getParent() == null ? 100 : getParent().displayZLevel;
-        showCenter(centerOn, pz >= 500 ? pz + 50 : 500);
+        showCenter(centerOn, pz >= defaultDisplayZ ? pz + 50 : defaultDisplayZ);
     }
 
     /**
@@ -277,7 +278,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
     }
 
     public void toggleShown(boolean centre) {
-        toggleShown(centre, 500);
+        toggleShown(centre, defaultDisplayZ);
     }
 
     public void toggleShown() {

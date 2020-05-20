@@ -524,7 +524,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         playGenericClick();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @OnlyIn(Dist.CLIENT) //Because this is referenced in
     public static void playGenericClick() {
         Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }

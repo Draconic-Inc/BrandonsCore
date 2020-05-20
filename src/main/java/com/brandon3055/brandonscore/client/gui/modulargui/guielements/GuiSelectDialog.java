@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
@@ -15,9 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Created by brandon3055 on 10/09/2016.
@@ -31,6 +30,8 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     protected T selectedItem = null;
     protected boolean noScrollBars = false;
     protected boolean closeOnSelection = false;
+    protected boolean playClickSound = false;
+    protected boolean reloadOnSelection = false;
     protected Consumer<T> selectionListener = null;
     protected LinkedList<T> sectionItems = new LinkedList<>();
     protected LinkedList<T> filteredItems = new LinkedList<>();
@@ -38,6 +39,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     protected IGuiEventListener listener = null;
     protected Map<T, GuiElement> sectionElements = new HashMap<>();
     protected Predicate<T> selectionFilter = null;
+    protected BiConsumer<T, GuiElement<?>> toolTipHandler = null;
     private int listSpacing = 0;
 
     //There is probably a much cleaner wau to do this... But i cant think of it right now.
@@ -60,7 +62,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
         super(xPos, yPos, xSize, ySize, parent);
     }
 
-    public GuiSelectDialog setListSpacing(int listSpacing) {
+    public GuiSelectDialog<T> setListSpacing(int listSpacing) {
         this.listSpacing = listSpacing;
         if (scrollElement != null) {
             scrollElement.setListSpacing(listSpacing);
@@ -69,7 +71,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     }
 
     @Override
-    public GuiSelectDialog setListener(IGuiEventListener listener) {
+    public GuiSelectDialog<T> setListener(IGuiEventListener listener) {
         this.listener = listener;
         return this;
     }
@@ -78,6 +80,21 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     @Override
     public IGuiEventListener getListener() {
         return listener;
+    }
+
+    public GuiSelectDialog<T> setToolTipHandler(BiConsumer<T, GuiElement<?>> toolTipHandler) {
+        this.toolTipHandler = toolTipHandler;
+        return this;
+    }
+
+    public GuiSelectDialog<T> setPlayClickSound(boolean playClickSound) {
+        this.playClickSound = playClickSound;
+        return this;
+    }
+
+    public GuiSelectDialog<T> setReloadOnSelection(boolean reloadOnSelection) {
+        this.reloadOnSelection = reloadOnSelection;
+        return this;
     }
 
     //region setup and list logic
@@ -103,7 +120,9 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     @Override
     public void reloadElement() {
         super.reloadElement();
-        scrollElement.setPosAndSize(this.getInsetRect());
+        if (scrollElement != null) {
+            scrollElement.setPosAndSize(this.getInsetRect());
+        }
         reloadSelectionList();
     }
 
@@ -179,11 +198,11 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      * @param item The item to be added to the list.
      * @param itemRenderer an element to represent this item in the list.
      */
-    public GuiSelectDialog<T> addItem(T item, @Nullable GuiElement itemRenderer) {
+    public GuiSelectDialog<T> addItem(T item, @Nullable GuiElement<?> itemRenderer) {
         if (!sectionItems.contains(item)){
             sectionItems.add(item);
         }
-        sectionElements.put(item, itemRenderer == null ? rendererBuilder.apply(item) : itemRenderer);
+        sectionElements.put(item, itemRenderer == null ? buildRenderer(item) : itemRenderer);
         reloadSelectionList();
         return this;
     }
@@ -191,7 +210,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     /**
      * @see #addItem(Object, GuiElement)
      */
-    public GuiSelectDialog<T> addItems(Map<T, GuiElement> itemMap) {
+    public GuiSelectDialog<T> addItems(Map<T, GuiElement<?>> itemMap) {
         sectionElements.putAll(itemMap);
         reloadSelectionList();
         return this;
@@ -205,7 +224,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
             if (!sectionItems.contains(t)) {
                 sectionItems.add(t);
             }
-            sectionElements.put(t, rendererBuilder.apply(t));
+            sectionElements.put(t, buildRenderer(t));
         });
         reloadSelectionList();
         return this;
@@ -215,9 +234,9 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      * Adds an item at the specified index.
      * @throws IndexOutOfBoundsException if the index is out of range.
      */
-    public GuiSelectDialog<T> addItemAt(T item, int index, @Nullable GuiElement itemRenderer) {
+    public GuiSelectDialog<T> addItemAt(T item, int index, @Nullable GuiElement<?> itemRenderer) {
         sectionItems.add(index, item);
-        sectionElements.put(item, itemRenderer == null ? rendererBuilder.apply(item) : itemRenderer);
+        sectionElements.put(item, itemRenderer == null ? buildRenderer(item) : itemRenderer);
         reloadSelectionList();
         return this;
     }
@@ -260,6 +279,14 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
         return this;
     }
 
+    private GuiElement buildRenderer(T item) {
+        GuiElement renderer = rendererBuilder.apply(item);
+        if (toolTipHandler != null) {
+            toolTipHandler.accept(item, renderer);
+        }
+        return renderer;
+    }
+
     /**
      * @return the selection items list. This is an immutable copy of the internal list because you are not allowed to
      * directly modify the list.
@@ -285,13 +312,20 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
         if (mouseButton == 0) {
             for (T item : filteredItems) {
                 if (sectionElements.get(item).isMouseOver(mouseX, mouseY)) {
+                    if (playClickSound) {
+                        GuiButton.playGenericClick();
+                    }
                     if (listener != null) {
                         listener.onMGuiEvent(new GuiEvent.SelectEvent(this, item, sectionElements.get(item)), this);
                     }
                     if (selectionListener != null) {
                         selectionListener.accept(item);
                     }
-                    if (closeOnSelection) close();
+                    if (closeOnSelection) {
+                        close();
+                    }else if (reloadOnSelection) {
+                        reloadElement();
+                    }
                     return true;
                 }
             }

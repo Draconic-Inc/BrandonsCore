@@ -3,8 +3,11 @@ package com.brandon3055.brandonscore.inventory;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+
+import java.util.function.Predicate;
 
 /**
  * Created by brandon3055 on 7/06/2016.
@@ -95,6 +98,28 @@ public class PlayerSlot {
             }
             player.inventory.offHandInventory.set(slot, stack);
         }
+    }
+
+    public static PlayerSlot findStack(PlayerInventory inv, Predicate<ItemStack> check) {
+        for (int i = 0; i < inv.mainInventory.size(); i++) {
+            ItemStack stack = inv.mainInventory.get(i);
+            if (!stack.isEmpty() && check.test(stack)) {
+                return new PlayerSlot(i, EnumInvCategory.MAIN);
+            }
+        }
+        for (int i = 0; i < inv.armorInventory.size(); i++) {
+            ItemStack stack = inv.armorInventory.get(i);
+            if (!stack.isEmpty() && check.test(stack)) {
+                return new PlayerSlot(i, EnumInvCategory.ARMOR);
+            }
+        }
+        for (int i = 0; i < inv.offHandInventory.size(); i++) {
+            ItemStack stack = inv.offHandInventory.get(i);
+            if (!stack.isEmpty() && check.test(stack)) {
+                return new PlayerSlot(i, EnumInvCategory.OFF_HAND);
+            }
+        }
+        return null;
     }
 
     public ItemStack getStackInSlot(PlayerEntity player) {

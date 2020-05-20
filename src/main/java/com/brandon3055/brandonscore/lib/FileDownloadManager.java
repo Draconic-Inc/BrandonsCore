@@ -30,7 +30,7 @@ public class FileDownloadManager implements Runnable {
     private Runnable queCompeteCallback = null;
     private final ThreadFileDownloader[] workers;
     private volatile boolean stopDownload = false;
-    private Queue<PairKV<String, File>> downloadQue = new ConcurrentLinkedDeque<>();
+    private Queue<Pair<String, File>> downloadQue = new ConcurrentLinkedDeque<>();
 
     public FileDownloadManager(String name, int maxWorkers, boolean resetOnFinish) {
         this.name = name;
@@ -57,7 +57,7 @@ public class FileDownloadManager implements Runnable {
                     for (int i = 0; i < workers.length; i++) {
                         if (!workers[i].isRunning()) {
                             workers[i].interrupt();
-                            downloadQue.add(new PairKV<>(workers[i].sourceURL, workers[i].outputFile));
+                            downloadQue.add(new Pair<>(workers[i].sourceURL, workers[i].outputFile));
                             workers[i] = null;
                         }
                     }
@@ -81,9 +81,9 @@ public class FileDownloadManager implements Runnable {
                     }
                     else if (downloadQue.size() > 0) {
                         filesDownloaded++;
-                        PairKV<String, File> file = downloadQue.poll();
-                        worker = new ThreadFileDownloader(name + ":worker-" + i, file.getKey(), file.getValue());
-                        LogHelperBC.dev("FileDownloadHandler: Starting Download: " + file.getKey() + " -> " + file.getValue());
+                        Pair<String, File> file = downloadQue.poll();
+                        worker = new ThreadFileDownloader(name + ":worker-" + i, file.key(), file.value());
+                        LogHelperBC.dev("FileDownloadHandler: Starting Download: " + file.key() + " -> " + file.value());
                         workers[i] = worker;
                         worker.start();
                     }
@@ -116,7 +116,7 @@ public class FileDownloadManager implements Runnable {
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
-        downloadQue.add(new PairKV<>(url, file));
+        downloadQue.add(new Pair<>(url, file));
         if (startIfStopped) {
             startDownload();
         }

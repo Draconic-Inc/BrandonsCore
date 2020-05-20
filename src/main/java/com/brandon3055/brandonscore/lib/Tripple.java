@@ -1,14 +1,16 @@
 package com.brandon3055.brandonscore.lib;
 
+import java.util.Objects;
+
 /**
  * Created by brandon3055 on 19/4/2016.
  */
-public class Set3<A, B, C> {
+public class Tripple<A, B, C> {
     private A a;
     private B b;
     private C c;
 
-    public Set3(A x, B y, C z) {
+    public Tripple(A x, B y, C z) {
         this.a = x;
         this.b = y;
         this.c = z;
@@ -38,22 +40,22 @@ public class Set3<A, B, C> {
         this.c = z;
     }
 
-    public static <A, B, C> Set3<A, B, C> of(A a, B b, C c) {
-        return new Set3<>(a, b, c);
+    public static <A, B, C> Tripple<A, B, C> of(A a, B b, C c) {
+        return new Tripple<>(a, b, c);
     }
 
     @Override
     public int hashCode() {
-        return (b.hashCode() + c.hashCode() * 31) * 31 + a.hashCode();
+        return Objects.hash(a, b, c);
     }
 
     public boolean equals(Object var1) {
         if (this == var1) {
             return true;
-        } else if (!(var1 instanceof Set3)) {
+        } else if (!(var1 instanceof Tripple)) {
             return false;
         } else {
-            Set3 var2 = (Set3) var1;
+            Tripple var2 = (Tripple) var1;
             if (this.a != null) {
                 if (!this.a.equals(var2.a)) {
                     return false;

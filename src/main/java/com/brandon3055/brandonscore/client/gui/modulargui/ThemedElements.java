@@ -83,7 +83,7 @@ public class ThemedElements {
     /**
      * This is a rectangle with a raised / inset 2 pixel border.
      * The colours used are meant to match the themed gui background colours.
-     * See the basic view properties window in {@link GuiConfigurableItem} for an example
+     * See the basic view properties window in DE's GuiConfigurableItem for an example
      */
     public static class ContentRect extends GuiElement<ContentRect> {
         private Supplier<Boolean> inset;
@@ -149,68 +149,70 @@ public class ThemedElements {
         }
     }
 
-    public static class DialogBackground extends GuiElement<DialogBackground> {
+//    @Deprecated
+//    public static class DialogBackground extends GuiElement<DialogBackground> {
+//
+//        private Supplier<Boolean> hasHeading;
+//
+//        public DialogBackground(Supplier<Boolean> hasHeading) {
+//            this.hasHeading = hasHeading;
+//        }
+//
+//        @Override
+//        public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+//            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+//            int backgroundColor = 0xF0100010;
+//            int borderColorStart = 0x90FFFFFF;
+//            int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
+//            //@formatter:off
+//            drawGradient(getter, xPos() + 1,           yPos(),               xSize() - 2, 1, backgroundColor, backgroundColor);             // Top
+//            drawGradient(getter, xPos() + 1,           yPos() + ySize() - 1, xSize() - 2, 1, backgroundColor, backgroundColor);             // Bottom
+//            drawGradient(getter, xPos(),               yPos() + 1,           1,           ySize() - 2, backgroundColor, backgroundColor);   // Left
+//            drawGradient(getter, xPos() + xSize() - 1, yPos() + 1,           1,           ySize() - 2, backgroundColor, backgroundColor);   // Right
+//            drawGradient(getter, xPos() + 1,           yPos() + 1,           xSize() - 2, ySize() - 2, backgroundColor, backgroundColor);   // Fill
+//            drawGradient(getter, xPos() + 1,           yPos() + 1,           1,           ySize() - 2, borderColorStart, borderColorEnd);   // Left Accent
+//            drawGradient(getter, xPos() + xSize() - 2, yPos() + 1,           1,           ySize() - 2, borderColorStart, borderColorEnd);   // Right Accent
+//            drawGradient(getter, xPos() + 2,           yPos() + 1,           xSize() - 4, 1, borderColorStart, borderColorStart);           // Top Accent
+//            drawGradient(getter, xPos() + 2,           yPos() + ySize() - 2, xSize() - 4, 1, borderColorEnd, borderColorEnd);               // Bottom Accent
+//            if (hasHeading.get()) {
+//                drawGradient(getter, xPos() + 2,       yPos() + 12,           xSize() - 4, 1, borderColorStart, borderColorStart);          // Heading Divider
+//            }
+//            //@formatter:on
+//            getter.finish();
+//            super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+//        }
+//    }
 
-        private boolean hasHeading;
-
-        public DialogBackground(boolean hasHeading) {
-            this.hasHeading = hasHeading;
-        }
-
-        @Override
-        public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-            int backgroundColor = 0xF0100010;
-            int borderColorStart = 0x90FFFFFF;
-            int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
-            //@formatter:off
-            drawGradient(getter, xPos() + 1,           yPos(),               xSize() - 2, 1, backgroundColor, backgroundColor);             // Top
-            drawGradient(getter, xPos() + 1,           yPos() + ySize() - 1, xSize() - 2, 1, backgroundColor, backgroundColor);             // Bottom
-            drawGradient(getter, xPos(),               yPos() + 1,           1,           ySize() - 2, backgroundColor, backgroundColor);   // Left
-            drawGradient(getter, xPos() + xSize() - 1, yPos() + 1,           1,           ySize() - 2, backgroundColor, backgroundColor);   // Right
-            drawGradient(getter, xPos() + 1,           yPos() + 1,           xSize() - 2, ySize() - 2, backgroundColor, backgroundColor);   // Fill
-            drawGradient(getter, xPos() + 1,           yPos() + 1,           1,           ySize() - 2, borderColorStart, borderColorEnd);   // Left Accent
-            drawGradient(getter, xPos() + xSize() - 2, yPos() + 1,           1,           ySize() - 2, borderColorStart, borderColorEnd);   // Right Accent
-            drawGradient(getter, xPos() + 2,           yPos() + 1,           xSize() - 4, 1, borderColorStart, borderColorStart);           // Top Accent
-            drawGradient(getter, xPos() + 2,           yPos() + ySize() - 2, xSize() - 4, 1, borderColorEnd, borderColorEnd);               // Bottom Accent
-            if (hasHeading) {
-                drawGradient(getter, xPos() + 2,       yPos() + 12,           xSize() - 4, 1, borderColorStart, borderColorStart);          // Heading Divider
-            }
-            //@formatter:on
-            getter.finish();
-            super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        }
-    }
-
-    public static class DialogBar extends GuiElement<DialogBar> {
-        private boolean background;
-        private Supplier<Boolean> dragging = () -> false;
-
-        public DialogBar(boolean background) {
-            this.background = background;
-        }
-
-        @Override
-        public void reloadElement() {
-            super.reloadElement();
-            GuiElement<?> parent = getParent();
-            if (parent instanceof GuiSlideControl) {
-                dragging = ((GuiSlideControl) parent)::isDragging;
-            }
-        }
-
-        @Override
-        public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-            if (background && (dragging.get() || isMouseOver(mouseX, mouseY))) {
-                drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x30b341ff);
-            } else if (!background) {
-                drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x8cb341ff);
-            }
-            getter.finish();
-            super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        }
-    }
+//    @Deprecated
+//    public static class DialogBar extends GuiElement<DialogBar> {
+//        private boolean background;
+//        private Supplier<Boolean> dragging = () -> false;
+//
+//        public DialogBar(boolean background) {
+//            this.background = background;
+//        }
+//
+//        @Override
+//        public void reloadElement() {
+//            super.reloadElement();
+//            GuiElement<?> parent = getParent();
+//            if (parent instanceof GuiSlideControl) {
+//                dragging = ((GuiSlideControl) parent)::isDragging;
+//            }
+//        }
+//
+//        @Override
+//        public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+//            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+//            if (background && (dragging.get() || isMouseOver(mouseX, mouseY))) {
+//                drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x30b341ff);
+//            } else if (!background) {
+//                drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x8cb341ff);
+//            }
+//            getter.finish();
+//            super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+//        }
+//    }
 
     public static class TestDialog extends GuiElement<TestDialog> {
 
@@ -222,23 +224,23 @@ public class ThemedElements {
         public void addChildElements() {
             super.addChildElements();
 
-            GuiSelectDialog<TextFormatting> dialog = GuiToolkit.createStandardDialog(this, "Test Heading", TextFormatting::name, Arrays.asList(TextFormatting.values()));
-            dialog.setPos(10, 10).setCloseOnOutsideClick(false);
-            dialog.show(600);
-
-            dialog = GuiToolkit.createStandardDialog(this, null, TextFormatting::name, Arrays.asList(TextFormatting.values()));
-            dialog.setPos(110, 10).setCloseOnOutsideClick(false);
-            dialog.show(600);
-
-            dialog = GuiToolkit.createStandardDialog(this, null, TextFormatting::getFriendlyName, Arrays.asList(TextFormatting.values()));
-            dialog.setPos(210, 10).setCloseOnOutsideClick(false);
-            dialog.setYSize(Math.min(dialog.ySize(), 150));
-            dialog.show(600);
-
-            dialog = GuiToolkit.createStandardDialog(this, "Test Heading", TextFormatting::getFriendlyName, Arrays.asList(TextFormatting.values()), 50, 100);
-            dialog.setPos(310, 10).setCloseOnOutsideClick(false);
-            dialog.setYSize(Math.min(dialog.ySize(), 150));
-            dialog.show(600);
+//            GuiSelectDialog<TextFormatting> dialog = GuiToolkit.createStandardDialog(this, "Test Heading", TextFormatting::name, Arrays.asList(TextFormatting.values()));
+//            dialog.setPos(10, 10).setCloseOnOutsideClick(false);
+//            dialog.show(600);
+//
+//            dialog = GuiToolkit.createStandardDialog(this, null, TextFormatting::name, Arrays.asList(TextFormatting.values()));
+//            dialog.setPos(110, 10).setCloseOnOutsideClick(false);
+//            dialog.show(600);
+//
+//            dialog = GuiToolkit.createStandardDialog(this, null, TextFormatting::getFriendlyName, Arrays.asList(TextFormatting.values()));
+//            dialog.setPos(210, 10).setCloseOnOutsideClick(false);
+//            dialog.setYSize(Math.min(dialog.ySize(), 150));
+//            dialog.show(600);
+//
+//            dialog = GuiToolkit.createStandardDialog(this, "Test Heading", TextFormatting::getFriendlyName, Arrays.asList(TextFormatting.values()), 50, 100);
+//            dialog.setPos(310, 10).setCloseOnOutsideClick(false);
+//            dialog.setYSize(Math.min(dialog.ySize(), 150));
+//            dialog.show(600);
 
             background = new GuiPickColourDialog(this);
             background.setPos(screenWidth / 2 - 90, screenHeight / 2);

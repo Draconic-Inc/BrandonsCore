@@ -79,6 +79,10 @@ public class BCSprites {
         registerThemed(MODID, "preset_icon");
         registerThemed(MODID, "global_icon");
         registerThemed(MODID, "global_icon_inactive");
+        registerThemed(MODID, "global_key_icon");
+        registerThemed(MODID, "grid_small");
+        registerThemed(MODID, "grid_large");
+        registerThemed(MODID, "item_config");
 
         register(MODID, "add");
         register(MODID, "delete");

@@ -103,7 +103,10 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+        boolean lastCC = capturesClicks;
+        capturesClicks = false;
         boolean captured = super.mouseClicked(mouseX, mouseY, mouseButton);
+        capturesClicks = lastCC;
         if (captured) return true;
 
         boolean posFlag = dragZone != null && dragZone.validate(mouseX, mouseY) && canDrag.get();
@@ -130,7 +133,7 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
             return true;
         }
 
-        return false;
+        return capturesClicks && isMouseOver(mouseX, mouseY);
     }
 
     @Override
