@@ -5,13 +5,24 @@ import cofh.redstoneflux.api.IEnergyHandler;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.capability.OPWrappers;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+
+import java.util.List;
+
+import static net.minecraft.util.text.TextFormatting.GRAY;
 
 /**
  * Created by brandon3055 on 15/11/2016.
@@ -35,8 +46,7 @@ public class EnergyUtils {
         if (!stack.isEmpty()) {
             if (stack.getItem() instanceof IEnergyContainerItem) {
                 return new OPWrappers.RFItem((IEnergyContainerItem) stack.getItem(), stack);
-            }
-            else {
+            } else {
                 return getStorageFromProvider(stack, null);
             }
         }
@@ -232,6 +242,19 @@ public class EnergyUtils {
     private static class ImpossibleException extends RuntimeException {
         public ImpossibleException() {
             super("This exception is impossible. If your seeing this in a crash report then... shit...");
+        }
+    }
+
+    // ================= Utils =================
+
+    @OnlyIn(Dist.CLIENT)
+    public static void addEnergyInfo(ItemStack stack, List<ITextComponent> list) {
+        IOPStorage storage = getStorage(stack);
+        if (storage != null) {
+            String energy = Utils.formatNumber(storage.getOPStored());
+            String maxEnergy = Utils.formatNumber(storage.getMaxOPStored());
+            String postFix = Screen.hasShiftDown() ? "(" + I18n.format("op.brandonscore.operational_potential") + ")" : I18n.format("op.brandonscore.op");
+            list.add(new StringTextComponent(I18n.format("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).applyTextStyle(GRAY));
         }
     }
 }

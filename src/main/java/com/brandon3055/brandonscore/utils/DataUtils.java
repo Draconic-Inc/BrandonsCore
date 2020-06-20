@@ -1,11 +1,10 @@
 package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.util.ArrayUtils;
+import net.minecraft.block.Block;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -324,5 +323,11 @@ public class DataUtils {
             remainder += ((double) val % (double) count) / (double) count;
         }
         return average + (long) remainder;
+    }
+
+    public static <T> Set<T> concatSets(Set<T>... sets) {
+        Set<T> returnSet = new HashSet<>();
+        for (Set<T> set : sets) returnSet.addAll(set);
+        return returnSet;
     }
 }

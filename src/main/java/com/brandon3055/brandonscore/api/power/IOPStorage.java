@@ -7,13 +7,15 @@ import javax.annotation.Nullable;
 
 /**
  * Created by brandon3055 on 14/8/19.
- *
+ * <p>
  * Operational Potential is the power system used by Draconic Evolution and related mods.
  * This system is an extension of Forge Energy that allows long based power transfer and storage.
- *
+ * <p>
  * When implementing this capability cap should be provided as both {@link net.minecraftforge.energy.CapabilityEnergy#ENERGY} and {@link CapabilityOP#OP}
  * So any mod that implements FE will find the FE cap and interact with it normally. However any mod that implements OP will fist check for the OP cap before falling back to RF.
- *
+ * <p>
+ * When creating an energy storage that extends this you MUST override ether the fe, op or both sets of io/storage methods.
+ * Not doing so will result in a stack overflow because by default they just map to each other.
  */
 public interface IOPStorage extends IEnergyStorage {
     /**
@@ -69,4 +71,23 @@ public interface IOPStorage extends IEnergyStorage {
         return null;
     }
 
+    @Override
+    default int receiveEnergy(int maxReceive, boolean simulate) {
+        return (int) receiveOP(maxReceive, simulate);
+    }
+
+    @Override
+    default int extractEnergy(int maxExtract, boolean simulate) {
+        return (int) extractOP(maxExtract, simulate);
+    }
+
+    @Override
+    default int getEnergyStored() {
+        return (int) Math.min(getOPStored(), Integer.MAX_VALUE);
+    }
+
+    @Override
+    default int getMaxEnergyStored() {
+        return (int) Math.min(getMaxOPStored(), Integer.MAX_VALUE);
+    }
 }

@@ -220,34 +220,34 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
     public void bindShader() {
         try {
-            if (useShaders()) {
-                ShaderProgram shader;
-                if (horizontal) {
-                    if (shaderProgramH == null) {
-                        shaderProgramH = new ShaderProgram();
-                        shaderProgramH.attachShader(BCShaders.energyBarH);
-                        shaderProgramH.attachShader(BCShaders.commonVert);
-                    }
-                    shader = shaderProgramH;
-                }
-                else {
-                    if (shaderProgram == null) {
-                        shaderProgram = new ShaderProgram();
-                        shaderProgram.attachShader(BCShaders.energyBar);
-                        shaderProgram.attachShader(BCShaders.commonVert);
-                    }
-                    shader = shaderProgram;
-                }
-                Rectangle rect = toScreenSpace(xPos() + 1, yPos() + 1, xSize() - 2, ySize() - 2);
-
-                shader.useShader(cache -> {
-                    cache.glUniform1F("time", BCClientEventHandler.elapsedTicks / 10F);
-                    cache.glUniform1F("charge", getSOC());
-                    cache.glUniform2I("ePos", rect.x, rect.y);
-                    cache.glUniform2I("eSize", rect.width, rect.height);
-                    cache.glUniform2I("screenSize", displayWidth(), displayHeight());
-                });
-            }
+//            if (useShaders()) {
+//                ShaderProgram shader;
+//                if (horizontal) {
+//                    if (shaderProgramH == null) {
+//                        shaderProgramH = new ShaderProgram();
+//                        shaderProgramH.attachShader(BCShaders.energyBarH);
+//                        shaderProgramH.attachShader(BCShaders.commonVert);
+//                    }
+//                    shader = shaderProgramH;
+//                }
+//                else {
+//                    if (shaderProgram == null) {
+//                        shaderProgram = new ShaderProgram();
+//                        shaderProgram.attachShader(BCShaders.energyBar);
+//                        shaderProgram.attachShader(BCShaders.commonVert);
+//                    }
+//                    shader = shaderProgram;
+//                }
+//                Rectangle rect = toScreenSpace(xPos() + 1, yPos() + 1, xSize() - 2, ySize() - 2);
+//
+//                shader.useShader(cache -> {
+//                    cache.glUniform1F("time", BCClientEventHandler.elapsedTicks / 10F);
+//                    cache.glUniform1F("charge", getSOC());
+//                    cache.glUniform2I("ePos", rect.x, rect.y);
+//                    cache.glUniform2I("eSize", rect.width, rect.height);
+//                    cache.glUniform2I("screenSize", displayWidth(), displayHeight());
+//                });
+//            }
         }
         catch (Throwable e) {
             e.printStackTrace();
@@ -256,7 +256,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
     public void releaseShader() {
         if (useShaders()) {
-            shaderProgram.releaseShader();
+//            shaderProgram.releaseShader();
         }
     }
 

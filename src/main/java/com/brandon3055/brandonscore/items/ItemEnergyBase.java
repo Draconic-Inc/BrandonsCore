@@ -25,6 +25,7 @@ import java.util.List;
  * Created by brandon3055 on 31/05/2016.
  * The base RF item for Brandon's Core
  */
+@Deprecated
 public class ItemEnergyBase extends ItemBCore {
 
     private long capacity;

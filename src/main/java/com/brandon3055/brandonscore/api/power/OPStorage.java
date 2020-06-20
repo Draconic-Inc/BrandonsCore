@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  * When implementing this capability cap should be provided as both {@link net.minecraftforge.energy.CapabilityEnergy#ENERGY} and {@link CapabilityOP#OP}
  * So any mod that implements FE will find the FE cap and interact with it normally. However any mod that implements OP will fist check for the OP cap before falling back to RF.
  */
-public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable {
+public class OPStorage implements INBTSerializable<CompoundNBT>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable, IOPStorageModifiable {
 
     protected long energy;
     protected long capacity;
@@ -123,17 +123,7 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
         return allowReceive && maxReceive > 0;
     }
 
-    /**
-     * This is a raw unchecked setter for the energy value.
-     * This is for internal use only. For things like saving and loading data.
-     *
-     * @param storedOP the new energy value.
-     */
-    public OPStorage setOPStored(long storedOP) {
-        this.energy = storedOP * 1000;
-        return this;
-    }
-
+    @Override
     public long modifyEnergyStored(long amount) {
         if (amount > capacity - energy) {
             amount = capacity - energy;
@@ -198,28 +188,6 @@ public class OPStorage implements IOPStorage, INBTSerializable<CompoundNBT>, IVa
     public OPStorage setMaxTransfer(long maxTransfer) {
         this.maxReceive = this.maxExtract = maxTransfer;
         return this;
-    }
-
-    //FE Methods
-
-    @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        return (int) receiveOP(maxReceive, simulate);
-    }
-
-    @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        return (int) extractOP(maxExtract, simulate);
-    }
-
-    @Override
-    public int getEnergyStored() {
-        return (int) Math.min(getOPStored(), Integer.MAX_VALUE);
-    }
-
-    @Override
-    public int getMaxEnergyStored() {
-        return (int) Math.min(getMaxOPStored(), Integer.MAX_VALUE);
     }
 
     @Override

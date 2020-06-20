@@ -756,6 +756,26 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             return addDynamicLabel(stringSupplier, new Dimension(xSize, ySize));
         }
 
+        public GuiLabel addDynamicLabel(Supplier<String> stringSupplier, int ySize) {
+            Dimension dimension = new Dimension(fontRenderer.getStringWidth(stringSupplier.get()), ySize);
+            GuiLabel label = new GuiLabel(stringSupplier) {
+                @Override
+                public boolean onUpdate() {
+                    int lastWidth = dimension.width;
+                    dimension.width = fontRenderer.getStringWidth(stringSupplier.get());
+
+                    if (dimension.width != lastWidth) {
+                        updatePosSize();
+                    }
+                    return super.onUpdate();
+                }
+            };
+            label.setTrim(false);
+            label.setAlignment(GuiAlign.LEFT);
+            addElement(label, dimension);
+            return label;
+        }
+
         public GuiElement addLabeledValue(String labelText, int valueOffset, int lineHeight, Supplier<String> valueSupplier, boolean multiLine) {
             GuiElement container = new GuiElement();
             GuiLabel label = new GuiLabel(labelText).setAlignment(GuiAlign.LEFT);
@@ -820,7 +840,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             Dimension actSize = prefBounds;
             int xPos = leftSide ? parent.xPos() - xSize() - 2 : parent.maxXPos() + 2;
             int yPos = parent.yPos() + (leftSide && hasPI ? 25 : 0);
-            Rectangle bounds = /*new Rectangle(xPos, yPos, prefBounds.width + 6, prefBounds.height + 6);*/new Rectangle(xPos, yPos, actSize.width + 8, actSize.height + 8);
+            Rectangle bounds = /*new Rectangle(xPos, yPos, prefBounds.width + 6, prefBounds.height + 6);*/new Rectangle(xPos, yPos, actSize.width + 8, actSize.height + 6);
             Point origin = this.origin == null ? new Point(xPos, yPos) : this.origin.get();
             Rectangle collapsed = new Rectangle(origin.x, origin.y, 12, 12);
 

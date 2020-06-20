@@ -121,7 +121,10 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
             isDragging = true;
             if (posFlag) {
                 dragPos = true;
-                onStartMove(mouseX, mouseY);
+                if (onStartMove(mouseX, mouseY)) {
+                    isDragging = false;
+                    return true;
+                }
             } else {
                 dragTop = topFlag;
                 dragLeft = leftFlag;
@@ -129,7 +132,9 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
                 dragRight = rightFlag;
                 onStartResized(mouseX, mouseY);
             }
-            onStartManipulation(mouseX, mouseY);
+            if (onStartManipulation(mouseX, mouseY)) {
+                dragPos = dragTop = dragLeft = dragBottom = dragRight = false;
+            }
             return true;
         }
 
@@ -187,11 +192,15 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
 
     protected void onManipulated(double mouseX, double mouseY) {}
 
-    protected void onStartManipulation(double mouseX, double mouseY) {}
+    protected boolean onStartManipulation(double mouseX, double mouseY) {
+        return false;
+    }
 
     protected void onFinishManipulation(double mouseX, double mouseY) {}
 
-    protected void onStartMove(double mouseX, double mouseY) {}
+    protected boolean onStartMove(double mouseX, double mouseY) {
+        return false;
+    }
 
     protected void onStartResized(double mouseX, double mouseY) {}
 

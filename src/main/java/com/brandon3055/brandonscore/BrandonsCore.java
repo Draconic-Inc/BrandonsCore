@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore;
 
+import codechicken.lib.util.SneakyUtils;
 import com.brandon3055.brandonscore.client.ClientProxy;
 import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTPX;
@@ -29,6 +30,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 
 
 @Mod(BrandonsCore.MODID)
@@ -93,9 +97,9 @@ public class BrandonsCore {
         if (event.getGui() instanceof MainMenuScreen && !autoConnected) {
             autoConnected = true;
             new Thread(() -> {
-//                SneakyUtils.sneak(() -> Thread.sleep(500)).run();
+//                SneakyUtils.sneak(() -> Thread.sleep(3000)).run();
                 Minecraft mc = Minecraft.getInstance();
-                mc.deferTask(() -> mc.launchIntegratedServer("New World", "Main Test World", null));
+//                mc.deferTask(() -> mc.launchIntegratedServer("Main Test World", "Main Test World", null));
             }).start();
         }
     }

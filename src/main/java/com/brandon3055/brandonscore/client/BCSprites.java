@@ -69,6 +69,7 @@ public class BCSprites {
         registerThemed(MODID, "slot");
         registerThemed(MODID, "resize");
         registerThemed(MODID, "reposition");
+        registerThemed(MODID, "copy");
         registerThemed(MODID, "theme");
         registerThemed(MODID, "gear");
         registerThemed(MODID, "advanced");

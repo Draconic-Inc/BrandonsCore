@@ -5,10 +5,10 @@ import com.brandon3055.brandonscore.BCConfig;
 
 import java.io.IOException;
 
-import static codechicken.lib.render.shader.ShaderHelper.getStream;
-import static codechicken.lib.render.shader.ShaderHelper.readShader;
-import static codechicken.lib.render.shader.ShaderObject.ShaderType.FRAGMENT;
-import static codechicken.lib.render.shader.ShaderObject.ShaderType.VERTEX;
+//import static codechicken.lib.render.shader.ShaderHelper.getStream;
+//import static codechicken.lib.render.shader.ShaderHelper.readShader;
+//import static codechicken.lib.render.shader.ShaderObject.ShaderType.FRAGMENT;
+//import static codechicken.lib.render.shader.ShaderObject.ShaderType.VERTEX;
 
 /**
  * Created by brandon3055 on 6/11/2016.
@@ -35,9 +35,9 @@ public class BCShaders {
         dispose(energyBarH);
         dispose(commonVert);
 
-        energyBar = new ShaderObject(FRAGMENT, readShader(getStream("/assets/brandonscore/shaders/power_bar.frag")));
-        energyBarH = new ShaderObject(FRAGMENT, readShader(getStream("/assets/brandonscore/shaders/power_bar_horizontal.frag")));
-        commonVert = new ShaderObject(VERTEX, readShader(getStream("/assets/brandonscore/shaders/common.vert")));
+//        energyBar = new ShaderObject(FRAGMENT, readShader(getStream("/assets/brandonscore/shaders/power_bar.frag")));
+//        energyBarH = new ShaderObject(FRAGMENT, readShader(getStream("/assets/brandonscore/shaders/power_bar_horizontal.frag")));
+//        commonVert = new ShaderObject(VERTEX, readShader(getStream("/assets/brandonscore/shaders/common.vert")));
     }
 
     public static boolean useShaders() {
@@ -46,7 +46,7 @@ public class BCShaders {
 
     private static void dispose(ShaderObject object) {
         if (object != null) {
-            object.disposeObject();
+//            object.disposeObject();
         }
     }
 }
