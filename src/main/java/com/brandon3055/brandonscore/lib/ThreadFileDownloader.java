@@ -91,7 +91,7 @@ public class ThreadFileDownloader extends Thread implements IProcess {
             finished = true;
         }
         catch (Exception e) {
-            LogHelperBC.dev("ThreadFileDownloader: DL Failed " + e.getMessage());
+            LogHelperBC.warn("ThreadFileDownloader: DL Failed " + e.getMessage());
             if (BCConfig.devLog) {
                 e.printStackTrace();
             }
