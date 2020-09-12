@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -698,19 +699,23 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 //    }
 
     public static class InfoPanel extends GuiElement<InfoPanel> {
+        private static AtomicBoolean globalExpanded = new AtomicBoolean(false);
         private Map<GuiElement, Dimension> elementsDimMap = new LinkedHashMap<>();
         private final GuiElement parent;
         private boolean leftSide = false;
         private boolean hasPI = true;
-        public static boolean expanded = false;
-        public static double animState = 0;
+        private AtomicBoolean expanded;
+        public double animState = 0;
         public Supplier<Point> origin;
         public String hoverText = I18n.format("gui.brandonscore.info_panel");
 
-        public InfoPanel(GuiElement parent, boolean leftSide) {
+        public InfoPanel(GuiElement parent, boolean leftSide, AtomicBoolean expandedHolder) {
             this.parent = parent;
             this.leftSide = leftSide;
+            this.expanded = expandedHolder;
+            this.animState = isExpanded() ? 1 : -0.5;
             setEnabled(false);
+
             if (animState == -0.5) {
                 setHoverText(hoverText);
             }
@@ -718,10 +723,32 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             setHoverTextDelay(10);
         }
 
+        public InfoPanel(GuiElement parent, boolean leftSide) {
+            this(parent, leftSide, globalExpanded);
+        }
+
+        public void setExpandedHolder(AtomicBoolean expanded) {
+            this.expanded = expanded;
+            this.animState = isExpanded() ? 1 : -0.5;
+            setHoverTextEnabled(false);
+            if (animState == -0.5) {
+                setHoverText(hoverText);
+                setHoverTextEnabled(true);
+            }
+        }
+
+        public boolean isExpanded() {
+            return expanded.get();
+        }
+
+        public void toggleExpanded() {
+            expanded.set(!expanded.get());
+        }
+
         @Override
         public void reloadElement() {
             super.reloadElement();
-            if (expanded) {
+            if (isExpanded()) {
                 updatePosSize();
             }
         }
@@ -780,23 +807,41 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             GuiElement container = new GuiElement();
             GuiLabel label = new GuiLabel(labelText).setAlignment(GuiAlign.LEFT);
             label.setSize(multiLine ? fontRenderer.getStringWidth(labelText) : valueOffset, lineHeight);
+            label.setWrap(true);
             container.addChild(label);
+            String value = valueSupplier.get();
+            int extraHeiht = fontRenderer.FONT_HEIGHT;
+            if (value.contains("\n")) {
+                String[] strs = value.split("\n");
+                value = "";
+                for (String s : strs) if (s.length() > value.length()) {
+                    extraHeiht += fontRenderer.FONT_HEIGHT;
+                    value = s;
+                }
+            }
+            extraHeiht -= fontRenderer.FONT_HEIGHT;
 
-            Dimension dimension;//
+            Dimension dimension;
             if (multiLine) {
-                dimension = new Dimension(Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(valueSupplier.get())), lineHeight * 2);
+                dimension = new Dimension(Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(value)), (lineHeight * 2) + extraHeiht);
             } else {
-                dimension = new Dimension(valueOffset + fontRenderer.getStringWidth(valueSupplier.get()), lineHeight);
+                dimension = new Dimension(valueOffset + fontRenderer.getStringWidth(value), lineHeight);
             }
 
             GuiLabel valueLabel = new GuiLabel() {
                 @Override
                 public boolean onUpdate() {
                     int lastWidth = dimension.width;
+                    String value = valueSupplier.get();
+                    if (value.contains("\n")) {
+                        String[] strs = value.split("\n");
+                        value = "";
+                        for (String s : strs) if (s.length() > value.length()) value = s;
+                    }
                     if (multiLine) {
-                        dimension.width = Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(valueSupplier.get()));
+                        dimension.width = Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(value));
                     } else {
-                        dimension.width = valueOffset + fontRenderer.getStringWidth(valueSupplier.get());
+                        dimension.width = valueOffset + fontRenderer.getStringWidth(value);
                     }
 
                     if (dimension.width != lastWidth) {
@@ -822,8 +867,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
             boolean ret = super.mouseClicked(mouseX, mouseY, mouseButton);
             if (!ret && isMouseOver(mouseX, mouseY)) {
-                expanded = !expanded;
-                GuiButton.playGenericClick(mc);
+                toggleExpanded();
+                GuiButton.playGenericClick();
                 return true;
             }
 
@@ -844,7 +889,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             Point origin = this.origin == null ? new Point(xPos, yPos) : this.origin.get();
             Rectangle collapsed = new Rectangle(origin.x, origin.y, 12, 12);
 
-            double animState = Math.max(0, InfoPanel.animState);
+            double animState = Math.max(0, this.animState);
             int sx = (int) MathUtils.map(animState, 0, 1, collapsed.x, bounds.x);
             int sy = (int) MathUtils.map(animState, 0, 1, collapsed.y, bounds.y);
             int sw = (int) MathUtils.map(animState, 0, 1, collapsed.width, bounds.width);
@@ -898,11 +943,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
         @Override
         public boolean onUpdate() {
-            if (expanded && animState < 1) {
+            if (isExpanded() && animState < 1) {
                 animState = Math.min(1, animState + 0.2);
                 setHoverTextEnabled(false);
                 updatePosSize();
-            } else if (!expanded && animState > -0.5) {
+            } else if (!isExpanded() && animState > -0.5) {
                 animState = Math.max(-0.5, animState - 0.2);
                 if (animState == -0.5) {
                     setHoverText(hoverText);

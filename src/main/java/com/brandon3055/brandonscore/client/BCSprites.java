@@ -117,6 +117,10 @@ public class BCSprites {
         register(MODID, "item_charge/right_discharge");
         register(MODID, "item_charge/vertical_charge");
         register(MODID, "item_charge/vertical_discharge");
+
+        register(MODID, "bars/food_empty");
+        register(MODID, "bars/food_half");
+        register(MODID, "bars/food_full");
     }
 
     //region register

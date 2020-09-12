@@ -25,21 +25,21 @@ public class CapabilityOP {
         CapabilityManager.INSTANCE.register(IOPStorage.class, new Capability.IStorage<IOPStorage>() {
             @Override
             public INBT writeNBT(Capability<IOPStorage> capability, IOPStorage instance, Direction side) {
-                if (instance instanceof OPStorage) {
-                    return ((INBTSerializable) instance).serializeNBT();
+                if (instance instanceof INBTSerializable) {
+                    return ((INBTSerializable<?>) instance).serializeNBT();
                 }
                 else {
-                    throw new IllegalArgumentException("Can not serialize to an instance that isn't the default implementation");
+                    throw new IllegalArgumentException("IOPStorage instance is not serializable!");
                 }
             }
 
             @Override
             public void readNBT(Capability<IOPStorage> capability, IOPStorage instance, Direction side, INBT nbt) {
-                if (instance instanceof OPStorage) {
-                    ((OPStorage) instance).deserializeNBT((CompoundNBT) nbt);
+                if (instance instanceof INBTSerializable) {
+                    ((INBTSerializable) instance).deserializeNBT(nbt);
                 }
                 else {
-                    throw new IllegalArgumentException("Can not serialize to an instance that isn't the default implementation");
+                    throw new IllegalArgumentException("IOPStorage instance is not serializable!");
                 }
             }
         }, () -> new OPStorage(1000));

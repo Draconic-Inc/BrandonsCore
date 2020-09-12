@@ -37,7 +37,7 @@ public class TBasicMachine extends TGuiBase {
         if (tile instanceof IRSSwitchable) {
             rsButton = toolkit.createRSSwitch(background, (IRSSwitchable) tile);
             rsButton.setXPos(themeButton.xPos());
-            rsButton.setYPosMod(() -> infoPanel.isEnabled() ? (infoPanel.origin.get().y + (int) ((1D - InfoPanel.animState) * 9)) : themeButton.maxYPos());
+            rsButton.setYPosMod(() -> infoPanel.isEnabled() ? (infoPanel.origin.get().y + (int) ((1D - infoPanel.animState) * 9)) : themeButton.maxYPos());
         }
     }
 

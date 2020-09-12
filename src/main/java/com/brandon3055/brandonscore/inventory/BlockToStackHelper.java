@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -44,19 +45,11 @@ public class BlockToStackHelper {
         }
         itemCollection = new ArrayList<>();
 
-//        TileEntity tile = world.getTileEntity(pos);
-//        if (block.removedByPlayer(state, world, pos, player, true, world.getFluidState(pos))) {
-////            block.onPlayerDestroy(world, pos, state);
-//            block.onBlockHarvested(world, pos, state, player);
-//            block.harvestBlock(world, player, pos, state, tile, player.getHeldItemMainhand());
-////            block.dropXpOnBlockBreak(world, pos, xp);
-//        }
-
-        //TODO I think this is good? Needs testing
+        TileEntity tile = world.getTileEntity(pos);
         if (state.removedByPlayer(world, pos, player, true, world.getFluidState(pos))){
             state.getBlock().onPlayerDestroy(world, pos, state);
+            block.harvestBlock(world, player, pos, state, tile, player.getHeldItemMainhand());
         }
-
 
         stacks.addAll(itemCollection);
         itemCollection = null;

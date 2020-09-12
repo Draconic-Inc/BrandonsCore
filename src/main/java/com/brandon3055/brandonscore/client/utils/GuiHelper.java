@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.utils;
 
+import codechicken.lib.colour.ColourARGB;
 import codechicken.lib.render.RenderUtils;
 import codechicken.lib.render.buffer.TransformingVertexBuilder;
 import codechicken.lib.util.SneakyUtils;
@@ -14,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
 
@@ -24,6 +26,13 @@ import java.util.List;
  */
 public class GuiHelper {
     public static final RenderType TRANS_TYPE = RenderType.makeType("gui_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .alpha(RenderState.ZERO_ALPHA)
+            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+            .build(false)
+    );
+
+    public static RenderType FAN_TYPE = RenderType.makeType("charge_type", DefaultVertexFormats.POSITION_COLOR, GL11.GL_TRIANGLE_FAN, 256, RenderType.State.getBuilder()
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
             .alpha(RenderState.ZERO_ALPHA)
             .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
@@ -288,6 +297,18 @@ public class GuiHelper {
         }
     }
 
+    public static void drawBackgroundString(IVertexBuilder vertexBuilder, FontRenderer font, String text, float x, float y, int color, int background, int padding, boolean shadow, boolean centered) {
+        int width = font.getStringWidth(text);
+        x = centered ? x - width / 2F : x;
+        drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.FONT_HEIGHT - 2 + padding * 2, background, 0);
+        if (shadow) {
+            font.drawStringWithShadow(text, x, y, color);
+        } else {
+            font.drawString(text, x, y, color);
+        }
+    }
+
+
 //    public static void drawCenteredSplitString(FontRenderer fontRenderer, String str, int x, int y, int wrapWidth, int color, boolean dropShadow) {
 //        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
 //            drawCenteredString(fontRenderer, s, x, y, color, dropShadow);
@@ -405,5 +426,76 @@ public class GuiHelper {
         drawColouredRect(builder, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
         drawColouredRect(builder, posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
         drawColouredRect(builder, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour, zLevel);
+    }
+
+    public static void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour, double zLevel) {
+        int texWidth = tex.getWidth();
+        int texHeight = tex.getHeight();
+        int trimWidth = texWidth - leftTrim - rightTrim;
+        int trimHeight = texHeight - topTrim - bottomTrim;
+        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
+
+        for (int x = 0; x < xSize; ) {
+            int rWidth = Math.min(xSize - x, trimWidth);
+            int trimU = 0;
+            if (x != 0) {
+                if (x + leftTrim + trimWidth <= xSize) {
+                    trimU = leftTrim;
+                } else {
+                    trimU = (texWidth - (xSize - x));
+                }
+            }
+
+            //Top & Bottom trim
+            bufferTexturedModalRect(builder, tex, xPos + x, yPos, trimU, 0, rWidth, topTrim, colour, zLevel);
+            bufferTexturedModalRect(builder, tex, xPos + x, yPos + ySize - bottomTrim, trimU, texHeight - bottomTrim, rWidth, bottomTrim, colour, zLevel);
+
+
+            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
+            for (int y = 0; y < ySize; ) {
+                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
+                int trimV;
+                if (y + (texHeight - topTrim - bottomTrim) <= ySize) {
+                    trimV = topTrim;
+                } else {
+                    trimV = texHeight - (ySize - y);
+                }
+
+                //Left & Right trim
+                if (x == 0 && y + topTrim < ySize - bottomTrim) {
+                    bufferTexturedModalRect(builder, tex, xPos, yPos + y + topTrim, 0, trimV, leftTrim, rHeight, colour, zLevel);
+                    bufferTexturedModalRect(builder, tex, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight, colour, zLevel);
+                }
+
+                //Core
+                if (y + topTrim < ySize - bottomTrim && x + leftTrim < xSize - rightTrim) {
+                    bufferTexturedModalRect(builder, tex, xPos + x + leftTrim, yPos + y + topTrim, leftTrim, topTrim, rWidth, rHeight, colour, zLevel);
+                }
+                y += trimHeight;
+            }
+            x += trimWidth;
+        }
+    }
+
+    private static void bufferTexturedModalRect(IVertexBuilder builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour, double zLevel) {
+        int w = tex.getWidth();
+        int h = tex.getHeight();
+        int[] colours = ColourARGB.unpack(colour);
+        //@formatter:off
+        builder.pos(x,         y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU((textureX / w) * 16D),          tex.getInterpolatedV(((textureY + height) / h) * 16)).endVertex();
+        builder.pos(x + width, y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU(((textureX + width) / w) * 16), tex.getInterpolatedV(((textureY + height) / h) * 16)).endVertex();
+        builder.pos(x + width, y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU(((textureX + width) / w) * 16), tex.getInterpolatedV(((textureY) / h) * 16)).endVertex();
+        builder.pos(x,         y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU((textureX / w) * 16),           tex.getInterpolatedV(((textureY) / h) * 16)).endVertex();
+        //@formatter:on
+    }
+
+    public static void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite, double zLevel) {
+        //@formatter:off
+        builder.pos(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+        builder.pos(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+        builder.pos(x,          y,          zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        //@formatter:on
     }
 }

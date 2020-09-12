@@ -57,6 +57,7 @@ import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.io.IOUtils;
+import sun.rmi.log.LogHandler;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -167,6 +168,7 @@ public class BCUtilCommands {
 
         CompoundNBT compound = stack.getTag();
         LogHelperBC.logNBT(compound);
+        LogHelperBC.info(compound);
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");

@@ -2710,7 +2710,18 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             if (wrap) {
                 drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
             } else {
-                drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
+                if (text.contains("\n")) {
+                    int offset = 0;
+                    String prefix = "";
+                    if (text.startsWith("\u00A7") && text.length() > 1) prefix = text.substring(0, 2);
+                    for (String str : text.split("\n")) {
+                        if (!str.isEmpty()) {
+                            drawAlignedString(fr, str.startsWith("\u00A7") ? str : prefix + str, x, y + offset, width, alignment, colour, dropShadow, trim);
+                            offset += fontRenderer.FONT_HEIGHT;
+                        }
+                    }
+                } else
+                    drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
             }
         } else {
             RenderSystem.pushMatrix();

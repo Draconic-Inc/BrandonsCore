@@ -47,29 +47,33 @@ public class BrandonsCore {
         inDev = VERSION.equals("${mod_version}");
         FileHandler.init();
 
-        Logger deLog = LogManager.getLogger("draconicevolution");
-        if (ModList.get().isLoaded("draconicevolution")) {
-            deLog.log(Level.WARN, "Warning! Reactor detonation imminent!");
-            LogHelperBC.info("Oh no... Not again...");
-        } else {
-            LogHelperBC.info("Hay! Where's DE?");
-            LogHelperBC.info("Oh well.. At least we dont have to worry about getting blown up now...");
+        //Knock Knock...
+        synchronized (MinecraftForge.EVENT_BUS) {
+            Logger deLog = LogManager.getLogger("draconicevolution");
+            if (ModList.get().isLoaded("draconicevolution")) {
+                LogHelperBC.info("Knock Knock...");
+                deLog.log(Level.WARN, "Reactor detonation initiated.");
+                LogHelperBC.info("Wait... NO! What?");
+                LogHelperBC.info("Stop That! That's not how this works!");
+                deLog.log(Level.WARN, "Calculating explosion ETA");
+                LogHelperBC.info("Ahh... NO... NONONO! DONT DO THAT!!! STOP THIS NOW!");
+                deLog.log(Level.WARN, "**Explosion Imminent!!!**");
+                LogHelperBC.info("Well...... fork...");
+            } else {
+                LogHelperBC.info("Hay! Where's DE?");
+                LogHelperBC.info("Oh well.. At least we dont have to worry about getting blown up now...");
+            }
         }
 
         proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
         proxy.construct();
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
         MinecraftForge.EVENT_BUS.register(this);
-//        FMLJavaModLoadingContext.get().getModEventBus().register(new BCConfig());
 
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         modLoadingContext.registerConfig(ModConfig.Type.CLIENT, BCConfig.CLIENT_SPEC);
         modLoadingContext.registerConfig(ModConfig.Type.SERVER, BCConfig.SERVER_SPEC);
         modLoadingContext.registerConfig(ModConfig.Type.COMMON, BCConfig.COMMON_SPEC);
-
-//        MainWindow window = Minecraft.getInstance().getMainWindow();
-//        GLFW.glfwSetWindowPos(window.getHandle(), 0, 1080);
-//        GLFW.glfwMaximizeWindow(window.getHandle());
     }
 
     @SubscribeEvent
