@@ -6,6 +6,7 @@ import codechicken.lib.render.buffer.TransformingVertexBuilder;
 import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Matrix4;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -15,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
@@ -271,8 +273,12 @@ public class GuiHelper {
      * Draws the players inventory slots into the gui.
      * note. X-Size is 162
      */
+    @Deprecated
     public static void drawPlayerSlots(AbstractGui gui, int posX, int posY, boolean center) {
-        ResourceHelperBC.bindTexture("textures/gui/bc_widgets.png");
+        RenderSystem.color4f(1F, 1F, 1F, 1F);
+        Material mat = BCSprites.getThemed("slot");
+        ResourceHelperBC.bindTexture(mat.getAtlasLocation());
+        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
 
         if (center) {
             posX -= 81;
@@ -280,13 +286,14 @@ public class GuiHelper {
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                gui.blit(posX + x * 18, posY + y * 18, 138, 0, 18, 18);
+                drawSprite(mat.getBuffer(getter, BCSprites::makeType), posX + x * 18, posY + y * 18, 18, 18, mat.getSprite(), 0);
             }
         }
 
         for (int x = 0; x < 9; x++) {
-            gui.blit(posX + x * 18, posY + 58, 138, 0, 18, 18);
+            drawSprite(mat.getBuffer(getter, BCSprites::makeType), posX + x * 18, posY + 58, 18, 18, mat.getSprite(), 0);
         }
+        getter.finish();
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {

@@ -57,7 +57,7 @@ import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.io.IOUtils;
-import sun.rmi.log.LogHandler;
+
 
 import javax.annotation.Nullable;
 import java.io.*;

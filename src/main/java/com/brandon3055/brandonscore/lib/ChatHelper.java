@@ -155,7 +155,7 @@ public class ChatHelper {
      */
     public static void indexedMsg(PlayerEntity player, String message) {
         if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(message), -330553055);
+            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(message), 0xec4c2921);
         }
     }
 

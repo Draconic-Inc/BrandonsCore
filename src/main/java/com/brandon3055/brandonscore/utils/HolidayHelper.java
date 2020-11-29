@@ -22,7 +22,7 @@ public class HolidayHelper {
             lastCheck = System.currentTimeMillis();
         }
 
-        return isAprilFools;
+        return isAprilFools || true;
     }
 
     static void setDate(Calendar cal, int month, int date, boolean endOfDay) {

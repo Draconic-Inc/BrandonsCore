@@ -130,8 +130,9 @@ public class GuiLabel extends GuiElement<GuiLabel> {
         return this;
     }
 
-    public void setShadowStateSupplier(Supplier<Boolean> shadowStateSupplier) {
+    public GuiLabel setShadowStateSupplier(Supplier<Boolean> shadowStateSupplier) {
         this.shadowStateSupplier = shadowStateSupplier;
+        return this;
     }
 
     public boolean hasShadow() {

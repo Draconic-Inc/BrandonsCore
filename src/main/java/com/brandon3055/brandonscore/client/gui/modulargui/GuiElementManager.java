@@ -32,7 +32,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     private int width;
     private int height;
     private List<GuiElement> toRemove = new ArrayList<GuiElement>();
-    private Supplier<List<GuiElement>> jeiExclusions = null;
+    private Supplier<List<GuiElement<?>>> jeiExclusions = null;
     private List<JEITargetAdapter> jeiGhostTargets = new ArrayList<>();
     private ResourceLocation newCursor = null;
     private boolean mousePressed = false;
@@ -462,7 +462,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         return parentGui;
     }
 
-    public void setJeiExclusions(Supplier<List<GuiElement>> exclusions) {
+    public void setJeiExclusions(Supplier<List<GuiElement<?>>> exclusions) {
         this.jeiExclusions = exclusions;
     }
 

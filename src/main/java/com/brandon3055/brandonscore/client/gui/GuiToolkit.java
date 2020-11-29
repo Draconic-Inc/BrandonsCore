@@ -47,7 +47,7 @@ import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotTyp
 public class GuiToolkit<T extends Screen & IModularGui> {
 
     private static Map<String, ResourceLocation> resourceCache = new HashMap<>();
-    private List<GuiElement> jeiExclusions = new ArrayList<>();
+    private List<GuiElement<?>> jeiExclusions = new ArrayList<>();
 
     private T gui;
     private GuiLayout layout;

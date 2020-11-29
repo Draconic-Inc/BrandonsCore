@@ -4,9 +4,10 @@ loaderVersion="[28,)"
 [[mods]]
 	modId="brandonscore"
 	displayName="Brandon's Core"
-	version="3.0.0"
+    version="${version}"
 	authors="brandon3055"
 	description=''''''
+    updateJSONURL="https://version-check.covers1624.net/check/?mod=BrandonsCore&mc=${mc_version}"
 [[dependencies.brandonscore]]
 	modId="forge"
 	mandatory=true
@@ -19,4 +20,9 @@ loaderVersion="[28,)"
     versionRange="[1.15.2]"
     ordering="NONE"
     side="BOTH"
-
+[[dependencies.enderstorage]]
+    modId="codechickenlib"
+    mandatory=true
+    versionRange="[${ccl_version},)"
+    ordering="AFTER"
+    side="BOTH"
