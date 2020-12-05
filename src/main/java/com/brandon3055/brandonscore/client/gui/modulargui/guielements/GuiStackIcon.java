@@ -28,8 +28,13 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     private GuiElement background = null;
     protected List<String> toolTipOverride = null;
     private StackReference stackReference;
+    private ItemStack stack = ItemStack.EMPTY;
     private Runnable clickListener = null;
     private Consumer<Object> ingredientDropListener = null;
+
+    public GuiStackIcon() {
+        this(null);
+    }
 
     public GuiStackIcon(StackReference stackReference) {
         this.stackReference = stackReference;
@@ -63,6 +68,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     private void renderStack(Minecraft minecraft) {
 //        RenderHelper.enableGUIStandardItemLighting();
+        if (getStack().isEmpty()) return;
 
         double scaledWidth = xSize() / 18D;
         double scaledHeight = ySize() / 18D;
@@ -97,7 +103,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && stackReference != null) {
+        if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && !getStack().isEmpty()) {
             List<String> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItem(getStack());
             drawHoveringText(list, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             return true;
@@ -121,6 +127,11 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     public GuiStackIcon setStack(StackReference stackReference) {
         this.stackReference = stackReference;
+        return this;
+    }
+
+    public GuiStackIcon setStack(ItemStack stack) {
+        this.stack = stack;
         return this;
     }
 
@@ -165,7 +176,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     public ItemStack getStack() {
         if (stackReference == null) {
-            return ItemStack.EMPTY;
+            return stack;
         }
         int hash = stackReference.hashCode();
         if (!stackCache.containsKey(hash)) {

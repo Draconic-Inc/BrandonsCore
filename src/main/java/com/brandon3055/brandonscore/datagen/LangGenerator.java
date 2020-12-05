@@ -49,6 +49,8 @@ public class LangGenerator extends LanguageProvider {
         add("op.brandonscore.op_transfer"                                                       ,"OP Transfer");
 
 
+
+
         //endergion
 
         //region # Misc
@@ -59,6 +61,18 @@ public class LangGenerator extends LanguageProvider {
 
 
         //endregion
+
+        //# Gui Toolkit
+        add("gui.brandonscore.theme.light",                                                     "Light Theme");
+        add("gui.brandonscore.theme.dark",                                                      "Dark Theme");
+        add("gui.brandonscore.info_panel",                                                      "Display additional information");
+        add("gui.brandonscore.rs_mode.always_active",                                           "Always active");
+        add("gui.brandonscore.rs_mode.active_high",                                             "Active with redstone signal");
+        add("gui.brandonscore.rs_mode.active_low",                                              "Active without redstone signal");
+        add("gui.brandonscore.rs_mode.never_active",                                            "Never active");
+        add("gui.brandonscore.large_view",                                                      "Large View");
+        add("gui.brandonscore.large_view.close",                                                "Click outside or press Esc to close");
+        add("gui.brandonscore.your_inventory",                                                  "Your Inventory");
 
 
         //temp

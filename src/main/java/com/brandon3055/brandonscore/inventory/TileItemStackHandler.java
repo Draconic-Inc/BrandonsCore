@@ -104,6 +104,7 @@ public class TileItemStackHandler extends ItemStackHandler {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+        stacks.clear();
         ListNBT tagList = nbt.getList("Items", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < tagList.size(); i++) {
             CompoundNBT itemTags = tagList.getCompound(i);

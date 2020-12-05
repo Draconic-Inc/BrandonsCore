@@ -754,7 +754,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
         private void updateStackIcon() {
             if (getNode() != null) {
                 if (getNode().getItemName().isEmpty()) {
-                    stackIcon.setStack(null);
+                    stackIcon.setStack((StackReference) null);
                     stackIcon.setHoverText(I18n.format("gui.bc.entity_filter.set_stack"));
                 } else {
                     StackReference stack = new StackReference(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
