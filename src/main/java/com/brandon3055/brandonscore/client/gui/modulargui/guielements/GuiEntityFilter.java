@@ -515,7 +515,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     renderer.setPos(8, 2);
                     container.addChild(renderer);
                     EntityType type = ForgeRegistries.ENTITIES.getValue(rs);
-                    String name = type == null ? "unknown" : type.getName().getFormattedText();
+                    String name = type == null ? "unknown" : type.getName().getString();
                     GuiLabel label = new GuiLabel(I18n.format(I18n.format(name == null ? "[no-name-available]" : "entity." + name + ".name")));
                     label.setPos(renderer.maxXPos() + 6, container.yPos() + 2).setWrap(true).setYSize(container.ySize() - 4).setXSizeMod(() -> container.xSize() - (16 + 6 + 2 + 2));
                     container.addChild(label);
@@ -534,7 +534,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     }
                 });
 
-                DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> e.getValue().create(mc.world) instanceof LivingEntity, e -> dialog.addItem(e.getKey()));
+                DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> e.getValue().create(mc.world) instanceof LivingEntity, e -> dialog.addItem(e.getKey().getRegistryName()));
                 dialog.setSize(150, 190);
                 dialog.addBackGroundChild(new GuiBorderedRect().set3DGetters(SubItem::fill, SubItem::accentLight, SubItem::accentDark).setDoubleBorder(1).setBorderColourL(e -> SubItem.border3d()).setPosAndSize(dialog));
                 GuiTextField filter = new GuiTextField();
@@ -542,14 +542,14 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 filter.setChangeListener((s) -> {
                     dialog.clearItems();
                     DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
-                        EntityType type = e.getValue();
+                        EntityType<?> type = e.getValue();
                         boolean pass = s.isEmpty() || type.toString().toLowerCase().contains(s.toLowerCase());
-                        String name = type.getName().getFormattedText();
+                        String name = type.getName().getString();
                         if (!pass && name.toLowerCase().contains(s.toLowerCase())) {
                             pass = true;
                         }
                         return pass && type.create(mc.world) instanceof LivingEntity;
-                    }, e -> dialog.addItem(e.getKey()));
+                    }, e -> dialog.addItem(e.getKey().getRegistryName()));
                 });
                 GuiLabel searchLabel = new GuiLabel(I18n.format("gui.bc.search")).setTextColour(0xB0B0B0).setShadow(false);
                 searchLabel.setPosAndSize(filter).translate(0, 1);

@@ -143,7 +143,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
-    public void handleUpdateTag(CompoundNBT tag) {
+    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
         dataManager.readSyncNBT(tag);
         readExtraNBT(tag);
     }
@@ -387,14 +387,14 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
-    public final void read(CompoundNBT compound) {
-        super.read(compound);
-
-        dataManager.readFromNBT(compound);
-        readExtraNBT(compound);
+    public void read(BlockState state, CompoundNBT nbt) {
+        super.read(state, nbt);
+        dataManager.readFromNBT(nbt);
+        readExtraNBT(nbt);
 
         onTileLoaded();
     }
+
 
 //    @Override
 //    public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate) {
@@ -747,7 +747,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
             return new StringTextComponent(customName);
         }
 
-        return getBlockState().getBlock().getNameTextComponent();
+        return getBlockState().getBlock().getTranslatedName();
     }
 
     @Override

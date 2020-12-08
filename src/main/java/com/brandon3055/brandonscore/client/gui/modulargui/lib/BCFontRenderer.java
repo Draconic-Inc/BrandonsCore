@@ -1,14 +1,21 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
+import com.brandon3055.brandonscore.utils.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.fonts.Font;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.TextFormatting;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Created by brandon3055 on 10/07/2017.
@@ -21,32 +28,140 @@ public class BCFontRenderer extends FontRenderer {
     private static boolean colourFormatSet = false;
     private static Map<FontRenderer, BCFontRenderer> cashedRenderers = new HashMap<>();
 
-    public BCFontRenderer(TextureManager textureManagerIn, Font fontIn) {
-        super(textureManagerIn, fontIn);
+    public BCFontRenderer(Function<ResourceLocation, Font> font) {
+        super(font);
     }
 
-    int recurs = 0;
 
-    //This is a temporary hack that wont be needed once i re write my gui system
     @Override
-    public int renderStringAt(String text, float x, float y, int color, boolean dropShadow, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparentIn, int colorBackgroundIn, int packedLight) {
-        if (this.bidiFlag) {
+    public int func_238423_b_(String text, float x, float y, int color, boolean p_238423_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparent, int p_238423_9_, int p_238423_10_, boolean p_238423_11_) {
+        if (p_238423_11_) {
             text = this.bidiReorder(text);
         }
 
-        if ((color & -67108864) == 0) {
-            color |= -16777216;
-        }
-
-        if (dropShadow) {
-            this.renderStringAtPos(text, x, y, color, true, matrix, buffer, transparentIn, colorBackgroundIn, packedLight);
-        }
-
+        color = fixAlpha(color);
         Matrix4f matrix4f = matrix.copy();
-//        matrix4f.translate(new Vector3f(0.0F, 0.0F, 0.001F));
-        x = this.renderStringAtPos(text, x, y, color, false, matrix4f, buffer, transparentIn, colorBackgroundIn, packedLight);
-        return (int)x + (dropShadow ? 1 : 0);
+        if (p_238423_5_) {
+            this.renderStringAtPos(text, x, y, color, true, matrix, buffer, transparent, p_238423_9_, p_238423_10_);
+//            matrix4f.translate(FONT_OFFSET);
+        }
+
+        x = this.renderStringAtPos(text, x, y, color, false, matrix4f, buffer, transparent, p_238423_9_, p_238423_10_);
+        return (int)x + (p_238423_5_ ? 1 : 0);
     }
+
+    @Override
+    public int func_238424_b_(IReorderingProcessor p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
+        color = fixAlpha(color);
+        Matrix4f matrix4f = matrix.copy();
+        if (p_238424_5_) {
+            this.func_238426_c_(p_238424_1_, x, y, color, true, matrix, buffer, p_238424_8_, p_238424_9_, p_238424_10_);
+//            matrix4f.translate(FONT_OFFSET);
+        }
+
+        x = this.func_238426_c_(p_238424_1_, x, y, color, false, matrix4f, buffer, p_238424_8_, p_238424_9_, p_238424_10_);
+        return (int)x + (p_238424_5_ ? 1 : 0);
+    }
+
+
+    public static List<String> listFormattedStringToWidth(String str, int wrapWidth) {
+        return Arrays.asList(wrapFormattedStringToWidth(str, wrapWidth).split("\n"));
+    }
+
+    public static String wrapFormattedStringToWidth(String str, int wrapWidth) {
+        String s;
+        String s1;
+        for(s = ""; !str.isEmpty(); s = s + s1 + "\n") {
+            int i = sizeStringToWidth(str, wrapWidth);
+            if (str.length() <= i) {
+                return s + str;
+            }
+
+            s1 = str.substring(0, i);
+            char c0 = str.charAt(i);
+            boolean flag = c0 == ' ' || c0 == '\n';
+            str = Utils.getTextFormatString(s1) + str.substring(i + (flag ? 1 : 0));
+        }
+
+        return s;
+    }
+
+    public static int sizeStringToWidth(String str, int wrapWidth) {
+        int i = Math.max(1, wrapWidth);
+        int j = str.length();
+        float f = 0.0F;
+        int k = 0;
+        int l = -1;
+        boolean flag = false;
+
+        for(boolean flag1 = true; k < j; ++k) {
+            char c0 = str.charAt(k);
+            switch(c0) {
+                case '\n':
+                    --k;
+                    break;
+                case ' ':
+                    l = k;
+                default:
+                    if (f != 0.0F) {
+                        flag1 = false;
+                    }
+
+                    f += Minecraft.getInstance().fontRenderer.getCharacterManager().func_238350_a_(c0+"");
+                    if (flag) {
+                        ++f;
+                    }
+                    break;
+                case '\u00a7':
+                    if (k < j - 1) {
+                        ++k;
+                        TextFormatting textformatting = TextFormatting.fromFormattingCode(str.charAt(k));
+                        if (textformatting == TextFormatting.BOLD) {
+                            flag = true;
+                        } else if (textformatting != null && !textformatting.isFancyStyling()) {
+                            flag = false;
+                        }
+                    }
+            }
+
+            if (c0 == '\n') {
+                ++k;
+                l = k;
+                break;
+            }
+
+            if (f > (float)i) {
+                if (flag1) {
+                    ++k;
+                }
+                break;
+            }
+        }
+
+        return k != j && l != -1 && l < k ? l : k;
+    }
+
+
+    //This is a temporary hack that wont be needed once i re write my gui system
+//    @Override
+//    public int func_238423_b_(String text, float x, float y, int color, boolean dropShadow, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparentIn, int colorBackgroundIn, int packedLight) {
+//        if (this.bidiFlag) {
+//            text = this.bidiReorder(text);
+//        }
+//
+//        if ((color & -67108864) == 0) {
+//            color |= -16777216;
+//        }
+//
+//        if (dropShadow) {
+//            this.renderStringAtPos(text, x, y, color, true, matrix, buffer, transparentIn, colorBackgroundIn, packedLight);
+//        }
+//
+//        Matrix4f matrix4f = matrix.copy();
+////        matrix4f.translate(new Vector3f(0.0F, 0.0F, 0.001F));
+//        x = this.renderStringAtPos(text, x, y, color, false, matrix4f, buffer, transparentIn, colorBackgroundIn, packedLight);
+//        return (int)x + (dropShadow ? 1 : 0);
+//    }
 
 //    @Override
 //    public String wrapFormattedStringToWidth(String str, int wrapWidth) {
@@ -204,7 +319,7 @@ public class BCFontRenderer extends FontRenderer {
 
     public static BCFontRenderer convert(FontRenderer fontRenderer) {
         if (!cashedRenderers.containsKey(fontRenderer)) {
-            BCFontRenderer fr = new BCFontRenderer(fontRenderer.textureManager, fontRenderer.font);
+            BCFontRenderer fr = new BCFontRenderer(fontRenderer.font);
 //                        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(fr);
             cashedRenderers.put(fontRenderer, fr);
         }

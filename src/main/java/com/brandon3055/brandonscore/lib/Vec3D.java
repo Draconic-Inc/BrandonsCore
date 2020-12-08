@@ -25,9 +25,9 @@ public class Vec3D {
     }
 
     public Vec3D(Entity entity) {
-        this.x = entity.posX;
-        this.y = entity.posY;
-        this.z = entity.posZ;
+        this.x = entity.getPosX();
+        this.y = entity.getPosY();
+        this.z = entity.getPosZ();
     }
 
     public Vec3D(double x, double y, double z) {

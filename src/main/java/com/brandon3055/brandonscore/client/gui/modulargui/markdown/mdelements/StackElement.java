@@ -11,11 +11,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
@@ -82,7 +83,7 @@ public class StackElement extends MDElementBase<StackElement> {
         RenderSystem.pushMatrix();
 
         if (drawSlot) {
-            Material mat = BCSprites.get("light/slot");
+            RenderMaterial mat = BCSprites.get("light/slot");
             bindTexture(mat.getAtlasLocation());
             RenderSystem.color4f(1F, 1F, 1F, 1F);
             IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
@@ -118,14 +119,14 @@ public class StackElement extends MDElementBase<StackElement> {
         if (enableTooltip && isMouseOver(mouseX, mouseY)) {
             if (tooltip.isEmpty()) {
                 ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
-                List<String> list = getTooltipFromItem(stack);
+                List<ITextComponent> list = getTooltipFromItem(stack);
 
                 for (int i = 0; i < list.size(); ++i) {
                     if (i == 0) {
-                        list.set(i, stack.getRarity().color + list.get(i));
+//                        list.set(i, stack.getRarity().color + list.get(i));
                     }
                     else {
-                        list.set(i, TextFormatting.GRAY + list.get(i));
+//                        list.set(i, TextFormatting.GRAY + list.get(i));
                     }
                 }
 

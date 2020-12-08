@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.network;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.blocks.TileBCore;
-import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -52,30 +51,30 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     }
 
     private void handlePlayerAccess(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
-        int button = packet.readByte();
-        if (!sender.getCommandSource().hasPermissionLevel(3)) {
-            sender.sendMessage(new StringTextComponent("You do not have permission to use that command").setStyle(new Style().setColor(TextFormatting.RED)));
-            return;
-        }
-        ContainerPlayerAccess container = sender.openContainer instanceof ContainerPlayerAccess ? (ContainerPlayerAccess) sender.openContainer : null;
-        if (container == null) return;
-        PlayerEntity other = container.playerAccess;
-        switch (button) {
-            case 0: //tp to player
-                TeleportUtils.teleportEntity(sender, other.dimension.getId(), other.posX, other.posY, other.posZ, other.rotationYaw, other.rotationPitch);
-                break;
-            case 1: //tp player to you
-                if (other instanceof OfflinePlayer) {
-                    ((OfflinePlayer) other).tpTo(sender);
-                }
-                else {
-                    TeleportUtils.teleportEntity(other, sender.dimension.getId(), sender.posX, sender.posY, sender.posZ, sender.rotationYaw, sender.rotationPitch);
-                }
-                break;
-            case 2: //clear player inventory
-                other.inventory.clear();
-                break;
-        }
+//        int button = packet.readByte();
+//        if (!sender.getCommandSource().hasPermissionLevel(3)) {
+//            sender.sendMessage(new StringTextComponent("You do not have permission to use that command").setStyle(new Style().setColor(TextFormatting.RED)));
+//            return;
+//        }
+//        ContainerPlayerAccess container = sender.openContainer instanceof ContainerPlayerAccess ? (ContainerPlayerAccess) sender.openContainer : null;
+//        if (container == null) return;
+//        PlayerEntity other = container.playerAccess;
+//        switch (button) {
+//            case 0: //tp to player
+//                TeleportUtils.teleportEntity(sender, other.dimension.getId(), other.posX, other.posY, other.posZ, other.rotationYaw, other.rotationPitch);
+//                break;
+//            case 1: //tp player to you
+//                if (other instanceof OfflinePlayer) {
+//                    ((OfflinePlayer) other).tpTo(sender);
+//                }
+//                else {
+//                    TeleportUtils.teleportEntity(other, sender.dimension.getId(), sender.posX, sender.posY, sender.posZ, sender.rotationYaw, sender.rotationPitch);
+//                }
+//                break;
+//            case 2: //clear player inventory
+//                other.inventory.clear();
+//                break;
+//        }
     }
 
     private void handleTileDataManager(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {

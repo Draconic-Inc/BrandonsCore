@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.model.RenderMaterial;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -29,7 +29,7 @@ public class GuiSlotRender extends GuiElement<GuiSlotRender> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1F, 1F, 1F, 1F);
-        Material mat = BCSprites.getThemed("slot");
+        RenderMaterial mat = BCSprites.getThemed("slot");
         bindTexture(mat.getAtlasLocation());
         IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
         drawSprite(mat.getBuffer(getter, BCSprites::makeType), getInsetRect().x, getInsetRect().y, 18, 18, mat.getSprite());

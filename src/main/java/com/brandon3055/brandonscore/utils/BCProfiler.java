@@ -67,7 +67,7 @@ public class BCProfiler {
         debug.addAll(renderDebug);
         for (String s: debug) {
             GuiHelper.drawColouredRect(0, y, mc.fontRenderer.getStringWidth(s) + 5, 10, 0x90000000);
-            mc.fontRenderer.drawString(s, 2, y + 1, 0xFFFFFF);
+            mc.fontRenderer.drawString(event.getMatrixStack(), s, 2, y + 1, 0xFFFFFF);
             y += 10;
         }
 

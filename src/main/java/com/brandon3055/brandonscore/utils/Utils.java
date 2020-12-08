@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
@@ -133,8 +134,8 @@ public class Utils {
      * Determine the orientation of a blocks based on the position of the entity that placed it.
      */
     public static int determineOrientation(int x, int y, int z, LivingEntity entity) {
-        if (MathHelper.abs((float) entity.posX - (float) x) < 2.0F && MathHelper.abs((float) entity.posZ - (float) z) < 2.0F) {
-            double d0 = entity.posY + 1.82D - (double) entity.getYOffset();
+        if (MathHelper.abs((float) entity.getPosX() - (float) x) < 2.0F && MathHelper.abs((float) entity.getPosZ() - (float) z) < 2.0F) {
+            double d0 = entity.getPosY() + 1.82D - (double) entity.getYOffset();
 
             if (d0 - (double) y > 2.0D) return 0;
 
@@ -373,6 +374,29 @@ public class Utils {
             fluidBlocks = tmp;
         }
         return fluidBlocks.get(block);
+    }
+
+    public static String getTextFormatString(String stringIn) {
+        StringBuilder stringbuilder = new StringBuilder();
+        int i = -1;
+        int j = stringIn.length();
+
+        while((i = stringIn.indexOf(167, i + 1)) != -1) {
+            if (i < j - 1) {
+                TextFormatting textformatting = TextFormatting.fromFormattingCode(stringIn.charAt(i + 1));
+                if (textformatting != null) {
+                    if (!textformatting.isFancyStyling()) {
+                        stringbuilder.setLength(0);
+                    }
+
+                    if (textformatting != TextFormatting.RESET) {
+                        stringbuilder.append((Object)textformatting);
+                    }
+                }
+            }
+        }
+
+        return stringbuilder.toString();
     }
 }
 

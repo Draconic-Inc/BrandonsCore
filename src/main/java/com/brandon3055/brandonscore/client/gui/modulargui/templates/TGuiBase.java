@@ -215,6 +215,6 @@ public class TGuiBase implements IGuiTemplate {
     }
 
     protected String getTitle() {
-        return gui.getTitle().getFormattedText();
+        return gui.getTitle().getString();
     }
 }

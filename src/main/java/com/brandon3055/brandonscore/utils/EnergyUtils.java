@@ -254,7 +254,7 @@ public class EnergyUtils {
             String energy = Utils.formatNumber(storage.getOPStored());
             String maxEnergy = Utils.formatNumber(storage.getMaxOPStored());
             String postFix = Screen.hasShiftDown() ? "(" + I18n.format("op.brandonscore.operational_potential") + ")" : I18n.format("op.brandonscore.op");
-            list.add(new StringTextComponent(I18n.format("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).applyTextStyle(GRAY));
+            list.add(new StringTextComponent(I18n.format("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).mergeStyle(GRAY));
         }
     }
 }

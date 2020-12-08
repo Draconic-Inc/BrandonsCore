@@ -34,18 +34,15 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
@@ -191,8 +188,8 @@ public class BCUtilCommands {
                 ChunkGenerator chunkGenerate = chunkProviderServer.getChunkGenerator();
 
 //                chunkGenerate.generateSurface(oldChunk);
-                chunkGenerate.generateBiomes(oldChunk);
-                chunkGenerate.generateStructureStarts(world, oldChunk);
+//                chunkGenerate.generateBiomes(oldChunk);
+//                chunkGenerate.generateStructureStarts(world, oldChunk);
 //                Chunk newChunk = chunkGenerate.generateChunk(chunkX, chunkZ);
 //
 //                for (int x = 0; x < 16; x++) {
@@ -249,7 +246,7 @@ public class BCUtilCommands {
 
     private static int getUUID(CommandSource source, ServerPlayerEntity player) throws CommandException {
         StringTextComponent comp = new StringTextComponent(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUniqueID());
-        Style style = new Style();
+        Style style = Style.EMPTY;
         style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, player.getUniqueID().toString()));
         style.setHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to get text")));
         comp.setStyle(style);
@@ -330,7 +327,7 @@ public class BCUtilCommands {
         Entity entity = traceEntity(player);
 
         if (entity == null) {
-            player.sendMessage(new StringTextComponent("You must be looking at an entity!"));
+            player.sendMessage(new StringTextComponent("You must be looking at an entity!"), Util.DUMMY_UUID);
             return;
         }
 
@@ -360,9 +357,9 @@ public class BCUtilCommands {
         List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getBoundingBox().grow(20.0D));
         double d0 = 0.0D;
 
-        Vec3d start = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
-        Vec3d look = player.getLookVec();
-        Vec3d end = new Vec3d(player.posX + (look.x * 20), player.posY + player.getEyeHeight() + (look.y * 20), player.posZ + (look.z * 20));
+        Vector3d start = new Vector3d(player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ());
+        Vector3d look = player.getLookVec();
+        Vector3d end = new Vector3d(player.getPosX() + (look.x * 20), player.getPosY() + player.getEyeHeight() + (look.y * 20), player.getPosZ() + (look.z * 20));
 
         for (int i = 0; i < list.size(); ++i) {
             Entity entity1 = list.get(i);
@@ -386,30 +383,30 @@ public class BCUtilCommands {
     //region Player Access Command
 
     private static Map<UUID, GameProfile> accessiblePlayers(CommandSource source) throws CommandException {
-        PlayerProfileCache cache = source.getServer().getPlayerProfileCache();
-
-        File playersFolder = new File(source.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
-        File[] playerArray = playersFolder.listFiles((dir, name) -> name.endsWith(".dat"));
-        if (playerArray == null) {
-            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
-        }
-
-        Map<String, File> playerFiles = new HashMap<>();
-        for (File file : playerArray) {
-            playerFiles.put(file.getName().replace(".dat", ""), file);
-        }
+//        PlayerProfileCache cache = source.getServer().getPlayerProfileCache();
+//
+//        File playersFolder = new File(source.getServer().getWorld(World.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
+//        File[] playerArray = playersFolder.listFiles((dir, name) -> name.endsWith(".dat"));
+//        if (playerArray == null) {
+//            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
+//        }
+//
+//        Map<String, File> playerFiles = new HashMap<>();
+//        for (File file : playerArray) {
+//            playerFiles.put(file.getName().replace(".dat", ""), file);
+//        }
 
         Map<UUID, GameProfile> playerMap = new HashMap<>();
-        for (String stringId : playerFiles.keySet()) {
-            try {
-                UUID uuid = UUID.fromString(stringId);
-                GameProfile profile = cache.getProfileByUUID(uuid);
-                playerMap.put(uuid, profile);
-            }
-            catch (Throwable e) {
-                source.sendErrorMessage(new StringTextComponent("Detected possible non-playerdata file in playerdata folder: " + playerFiles.get(stringId) + ". Skipping").setStyle(new Style().setColor(TextFormatting.RED)));
-            }
-        }
+//        for (String stringId : playerFiles.keySet()) {
+//            try {
+//                UUID uuid = UUID.fromString(stringId);
+//                GameProfile profile = cache.getProfileByUUID(uuid);
+//                playerMap.put(uuid, profile);
+//            }
+//            catch (Throwable e) {
+//                source.sendErrorMessage(new StringTextComponent("Detected possible non-playerdata file in playerdata folder: " + playerFiles.get(stringId) + ". Skipping").setStyle(new Style().setColor(TextFormatting.RED)));
+//            }
+//        }
         return playerMap;
     }
 
@@ -453,18 +450,18 @@ public class BCUtilCommands {
                     }
                 }
 
-                ITextComponent message = new StringTextComponent((online ? TextFormatting.GREEN + "[Online]: " : TextFormatting.GRAY + "[Offline]: ") + profile.getName());
+                TextComponent message = new StringTextComponent((online ? TextFormatting.GREEN + "[Online]: " : TextFormatting.GRAY + "[Offline]: ") + profile.getName());
 
                 boolean offline = UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)).equals(uuid);
                 if (offline) {
-                    message.appendSibling(new StringTextComponent(" (Offline Account)").setStyle(new Style().setColor(TextFormatting.RED)));
+                    message.append(new StringTextComponent(" (Offline Account)").mergeStyle(TextFormatting.RED));
                 }
 
                 ITextComponent messageHover = new StringTextComponent("Last Seen: " + "\n") //
-                        .appendSibling(new StringTextComponent(TextFormatting.GRAY + "UUID: " + uuid + "\n")) //
-                        .appendSibling(new StringTextComponent(TextFormatting.GOLD + "-Click to access player."));
+                        .append(new StringTextComponent(TextFormatting.GRAY + "UUID: " + uuid + "\n")) //
+                        .append(new StringTextComponent(TextFormatting.GOLD + "-Click to access player."));
 
-                Style msgStyle = new Style();
+                Style msgStyle = Style.EMPTY;
                 msgStyle.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
                 msgStyle.setHoverEvent(new HoverEvent(SHOW_TEXT, messageHover));
                 message.setStyle(msgStyle);
@@ -495,7 +492,7 @@ public class BCUtilCommands {
         PlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayerByUUID(profile.getId());
         if (targetPlayer == null) {
             File playerFile = getPlayerFile(source.getServer(), target);
-            targetPlayer = new OfflinePlayer(playerSender, source.getServer().getWorld(DimensionType.OVERWORLD), profile, playerFile);
+//            targetPlayer = new OfflinePlayer(playerSender, source.getServer().getWorld(World.OVERWORLD), profile, playerFile);
         }
 
         if (playerSender == targetPlayer) {
@@ -506,17 +503,17 @@ public class BCUtilCommands {
     }
 
     public static File getPlayerFile(MinecraftServer server, String uuid) throws CommandException {
-        File playerFolder = new File(server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
-        File[] playerArray = playerFolder.listFiles();
-        if (playerArray == null) {
-            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
-        }
+//        File playerFolder = new File(server.getWorld(World.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
+//        File[] playerArray = playerFolder.listFiles();
+//        if (playerArray == null) {
+//            throw new CommandException(new StringTextComponent("There are no players in the playerdata folder"));
+//        }
 
-        for (File file : playerArray) {
-            if (file.getName().replace(".dat", "").equals(uuid)) {
-                return file;
-            }
-        }
+//        for (File file : playerArray) {
+//            if (file.getName().replace(".dat", "").equals(uuid)) {
+//                return file;
+//            }
+//        }
 
         throw new CommandException(new StringTextComponent("Could not find a data file for the specified player!"));
     }
@@ -579,61 +576,61 @@ public class BCUtilCommands {
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
     }
 
-    public static class OfflinePlayer extends PlayerEntity {
-
-        private final PlayerEntity accessedBy;
-        private final File playerFile;
-        private CompoundNBT playerCompound;
-
-        public OfflinePlayer(PlayerEntity accessedBy, World worldIn, GameProfile gameProfileIn, File playerFile) throws CommandException {
-            super(worldIn, gameProfileIn);
-            this.accessedBy = accessedBy;
-            this.playerFile = playerFile;
-            inventory = new PlayerInventory(this) {
-                @Override
-                public void markDirty() {
-                    saveOfflinePlayer();
-                }
-
-                @Override
-                public void clear() {
-                    super.clear();
-                    saveOfflinePlayer();
-                }
-            };
-            playerCompound = readPlayerCompound(playerFile);
-            read(playerCompound);
-        }
-
-        public void tpTo(PlayerEntity player) {
-            posX = player.posX;
-            posY = player.posY;
-            posZ = player.posZ;
-            dimension = player.dimension;
-            saveOfflinePlayer();
-        }
-
-        @Override
-        public boolean isSpectator() {
-            return false;
-        }
-
-        @Override
-        public boolean isCreative() {
-            return false;
-        }
-
-        public void saveOfflinePlayer() {
-            playerCompound = serializeNBT();
-            try {
-                writePlayerCompound(playerFile, playerCompound);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                accessedBy.sendMessage(new StringTextComponent("An error occurred while saving the player's inventory!\n" + e.toString() + "\nFull error is in server console."));
-            }
-        }
-    }
+//    public static class OfflinePlayer extends PlayerEntity {
+//
+//        private final PlayerEntity accessedBy;
+//        private final File playerFile;
+//        private CompoundNBT playerCompound;
+//
+//        public OfflinePlayer(PlayerEntity accessedBy, World worldIn, GameProfile gameProfileIn, File playerFile) throws CommandException {
+//            super(worldIn, gameProfileIn);
+//            this.accessedBy = accessedBy;
+//            this.playerFile = playerFile;
+//            inventory = new PlayerInventory(this) {
+//                @Override
+//                public void markDirty() {
+//                    saveOfflinePlayer();
+//                }
+//
+//                @Override
+//                public void clear() {
+//                    super.clear();
+//                    saveOfflinePlayer();
+//                }
+//            };
+//            playerCompound = readPlayerCompound(playerFile);
+//            read(playerCompound);
+//        }
+//
+//        public void tpTo(PlayerEntity player) {
+//            posX = player.getPosX();
+//            posY = player.getPosY();
+//            posZ = player.getPosZ();
+//            dimension = player.dimension;
+//            saveOfflinePlayer();
+//        }
+//
+//        @Override
+//        public boolean isSpectator() {
+//            return false;
+//        }
+//
+//        @Override
+//        public boolean isCreative() {
+//            return false;
+//        }
+//
+//        public void saveOfflinePlayer() {
+//            playerCompound = serializeNBT();
+//            try {
+//                writePlayerCompound(playerFile, playerCompound);
+//            }
+//            catch (IOException e) {
+//                e.printStackTrace();
+//                accessedBy.sendMessage(new StringTextComponent("An error occurred while saving the player's inventory!\n" + e.toString() + "\nFull error is in server console."));
+//            }
+//        }
+//    }
 
     //endregion
 }

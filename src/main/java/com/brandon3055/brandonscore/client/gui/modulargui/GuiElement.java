@@ -26,7 +26,9 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.GL11;
@@ -1824,15 +1826,20 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return this.mc.mouseHelper.getMouseY() * (double) this.mc.getMainWindow().getScaledHeight() / (double) this.mc.getMainWindow().getHeight();
     }
 
-    public List<String> getTooltipFromItem(ItemStack stack) {
+    @Deprecated
+    public List<String> getTooltipFromItemString(ItemStack stack) {
         List<ITextComponent> list = stack.getTooltip(mc.player, mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
         List<String> list1 = Lists.newArrayList();
 
         for (ITextComponent itextcomponent : list) {
-            list1.add(itextcomponent.getFormattedText());
+            list1.add(itextcomponent.getString());
         }
 
         return list1;
+    }
+
+    public List<ITextComponent> getTooltipFromItem(ItemStack stack) {
+        return stack.getTooltip(mc.player, mc.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
     }
 
     //endregion
@@ -2666,7 +2673,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a split string (multi line string)
      */
     public void drawSplitString(FontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
+        for (String s : BCFontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
             drawString(fontRenderer, s, x, y, colour, dropShadow);
             y += fontRenderer.FONT_HEIGHT;
         }
@@ -2676,7 +2683,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a centered split string
      */
     public void drawCenteredSplitString(FontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
+        for (String s : BCFontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
             drawCenteredString(fontRenderer, s, x, y, colour, dropShadow);
             y += fontRenderer.FONT_HEIGHT;
         }
@@ -2697,12 +2704,13 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean midTrim, boolean dropShadow) {
         if (width <= 0) return;
+        ITextComponent textComponent = new StringTextComponent(text);
         if (trim && fr.getStringWidth(text) > width) {
             int dotW = fr.getStringWidth("..");
             if (midTrim) {
-                text = fr.trimStringToWidth(text, (width / 2) - (dotW / 2)) + ".." + fr.trimStringToWidth(text, (width / 2) - (dotW / 2), true);
+                text = fr.func_238412_a_(text, (width / 2) - (dotW / 2)) + ".." + fr.func_238413_a_(text, (width / 2) - (dotW / 2), true);
             } else {
-                text = fr.trimStringToWidth(text, width - dotW) + "..";
+                text = fr.func_238412_a_(text, width - dotW) + "..";
             }
         }
 
@@ -2750,7 +2758,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Allows you to draw a split string aligned to the left, middle or right of the specified area.
      */
     public void drawAlignedSplitString(FontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
-        for (String s : fontRenderer.listFormattedStringToWidth(text, width)) {
+        for (String s : BCFontRenderer.listFormattedStringToWidth(text, width)) {
             drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
             y += fontRenderer.FONT_HEIGHT;
         }
@@ -2761,7 +2769,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     public void drawAlignedString(FontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
         if (trim && fr.getStringWidth(text) > width) {
-            text = fr.trimStringToWidth(text, width - 8) + "..";
+            text = fr.func_238412_a_(text, width - 8) + "..";
         }
 
         int stringWidth = fr.getStringWidth(text);
@@ -2835,7 +2843,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 List<String> wrappedTextLines = new ArrayList<>();
                 for (int i = 0; i < textLines.size(); i++) {
                     String textLine = textLines.get(i);
-                    List<String> wrappedLine = font.listFormattedStringToWidth(textLine, tooltipTextWidth);
+                    List<String> wrappedLine = BCFontRenderer.listFormattedStringToWidth(textLine, tooltipTextWidth);
                     if (i == 0) {
                         titleLinesCount = wrappedLine.size();
                     }
@@ -2916,9 +2924,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * My only concern with implementing forge events in the modular gui system is that other mods may try to replace this call with their own renderer
      * which in the context of a modular gui would probably break.
      */
-    public void drawHoveringText(@Nonnull final ItemStack stack, List<String> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, BCFontRenderer font) {
+    public void drawHoveringText(@Nonnull final ItemStack stack, List<ITextComponent> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, BCFontRenderer font) {
         if (!textLines.isEmpty()) {
-            RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
+            RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, new MatrixStack(), mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
             if (MinecraftForge.EVENT_BUS.post(event)) {
                 return;
             }
@@ -2935,8 +2943,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             RenderSystem.disableDepthTest();
             int tooltipTextWidth = 0;
 
-            for (String textLine : textLines) {
-                int textLineWidth = font.getStringWidth(textLine);
+            for (ITextComponent textLine : textLines) {
+                int textLineWidth = font.getStringPropertyWidth(textLine);
 
                 if (textLineWidth > tooltipTextWidth) {
                     tooltipTextWidth = textLineWidth;
@@ -2967,10 +2975,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
             if (needsWrap) {
                 int wrappedTooltipWidth = 0;
-                List<String> wrappedTextLines = new ArrayList<String>();
+                List<ITextComponent> wrappedTextLines = new ArrayList<>();
                 for (int i = 0; i < textLines.size(); i++) {
-                    String textLine = textLines.get(i);
-                    List<String> wrappedLine = font.listFormattedStringToWidth(textLine, tooltipTextWidth);
+                    ITextComponent textLine = textLines.get(i);
+                    List<String> wrappedLine = BCFontRenderer.listFormattedStringToWidth(textLine.getString(), tooltipTextWidth);
                     if (i == 0) {
                         titleLinesCount = wrappedLine.size();
                     }
@@ -2980,7 +2988,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                         if (lineWidth > wrappedTooltipWidth) {
                             wrappedTooltipWidth = lineWidth;
                         }
-                        wrappedTextLines.add(line);
+                        wrappedTextLines.add(new StringTextComponent(line));
                     }
                 }
                 tooltipTextWidth = wrappedTooltipWidth;
@@ -3021,12 +3029,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
             drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 
-            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
+            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, new MatrixStack(), tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
             int tooltipTop = tooltipY;
 
             for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
-                String line = textLines.get(lineNumber);
-                drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
+                ITextComponent line = textLines.get(lineNumber);
+                drawString(font, line.getString(), (float) tooltipX, (float) tooltipY, -1, true);
 
                 if (lineNumber + 1 == titleLinesCount) {
                     tooltipY += 2;
@@ -3037,7 +3045,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
             zOffset--;
 
-            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
+            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, new MatrixStack(), tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
 
 //            RenderSystem.enableLighting();
             RenderSystem.enableDepthTest();
@@ -3182,7 +3190,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     //TODO I can probably expend on this. Maybe re write things to use text components or some custom system that supports text components.
     public E setComponentHoverText(List<ITextComponent> textLines) {
-        setHoverText(element -> textLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()));
+        setHoverText(element -> textLines.stream().map(ITextComponent::getString).collect(Collectors.toList()));
         return (E) this;
     }
 

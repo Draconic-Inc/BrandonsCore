@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.inventory;
 
 import codechicken.lib.inventory.InventorySimple;
 import com.brandon3055.brandonscore.BCContent;
-import com.brandon3055.brandonscore.command.BCUtilCommands.OfflinePlayer;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
@@ -59,20 +58,20 @@ public class ContainerPlayerAccess extends Container {
     //    @OnlyIn(Dist.DEDICATED_SERVER)
     @Override
     public void detectAndSendChanges() {
-        if (playerAccess != null && !(playerAccess instanceof OfflinePlayer)) {
-            if (!playerAccess.isAlive()) {
-                player.closeScreen();
-                player.sendMessage(new StringTextComponent("Target player died or disconnected.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
-                return;
-            }
-        } else if (playerAccess != null) {
-            //noinspection ConstantConditions
-            if (server.getPlayerList().getPlayerByUUID(playerAccess.getGameProfile().getId()) != null) {
-                player.closeScreen();
-                player.sendMessage(new StringTextComponent("Target player is now online.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
-                return;
-            }
-        }
+//        if (playerAccess != null && !(playerAccess instanceof OfflinePlayer)) {
+//            if (!playerAccess.isAlive()) {
+//                player.closeScreen();
+//                player.sendMessage(new StringTextComponent("Target player died or disconnected.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
+//                return;
+//            }
+//        } else if (playerAccess != null) {
+//            //noinspection ConstantConditions
+//            if (server.getPlayerList().getPlayerByUUID(playerAccess.getGameProfile().getId()) != null) {
+//                player.closeScreen();
+//                player.sendMessage(new StringTextComponent("Target player is now online.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
+//                return;
+//            }
+//        }
 
         if (tick++ % 10 == 0 && player instanceof ServerPlayerEntity && playerAccess != null) {
             BCoreNetwork.sendPlayerAccessUIUpdate((ServerPlayerEntity) player, playerAccess);

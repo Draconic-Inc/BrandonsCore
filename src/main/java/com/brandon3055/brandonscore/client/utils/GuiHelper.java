@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
@@ -114,6 +114,7 @@ public class GuiHelper {
 //    }
 
     public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
+        MatrixStack matrixstack = new MatrixStack();
         if (!list.isEmpty()) {
             RenderSystem.pushMatrix();
             RenderSystem.disableRescaleNormal();
@@ -170,7 +171,7 @@ public class GuiHelper {
                 RenderSystem.enableBlend();
                 RenderSystem.disableAlphaTest();
                 RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-                font.drawStringWithShadow(s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
+                font.drawStringWithShadow(matrixstack, s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
                 RenderSystem.enableAlphaTest();
                 tooltipY += 10;
                 ++i2;
@@ -263,10 +264,11 @@ public class GuiHelper {
     public static void drawGuiBaseBackground(AbstractGui gui, int posX, int posY, int xSize, int ySize) {
         ResourceHelperBC.bindTexture("textures/gui/base_gui.png");
         RenderSystem.color3f(1F, 1F, 1F);
-        gui.blit(posX, posY, 0, 0, xSize - 3, ySize - 3);
-        gui.blit(posX + xSize - 3, posY, 253, 0, 3, ySize - 3);
-        gui.blit(posX, posY + ySize - 3, 0, 253, xSize - 3, 3);
-        gui.blit(posX + xSize - 3, posY + ySize - 3, 253, 253, 3, 3);
+        MatrixStack matrixstack = new MatrixStack();
+        gui.blit(matrixstack, posX, posY, 0, 0, xSize - 3, ySize - 3);
+        gui.blit(matrixstack, posX + xSize - 3, posY, 253, 0, 3, ySize - 3);
+        gui.blit(matrixstack, posX, posY + ySize - 3, 0, 253, xSize - 3, 3);
+        gui.blit(matrixstack, posX + xSize - 3, posY + ySize - 3, 253, 253, 3, 3);
     }
 
     /**
@@ -276,7 +278,7 @@ public class GuiHelper {
     @Deprecated
     public static void drawPlayerSlots(AbstractGui gui, int posX, int posY, boolean center) {
         RenderSystem.color4f(1F, 1F, 1F, 1F);
-        Material mat = BCSprites.getThemed("slot");
+        RenderMaterial mat = BCSprites.getThemed("slot");
         ResourceHelperBC.bindTexture(mat.getAtlasLocation());
         IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
 
@@ -297,21 +299,23 @@ public class GuiHelper {
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
+        MatrixStack matrixstack = new MatrixStack();
         if (dropShadow) {
-            fontRenderer.drawStringWithShadow(text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+            fontRenderer.drawStringWithShadow(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
         } else {
-            fontRenderer.drawString(text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+            fontRenderer.drawString(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
         }
     }
 
     public static void drawBackgroundString(IVertexBuilder vertexBuilder, FontRenderer font, String text, float x, float y, int color, int background, int padding, boolean shadow, boolean centered) {
+        MatrixStack matrixstack = new MatrixStack();
         int width = font.getStringWidth(text);
         x = centered ? x - width / 2F : x;
         drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.FONT_HEIGHT - 2 + padding * 2, background, 0);
         if (shadow) {
-            font.drawStringWithShadow(text, x, y, color);
+            font.drawStringWithShadow(matrixstack, text, x, y, color);
         } else {
-            font.drawString(text, x, y, color);
+            font.drawString(matrixstack, text, x, y, color);
         }
     }
 

@@ -4,14 +4,9 @@ import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.Material;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Supplier;
@@ -30,8 +25,8 @@ public class GuiTexture extends GuiElement<GuiTexture> {
     private Supplier<Integer> texXGetter = null;
     private Supplier<Integer> texYGetter = null;
 
-    public Material material;
-    public Supplier<Material> materialSupplier;
+    public RenderMaterial material;
+    public Supplier<RenderMaterial> materialSupplier;
 
     @Deprecated
     public ResourceLocation texture;
@@ -60,22 +55,22 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         this.texture = texture;
     }
 
-    public GuiTexture(int xPos, int yPos, int xSize, int ySize, Material material) {
+    public GuiTexture(int xPos, int yPos, int xSize, int ySize, RenderMaterial material) {
         super(xPos, yPos, xSize, ySize);
         this.material = material;
     }
 
-    public GuiTexture(int xSize, int ySize, Material material) {
+    public GuiTexture(int xSize, int ySize, RenderMaterial material) {
         super(0, 0, xSize, ySize);
         this.material = material;
     }
 
-    public GuiTexture(int xSize, int ySize, Supplier<Material> materialSupplier) {
+    public GuiTexture(int xSize, int ySize, Supplier<RenderMaterial> materialSupplier) {
         super(0, 0, xSize, ySize);
         this.materialSupplier = materialSupplier;
     }
 
-    public GuiTexture(Supplier<Material> materialSupplier) {
+    public GuiTexture(Supplier<RenderMaterial> materialSupplier) {
         super(0, 0);
         this.materialSupplier = materialSupplier;
     }
@@ -86,7 +81,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
             RenderSystem.color4f(1, 1, 1, 1);
         }
 
-        Material mat = getMaterial();
+        RenderMaterial mat = getMaterial();
         if (mat != null) {
             IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
             drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.getSprite());
@@ -131,16 +126,16 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return this;
     }
 
-    public GuiTexture setMaterial(Material material) {
+    public GuiTexture setMaterial(RenderMaterial material) {
         this.material = material;
         return this;
     }
 
-    public Material getMaterial() {
+    public RenderMaterial getMaterial() {
         return materialSupplier == null ? material : materialSupplier.get();
     }
 
-    public GuiTexture setMaterialSupplier(Supplier<Material> materialSupplier) {
+    public GuiTexture setMaterialSupplier(Supplier<RenderMaterial> materialSupplier) {
         this.materialSupplier = materialSupplier;
         return this;
     }
@@ -257,11 +252,11 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         };
     }
 
-    public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<Material> materialSupplier) {
+    public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<RenderMaterial> materialSupplier) {
         return newDynamicTexture(materialSupplier).setSize(xSize, ySize);
     }
 
-    public static GuiTexture newDynamicTexture(Supplier<Material> materialSupplier) {
+    public static GuiTexture newDynamicTexture(Supplier<RenderMaterial> materialSupplier) {
         return new GuiTexture(null) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {

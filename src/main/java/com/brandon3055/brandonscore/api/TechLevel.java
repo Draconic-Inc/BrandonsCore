@@ -4,6 +4,7 @@ import net.minecraft.item.IItemTier;
 import net.minecraft.item.Rarity;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -73,7 +74,7 @@ public enum TechLevel {
         return textColour;
     }
 
-    public ITextComponent getDisplayName() {
+    public TextComponent getDisplayName() {
         return new TranslationTextComponent("tech_level.draconicevolution." + name().toLowerCase());
     }
 

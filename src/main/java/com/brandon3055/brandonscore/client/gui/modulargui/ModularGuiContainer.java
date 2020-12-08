@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GLX;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -150,27 +151,27 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
             return true;
         } else {
             InputMappings.Input mouseKey = InputMappings.getInputByCode(keyCode, scanCode);
-            if (keyCode == 256 || this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(mouseKey)) {
-                this.minecraft.player.closeScreen();
-                onClose();
-                return true; // Forge MC-146650: Needs to return true when the key is handled.
-            }
-
-            if (this.func_195363_d(keyCode, scanCode))
-                return true; // Forge MC-146650: Needs to return true when the key is handled.
-            if (this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
-                if (this.minecraft.gameSettings.keyBindPickBlock.isActiveAndMatches(mouseKey)) {
-                    this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, 0, ClickType.CLONE);
-                    return true; // Forge MC-146650: Needs to return true when the key is handled.
+            if (super.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            } else if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(mouseKey)) {
+                this.closeScreen();
+                return true;
+            } else {
+                boolean handled = this.itemStackMoved(keyCode, scanCode);// Forge MC-146650: Needs to return true when the key is handled
+                if (this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
+                    if (this.minecraft.gameSettings.keyBindPickBlock.isActiveAndMatches(mouseKey)) {
+                        this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, 0, ClickType.CLONE);
+                        handled = true;
+                    } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
+                        this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, hasControlDown() ? 1 : 0, ClickType.THROW);
+                        handled = true;
+                    }
                 } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
-                    this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, hasControlDown() ? 1 : 0, ClickType.THROW);
-                    return true; // Forge MC-146650: Needs to return true when the key is handled.
+                    handled = true; // Forge MC-146650: Emulate MC bug, so we don't drop from hotbar when pressing drop without hovering over a item.
                 }
-            } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
-                return true; // Forge MC-146650: Emulate MC bug, so we don't drop from hotbar when pressing drop without hovering over a item.
-            }
 
-            return false; // Forge MC-146650: Needs to return false when the key is not handled.
+                return handled;
+            }
         }
     }
 
@@ -211,30 +212,30 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     //region Render
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
         renderBackgroundLayer(mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {}
+    protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {}
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (dumbGui) {
-            super.render(mouseX, mouseY, partialTicks);
+            super.render(matrixStack, mouseX, mouseY, partialTicks);
             return;
         }
 
         if (enableDefaultBackground) {
-            renderBackground();
+            renderBackground(matrixStack);
         }
 
-        renderSuperScreen(mouseX, mouseY, partialTicks);
+        renderSuperScreen(matrixStack, mouseX, mouseY, partialTicks);
         renderOverlayLayer(mouseX, mouseY, partialTicks);
 
         if (itemTooltipsEnabled) {
             RenderSystem.translated(0, 0, 400);
-            renderHoveredToolTip(mouseX, mouseY);
+            renderHoveredTooltip(matrixStack, mouseX, mouseY);
             RenderSystem.translated(0, 0, -400);
         }
     }
@@ -267,16 +268,16 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
     //region Overriding vanilla stuff and things
 
-    public void renderSuperScreen(int mouseX, int mouseY, float partialTicks) {
+    public void renderSuperScreen(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         int left = this.guiLeft;
         int top = this.guiTop;
-        this.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawBackground(this, mouseX, mouseY));
+        this.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawBackground(this, matrixStack, mouseX, mouseY));
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
 
         for (int i = 0; i < this.buttons.size(); ++i) {
-            this.buttons.get(i).render(mouseX, mouseY, partialTicks);
+            this.buttons.get(i).render(matrixStack, mouseX, mouseY, partialTicks);
         }
 
         RenderSystem.pushMatrix();
@@ -292,7 +293,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         for (int i1 = 0; i1 < this.container.inventorySlots.size(); ++i1) {
             Slot slot = this.container.inventorySlots.get(i1);
             if (slot.isEnabled()) {
-                this.drawSlot(slot);
+                this.drawSlot(matrixStack, slot);
             }
 
             boolean occluded = manager.isAreaUnderElement(slot.xPos + guiLeft(), slot.yPos + guiTop(), 16, 16, 100);
@@ -304,7 +305,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
                     int k1 = slot.yPos;
                     RenderSystem.colorMask(true, true, true, false);
                     int slotColor = this.getSlotColor(i1);
-                    this.fillGradient(j1, k1, j1 + 16, k1 + 16, slotColor, slotColor);
+                    this.fillGradient(matrixStack, j1, k1, j1 + 16, k1 + 16, slotColor, slotColor);
                     RenderSystem.colorMask(true, true, true, true);
                     RenderSystem.enableDepthTest();
                 }
@@ -312,8 +313,8 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
             }
         }
 
-        this.drawGuiContainerForegroundLayer(mouseX, mouseY);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawForeground(this, mouseX, mouseY));
+        this.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawForeground(this, matrixStack, mouseX, mouseY));
         PlayerInventory playerinventory = this.minecraft.player.inventory;
         ItemStack itemstack = this.draggedStack.isEmpty() ? playerinventory.getItemStack() : this.draggedStack;
         if (!itemstack.isEmpty()) {
@@ -352,7 +353,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         RenderSystem.enableDepthTest();
     }
 
-    private void drawSlot(Slot slotIn) {
+    private void drawSlot(MatrixStack matrixStack, Slot slotIn) {
         int yPos = slotIn.yPos;
         int xPos = slotIn.xPos;
 
@@ -392,18 +393,18 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         this.setBlitOffset(100);
         this.itemRenderer.zLevel = 100.0F;
         if (itemstack.isEmpty() && slotIn.isEnabled()) {
-            Pair<ResourceLocation, ResourceLocation> pair = slotIn.func_225517_c_();
+            Pair<ResourceLocation, ResourceLocation> pair = slotIn.getBackground();
             if (pair != null) {
                 TextureAtlasSprite textureatlassprite = this.minecraft.getAtlasSpriteGetter(pair.getFirst()).apply(pair.getSecond());
                 this.minecraft.getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getTextureLocation());
-                blit(xPos, yPos, this.getBlitOffset(), 16, 16, textureatlassprite);
+                blit(matrixStack, xPos, yPos, this.getBlitOffset(), 16, 16, textureatlassprite);
                 flag1 = true;
             }
         }
 
         if (!flag1) {
             if (flag) {
-                fill(xPos, yPos, xPos + 16, yPos + 16, -2130706433);
+                fill(matrixStack, xPos, yPos, xPos + 16, yPos + 16, -2130706433);
             }
 
             RenderSystem.enableDepthTest();

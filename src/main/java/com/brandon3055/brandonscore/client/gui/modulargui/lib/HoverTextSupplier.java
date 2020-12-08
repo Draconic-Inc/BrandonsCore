@@ -29,7 +29,7 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
             return splitNewLines((List<String>) hoverText);
         }
         else if (hoverText instanceof ITextComponent) {
-            return Collections.singletonList(((ITextComponent) hoverText).getFormattedText());
+            return Collections.singletonList(((ITextComponent) hoverText).getString());
         }
         return null;
     }

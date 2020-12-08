@@ -104,7 +104,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && !getStack().isEmpty()) {
-            List<String> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItem(getStack());
+            List<String> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItemString(getStack());
             drawHoveringText(list, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             return true;
         }

@@ -1,6 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.lib.datamanager.ManagedStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -420,8 +422,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
                 i -= 4;
             }
 
-            String s = this.fontRenderer.trimStringToWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
-            this.setCursorPosition(this.fontRenderer.trimStringToWidth(s, i).length() + this.lineScrollOffset);
+            String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
+            this.setCursorPosition(this.fontRenderer.func_238412_a_(s, i).length() + this.lineScrollOffset);
             return true;
         } else {
             return false;
@@ -445,7 +447,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 ////        if (!isFocused) setCursorPosition(0);
 //    }
 
-    public void drawTextBox() {
+    public void drawTextBox(MatrixStack matrixStack) {
 //        if (this.isEnabled()) {
         if (this.getEnableBackgroundDrawing()) {
             drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, fillColour, borderColour);
@@ -457,7 +459,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         int i = this.isFieldEnabled ? getTextColor() : this.disabledColor;
         int j = this.cursorPosition - this.lineScrollOffset;
         int k = this.selectionEnd - this.lineScrollOffset;
-        String s = this.fontRenderer.trimStringToWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
+        String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
         boolean flag = j >= 0 && j <= s.length();
         boolean flag1 = this.isFocused() && this.cursorCounter / 10 % 2 == 0 && flag;
         int l = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
@@ -470,9 +472,9 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
             if (getShadow()) {
-                j1 = this.fontRenderer.drawStringWithShadow(this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+                j1 = this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
             } else {
-                j1 = this.fontRenderer.drawString(this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+                j1 = this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
             }
         }
 
@@ -489,28 +491,28 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
         if (!s.isEmpty() && flag && j < s.length()) {
             if (getShadow()) {
-                this.fontRenderer.drawStringWithShadow(this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+                this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
             } else {
-                this.fontRenderer.drawString(this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+                this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
             }
         }
 
         if (!flag2 && this.suggestion != null) {
             if (getShadow()) {
-                this.fontRenderer.drawStringWithShadow(this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
+                this.fontRenderer.drawStringWithShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
             } else {
-                this.fontRenderer.drawString(this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
+                this.fontRenderer.drawString(matrixStack, this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
             }
         }
 
         if (flag1) {
             if (flag2) {
-                AbstractGui.fill(k1, i1 - 1, k1 + 1, i1 + 1 + 9, cursorColor);
+                AbstractGui.fill(matrixStack, k1, i1 - 1, k1 + 1, i1 + 1 + 9, cursorColor);
             } else {
                 if (getShadow()) {
-                    this.fontRenderer.drawStringWithShadow("_", (float) k1, (float) i1, i);
+                    this.fontRenderer.drawStringWithShadow(matrixStack, "_", (float) k1, (float) i1, i);
                 } else {
-                    this.fontRenderer.drawString("_", (float) k1, (float) i1, i);
+                    this.fontRenderer.drawString(matrixStack, "_", (float) k1, (float) i1, i);
                 }
             }
         }
@@ -680,10 +682,10 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             }
 
             int j = this.getAdjustedWidth();
-            String s = this.fontRenderer.trimStringToWidth(this.text().substring(this.lineScrollOffset), j);
+            String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), j);
             int k = s.length() + this.lineScrollOffset;
             if (this.selectionEnd == this.lineScrollOffset) {
-                this.lineScrollOffset -= this.fontRenderer.trimStringToWidth(this.text(), j, true).length();
+                this.lineScrollOffset -= this.fontRenderer.func_238413_a_(this.text(), j, true).length();
             }
 
             if (this.selectionEnd > k) {
@@ -732,7 +734,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        drawTextBox();
+        drawTextBox(new MatrixStack());
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 

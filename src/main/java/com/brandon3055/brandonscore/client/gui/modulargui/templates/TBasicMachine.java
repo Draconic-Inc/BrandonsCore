@@ -43,6 +43,6 @@ public class TBasicMachine extends TGuiBase {
 
     @Override
     protected String getTitle() {
-        return tile == null || tile.getDisplayName() == null ? gui.getTitle().getFormattedText() : tile.getDisplayName().getFormattedText();
+        return tile == null || tile.getDisplayName() == null ? gui.getTitle().getString() : tile.getDisplayName().getString();
     }
 }

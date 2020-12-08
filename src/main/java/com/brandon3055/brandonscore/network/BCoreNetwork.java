@@ -56,8 +56,8 @@ public class BCoreNetwork {
         PacketCustom packet = new PacketCustom(CHANNEL, C_PLAYER_ACCESS_UPDATE);
         packet.writeString(target.getGameProfile().getName());
         packet.writePos(target.getPosition());
-        packet.writeInt(target.dimension.getId());
-        packet.sendToPlayer(player);
+//        packet.writeInt(target.dimension.getId());
+//        packet.sendToPlayer(player);
     }
 
     public static void sendPlayerAccessButton(int button) {

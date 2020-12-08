@@ -14,6 +14,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -68,7 +69,9 @@ public class BrandonsCore {
         proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
         proxy.construct();
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(BrandonsCore::registerCommands);
+        MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
+        MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
 
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         modLoadingContext.registerConfig(ModConfig.Type.CLIENT, BCConfig.CLIENT_SPEC);
@@ -94,33 +97,31 @@ public class BrandonsCore {
         GLFW.glfwMaximizeWindow(window.getHandle());
     }
 
-    private boolean autoConnected = false;
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void initGui(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (event.getGui() instanceof MainMenuScreen && !autoConnected) {
-            autoConnected = true;
-            new Thread(() -> {
-//                SneakyUtils.sneak(() -> Thread.sleep(3000)).run();
-                Minecraft mc = Minecraft.getInstance();
-//                mc.deferTask(() -> mc.launchIntegratedServer("Main Test World", "Main Test World", null));
-            }).start();
-        }
-    }
+//    private boolean autoConnected = false;
+//    @OnlyIn(Dist.CLIENT)
+//    @SubscribeEvent
+//    public void initGui(GuiScreenEvent.InitGuiEvent.Post event) {
+//        if (event.getGui() instanceof MainMenuScreen && !autoConnected) {
+//            autoConnected = true;
+//            new Thread(() -> {
+////                SneakyUtils.sneak(() -> Thread.sleep(3000)).run();
+//                Minecraft mc = Minecraft.getInstance();
+////                mc.deferTask(() -> mc.launchIntegratedServer("Main Test World", "Main Test World", null));
+//            }).start();
+//        }
+//    }
 
     @SubscribeEvent
     public void onServerSetup(FMLDedicatedServerSetupEvent event) {
         proxy.serverSetup(event);
     }
 
-    @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
-        BCUtilCommands.register(event.getCommandDispatcher());
-        CommandTPX.register(event.getCommandDispatcher());
+    public static void registerCommands(RegisterCommandsEvent event) {
+        BCUtilCommands.register(event.getDispatcher());
+        CommandTPX.register(event.getDispatcher());
     }
 
-    @SubscribeEvent
-    public void onServerStop(FMLServerStoppedEvent event) {
+    public static void onServerStop(FMLServerStoppedEvent event) {
         ProcessHandler.clearHandler();
     }
 

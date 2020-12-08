@@ -7,7 +7,7 @@ import com.brandon3055.brandonscore.client.render.GuiSpriteUploader;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -32,7 +32,7 @@ public class BCSprites {
 
     private static GuiSpriteUploader guiSpriteUploader;
     private static final Set<ResourceLocation> registeredSprites = new HashSet<>();
-    private static final Map<String, Material> matCache = new HashMap<>();
+    private static final Map<String, RenderMaterial> matCache = new HashMap<>();
 
 //    public static final RenderType guiType = RenderType.makeType("gui", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
 //            .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
@@ -138,36 +138,36 @@ public class BCSprites {
     }
 
     //endregion
-    public static Material getThemed(String modid, String location) {
+    public static RenderMaterial getThemed(String modid, String location) {
         return get(modid, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static Material getThemed(String location) {
+    public static RenderMaterial getThemed(String location) {
         return get(MODID, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static Material get(String modid, String location) {
+    public static RenderMaterial get(String modid, String location) {
         return matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
     }
 
-    public static Material get(String location) {
+    public static RenderMaterial get(String location) {
         return get(MODID, location);
     }
 
 
-    public static Supplier<Material> themedGetter(String modid, String location) {
+    public static Supplier<RenderMaterial> themedGetter(String modid, String location) {
         return () -> get(modid, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static Supplier<Material> themedGetter(String location) {
+    public static Supplier<RenderMaterial> themedGetter(String location) {
         return () -> get(MODID, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static Supplier<Material> getter(String modid, String location) {
+    public static Supplier<RenderMaterial> getter(String modid, String location) {
         return () -> matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
     }
 
-    public static Supplier<Material> getter(String location) {
+    public static Supplier<RenderMaterial> getter(String location) {
         return () -> get(MODID, location);
     }
 
@@ -175,12 +175,12 @@ public class BCSprites {
 
 
 
-    public static Material getButton(int state) {
+    public static RenderMaterial getButton(int state) {
         return getThemed(state == 1 ? "button" : state == 2 ? "button_highlight" : "button_disabled");
     }
 
     private static String[] ARMOR_ORDER = new String[] {"slots/armor_boots", "slots/armor_leggings", "slots/armor_chestplate", "slots/armor_helmet"};
-    public static Material getArmorSlot(int slot) {
+    public static RenderMaterial getArmorSlot(int slot) {
         return get(ARMOR_ORDER[slot]);
     }
 
@@ -208,7 +208,7 @@ public class BCSprites {
 //        return BCConfig.darkMode ? WIDGETS_DARK : WIDGETS_LIGHT;
 //    }
 
-    private static class CustomMat extends Material {
+    private static class CustomMat extends RenderMaterial {
 
         public CustomMat(ResourceLocation atlasLocationIn, ResourceLocation textureLocationIn) {
             super(atlasLocationIn, textureLocationIn);

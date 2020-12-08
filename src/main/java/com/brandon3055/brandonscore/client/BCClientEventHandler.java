@@ -2,8 +2,10 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.lib.datamanager.ManagedStack;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.MathUtils;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -12,8 +14,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
@@ -34,15 +38,15 @@ public class BCClientEventHandler {
     private static int remountTicksRemaining = 0;
     private static int remountEntityID = 0;
     private static int debugTimeout = 0;
-    private static Map<Integer, Integer[]> dimTickTimes = new HashMap<Integer, Integer[]>();
+    private static Map<RegistryKey<World>, Integer[]> dimTickTimes = new HashMap<>();
     private static Integer[] overallTickTime = new Integer[200];
     private static int renderIndex = 0;
-    private static LinkedList<Integer> sortingOrder = new LinkedList<Integer>();
+    private static LinkedList<RegistryKey<World>> sortingOrder = new LinkedList<>();
     public static int elapsedTicks = 0;
 
     //region sorter
 
-    private static Comparator<Integer> sorter = (value, compare) -> {
+    private static Comparator<RegistryKey<World>> sorter = (value, compare) -> {
         long totalValue = 0;
         for (Integer time : dimTickTimes.get(value)) {
             totalValue += time;
@@ -55,7 +59,7 @@ public class BCClientEventHandler {
         }
         totalCompare /= 200;
 
-        return totalValue > totalCompare ? -1 : totalValue < totalCompare ? 1 : 0;
+        return Long.compare(totalCompare, totalValue);
     };
 
     //endregion
@@ -100,23 +104,22 @@ public class BCClientEventHandler {
         GlStateManager.pushMatrix();
         GlStateManager.translated(0, 0, 600);
 
-        renderGraph(220, 0, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), overallTickTime, "Overall");
+        renderGraph(event.getMatrixStack(), 220, 0, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), overallTickTime, "Overall");
 
         int i = 0;
-        for (Integer dim : sortingOrder) {
-            if (dimTickTimes.get(dim) == null || DimensionType.getById(dim) == null) {
+        for (RegistryKey<World> dim : sortingOrder) {
+            if (dimTickTimes.get(dim) == null || dim == null) {
                 continue;
             }
 
-            DimensionType dimensionType = DimensionType.getById(dim);
-            renderGraph(0, i, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), dimTickTimes.get(dim), dimensionType == null ? dim.toString() : DimensionType.getKey(dimensionType).toString());
+            renderGraph(event.getMatrixStack(), 0, i, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), dimTickTimes.get(dim), dim.getLocation().toString());
             i++;
         }
 
         if (debugTimeout < 190) {
             FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-            fontRenderer.drawStringWithShadow("Server Stopped Sending Updates!", 0, event.getWindow().getScaledHeight() - 21, 0xFF0000);
-            fontRenderer.drawStringWithShadow("Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getScaledHeight() - 11, 0xFF0000);
+            fontRenderer.drawStringWithShadow(event.getMatrixStack(), "Server Stopped Sending Updates!", 0, event.getWindow().getScaledHeight() - 21, 0xFF0000);
+            fontRenderer.drawStringWithShadow(event.getMatrixStack(), "Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getScaledHeight() - 11, 0xFF0000);
         }
 
         GlStateManager.popMatrix();
@@ -212,16 +215,16 @@ public class BCClientEventHandler {
         LogHelperBC.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
     }
 
-    private void renderGraph(int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {
+    private void renderGraph(MatrixStack matrix, int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {
         int yHeight = screenHeight - 23 - (y * 45);
 
         GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
         FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-        fontRenderer.drawStringWithShadow(name, x + 2, yHeight - 43, 0xFFFFFF);
+        fontRenderer.drawStringWithShadow(matrix, name, x + 2, yHeight - 43, 0xFFFFFF);
         GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
         GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
-        fontRenderer.drawString("50ms", x + 2, yHeight - 16, 0xFFFFFF);
-        fontRenderer.drawString("100ms", x + 2, yHeight - 32, 0xFFFFFF);
+        fontRenderer.drawString(matrix, "50ms", x + 2, yHeight - 16, 0xFFFFFF);
+        fontRenderer.drawString(matrix, "100ms", x + 2, yHeight - 32, 0xFFFFFF);
 
         for (int i = 0; i < 200; i++) {
             int time = times[i] == null ? 0 : times[i];

@@ -3,9 +3,12 @@ package com.brandon3055.brandonscore.client.particle;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
@@ -23,7 +26,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
             List<Integer> list = new ArrayList<>();
             while (reader.peek() == ' ') {
                 reader.expect(' ');
-                list.add((int)reader.readInt());
+                list.add((int) reader.readInt());
             }
 
             return new IntParticleData(particleTypeIn, DataUtils.toPrimitive(list.toArray(new Integer[0])));
@@ -37,6 +40,11 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
 
     public IntParticleType(boolean alwaysShow) {
         super(alwaysShow, DESERIALIZER);
+    }
+
+    @Override
+    public Codec<IntParticleData> func_230522_e_() {
+        return null;
     }
 
     public static class IntParticleData implements IParticleData {

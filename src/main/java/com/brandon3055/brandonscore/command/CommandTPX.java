@@ -13,6 +13,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
@@ -35,9 +37,9 @@ public class CommandTPX {
                 Commands.literal("tpx")
                         .requires((p_198816_0_) -> p_198816_0_.hasPermissionLevel(2))
                         .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), new EntityLocation(ctx.getSource().assertIsEntity()), null))
                                 .then(Commands.argument("location", Vec3Argument.vec3())
-                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
+                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
                                 )
                         )
                         .then(Commands.argument("destination", EntityArgument.entity())
@@ -48,9 +50,9 @@ public class CommandTPX {
                                         .executes(ctx -> teleportToEntity(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), EntityArgument.getEntity(ctx, "destination")))
                                 )
                                 .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimensionArgument(ctx, "dimension"), new EntityLocation(ctx.getSource().assertIsEntity()), null))
                                         .then(Commands.argument("location", Vec3Argument.vec3())
-                                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getServer().getWorld(DimensionArgument.getDimensionArgument(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
+                                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
                                         )
                                 )
 //                                .then(Commands.argument("location", Vec3Argument.vec3())
@@ -71,7 +73,7 @@ public class CommandTPX {
 
     private static int teleportToEntity(CommandSource source, Collection<? extends Entity> targets, Entity destination) {
         for (Entity entity : targets) {
-            teleport(source, entity, (ServerWorld) destination.world, destination.posX, destination.posY, destination.posZ, EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class), destination.rotationYaw, destination.rotationPitch);
+            teleport(source, entity, (ServerWorld) destination.world, destination.getPosX(), destination.getPosY(), destination.getPosZ(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class), destination.rotationYaw, destination.rotationPitch);
         }
 
         if (targets.size() == 1) {
@@ -84,8 +86,8 @@ public class CommandTPX {
     }
 
     private static int teleportToPos(CommandSource source, Collection<? extends Entity> targets, ServerWorld worldIn, ILocationArgument position, @Nullable ILocationArgument rotationIn) throws CommandSyntaxException {
-        Vec3d vec3d = position.getPosition(source);
-        Vec2f vec2f = rotationIn == null ? null : rotationIn.getRotation(source);
+        Vector3d vec3d = position.getPosition(source);
+        Vector2f vec2f = rotationIn == null ? null : rotationIn.getRotation(source);
         Set<SPlayerPositionLookPacket.Flags> set = EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class);
         if (position.isXRelative()) {
             set.add(SPlayerPositionLookPacket.Flags.X);
@@ -154,7 +156,7 @@ public class CommandTPX {
                 entityIn.setRotationYawHead(f1);
             } else {
                 entityIn.detach();
-                entityIn.dimension = worldIn.dimension.getType();
+                entityIn.changeDimension(worldIn);
                 Entity entity = entityIn;
                 entityIn = entityIn.getType().create(worldIn);
                 if (entityIn == null) {
@@ -170,7 +172,7 @@ public class CommandTPX {
 
         if (!(entityIn instanceof LivingEntity) || !((LivingEntity) entityIn).isElytraFlying()) {
             entityIn.setMotion(entityIn.getMotion().mul(1.0D, 0.0D, 1.0D));
-            entityIn.onGround = true;
+            entityIn.setOnGround(true);
         }
     }
 
@@ -192,12 +194,12 @@ public class CommandTPX {
         }
 
         @Override
-        public Vec3d getPosition(CommandSource source) {
+        public Vector3d getPosition(CommandSource source) {
             return entity.getPositionVec();
         }
 
         @Override
-        public Vec2f getRotation(CommandSource source) {
+        public Vector2f getRotation(CommandSource source) {
             return source.getRotation();
         }
 

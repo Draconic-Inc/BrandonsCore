@@ -3,8 +3,10 @@ package com.brandon3055.brandonscore.utils;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 public class Teleporter
 {
@@ -12,7 +14,7 @@ public class Teleporter
         protected double xCoord;
         protected double yCoord;
         protected double zCoord;
-        protected DimensionType dimension;
+        protected RegistryKey<World> dimension;
         protected float pitch;
         protected float yaw;
         protected String name;
@@ -23,7 +25,7 @@ public class Teleporter
 
         }
 
-        public TeleportLocation(double x, double y, double z, DimensionType dimension) {
+        public TeleportLocation(double x, double y, double z, RegistryKey<World> dimension) {
             this.xCoord = x;
             this.yCoord = y;
             this.zCoord = z;
@@ -32,7 +34,7 @@ public class Teleporter
             this.yaw = 0;
         }
 
-        public TeleportLocation(double x, double y, double z, DimensionType dimension, float pitch, float yaw) {
+        public TeleportLocation(double x, double y, double z, RegistryKey<World> dimension, float pitch, float yaw) {
             this.xCoord = x;
             this.yCoord = y;
             this.zCoord = z;
@@ -41,7 +43,7 @@ public class Teleporter
             this.yaw = yaw;
         }
 
-        public TeleportLocation(double x, double y, double z, DimensionType dimension, float pitch, float yaw, String name) {
+        public TeleportLocation(double x, double y, double z, RegistryKey<World> dimension, float pitch, float yaw, String name) {
             this.xCoord = x;
             this.yCoord = y;
             this.zCoord = z;
@@ -63,7 +65,7 @@ public class Teleporter
             return zCoord;
         }
 
-        public DimensionType getDimension() {
+        public RegistryKey<World> getDimension() {
             return dimension;
         }
 
@@ -99,7 +101,7 @@ public class Teleporter
             zCoord = z;
         }
 
-        public void setDimension(DimensionType d) {
+        public void setDimension(RegistryKey<World> d) {
             dimension = d;
         }
 
@@ -123,7 +125,7 @@ public class Teleporter
             compound.putDouble("X", xCoord);
             compound.putDouble("Y", yCoord);
             compound.putDouble("Z", zCoord);
-            compound.putString("Dimension", dimension.getRegistryName().toString());
+            compound.putString("Dimension", dimension.getLocation().toString());
             compound.putFloat("Pitch", pitch);
             compound.putFloat("Yaw", yaw);
             compound.putString("Name", name);
@@ -135,7 +137,7 @@ public class Teleporter
             xCoord = compound.getDouble("X");
             yCoord = compound.getDouble("Y");
             zCoord = compound.getDouble("Z");
-            dimension = DimensionType.byName(new ResourceLocation(compound.getString("Dimension")));
+            dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(compound.getString("Dimension")));
             pitch = compound.getFloat("Pitch");
             yaw = compound.getFloat("Yaw");
             name = compound.getString("Name");

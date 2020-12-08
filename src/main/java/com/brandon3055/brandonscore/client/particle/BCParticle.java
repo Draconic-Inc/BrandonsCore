@@ -7,6 +7,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
@@ -21,11 +22,11 @@ public class BCParticle extends Particle {
     protected float airResistance = 0;
     protected float baseScale = 1;
 
-    public BCParticle(World worldIn, Vec3D pos) {
+    public BCParticle(ClientWorld worldIn, Vec3D pos) {
         super(worldIn, pos.x, pos.y, pos.z);
     }
 
-    public BCParticle(World worldIn, Vec3D pos, Vec3D speed) {
+    public BCParticle(ClientWorld worldIn, Vec3D pos, Vec3D speed) {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 

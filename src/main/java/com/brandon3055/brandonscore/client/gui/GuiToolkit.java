@@ -23,7 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
@@ -150,12 +150,12 @@ public class GuiToolkit<T extends Screen & IModularGui> {
      * Creates a generic set of inventory slots with the specified dimensions.
      * background is an optional 16x16 sprite that will be used as the slot background.
      */
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, Material background) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, RenderMaterial background) {
         GuiElement element = new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                Material slot = BCSprites.getThemed("slot");
+                RenderMaterial slot = BCSprites.getThemed("slot");
                 IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
                 IVertexBuilder buffer = getter.getBuffer(BCSprites.guiTexType);
 
@@ -222,11 +222,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createSlots(parent, columns, rows, 0);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, Material slotTexture) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, RenderMaterial slotTexture) {
         return createSlots(parent, columns, rows, spacing, null, slotTexture);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, Material slotTexture) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, RenderMaterial slotTexture) {
         return createSlots(parent, columns, rows, 0, null, slotTexture);
     }
 
@@ -412,7 +412,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createIconButton(parent, size, BCSprites.themedGetter(iconString));
     }
 
-    public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<Material> iconSupplier) {
+    public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<RenderMaterial> iconSupplier) {
         return createIconButton(parent, size, size, iconSupplier);
     }
 
@@ -420,7 +420,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createIconButton(parent, buttonSize, iconSize, BCSprites.getter(iconString));
     }
 
-    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<RenderMaterial> iconSupplier) {
         GuiButton button = new GuiButton();
         button.setHoverTextDelay(10);
         button.setSize(buttonSize, buttonSize);
@@ -459,7 +459,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return rect;
     }
 
-    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier) {
+    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<RenderMaterial> matSupplier) {
         GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
         GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
         addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> base.getHoverTime() > 0);
@@ -468,7 +468,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return base;
     }
 
-    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier, Function<GuiElement, Boolean> highlight) {
+    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<RenderMaterial> matSupplier, Function<GuiElement, Boolean> highlight) {
         GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
         GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
         addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> highlight.apply(base));
@@ -927,7 +927,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             }
 
             if (fadeAlpha < 1) {
-                Material mat = BCSprites.get("info_panel");
+                RenderMaterial mat = BCSprites.get("info_panel");
                 drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), 12, 12, mat.getSprite());
             }
 

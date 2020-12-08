@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.text.ITextComponent;
@@ -164,9 +165,9 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     //region Render
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
         renderElements(mouseX, mouseY, partialTicks);
-        super.render(mouseX, mouseY, partialTicks);
+        super.render(mStack, mouseX, mouseY, partialTicks);
         renderOverlayLayer(mouseX, mouseY, partialTicks);
     }
 

@@ -208,7 +208,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
         }
 
         if (tile instanceof TileBCore && stack.hasDisplayName()) {
-            ((TileBCore) tile).setCustomName(stack.getDisplayName().getFormattedText());
+            ((TileBCore) tile).setCustomName(stack.getDisplayName().getString());
         }
     }
 
