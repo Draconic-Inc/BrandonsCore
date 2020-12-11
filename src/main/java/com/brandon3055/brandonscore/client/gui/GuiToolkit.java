@@ -7,10 +7,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
@@ -32,9 +29,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
@@ -43,7 +38,6 @@ import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotTyp
 /**
  * Created by brandon3055 on 5/7/19.
  */
-@SuppressWarnings("rawtypes")
 public class GuiToolkit<T extends Screen & IModularGui> {
 
     private static Map<String, ResourceLocation> resourceCache = new HashMap<>();
@@ -52,6 +46,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     private T gui;
     private GuiLayout layout;
     private ContainerSlotLayout slotLayout;
+    private String translationPrefix = "";
 
     public GuiToolkit(T gui, GuiLayout layout) {
         this(gui, layout.xSize, layout.ySize);
@@ -69,6 +64,19 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         if (gui instanceof ModularGuiContainer && ((ModularGuiContainer) gui).getContainer() instanceof ContainerBCore) {
             setSlotLayout(((ContainerBCore) ((ModularGuiContainer) gui).getContainer()).getSlotLayout());
         }
+    }
+
+    public GuiToolkit<T> setTranslationPrefix(String translationPrefix) {
+        this.translationPrefix = translationPrefix + ".";
+        return this;
+    }
+
+    public String i18n(String translationKey) {
+        return I18n.format(translationPrefix + translationKey);
+    }
+
+    public Supplier<String> i18n(Supplier<String> translationKey) {
+        return () -> I18n.format(translationPrefix + translationKey.get());
     }
 
     public GuiLayout getLayout() {
@@ -479,8 +487,6 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
 
     //endregion
-
-
     //Create Progress Bar..
 
     //Create Power Bar
@@ -521,7 +527,32 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return panel;
     }
 
-    //etc...
+
+    //Create Text Field
+    public GuiTextField createTextField() {
+        return createTextField(null);
+    }
+
+    public GuiTextField createTextField(GuiElement parent) {
+        return createTextField(parent, true);
+    }
+
+    public GuiTextField createTextField(GuiElement parent, boolean background) {
+        GuiTextField textField = new GuiTextField();
+        textField.setTextColor(Palette.Ctrl::text);
+        textField.setShadow(false);
+
+        if (background) {
+            textField.setEnableBackgroundDrawing(true);
+            textField.setFillColour(Palette.Ctrl::fill);
+            textField.setBorderColour(hovering -> Palette.Ctrl.accentLight(false));
+        }
+
+        if (parent != null) {
+            parent.addChild(textField);
+        }
+        return textField;
+    }
 
     //LayoutUtils
     public void center(GuiElement element, GuiElement centerOn, int xOffset, int yOffset) {
@@ -598,6 +629,16 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     public int guiTop() {
         return gui.guiTop();
+    }
+
+    public Predicate<String> catchyValidator(Predicate<String> predicate) {
+        return s -> {
+            try {
+                return predicate.test(s);
+            } catch (Throwable e) {
+                return false;
+            }
+        };
     }
 
     //TODO add additional standard layouts as needed.
@@ -814,10 +855,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             if (value.contains("\n")) {
                 String[] strs = value.split("\n");
                 value = "";
-                for (String s : strs) if (s.length() > value.length()) {
-                    extraHeiht += fontRenderer.FONT_HEIGHT;
-                    value = s;
-                }
+                for (String s : strs)
+                    if (s.length() > value.length()) {
+                        extraHeiht += fontRenderer.FONT_HEIGHT;
+                        value = s;
+                    }
             }
             extraHeiht -= fontRenderer.FONT_HEIGHT;
 

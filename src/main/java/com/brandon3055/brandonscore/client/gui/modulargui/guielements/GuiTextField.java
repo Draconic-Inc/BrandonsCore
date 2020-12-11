@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedStack;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -51,9 +52,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     private Consumer<String> linkedSetter;
     private Supplier<String> linkedGetter;
 
-    public int fillColour = 0xFF5f5f60;
-    public int borderColour = 0xFF000000;
-
+    private GuiColourProvider.HoverColour<Integer> fillColour = h -> 0xFF5f5f60;
+    private GuiColourProvider.HoverColour<Integer> borderColour = h -> 0xFF000000;
     private boolean shiftCache;
     private String suggestion;
 
@@ -152,8 +152,9 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         return this.text().substring(start, end);
     }
 
-    public void setValidator(Predicate<String> validator) {
+    public GuiTextField setValidator(Predicate<String> validator) {
         this.validator = validator;
+        return this;
     }
 
     public void writeText(String textToWrite) {
@@ -447,10 +448,10 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 ////        if (!isFocused) setCursorPosition(0);
 //    }
 
-    public void drawTextBox(MatrixStack matrixStack) {
+    public void drawTextBox(MatrixStack matrixStack, boolean mouseOver) {
 //        if (this.isEnabled()) {
         if (this.getEnableBackgroundDrawing()) {
-            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, fillColour, borderColour);
+            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, getFillColour(mouseOver), getBorderColour(mouseOver));
         }
 
         double zLevel = getRenderZLevel();
@@ -705,7 +706,25 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public GuiTextField setColours(int fillColour, int borderColour) {
+        this.fillColour = h -> fillColour;
+        this.borderColour = h -> borderColour;
+        return this;
+    }
+
+    public int getFillColour(boolean hovering) {
+        return fillColour.getColour(hovering);
+    }
+
+    public int getBorderColour(boolean hovering) {
+        return borderColour.getColour(hovering);
+    }
+
+    public GuiTextField setFillColour(GuiColourProvider.HoverColour<Integer> fillColour) {
         this.fillColour = fillColour;
+        return this;
+    }
+
+    public GuiTextField setBorderColour(GuiColourProvider.HoverColour<Integer> borderColour) {
         this.borderColour = borderColour;
         return this;
     }
@@ -734,7 +753,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        drawTextBox(new MatrixStack());
+        drawTextBox(new MatrixStack(), isMouseOver(mouseX, mouseY));
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 

@@ -72,7 +72,7 @@ public class LangGenerator extends LanguageProvider {
         add("gui.brandonscore.rs_mode.never_active",                                            "Never active");
         add("gui.brandonscore.large_view",                                                      "Large View");
         add("gui.brandonscore.large_view.close",                                                "Click outside or press Esc to close");
-        add("gui.brandonscore.your_inventory",                                                  "Your Inventory");
+        add("gui.brandonscore.your_inventory",                                                  "Inventory");
 
 
         //temp

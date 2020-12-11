@@ -14,6 +14,7 @@ import net.minecraft.util.text.TranslationTextComponent;
  * This is just a simple helper class for chat messages.
  */
 @Deprecated //This is just too much crap that never gets used. Not sure what i am going to do about it yet.
+            //Think i will just add a proxy method that can serialize ITextComponents for indexing client side.
 public class ChatHelper {
 
     //region Translation
@@ -91,6 +92,7 @@ public class ChatHelper {
         if (player.getEntityWorld().isRemote) {
             BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(unlocalizedMessage, args).setStyle(style), -330553055);
         }
+
     }
 
     //endregion

@@ -36,7 +36,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     private List<JEITargetAdapter> jeiGhostTargets = new ArrayList<>();
     private ResourceLocation newCursor = null;
     private boolean mousePressed = false;
-//    private boolean passClick = false;
+    private Runnable onTick = null;
 
     public GuiElementManager(IModularGui parentGui) {
         this.parentGui = parentGui;
@@ -70,6 +70,10 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
 
     public void setCursor(ResourceLocation cursor) {
         this.newCursor = cursor;
+    }
+
+    public void onTick(Runnable onTick) {
+        this.onTick = onTick;
     }
 
     //region Elements
@@ -410,6 +414,8 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
             elements.removeAll(toRemove);
             toRemove.clear();
         }
+
+        if (onTick != null) onTick.run();
 
         for (GuiElement element : elements) {
             if (element.onUpdate()) {

@@ -1,10 +1,14 @@
 package com.brandon3055.brandonscore.utils;
 
+import net.minecraft.client.audio.Sound;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.minecraft.util.Direction.*;
 
 /**
  * Created by brandon3055 on 24/4/2016.
@@ -110,7 +114,7 @@ public class FacingUtils {
     public static Direction[] getAxisFaces(Direction.Axis axis) {
         switch (axis) {
             case X: return new Direction[]{Direction.EAST, Direction.WEST};
-            case Y: return new Direction[]{Direction.UP, Direction.DOWN};
+            case Y: return new Direction[]{Direction.UP, DOWN};
             case Z: return new Direction[]{Direction.NORTH, Direction.SOUTH};
             default: return new Direction[0];
         }
@@ -139,7 +143,7 @@ public class FacingUtils {
                 return facing;
             case Y:
 
-                if (facing != Direction.UP && facing != Direction.DOWN) {
+                if (facing != Direction.UP && facing != DOWN) {
                     return rotateY(facing, reverse);
                 }
 
@@ -174,13 +178,13 @@ public class FacingUtils {
     private static Direction rotateX(Direction facing, boolean reverse) {
         switch (facing) {
             case NORTH:
-                return reverse ? Direction.UP : Direction.DOWN;
+                return reverse ? Direction.UP : DOWN;
             case EAST:
             case WEST:
             default:
                 throw new IllegalStateException("Unable to get X-rotated facing of " + facing);
             case SOUTH:
-                return reverse ? Direction.DOWN : Direction.UP;
+                return reverse ? DOWN : Direction.UP;
             case UP:
                 return reverse ? Direction.SOUTH : Direction.NORTH;
             case DOWN:
@@ -191,12 +195,12 @@ public class FacingUtils {
     private static Direction rotateZ(Direction facing, boolean reverse) {
         switch (facing) {
             case EAST:
-                return reverse ? Direction.UP : Direction.DOWN;
+                return reverse ? Direction.UP : DOWN;
             case SOUTH:
             default:
                 throw new IllegalStateException("Unable to get Z-rotated facing of " + facing);
             case WEST:
-                return reverse ? Direction.DOWN : Direction.UP;
+                return reverse ? DOWN : Direction.UP;
             case UP:
                 return reverse ? Direction.WEST : Direction.EAST;
             case DOWN:
@@ -204,7 +208,7 @@ public class FacingUtils {
         }
     }
 
-    public static int destanceInDirection(BlockPos fromPos, BlockPos toPos, Direction direction) {
+    public static int distanceInDirection(BlockPos fromPos, BlockPos toPos, Direction direction) {
         switch (direction) {
             case DOWN:
                 return fromPos.getY() - toPos.getY();
@@ -220,5 +224,23 @@ public class FacingUtils {
                 return toPos.getX() - fromPos.getX();
         }
         return 0;
+    }
+
+    public static Direction rotateXYZ(Direction current) {
+        switch (current) {
+            case DOWN:
+                return UP;
+            case UP:
+                return NORTH;
+            case NORTH:
+                return SOUTH;
+            case SOUTH:
+                return WEST;
+            case WEST:
+                return EAST;
+            case EAST:
+                return DOWN;
+        }
+        return NORTH;
     }
 }
