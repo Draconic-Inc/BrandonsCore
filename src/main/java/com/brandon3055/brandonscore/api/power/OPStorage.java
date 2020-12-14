@@ -138,6 +138,16 @@ public class OPStorage implements INBTSerializable<CompoundNBT>, IValueHashable<
         return Math.abs(amount);
     }
 
+    @Override
+    public long maxExtract() {
+        return maxExtract > 0 ? maxExtract : maxReceive;
+    }
+
+    @Override
+    public long maxReceive() {
+        return maxReceive > 0 ? maxReceive : maxExtract;
+    }
+
     /**
      * This is a raw unchecked setter for the capacity value.
      * This is for internal use only. For things like saving and loading data.

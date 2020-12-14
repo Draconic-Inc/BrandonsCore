@@ -92,6 +92,10 @@ public class ContainerSlotLayout {
         return slotDataMap.containsKey(type) ? slotDataMap.get(type).get(index) : null;
     }
 
+    public int getPlayerSlotCount() {
+        return (int) slotDataList.stream().filter(e -> e.type.isPlayer).count();
+    }
+
     public enum SlotType {
         PLAYER_INV(true),
         PLAYER_ARMOR(true),

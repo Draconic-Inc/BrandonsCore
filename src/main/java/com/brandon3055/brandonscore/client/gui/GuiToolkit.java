@@ -39,6 +39,7 @@ import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotTyp
  * Created by brandon3055 on 5/7/19.
  */
 public class GuiToolkit<T extends Screen & IModularGui> {
+    private static final String INTERNAL_TRANSLATION_PREFIX = "gui_tkt.brandonscore.";
 
     private static Map<String, ResourceLocation> resourceCache = new HashMap<>();
     private List<GuiElement<?>> jeiExclusions = new ArrayList<>();
@@ -61,18 +62,34 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         this.layout = CUSTOM;
         this.gui.setUISize(xSize, ySize);
         gui.getManager().setJeiExclusions(() -> jeiExclusions);
-        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer) gui).getContainer() instanceof ContainerBCore) {
+        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer<?>) gui).getContainer() instanceof ContainerBCore) {
             setSlotLayout(((ContainerBCore) ((ModularGuiContainer) gui).getContainer()).getSlotLayout());
         }
     }
 
     public GuiToolkit<T> setTranslationPrefix(String translationPrefix) {
-        this.translationPrefix = translationPrefix + ".";
-        return this;
+        if (!translationPrefix.endsWith(".")) {
+            translationPrefix = translationPrefix + ".";
+        }
+        this.translationPrefix = translationPrefix;
+            return this;
     }
 
     public String i18n(String translationKey) {
+        if (translationKey.startsWith(".")) {
+            translationKey = translationKey.substring(1);
+        }
         return I18n.format(translationPrefix + translationKey);
+    }
+
+    /**
+     * Internal translator for use inside Toolkit
+     * */
+    protected static String i18ni(String translationKey) {
+        if (translationKey.startsWith(".")) {
+            translationKey = translationKey.substring(1);
+        }
+        return I18n.format(INTERNAL_TRANSLATION_PREFIX + translationKey);
     }
 
     public Supplier<String> i18n(Supplier<String> translationKey) {
@@ -95,7 +112,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase()));
         button.addChild(icon);
         icon.setYPosMod(button::yPos);
-        button.setHoverText(element -> I18n.format("gui.brandonscore.rs_mode." + switchable.getRSMode().name().toLowerCase()));
+        button.setHoverText(element -> i18ni("rs_mode." + switchable.getRSMode().name().toLowerCase()));
         button.onButtonPressed((pressed) -> switchable.setRSMode(switchable.getRSMode().next(Screen.hasShiftDown() || pressed == 1)));
         return button;
     }
@@ -157,6 +174,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     /**
      * Creates a generic set of inventory slots with the specified dimensions.
      * background is an optional 16x16 sprite that will be used as the slot background.
+     * @param slotMapper (column, row, slotData)
      */
     public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, RenderMaterial background) {
         GuiElement element = new GuiElement() {
@@ -165,7 +183,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 RenderMaterial slot = BCSprites.getThemed("slot");
                 IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-                IVertexBuilder buffer = getter.getBuffer(BCSprites.guiTexType);
+                IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TEX_TYPE);
 
                 for (int x = 0; x < columns; x++) {
                     for (int y = 0; y < rows; y++) {
@@ -256,7 +274,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         bar.setYPos(main.maxYPos() + 3);
 
         if (title) {
-            GuiLabel invTitle = new GuiLabel(I18n.format("gui.brandonscore.your_inventory"));
+            GuiLabel invTitle = new GuiLabel(i18ni("your_inventory"));
             invTitle.setAlignment(GuiAlign.LEFT).setHoverableTextCol(hovering -> Palette.BG.text());
             invTitle.setShadowStateSupplier(() -> darkMode);
             container.addChild(invTitle);
@@ -333,12 +351,16 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createButton(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d) {
+        return createButton(unlocalizedText, parent, inset3d, 1);
+    }
+
+    public GuiButton createButton(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
         GuiButton button = new GuiButton(I18n.format(unlocalizedText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
         if (inset3d) {
             button.set3dText(true);
-            GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(1);
+            GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(doubleBoarder);
             //I use modifiers here to account for the possibility that this button may have modifiers. Something i need to account for when i re write modular gui
             buttonBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
             buttonBG.setFillColourL(hovering -> Palette.Ctrl.fill(hovering || button.isPressed()));
@@ -372,7 +394,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     public GuiButton createThemeButton(GuiElement<?> parent) {
         GuiButton button = createThemedIconButton(parent, "theme");
-        button.setHoverText(element -> darkMode ? I18n.format("gui.brandonscore.theme.light") : I18n.format("gui.brandonscore.theme.dark"));
+        button.setHoverText(element -> darkMode ? i18ni("theme.light") : i18ni("theme.dark"));
         button.onPressed(() -> {
             BCConfig.CLIENT.dark_mode.set(!darkMode); //TODO check if this auto saves.
             darkMode = BCConfig.CLIENT.dark_mode.get(); //it seems ModConfigEvent sometimes fails to fire. This is a workaround.
@@ -390,7 +412,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     public GuiButton createResizeButton(GuiElement<?> parent) {
         GuiButton button = createThemedIconButton(parent, "resize");
-        button.setHoverText(element -> I18n.format("gui.brandonscore.large_view"));
+        button.setHoverText(element -> i18ni("large_view"));
         return button;
     }
 
@@ -635,7 +657,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return s -> {
             try {
                 return predicate.test(s);
-            } catch (Throwable e) {
+            }
+            catch (Throwable e) {
                 return false;
             }
         };
@@ -747,8 +770,9 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         private boolean hasPI = true;
         private AtomicBoolean expanded;
         public double animState = 0;
-        public Supplier<Point> origin;
-        public String hoverText = I18n.format("gui.brandonscore.info_panel");
+        private Supplier<Point> origin;
+        private GuiButton toggleButton;
+        public String hoverText = GuiToolkit.i18ni("info_panel");
 
         public InfoPanel(GuiElement parent, boolean leftSide, AtomicBoolean expandedHolder) {
             this.parent = parent;
@@ -787,6 +811,26 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
 
         @Override
+        public void addChildElements() {
+            super.addChildElements();
+
+            toggleButton = new GuiButton()
+                    .setHoverTextDelay(10)
+                    .setSize(12, 12)
+                    .onPressed(this::toggleExpanded)
+                    .setPosModifiers(() -> getOrigin().x, () -> getOrigin().y)
+                    .setEnabledCallback(() -> origin != null || animState <= 0);
+
+            addHoverHighlight(toggleButton);
+
+            GuiTexture icon = new GuiTexture(12, 12, BCSprites.getter("info_panel"))
+                    .setPosModifiers(() -> getOrigin().x, () -> getOrigin().y);
+
+            toggleButton.addChild(icon);
+            addChild(toggleButton);
+        }
+
+        @Override
         public void reloadElement() {
             super.reloadElement();
             if (isExpanded()) {
@@ -796,6 +840,15 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
         public void setOrigin(Supplier<Point> origin) {
             this.origin = origin;
+        }
+
+        public Point getOrigin() {
+            if (origin == null) {
+                int xPos = leftSide ? parent.xPos() - xSize() - 2 : parent.maxXPos() + 2;
+                int yPos = parent.yPos() + (leftSide && hasPI ? 25 : 0);
+                return new Point(xPos, yPos);
+            }
+            return origin.get();
         }
 
         public InfoPanel addElement(GuiElement element, Dimension preferredSize) {
@@ -928,7 +981,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             int xPos = leftSide ? parent.xPos() - xSize() - 2 : parent.maxXPos() + 2;
             int yPos = parent.yPos() + (leftSide && hasPI ? 25 : 0);
             Rectangle bounds = /*new Rectangle(xPos, yPos, prefBounds.width + 6, prefBounds.height + 6);*/new Rectangle(xPos, yPos, actSize.width + 8, actSize.height + 6);
-            Point origin = this.origin == null ? new Point(xPos, yPos) : this.origin.get();
+            Point origin = getOrigin();
             Rectangle collapsed = new Rectangle(origin.x, origin.y, 12, 12);
 
             double animState = Math.max(0, this.animState);
@@ -958,20 +1011,12 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+            toggleButton.renderElement(minecraft, mouseX, mouseY, partialTicks);
             double fadeAlpha = Math.min(1, ((animState + 0.5) * 2));
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
             int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
             IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-
-            if (animState < 0 && hoverTime > 0) {
-                drawColouredRect(getter, xPos(), yPos(), xSize(), ySize(), Palette.Ctrl.fill(true));
-            }
-
-            if (fadeAlpha < 1) {
-                RenderMaterial mat = BCSprites.get("info_panel");
-                drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), 12, 12, mat.getSprite());
-            }
 
             drawColouredRect(getter, xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
             drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 2, ySize(), col1);
@@ -980,7 +1025,14 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             drawColouredRect(getter, xPos() + 2, yPos() + 2, xSize() - 4, ySize() - 4, col1);
 
             getter.finish();
-            super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+
+            for (GuiElement<?> element : childElements) {
+                if (element.isEnabled() && element != toggleButton) {
+                    element.preDraw(minecraft, mouseX, mouseY, partialTicks);
+                    element.renderElement(minecraft, mouseX, mouseY, partialTicks);
+                    element.postDraw(minecraft, mouseX, mouseY, partialTicks);
+                }
+            }
         }
 
         @Override
@@ -1006,7 +1058,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
     }
 
-    public static class Palette {
+    public static abstract class Palette {
         /**
          * Background colours. These match the colours used in the default background textures.
          */
@@ -1143,6 +1195,15 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             }
         }
 
-        //bgColour, bgBorderColour, bgAccentLight, bgAccentDark, ctrlBgColour, ctrlBorderColourz
+//        public abstract int fill();
+//        public abstract int border();
+//        public abstract int accentLight();
+//        public abstract int accentDark();
+//        public abstract int text();
+//
+//        public static abstract class CtrlPallet extends Palette {
+//            public abstract int border3D(boolean hovering);
+//        }
+
     }
 }

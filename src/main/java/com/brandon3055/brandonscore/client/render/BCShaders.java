@@ -31,8 +31,8 @@ public class BCShaders {
 
     //Used in dev to reload shaders runtime
     public static void initShaders() throws IOException {
-        dispose(energyBar);
-        dispose(energyBarH);
+//        dispose(energyBar);
+//        dispose(energyBarH);
         dispose(commonVert);
 
 //        energyBar = new ShaderObject(FRAGMENT, readShader(getStream("/assets/brandonscore/shaders/power_bar.frag")));

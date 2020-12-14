@@ -16,6 +16,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandSource;
@@ -137,7 +138,9 @@ public class BCUtilCommands {
 
     private static ArgumentBuilder<CommandSource, ?> registerEggify() {
         return Commands.literal("eggify")
-                .requires(cs -> cs.hasPermissionLevel(3));
+                .requires(cs -> cs.hasPermissionLevel(3))
+                .then(Commands.argument("target", EntityArgument.entities())
+                        .executes(ctx -> eggify(ctx, EntityArgument.getEntity(ctx, "target"))));
     }
 
 //    private void help(ICommandSource sender) {
@@ -322,13 +325,13 @@ public class BCUtilCommands {
 
     //endregion
 
-    private void eggify(CommandSource source) throws CommandException, CommandSyntaxException {
-        ServerPlayerEntity player = source.asPlayer();
-        Entity entity = traceEntity(player);
+    private static int eggify(CommandContext<CommandSource> ctx, Entity target) throws CommandException, CommandSyntaxException {
+        ServerPlayerEntity player = ctx.getSource().asPlayer();
+        Entity entity = target;
 
         if (entity == null) {
             player.sendMessage(new StringTextComponent("You must be looking at an entity!"), Util.DUMMY_UUID);
-            return;
+            return 1;
         }
 
         ItemStack spawnEgg = new ItemStack(SpawnEggItem.getEgg(entity.getType()));
@@ -349,32 +352,34 @@ public class BCUtilCommands {
         data.remove("UUID");
 
         InventoryUtils.givePlayerStack(player, spawnEgg);
+        return 0;
     }
 
     @Nullable
-    protected Entity traceEntity(PlayerEntity player) {
+    protected static Entity traceEntity(PlayerEntity player) {
         Entity entity = null;
-        List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getBoundingBox().grow(20.0D));
-        double d0 = 0.0D;
-
-        Vector3d start = new Vector3d(player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ());
-        Vector3d look = player.getLookVec();
-        Vector3d end = new Vector3d(player.getPosX() + (look.x * 20), player.getPosY() + player.getEyeHeight() + (look.y * 20), player.getPosZ() + (look.z * 20));
-
-        for (int i = 0; i < list.size(); ++i) {
-            Entity entity1 = list.get(i);
-            AxisAlignedBB axisalignedbb = entity1.getBoundingBox().grow(0.2);
-            RayTraceResult raytraceresult = AxisAlignedBB.rayTrace(Collections.singleton(axisalignedbb), start, end, player.getPosition());//axisalignedbb.calculateIntercept(start, end);
-
-            if (raytraceresult != null) {
-                double d1 = start.squareDistanceTo(raytraceresult.getHitVec());
-
-                if (d1 < d0 || d0 == 0.0D) {
-                    entity = entity1;
-                    d0 = d1;
-                }
-            }
-        }
+//        List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getBoundingBox().grow(20.0D));
+//        double d0 = 0.0D;
+//
+//        Vector3d start = new Vector3d(player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ());
+//        Vector3d look = player.getLookVec();
+//        Vector3d end = new Vector3d(player.getPosX() + (look.x * 20), player.getPosY() + player.getEyeHeight() + (look.y * 20), player.getPosZ() + (look.z * 20));
+//
+//        for (int i = 0; i < list.size(); ++i) {
+//            Entity entity1 = list.get(i);
+//            AxisAlignedBB axisalignedbb = entity1.getBoundingBox().grow(0.2);
+//            RayTraceResult raytraceresult = AxisAlignedBB.rayTrace(Collections.singleton(axisalignedbb), start, end, player.getPosition());//axisalignedbb.calculateIntercept(start, end);
+//
+//            if (raytraceresult != null) {
+//                double d1 = start.squareDistanceTo(raytraceresult.getHitVec());
+//
+//                if (d1 < d0 || d0 == 0.0D) {
+//                    entity = entity1;
+//                    d0 = d1;
+//                }
+//            }
+//        }
+//
 
         return entity;
     }

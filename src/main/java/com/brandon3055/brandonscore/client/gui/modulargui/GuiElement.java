@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -69,6 +70,8 @@ import java.util.stream.Collectors;
  * just to name a few.
  */
 public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiParentElement<E> {
+    private static final String INTERNAL_TRANSLATION_PREFIX = "mod_gui.brandonscore.";
+
     protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     protected static final RenderType transColourType = RenderType.makeType("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
@@ -125,6 +128,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     protected int hoverTextDelay = 10;
     protected IDrawCallback preDrawCallback = null;
     protected IDrawCallback postDrawCallback = null;
+    protected String elementTranslationExt = "";
 
     /**
      * An id that is unique to this element (may or may not be used. If unused will be an empty string)
@@ -201,6 +205,20 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     public GuiElement(int xPos, int yPos, int xSize, int ySize) {
         this(xPos, yPos);
         setSize(xSize, ySize);
+    }
+
+    /**
+     * Translator for use inside gui elements.
+     * Appends INTERNAL_TRANSLATION_PREFIX to the front of the given key then translates the result.
+     * */
+    protected String i18ni(String translationKey) {
+        if (translationKey.startsWith(".")) {
+            translationKey = translationKey.substring(1);
+        }
+        if (!elementTranslationExt.isEmpty()) {
+            translationKey = elementTranslationExt + "." + translationKey;
+        }
+        return I18n.format(INTERNAL_TRANSLATION_PREFIX + translationKey);
     }
 
     //# Init & Reload

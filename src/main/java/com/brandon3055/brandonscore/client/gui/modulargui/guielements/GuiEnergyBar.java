@@ -1,24 +1,40 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import codechicken.lib.render.shader.ShaderProgram;
+import codechicken.lib.render.shader.ShaderProgramBuilder;
+import codechicken.lib.render.shader.UniformCache;
+import codechicken.lib.render.shader.UniformType;
+import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.api.power.IOInfo;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.render.BCShaders;
+import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.utils.EnergyUtils;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.function.Supplier;
 
+import static codechicken.lib.render.shader.ShaderObject.StandardShaderType.FRAGMENT;
+import static codechicken.lib.render.shader.ShaderObject.StandardShaderType.VERTEX;
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static net.minecraft.util.text.TextFormatting.*;
 
@@ -27,25 +43,62 @@ import static net.minecraft.util.text.TextFormatting.*;
  */
 public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
-    private boolean drawHoveringText = true;
+    public static ShaderProgram barShaderH = ShaderProgramBuilder.builder()
+            .addShader("vert", shader -> shader
+                    .type(VERTEX)
+                    .source(new ResourceLocation(BrandonsCore.MODID, "shaders/common.vert"))
+            )
+            .addShader("frag", shader -> shader
+                    .type(FRAGMENT)
+                    .source(new ResourceLocation(BrandonsCore.MODID, "shaders/power_bar_horizontal.frag"))
+                    .uniform("time", UniformType.FLOAT)
+                    .uniform("charge", UniformType.FLOAT)
+                    .uniform("ePos", UniformType.I_VEC2)
+                    .uniform("eSize", UniformType.I_VEC2)
+                    .uniform("screenSize", UniformType.I_VEC2)
+            )
+            .whenUsed(cache -> cache.glUniform1f("time", BCClientEventHandler.elapsedTicks / 10F))
+            .build();
+
+    public static ShaderProgram barShaderV = ShaderProgramBuilder.builder()
+            .addShader("vert", shader -> shader
+                    .type(VERTEX)
+                    .source(new ResourceLocation(BrandonsCore.MODID, "shaders/common.vert"))
+            )
+            .addShader("frag", shader -> shader
+                    .type(FRAGMENT)
+                    .source(new ResourceLocation(BrandonsCore.MODID, "shaders/power_bar.frag"))
+                    .uniform("time", UniformType.FLOAT)
+                    .uniform("charge", UniformType.FLOAT)
+                    .uniform("ePos", UniformType.I_VEC2)
+                    .uniform("eSize", UniformType.I_VEC2)
+                    .uniform("screenSize", UniformType.I_VEC2)
+            )
+            .whenUsed(cache -> cache.glUniform1f("time", BCClientEventHandler.elapsedTicks / 10F))
+            .build();
+
     private IOPStorage energyHandler = null;
     private Supplier<Long> capacitySupplier = null;
     private Supplier<Long> energySupplier = null;
     private boolean horizontal = false;
     private boolean rfMode = false;
-    private static ShaderProgram shaderProgram;
-    private static ShaderProgram shaderProgramH;
+    private Supplier<Boolean> shaderEnabled = () -> true;
+    private Supplier<Boolean> drawHoveringText = () -> true;
+    private Supplier<Boolean> disabled = () -> false;
 
     public GuiEnergyBar() {
         setSize(14, 14);
+        elementTranslationExt = "energy_bar";
     }
 
     public GuiEnergyBar(int xPos, int yPos) {
         super(xPos, yPos);
+        elementTranslationExt = "energy_bar";
     }
 
     public GuiEnergyBar(int xPos, int yPos, int xSize, int ySize) {
         super(xPos, yPos, xSize, ySize);
+        elementTranslationExt = "energy_bar";
     }
 
     public GuiEnergyBar setEnergySupplier(Supplier<Long> energySupplier) {
@@ -58,6 +111,22 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
         return this;
     }
 
+    public GuiEnergyBar setItemSupplier(Supplier<ItemStack> stackSupplier) {
+        this.capacitySupplier = () -> EnergyUtils.isEnergyItem(stackSupplier.get()) ? EnergyUtils.getMaxEnergyStored(stackSupplier.get()) : 0;
+        this.energySupplier = () -> EnergyUtils.isEnergyItem(stackSupplier.get()) ? EnergyUtils.getEnergyStored(stackSupplier.get()) : 0;
+        return this;
+    }
+
+    public GuiEnergyBar setShaderEnabled(Supplier<Boolean> shaderEnabled) {
+        this.shaderEnabled = shaderEnabled;
+        return this;
+    }
+
+    public GuiEnergyBar setDisabled(Supplier<Boolean> disabled) {
+        this.disabled = disabled;
+        return this;
+    }
+
     /**
      * Forces this energy bar to display as RF/Energy Storage instead of OP/Operational Potential
      */
@@ -67,6 +136,11 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     }
 
     public GuiEnergyBar setDrawHoveringText(boolean drawHoveringText) {
+        this.drawHoveringText = () -> drawHoveringText;
+        return this;
+    }
+
+    public GuiEnergyBar setDrawHoveringText(Supplier<Boolean> drawHoveringText) {
         this.drawHoveringText = drawHoveringText;
         return this;
     }
@@ -88,8 +162,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     protected long getCapacity() {
         if (capacitySupplier != null) {
             return capacitySupplier.get();
-        }
-        else if (energyHandler != null) {
+        } else if (energyHandler != null) {
             return energyHandler.getMaxOPStored();
         }
         return 0;
@@ -98,8 +171,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     protected long getEnergy() {
         if (energySupplier != null) {
             return energySupplier.get();
-        }
-        else if (energyHandler != null) {
+        } else if (energyHandler != null) {
             return energyHandler.getOPStored();
         }
         return 0;
@@ -116,11 +188,12 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-//        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-//        ResourceHelperBC.bindTexture("textures/gui/energy_gui.png");
 
-        int size = horizontal ? xSize() : ySize();
-        int draw = (int) ((double) getEnergy() / (double) getCapacity() * (size - 2));
+        int barLength = horizontal ? xSize() : ySize();
+        int barWidth = horizontal ? ySize() : xSize();
+        double energy = getEnergy();
+        double capacity = getCapacity();
+        int draw = (int) ((energy / capacity) * (barLength - 2));
 
         int posY = yPos();
         int posX = xPos();
@@ -130,34 +203,56 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             posY = posX;
             posX = x;
             RenderSystem.pushMatrix();
-            RenderSystem.translated(size + (posY * 2), 0, 0);
+            RenderSystem.translated(barLength + (posY * 2), 0, 0);
             RenderSystem.rotatef(90, 0, 0, 1);
         }
-
-        RenderSystem.color3f(1F, 1F, 1F);
-//        drawTexturedModalRect(posX, posY, 0, 0, 14, size);
-
         IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
         int light = darkMode ? 0xFFFFFFFF : 0xFFFFFFFF;
         int dark = darkMode ? 0xFF808080 : 0xFF505050;
-//        drawShadedRect(getter, xPos() - 2, yPos() - 2, xSize() + 4, ySize() + 4, 1, 0, light, dark, midColour(light, dark));
-        drawShadedRect(getter, posX, posY, 14, size, 1, 0, dark, light, midColour(light, dark));
-        getter.finish();;
+        drawShadedRect(getter, posX, posY, barWidth, barLength, 1, 0, dark, light, midColour(light, dark));
+        getter.finish();
 
-//        drawTexturedModalRect(posX, posY + size - 1, 0, 255, 14, 1);
-
-//        drawTexturedModalRect(posX + 1, posY + size - draw - 1, 14, size - draw, 12, draw);
-
-        //TODO re implement proper fall back energy bar.
-        bindShader();
-        drawColouredRect(posX + 1, posY + 1, 14 - 2, size - 2, 0xFF000000);
-        drawColouredRect(posX + 1, posY +size - draw - 1, 14 - 2, draw, 0xFFFF0000);
-        releaseShader();
-
+        if (disabled.get()) {
+            drawColouredRect(posX + 1, posY + 1, barWidth - 2, barLength - 2, 0xFF000000);
+        } else if (!shaderEnabled.get()) {
+            RenderMaterial matBase = BCSprites.get("bars/energy_empty");
+            RenderMaterial matOverlay = BCSprites.get("bars/energy_full");
+            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + 1, barWidth - 2, barLength - 2, matBase.getSprite());
+            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, matOverlay.getSprite());
+            getter.finish();
+        }
+        else {
+            bindShader(horizontal ? barShaderH : barShaderV);
+            drawColouredRect(posX + 1, posY + 1, barWidth - 2, barLength - 2, 0xFF000000);
+            drawColouredRect(posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, 0xFFFF0000);
+            releaseShader(horizontal ? barShaderH : barShaderV);
+        }
 
         if (horizontal) {
             RenderSystem.popMatrix();
         }
+    }
+    public void sliceSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, TextureAtlasSprite sprite) {
+        float texU = sprite.getMinU();
+        float texV = sprite.getMinV();
+        int texWidth = sprite.getWidth();
+        int texHeight = sprite.getHeight();
+        float uScale = (sprite.getMaxU() - texU) / texWidth;
+        float vScale = (sprite.getMaxV() - texV) / texHeight;
+        for (int i = 0; i < ySize; i += Math.min(texHeight - 2, ySize - i)) {
+            int partSize = Math.min(texHeight, ySize - i);
+            bufferRect(buffer, xPos, yPos + ySize - i, xSize, -partSize, sprite.getMinU(), sprite.getMinV(), xSize * uScale, partSize * vScale);
+        }
+    }
+
+    private void bufferRect(IVertexBuilder buffer, float x, float y, float width, float height, float minU, float minV, float tWidth, float tHeight) {
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        buffer.pos(x,           y + height, zLevel).color(1F, 1F, 1F, 1F).tex(minU, minV + tHeight).endVertex();
+        buffer.pos(x + width,   y + height, zLevel).color(1F, 1F, 1F, 1F).tex(minU + tWidth, minV + tHeight).endVertex();
+        buffer.pos(x + width,   y,          zLevel).color(1F, 1F, 1F, 1F).tex(minU + tWidth, minV).endVertex();
+        buffer.pos(x,           y,          zLevel).color(1F, 1F, 1F, 1F).tex(minU, minV).endVertex();
+        //@formatter:on
     }
 
     public Rectangle toScreenSpace(int xPos, int yPos, int xSize, int ySize) {
@@ -173,35 +268,34 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     //TODO some sort of "modular tool tip" that would allow me to properly define key: value columns in the tooltip
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (drawHoveringText && isMouseOver(mouseX, mouseY)) {
+        if (drawHoveringText.get() && isMouseOver(mouseX, mouseY)) {
             long maxEnergy = getCapacity();
             long energy = getEnergy();
 
-            String title = rfMode ? "gui.bc.energy_storage.txt" : "gui.bc.operational_potential.txt";
+            String title = rfMode ? i18ni("energy_storage") : i18ni("operational_potential");
             boolean shift = Screen.hasShiftDown();
-            String suffix = rfMode ? "RF" : "OP";
+            String suffix = rfMode ? i18ni("rf") : i18ni("op");
             String capString = (shift ? Utils.addCommas(maxEnergy) : Utils.formatNumber(maxEnergy)) + " " + suffix;
             String storedString = (shift ? Utils.addCommas(energy) : Utils.formatNumber(energy)) + " " + suffix;
-            String percent = " (" + MathUtils.round(((double)energy / (double)maxEnergy) * 100D, 100) + "%)";
+            String percent = " (" + MathUtils.round(((double) energy / (double) maxEnergy) * 100D, 100) + "%)";
 
             StringBuilder builder = new StringBuilder();
             builder.append(DARK_AQUA).append(I18n.format(title)).append("\n");
 
-            builder.append(GOLD).append(I18n.format("gui.bc.capacity.txt")).append(" ").append(GRAY).append(capString).append("\n");
-            builder.append(GOLD).append(I18n.format("gui.bc.stored.txt")).append(" ").append(GRAY).append(storedString).append(percent).append("\n");
+            builder.append(GOLD).append(i18ni("capacity")).append(" ").append(GRAY).append(capString).append("\n");
+            builder.append(GOLD).append(i18ni("stored")).append(" ").append(GRAY).append(storedString).append(percent).append("\n");
 
             IOInfo ioInfo = getIOInfo();
             if (ioInfo != null) {
                 if (shift) {
-                    builder.append(GOLD).append(I18n.format("gui.bc.input.txt")).append(" ").append(GREEN).append("+").append(Utils.formatNumber(ioInfo.currentInput()));
+                    builder.append(GOLD).append(i18ni("input")).append(" ").append(GREEN).append("+").append(Utils.formatNumber(ioInfo.currentInput()));
                     builder.append(" ").append(suffix).append("/t\n");
 
-                    builder.append(GOLD).append(I18n.format("gui.bc.output.txt")).append(" ").append(RED).append("-").append(Utils.formatNumber(ioInfo.currentOutput()));
+                    builder.append(GOLD).append(i18ni("output")).append(" ").append(RED).append("-").append(Utils.formatNumber(ioInfo.currentOutput()));
                     builder.append(" ").append(suffix).append("/t\n");
-                }
-                else {
+                } else {
                     long io = ioInfo.currentInput() - ioInfo.currentOutput();
-                    builder.append(GOLD).append(I18n.format("gui.bc.io.txt")).append(" ").append(io > 0 ? GREEN + "+" : io < 0 ? RED : GRAY);
+                    builder.append(GOLD).append(i18ni("io")).append(" ").append(io > 0 ? GREEN + "+" : io < 0 ? RED : GRAY);
                     builder.append(Utils.formatNumber(io)).append(" ").append(suffix).append("/t\n");
                 }
             }
@@ -218,49 +312,27 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
         return super.onUpdate();
     }
 
-    public void bindShader() {
-        try {
-//            if (useShaders()) {
-//                ShaderProgram shader;
-//                if (horizontal) {
-//                    if (shaderProgramH == null) {
-//                        shaderProgramH = new ShaderProgram();
-//                        shaderProgramH.attachShader(BCShaders.energyBarH);
-//                        shaderProgramH.attachShader(BCShaders.commonVert);
-//                    }
-//                    shader = shaderProgramH;
-//                }
-//                else {
-//                    if (shaderProgram == null) {
-//                        shaderProgram = new ShaderProgram();
-//                        shaderProgram.attachShader(BCShaders.energyBar);
-//                        shaderProgram.attachShader(BCShaders.commonVert);
-//                    }
-//                    shader = shaderProgram;
-//                }
-//                Rectangle rect = toScreenSpace(xPos() + 1, yPos() + 1, xSize() - 2, ySize() - 2);
-//
-//                shader.useShader(cache -> {
-//                    cache.glUniform1F("time", BCClientEventHandler.elapsedTicks / 10F);
-//                    cache.glUniform1F("charge", getSOC());
-//                    cache.glUniform2I("ePos", rect.x, rect.y);
-//                    cache.glUniform2I("eSize", rect.width, rect.height);
-//                    cache.glUniform2I("screenSize", displayWidth(), displayHeight());
-//                });
-//            }
-        }
-        catch (Throwable e) {
-            e.printStackTrace();
+
+    public void bindShader(ShaderProgram program) {
+        if (useShaders()) {
+            Rectangle rect = toScreenSpace(xPos() + 1, yPos() + 1, xSize() - 2, ySize() - 2);
+            UniformCache uniforms = program.pushCache();
+            uniforms.glUniform1f("charge", getSOC());
+            uniforms.glUniform2i("ePos", rect.x, rect.y);
+            uniforms.glUniform2i("eSize", rect.width, rect.height);
+            uniforms.glUniform2i("screenSize", displayWidth(), displayHeight());
+            program.use();
+            program.popCache(uniforms);
         }
     }
 
-    public void releaseShader() {
+    public void releaseShader(ShaderProgram program) {
         if (useShaders()) {
-//            shaderProgram.releaseShader();
+            program.release();
         }
     }
 
     public boolean useShaders() {
-        return !rfMode && BCShaders.useShaders();
+        return !rfMode && shaderEnabled.get() && BCShaders.useShaders();
     }
 }

@@ -5,17 +5,12 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.TextFormatting;
@@ -648,7 +643,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         RenderMaterial mat = BCSprites.getButton(getRenderState(hovered));
-        IVertexBuilder builder = mat.getBuffer(getter, location -> BCSprites.guiTexType);
+        IVertexBuilder builder = mat.getBuffer(getter, location -> BCSprites.GUI_TEX_TYPE);
         drawDynamicSprite(builder, mat.getSprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
         getter.finish();
     }

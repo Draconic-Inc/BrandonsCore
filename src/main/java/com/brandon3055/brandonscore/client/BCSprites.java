@@ -42,7 +42,7 @@ public class BCSprites {
 //            .build(false)
 //    );
 
-    public static final RenderType guiTexType = RenderType.makeType("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+    public static final RenderType GUI_TEX_TYPE = RenderType.makeType("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
             .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
             .cull(RenderState.CULL_DISABLED)
@@ -108,9 +108,11 @@ public class BCSprites {
         register(MODID, "item_charge/btn_right_charge");
         register(MODID, "item_charge/btn_right_discharge");
         register(MODID, "item_charge/btn_right_disabled");
+        register(MODID, "item_charge/btn_right_both");
         register(MODID, "item_charge/btn_vertical_charge");
         register(MODID, "item_charge/btn_vertical_discharge");
         register(MODID, "item_charge/btn_vertical_disabled");
+        register(MODID, "item_charge/btn_vertical_both");
         register(MODID, "item_charge/horizontal_charge");
         register(MODID, "item_charge/horizontal_discharge");
         register(MODID, "item_charge/right_charge");
@@ -121,6 +123,8 @@ public class BCSprites {
         register(MODID, "bars/food_empty");
         register(MODID, "bars/food_half");
         register(MODID, "bars/food_full");
+        register(MODID, "bars/energy_empty");
+        register(MODID, "bars/energy_full");
     }
 
     //region register
@@ -170,10 +174,6 @@ public class BCSprites {
     public static Supplier<RenderMaterial> getter(String location) {
         return () -> get(MODID, location);
     }
-
-
-
-
 
     public static RenderMaterial getButton(int state) {
         return getThemed(state == 1 ? "button" : state == 2 ? "button_highlight" : "button_disabled");

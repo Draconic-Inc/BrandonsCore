@@ -278,16 +278,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //endregion
 
+    @Override
     public boolean propagatesSkylightDown(BlockState state, IBlockReader reader, BlockPos pos) {
         return !isBlockFullCube();
-    }
-
-    public boolean causesSuffocation(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return isBlockFullCube();
-    }
-
-    public boolean isNormalCube(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return isBlockFullCube();
     }
 
     //Utils

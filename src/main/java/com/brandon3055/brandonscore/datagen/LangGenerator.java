@@ -10,9 +10,57 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 /**
  * Created by brandon3055 on 21/5/20.
  */
+//@formatter:off
 public class LangGenerator extends LanguageProvider {
     public LangGenerator(DataGenerator gen) {
         super(gen, MODID, "en_us");
+    }
+
+    private void addModularGui(PrefixHelper helper) {
+        helper.setPrefix("mod_gui.brandonscore.energy_bar");
+        helper.add("operational_potential"                  ,"Operational Potential");
+        helper.add("op"                                     ,"OP");
+        helper.add("rf"                                     ,"RF");
+        helper.add("capacity"                               ,"Capacity");
+        helper.add("stored"                                 ,"Stored");
+        helper.add("input"                                  ,"Input");
+        helper.add("output"                                 ,"Output");
+        helper.add("io"                                     ,"I/O");
+    }
+
+    private void addGuiToolkit(PrefixHelper helper) {
+        helper.setPrefix("gui_tkt.brandonscore");
+        helper.add("theme.light"                                   ,"Light Theme");
+        helper.add("theme.dark"                                    ,"Dark Theme");
+        helper.add("info_panel"                                    ,"Display additional information");
+        helper.add("rs_mode.always_active"                         ,"Always active");
+        helper.add("rs_mode.active_high"                           ,"Active with redstone signal");
+        helper.add("rs_mode.active_low"                            ,"Active without redstone signal");
+        helper.add("rs_mode.never_active"                          ,"Never active");
+        helper.add("large_view"                                    ,"Large View");
+        helper.add("large_view.close"                              ,"Click outside or press Esc to close");
+        helper.add("your_inventory"                                ,"Inventory");
+    }
+
+    private void addMisc(PrefixHelper helper) {
+        helper.setPrefix("op.brandonscore");
+        helper.add("operational_potential"                  ,"Operational Potential");
+        helper.add("op"                                     ,"OP");
+        helper.add("charge"                                 ,"Charge");
+        helper.add("op_capacity"                            ,"OP Capacity");
+        helper.add("op_stored"                              ,"OP Stored");
+//        helper.add("op_max_receive"                         ,"Draconic Evolution Blocks");
+//        helper.add("op_max_extract"                         ,"Draconic Evolution Blocks");
+        helper.add("op_transfer"                            ,"OP Transfer");
+    }
+
+
+    @Override
+    protected void addTranslations() {
+        PrefixHelper helper = new PrefixHelper(this);
+        addModularGui(helper);
+        addGuiToolkit(helper);
+        addMisc(helper);
     }
 
     @Override
@@ -25,58 +73,28 @@ public class LangGenerator extends LanguageProvider {
         if (key != null)super.add(key, name);
     }
 
-    @Override
-    protected void addTranslations() {
-        //@formatter:off
+    public static class PrefixHelper {
+        private LangGenerator generator;
+        private String prefix;
 
-        //region # Gui's and related translations
-//        add("gui.draconicevolution.item_config.show_unavailable"                            ,"Show unavailable");
+        public PrefixHelper(LangGenerator generator) {
+            this.generator = generator;
+        }
 
+        public void setPrefix(String prefix) {
+            this.prefix = prefix + ".";
+        }
 
-        //endregion
+        public void add(String translationKey, String translation) {
+            generator.add(prefix + translationKey, translation);
+        }
 
+        public void add(Block key, String name) {
+            if (key != null) generator.add(key, name);
+        }
 
-
-
-        //region general energy
-        add("op.brandonscore.operational_potential"                                             ,"Operational Potential");
-        add("op.brandonscore.op"                                                                ,"OP");
-        add("op.brandonscore.charge"                                                            ,"Charge");
-        add("op.brandonscore.op_capacity"                                                       ,"OP Capacity");
-        add("op.brandonscore.op_stored"                                                         ,"OP Stored");
-//        add("op.brandonscore.op_max_receive"                                                    ,"Draconic Evolution Blocks");
-//        add("op.brandonscore.op_max_extract"                                                    ,"Draconic Evolution Blocks");
-        add("op.brandonscore.op_transfer"                                                       ,"OP Transfer");
-
-
-
-
-        //endergion
-
-        //region # Misc
-//        add("itemGroup.draconicevolution.blocks"                                            ,"Draconic Evolution Blocks");
-//        add("itemGroup.draconicevolution.items"                                             ,"Draconic Evolution Items");
-//        add("itemGroup.draconicevolution.modules"                                           ,"Draconic Evolution Modules");
-
-
-
-        //endregion
-
-        //# Gui Toolkit
-        add("gui.brandonscore.theme.light",                                                     "Light Theme");
-        add("gui.brandonscore.theme.dark",                                                      "Dark Theme");
-        add("gui.brandonscore.info_panel",                                                      "Display additional information");
-        add("gui.brandonscore.rs_mode.always_active",                                           "Always active");
-        add("gui.brandonscore.rs_mode.active_high",                                             "Active with redstone signal");
-        add("gui.brandonscore.rs_mode.active_low",                                              "Active without redstone signal");
-        add("gui.brandonscore.rs_mode.never_active",                                            "Never active");
-        add("gui.brandonscore.large_view",                                                      "Large View");
-        add("gui.brandonscore.large_view.close",                                                "Click outside or press Esc to close");
-        add("gui.brandonscore.your_inventory",                                                  "Inventory");
-
-
-        //temp
-
-        //@formatter:on
+        public void add(Item key, String name) {
+            if (key != null) generator.add(key, name);
+        }
     }
 }

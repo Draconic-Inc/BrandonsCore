@@ -96,6 +96,10 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
 
     @Override
     public ItemStack transferStackInSlot(PlayerEntity player, int i) {
+        int playerSlots = 36;
+        if (slotLayout != null) {
+            playerSlots = slotLayout.getPlayerSlotCount();
+        }
         LazyOptional<IItemHandler> optional = getItemHandler();
         if (optional.isPresent()) {
             IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
@@ -106,13 +110,13 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
                 ItemStack result = stack.copy();
 
                 //Transferring from tile to player
-                if (i >= 36) {
-                    if (!mergeItemStack(stack, 0, 36, false)) {
+                if (i >= playerSlots) {
+                    if (!mergeItemStack(stack, 0, playerSlots, false)) {
                         return ItemStack.EMPTY; //Return if failed to merge
                     }
                 } else {
                     //Transferring from player to tile
-                    if (!mergeItemStack(stack, 36, 36 + handler.getSlots(), false)) {
+                    if (!mergeItemStack(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
                         return ItemStack.EMPTY;  //Return if failed to merge
                     }
                 }

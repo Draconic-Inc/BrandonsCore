@@ -8,7 +8,6 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
-import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -26,7 +25,8 @@ public class TileItemStackHandler extends ItemStackHandler {
     private Consumer<Integer> contentsChangeListener = null;
     private Map<Integer, Predicate<ItemStack>> slotValidators = new HashMap<>();
     private ItemStack prevStack = ItemStack.EMPTY;
-    private Supplier<Integer> stackLimit = null;
+    private Supplier<Integer> perSlotLimit = null;
+    private int slotLimit = 64;
 
 
     public TileItemStackHandler() {
@@ -40,24 +40,39 @@ public class TileItemStackHandler extends ItemStackHandler {
         super(stacks);
     }
 
-    public void setStackValidator(BiPredicate<Integer, ItemStack> stackValidator) {
+    public TileItemStackHandler setStackValidator(BiPredicate<Integer, ItemStack> stackValidator) {
         this.stackValidator = stackValidator;
+        return this;
     }
 
-    public void setSlotValidator(int slot, Predicate<ItemStack> validator) {
+    public TileItemStackHandler setStackValidator(Predicate<ItemStack> stackValidator) {
+        this.stackValidator = (integer, stack) -> stackValidator.test(stack);
+        return this;
+    }
+
+    public TileItemStackHandler setSlotValidator(int slot, Predicate<ItemStack> validator) {
         slotValidators.put(slot, validator);
+        return this;
     }
 
-    public void setLoadListener(Runnable loadListener) {
+    public TileItemStackHandler setLoadListener(Runnable loadListener) {
         this.loadListener = loadListener;
+        return this;
     }
 
-    public void setContentsChangeListener(Consumer<Integer> contentsChangeListener) {
+    public TileItemStackHandler setContentsChangeListener(Consumer<Integer> contentsChangeListener) {
         this.contentsChangeListener = contentsChangeListener;
+        return this;
     }
 
-    public void setStackLimit(Supplier<Integer> stackLimit) {
-        this.stackLimit = stackLimit;
+    public TileItemStackHandler setPerSlotLimit(Supplier<Integer> perSlotLimit) {
+        this.perSlotLimit = perSlotLimit;
+        return this;
+    }
+
+    public TileItemStackHandler setSlotLimit(int slotLimit) {
+        this.slotLimit = slotLimit;
+        return this;
     }
 
     @Nonnull
@@ -139,7 +154,7 @@ public class TileItemStackHandler extends ItemStackHandler {
 
     @Override
     public int getSlotLimit(int slot) {
-        return stackLimit == null ? super.getSlotLimit(slot) : stackLimit.get();
+        return perSlotLimit == null ? slotLimit : perSlotLimit.get();
     }
 }
 
