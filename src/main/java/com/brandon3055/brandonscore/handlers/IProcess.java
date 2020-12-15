@@ -5,7 +5,7 @@ package com.brandon3055.brandonscore.handlers;
  */
 public interface IProcess {
 
-    public void updateProcess();
+    void updateProcess();
 
-    public boolean isDead();
+    boolean isDead();
 }

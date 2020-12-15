@@ -32,6 +32,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -2676,6 +2677,27 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     /**
+     * Simply draws a string with the given colour and no shadow.
+     */
+    public float drawString(BCFontRenderer fontRenderer, ITextComponent text, float x, float y, int colour) {
+        return drawString(fontRenderer, text, x, y, colour, false);
+    }
+
+    /**
+     * Draws a string with the given colour and optional shadow.
+     */
+    public float drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int colour, boolean dropShadow) {
+        IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+        MatrixStack textStack = new MatrixStack();
+        textStack.translate(0.0D, 0.0D, getRenderZLevel());
+        Matrix4f textLocation = textStack.getLast().getMatrix();
+//        float i = fontRenderer.func_238426_c_(text.func_241878_f(), x, y, colour, false, textLocation, renderType, true, 0, 15728880);
+        float i = fontRenderer.func_238424_b_(text.func_241878_f(), x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
+        renderType.finish();
+        return i;
+    }
+
+    /**
      * Draws a centered string
      */
     public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
@@ -2806,18 +2828,19 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight) {
-        drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
+        drawHoveringTextString(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
     }
 
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font) {
-        drawHoveringText(textLines, mouseX, mouseY, font, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX));
+    @Deprecated
+    public void drawHoveringTextString(List<String> textLines, int mouseX, int mouseY, FontRenderer font) {
+        drawHoveringTextString(textLines, mouseX, mouseY, font, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX));
     }
 
     /**
      * This is almost an exact copy of forges code except it respects zLevel.
      */
     @Deprecated
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
+    public void drawHoveringTextString(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
         font = mc.fontRenderer;
         if (!textLines.isEmpty()) {
             RenderSystem.disableRescaleNormal();
@@ -2937,12 +2960,17 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
+    public void drawHoveringText(List<ITextComponent> textLines, int mouseX, int mouseY, FontRenderer font) {
+        drawHoveringText(ItemStack.EMPTY, textLines, mouseX, mouseY, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX), font);
+    }
+
+
     /**
      * Forges drawHoveringText for drawing item tool tips. Modified to work with the modular GUI system.
      * My only concern with implementing forge events in the modular gui system is that other mods may try to replace this call with their own renderer
      * which in the context of a modular gui would probably break.
      */
-    public void drawHoveringText(@Nonnull final ItemStack stack, List<ITextComponent> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, BCFontRenderer font) {
+    public void drawHoveringText(@Nonnull final ItemStack stack, List<ITextComponent> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FontRenderer font) {
         if (!textLines.isEmpty()) {
             RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, new MatrixStack(), mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
             if (MinecraftForge.EVENT_BUS.post(event)) {
@@ -3033,7 +3061,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 tooltipY = screenHeight - tooltipHeight - 6;
             }
 
-            zOffset++;
+            double renderOffset = 800 - getRenderZLevel();
+            zOffset += renderOffset;
             final int backgroundColor = 0xF0100010;
             drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
             drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
@@ -3052,7 +3081,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
             for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
                 ITextComponent line = textLines.get(lineNumber);
-                drawString(font, line.getString(), (float) tooltipX, (float) tooltipY, -1, true);
+                drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
 
                 if (lineNumber + 1 == titleLinesCount) {
                     tooltipY += 2;
@@ -3061,7 +3090,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 tooltipY += 10;
             }
 
-            zOffset--;
+            zOffset -= renderOffset;
 
             MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, new MatrixStack(), tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
 
