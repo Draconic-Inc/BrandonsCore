@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore;
 
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
@@ -9,11 +8,11 @@ import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.animation.ITimeValue;
 import net.minecraftforge.common.model.animation.IAnimationStateMachine;
@@ -86,9 +85,11 @@ public class CommonProxy {
         return null;
     }
 
-    public void setChatAtIndex(ITextComponent chat, int index) {
-
-    }
+//    public void setChatAtIndex(ITextComponent chat, int index) {
+//
+//        getClientPlayer().sendMessage();
+//
+//    }
 
     public void addProcess(IProcess iProcess) {
         ProcessHandler.addProcess(iProcess);
@@ -114,4 +115,7 @@ public class CommonProxy {
         return TimeKeeper.getServerTick();
     }
 
+    public void sendIndexedMessage(PlayerEntity player, ITextComponent message, int index) {
+        BCoreNetwork.sendIndexedMessage((ServerPlayerEntity) player, message, index);
+    }
 }

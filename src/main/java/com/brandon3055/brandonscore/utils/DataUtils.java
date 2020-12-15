@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.util.ArrayUtils;
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.*;
@@ -329,5 +330,14 @@ public class DataUtils {
         Set<T> returnSet = new HashSet<>();
         for (Set<T> set : sets) returnSet.addAll(set);
         return returnSet;
+    }
+
+    public static <T> boolean contains(Iterable<T> heldEquipment, T test) {
+        for (T t : heldEquipment) {
+            if (t == test) {
+                return true;
+            }
+        }
+        return false;
     }
 }

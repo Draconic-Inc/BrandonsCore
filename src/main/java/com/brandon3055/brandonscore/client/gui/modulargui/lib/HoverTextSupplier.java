@@ -17,6 +17,9 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
     default List<String> getHoverText(E element) {
         Object hoverText = getText(element);
         if (hoverText instanceof String) {
+            if (((String) hoverText).isEmpty()) {
+                return Collections.emptyList();
+            }
             if (((String) hoverText).contains("\n")) {
                 return Arrays.asList(((String) hoverText).split("\n"));
             }
@@ -31,7 +34,7 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
         else if (hoverText instanceof ITextComponent) {
             return Collections.singletonList(((ITextComponent) hoverText).getString());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     static List<String> splitNewLines(Collection<String> collection) {

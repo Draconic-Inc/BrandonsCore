@@ -172,7 +172,7 @@ public class BCUtilCommands {
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.message(player, s, TextFormatting.GOLD));
+        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new StringTextComponent(s).mergeStyle(TextFormatting.GOLD)));
         return 0;
     }
 

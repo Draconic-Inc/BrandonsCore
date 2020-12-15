@@ -133,15 +133,6 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void setChatAtIndex(ITextComponent chat, int index) {
-        if (chat == null) {
-            Minecraft.getInstance().ingameGUI.getChatGUI().deleteChatLine(index);
-        } else {
-            Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(chat, index);
-        }
-    }
-
-    @Override
     public void addProcess(IProcess iProcess) {
         ProcessHandlerClient.addProcess(iProcess);
     }
@@ -170,5 +161,14 @@ public class ClientProxy extends CommonProxy {
     @Override
     public int tickTimer() {
         return TimeKeeper.getClientTick();
+    }
+
+    @Override
+    public void sendIndexedMessage(PlayerEntity player, ITextComponent message, int index) {
+        if (message == null) {
+            Minecraft.getInstance().ingameGUI.getChatGUI().deleteChatLine(index);
+        } else {
+            Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(message, index);
+        }
     }
 }

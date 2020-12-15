@@ -2,184 +2,117 @@ package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.event.world.BlockEvent;
+import sun.rmi.log.LogHandler;
 
 /**
- * Created by brandon3055 on 28/11/2016.
+ * Created by brandon3055 on 15/12/2020.
  * This is just a simple helper class for chat messages.
  */
-@Deprecated //This is just too much crap that never gets used. Not sure what i am going to do about it yet.
-            //Think i will just add a proxy method that can serialize ITextComponents for indexing client side.
 public class ChatHelper {
 
-    //region Translation
-
-    public static void tranServer(PlayerEntity player, String unlocalizedMessage, Object... args) {
-        if (!player.getEntityWorld().isRemote) {
-            translate(player, unlocalizedMessage, args);
-        }
+    /**
+     * Dead simple method for sending a message to the player.
+     *
+     * @param player  The player.
+     * @param message The message.
+     */
+    public static void sendMessage(PlayerEntity player, ITextComponent message) {
+        player.sendMessage(message, Util.DUMMY_UUID);
     }
 
-    public static void tranServer(PlayerEntity player, String unlocalizedMessage, TextFormatting colour, Object... args) {
-        if (!player.getEntityWorld().isRemote) {
-            translate(player, unlocalizedMessage, colour, args);
-        }
+    /**
+     * This uses some trickery to send a message to the player using a specific index which means.
+     * These messages will show up as normal however sending new messages with the same index will overwrite the
+     * previous rather than adding a new message to the chat history. All messages sent to the same index will show up as if they
+     * are new messages but the previous will no longer show in chat history.
+     * <p>
+     * This is use full when for example clicking a block adjusts some setting and you want to show the new value in chat without spamming the chat
+     * as the user cycles though functions.
+     * <p>
+     * For the index just pick a number between -1000, and +1000. This will be converted to something outside the rage typically used by minecraft.
+     * You can use the same index for everything or use different indexes for different application. Its up to you.
+     *
+     * @param player  The player.
+     * @param message The message
+     * @param index   message index.
+     */
+    public static void sendIndexed(PlayerEntity player, ITextComponent message, int index) {
+        //0xE3055000 is an arbitrary number. Combine that with the relatively limited range and chances if my indexes conflicting with
+        //another mod doing something similar are pretty low. But even if there is a conflict its hardly a game breaking issue. 
+        if (index < -1000 || index > 1000) LogHelperBC.bigWarn("Message index is out of bounds. Message: " + message.getString());
+        BrandonsCore.proxy.sendIndexedMessage(player, message, index + 0xE3055000);
     }
 
-    public static void tranServer(PlayerEntity player, String unlocalizedMessage, Style style, Object... args) {
-        if (!player.getEntityWorld().isRemote) {
-            translate(player, unlocalizedMessage, style, args);
-        }
-    }
-
-    public static void tranClient(PlayerEntity player, String unlocalizedMessage, Object... args) {
-        if (player.getEntityWorld().isRemote) {
-            translate(player, unlocalizedMessage, args);
-        }
-    }
-
-    public static void tranClient(PlayerEntity player, String unlocalizedMessage, TextFormatting colour, Object... args) {
-        if (player.getEntityWorld().isRemote) {
-            translate(player, unlocalizedMessage, colour, args);
-        }
-    }
-
-    public static void tranClient(PlayerEntity player, String unlocalizedMessage, Style style, Object... args) {
-        if (player.getEntityWorld().isRemote) {
-            translate(player, unlocalizedMessage, style, args);
-        }
-    }
-
-    public static void translate(PlayerEntity player, String unlocalizedMessage, Object... args) {
-        player.sendMessage(new TranslationTextComponent(unlocalizedMessage, args), Util.DUMMY_UUID);
-    }
-
-    public static void translate(PlayerEntity player, String unlocalizedMessage, TextFormatting colour, Object... args) {
-        player.sendMessage(new TranslationTextComponent(unlocalizedMessage, args).mergeStyle(colour), Util.DUMMY_UUID);
-    }
-
-    public static void translate(PlayerEntity player, String unlocalizedMessage, Style style, Object... args) {
-        player.sendMessage(new TranslationTextComponent(unlocalizedMessage, args).setStyle(style), Util.DUMMY_UUID);
-    }
-
-    public static void indexedTrans(PlayerEntity player, String unlocalizedMessage, int index, Object... args) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(unlocalizedMessage, args), index);
-        }
-        else if (player instanceof ServerPlayerEntity){
-            BCoreNetwork.sendIndexedLocalizedChat((ServerPlayerEntity) player, unlocalizedMessage, index);
+    /**
+     * For situations where this code will be called on both the client and the server. This ensures the message is not duplicated.
+     * This only sends the server side message since the server is usually the one calling the shots.
+     * 
+     * If the client side message is what you want then use {@link #sendDeDupeMessageClient(PlayerEntity, ITextComponent)}
+     * 
+     * @param player  The player.
+     * @param message The message.
+     */
+    public static void sendDeDupeMessage(PlayerEntity player, ITextComponent message) {
+        if (player instanceof ServerPlayerEntity) {
+            sendMessage(player, message);
         }
     }
 
     /**
-     * Client side use only!
+     * For situations where this code will be called on both the client and the server. This ensures the message is not duplicated.
+     * This only sends the server side message since the server is usually the one calling the shots.
+     * 
+     * If the client side message is what you want then use {@link #sendDeDupeIndexedClient(PlayerEntity, ITextComponent, int)}
+     * 
+     * @param player  The player.
+     * @param message The message
+     * @param index   message index.
+     * @see #sendIndexed(PlayerEntity, ITextComponent, int) 
      */
-    public static void indexedTrans(PlayerEntity player, String unlocalizedMessage, TextFormatting colour, Object... args) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(unlocalizedMessage, args).mergeStyle(colour), -330553055);
+    public static void sendDeDupeIndexed(PlayerEntity player, ITextComponent message, int index) {
+        if (player instanceof ServerPlayerEntity) {
+            sendIndexed(player, message, index);
+        }
+    }
+
+
+    /**
+     * For situations where this code will be called on both the client and the server. This ensures the message is not duplicated.
+     * this only sends the client side message.
+     *
+     * @param player  The player.
+     * @param message The message.
+     */
+    public static void sendDeDupeMessageClient(PlayerEntity player, ITextComponent message) {
+        if (player instanceof ClientPlayerEntity) {
+            sendMessage(player, message);
         }
     }
 
     /**
-     * Client side use only!
+     * For situations where this code will be called on both the client and the server. This ensures the message is not duplicated.
+     * this only sends the client side message.
+     *
+     * 
+     * @param player  The player.
+     * @param message The message
+     * @param index   message index.
+     * @see #sendIndexed(PlayerEntity, ITextComponent, int)
      */
-    public static void indexedTrans(PlayerEntity player, String unlocalizedMessage, Style style, Object... args) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(unlocalizedMessage, args).setStyle(style), -330553055);
-        }
-
-    }
-
-    //endregion
-
-    //region nonTranslation
-
-    public static void msgServer(PlayerEntity player, String message) {
-        if (!player.getEntityWorld().isRemote) {
-            message(player, message);
+    public static void sendDeDupeIndexedClient(PlayerEntity player, ITextComponent message, int index) {
+        if (player instanceof ClientPlayerEntity) {
+            sendIndexed(player, message, index);
         }
     }
-
-    public static void msgServer(PlayerEntity player, String message, TextFormatting colour) {
-        if (!player.getEntityWorld().isRemote) {
-            message(player, message, colour);
-        }
-    }
-
-    public static void msgServer(PlayerEntity player, String message, Style style) {
-        if (!player.getEntityWorld().isRemote) {
-            message(player, message, style);
-        }
-    }
-
-    public static void msgClient(PlayerEntity player, String message) {
-        if (player.getEntityWorld().isRemote) {
-            message(player, message);
-        }
-    }
-
-    public static void msgClient(PlayerEntity player, String message, TextFormatting colour) {
-        if (player.getEntityWorld().isRemote) {
-            message(player, message, colour);
-        }
-    }
-
-    public static void msgClient(PlayerEntity player, String message, Style style) {
-        if (player.getEntityWorld().isRemote) {
-            message(player, message, style);
-        }
-    }
-
-    public static void message(PlayerEntity player, String message) {
-        player.sendMessage(new TranslationTextComponent(message), Util.DUMMY_UUID);
-    }
-
-    public static void message(PlayerEntity player, String message, TextFormatting colour) {
-        player.sendMessage(new TranslationTextComponent(message).mergeStyle(colour), Util.DUMMY_UUID);
-    }
-
-    public static void message(PlayerEntity player, String message, Style style) {
-        player.sendMessage(new TranslationTextComponent(message).setStyle(style), Util.DUMMY_UUID);
-    }
-
-    public static void indexedMsg(PlayerEntity player, String message, int index) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(message), index);
-        }
-    }
-
-    /**
-     * Client side use only!
-     */
-    public static void indexedMsg(PlayerEntity player, String message) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(message), 0xec4c2921);
-        }
-    }
-
-    /**
-     * Client side use only!
-     */
-    public static void indexedMsg(PlayerEntity player, String message, TextFormatting colour) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(message).mergeStyle(colour), -330553055);
-        }
-    }
-
-    /**
-     * Client side use only!
-     */
-    public static void indexedMsg(PlayerEntity player, String message, Style style) {
-        if (player.getEntityWorld().isRemote) {
-            BrandonsCore.proxy.setChatAtIndex(new TranslationTextComponent(message).setStyle(style), -330553055);
-        }
-    }
-
-    //endregion
 }
 

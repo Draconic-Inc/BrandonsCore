@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.network.event.EventNetworkChannel;
 
 /**
@@ -24,7 +25,7 @@ public class BCoreNetwork {
     public static final int C_NO_CLIP = 4;
     public static final int C_PLAYER_ACCESS = 5;
     public static final int C_PLAYER_ACCESS_UPDATE = 6;
-    public static final int C_INDEXED_LOCALIZED_CHAT = 7;
+    public static final int C_INDEXED_MESSAGE = 7;
     public static final int C_TILE_CAP_DATA = 8;
     //Client to server
     public static final int S_TILE_MESSAGE = 1;
@@ -66,9 +67,9 @@ public class BCoreNetwork {
         packet.sendToServer();
     }
 
-    public static void sendIndexedLocalizedChat(ServerPlayerEntity player, String unlocalizedText, int index) {
-        PacketCustom packet = new PacketCustom(CHANNEL, C_INDEXED_LOCALIZED_CHAT);
-        packet.writeString(unlocalizedText);
+    public static void sendIndexedMessage(ServerPlayerEntity player, ITextComponent message, int index) {
+        PacketCustom packet = new PacketCustom(CHANNEL, C_INDEXED_MESSAGE);
+        packet.writeTextComponent(message);
         packet.writeInt(index);
         packet.sendToPlayer(player);
     }

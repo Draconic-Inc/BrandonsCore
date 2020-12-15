@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
@@ -62,8 +63,8 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                     gui.dimension = packet.readInt();
                 }
                 break;
-            case BCoreNetwork.C_INDEXED_LOCALIZED_CHAT:
-                ChatHelper.indexedMsg(mc.player, I18n.format(packet.readString()), packet.readInt());
+            case BCoreNetwork.C_INDEXED_MESSAGE:
+                BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), packet.readInt());
                 break;
             case BCoreNetwork.C_TILE_CAP_DATA:
                 BlockPos pos = packet.readPos();
