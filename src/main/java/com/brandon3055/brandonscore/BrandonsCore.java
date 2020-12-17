@@ -1,18 +1,16 @@
 package com.brandon3055.brandonscore;
 
-import codechicken.lib.util.SneakyUtils;
 import com.brandon3055.brandonscore.client.ClientProxy;
 import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTPX;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.worldentity.WorldEntityHandler;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,16 +22,12 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
-
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 
 
 @Mod(BrandonsCore.MODID)
@@ -66,12 +60,15 @@ public class BrandonsCore {
             }
         }
 
-        proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
+        proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
         proxy.construct();
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
+
         MinecraftForge.EVENT_BUS.addListener(BrandonsCore::registerCommands);
         MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
         MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
+
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(WorldEntityHandler::createRegistry);
 
         ModLoadingContext modLoadingContext = ModLoadingContext.get();
         modLoadingContext.registerConfig(ModConfig.Type.CLIENT, BCConfig.CLIENT_SPEC);
@@ -123,6 +120,7 @@ public class BrandonsCore {
 
     public static void onServerStop(FMLServerStoppedEvent event) {
         ProcessHandler.clearHandler();
+        WorldEntityHandler.serverStopped();
     }
 
 //
