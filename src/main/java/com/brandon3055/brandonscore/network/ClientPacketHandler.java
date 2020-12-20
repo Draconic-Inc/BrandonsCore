@@ -12,6 +12,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 
 public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHandler {
@@ -43,8 +45,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 boolean enable = packet.readBoolean();
                 if (enable) {
                     BCEventHandler.noClipPlayers.add(mc.player.getUniqueID());
-                }
-                else {
+                } else {
                     BCEventHandler.noClipPlayers.add(mc.player.getUniqueID());
                 }
                 break;
@@ -73,6 +74,20 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                     ((TileBCore) tile).getCapManager().receiveCapSyncData(packet);
                 }
                 break;
+            case BCoreNetwork.C_PLAY_SOUND:
+                handlePlaySound(packet, mc);
+                break;
         }
+    }
+
+    private static void handlePlaySound(PacketCustom packet, Minecraft mc) {
+        if (mc.world == null) return;
+        BlockPos pos = packet.readPos();
+        SoundEvent sound = packet.readRegistryId();
+        SoundCategory category = SoundCategory.values()[packet.readVarInt()];
+        float volume = packet.readFloat();
+        float pitch = packet.readFloat();
+        boolean distanceDelay = packet.readBoolean();
+        mc.world.playSound(pos, sound, category, volume, pitch, distanceDelay);
     }
 }

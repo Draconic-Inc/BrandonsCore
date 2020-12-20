@@ -7,7 +7,13 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.fml.network.event.EventNetworkChannel;
 
 /**
@@ -27,6 +33,7 @@ public class BCoreNetwork {
     public static final int C_PLAYER_ACCESS_UPDATE = 6;
     public static final int C_INDEXED_MESSAGE = 7;
     public static final int C_TILE_CAP_DATA = 8;
+    public static final int C_PLAY_SOUND = 9;
     //Client to server
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
@@ -75,6 +82,20 @@ public class BCoreNetwork {
     }
 
 
+    public static void sendSound(World world, int x, int y, int z, SoundEvent sound, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
+        sendSound(world, new BlockPos(x, y, z), sound, category, volume, pitch, distanceDelay);
+    }
+
+    public static void sendSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
+        PacketCustom packet = new PacketCustom(CHANNEL, C_PLAY_SOUND);
+        packet.writePos(pos);
+        packet.writeRegistryId(sound);
+        packet.writeVarInt(category.ordinal());
+        packet.writeFloat(volume);
+        packet.writeFloat(pitch);
+        packet.writeBoolean(distanceDelay);
+        packet.sendToChunk(world, pos);
+    }
 
 
     public static void init() {
