@@ -32,6 +32,7 @@ import org.lwjgl.glfw.GLFW;
 
 @Mod(BrandonsCore.MODID)
 public class BrandonsCore {
+    public static final Logger LOGGER = LogManager.getLogger("BrandonsCore"); //TODO going to slowly transition everything to this.
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
     public static final String VERSION = "${mod_version}";

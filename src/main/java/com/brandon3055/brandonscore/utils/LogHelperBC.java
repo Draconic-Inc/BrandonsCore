@@ -17,6 +17,7 @@ import java.util.Set;
  * Created by covers1624 on 3/21/2016.
  * Covers gave me permission to use this. In fact he FORCED me to use it!!!
  */
+@Deprecated //Want to transition everything over to {@link BrandonsCore#LOGGER}
 public class LogHelperBC {
 
     public static Logger logger = LogManager.getLogger(BrandonsCore.MODID);

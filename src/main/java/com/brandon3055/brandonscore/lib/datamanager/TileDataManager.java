@@ -178,7 +178,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
 
     @Override
     public void markDirty() {
-        if (!tile.getWorld().isRemote) {
+        if (tile.getWorld() != null && !tile.getWorld().isRemote) {
             tile.markDirty();
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncOnSet && data.isDirty(true)) {

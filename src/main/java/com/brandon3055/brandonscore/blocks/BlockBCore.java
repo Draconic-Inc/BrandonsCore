@@ -248,8 +248,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     //region Mob Resistance
 
-    public void setMobResistant(boolean mobResistant) {
-        isMobResistant = mobResistant;
+    public BlockBCore setMobResistant() {
+        isMobResistant = true;
+        return this;
     }
 
     @Override
