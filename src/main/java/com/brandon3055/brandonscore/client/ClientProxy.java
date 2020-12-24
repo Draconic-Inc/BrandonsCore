@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client;
 
+import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.api.TimeKeeper;
@@ -21,6 +22,7 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
@@ -170,5 +172,15 @@ public class ClientProxy extends CommonProxy {
         } else {
             Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(message, index);
         }
+    }
+
+    @Override
+    public void setClipboardString(String text) {
+        Minecraft.getInstance().keyboardListener.setClipboardString(text);
+    }
+
+    @Override
+    public void sendToServer(PacketCustom packet) {
+        packet.sendToServer();
     }
 }

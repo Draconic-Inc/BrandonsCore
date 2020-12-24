@@ -59,6 +59,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
      */
     public GuiEntityFilter(EntityFilter entityFilter) {
         this.entityFilter = entityFilter;
+        this.elementTranslationExt = "entity_filter";
     }
 
     public void setNodeBackgroundBuilder(Supplier<GuiElement> nodeBackgroundBuilder) {
@@ -105,10 +106,6 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
         return scrollElement;
     }
 
-//    public void reloadFilter() {
-//        scrollElement
-//    }
-
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.5, 0, Color.getHSBColor(((TimeKeeper.getClientTick() + hashCode()) / 500F) % 1F, 1F, 1F).getRGB());
@@ -141,6 +138,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             this.gui = gui;
             this.nodeID = filterNode.getNodeId();
             this.filterNameKey = filterNode.getTranslationKey();
+            this.elementTranslationExt = "entity_filter";
         }
 
         @Override
@@ -157,7 +155,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addChild(nodeLabel);
 
             trash = new GuiButton().setSize(10, 10);
-            trash.setHoverText(I18n.format("gui.bc.entity_filter.delete." + (nodeID == 0 ? "all" : "node")));
+            trash.setHoverText(i18ni("delete." + (nodeID == 0 ? "all" : "node")));
             GuiTexture icon = new GuiTexture(10, 10, () -> BCSprites.get(nodeID == 0 ? "delete_all" : "delete"));
             trash.onPressed(() -> {
                 trashClicks++;
@@ -217,7 +215,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             background.setYSizeMod(this::ySize);
 
             GuiButton addButton = new GuiButton().setSize(10, 10);
-            addButton.setHoverText(I18n.format("gui.bc.entity_filter.add_filter"));
+            addButton.setHoverText(i18ni("add_filter"));
             GuiTexture addIcon = new GuiTexture(10, 10, BCSprites.get("add"));
             addButton.onPressed(() -> {
                 GuiSelectDialog<FilterType> dialog = new GuiSelectDialog<>(gui);
@@ -225,7 +223,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 dialog.setListSpacing(1);
                 dialog.setInsets(2, 2, 2, 2);
                 dialog.setRendererBuilder(type -> {
-                    GuiButton button = new GuiButton(I18n.format("gui.bc.entity_filter." + type.name().toLowerCase())).set3dText(true);
+                    GuiButton button = new GuiButton(i18ni(type.name().toLowerCase())).set3dText(true);
                     button.setInsets(5, 0, 5, 0);
                     button.setSize(dialog.getInsetRect().x, 14);
                     GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(1).setXPos(button.xPos()).setYSizeMod(button::ySize).bindSize(button, false);
@@ -253,8 +251,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addButton.setEnabledCallback(() -> gui.entityFilter.nodeMap.size() < gui.entityFilter.maxFilters);
 
             GuiButton matchButton = new GuiButton().setShadow(true).setYSize(10).setInsets(0, 0, 0, 0);
-            matchButton.setDisplaySupplier(() -> TextFormatting.UNDERLINE + I18n.format("gui.bc.entity_filter.and_group.button." + isAndNode()));
-            matchButton.setHoverText((e) -> I18n.format("gui.bc.entity_filter.and_group." + isAndNode()));
+            matchButton.setDisplaySupplier(() -> TextFormatting.UNDERLINE + i18ni("and_group.button." + isAndNode()));
+            matchButton.setHoverText((e) -> i18ni("and_group." + isAndNode()));
             matchButton.onPressed(() -> { if (getNode() != null) getNode().setAndGroup(!getNode().isAndGroup()); });
             matchButton.setYPos(yPos() + 1).setXPosMod(() -> addButton.xPos() - fontRenderer.getStringWidth(matchButton.getDisplayString()) - 1);
             matchButton.setXSizeMod(() -> fontRenderer.getStringWidth(matchButton.getDisplayString()));
@@ -343,7 +341,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleHostile = new GuiButton();
             toggleHostile.setPos(this).setYSize(ySize()).setXSizeMod(() -> xSize() - 12);
-            toggleHostile.setDisplaySupplier(() -> I18n.format("gui.bc.entity_filter.hostile." + (getNode() != null && getNode().isWhitelistHostile())));
+            toggleHostile.setDisplaySupplier(() -> i18ni("hostile." + (getNode() != null && getNode().isWhitelistHostile())));
             toggleHostile.setAlignment(GuiAlign.LEFT);
             toggleHostile.getInsets().left = 2;
             toggleHostile.onPressed(() -> { if (getNode() != null) getNode().setWhitelistHostile(!getNode().isWhitelistHostile()); });
@@ -365,7 +363,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleTamed = new GuiButton();
             toggleTamed.setPos(xPos(), yPos() + 2).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleTamed.setDisplaySupplier(() -> I18n.format("gui.bc.entity_filter.tamed." + (getNode() != null && getNode().isWhitelistTamed())));
+            toggleTamed.setDisplaySupplier(() -> i18ni("tamed." + (getNode() != null && getNode().isWhitelistTamed())));
             toggleTamed.setAlignment(GuiAlign.LEFT);
             toggleTamed.getInsets().left = 2;
             toggleTamed.onPressed(() -> { if (getNode() != null) getNode().setWhitelistTamed(!getNode().isWhitelistTamed()); });
@@ -373,8 +371,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleTamable = new GuiButton();
             toggleTamable.setPos(xPos(), yPos() + 12).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleTamable.setDisplaySupplier(() -> "[ " + I18n.format("gui.bc.entity_filter.tamable." + (getNode() != null && getNode().isIncludeTamable())) + " ]");
-            toggleTamable.setHoverText((e) -> I18n.format("gui.bc.entity_filter.tamable.info"));
+            toggleTamable.setDisplaySupplier(() -> "[ " + i18ni("tamable." + (getNode() != null && getNode().isIncludeTamable())) + " ]");
+            toggleTamable.setHoverText((e) -> i18ni("tamable.info"));
             toggleTamable.setAlignment(GuiAlign.LEFT);
             toggleTamable.getInsets().left = 6;
             toggleTamable.onPressed(() -> { if (getNode() != null) getNode().setIncludeTamable(!getNode().isIncludeTamable()); });
@@ -396,7 +394,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleAdults = new GuiButton();
             toggleAdults.setPos(xPos(), yPos() + 2).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleAdults.setDisplaySupplier(() -> I18n.format("gui.bc.entity_filter.adults." + (getNode() != null && getNode().isWhitelistAdults())));
+            toggleAdults.setDisplaySupplier(() -> i18ni("adults." + (getNode() != null && getNode().isWhitelistAdults())));
             toggleAdults.setAlignment(GuiAlign.LEFT);
             toggleAdults.getInsets().left = 2;
             toggleAdults.onPressed(() -> { if (getNode() != null) getNode().setWhitelistAdults(!getNode().isWhitelistAdults()); });
@@ -404,8 +402,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleAgeable = new GuiButton();
             toggleAgeable.setPos(xPos(), yPos() + 12).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleAgeable.setDisplaySupplier(() -> "[ " + I18n.format("gui.bc.entity_filter.non_ageable." + (getNode() != null && getNode().isIncludeNonAgeable())) + " ]");
-            toggleAgeable.setHoverText((e) -> I18n.format("gui.bc.entity_filter.non_ageable.info"));
+            toggleAgeable.setDisplaySupplier(() -> "[ " + i18ni("non_ageable." + (getNode() != null && getNode().isIncludeNonAgeable())) + " ]");
+            toggleAgeable.setHoverText((e) -> i18ni("non_ageable.info"));
             toggleAgeable.setAlignment(GuiAlign.LEFT);
             toggleAgeable.getInsets().left = 6;
             toggleAgeable.onPressed(() -> { if (getNode() != null) getNode().setIncludeNonAgeable(!getNode().isIncludeNonAgeable()); });
@@ -427,14 +425,14 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleIncludePlayers = new GuiButton();
             toggleIncludePlayers.setPos(xPos(), yPos() + 2).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleIncludePlayers.setDisplaySupplier(() -> I18n.format("gui.bc.entity_filter.player." + (getNode() != null && getNode().isWhitelistPlayers())));
+            toggleIncludePlayers.setDisplaySupplier(() -> i18ni("player." + (getNode() != null && getNode().isWhitelistPlayers())));
             toggleIncludePlayers.setAlignment(GuiAlign.LEFT);
             toggleIncludePlayers.getInsets().left = 2;
             toggleIncludePlayers.onPressed(() -> { if (getNode() != null) getNode().setWhitelistPlayers(!getNode().isWhitelistPlayers()); });
-            toggleIncludePlayers.setHoverText(I18n.format("gui.bc.entity_filter.player.info"));
+            toggleIncludePlayers.setHoverText(i18ni("player.info"));
             addChild(toggleIncludePlayers);
 
-            GuiLabel nameLabel = new GuiLabel(I18n.format("gui.bc.entity_filter.player.name")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
+            GuiLabel nameLabel = new GuiLabel(i18ni("player.name")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
             nameLabel.setPos(xPos() + 2, yPos() + 12).setWidthFromText(8);
             addChild(nameLabel);
 
@@ -464,13 +462,13 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleIncludeEntity = new GuiButton();
             toggleIncludeEntity.setPos(xPos(), yPos() + 2).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleIncludeEntity.setDisplaySupplier(() -> I18n.format("gui.bc.entity_filter.entity_type." + (getNode() != null && getNode().isWhitelistEntity())));
+            toggleIncludeEntity.setDisplaySupplier(() -> i18ni("entity_type." + (getNode() != null && getNode().isWhitelistEntity())));
             toggleIncludeEntity.setAlignment(GuiAlign.LEFT);
             toggleIncludeEntity.getInsets().left = 2;
             toggleIncludeEntity.onPressed(() -> { if (getNode() != null) getNode().setWhitelistEntity(!getNode().isWhitelistEntity()); });
             addChild(toggleIncludeEntity);
 
-            GuiLabel nameLabel = new GuiLabel(I18n.format("gui.bc.entity_filter.entity_type.name")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
+            GuiLabel nameLabel = new GuiLabel(i18ni("entity_type.name")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
             nameLabel.setPos(xPos() + 2, yPos() + 12).setWidthFromText(8);
             addChild(nameLabel);
 
@@ -500,7 +498,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton select = new GuiButton("...").setFillColour(0xFF000000).setBorderColour(0xFF303030);
             select.setYPos(yPos() + 12).setXPosMod(() -> maxXPos() - 10).setYSize(8).setXSize(8);
-            select.setHoverText(I18n.format("gui.bc.entity_filter.entity_type.find"));
+            select.setHoverText(i18ni("entity_type.find"));
             select.setInsets(0, 1, 3, 0);
             select.onPressed(() -> {
                 GuiSelectDialog<ResourceLocation> dialog = new GuiSelectDialog<>(gui);
@@ -551,7 +549,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                         return pass && type.create(mc.world) instanceof LivingEntity;
                     }, e -> dialog.addItem(e.getKey().getRegistryName()));
                 });
-                GuiLabel searchLabel = new GuiLabel(I18n.format("gui.bc.search")).setTextColour(0xB0B0B0).setShadow(false);
+                GuiLabel searchLabel = new GuiLabel(i18ni("search")).setTextColour(0xB0B0B0).setShadow(false);
                 searchLabel.setPosAndSize(filter).translate(0, 1);
                 searchLabel.setAlignment(GuiAlign.LEFT);
                 searchLabel.getInsets().left = 3;
@@ -583,7 +581,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton toggleWhiteList = new GuiButton();
             toggleWhiteList.setPos(xPos(), yPos() + 2).setYSize(8).setXSizeMod(() -> xSize() - 12);
-            toggleWhiteList.setDisplaySupplier(() -> I18n.format("gui.bc.entity_filter.item_filter." + (getNode() != null && getNode().isWhitelistItem())));
+            toggleWhiteList.setDisplaySupplier(() -> i18ni("item_filter." + (getNode() != null && getNode().isWhitelistItem())));
             toggleWhiteList.setAlignment(GuiAlign.LEFT);
             toggleWhiteList.getInsets().left = 2;
             toggleWhiteList.onPressed(() -> { if (getNode() != null) getNode().setWhitelistItem(!getNode().isWhitelistItem()); });
@@ -623,18 +621,18 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             });
             stackIcon.setEnabledCallback(() -> gui.scrollElement.getInsetRect().intersects(stackIcon.getRect()));
 
-            GuiLabel countLabel = new GuiLabel(I18n.format("gui.bc.entity_filter.item.count")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
+            GuiLabel countLabel = new GuiLabel(i18ni("item.count")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
             countLabel.setPos(stackIcon.maxXPos() + 2, yPos() + 12).setWidthFromText(8);
-            countLabel.setHoverText(I18n.format("gui.bc.entity_filter.item.count.info"));
+            countLabel.setHoverText(i18ni("item.count.info"));
             addChild(countLabel);
 
-            GuiLabel metaLabel = new GuiLabel(I18n.format("gui.bc.entity_filter.item.damage")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
+            GuiLabel metaLabel = new GuiLabel(i18ni("item.damage")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
             metaLabel.setPos(stackIcon.maxXPos() + 2, yPos() + 20).setWidthFromText(8);
-            metaLabel.setHoverText(I18n.format("gui.bc.entity_filter.item.damage.info"));
+            metaLabel.setHoverText(i18ni("item.damage.info"));
             addChild(metaLabel);
 
             countField = new GuiTextField();
-            countField.setHoverText(I18n.format("gui.bc.entity_filter.item.count.info"));
+            countField.setHoverText(i18ni("item.count.info"));
 //            countField.setLinkedValue(() -> getNode() == null ? "" : getNode().getCount() == 0 ? "" : "" + getNode().getCount());
             countField.setLinkedValue(() -> getNode() == null ? "" : getNode().getCount() == 0 ? "" : "" + getNode().getCount(), s -> {
                 if (getNode() != null) {
@@ -656,7 +654,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addChild(countField);
 
             metaField = new GuiTextField();
-            metaField.setHoverText(I18n.format("gui.bc.entity_filter.item.damage.info"));
+            metaField.setHoverText(i18ni("item.damage.info"));
 //            metaField.setLinkedValue(() -> getNode() == null ? "" : getNode().getDamage() == -1 ? "" : "" + getNode().getDamage());
             countField.setLinkedValue(() -> getNode() == null ? "" : getNode().getDamage() == 0 ? "" : "" + getNode().getDamage(), s -> {
                 if (getNode() != null) {
@@ -681,9 +679,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             blocksItems.setYPos(yPos() + 16).setYSize(16).setXPosMod(() -> Math.max(metaLabel.maxXPos(), countLabel.maxXPos()) + 3);
             blocksItems.setDisplaySupplier(() -> {
                 if (getNode() != null) {
-                    return getNode().isFilterBlocks() ? I18n.format("gui.bc.entity_filter.item.blocks_only") : //
-                            getNode().isFilterItems() ? I18n.format("gui.bc.entity_filter.item.items_only") : //
-                                    I18n.format("gui.bc.entity_filter.item.items_or_blocks");
+                    return getNode().isFilterBlocks() ? i18ni("item.blocks_only") : //
+                            getNode().isFilterItems() ? i18ni("item.items_only") : //
+                                    i18ni("item.items_or_blocks");
                 }
                 return "error";
             });
@@ -705,31 +703,31 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             });
             addChild(blocksItems);
 
-            GuiLabel nbtLabel = new GuiLabel(I18n.format("gui.bc.entity_filter.item.nbt")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
+            GuiLabel nbtLabel = new GuiLabel(i18ni("item.nbt")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
             nbtLabel.setPos(xPos() + 2, yPos() + 31).setWidthFromText(8);
-            nbtLabel.setHoverText(I18n.format("gui.bc.entity_filter.item.nbt.info"));
+            nbtLabel.setHoverText(i18ni("item.nbt.info"));
             addChild(nbtLabel);
 
             nbtField = new GuiTextField();
-            nbtField.setHoverText(I18n.format("gui.bc.entity_filter.item.nbt.info"));
+            nbtField.setHoverText(i18ni("item.nbt.info"));
             nbtField.setText(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
             nbtField.setChangeListener(s -> {
                 if (getNode() != null) {
                     if (s.isEmpty()) {
                         getNode().setNbt(null);
                         nbtField.setTextColor(0xFFFFFF);
-                        nbtField.setHoverText(I18n.format("gui.bc.entity_filter.item.nbt.info"));
+                        nbtField.setHoverText(i18ni("item.nbt.info"));
                     } else {
                         try {
                             CompoundNBT compound = JsonToNBT.getTagFromJson(s);
                             getNode().setNbt(compound);
                             nbtField.setTextColor(0xFFFFFF);
-                            nbtField.setHoverText(I18n.format("gui.bc.entity_filter.item.nbt.info"));
+                            nbtField.setHoverText(i18ni("item.nbt.info"));
                         }
                         catch (CommandSyntaxException e) {
                             getNode().setNbt(null);
                             nbtField.setTextColor(0xFF0000);
-                            nbtField.setHoverText(I18n.format("gui.bc.entity_filter.item.nbt.bad"));
+                            nbtField.setHoverText(i18ni("item.nbt.bad"));
                         }
                     }
                 }
@@ -755,13 +753,13 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             if (getNode() != null) {
                 if (getNode().getItemName().isEmpty()) {
                     stackIcon.setStack((StackReference) null);
-                    stackIcon.setHoverText(I18n.format("gui.bc.entity_filter.set_stack"));
+                    stackIcon.setHoverText(i18ni("set_stack"));
                 } else {
                     StackReference stack = new StackReference(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
                     stackIcon.setStack(stack);
                     List<ITextComponent> tooltip = stack.createStack().getTooltip(mc.player, mc.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
                     tooltip.add(new StringTextComponent(TextFormatting.GRAY + "----------------------------"));
-                    tooltip.add(new TranslationTextComponent("gui.bc.entity_filter.set_stack"));
+                    tooltip.add(new TranslationTextComponent("set_stack"));
                     stackIcon.setComponentHoverText(tooltip);
                 }
             }

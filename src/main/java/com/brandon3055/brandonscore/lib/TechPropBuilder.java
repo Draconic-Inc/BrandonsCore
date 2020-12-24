@@ -114,19 +114,19 @@ public class TechPropBuilder {
 
 
     public Item.Properties pickaxeProps() {
-        return build().addToolType(PICKAXE, miningLevel);
+        return build().addToolType(PICKAXE, miningLevel).isImmuneToFire();
     }
 
     public Item.Properties axeProps() {
-        return build().addToolType(AXE, miningLevel);
+        return build().addToolType(AXE, miningLevel).isImmuneToFire();
     }
 
     public Item.Properties shovelProps() {
-        return build().addToolType(SHOVEL, miningLevel);
+        return build().addToolType(SHOVEL, miningLevel).isImmuneToFire();
     }
 
     public Item.Properties staffProps() {
-        return build().addToolType(PICKAXE, miningLevel).addToolType(AXE, miningLevel).addToolType(SHOVEL, miningLevel);
+        return build().addToolType(PICKAXE, miningLevel).addToolType(AXE, miningLevel).addToolType(SHOVEL, miningLevel).isImmuneToFire();
     }
 
 

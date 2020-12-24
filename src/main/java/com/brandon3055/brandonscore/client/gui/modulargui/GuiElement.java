@@ -74,7 +74,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     private static final String INTERNAL_TRANSLATION_PREFIX = "mod_gui.brandonscore.";
 
     protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
-    protected static final RenderType transColourType = RenderType.makeType("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
+    public static final RenderType transColourType = RenderType.makeType("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
             .cull(RenderState.CULL_DISABLED)
             .shadeModel(RenderState.SHADE_ENABLED)
@@ -2692,7 +2692,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.getLast().getMatrix();
 //        float i = fontRenderer.func_238426_c_(text.func_241878_f(), x, y, colour, false, textLocation, renderType, true, 0, 15728880);
-        float i = fontRenderer.func_238424_b_(text.func_241878_f(), x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
+//        float i = fontRenderer.func_238424_b_(text.func_241878_f(), x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
+        float i = fontRenderer.func_243247_a(text, x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
         renderType.finish();
         return i;
     }

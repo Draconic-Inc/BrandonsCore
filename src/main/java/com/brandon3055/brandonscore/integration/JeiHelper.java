@@ -162,12 +162,12 @@ public class JeiHelper {
                 recipeLayout.setPosition(xPos, yPos);
             }
 
-            recipeLayout.drawRecipe(mouseX, mouseY);
+//            recipeLayout.drawRecipe(mouseX, mouseY);
         }
 
         @Override
         public void renderOverlay(Minecraft mc, int mouseX, int mouseY) {
-            recipeLayout.drawOverlays(mouseX, mouseY);
+//            recipeLayout.drawOverlays(mouseX, mouseY);
         }
 
         @Override

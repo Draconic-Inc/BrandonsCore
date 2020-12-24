@@ -11,6 +11,7 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.util.ResourceLocation;
 
@@ -39,10 +40,10 @@ public class BCJEIPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler<ModularGuiContainer>() {
+        registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler() { //TODO figure out why this wont compile when done proeprly
             @Override
-            public List<Rectangle2d> getGuiExtraAreas(ModularGuiContainer containerScreen) {
-                return containerScreen.getManager().getJeiExclusions();
+            public List<Rectangle2d> getGuiExtraAreas(ContainerScreen containerScreen) {
+                return ((ModularGuiContainer)containerScreen).getManager().getJeiExclusions();
             }
         });
 //        registration.addGuiScreenHandler(ModularGuiScreen.class, new IScreenHandler<ModularGuiScreen>() {

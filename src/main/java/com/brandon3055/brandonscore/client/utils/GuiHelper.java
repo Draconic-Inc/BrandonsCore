@@ -262,13 +262,13 @@ public class GuiHelper {
 //    }
 
     public static void drawGuiBaseBackground(AbstractGui gui, int posX, int posY, int xSize, int ySize) {
-        ResourceHelperBC.bindTexture("textures/gui/base_gui.png");
+        ResourceHelperBC.bindTexture("textures/gui/light/background_dynamic.png");
         RenderSystem.color3f(1F, 1F, 1F);
         MatrixStack matrixstack = new MatrixStack();
-        gui.blit(matrixstack, posX, posY, 0, 0, xSize - 3, ySize - 3);
-        gui.blit(matrixstack, posX + xSize - 3, posY, 253, 0, 3, ySize - 3);
-        gui.blit(matrixstack, posX, posY + ySize - 3, 0, 253, xSize - 3, 3);
-        gui.blit(matrixstack, posX + xSize - 3, posY + ySize - 3, 253, 253, 3, 3);
+        gui.blit(matrixstack, posX, posY, 0, 0, xSize - 4, ySize - 4);
+        gui.blit(matrixstack, posX + xSize - 4, posY, 252, 0, 4, ySize - 4);
+        gui.blit(matrixstack, posX, posY + ySize - 4, 0, 252, xSize - 4, 4);
+        gui.blit(matrixstack, posX + xSize - 4, posY + ySize - 4, 252, 252, 4, 4);
     }
 
     /**
@@ -298,8 +298,17 @@ public class GuiHelper {
         getter.finish();
     }
 
+    @Deprecated
     public static void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
         MatrixStack matrixstack = new MatrixStack();
+        if (dropShadow) {
+            fontRenderer.drawStringWithShadow(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+        } else {
+            fontRenderer.drawString(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+        }
+    }
+
+    public static void drawCenteredString(FontRenderer fontRenderer, MatrixStack matrixstack, String text, int x, int y, int color, boolean dropShadow) {
         if (dropShadow) {
             fontRenderer.drawStringWithShadow(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
         } else {

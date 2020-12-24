@@ -9,9 +9,16 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.server.ChunkHolder;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 
@@ -305,7 +312,9 @@ public class Utils {
                 StringSelection stringselection = new StringSelection(copyText);
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
             }
-            catch (Exception var2) {}
+            catch (Exception var2) {
+                var2.printStackTrace();
+            }
         }
     }
 
@@ -397,6 +406,17 @@ public class Utils {
         }
 
         return stringbuilder.toString();
+    }
+
+    public static boolean isAreaLoaded(World world, BlockPos pos, ChunkHolder.LocationType minimum) {
+        ChunkPos chunkPos = new ChunkPos(pos);
+        IChunk ichunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
+        if (!(ichunk instanceof Chunk)) {
+            return false;
+        }
+
+        ChunkHolder.LocationType locationType = ((Chunk) ichunk).getLocationType();
+        return locationType.isAtLeast(minimum);
     }
 }
 

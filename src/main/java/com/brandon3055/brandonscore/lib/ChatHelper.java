@@ -1,18 +1,12 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.event.world.BlockEvent;
-import sun.rmi.log.LogHandler;
 
 /**
  * Created by brandon3055 on 15/12/2020.

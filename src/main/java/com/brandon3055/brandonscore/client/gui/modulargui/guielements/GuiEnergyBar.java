@@ -1,26 +1,23 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
+import codechicken.lib.math.MathHelper;
 import codechicken.lib.render.shader.ShaderProgram;
 import codechicken.lib.render.shader.ShaderProgramBuilder;
 import codechicken.lib.render.shader.UniformCache;
 import codechicken.lib.render.shader.UniformType;
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.api.power.IOInfo;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.BCSprites;
-import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.render.BCShaders;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -182,7 +179,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     }
 
     protected float getSOC() {
-        return (float) getEnergy() / (float) Math.max(1, getCapacity());
+        return MathHelper.clip((float) getEnergy() / (float) Math.max(1, getCapacity()), 0F, 1F);
     }
 
     @Override
@@ -191,9 +188,9 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
         int barLength = horizontal ? xSize() : ySize();
         int barWidth = horizontal ? ySize() : xSize();
-        double energy = getEnergy();
-        double capacity = getCapacity();
-        int draw = (int) ((energy / capacity) * (barLength - 2));
+        double charge = getSOC();
+        if (Double.isNaN(charge)) charge = 0;
+        int draw = (int) (charge * (barLength - 2));
 
         int posY = yPos();
         int posX = xPos();
@@ -317,7 +314,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
         if (useShaders()) {
             Rectangle rect = toScreenSpace(xPos() + 1, yPos() + 1, xSize() - 2, ySize() - 2);
             UniformCache uniforms = program.pushCache();
-            uniforms.glUniform1f("charge", getSOC());
+            uniforms.glUniform1f("charge", getSOC() * 1.01F);
             uniforms.glUniform2i("ePos", rect.x, rect.y);
             uniforms.glUniform2i("eSize", rect.width, rect.height);
             uniforms.glUniform2i("screenSize", displayWidth(), displayHeight());

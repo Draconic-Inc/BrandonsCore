@@ -34,7 +34,7 @@ public class BCFontRenderer extends FontRenderer {
 
 
     @Override
-    public int func_238423_b_(String text, float x, float y, int color, boolean p_238423_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparent, int p_238423_9_, int p_238423_10_, boolean p_238423_11_) {
+    protected int func_238423_b_(String text, float x, float y, int color, boolean p_238423_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparent, int p_238423_9_, int p_238423_10_, boolean p_238423_11_) {
         if (p_238423_11_) {
             text = this.bidiReorder(text);
         }
@@ -51,7 +51,7 @@ public class BCFontRenderer extends FontRenderer {
     }
 
     @Override
-    public int func_238424_b_(IReorderingProcessor p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
+    protected int func_238424_b_(IReorderingProcessor p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
         color = fixAlpha(color);
         Matrix4f matrix4f = matrix.copy();
         if (p_238424_5_) {

@@ -37,10 +37,10 @@ public class BrandonsCore {
     public static final String MODID = "brandonscore";
     public static final String VERSION = "${mod_version}";
     public static CommonProxy proxy;
-    public static boolean inDev;
+    public static boolean inDev = false;
 
     public BrandonsCore() {
-        inDev = VERSION.equals("${mod_version}");
+//        inDev = Minecraft///VERSION.equals("${mod_version}");
         FileHandler.init();
 
         //Knock Knock...

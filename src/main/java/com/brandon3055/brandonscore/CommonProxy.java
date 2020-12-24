@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore;
 
+import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.handlers.IProcess;
@@ -9,6 +10,7 @@ import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -117,5 +119,11 @@ public class CommonProxy {
 
     public void sendIndexedMessage(PlayerEntity player, ITextComponent message, int index) {
         BCoreNetwork.sendIndexedMessage((ServerPlayerEntity) player, message, index);
+    }
+
+    public void setClipboardString(String text) {}
+
+    public void sendToServer(PacketCustom packet) {
+
     }
 }

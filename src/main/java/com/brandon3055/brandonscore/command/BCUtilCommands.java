@@ -79,10 +79,10 @@ public class BCUtilCommands {
         dispatcher.register(
                 Commands.literal("bcore_util")
                         .then(registerNBT())
-                        .then(registerRegenChunk())
+//                        .then(registerRegenChunk())
                         .then(registerNoClip())
                         .then(registerUUID())
-                        .then(registerPlayerAccess())
+//                        .then(registerPlayerAccess())
                         .then(registerDumpEvents())
                         .then(registerEggify())
         );
@@ -177,7 +177,7 @@ public class BCUtilCommands {
     }
 
     private static int regenChunk(CommandSource source, int rad) throws CommandException, CommandSyntaxException {
-        LogHelperBC.dev(rad);
+//        LogHelperBC.dev(rad);
 
         for (int xOffset = -rad; xOffset <= rad; xOffset++) {
             for (int yOffset = -rad; yOffset <= rad; yOffset++) {

@@ -82,6 +82,6 @@ public abstract class FilterBase implements INBTSerializable<CompoundNBT>, IMCDa
     }
 
     public String getTranslationKey() {
-        return "gui.bc.entity_filter." + getType().name().toLowerCase();
+        return "mod_gui.brandonscore.entity_filter." + getType().name().toLowerCase();
     }
 }

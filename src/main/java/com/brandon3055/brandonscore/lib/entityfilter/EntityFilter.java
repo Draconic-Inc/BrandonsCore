@@ -383,7 +383,7 @@ public class EntityFilter extends FilterGroup {
 
     @Override
     public String getTranslationKey() {
-        return "gui.bc.entity_filter";
+        return "mod_gui.brandonscore.entity_filter";
     }
 
     public FilterBase getNode(int nodeID) {

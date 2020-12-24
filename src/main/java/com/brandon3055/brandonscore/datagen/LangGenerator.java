@@ -26,6 +26,57 @@ public class LangGenerator extends LanguageProvider {
         helper.add("input"                                  ,"Input");
         helper.add("output"                                 ,"Output");
         helper.add("io"                                     ,"I/O");
+
+        helper.setPrefix("mod_gui.brandonscore.entity_filter");
+        add("mod_gui.brandonscore.entity_filter",   "Entity Filter");
+        helper.add("hostile",                       "Filter Hostility");
+        helper.add("hostile.true",                  "Hostile Mobs Only");
+        helper.add("hostile.false",                 "Passive Mobs Only");
+        helper.add("tamed",                         "Filter Tamed");
+        helper.add("tamed.true",                    "Tamed Only");
+        helper.add("tamed.false",                   "Untamable Only");
+        helper.add("tamable.true",                  "Include Tamable");
+        helper.add("tamable.false",                 "Exclude Tamable");
+        helper.add("tamable.info",                  "Applies to tamable mobs that are not owned by a player.");
+        helper.add("adults",                        "Filter Adults");
+        helper.add("adults.true",                   "Adults Only");
+        helper.add("adults.false",                  "Babies Only");
+        helper.add("non_ageable.true",              "Include Non-Ageable");
+        helper.add("non_ageable.false",             "Exclude Non-Ageable");
+        helper.add("non_ageable.info",              "'Include Non-Ageable' will treat any 'non-ageable' mob as an adult.");
+        helper.add("player",                        "Filter Players");
+        helper.add("player.true",                   "Include Player(s)");
+        helper.add("player.false",                  "Exclude Player(s)");
+        helper.add("player.name",                   "Name:");
+        helper.add("player.info",                   "This filter applies to all players.\nUnless a specific player name is entered.");
+        helper.add("entity_type",                   "Filter Entity Type");
+        helper.add("entity_type.true",              "Include Entity");
+        helper.add("entity_type.false",             "Exclude Entity");
+        helper.add("entity_type.name",              "Name:");
+        helper.add("entity_type.find",              "Select from entity list.");
+        helper.add("item_filter",                   "Filter Item");
+        helper.add("set_stack",                     "Drop stack here to set\nOr click to clear");
+        helper.add("item_filter.true",              "Include Item Stack");
+        helper.add("item_filter.false",             "Exclude Item Stack");
+        helper.add("item.count",                    "Stack Size:");
+        helper.add("item.count.info",               "Search for a specific stack size\nOr leave empty to ignore stack size.");
+        helper.add("item.damage",                   "Meta Data:");
+        helper.add("item.damage.info",              "Search for a specific damage value\nOr leave empty to ignore meta data.");
+        helper.add("item.nbt",                      "NBT:");
+        helper.add("item.nbt.info",                 "Search for a stack with specific NBT data\nOr leave empty to ignore NBT.");
+        helper.add("item.nbt.bad",                  "Invalid NBT string.\nMust be in standard JSON NBT format.");
+        helper.add("item.blocks_only",              "Blocks Only");
+        helper.add("item.items_only",               "Items Only");
+        helper.add("item.items_or_blocks",          "Items or Blocks");
+        helper.add("filter_group",                  "Filter Group");
+        helper.add("add_filter",                    "Add Filter");
+        helper.add("and_group.button.true",         "Match All");
+        helper.add("and_group.button.false",        "Match Any");
+        helper.add("and_group.true",                "An entity will be accepted if it matches ALL of the filters in this group.");
+        helper.add("and_group.false",               "An entity will be accepted if it matches ANY of the filters in this group.");
+        helper.add("delete.node",                   "Double-Click to delete filter node");
+        helper.add("delete.all",                    "Tripple-Click to clear all nodes");
+        helper.add("search",                        "Search...");
     }
 
     private void addGuiToolkit(PrefixHelper helper) {
@@ -40,6 +91,7 @@ public class LangGenerator extends LanguageProvider {
         helper.add("large_view"                                    ,"Large View");
         helper.add("large_view.close"                              ,"Click outside or press Esc to close");
         helper.add("your_inventory"                                ,"Inventory");
+        helper.add("click_out_close"                               ,"Click outside to close");
     }
 
     private void addMisc(PrefixHelper helper) {

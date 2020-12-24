@@ -29,9 +29,12 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.INameable;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
@@ -424,125 +427,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     //endregion
 
-//    //region Capabilities
-//
-//    /**
-//     * Adds an forge energy storage capability to the tile.
-//     * This should be used in the tile's constructor to apply capabilities.
-//     * Capability data will be automatically saved and loaded from tile NBT.
-//     *
-//     * @param tagName The name used to save this cap instance to NBT. FE, OP and Item Handler caps are all stored to the same NBT Compound so this
-//     *                name must be unique. Pass null to prevent this cap from being saved to NBT.
-//     * @param storage The energy storage to add.
-//     * @param sides   The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags. Or null if tagName is null.
-//     */
-//    protected <T extends IEnergyStorage & INBTSerializable<CompoundNBT>> SerializationFlags<T> addEnergyCap(@Nullable String tagName, T storage, Direction... sides) {
-//        mapCapToSides(storage, energyCaps, sides);
-//        if (storage instanceof IOPStorage) {
-//            mapCapToSides((IOPStorage) storage, opEnergyCaps, sides);
-//        }
-//        if (tagName != null) {
-//            return addInternalCap(tagName, storage);
-//        }
-//        return null;
-//    }
-//
-//    /**
-//     * Convenience method for adding a single FE cap with the tag name "energy_storage"
-//     *
-//     * @param storage The energy storage to add.
-//     * @param sides   The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
-//     */
-//    protected <T extends IEnergyStorage & INBTSerializable<CompoundNBT>> SerializationFlags<T> addEnergyCap(T storage, Direction... sides) {
-//        return addEnergyCap("energy_storage", storage, sides);
-//    }
-//
-//    /**
-//     * Adds this cap strait to the capability maps bypassing all save and synchronization functionality.
-//     */
-//    protected <T extends IEnergyStorage> T addRawEnergyCap(T storage, Direction... sides) {
-//        mapCapToSides(storage, energyCaps, sides);
-//
-//        if (storage instanceof IOPStorage) {
-//            mapCapToSides((IOPStorage) storage, opEnergyCaps, sides);
-//        }
-//        return storage;
-//    }
-//
-//    /**
-//     * Adds an IItemHandler capability to the tile.
-//     * This should be used in the tile's constructor to apply capabilities.
-//     * Capability data will be automatically saved and loaded from tile NBT.
-//     *
-//     * @param tagName     The name used to save this cap instance to NBT. FE, OP and Item Handler caps are all stored to the same NBT Compound so this
-//     *                    name must be unique. Pass null to prevent this cap from being saved to NBT.
-//     * @param itemHandler The item handler to add.
-//     * @param sides       The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
-//     */
-//    protected <T extends ItemStackHandler> SerializationFlags<T> addItemHandlerCap(@Nullable String tagName, T itemHandler, Direction... sides) {
-//        mapCapToSides(itemHandler, invCaps, sides);
-//        if (tagName != null) {
-//            return addInternalCap(tagName, itemHandler);
-//        }
-//        return null;
-//    }
-//
-//    /**
-//     * Convenience method for adding a single item handler cap with the tag name "item_handler"
-//     *
-//     * @param itemHandler The item handler to add.
-//     * @param sides       The side or sides (including null) that this storage should be exposed to. If nothing is specified this storage will be available to all sides.
-//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
-//     */
-//    protected <T extends ItemStackHandler> SerializationFlags<T> addItemHandlerCap(T itemHandler, Direction... sides) {
-//        return addItemHandlerCap("item_handler", itemHandler, sides);
-//    }
-//
-//    protected <T extends ItemStackHandler> SerializationFlags<T> addInternalItemHandlerCap(String tagName, T itemHandler) {
-//        return addInternalCap(tagName, itemHandler);
-//    }
-//
-//    protected <T extends ItemStackHandler> SerializationFlags<T> addInternalItemHandlerCap(T itemHandler) {
-//        return addInternalItemHandlerCap("item_handler", itemHandler);
-//    }
-//
-//    /**
-//     * Adds this cap strait to the capability map bypassing all save and synchronization functionality.
-//     */
-//    protected <T extends IItemHandler> T addRawItemCap(T handler, Direction... sides) {
-//        mapCapToSides(handler, invCaps, sides);
-//        return handler;
-//    }
-//
-//    /**
-//     * Allows you to add a capability to be saved and synchronized without actually exposing via has/getCapability.
-//     * Technically this can be used to save and sync any {@link INBTSerializable<CompoundNBT>}
-//     *
-//     * @param tagName  The tag name that will be used to save this capability to nbt.
-//     * @param instance The INBTSerializable instance.
-//     * @return the {@link SerializationFlags} instance assigned to this data. Can be used to toggle save and sync flags.
-//     */
-//    protected <T extends INBTSerializable<CompoundNBT>> SerializationFlags<T> addInternalCap(String tagName, T instance) {
-//        SerializationFlags<T> helper = new SerializationFlags<>(tagName, instance);
-//        serializableMap.put(instance, helper);
-//        indexedDataList.add(helper);
-//        return helper;
-//    }
-//
-//    private <C> void mapCapToSides(C cap, Map<Direction, C> map, Direction... sides) {
-//        if (sides == null || sides.length == 0) {
-//            sides = Direction.values();
-//            map.put(null, cap);
-//        }
-//
-//        for (Direction facing : sides) {
-//            map.put(facing, cap);
-//        }
-//    }
-
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction side) {
@@ -555,8 +439,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         super.invalidateCaps();
         capManager.invalidate();
     }
-
-    //endregion
 
     //region EnergyHelpers
 
@@ -599,26 +481,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         }
         return i;
     }
-
-//    /**
-//     * Convenience method for getting the tiles primary energy handler.
-//     * Will only return if the tile has a single energy storage. OOtherwisewill return null.
-//     */
-//    @Nullable
-//    public IOPStorage getPrimaryOPStorage() {
-//        return primaryOPStorage;
-//    }
-//
-//    /**
-//     * Sets the "primary" op storage. This is meant to be used as a simple internal method for retrieving the op storage
-//     * from any {@link TileBCore}.
-//     * This is used for things like the default energy bar implementation.
-//     *
-//     * @param primaryOPStorage An {@link IOPStorage} object or null.
-//     */
-//    public void setPrimaryOPStorage(@Nullable IOPStorage primaryOPStorage) {
-//        this.primaryOPStorage = primaryOPStorage;
-//    }
 
     /**
      * Adds an io tracker to the specified storage and ensures the tracker is updated every tick.
@@ -747,7 +609,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
             return new StringTextComponent(customName);
         }
 
-        return getBlockState().getBlock().getTranslatedName();
+        return new TranslationTextComponent(getBlockState().getBlock().getTranslationKey());
     }
 
     @Override
