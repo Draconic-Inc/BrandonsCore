@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * Created by Brandon on 1/07/2014.
  */
-@Deprecated
 public class InfoHelper {
 
     @Deprecated
@@ -34,14 +33,13 @@ public class InfoHelper {
         return Screen.hasControlDown();
     }
 
-    @Deprecated
     public static boolean holdShiftForDetails(List<ITextComponent> list, boolean inverted) {
-        if (isShiftKeyDown() == inverted)
-            list.add(new TranslationTextComponent("info.bc.holdShiftForDetails.txt", TextFormatting.AQUA + "" + TextFormatting.ITALIC, TextFormatting.RESET + "" + TextFormatting.GRAY));
+        if (isShiftKeyDown() == inverted){
+            list.add(new StringTextComponent(I18n.format("item_info.brandonscore.shift_for_details", TextFormatting.AQUA + "" + TextFormatting.ITALIC, TextFormatting.RESET + "" + TextFormatting.GRAY)).mergeStyle(TextFormatting.GRAY));
+        }
         return isShiftKeyDown();
     }
 
-    @Deprecated
     public static boolean holdShiftForDetails(List<ITextComponent> list) {
         return holdShiftForDetails(list, false);
     }

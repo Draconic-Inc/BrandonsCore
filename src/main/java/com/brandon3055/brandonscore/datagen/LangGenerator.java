@@ -104,6 +104,9 @@ public class LangGenerator extends LanguageProvider {
 //        helper.add("op_max_receive"                         ,"Draconic Evolution Blocks");
 //        helper.add("op_max_extract"                         ,"Draconic Evolution Blocks");
         helper.add("op_transfer"                            ,"OP Transfer");
+
+        helper.setPrefix("item_info.brandonscore");
+        helper.add("shift_for_details"                      ,"Hold %sShift%s for details");
     }
 
 

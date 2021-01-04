@@ -340,4 +340,25 @@ public class DataUtils {
         }
         return false;
     }
+
+    public static <T> T safeRemove(List<T> list, int removeIndex) {
+        if (removeIndex >= 0 && removeIndex < list.size()) {
+            return list.remove(removeIndex);
+        }
+        return null;
+    }
+
+
+    public static <T> T safeGet(List<T> list, int getIndex) {
+        if (getIndex >= 0 && getIndex < list.size()) {
+            return list.get(getIndex);
+        }
+        return null;
+    }
+
+    public static <T> void ifPresent(List<T> list, int removeIndex, Consumer<T> callback) {
+        if (removeIndex >= 0 && removeIndex < list.size()) {
+            callback.accept(list.get(removeIndex));
+        }
+    }
 }

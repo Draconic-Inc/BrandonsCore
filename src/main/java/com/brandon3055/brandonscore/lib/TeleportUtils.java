@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraft.block.PortalInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -109,10 +110,26 @@ public class TeleportUtils {
         if (!entity.isAlive() || targetWorld == null) {
             return null;
         }
-        entity = entity.changeDimension(targetWorld);
-        if (entity != null) {
-            entity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
+
+        Entity movedEntity = entity.changeDimension(targetWorld);
+        if (movedEntity != null) {
+            movedEntity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
+            return movedEntity;
         }
+
+        entity.detach();
+        movedEntity = entity.getType().create(targetWorld);
+        if (movedEntity != null) {
+            movedEntity.copyDataFromOld(entity);
+            movedEntity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
+            targetWorld.addFromAnotherDimension(movedEntity);
+            entity.remove(false);
+            ((ServerWorld) entity.world).resetUpdateEntityTick();
+            targetWorld.resetUpdateEntityTick();
+            return movedEntity;
+        }
+
+
         return entity;
 
 //

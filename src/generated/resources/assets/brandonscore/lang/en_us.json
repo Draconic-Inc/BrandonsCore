@@ -10,6 +10,7 @@
   "gui_tkt.brandonscore.theme.dark": "Dark Theme",
   "gui_tkt.brandonscore.theme.light": "Light Theme",
   "gui_tkt.brandonscore.your_inventory": "Inventory",
+  "item_info.brandonscore.shift_for_details": "Hold %sShift%s for details",
   "mod_gui.brandonscore.energy_bar.capacity": "Capacity",
   "mod_gui.brandonscore.energy_bar.input": "Input",
   "mod_gui.brandonscore.energy_bar.io": "I/O",
