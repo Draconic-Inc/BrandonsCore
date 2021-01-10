@@ -115,6 +115,11 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
         return this;
     }
 
+    public GuiSlideControl addInputListener(Consumer<GuiSlideControl> inputListener) {
+        this.inputListener = this.inputListener == null ? inputListener : this.inputListener.andThen(inputListener);
+        return this;
+    }
+
     public GuiSlideControl setReverseScrollDir(boolean reverseScrollDir) {
         this.reverseScrollDir = reverseScrollDir;
         return this;
@@ -251,7 +256,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
 
             if (rotation == HORIZONTAL) {
                 if (isMiddleClickDragging) {
-                    sliderElement.setXPos((int) dragStartElementX + (int) ((mouseX - dragStartX) * scrollSpeed * 2));
+                    sliderElement.setXPos((int) dragStartElementX + (int) ((mouseX - dragStartX) * scrollSpeed * -2));
                 } else {
                     sliderElement.setXPos((int) (mouseX - mouseDragOffset));
                 }
@@ -263,7 +268,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                 }
             } else {
                 if (isMiddleClickDragging) {
-                    sliderElement.setYPos((int) dragStartElementY + (int) ((mouseY - dragStartY) * scrollSpeed * 2));
+                    sliderElement.setYPos((int) dragStartElementY + (int) ((mouseY - dragStartY) * scrollSpeed * -2));
                 } else {
                     sliderElement.setYPos((int) (mouseY - mouseDragOffset));
                 }
@@ -712,6 +717,8 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }
+
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FFFF);
     }
 
     /**

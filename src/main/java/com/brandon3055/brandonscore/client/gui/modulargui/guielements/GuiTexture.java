@@ -274,4 +274,12 @@ public class GuiTexture extends GuiElement<GuiTexture> {
             }
         }.setMaterialSupplier(materialSupplier);
     }
+
+    public GuiTexture centerOnParent() {
+        if (getParent() != null) {
+            setXPos(getParent().xPos() + (getParent().xSize() / 2) - (xSize() / 2));
+            setYPos(getParent().yPos() + (getParent().ySize() / 2) - (ySize() / 2));
+        }
+        return this;
+    }
 }

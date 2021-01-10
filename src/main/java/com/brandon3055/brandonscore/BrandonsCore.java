@@ -1,5 +1,7 @@
 package com.brandon3055.brandonscore;
 
+import codechicken.lib.reflect.ObfMapping;
+import codechicken.lib.reflect.ReflectionManager;
 import com.brandon3055.brandonscore.client.ClientProxy;
 import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTPX;
@@ -7,12 +9,19 @@ import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.worldentity.WorldEntityHandler;
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.merchant.villager.VillagerProfession;
+import net.minecraft.village.PointOfInterest;
+import net.minecraft.village.PointOfInterestType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -28,6 +37,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Mod(BrandonsCore.MODID)
@@ -122,6 +134,23 @@ public class BrandonsCore {
     public static void onServerStop(FMLServerStoppedEvent event) {
         ProcessHandler.clearHandler();
         WorldEntityHandler.serverStopped();
+    }
+
+    @SubscribeEvent
+    public void fixFletcher(RegistryEvent.Register<PointOfInterestType> event) {
+
+//        event.getRegistry().register(new PointOfInterestType("fletcher", PointOfInterestType.getAllStates(Blocks.FLETCHING_TABLE), 1, thing -> thing == PointOfInterestType.FLETCHER, 1).setRegistryName("fletcher_fix"));
+//        event.getRegistry().register(new PointOfInterestType("fletcher", PointOfInterestType.getAllStates(Blocks.COAL_BLOCK), 1, thing -> thing == PointOfInterestType.FLETCHER, 1).setRegistryName("fletcher_fix2"));
+
+        //Fix fletcher
+        Set<BlockState> stateSet = new HashSet<>(PointOfInterestType.getAllStates(Blocks.FLETCHING_TABLE));
+        PointOfInterestType.FLETCHER.blockStates = ImmutableSet.copyOf(stateSet);
+        PointOfInterestType.POIT_BY_BLOCKSTATE.put(Blocks.FLETCHING_TABLE.getDefaultState(), PointOfInterestType.FLETCHER);
+
+        //Fix Armorer
+        stateSet = new HashSet<>(PointOfInterestType.getAllStates(Blocks.BLAST_FURNACE));
+        PointOfInterestType.ARMORER.blockStates = ImmutableSet.copyOf(stateSet);
+        PointOfInterestType.POIT_BY_BLOCKSTATE.put(Blocks.BLAST_FURNACE.getDefaultState(), PointOfInterestType.ARMORER);
     }
 
 //

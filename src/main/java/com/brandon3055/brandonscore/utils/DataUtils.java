@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Created by brandon3055 on 31/3/2016.
@@ -354,6 +355,13 @@ public class DataUtils {
             return list.get(getIndex);
         }
         return null;
+    }
+
+    public static <T> T safeGet(List<T> list, int getIndex, Supplier<T> orDefault) {
+        if (getIndex >= 0 && getIndex < list.size()) {
+            return list.get(getIndex);
+        }
+        return orDefault.get();
     }
 
     public static <T> void ifPresent(List<T> list, int removeIndex, Consumer<T> callback) {

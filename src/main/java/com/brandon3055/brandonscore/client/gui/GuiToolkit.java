@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
+import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
@@ -152,7 +153,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     //UI Heading
     public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent, boolean layout) {
         GuiLabel heading = new GuiLabel(I18n.format(unlocalizedHeading));
-        heading.setHoverableTextCol(hovering -> Palette.BG.text());
+        heading.setTextColGetter(Palette.BG::text);
         heading.setShadowStateSupplier(() -> darkMode);
         if (parent != null) {
             parent.addChild(heading);
@@ -367,6 +368,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             buttonBG.setBorderColourL(Palette.Ctrl::border3D);
             buttonBG.set3dTopLeftColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentDark(true) : Palette.Ctrl.accentLight(hovering));
             buttonBG.set3dBottomRightColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentLight(true) : Palette.Ctrl.accentDark(hovering));
+            GuiTexture disabledBG = GuiTexture.newDynamicTexture(BCSprites.themedGetter("button_disabled"));
+            disabledBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
+            disabledBG.setEnabledCallback(button::isDisabled);
+            buttonBG.addChild(disabledBG);
+
             button.addChild(buttonBG);
         } else {
             button.setRectFillColourGetter((hovering, disabled) -> Palette.Ctrl.fill(hovering));
@@ -456,7 +462,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         button.setSize(buttonSize, buttonSize);
         addHoverHighlight(button);
         GuiTexture icon = new GuiTexture(iconSize, iconSize, iconSupplier);
-        button.addChild(icon.setPos(-((iconSize - buttonSize) / 2), -((iconSize - buttonSize) / 2)));
+        icon.setPosModifiers(() -> button.xPos() + -((iconSize - buttonSize) / 2), () -> button.yPos() + -((iconSize - buttonSize) / 2));
+        button.addChild(icon);
         if (parent != null) {
             parent.addChild(button);
         }
@@ -549,7 +556,6 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return panel;
     }
 
-
     //Create Text Field
     public GuiTextField createTextField() {
         return createTextField(null);
@@ -564,8 +570,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         textField.setTextColor(Palette.Ctrl::text);
         textField.setShadow(false);
 
+        textField.setEnableBackgroundDrawing(background);
         if (background) {
-            textField.setEnableBackgroundDrawing(true);
             textField.setFillColour(Palette.Ctrl::fill);
             textField.setBorderColour(hovering -> Palette.Ctrl.accentLight(false));
         }
@@ -576,7 +582,28 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return textField;
     }
 
-    //LayoutUtils
+    //Create Scroll Bars
+    public GuiSlideControl createVanillaScrollBar(GuiSlideControl.SliderRotation rotation, boolean forceEnabled) {
+        GuiSlideControl scrollBar = new GuiSlideControl(rotation);
+        scrollBar.setBackgroundElement(GuiTexture.newDynamicTexture(BCSprites.themedGetter("button_disabled")));
+        scrollBar.setSliderElement(GuiTexture.newDynamicTexture(BCSprites.themedGetter("button_borderless")));
+        if (forceEnabled) {
+            scrollBar.setEnabledCallback(() -> true);
+        }
+        scrollBar.onReload(GuiSlideControl::updateElements);
+        return scrollBar;
+    }
+
+    public GuiSlideControl createVanillaScrollBar(GuiSlideControl.SliderRotation rotation) {
+        return createVanillaScrollBar(rotation, true);
+    }
+
+    public GuiSlideControl createVanillaScrollBar() {
+        return createVanillaScrollBar(GuiSlideControl.SliderRotation.VERTICAL, true);
+    }
+
+
+        //LayoutUtils
     public void center(GuiElement element, GuiElement centerOn, int xOffset, int yOffset) {
         element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2));
         element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2));

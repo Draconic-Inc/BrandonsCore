@@ -32,6 +32,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     private int cursorCounter;
     private boolean enableBackgroundDrawing = true;
     private boolean canLoseFocus = true;
+    private boolean canFocus = true;
     private boolean isFocused;
     private boolean isFieldEnabled = true; //This is similar to the the disabled field in Button.
     private boolean blinkCursor = false;
@@ -413,8 +414,10 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean mouseOver = isMouseOver(mouseX, mouseY);
-        if (this.canLoseFocus) {
-            this.setFocused(mouseOver);
+        if (mouseOver && canFocus) {
+            this.setFocused(true);
+        } else if (!mouseOver && canLoseFocus) {
+            this.setFocused(false);
         }
 
         if (this.isFocused() && mouseOver && button == 0) {
@@ -463,9 +466,9 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
         boolean flag = j >= 0 && j <= s.length();
         boolean flag1 = this.isFocused() && this.cursorCounter / 10 % 2 == 0 && flag;
-        int l = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
-        int i1 = this.enableBackgroundDrawing ? this.yPos() + (this.ySize() - 8) / 2 : this.yPos();
-        int j1 = l;
+        int stringX = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
+        int stringY = this.enableBackgroundDrawing ? this.yPos() + (this.ySize() - 8) / 2 : this.yPos();
+        int j1 = stringX;
         if (k > s.length()) {
             k = s.length();
         }
@@ -473,16 +476,16 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
             if (getShadow()) {
-                j1 = this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+                j1 = this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
             } else {
-                j1 = this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) l, (float) i1, i);
+                j1 = this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
             }
         }
 
         boolean flag2 = this.cursorPosition < this.text().length() || this.text().length() >= this.getMaxStringLength();
         int k1 = j1;
         if (!flag) {
-            k1 = j > 0 ? l + this.xSize() : l;
+            k1 = j > 0 ? stringX + this.xSize() : stringX;
         } else if (flag2) {
             k1 = j1 - 1;
             if (getShadow()) {
@@ -492,35 +495,35 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
         if (!s.isEmpty() && flag && j < s.length()) {
             if (getShadow()) {
-                this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+                this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
             } else {
-                this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) i1, i);
+                this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
             }
         }
 
         if (!flag2 && this.suggestion != null) {
             if (getShadow()) {
-                this.fontRenderer.drawStringWithShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
+                this.fontRenderer.drawStringWithShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
             } else {
-                this.fontRenderer.drawString(matrixStack, this.suggestion, (float) (k1 - 1), (float) i1, 0xff808080);
+                this.fontRenderer.drawString(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
             }
         }
 
         if (flag1) {
             if (flag2) {
-                AbstractGui.fill(matrixStack, k1, i1 - 1, k1 + 1, i1 + 1 + 9, cursorColor);
+                AbstractGui.fill(matrixStack, k1, stringY - 1, k1 + 1, stringY + 1 + 9, cursorColor);
             } else {
                 if (getShadow()) {
-                    this.fontRenderer.drawStringWithShadow(matrixStack, "_", (float) k1, (float) i1, i);
+                    this.fontRenderer.drawStringWithShadow(matrixStack, "_", (float) k1, (float) stringY, i);
                 } else {
-                    this.fontRenderer.drawString(matrixStack, "_", (float) k1, (float) i1, i);
+                    this.fontRenderer.drawString(matrixStack, "_", (float) k1, (float) stringY, i);
                 }
             }
         }
 
         if (k != j) {
-            int l1 = l + this.fontRenderer.getStringWidth(s.substring(0, k));
-            this.drawSelectionBox(k1, i1 - 1, l1 - 1, i1 + 1 + 9);
+            int l1 = stringX + this.fontRenderer.getStringWidth(s.substring(0, k));
+            this.drawSelectionBox(k1, stringY - 1, l1 - 1, stringY + 1 + 9);
         }
 
         RenderSystem.translated(0, 0, -zLevel);
@@ -698,6 +701,11 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             this.lineScrollOffset = MathHelper.clamp(this.lineScrollOffset, 0, texLen);
         }
 
+    }
+
+    public GuiTextField setCanFocus(boolean canFocus) {
+        this.canFocus = canFocus;
+        return this;
     }
 
     public GuiTextField setCanLoseFocus(boolean canLoseFocusIn) {

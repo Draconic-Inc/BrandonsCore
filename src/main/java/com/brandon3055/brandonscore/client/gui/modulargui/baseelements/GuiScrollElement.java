@@ -675,15 +675,15 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
 
         double xPos = getInsetRect().x;
         double yPos = getInsetRect().y;
-        double xSize = getInsetRect().width;
-        double ySize = getInsetRect().height;
+        double xSize = getInsetRect().width + 1;
+        double ySize = getInsetRect().height + 1;
 
         double yResScale = (double) displayHeight() / (screenHeight);
         double xResScale = (double) displayWidth() / (screenWidth);
         double scaledWidth = xSize * xResScale;
         double scaledHeight = ySize * yResScale;
         int x = (int) (xPos * xResScale);
-        int y = (int) (displayHeight() - (yPos * yResScale) - scaledHeight + 1);
+        int y = (int) (displayHeight() - (yPos * yResScale) - scaledHeight);
 
         ScissorHelper.pushScissor(x, y, (int) scaledWidth, (int) scaledHeight);
 
@@ -703,7 +703,8 @@ public class GuiScrollElement extends GuiElement<GuiScrollElement> implements IG
                 element.renderElement(minecraft, mouseX, mouseY, partialTicks);
             }
         }
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
+
+//        drawBorderedRect(xPos, yPos, xSize, ySize, 1, 0, 0xFF00FFFF);
     }
 
     //endregion

@@ -72,8 +72,9 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         this.newCursor = cursor;
     }
 
-    public void onTick(Runnable onTick) {
+    public Runnable onTick(Runnable onTick) {
         this.onTick = onTick;
+        return onTick;
     }
 
     //region Elements

@@ -63,15 +63,15 @@ public class TargetPos {
         yaw = player.rotationYaw;
     }
 
-    public double getXCoord() {
+    public double getX() {
         return x;
     }
 
-    public double getYCoord() {
+    public double getY() {
         return y;
     }
 
-    public double getZCoord() {
+    public double getZ() {
         return z;
     }
 
@@ -187,10 +187,5 @@ public class TargetPos {
             return TeleportUtils.teleportEntity(entity, dimension, x, y, z, yaw, pitch);
         }
         return TeleportUtils.teleportEntity(entity, dimension, x, y, z);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(x, y, z, dimension, yaw, pitch);
     }
 }
