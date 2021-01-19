@@ -1,12 +1,15 @@
 package com.brandon3055.brandonscore.inventory;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static com.brandon3055.brandonscore.BrandonsCore.equipmentManager;
 import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.*;
 
 /**
@@ -71,6 +75,21 @@ public class ContainerSlotLayout {
         return this;
     }
 
+    public ContainerSlotLayout playerEquipMod(PlayerEntity player) {
+        if (slotDataMap.keySet().stream().anyMatch(slotType -> !slotType.isPlayer)) {
+            throw new IllegalStateException("All player slots must be added before tile slots.");
+        }
+        if (equipmentManager != null) {
+            LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
+            optional.ifPresent(handler -> {
+                for (int i = 0; i < handler.getSlots(); i++) {
+                    slotDataList.add(new SlotData(this, PLAYER_EQUIPMENT, handler, i));
+                }
+            });
+        }
+        return this;
+    }
+
     public ContainerSlotLayout playerOffHand(PlayerEntity player) {
         playerEquipSlot(player, 4);
         return this;
@@ -100,6 +119,7 @@ public class ContainerSlotLayout {
         PLAYER_INV(true),
         PLAYER_ARMOR(true),
         PLAYER_OFF_HAND(true),
+        PLAYER_EQUIPMENT(true),
         TILE_INV(false);
 
         private boolean isPlayer;
@@ -122,7 +142,12 @@ public class ContainerSlotLayout {
             this.itemHandler = itemHandler;
             this.index = index;
             //'fake' layout just in case the server does not like multiple overlapping slots.
-            this.slot = new SlotCheckValid(itemHandler, index, (index % 9) * 18, ((index / 9) + (type.isPlayer ? 0 : 5)) * 18);
+            this.slot = new SlotCheckValid(itemHandler, index, (index % 9) * 18, ((index / 9) + (type.isPlayer ? 0 : 5)) * 18) {
+                @Override
+                public boolean isItemValid(ItemStack stack) {
+                    return super.isItemValid(stack) && type != PLAYER_EQUIPMENT;
+                }
+            };
             layout.slotDataMap.computeIfAbsent(type, slotType -> new HashMap<>()).put(index, this);
         }
 

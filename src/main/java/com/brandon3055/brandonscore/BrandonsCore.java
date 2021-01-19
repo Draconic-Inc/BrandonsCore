@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTPX;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.lib.IEquipmentManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.worldentity.WorldEntityHandler;
 import com.google.common.collect.ImmutableSet;
@@ -50,6 +51,7 @@ public class BrandonsCore {
     public static final String VERSION = "${mod_version}";
     public static CommonProxy proxy;
     public static boolean inDev = false;
+    public static IEquipmentManager equipmentManager = null;
 
     public BrandonsCore() {
 //        inDev = Minecraft///VERSION.equals("${mod_version}");

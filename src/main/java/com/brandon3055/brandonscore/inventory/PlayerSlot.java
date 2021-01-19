@@ -1,15 +1,22 @@
 package com.brandon3055.brandonscore.inventory;
 
+import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.lib.IEquipmentManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
+
+import static com.brandon3055.brandonscore.BrandonsCore.equipmentManager;
 
 /**
  * Created by brandon3055 on 7/06/2016.
@@ -96,6 +103,16 @@ public class PlayerSlot {
                 return;
             }
             player.inventory.offHandInventory.set(slot, stack);
+        } else if (category == EnumInvCategory.EQUIPMENT && equipmentManager != null) {
+            LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
+            if (optional.isPresent()) {
+                IItemHandlerModifiable handler = optional.orElseThrow(IllegalStateException::new);
+                if (slot < 0 || slot >= handler.getSlots()) {
+                    LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
+                    return;
+                }
+                handler.setStackInSlot(slot, stack);
+            }
         }
     }
 
@@ -116,6 +133,18 @@ public class PlayerSlot {
             ItemStack stack = inv.offHandInventory.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.OFF_HAND);
+            }
+        }
+        if (equipmentManager != null) {
+            LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(inv.player);
+            if (optional.isPresent()) {
+                IItemHandlerModifiable handler = optional.orElseThrow(IllegalStateException::new);
+                for (int i = 0; i < handler.getSlots(); i++) {
+                    ItemStack stack = handler.getStackInSlot(i);
+                    if (!stack.isEmpty() && check.test(stack)) {
+                        return new PlayerSlot(i, EnumInvCategory.EQUIPMENT);
+                    }
+                }
             }
         }
         return null;
@@ -143,6 +172,18 @@ public class PlayerSlot {
                 return new PlayerSlot(i, EnumInvCategory.MAIN);
             }
         }
+        if (equipmentManager != null) {
+            LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(inv.player);
+            if (optional.isPresent()) {
+                IItemHandlerModifiable handler = optional.orElseThrow(IllegalStateException::new);
+                for (int i = 0; i < handler.getSlots(); i++) {
+                    ItemStack stack = handler.getStackInSlot(i);
+                    if (!stack.isEmpty() && check.test(stack)) {
+                        return new PlayerSlot(i, EnumInvCategory.EQUIPMENT);
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -150,10 +191,14 @@ public class PlayerSlot {
     public EquipmentSlotType getEquipmentSlot() {
         if (category == EnumInvCategory.ARMOR) {
             switch (slot) {
-                case 0: return EquipmentSlotType.FEET;
-                case 1: return EquipmentSlotType.LEGS;
-                case 2: return EquipmentSlotType.CHEST;
-                case 3: return EquipmentSlotType.HEAD;
+                case 0:
+                    return EquipmentSlotType.FEET;
+                case 1:
+                    return EquipmentSlotType.LEGS;
+                case 2:
+                    return EquipmentSlotType.CHEST;
+                case 3:
+                    return EquipmentSlotType.HEAD;
             }
         } else if (category == EnumInvCategory.OFF_HAND) {
             return EquipmentSlotType.OFFHAND;
@@ -168,6 +213,14 @@ public class PlayerSlot {
             return player.inventory.mainInventory.get(slot);
         } else if (category == EnumInvCategory.OFF_HAND) {
             return player.inventory.offHandInventory.get(slot);
+        } else if (category == EnumInvCategory.EQUIPMENT && equipmentManager != null) {
+            LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
+            if (optional.isPresent()) {
+                IItemHandlerModifiable handler = optional.orElseThrow(IllegalStateException::new);
+                return handler.getSlots() > slot ? handler.getStackInSlot(slot) : ItemStack.EMPTY;
+            }
+
+            return ItemStack.EMPTY;
         } else {
             LogHelperBC.bigError("PlayerSlot#getStackInSlot Invalid or null category! This should not be possible! [%s]... Fix your Shit!", category);
             return ItemStack.EMPTY;
@@ -177,9 +230,10 @@ public class PlayerSlot {
     public enum EnumInvCategory {
         MAIN(0),
         ARMOR(1),
-        OFF_HAND(2);
+        OFF_HAND(2),
+        EQUIPMENT(3);
         private int index;
-        private static EnumInvCategory[] indexMap = new EnumInvCategory[3];
+        private static EnumInvCategory[] indexMap = new EnumInvCategory[4];
 
         private EnumInvCategory(int index) {
             this.index = index;
@@ -190,7 +244,7 @@ public class PlayerSlot {
         }
 
         public static EnumInvCategory fromIndex(int index) {
-            if (index > 2 || index < 0) {
+            if (index > 3 || index < 0) {
                 LogHelperBC.bigError("PlayerSlot.EnumInvCategory#fromIndex Attempt to read invalid index! [%s]", index);
                 return indexMap[0];
             }
@@ -201,6 +255,7 @@ public class PlayerSlot {
             indexMap[0] = MAIN;
             indexMap[1] = ARMOR;
             indexMap[2] = OFF_HAND;
+            indexMap[3] = EQUIPMENT;
         }
     }
 }

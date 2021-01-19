@@ -104,6 +104,7 @@ public class BCSprites {
         register(MODID, "slots/armor_helmet");
         register(MODID, "slots/armor_leggings");
         register(MODID, "slots/armor_shield");
+        register(MODID, "slots/sword");
 
         register(MODID, "item_charge/btn_right_charge");
         register(MODID, "item_charge/btn_right_discharge");
