@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -22,17 +23,28 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSpriteStitcher;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
+import static com.brandon3055.brandonscore.BrandonsCore.LOGGER;
+import static com.brandon3055.brandonscore.BrandonsCore.equipmentManager;
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
 import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.*;
 
@@ -73,7 +85,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             translationPrefix = translationPrefix + ".";
         }
         this.translationPrefix = translationPrefix;
-            return this;
+        return this;
     }
 
     public String i18n(String translationKey) {
@@ -85,7 +97,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     /**
      * Internal translator for use inside Toolkit
-     * */
+     */
     protected static String i18ni(String translationKey) {
         if (translationKey.startsWith(".")) {
             translationKey = translationKey.substring(1);
@@ -175,6 +187,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     /**
      * Creates a generic set of inventory slots with the specified dimensions.
      * background is an optional 16x16 sprite that will be used as the slot background.
+     *
      * @param slotMapper (column, row, slotData)
      */
     public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, RenderMaterial background) {
@@ -309,6 +322,37 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
 
         return container;
+    }
+
+    public GuiElement createEquipModSlots(GuiElement parent, PlayerEntity player, boolean jeiExclude, Predicate<ItemStack> showFilter) {
+        GuiElement fallback = new GuiElement();
+        if (equipmentManager != null) {
+            LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
+            GuiElement container = GuiTexture.newDynamicTexture(() -> BCSprites.getThemed("bg_dynamic_small"));
+            container.setXSize(26);
+            optional.ifPresent(handler -> {
+                if (jeiExclude) {
+                    jeiExclude(container);
+                }
+                parent.addBackGroundChild(container);
+                int c = 0;
+                for (int i = 0; i < handler.getSlots(); i++) {
+                    int finalI = i;
+                    ContainerSlotLayout.SlotData data = slotLayout.getSlotData(PLAYER_EQUIPMENT, finalI);
+                    if (showFilter != null && !showFilter.test(data.slot.getStack())) {
+                        data.setPos(-9999, -9999);
+                        continue;
+                    }
+                    GuiElement element = createSlots(container, 1, 1, 0, (column, row) -> data, null);
+                    element.setXPos(container.xPos() + 4, false);
+                    element.setYPos(container.yPos() + (c * 19) + 4);
+                    container.setMaxYPos(element.maxYPos() + 4, true);
+                    c++;
+                }
+            });
+            return container.getChildElements().isEmpty() ? fallback : container;
+        }
+        return fallback;
     }
 
     public GuiElement createPlayerSlots() {
@@ -603,7 +647,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
 
-        //LayoutUtils
+    //LayoutUtils
     public void center(GuiElement element, GuiElement centerOn, int xOffset, int yOffset) {
         element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2));
         element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2));
