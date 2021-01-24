@@ -58,22 +58,42 @@ import java.util.Base64;
  */
 public class ClientProxy extends CommonProxy {
 
-    public static final IParticleRenderType PARTICLE_SHEET_NO_DEPTH = new IParticleRenderType() {
-        public void beginRender(BufferBuilder p_217600_1_, TextureManager p_217600_2_) {
+    public static final IParticleRenderType PARTICLE_NO_DEPTH = new IParticleRenderType() {
+        public void beginRender(BufferBuilder builder, TextureManager manager) {
             RenderSystem.depthMask(false);
-            p_217600_2_.bindTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE);
+            manager.bindTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.alphaFunc(516, 0.003921569F);
-            p_217600_1_.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
+            builder.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
         }
 
-        public void finishRender(Tessellator p_217599_1_) {
-            p_217599_1_.draw();
+        public void finishRender(Tessellator tesselator) {
+            tesselator.draw();
+
         }
 
         public String toString() {
-            return "PARTICLE_SHEET_NO_DEPTH";
+            return "PARTICLE_NO_DEPTH";
+        }
+    };
+
+    public static final IParticleRenderType PARTICLE_NO_DEPTH_NO_LIGHT = new IParticleRenderType() {
+        public void beginRender(BufferBuilder builder, TextureManager manager) {
+            RenderSystem.depthMask(false);
+            manager.bindTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.alphaFunc(516, 0.003921569F);
+            builder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        }
+
+        public void finishRender(Tessellator tesselator) {
+            tesselator.draw();
+        }
+
+        public String toString() {
+            return "PARTICLE_NO_DEPTH_NO_LIGHT";
         }
     };
 
