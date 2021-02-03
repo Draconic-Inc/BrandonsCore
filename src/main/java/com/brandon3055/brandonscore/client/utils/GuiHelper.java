@@ -34,7 +34,8 @@ public class GuiHelper {
             .build(false)
     );
 
-    public static RenderType FAN_TYPE = RenderType.makeType("charge_type", DefaultVertexFormats.POSITION_COLOR, GL11.GL_TRIANGLE_FAN, 256, RenderType.State.getBuilder()
+    //Triangle Fan Type
+    public static RenderType FAN_TYPE = RenderType.makeType("tri_fan_type", DefaultVertexFormats.POSITION_COLOR, GL11.GL_TRIANGLE_FAN, 256, RenderType.State.getBuilder()
             .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
             .alpha(RenderState.ZERO_ALPHA)
             .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))

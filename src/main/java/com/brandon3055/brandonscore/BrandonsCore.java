@@ -70,7 +70,7 @@ public class BrandonsCore {
                 deLog.log(Level.WARN, "**Explosion Imminent!!!**");
                 LogHelperBC.info("Well...... fork...");
             } else {
-                LogHelperBC.info("Hay! Where's DE?");
+                LogHelperBC.info("Hey! Where's DE?");
                 LogHelperBC.info("Oh well.. At least we dont have to worry about getting blown up now...");
             }
         }
@@ -80,7 +80,6 @@ public class BrandonsCore {
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
 
         MinecraftForge.EVENT_BUS.addListener(BrandonsCore::registerCommands);
-        MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
         MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(WorldEntityHandler::createRegistry);

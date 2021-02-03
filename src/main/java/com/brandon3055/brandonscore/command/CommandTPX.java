@@ -1,13 +1,13 @@
 package com.brandon3055.brandonscore.command;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.ILocationArgument;
-import net.minecraft.command.arguments.Vec3Argument;
+import net.minecraft.command.arguments.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -16,14 +16,13 @@ import net.minecraft.util.math.*;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This command has all of the functionality of the vanilla tp command but with the ability
@@ -37,7 +36,7 @@ public class CommandTPX {
                 Commands.literal("tpx")
                         .requires((p_198816_0_) -> p_198816_0_.hasPermissionLevel(2))
                         .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), null, null))
                                 .then(Commands.argument("location", Vec3Argument.vec3())
                                         .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
                                 )
@@ -46,15 +45,15 @@ public class CommandTPX {
                                 .executes(ctx -> teleportToEntity(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), EntityArgument.getEntity(ctx, "destination")))
                         )
                         .then(Commands.argument("targets", EntityArgument.entities())
-                                .then(Commands.argument("destination", EntityArgument.entity())
-                                        .executes(ctx -> teleportToEntity(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), EntityArgument.getEntity(ctx, "destination")))
-                                )
-                                .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimensionArgument(ctx, "dimension"), new EntityLocation(ctx.getSource().assertIsEntity()), null))
-                                        .then(Commands.argument("location", Vec3Argument.vec3())
-                                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
+                                        .then(Commands.argument("destination", EntityArgument.entity())
+                                                .executes(ctx -> teleportToEntity(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), EntityArgument.getEntity(ctx, "destination")))
                                         )
-                                )
+                                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
+                                                .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimensionArgument(ctx, "dimension"), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                                .then(Commands.argument("location", Vec3Argument.vec3())
+                                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
+                                                )
+                                        )
 //                                .then(Commands.argument("location", Vec3Argument.vec3())
 //                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getWorld(), Vec3Argument.getLocation(ctx, "location"), null))
 //                                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
@@ -85,7 +84,29 @@ public class CommandTPX {
         return targets.size();
     }
 
-    private static int teleportToPos(CommandSource source, Collection<? extends Entity> targets, ServerWorld worldIn, ILocationArgument position, @Nullable ILocationArgument rotationIn) throws CommandSyntaxException {
+    private static Random rand = new Random();
+    private static int teleportToPos(CommandSource source, Collection<? extends Entity> targets, ServerWorld targetWorld, @Nullable ILocationArgument position, @Nullable ILocationArgument rotationIn) throws CommandSyntaxException {
+        if (position == null) {
+            BlockPos pos = new BlockPos(0, 127, 0);
+            rand.setSeed(0);
+            for (int i = 0; i < 1000; i++) {
+                pos = new BlockPos(-150 + rand.nextInt(300), 32 + rand.nextInt(80), -150 + rand.nextInt(300));
+                if (targetWorld.isAirBlock(pos)) {
+                    while (targetWorld.isAirBlock(pos.down())) {
+                        pos = pos.down();
+                    }
+                    BlockState state = targetWorld.getBlockState(pos.down());
+                    if (!state.getFluidState().isEmpty()) {
+                        continue;
+                    }
+                    if (state.getMaterial().blocksMovement()) {
+                        break;
+                    }
+                }
+            }
+            position = new BlockLocation(pos);
+        }
+
         Vector3d vec3d = position.getPosition(source);
         Vector2f vec2f = rotationIn == null ? null : rotationIn.getRotation(source);
         Set<SPlayerPositionLookPacket.Flags> set = EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class);
@@ -116,9 +137,9 @@ public class CommandTPX {
 
         for (Entity entity : targets) {
             if (rotationIn == null) {
-                teleport(source, entity, worldIn, vec3d.x, vec3d.y, vec3d.z, set, entity.rotationYaw, entity.rotationPitch);
+                teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, entity.rotationYaw, entity.rotationPitch);
             } else {
-                teleport(source, entity, worldIn, vec3d.x, vec3d.y, vec3d.z, set, vec2f.y, vec2f.x);
+                teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, vec2f.y, vec2f.x);
             }
         }
 
@@ -196,6 +217,39 @@ public class CommandTPX {
         @Override
         public Vector3d getPosition(CommandSource source) {
             return entity.getPositionVec();
+        }
+
+        @Override
+        public Vector2f getRotation(CommandSource source) {
+            return source.getRotation();
+        }
+
+        @Override
+        public boolean isXRelative() {
+            return false;
+        }
+
+        @Override
+        public boolean isYRelative() {
+            return false;
+        }
+
+        @Override
+        public boolean isZRelative() {
+            return false;
+        }
+    }
+
+    private static class BlockLocation implements ILocationArgument {
+        private BlockPos pos;
+
+        public BlockLocation(BlockPos pos) {
+            this.pos = pos;
+        }
+
+        @Override
+        public Vector3d getPosition(CommandSource source) {
+            return Vector3d.copyCentered(pos);
         }
 
         @Override
