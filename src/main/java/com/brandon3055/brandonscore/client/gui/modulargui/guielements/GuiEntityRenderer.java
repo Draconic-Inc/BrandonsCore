@@ -10,6 +10,7 @@ import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
+import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -126,13 +127,18 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
 
                 double zLevel = getRenderZLevel() + 100;
                 double posX = rect.x + (rect.width / 2D);
+                int yPos = (yPos() + (ySize() / 2)) + (rect.height / 2);
 
                 float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
                 if (entity instanceof LivingEntity) {
                     int eyeOffset = (int) ((entity.getHeight() - entity.getEyeHeight()) * scale);
-                    drawEntityOnScreen(posX, rect.y, scale, (int) posX - mouseX, rect.y - mouseY + eyeOffset, (LivingEntity) entity, trackMouse, rotation, drawName, zLevel);
+                    RenderSystem.translated(0, 0, zLevel);
+                    InventoryScreen.drawEntityOnScreen((int)posX, yPos, (int)scale, (int)posX - mouseX, yPos - mouseY - eyeOffset, (LivingEntity) entity);
+                    RenderSystem.translated(0, 0, -zLevel);
+//                    InventoryScreen.drawEntityOnScreen(20, 20, (int)scale, mouseX, mouseY, (LivingEntity) entity);
+//                    drawEntityOnScreen(posX, rect.y, scale, (int) posX - mouseX, rect.y - mouseY + eyeOffset, (LivingEntity) entity, trackMouse, rotation, drawName, zLevel);
                 } else {
-                    drawEntityOnScreen(posX, rect.y, scale, entity, rotation, zLevel);
+//                    drawEntityOnScreen(posX, rect.y, scale, entity, rotation, zLevel);
                 }
             }
         }
@@ -192,100 +198,102 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         return rotationSpeed;
     }
 
-    //TODO This no needs to be re written
-    public static void drawEntityOnScreen(double posX, double posY, double scale, Entity ent, double rotation, double zOffset) {
-        RenderSystem.enableColorMaterial();
-        RenderSystem.pushMatrix();
 
-//        RenderSystem.translate((float) posX, (float) posY, 50.0F);
-        RenderSystem.translated((float) posX, (float) posY + (ent.getHeight() * scale), zOffset);
 
-        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
-        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        float f1 = ent.rotationYaw;
-        float f2 = ent.rotationPitch;
-        RenderSystem.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
-        RenderHelper.enableStandardItemLighting();
-        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-//        RenderSystem.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-//        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
-//        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
-        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
-//        rendermanager.setPlayerViewY(180.0F);
+//    //TODO This no needs to be re written
+//    public static void drawEntityOnScreen(double posX, double posY, double scale, Entity ent, double rotation, double zOffset) {
+//        RenderSystem.enableColorMaterial();
+//        RenderSystem.pushMatrix();
+//
+////        RenderSystem.translate((float) posX, (float) posY, 50.0F);
+//        RenderSystem.translated((float) posX, (float) posY + (ent.getHeight() * scale), zOffset);
+//
+//        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
+//        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+//        float f1 = ent.rotationYaw;
+//        float f2 = ent.rotationPitch;
+//        RenderSystem.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
+//        RenderHelper.enableStandardItemLighting();
+//        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+////        RenderSystem.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+////        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
+////        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
+//        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
+//        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
+////        rendermanager.setPlayerViewY(180.0F);
+////        rendermanager.setRenderShadow(false);
+////        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+////        rendermanager.setRenderShadow(true);
+//
+//        MatrixStack matrixstack = new MatrixStack();
+//        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getRenderManager();
+////        quaternion1.conjugate();
+////        entityrenderermanager.setCameraOrientation(quaternion1);
+//        entityrenderermanager.setRenderShadow(false);
+//        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+//        entityrenderermanager.renderEntityStatic(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880);
+//        irendertypebuffer$impl.finish();
+//        entityrenderermanager.setRenderShadow(true);
+//
+//
+//
+//        ent.rotationYaw = f1;
+//        ent.rotationPitch = f2;
+//        RenderSystem.popMatrix();
+//        RenderHelper.disableStandardItemLighting();
+//        RenderSystem.disableRescaleNormal();
+////        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
+////        RenderSystem.disableTexture();
+////        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
+//    }
+//
+//    //TODO so does this
+//    public static void drawEntityOnScreen(double posX, double posY, double scale, double mouseX, double mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName, double zOffset) {
+//        float rotation = trackMouse ? 0 : (float) noTrackRotation;
+//        if (!trackMouse) {
+//            mouseX = 0;
+//            mouseY = 0;
+//        }
+//
+//        RenderSystem.enableColorMaterial();
+//        RenderSystem.pushMatrix();
+////        RenderSystem.translate((float) posX, (float) posY, 50.0F);
+//        RenderSystem.translated(posX, posY + (ent.getHeight() * scale), zOffset);
+//
+//        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
+//        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+//        float f = ent.renderYawOffset;
+//        float f1 = ent.rotationYaw;
+//        float f2 = ent.rotationPitch;
+//        float f3 = ent.prevRotationYawHead;
+//        float f4 = ent.rotationYawHead;
+//        RenderSystem.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
+//        RenderHelper.enableStandardItemLighting();
+//        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+//        RenderSystem.rotatef(-((float) Math.atan(mouseY / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
+//        ent.renderYawOffset = (float) Math.atan(mouseX / 40.0F) * 20.0F;
+//        ent.rotationYaw = (float) Math.atan(mouseX / 40.0F) * 40.0F;
+//        ent.rotationPitch = -((float) Math.atan(mouseY / 40.0F)) * 20.0F;
+//        ent.rotationYawHead = ent.rotationYaw;
+//        ent.prevRotationYawHead = ent.rotationYaw;
+//        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
+//        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
+////        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
 //        rendermanager.setRenderShadow(false);
-//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+////        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
 //        rendermanager.setRenderShadow(true);
-
-        MatrixStack matrixstack = new MatrixStack();
-        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getRenderManager();
-//        quaternion1.conjugate();
-//        entityrenderermanager.setCameraOrientation(quaternion1);
-        entityrenderermanager.setRenderShadow(false);
-        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        entityrenderermanager.renderEntityStatic(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880);
-        irendertypebuffer$impl.finish();
-        entityrenderermanager.setRenderShadow(true);
-
-
-
-        ent.rotationYaw = f1;
-        ent.rotationPitch = f2;
-        RenderSystem.popMatrix();
-        RenderHelper.disableStandardItemLighting();
-        RenderSystem.disableRescaleNormal();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
-//        RenderSystem.disableTexture();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
-    }
-
-    //TODO so does this
-    public static void drawEntityOnScreen(double posX, double posY, double scale, double mouseX, double mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName, double zOffset) {
-        float rotation = trackMouse ? 0 : (float) noTrackRotation;
-        if (!trackMouse) {
-            mouseX = 0;
-            mouseY = 0;
-        }
-
-        RenderSystem.enableColorMaterial();
-        RenderSystem.pushMatrix();
-//        RenderSystem.translate((float) posX, (float) posY, 50.0F);
-        RenderSystem.translated(posX, posY + (ent.getHeight() * scale), zOffset);
-
-        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
-        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        float f = ent.renderYawOffset;
-        float f1 = ent.rotationYaw;
-        float f2 = ent.rotationPitch;
-        float f3 = ent.prevRotationYawHead;
-        float f4 = ent.rotationYawHead;
-        RenderSystem.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
-        RenderHelper.enableStandardItemLighting();
-        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-        RenderSystem.rotatef(-((float) Math.atan(mouseY / 40.0F)) * 20.0F, 1.0F, 0.0F, 0.0F);
-        ent.renderYawOffset = (float) Math.atan(mouseX / 40.0F) * 20.0F;
-        ent.rotationYaw = (float) Math.atan(mouseX / 40.0F) * 40.0F;
-        ent.rotationPitch = -((float) Math.atan(mouseY / 40.0F)) * 20.0F;
-        ent.rotationYawHead = ent.rotationYaw;
-        ent.prevRotationYawHead = ent.rotationYaw;
-        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
-        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
-//        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
-        rendermanager.setRenderShadow(false);
-//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-        rendermanager.setRenderShadow(true);
-        ent.renderYawOffset = f;
-        ent.rotationYaw = f1;
-        ent.rotationPitch = f2;
-        ent.prevRotationYawHead = f3;
-        ent.rotationYawHead = f4;
-        RenderSystem.popMatrix();
-        RenderHelper.disableStandardItemLighting();
-        RenderSystem.disableRescaleNormal();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
-//        RenderSystem.disableTexture();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
-    }
+//        ent.renderYawOffset = f;
+//        ent.rotationYaw = f1;
+//        ent.rotationPitch = f2;
+//        ent.prevRotationYawHead = f3;
+//        ent.rotationYawHead = f4;
+//        RenderSystem.popMatrix();
+//        RenderHelper.disableStandardItemLighting();
+//        RenderSystem.disableRescaleNormal();
+////        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
+////        RenderSystem.disableTexture();
+////        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
+//    }
 
     public static PlayerEntity createRenderPlayer(ClientWorld world, String username) {
         return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameProfile(new GameProfile(null, username))) {

@@ -473,18 +473,25 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addChild(nameLabel);
 
             GuiTextField nameField = new GuiTextField();
+            nameField.setValidator(ResourceLocation::isResouceNameValid);
 //            nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getEntityName());
             nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getEntityName(), s -> {
                 if (getNode() != null) {
                     getNode().setEntityName(s);
                     ResourceLocation rs = new ResourceLocation(s);
                     //TODO Test
-                    EntityType type = ForgeRegistries.ENTITIES.getValue(rs);
-                    boolean exists = type != null;
+                    EntityType<?> type = ForgeRegistries.ENTITIES.getValue(rs);
+                    boolean exists = ForgeRegistries.ENTITIES.containsKey(rs);
                     String name = exists ? type.getTranslationKey() : "unknown";
                     nameField.setTextColor(exists ? 0x00FF00 : 0xFF0000);
                     Optional<? extends ModContainer> mod = ModList.get().getModContainerById(rs.getNamespace());
-                    nameField.setHoverText(exists ? mod.isPresent() ? mod.get().getModInfo().getDisplayName() : "[unknown-mod]" + " " + I18n.format(name == null ? "[no-name-available]" : "entity." + name + ".name") : "Unknown entity string");
+                    String modName = mod.isPresent() ? mod.get().getModInfo().getDisplayName() : "[unknown-mod]";
+                    String entityName = I18n.format(name);
+                    if (exists) {
+                        nameField.setHoverText(entityName, TextFormatting.BLUE + "" + TextFormatting.ITALIC + modName);
+                    } else {
+                        nameField.setHoverText(TextFormatting.RED + "Unknown entity string");
+                    }
                 }
             }); //TODO Test
 
@@ -514,9 +521,10 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     container.addChild(renderer);
                     EntityType type = ForgeRegistries.ENTITIES.getValue(rs);
                     String name = type == null ? "unknown" : type.getName().getString();
-                    GuiLabel label = new GuiLabel(I18n.format(I18n.format(name == null ? "[no-name-available]" : "entity." + name + ".name")));
+                    GuiLabel label = new GuiLabel(I18n.format(I18n.format(name)));
                     label.setPos(renderer.maxXPos() + 6, container.yPos() + 2).setWrap(true).setYSize(container.ySize() - 4).setXSizeMod(() -> container.xSize() - (16 + 6 + 2 + 2));
                     container.addChild(label);
+                    label.zOffset+=5;
                     GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(0).setXPos(container.xPos()).setYSizeMod(container::ySize).bindSize(container, false);
                     buttonBG.setFillColourL((h) -> SubItem.fill());
                     buttonBG.setBorderColourL((h) -> SubItem.border3d());
@@ -532,10 +540,13 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     }
                 });
 
-                DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> e.getValue().create(mc.world) instanceof LivingEntity, e -> dialog.addItem(e.getKey().getRegistryName()));
+                DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
+                    return e.getValue().create(mc.world) instanceof LivingEntity;
+                }, e -> dialog.addItem(e.getKey().getLocation()));
                 dialog.setSize(150, 190);
                 dialog.addBackGroundChild(new GuiBorderedRect().set3DGetters(SubItem::fill, SubItem::accentLight, SubItem::accentDark).setDoubleBorder(1).setBorderColourL(e -> SubItem.border3d()).setPosAndSize(dialog));
                 GuiTextField filter = new GuiTextField();
+                filter.textZOffset+=5;
                 filter.setSize(dialog.xSize() - 6, 12).setPos(dialog.xPos() + 3, dialog.maxYPos() - 15);
                 filter.setChangeListener((s) -> {
                     dialog.clearItems();
@@ -547,7 +558,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                             pass = true;
                         }
                         return pass && type.create(mc.world) instanceof LivingEntity;
-                    }, e -> dialog.addItem(e.getKey().getRegistryName()));
+                    }, e -> dialog.addItem(e.getKey().getLocation()));
                 });
                 GuiLabel searchLabel = new GuiLabel(i18ni("search")).setTextColour(0xB0B0B0).setShadow(false);
                 searchLabel.setPosAndSize(filter).translate(0, 1);
@@ -556,6 +567,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 searchLabel.setEnabledCallback(() -> filter.getText().isEmpty() && !filter.isFocused());
                 filter.addChild(searchLabel);
                 dialog.addChild(filter);
+                filter.zOffset++;
+                searchLabel.zOffset++;
                 dialog.showCenter(500);
                 gui.scrollBarCustomizer.accept(dialog.scrollElement.getVerticalScrollBar());
             });

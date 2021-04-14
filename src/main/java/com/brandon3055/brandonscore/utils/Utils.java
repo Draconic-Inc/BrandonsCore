@@ -29,6 +29,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
 import java.text.DecimalFormat;
+import java.util.Random;
 
 /**
  * Created by Brandon on 25/07/2014.
@@ -37,7 +38,6 @@ import java.text.DecimalFormat;
 public class Utils {
 
     public static final String SELECT = "\u00A7";
-
     private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
 
     public static String formatNumber(double value) {

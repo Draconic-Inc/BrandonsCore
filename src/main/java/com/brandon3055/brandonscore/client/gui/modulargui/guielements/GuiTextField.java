@@ -58,6 +58,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     private boolean shiftCache;
     private String suggestion;
 
+    public int textZOffset = 0;
+
     private BiFunction<String, Integer, String> textFormatter = (p_195610_0_, p_195610_1_) -> {
         return p_195610_0_;
     };
@@ -473,6 +475,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             k = s.length();
         }
 
+        if (textZOffset != 0) matrixStack.translate(0, 0, textZOffset);
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
             if (getShadow()) {
@@ -525,6 +528,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             int l1 = stringX + this.fontRenderer.getStringWidth(s.substring(0, k));
             this.drawSelectionBox(k1, stringY - 1, l1 - 1, stringY + 1 + 9);
         }
+        if (textZOffset != 0) matrixStack.translate(0, 0, -textZOffset);
 
         RenderSystem.translated(0, 0, -zLevel);
 

@@ -1,9 +1,41 @@
 package com.brandon3055.brandonscore.utils;
 
+import java.util.Random;
+
 /**
  * Created by brandon3055 on 18/9/19.
  */
 public class MathUtils {
+
+    private static Random rand = new Random();
+    private static float[] randSet = new float[4096];
+    private static int randPos = 0;
+
+    static {
+        rand.setSeed(123); //Just to ensure consistency
+        for (int i = 0; i < randSet.length; i++) {
+            randSet[i] = rand.nextFloat();
+        }
+    }
+
+    /**
+     * This is a 'random' float generator.
+     * - It actually just loops through a set of randSet.length different random floats
+     * Much faster than java random and more than sufficient for certain rendering tasks.
+     * */
+    public static float nextFloat() {
+        return randSet[randPos++ % randSet.length];
+    }
+
+    /**
+     * Sets the current position for 'random' float generator.
+     * Effectively the same function as {@link Random#setSeed(long)} because the floats
+     * will always be supplied in the same order.
+     * */
+    public static void setRandSeed(long i) {
+        randPos = (int)i % randSet.length;
+    }
+
     /**
      * Rounds the number of decimal places based on the given multiplier.<br>
      * e.g.<br>
