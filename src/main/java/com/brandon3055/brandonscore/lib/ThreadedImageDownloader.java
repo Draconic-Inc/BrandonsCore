@@ -71,8 +71,8 @@ public class ThreadedImageDownloader extends SimpleTexture {
     }
 
     private void upload(NativeImage imageIn) {
-        TextureUtil.prepareImage(this.getGlTextureId(), imageIn.getWidth(), imageIn.getHeight());
-        imageIn.uploadTextureSub(0, 0, 0, true);
+        TextureUtil.prepareImage(this.getId(), imageIn.getWidth(), imageIn.getHeight());
+        imageIn.upload(0, 0, 0, true);
     }
 
     private void setImage(NativeImage nativeImageIn) {
@@ -97,10 +97,10 @@ public class ThreadedImageDownloader extends SimpleTexture {
 
 
     @Override
-    public void loadTexture(IResourceManager manager) throws IOException {
+    public void load(IResourceManager manager) throws IOException {
         if (!this.textureUploaded) {
             synchronized (this) {
-                super.loadTexture(manager);
+                super.load(manager);
                 this.textureUploaded = true;
             }
         }
@@ -157,7 +157,7 @@ public class ThreadedImageDownloader extends SimpleTexture {
 
                     }
 
-                }, Util.getServerExecutor());
+                }, Util.backgroundExecutor());
             }
         }
 
@@ -275,7 +275,7 @@ public class ThreadedImageDownloader extends SimpleTexture {
 //    }
 
 //    @Override
-//    protected SimpleTexture.TextureData func_215246_b(IResourceManager resourceManager) {
-//        return SimpleTexture.TextureData.func_217799_a(resourceManager, this.textureLocation);
+//    protected SimpleTexture.TextureData getTextureImage(IResourceManager resourceManager) {
+//        return SimpleTexture.TextureData.load(resourceManager, this.textureLocation);
 //    }
 }

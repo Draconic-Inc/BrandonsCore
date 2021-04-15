@@ -14,31 +14,31 @@ public class HandHelper {
      * Returns the first item found in ether of the players hands starting with the main hand
      */
     public static ItemStack getMainFirst(PlayerEntity player) {
-        if (!player.getHeldItemMainhand().isEmpty()) {
-            return player.getHeldItemMainhand();
+        if (!player.getMainHandItem().isEmpty()) {
+            return player.getMainHandItem();
         }
-        return player.getHeldItemOffhand();
+        return player.getOffhandItem();
     }
 
     /**
      * Returns the first item found in ether of the players hands starting with the off hand
      */
     public static ItemStack getOffFirst(PlayerEntity player) {
-        if (!player.getHeldItemOffhand().isEmpty()) {
-            return player.getHeldItemOffhand();
+        if (!player.getOffhandItem().isEmpty()) {
+            return player.getOffhandItem();
         }
-        return player.getHeldItemMainhand();
+        return player.getMainHandItem();
     }
 
     /**
      * Returns the first item found in ether of the players hands that is the same as the given item
      */
     public static ItemStack getItem(PlayerEntity player, Item item) {
-        if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == item) {
-            return player.getHeldItemMainhand();
+        if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().getItem() == item) {
+            return player.getMainHandItem();
         }
-        else if (!player.getHeldItemOffhand().isEmpty() && player.getHeldItemOffhand().getItem() == item) {
-            return player.getHeldItemOffhand();
+        else if (!player.getOffhandItem().isEmpty() && player.getOffhandItem().getItem() == item) {
+            return player.getOffhandItem();
         }
         return ItemStack.EMPTY;
     }
@@ -54,11 +54,11 @@ public class HandHelper {
 //    }
 
     public static boolean isHoldingItemEther(PlayerEntity player, Item item) {
-        if (!player.getHeldItemMainhand().isEmpty() && player.getHeldItemMainhand().getItem() == item) {
+        if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().getItem() == item) {
             return true;
         }
         else {
-            return !player.getHeldItemOffhand().isEmpty() && player.getHeldItemOffhand().getItem() == item;
+            return !player.getOffhandItem().isEmpty() && player.getOffhandItem().getItem() == item;
         }
     }
 }

@@ -120,18 +120,18 @@ public class GuiEffect {
         float scale = 8F * this.particleScale;
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuilder();
         vertexbuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
         float renderX = (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) partialTicks);
         float renderY = (float) (this.prevPosY + (this.posY - this.prevPosY) * (double) partialTicks);
 
-        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY - 1 * scale), zLevel).tex( maxU,  maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
-        vertexbuffer.pos((double) (renderX - 1 * scale), (double) (renderY + 1 * scale), zLevel).tex( maxU,  minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
-        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY + 1 * scale), zLevel).tex( minU,  minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
-        vertexbuffer.pos((double) (renderX + 1 * scale), (double) (renderY - 1 * scale), zLevel).tex( minU,  maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.vertex((double) (renderX - 1 * scale), (double) (renderY - 1 * scale), zLevel).uv( maxU,  maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.vertex((double) (renderX - 1 * scale), (double) (renderY + 1 * scale), zLevel).uv( maxU,  minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.vertex((double) (renderX + 1 * scale), (double) (renderY + 1 * scale), zLevel).uv( minU,  minV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
+        vertexbuffer.vertex((double) (renderX + 1 * scale), (double) (renderY - 1 * scale), zLevel).uv( minU,  maxV).color(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha).endVertex();
 
-        tessellator.draw();
+        tessellator.end();
     }
 
     public int getFXLayer()

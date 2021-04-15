@@ -57,7 +57,7 @@ public class ContainerPlayerAccess extends Container {
 
     //    @OnlyIn(Dist.DEDICATED_SERVER)
     @Override
-    public void detectAndSendChanges() {
+    public void broadcastChanges() {
 //        if (playerAccess != null && !(playerAccess instanceof OfflinePlayer)) {
 //            if (!playerAccess.isAlive()) {
 //                player.closeScreen();
@@ -77,7 +77,7 @@ public class ContainerPlayerAccess extends Container {
             BCoreNetwork.sendPlayerAccessUIUpdate((ServerPlayerEntity) player, playerAccess);
         }
 
-        super.detectAndSendChanges();
+        super.broadcastChanges();
     }
 
     public void layoutSlots() {
@@ -120,12 +120,12 @@ public class ContainerPlayerAccess extends Container {
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true;
     }
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
         return ItemStack.EMPTY;
     }
 
@@ -139,17 +139,17 @@ public class ContainerPlayerAccess extends Container {
             this.aPlayer = aPlayer;
         }
 
-        public int getSlotStackLimit() {
+        public int getMaxStackSize() {
             return 64;
         }
 
-        public boolean isItemValid(ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return true;//stack.getItem().isValidArmor(stack, eSlot, aPlayer);
         }
 
-        public boolean canTakeStack(PlayerEntity playerIn) {
-            ItemStack itemstack = this.getStack();
-            return (itemstack.isEmpty() || playerIn.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.canTakeStack(playerIn);
+        public boolean mayPickup(PlayerEntity playerIn) {
+            ItemStack itemstack = this.getItem();
+            return (itemstack.isEmpty() || playerIn.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.mayPickup(playerIn);
         }
 
         @Nullable

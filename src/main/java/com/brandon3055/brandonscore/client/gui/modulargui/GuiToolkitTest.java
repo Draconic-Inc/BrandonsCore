@@ -28,7 +28,7 @@ public class GuiToolkitTest extends ModularGuiScreen {
 
     @Override
     public void addElements(GuiElementManager manager) {
-        manager.addChild(new GuiButton("Reload").setSize(50, 16).setVanillaButtonRender(true).onPressed(() -> minecraft.displayGuiScreen(new GuiToolkitTest(title))));
+        manager.addChild(new GuiButton("Reload").setSize(50, 16).setVanillaButtonRender(true).onPressed(() -> minecraft.setScreen(new GuiToolkitTest(title))));
 
         TBasicMachine template = toolkit.loadTemplate(new TBasicMachine(this, null));
         template.title.setLabelText("Colour Palette Test UI");
@@ -42,9 +42,9 @@ public class GuiToolkitTest extends ModularGuiScreen {
         template.playerSlots.setXPos(template.background.xPos() + 7);
 
         //Info Panel
-        template.infoPanel.addLabeledValue(GOLD + I18n.format("gui.de.generator.fuel_efficiency"), 6, 11, () -> GRAY + ("--" + "%"), true);
-        template.infoPanel.addLabeledValue(GOLD + I18n.format("gui.de.generator.output_power"), 6, 11, () -> GRAY + ("--" + " / " + "--" + " OP/t"), true);
-        template.infoPanel.addLabeledValue(GOLD + I18n.format("gui.de.generator.current_fuel_value"), 6, 11, () -> GRAY + ("n/a"), true);
+        template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.fuel_efficiency"), 6, 11, () -> GRAY + ("--" + "%"), true);
+        template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.output_power"), 6, 11, () -> GRAY + ("--" + " / " + "--" + " OP/t"), true);
+        template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.current_fuel_value"), 6, 11, () -> GRAY + ("n/a"), true);
 
 
 

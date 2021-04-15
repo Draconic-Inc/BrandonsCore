@@ -30,9 +30,9 @@ public class MultiBlockHelper {
     public void setBlock(String name, World world, BlockPos pos) {
         Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name));
         if (block != null) {
-            world.setBlockState(pos, block.getDefaultState());
+            world.setBlockAndUpdate(pos, block.defaultBlockState());
         } else {
-            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+            world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
         }
 
     }

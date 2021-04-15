@@ -108,7 +108,7 @@ public class TileItemStackHandler extends ItemStackHandler {
             if (!stacks.get(i).isEmpty()) {
                 CompoundNBT itemTag = new CompoundNBT();
                 itemTag.putInt("Slot", i);
-                stacks.get(i).write(itemTag);
+                stacks.get(i).save(itemTag);
                 nbtTagList.add(itemTag);
             }
         }
@@ -126,7 +126,7 @@ public class TileItemStackHandler extends ItemStackHandler {
             int slot = itemTags.getInt("Slot");
 
             if (slot >= 0 && slot < stacks.size()) {
-                stacks.set(slot, ItemStack.read(itemTags));
+                stacks.set(slot, ItemStack.of(itemTags));
             }
         }
         onLoad();

@@ -30,10 +30,10 @@ public class GuiSlotRender extends GuiElement<GuiSlotRender> {
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1F, 1F, 1F, 1F);
         RenderMaterial mat = BCSprites.getThemed("slot");
-        bindTexture(mat.getAtlasLocation());
-        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-        drawSprite(mat.getBuffer(getter, BCSprites::makeType), getInsetRect().x, getInsetRect().y, 18, 18, mat.getSprite());
-        getter.finish();
+        bindTexture(mat.atlasLocation());
+        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+        drawSprite(mat.buffer(getter, BCSprites::makeType), getInsetRect().x, getInsetRect().y, 18, 18, mat.sprite());
+        getter.endBatch();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 }

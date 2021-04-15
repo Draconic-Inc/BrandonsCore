@@ -107,14 +107,14 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     public void detectAndSendChanges() {
-        if (world != null && !world.isRemote) {
+        if (level != null && !level.isClientSide) {
             dataManager.detectAndSendChanges();
             capManager.detectAndSendChanges();
         }
     }
 
     public void detectAndSendChangesToListeners(List<IContainerListener> listeners) {
-        if (world != null && !world.isRemote) {
+        if (level != null && !level.isClientSide) {
             dataManager.detectAndSendChangesToListeners(listeners);
             capManager.detectAndSendChangesToListeners(listeners);
         }
@@ -133,7 +133,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         CompoundNBT compound = new CompoundNBT();
         dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
-        return new SUpdateTileEntityPacket(this.pos, 0, compound);
+        return new SUpdateTileEntityPacket(this.worldPosition, 0, compound);
     }
 
     //Used when initially sending chunks to the client... I think
@@ -153,13 +153,13 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        dataManager.readSyncNBT(pkt.getNbtCompound());
-        readExtraNBT(pkt.getNbtCompound());
+        dataManager.readSyncNBT(pkt.getTag());
+        readExtraNBT(pkt.getTag());
     }
 
     public PacketCustom createServerBoundPacket(int id) {
         PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_MESSAGE);
-        packet.writePos(pos);
+        packet.writePos(worldPosition);
         packet.writeByte((byte) id);
         return packet;
     }
@@ -184,7 +184,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     public PacketCustom createClientBoundPacket(int id) {
         PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.C_TILE_MESSAGE);
-        packet.writePos(pos);
+        packet.writePos(worldPosition);
         packet.writeByte((byte) id);
         return packet;
     }
@@ -254,13 +254,13 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     //region Helper Functions.
 
     public void updateBlock() {
-        BlockState state = world.getBlockState(getPos());
-        world.notifyBlockUpdate(getPos(), state, state, 3);
+        BlockState state = level.getBlockState(getBlockPos());
+        level.sendBlockUpdated(getBlockPos(), state, state, 3);
     }
 
     public void dirtyBlock() {
-        Chunk chunk = world.getChunkAt(getPos());
-        chunk.setModified(true);
+        Chunk chunk = level.getChunkAt(getBlockPos());
+        chunk.setUnsaved(true);
     }
 
 //    /**
@@ -298,7 +298,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * Note: Packets from client to server do not need to be verified because that is already handled by the packet handler.
      */
     public boolean verifyPlayerPermission(PlayerEntity player) {
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, Direction.UP);
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, worldPosition, Direction.UP);
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }
@@ -380,8 +380,8 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
-    public final CompoundNBT write(CompoundNBT compound) {
-        super.write(compound);
+    public final CompoundNBT save(CompoundNBT compound) {
+        super.save(compound);
 
         dataManager.writeToNBT(compound);
         writeExtraNBT(compound);
@@ -390,8 +390,8 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
-        super.read(state, nbt);
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state, nbt);
         dataManager.readFromNBT(nbt);
         readExtraNBT(nbt);
 
@@ -455,7 +455,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
             return 0;
         }
 
-        TileEntity tile = world.getTileEntity(pos.offset(side));
+        TileEntity tile = level.getBlockEntity(worldPosition.relative(side));
         if (tile != null) {
             return EnergyUtils.insertEnergy(tile, maxSend, side.getOpposite(), false);
         }
@@ -467,7 +467,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
             return 0;
         }
 
-        TileEntity tile = world.getTileEntity(pos.offset(side));
+        TileEntity tile = world.getBlockEntity(pos.relative(side));
         if (tile != null) {
             return EnergyUtils.insertEnergy(tile, maxSend, side.getOpposite(), false);
         }
@@ -585,7 +585,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     public void onNeighborChange(BlockPos neighbor) {
         if (this instanceof IRSSwitchable) {
-            rsPowered.set(world.isBlockPowered(pos));
+            rsPowered.set(level.hasNeighborSignal(worldPosition));
         }
     }
 
@@ -609,7 +609,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
             return new StringTextComponent(customName);
         }
 
-        return new TranslationTextComponent(getBlockState().getBlock().getTranslationKey());
+        return new TranslationTextComponent(getBlockState().getBlock().getDescriptionId());
     }
 
     @Override
@@ -651,7 +651,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * playerAccessTracking must be enabled in this tile's constructor in order for this to work.
      */
     public Set<PlayerEntity> getAccessingPlayers() {
-        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCore) || ((ContainerBCTile) e.openContainer).tile != this); //Clean up set
+        accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCore) || ((ContainerBCTile) e.containerMenu).tile != this); //Clean up set
         return accessingPlayers;
     }
 
@@ -661,7 +661,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     public void onPlayerCloseContainer(PlayerEntity player) {
         accessingPlayers.remove(player);
-        accessingPlayers.removeIf(e -> !(e.openContainer instanceof ContainerBCore) || ((ContainerBCTile) e.openContainer).tile != this); //Clean up set
+        accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCore) || ((ContainerBCTile) e.containerMenu).tile != this); //Clean up set
     }
 
 }

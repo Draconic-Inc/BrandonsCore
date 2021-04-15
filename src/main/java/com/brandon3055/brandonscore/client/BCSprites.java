@@ -42,12 +42,12 @@ public class BCSprites {
 //            .build(false)
 //    );
 
-    public static final RenderType GUI_TEX_TYPE = RenderType.makeType("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-            .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
-            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .cull(RenderState.CULL_DISABLED)
-            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .build(false)
+    public static final RenderType GUI_TEX_TYPE = RenderType.create("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
+            .setTextureState(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
+            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .setCullState(RenderState.NO_CULL)
+            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+            .createCompositeState(false)
     );
 
 
@@ -186,12 +186,12 @@ public class BCSprites {
     }
 
     public static RenderType makeType(ResourceLocation location) {
-        return RenderType.makeType("sprite_type", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-                .texture(new RenderState.TextureState(location, false, false))
-                .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-                .cull(RenderState.CULL_DISABLED)
-                .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-                .build(false));
+        return RenderType.create("sprite_type", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
+                .setTextureState(new RenderState.TextureState(location, false, false))
+                .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(RenderState.NO_CULL)
+                .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+                .createCompositeState(false));
     }
 
 
@@ -216,8 +216,8 @@ public class BCSprites {
         }
 
         @Override
-        public TextureAtlasSprite getSprite() {
-            return guiSpriteUploader.getSprite(getTextureLocation());
+        public TextureAtlasSprite sprite() {
+            return guiSpriteUploader.getSprite(texture());
         }
     }
 }

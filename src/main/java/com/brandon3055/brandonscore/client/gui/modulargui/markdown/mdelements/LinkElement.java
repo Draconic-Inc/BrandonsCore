@@ -36,9 +36,9 @@ public class LinkElement extends MDElementBase<LinkElement> {
         List<String> wrappedText = fontRenderer.listFormattedStringToWidth(displayText, avalibleTextWidth);
         int textWidth = 0;
         for (String text : wrappedText) {
-            textWidth = Math.max(textWidth, fontRenderer.getStringWidth(text));
+            textWidth = Math.max(textWidth, fontRenderer.width(text));
         }
-        int textHeight = fontRenderer.getWordWrappedHeight(displayText, avalibleTextWidth);
+        int textHeight = fontRenderer.wordWrapHeight(displayText, avalibleTextWidth);
 
         setSize(textWidth + leftPad + rightPad, textHeight + topPad + bottomPad);
 
@@ -84,8 +84,8 @@ public class LinkElement extends MDElementBase<LinkElement> {
         if (isMouseOver(mouseX, mouseY)) {
             if (container.linkDisplayTarget != null) {
                 GuiElement e = container.linkDisplayTarget;
-                int width = fontRenderer.getStringWidth(linkTarget);
-                int height = fontRenderer.getWordWrappedHeight(linkTarget, e.xSize()) + 4;
+                int width = fontRenderer.width(linkTarget);
+                int height = fontRenderer.wordWrapHeight(linkTarget, e.xSize()) + 4;
                 zOffset += container.linkDisplayZOffset;
                 drawColouredRect(e.xPos(), e.maxYPos() - height, Math.min(Math.max(width + 4, e.xSize() / 2), e.xSize()), height, 0x90000000);
                 drawSplitString(fontRenderer, linkTarget, e.xPos() + 2, e.maxYPos() - height + 2, e.xSize(), 0xc0c0c0, false);

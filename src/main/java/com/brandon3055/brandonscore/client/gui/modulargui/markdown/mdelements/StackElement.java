@@ -44,7 +44,7 @@ public class StackElement extends MDElementBase<StackElement> {
         List<ItemStack> baseStacks = new ArrayList<>();
 
         if (isOre) {
-            baseStacks.addAll(tag.getAllElements().stream().map(ItemStack::new).collect(Collectors.toList()));
+            baseStacks.addAll(tag.getValues().stream().map(ItemStack::new).collect(Collectors.toList()));
         }
         else {
             StackReference stackRef = StackReference.fromString(stackString);
@@ -84,32 +84,32 @@ public class StackElement extends MDElementBase<StackElement> {
 
         if (drawSlot) {
             RenderMaterial mat = BCSprites.get("light/slot");
-            bindTexture(mat.getAtlasLocation());
+            bindTexture(mat.atlasLocation());
             RenderSystem.color4f(1F, 1F, 1F, 1F);
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-            drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.getSprite());
-            getter.finish();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+            drawSprite(mat.buffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+            getter.endBatch();
         }
 
         double scale = size / 18D;
         ItemStack stack = stacks[(BCClientEventHandler.elapsedTicks / 40) % stacks.length];
 
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.turnBackOn();
         RenderSystem.translated(xPos() + scale, yPos() + scale, getRenderZLevel() - 80);
         RenderSystem.scaled(scale, scale, 1);
-        minecraft.getItemRenderer().renderItemIntoGUI(stack, 0, 0);
+        minecraft.getItemRenderer().renderGuiItem(stack, 0, 0);
 
         if (stack.getCount() > 1) {
             String s = "" + Utils.SELECT + "f" + stack.getCount() + "" + Utils.SELECT + "f";
             RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
-            drawString(fontRenderer, s, 18 - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
+            drawString(fontRenderer, s, 18 - (fontRenderer.width(s)) - 1, fontRenderer.lineHeight, 0xFFFFFF, true);
             zOffset -= 45;
         }
 
         //TODO com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer
 //        RenderSystem.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
         RenderSystem.popMatrix();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
@@ -169,7 +169,7 @@ public class StackElement extends MDElementBase<StackElement> {
                 return true;
             }
             //TODO Test
-            else if (PIHelper.isInstalled() && PIHelper.getETGuiKey().matchesKey(keyCode, scanCode)) {
+            else if (PIHelper.isInstalled() && PIHelper.getETGuiKey().matches(keyCode, scanCode)) {
                 List<String> pages = PIHelper.getRelatedPages(stack);
                 if (!pages.isEmpty()) {
                     PIHelper.openGui(modularGui.getScreen(), pages);

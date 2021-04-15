@@ -69,14 +69,14 @@ public class FilterPlayer extends FilterBase {
             return player.getGameProfile().getName().equalsIgnoreCase(playerName);
         }
         else if (!playerUUID.isEmpty()) {
-            return player.getUniqueID().toString().equals(playerUUID);
+            return player.getUUID().toString().equals(playerUUID);
         }
         MinecraftServer server = player.getServer();
         if (server != null){
-            GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(playerName);
+            GameProfile profile = server.getProfileCache().get(playerName);
             if (profile != null) {
                 playerUUID = profile.getId().toString();
-                return player.getUniqueID().toString().equals(playerUUID);
+                return player.getUUID().toString().equals(playerUUID);
             }
         }
         return player.getGameProfile().getName().equalsIgnoreCase(playerName);

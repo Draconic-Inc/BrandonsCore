@@ -200,12 +200,12 @@ public class GuiLabel extends GuiElement<GuiLabel> {
             int colour = getTextColour(mouseOver);
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 
-            int ySize = fontRenderer.FONT_HEIGHT;
+            int ySize = fontRenderer.lineHeight;
             if (wrap && !trim) {
-                ySize = fontRenderer.getWordWrappedHeight(displayString, widthLimit);
+                ySize = fontRenderer.wordWrapHeight(displayString, widthLimit);
             }
 
-            boolean wrap = this.wrap && fontRenderer.getStringWidth(displayString) > widthLimit;
+            boolean wrap = this.wrap && fontRenderer.width(displayString) > widthLimit;
 
             int yPos = (getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2);
             int xPos = getInsetRect().x;
@@ -239,7 +239,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
      * Automatically adjusts the width of this element to fit the text it is displaying.
      */
     public GuiLabel setWidthFromText() {
-        int textWidth = fontRenderer.getStringWidth(getLabelText());
+        int textWidth = fontRenderer.width(getLabelText());
         setXSize(textWidth + getInsets().left + getInsets().right);
         return this;
     }
@@ -258,7 +258,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
      * the added height from wrapping if the text is too long to fit within the current xSize.
      */
     public GuiLabel setHeightForText() {
-        int textHeight = fontRenderer.getWordWrappedHeight(getLabelText(), getInsetRect().width);
+        int textHeight = fontRenderer.wordWrapHeight(getLabelText(), getInsetRect().width);
         setYSize(textHeight + getInsets().top + getInsets().bottom);
         return this;
     }

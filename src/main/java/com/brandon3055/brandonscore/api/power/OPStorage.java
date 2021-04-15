@@ -229,7 +229,7 @@ public class OPStorage implements INBTSerializable<CompoundNBT>, IValueHashable<
     private long smartRead(String name, CompoundNBT compound) {
         INBT tag = compound.get(name);
         if (tag instanceof NumberNBT) {
-            return ((NumberNBT) tag).getLong();
+            return ((NumberNBT) tag).getAsLong();
         }
         return 0;
     }

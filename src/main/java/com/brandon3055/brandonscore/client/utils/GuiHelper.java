@@ -27,19 +27,19 @@ import java.util.List;
  * Created by Brandon on 28/06/2014.
  */
 public class GuiHelper {
-    public static final RenderType TRANS_TYPE = RenderType.makeType("gui_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .alpha(RenderState.ZERO_ALPHA)
-            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .build(false)
+    public static final RenderType TRANS_TYPE = RenderType.create("gui_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.builder()
+            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .setAlphaState(RenderState.NO_ALPHA)
+            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+            .createCompositeState(false)
     );
 
     //Triangle Fan Type
-    public static RenderType FAN_TYPE = RenderType.makeType("tri_fan_type", DefaultVertexFormats.POSITION_COLOR, GL11.GL_TRIANGLE_FAN, 256, RenderType.State.getBuilder()
-            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .alpha(RenderState.ZERO_ALPHA)
-            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .build(false)
+    public static RenderType FAN_TYPE = RenderType.create("tri_fan_type", DefaultVertexFormats.POSITION_COLOR, GL11.GL_TRIANGLE_FAN, 256, RenderType.State.builder()
+            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .setAlphaState(RenderState.NO_ALPHA)
+            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+            .createCompositeState(false)
     );
 
     public static final float PXL128 = 0.0078125F;
@@ -55,13 +55,13 @@ public class GuiHelper {
 
     public static void drawTexturedRect(float x, float y, float width, float height, int u, int v, int uSize, int vSize, float zLevel, float pxl) {
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder vertexBuffer = tessellator.getBuffer();
+        BufferBuilder vertexBuffer = tessellator.getBuilder();
         vertexBuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        vertexBuffer.pos(x, y + height, zLevel).tex(u * pxl, (v + vSize) * pxl).endVertex();
-        vertexBuffer.pos(x + width, y + height, zLevel).tex((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
-        vertexBuffer.pos(x + width, y, zLevel).tex((u + uSize) * pxl, v * pxl).endVertex();
-        vertexBuffer.pos(x, y, zLevel).tex(u * pxl, v * pxl).endVertex();
-        tessellator.draw();
+        vertexBuffer.vertex(x, y + height, zLevel).uv(u * pxl, (v + vSize) * pxl).endVertex();
+        vertexBuffer.vertex(x + width, y + height, zLevel).uv((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
+        vertexBuffer.vertex(x + width, y, zLevel).uv((u + uSize) * pxl, v * pxl).endVertex();
+        vertexBuffer.vertex(x, y, zLevel).uv(u * pxl, v * pxl).endVertex();
+        tessellator.end();
     }
 
     public static void drawTiledTextureRectWithTrim(int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight, double zLevel) {
@@ -70,7 +70,7 @@ public class GuiHelper {
         if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
 
         for (int x = 0; x < xSize; ) {
@@ -100,14 +100,14 @@ public class GuiHelper {
             x += trimWidth;
         }
 
-        tessellator.draw();
+        tessellator.end();
     }
 
     private static void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height, double zLevel) {
-        buffer.pos(x, y + height, zLevel).tex( ((float) (textureX) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos(x + width, y + height, zLevel).tex( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.pos(x + width, y, zLevel).tex( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
-        buffer.pos(x, y, zLevel).tex( ((float) (textureX) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.vertex(x, y + height, zLevel).uv( ((float) (textureX) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.vertex(x + width, y + height, zLevel).uv( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.vertex(x + width, y, zLevel).uv( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.vertex(x, y, zLevel).uv( ((float) (textureX) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
     }
 
 //    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
@@ -119,7 +119,7 @@ public class GuiHelper {
         if (!list.isEmpty()) {
             RenderSystem.pushMatrix();
             RenderSystem.disableRescaleNormal();
-            RenderHelper.disableStandardItemLighting();
+            RenderHelper.turnOff();
             RenderSystem.disableLighting();
             RenderSystem.disableDepthTest();
             RenderSystem.scaled(scale, scale, 1);
@@ -130,7 +130,7 @@ public class GuiHelper {
 
             for (Object aList : list) {
                 String s = (String) aList;
-                int l = font.getStringWidth(s);
+                int l = font.width(s);
 
                 if (l > tooltipTextWidth) {
                     tooltipTextWidth = l;
@@ -172,7 +172,7 @@ public class GuiHelper {
                 RenderSystem.enableBlend();
                 RenderSystem.disableAlphaTest();
                 RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-                font.drawStringWithShadow(matrixstack, s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
+                font.drawShadow(matrixstack, s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
                 RenderSystem.enableAlphaTest();
                 tooltipY += 10;
                 ++i2;
@@ -180,7 +180,7 @@ public class GuiHelper {
 
             RenderSystem.enableLighting();
             RenderSystem.enableDepthTest();
-            RenderHelper.enableStandardItemLighting();
+            RenderHelper.turnBackOn();
             RenderSystem.enableRescaleNormal();
             RenderSystem.popMatrix();
         }
@@ -202,13 +202,13 @@ public class GuiHelper {
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         RenderSystem.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder vertexbuffer = tessellator.getBuffer();
+        BufferBuilder vertexbuffer = tessellator.getBuilder();
         vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        vertexbuffer.pos(right, top, zLevel).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.pos(left, top, zLevel).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.pos(left, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        vertexbuffer.pos(right, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        tessellator.draw();
+        vertexbuffer.vertex(right, top, zLevel).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.vertex(left, top, zLevel).color(f1, f2, f3, f).endVertex();
+        vertexbuffer.vertex(left, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        vertexbuffer.vertex(right, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        tessellator.end();
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -280,8 +280,8 @@ public class GuiHelper {
     public static void drawPlayerSlots(AbstractGui gui, int posX, int posY, boolean center) {
         RenderSystem.color4f(1F, 1F, 1F, 1F);
         RenderMaterial mat = BCSprites.getThemed("slot");
-        ResourceHelperBC.bindTexture(mat.getAtlasLocation());
-        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+        ResourceHelperBC.bindTexture(mat.atlasLocation());
+        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().renderBuffers().bufferSource();
 
         if (center) {
             posX -= 81;
@@ -289,43 +289,43 @@ public class GuiHelper {
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                drawSprite(mat.getBuffer(getter, BCSprites::makeType), posX + x * 18, posY + y * 18, 18, 18, mat.getSprite(), 0);
+                drawSprite(mat.buffer(getter, BCSprites::makeType), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
             }
         }
 
         for (int x = 0; x < 9; x++) {
-            drawSprite(mat.getBuffer(getter, BCSprites::makeType), posX + x * 18, posY + 58, 18, 18, mat.getSprite(), 0);
+            drawSprite(mat.buffer(getter, BCSprites::makeType), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
         }
-        getter.finish();
+        getter.endBatch();
     }
 
     @Deprecated
     public static void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
         MatrixStack matrixstack = new MatrixStack();
         if (dropShadow) {
-            fontRenderer.drawStringWithShadow(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+            fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
         } else {
-            fontRenderer.drawString(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+            fontRenderer.draw(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
         }
     }
 
     public static void drawCenteredString(FontRenderer fontRenderer, MatrixStack matrixstack, String text, int x, int y, int color, boolean dropShadow) {
         if (dropShadow) {
-            fontRenderer.drawStringWithShadow(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+            fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
         } else {
-            fontRenderer.drawString(matrixstack, text, (float) (x - fontRenderer.getStringWidth(text) / 2), (float) y, color);
+            fontRenderer.draw(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
         }
     }
 
     public static void drawBackgroundString(IVertexBuilder vertexBuilder, FontRenderer font, String text, float x, float y, int color, int background, int padding, boolean shadow, boolean centered) {
         MatrixStack matrixstack = new MatrixStack();
-        int width = font.getStringWidth(text);
+        int width = font.width(text);
         x = centered ? x - width / 2F : x;
-        drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.FONT_HEIGHT - 2 + padding * 2, background, 0);
+        drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.lineHeight - 2 + padding * 2, background, 0);
         if (shadow) {
-            font.drawStringWithShadow(matrixstack, text, x, y, color);
+            font.drawShadow(matrixstack, text, x, y, color);
         } else {
-            font.drawString(matrixstack, text, x, y, color);
+            font.draw(matrixstack, text, x, y, color);
         }
     }
 
@@ -389,9 +389,9 @@ public class GuiHelper {
 
     public static void renderCuboid(Cuboid6 cuboid, float r, float g, float b, float a) {
         MatrixStack stack = new MatrixStack();
-        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().renderBuffers().bufferSource();
         Matrix4 mat = new Matrix4(stack);
-        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(RenderType.getLines()), mat);
+        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(RenderType.lines()), mat);
         RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);
     }
 
@@ -434,10 +434,10 @@ public class GuiHelper {
         float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
         float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(endColor         & 255) / 255.0F;
-        builder.pos(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        builder.pos( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        builder.pos( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-        builder.pos(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.vertex( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.vertex(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
         //@formatter:on
     }
 
@@ -504,19 +504,19 @@ public class GuiHelper {
         int h = tex.getHeight();
         int[] colours = ColourARGB.unpack(colour);
         //@formatter:off
-        builder.pos(x,         y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU((textureX / w) * 16D),          tex.getInterpolatedV(((textureY + height) / h) * 16)).endVertex();
-        builder.pos(x + width, y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU(((textureX + width) / w) * 16), tex.getInterpolatedV(((textureY + height) / h) * 16)).endVertex();
-        builder.pos(x + width, y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU(((textureX + width) / w) * 16), tex.getInterpolatedV(((textureY) / h) * 16)).endVertex();
-        builder.pos(x,         y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).tex(tex.getInterpolatedU((textureX / w) * 16),           tex.getInterpolatedV(((textureY) / h) * 16)).endVertex();
+        builder.vertex(x,         y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU((textureX / w) * 16D),          tex.getV(((textureY + height) / h) * 16)).endVertex();
+        builder.vertex(x + width, y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU(((textureX + width) / w) * 16), tex.getV(((textureY + height) / h) * 16)).endVertex();
+        builder.vertex(x + width, y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU(((textureX + width) / w) * 16), tex.getV(((textureY) / h) * 16)).endVertex();
+        builder.vertex(x,         y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU((textureX / w) * 16),           tex.getV(((textureY) / h) * 16)).endVertex();
         //@formatter:on
     }
 
     public static void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite, double zLevel) {
         //@formatter:off
-        builder.pos(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
-        builder.pos(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
-        builder.pos(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
-        builder.pos(x,          y,          zLevel).color(1F, 1F, 1F, 1F).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+        builder.vertex(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
+        builder.vertex(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();
+        builder.vertex(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV0()).endVertex();
+        builder.vertex(x,          y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV0()).endVertex();
         //@formatter:on
     }
 }

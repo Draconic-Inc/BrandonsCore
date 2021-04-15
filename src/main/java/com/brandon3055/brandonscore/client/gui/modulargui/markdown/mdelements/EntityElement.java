@@ -67,7 +67,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
         setSize(size, size);
 
         try {
-            renderEntity = getRenderEntity(mc.world, entityName, EquipmentHelper.create(this));
+            renderEntity = getRenderEntity(mc.level, entityName, EquipmentHelper.create(this));
         }
         catch (IllegalArgumentException e) {
             error("[Broken Entity. " + e.getMessage() + "]");
@@ -91,17 +91,17 @@ public class EntityElement extends MDElementBase<EntityElement> {
         int yPos = yPos() + yOffset;
 
         try {
-            int scale = (int) ((size / Math.max(renderEntity.getHeight(), renderEntity.getWidth())) * drawScale);
+            int scale = (int) ((size / Math.max(renderEntity.getBbHeight(), renderEntity.getBbWidth())) * drawScale);
             double posX = xPos + (size / 2D);
             double entityRotation = rotation + ((BCClientEventHandler.elapsedTicks + partialTicks) * rotateSpeed);
 
-            renderEntity.ticksExisted = BCClientEventHandler.elapsedTicks;
+            renderEntity.tickCount = BCClientEventHandler.elapsedTicks;
 
             RenderSystem.pushMatrix();
             RenderSystem.translated(0, 0, 25 + getRenderZLevel() + scale);
             RenderSystem.color4f(1, 1, 1, 1);
 
-            int eyeOffset = (int) ((renderEntity.getHeight() - renderEntity.getEyeHeight()) * scale);
+            int eyeOffset = (int) ((renderEntity.getBbHeight() - renderEntity.getEyeHeight()) * scale);
             if (renderEntity instanceof LivingEntity) {
                 drawEntityOnScreen((int) posX, yPos + ySize(), scale, (int) posX - mouseX, yPos() - mouseY + eyeOffset, (LivingEntity) renderEntity, trackMouse, entityRotation, drawName);
             }
@@ -125,11 +125,11 @@ public class EntityElement extends MDElementBase<EntityElement> {
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (!tooltip.isEmpty() && !errored && renderEntity != null) {
-            double ar = renderEntity.getHeight() / renderEntity.getWidth();
+            double ar = renderEntity.getBbHeight() / renderEntity.getBbWidth();
             double width = size * drawScale;
             double height = size * drawScale;
             if (ar > 1) {
-                width *= renderEntity.getWidth() / renderEntity.getHeight();
+                width *= renderEntity.getBbWidth() / renderEntity.getBbHeight();
             }
             else {
                 height *= ar;
@@ -152,24 +152,24 @@ public class EntityElement extends MDElementBase<EntityElement> {
         RenderSystem.translated((float) posX, (float) posY, 50.0F);
         RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
         RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        float f1 = ent.rotationYaw;
-        float f2 = ent.rotationPitch;
+        float f1 = ent.yRot;
+        float f2 = ent.xRot;
         RenderSystem.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.turnBackOn();
         RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
 //        RenderSystem.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 //        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
 //        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
         RenderSystem.translatef(0.0F, 0.0F, 0.0F);
-        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
+        EntityRendererManager rendermanager = Minecraft.getInstance().getEntityRenderDispatcher();
 //        rendermanager.setPlayerViewY(180.0F);
 //        rendermanager.setRenderShadow(false);
 //        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
 //        rendermanager.setRenderShadow(true);
-        ent.rotationYaw = f1;
-        ent.rotationPitch = f2;
+        ent.yRot = f1;
+        ent.xRot = f2;
         RenderSystem.popMatrix();
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
         RenderSystem.disableRescaleNormal();
 //        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
 //        RenderSystem.disableTexture();
@@ -192,39 +192,39 @@ public class EntityElement extends MDElementBase<EntityElement> {
         RenderSystem.translatef((float) posX, (float) posY, 50.0F);
         RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
         RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        float f = ent.renderYawOffset;
-        float f1 = ent.rotationYaw;
-        float f2 = ent.rotationPitch;
-        float f3 = ent.prevRotationYawHead;
-        float f4 = ent.rotationYawHead;
+        float f = ent.yBodyRot;
+        float f1 = ent.yRot;
+        float f2 = ent.xRot;
+        float f3 = ent.yHeadRotO;
+        float f4 = ent.yHeadRot;
         RenderSystem.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.turnBackOn();
         RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
         RenderSystem.rotatef(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-        ent.renderYawOffset = (float) Math.atan((double) (mouseX / 40.0F)) * 20.0F;
-        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
-        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        ent.rotationYawHead = ent.rotationYaw;
-        ent.prevRotationYawHead = ent.rotationYaw;
+        ent.yBodyRot = (float) Math.atan((double) (mouseX / 40.0F)) * 20.0F;
+        ent.yRot = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
+        ent.xRot = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
+        ent.yHeadRot = ent.yRot;
+        ent.yHeadRotO = ent.yRot;
 
         if (ent instanceof EnderDragonEntity) {
-            RenderSystem.rotatef(ent.rotationPitch, 1, 0, 0);
-            RenderSystem.rotatef(-ent.rotationYawHead + 180, 0, 1, 0);
+            RenderSystem.rotatef(ent.xRot, 1, 0, 0);
+            RenderSystem.rotatef(-ent.yHeadRot + 180, 0, 1, 0);
         }
 
         RenderSystem.translatef(0.0F, 0.0F, 0.0F);
-        EntityRendererManager rendermanager = Minecraft.getInstance().getRenderManager();
+        EntityRendererManager rendermanager = Minecraft.getInstance().getEntityRenderDispatcher();
 //        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
 //        rendermanager.setRenderShadow(false);
 //        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
 //        rendermanager.setRenderShadow(true);
-        ent.renderYawOffset = f;
-        ent.rotationYaw = f1;
-        ent.rotationPitch = f2;
-        ent.prevRotationYawHead = f3;
-        ent.rotationYawHead = f4;
+        ent.yBodyRot = f;
+        ent.yRot = f1;
+        ent.xRot = f2;
+        ent.yHeadRotO = f3;
+        ent.yHeadRot = f4;
         RenderSystem.popMatrix();
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
         RenderSystem.disableRescaleNormal();
 //        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
 //        RenderSystem.disableTexture();
@@ -270,24 +270,24 @@ public class EntityElement extends MDElementBase<EntityElement> {
     }
 
     public static PlayerEntity createRenderPlayer(ClientWorld world, String username) {
-        return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameProfile(new GameProfile(null, username))) {
+        return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameprofile(new GameProfile(null, username))) {
             @Override
-            public String getSkinType() {
-                return super.getSkinType();
+            public String getModelName() {
+                return super.getModelName();
             }
 
             @Override
-            public ResourceLocation getLocationSkin() {
+            public ResourceLocation getSkinTextureLocation() {
                 ResourceLocation resourcelocation;
 
                 Minecraft minecraft = Minecraft.getInstance();
-                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(getGameProfile());
+                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(getGameProfile());
 
                 if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                    resourcelocation = minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+                    resourcelocation = minecraft.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
                 }
                 else {
-                    UUID uuid = PlayerEntity.getUUID(getGameProfile());
+                    UUID uuid = PlayerEntity.createPlayerUUID(getGameProfile());
                     resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
                 }
 
@@ -295,7 +295,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
             }
 
             @Override
-            public boolean isWearing(PlayerModelPart part) {
+            public boolean isModelPartShown(PlayerModelPart part) {
                 return true;
             }
         };
@@ -308,7 +308,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
     public boolean onUpdate() {
         if (animate && renderEntity != null && !errored && !animateBroken && animTick != BCClientEventHandler.elapsedTicks) {
             try {
-                renderEntity.ticksExisted = animTick;
+                renderEntity.tickCount = animTick;
                 animTick = BCClientEventHandler.elapsedTicks;
                 renderEntity.tick();
             }
@@ -329,12 +329,12 @@ public class EntityElement extends MDElementBase<EntityElement> {
         public boolean hasEquipment = false;
 
         public void apply(LivingEntity entity) {
-            if (!mainHand.isEmpty()) entity.setHeldItem(Hand.MAIN_HAND, mainHand);
-            if (!offHand.isEmpty()) entity.setHeldItem(Hand.OFF_HAND, offHand);
-            if (!head.isEmpty()) entity.setItemStackToSlot(EquipmentSlotType.HEAD, head);
-            if (!chest.isEmpty()) entity.setItemStackToSlot(EquipmentSlotType.CHEST, chest);
-            if (!legs.isEmpty()) entity.setItemStackToSlot(EquipmentSlotType.LEGS, legs);
-            if (!boots.isEmpty()) entity.setItemStackToSlot(EquipmentSlotType.FEET, boots);
+            if (!mainHand.isEmpty()) entity.setItemInHand(Hand.MAIN_HAND, mainHand);
+            if (!offHand.isEmpty()) entity.setItemInHand(Hand.OFF_HAND, offHand);
+            if (!head.isEmpty()) entity.setItemSlot(EquipmentSlotType.HEAD, head);
+            if (!chest.isEmpty()) entity.setItemSlot(EquipmentSlotType.CHEST, chest);
+            if (!legs.isEmpty()) entity.setItemSlot(EquipmentSlotType.LEGS, legs);
+            if (!boots.isEmpty()) entity.setItemSlot(EquipmentSlotType.FEET, boots);
         }
 
         public static EquipmentHelper create(EntityElement element) {

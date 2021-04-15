@@ -46,7 +46,7 @@ public class StackReference {
     }
 
     public StackReference(ItemStack stack) {
-        this(stack.getItem().getRegistryName().toString(), stack.getCount(), stack.getDamage(), stack.getTag());
+        this(stack.getItem().getRegistryName().toString(), stack.getCount(), stack.getDamageValue(), stack.getTag());
     }
 
     private StackReference() {
@@ -71,7 +71,7 @@ public class StackReference {
             else {
                 itemStack = new ItemStack(block, stackSize);
             }
-            itemStack.setDamage(metadata);
+            itemStack.setDamageValue(metadata);
 
             if (nbt != null) {
                 itemStack.setTag(nbt.copy());
@@ -220,7 +220,7 @@ public class StackReference {
         }
         if (nbt.length() > 0) {
             try {
-                compound = JsonToNBT.getTagFromJson(nbt);
+                compound = JsonToNBT.parseTag(nbt);
             }
             catch (Exception e) {
                 LogHelperBC.warn("StackReference: Failed to parse stack nbt from string - " + nbt + " error: " + e.getMessage());
@@ -240,7 +240,7 @@ public class StackReference {
             String name = string.substring(5, string.indexOf(",size:"));
             int size = Integer.parseInt(string.substring(string.indexOf(",size:") + 6, string.indexOf(",meta:")));
             int meta = Integer.parseInt(string.substring(string.indexOf(",meta:") + 6, string.indexOf(",nbt:")));
-            CompoundNBT compound = JsonToNBT.getTagFromJson(string.substring(string.indexOf(",nbt:") + 5, string.length()));
+            CompoundNBT compound = JsonToNBT.parseTag(string.substring(string.indexOf(",nbt:") + 5, string.length()));
 
             return new StackReference(name, size, meta, compound.isEmpty() ? null : compound);
         }

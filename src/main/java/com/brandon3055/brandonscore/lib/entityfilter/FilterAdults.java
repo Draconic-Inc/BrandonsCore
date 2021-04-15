@@ -46,7 +46,7 @@ public class FilterAdults extends FilterBase {
         boolean isAgeable = entity instanceof AgeableEntity;
         if (isAgeable) {
             AgeableEntity ageable = (AgeableEntity) entity;
-            return whitelistAdults == !ageable.isChild();
+            return whitelistAdults == !ageable.isBaby();
         }
         return includeNonAgeable;
     }

@@ -25,9 +25,9 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
         this.ySize = ySize;
         this.minecraft = Minecraft.getInstance();
         this.itemRenderer = minecraft.getItemRenderer();
-        this.font = minecraft.fontRenderer;
-        this.width = minecraft.getMainWindow().getScaledWidth();
-        this.height = minecraft.getMainWindow().getScaledHeight();
+        this.font = minecraft.font;
+        this.width = minecraft.getWindow().getGuiScaledWidth();
+        this.height = minecraft.getWindow().getGuiScaledHeight();
         manager.setWorldAndResolution(minecraft, width, height);
     }
 

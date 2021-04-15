@@ -23,11 +23,11 @@ public class InventoryUtils {
             return false;
         }
 
-        for (int i = 0; i < inventory.getSizeInventory(); i++) {
-            ItemStack s = inventory.getStackInSlot(i);
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack s = inventory.getItem(i);
 
             //TODO Do i still need to check damage?
-            if (ItemStack.areItemsEqual(stack, s) && stack.getDamage() == s.getDamage() && s.getCount() >= stack.getCount()) {
+            if (ItemStack.isSame(stack, s) && stack.getDamageValue() == s.getDamageValue() && s.getCount() >= stack.getCount()) {
                 return true;
             }
         }
@@ -40,16 +40,16 @@ public class InventoryUtils {
             return false;
         }
 
-        for (int i = 0; i < inventory.getSizeInventory(); i++) {
-            ItemStack s = inventory.getStackInSlot(i);
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack s = inventory.getItem(i);
             if (s.isEmpty()) {
                 continue;
             }
 
             //TODO Do i still need to check damage?
-            if (ItemStack.areItemsEqual(stack, s) && stack.getDamage() == s.getDamage() && s.getCount() >= stack.getCount()) {
+            if (ItemStack.isSame(stack, s) && stack.getDamageValue() == s.getDamageValue() && s.getCount() >= stack.getCount()) {
                 s.shrink(stack.getCount());
-                inventory.markDirty();
+                inventory.setChanged();
                 return true;
             }
         }
@@ -67,46 +67,46 @@ public class InventoryUtils {
      * Will not transfer partial stacks.
      */
     public static void handleHeldStackTransfer(int slot, IInventory inventory, PlayerEntity player) {
-        if (player.world.isRemote) {
+        if (player.level.isClientSide) {
             return;
         }
 
-        if (!inventory.getStackInSlot(slot).isEmpty()) {
-            if (player.getHeldItemMainhand().isEmpty()) {
-                player.setHeldItem(Hand.MAIN_HAND, inventory.getStackInSlot(slot));
+        if (!inventory.getItem(slot).isEmpty()) {
+            if (player.getMainHandItem().isEmpty()) {
+                player.setItemInHand(Hand.MAIN_HAND, inventory.getItem(slot));
             } else {
-                givePlayerStack(player, inventory.getStackInSlot(slot));
+                givePlayerStack(player, inventory.getItem(slot));
             }
-            inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+            inventory.setItem(slot, ItemStack.EMPTY);
         } else {
             DataUtils.forEach(Hand.values(), enumHand -> {
-                ItemStack stack = player.getHeldItem(enumHand);
-                if (!stack.isEmpty() && inventory.isItemValidForSlot(slot, stack) && inventory.getStackInSlot(slot).isEmpty()) {
-                    inventory.setInventorySlotContents(slot, stack);
-                    player.setHeldItem(enumHand, ItemStack.EMPTY);
+                ItemStack stack = player.getItemInHand(enumHand);
+                if (!stack.isEmpty() && inventory.canPlaceItem(slot, stack) && inventory.getItem(slot).isEmpty()) {
+                    inventory.setItem(slot, stack);
+                    player.setItemInHand(enumHand, ItemStack.EMPTY);
                 }
             });
         }
     }
 
     public static void handleHeldStackTransfer(int slot, IItemHandlerModifiable inventory, PlayerEntity player) {
-        if (player.world.isRemote) {
+        if (player.level.isClientSide) {
             return;
         }
 
         if (!inventory.getStackInSlot(slot).isEmpty()) {
-            if (player.getHeldItemMainhand().isEmpty()) {
-                player.setHeldItem(Hand.MAIN_HAND, inventory.getStackInSlot(slot));
+            if (player.getMainHandItem().isEmpty()) {
+                player.setItemInHand(Hand.MAIN_HAND, inventory.getStackInSlot(slot));
             } else {
                 givePlayerStack(player, inventory.getStackInSlot(slot));
             }
             inventory.setStackInSlot(slot, ItemStack.EMPTY);
         } else {
             DataUtils.forEach(Hand.values(), enumHand -> {
-                ItemStack stack = player.getHeldItem(enumHand);
+                ItemStack stack = player.getItemInHand(enumHand);
                 if (!stack.isEmpty() && inventory.isItemValid(slot, stack) && inventory.getStackInSlot(slot).isEmpty()) {
                     inventory.setStackInSlot(slot, stack);
-                    player.setHeldItem(enumHand, ItemStack.EMPTY);
+                    player.setItemInHand(enumHand, ItemStack.EMPTY);
                 }
             });
         }
@@ -114,24 +114,24 @@ public class InventoryUtils {
 
     public static void consumeHeldItem(PlayerEntity player, ItemStack stack, Hand hand) {
         stack.shrink(1);
-        player.setHeldItem(hand, stack.getCount() > 0 ? stack.copy() : ItemStack.EMPTY);
+        player.setItemInHand(hand, stack.getCount() > 0 ? stack.copy() : ItemStack.EMPTY);
     }
 
     public static void givePlayerStack(PlayerEntity player, ItemStack stack) {
-        if (player.world.isRemote) {
+        if (player.level.isClientSide) {
             return;
         }
-        player.inventory.addItemStackToInventory(stack);
+        player.inventory.add(stack);
         if (stack.getCount() > 0) {
-            dropItemNoDelay(stack, player.world, Vector3.fromEntity(player));
+            dropItemNoDelay(stack, player.level, Vector3.fromEntity(player));
         }
     }
 
     public static void dropItemNoDelay(ItemStack stack, World world, Vector3 dropLocation) {
         ItemEntity item = new ItemEntity(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
-        item.setMotion(world.rand.nextGaussian() * 0.05, world.rand.nextGaussian() * 0.05 + 0.2F, world.rand.nextGaussian() * 0.05);
-        world.addEntity(item);
-        item.setPickupDelay(0);
+        item.setDeltaMovement(world.random.nextGaussian() * 0.05, world.random.nextGaussian() * 0.05 + 0.2F, world.random.nextGaussian() * 0.05);
+        world.addFreshEntity(item);
+        item.setPickUpDelay(0);
     }
 
     public static int findMatchingStack(IItemHandler itemHandler, TriPredicate<IItemHandler, ItemStack, Integer> predicate) {

@@ -98,14 +98,14 @@ public class TechPropBuilder {
     public Item.Properties build() {
         Item.Properties props = new Item.Properties();
         props.food(food);
-        props.group(group);
-        props.maxDamage(maxDamage);
+        props.tab(group);
+        props.durability(maxDamage);
         props.rarity(rarity);
         if (!canRepair) props.setNoRepair();
         props.setISTER(ister);
         toolClasses.forEach(props::addToolType);
-        props.containerItem(containerItem);
-        props.maxStackSize(maxStackSize);
+        props.craftRemainder(containerItem);
+        props.stacksTo(maxStackSize);
 
 
         return props;
@@ -114,19 +114,19 @@ public class TechPropBuilder {
 
 
     public Item.Properties pickaxeProps() {
-        return build().addToolType(PICKAXE, miningLevel).isImmuneToFire();
+        return build().addToolType(PICKAXE, miningLevel).fireResistant();
     }
 
     public Item.Properties axeProps() {
-        return build().addToolType(AXE, miningLevel).isImmuneToFire();
+        return build().addToolType(AXE, miningLevel).fireResistant();
     }
 
     public Item.Properties shovelProps() {
-        return build().addToolType(SHOVEL, miningLevel).isImmuneToFire();
+        return build().addToolType(SHOVEL, miningLevel).fireResistant();
     }
 
     public Item.Properties staffProps() {
-        return build().addToolType(PICKAXE, miningLevel).addToolType(AXE, miningLevel).addToolType(SHOVEL, miningLevel).isImmuneToFire();
+        return build().addToolType(PICKAXE, miningLevel).addToolType(AXE, miningLevel).addToolType(SHOVEL, miningLevel).fireResistant();
     }
 
 

@@ -50,14 +50,14 @@ public class BCProfiler {
     @SubscribeEvent
     public void render(RenderGameOverlayEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (!enableProfiler || event.getType() != RenderGameOverlayEvent.ElementType.ALL || mc.gameSettings.showDebugInfo) {
+        if (!enableProfiler || event.getType() != RenderGameOverlayEvent.ElementType.ALL || mc.options.renderDebug) {
             return;
         }
 
 //        ScaledResolution res = event.getResolution();
-        GlStateManager.pushMatrix();
-        GlStateManager.scaled(1D / mc.getMainWindow().getGuiScaleFactor(), 1D / mc.getMainWindow().getGuiScaleFactor(), 1);
-        GlStateManager.scaled(2, 2, 1);
+        GlStateManager._pushMatrix();
+        GlStateManager._scaled(1D / mc.getWindow().getGuiScale(), 1D / mc.getWindow().getGuiScale(), 1);
+        GlStateManager._scaled(2, 2, 1);
 
         int y = 0;
         List<String> debug = new ArrayList<>();
@@ -66,12 +66,12 @@ public class BCProfiler {
         debug.addAll(tickDebug);
         debug.addAll(renderDebug);
         for (String s: debug) {
-            GuiHelper.drawColouredRect(0, y, mc.fontRenderer.getStringWidth(s) + 5, 10, 0x90000000);
-            mc.fontRenderer.drawString(event.getMatrixStack(), s, 2, y + 1, 0xFFFFFF);
+            GuiHelper.drawColouredRect(0, y, mc.font.width(s) + 5, 10, 0x90000000);
+            mc.font.draw(event.getMatrixStack(), s, 2, y + 1, 0xFFFFFF);
             y += 10;
         }
 
-        GlStateManager.popMatrix();
+        GlStateManager._popMatrix();
     }
 
 

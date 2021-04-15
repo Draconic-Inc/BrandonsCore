@@ -30,7 +30,7 @@ public class TileEntityFilter extends EntityFilter {
     public void receiveConfigFromClient(CompoundNBT compound) {
         super.receiveConfigFromClient(compound);
         tile.updateBlock();
-        tile.markDirty();
+        tile.setChanged();
     }
 
     @Override

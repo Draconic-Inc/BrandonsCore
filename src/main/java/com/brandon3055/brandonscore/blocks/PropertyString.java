@@ -38,13 +38,13 @@ public class PropertyString extends Property<String> {
 
     @Nonnull
     @Override
-    public Collection<String> getAllowedValues() {
+    public Collection<String> getPossibleValues() {
         return Collections.unmodifiableSet(valuesSet);
     }
 
     @Nonnull
     @Override
-    public Optional<String> parseValue(@Nonnull String value) {
+    public Optional<String> getValue(@Nonnull String value) {
         if (valuesSet.contains(value.intern())) {
             return Optional.of(value.intern());
         }

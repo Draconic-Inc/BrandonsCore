@@ -70,12 +70,12 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
             boolean inset = this.inset.get();
             int light = inset ? getBgLight() : getBgDark();
             int dark = inset ? getBgDark() : getBgLight();
             drawShadedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, fill ? getBgFill() : 0, dark, light, getBgFill());
-            getter.finish();
+            getter.endBatch();
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
     }
@@ -104,14 +104,14 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
             boolean inset = this.inset.get();
             int light = inset ? getBgDark() : getBgLight();
             int dark = inset ? getBgLight() : getBgDark();
             int fill = getBgFill();
             drawShadedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, 0, light, dark, fill);
             drawShadedRect(getter, xPos() + 1, yPos() + 1, xSize() - 2, ySize() - 2, 1, this.fill ? fill : 0, dark, light, fill);
-            getter.finish();
+            getter.endBatch();
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
     }
@@ -135,7 +135,7 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
             if (background) {
                 boolean highlight = isMouseOver(mouseX, mouseY) || dragging.get();
                 drawColouredRect(getter, xPos(), yPos(), xSize(), ySize(), GuiElement.mixColours(ThemedElements.getBgFill(), 0x00303030 + (highlight ? 0x00151515 : 0), !darkMode));
@@ -144,7 +144,7 @@ public class ThemedElements {
                 int dark = getDarkScroll();//mixColours(getDark(), 0x00101010, true);
                 drawShadedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, midColour(light, dark), light, dark, midColour(light, dark));
             }
-            getter.finish();
+            getter.endBatch();
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
     }
@@ -269,7 +269,7 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
             setPos(screenWidth / 2 + 10, screenHeight / 2).setSize(150, 50);
 
 
@@ -299,7 +299,7 @@ public class ThemedElements {
 
 //            drawColouredRect(getter, xPos() + xSize() - 7, yPos() + 3, 4, ySize() - 6, 0x30b341ff);
 //            drawColouredRect(getter, xPos() + xSize() - 7, yPos() + 7, 4, 18, 0x8cb341ff);
-            getter.finish();
+            getter.endBatch();
         }
     }
 }

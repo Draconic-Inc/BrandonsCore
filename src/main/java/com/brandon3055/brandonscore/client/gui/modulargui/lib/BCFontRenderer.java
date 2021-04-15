@@ -34,32 +34,32 @@ public class BCFontRenderer extends FontRenderer {
 
 
     @Override
-    protected int func_238423_b_(String text, float x, float y, int color, boolean p_238423_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparent, int p_238423_9_, int p_238423_10_, boolean p_238423_11_) {
+    protected int drawInternal(String text, float x, float y, int color, boolean p_238423_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparent, int p_238423_9_, int p_238423_10_, boolean p_238423_11_) {
         if (p_238423_11_) {
-            text = this.bidiReorder(text);
+            text = this.bidirectionalShaping(text);
         }
 
-        color = fixAlpha(color);
+        color = adjustColor(color);
         Matrix4f matrix4f = matrix.copy();
         if (p_238423_5_) {
-            this.renderStringAtPos(text, x, y, color, true, matrix, buffer, transparent, p_238423_9_, p_238423_10_);
+            this.renderText(text, x, y, color, true, matrix, buffer, transparent, p_238423_9_, p_238423_10_);
 //            matrix4f.translate(FONT_OFFSET);
         }
 
-        x = this.renderStringAtPos(text, x, y, color, false, matrix4f, buffer, transparent, p_238423_9_, p_238423_10_);
+        x = this.renderText(text, x, y, color, false, matrix4f, buffer, transparent, p_238423_9_, p_238423_10_);
         return (int)x + (p_238423_5_ ? 1 : 0);
     }
 
     @Override
-    protected int func_238424_b_(IReorderingProcessor p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
-        color = fixAlpha(color);
+    protected int drawInternal(IReorderingProcessor p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
+        color = adjustColor(color);
         Matrix4f matrix4f = matrix.copy();
         if (p_238424_5_) {
-            this.func_238426_c_(p_238424_1_, x, y, color, true, matrix, buffer, p_238424_8_, p_238424_9_, p_238424_10_);
+            this.renderText(p_238424_1_, x, y, color, true, matrix, buffer, p_238424_8_, p_238424_9_, p_238424_10_);
 //            matrix4f.translate(FONT_OFFSET);
         }
 
-        x = this.func_238426_c_(p_238424_1_, x, y, color, false, matrix4f, buffer, p_238424_8_, p_238424_9_, p_238424_10_);
+        x = this.renderText(p_238424_1_, x, y, color, false, matrix4f, buffer, p_238424_8_, p_238424_9_, p_238424_10_);
         return (int)x + (p_238424_5_ ? 1 : 0);
     }
 
@@ -107,7 +107,7 @@ public class BCFontRenderer extends FontRenderer {
                         flag1 = false;
                     }
 
-                    f += Minecraft.getInstance().fontRenderer.getCharacterManager().func_238350_a_(c0+"");
+                    f += Minecraft.getInstance().font.getSplitter().stringWidth(c0+"");
                     if (flag) {
                         ++f;
                     }
@@ -115,10 +115,10 @@ public class BCFontRenderer extends FontRenderer {
                 case '\u00a7':
                     if (k < j - 1) {
                         ++k;
-                        TextFormatting textformatting = TextFormatting.fromFormattingCode(str.charAt(k));
+                        TextFormatting textformatting = TextFormatting.getByCode(str.charAt(k));
                         if (textformatting == TextFormatting.BOLD) {
                             flag = true;
-                        } else if (textformatting != null && !textformatting.isFancyStyling()) {
+                        } else if (textformatting != null && !textformatting.isFormat()) {
                             flag = false;
                         }
                     }
@@ -144,7 +144,7 @@ public class BCFontRenderer extends FontRenderer {
 
     //This is a temporary hack that wont be needed once i re write my gui system
 //    @Override
-//    public int func_238423_b_(String text, float x, float y, int color, boolean dropShadow, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparentIn, int colorBackgroundIn, int packedLight) {
+//    public int drawInternal(String text, float x, float y, int color, boolean dropShadow, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparentIn, int colorBackgroundIn, int packedLight) {
 //        if (this.bidiFlag) {
 //            text = this.bidiReorder(text);
 //        }
@@ -319,7 +319,7 @@ public class BCFontRenderer extends FontRenderer {
 
     public static BCFontRenderer convert(FontRenderer fontRenderer) {
         if (!cashedRenderers.containsKey(fontRenderer)) {
-            BCFontRenderer fr = new BCFontRenderer(fontRenderer.font);
+            BCFontRenderer fr = new BCFontRenderer(fontRenderer.fonts);
 //                        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(fr);
             cashedRenderers.put(fontRenderer, fr);
         }

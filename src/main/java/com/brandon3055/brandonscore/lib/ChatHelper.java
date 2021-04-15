@@ -21,7 +21,7 @@ public class ChatHelper {
      * @param message The message.
      */
     public static void sendMessage(PlayerEntity player, ITextComponent message) {
-        player.sendMessage(message, Util.DUMMY_UUID);
+        player.sendMessage(message, Util.NIL_UUID);
     }
 
     /**

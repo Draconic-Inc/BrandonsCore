@@ -75,8 +75,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         this.layout = CUSTOM;
         this.gui.setUISize(xSize, ySize);
         gui.getManager().setJeiExclusions(() -> jeiExclusions);
-        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer<?>) gui).getContainer() instanceof ContainerBCore) {
-            setSlotLayout(((ContainerBCore) ((ModularGuiContainer) gui).getContainer()).getSlotLayout());
+        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer<?>) gui).getMenu() instanceof ContainerBCore) {
+            setSlotLayout(((ContainerBCore) ((ModularGuiContainer) gui).getMenu()).getSlotLayout());
         }
     }
 
@@ -92,7 +92,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         if (translationKey.startsWith(".")) {
             translationKey = translationKey.substring(1);
         }
-        return I18n.format(translationPrefix + translationKey);
+        return I18n.get(translationPrefix + translationKey);
     }
 
     /**
@@ -102,11 +102,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         if (translationKey.startsWith(".")) {
             translationKey = translationKey.substring(1);
         }
-        return I18n.format(INTERNAL_TRANSLATION_PREFIX + translationKey);
+        return I18n.get(INTERNAL_TRANSLATION_PREFIX + translationKey);
     }
 
     public Supplier<String> i18n(Supplier<String> translationKey) {
-        return () -> I18n.format(translationPrefix + translationKey.get());
+        return () -> I18n.get(translationPrefix + translationKey.get());
     }
 
     public GuiLayout getLayout() {
@@ -164,7 +164,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     //UI Heading
     public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent, boolean layout) {
-        GuiLabel heading = new GuiLabel(I18n.format(unlocalizedHeading));
+        GuiLabel heading = new GuiLabel(I18n.get(unlocalizedHeading));
         heading.setTextColGetter(Palette.BG::text);
         heading.setShadowStateSupplier(() -> darkMode);
         if (parent != null) {
@@ -196,12 +196,12 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 RenderMaterial slot = BCSprites.getThemed("slot");
-                IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+                IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
                 IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TEX_TYPE);
 
                 for (int x = 0; x < columns; x++) {
                     for (int y = 0; y < rows; y++) {
-                        drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, slot.getSprite());
+                        drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, slot.sprite());
                     }
                 }
 
@@ -210,16 +210,16 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                         for (int y = 0; y < rows; y++) {
                             if (slotMapper != null) {
                                 SlotData data = slotMapper.apply(x, y);
-                                if (data != null && data.slot.getHasStack()) {
+                                if (data != null && data.slot.hasItem()) {
                                     continue;
                                 }
                             }
-                            drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, background.getSprite());
+                            drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, background.sprite());
                         }
                     }
                 }
 
-                getter.finish();
+                getter.endBatch();
             }
 
             @Override
@@ -240,10 +240,10 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
             public void quad(BufferBuilder buffer, int x, int y, int width, int height) {
                 double zLevel = getRenderZLevel();
-                buffer.pos(x, y + height, zLevel).tex(0, 1).endVertex();
-                buffer.pos(x + width, y + height, zLevel).tex(1, 1).endVertex();
-                buffer.pos(x + width, y, zLevel).tex(1, (float) 0).endVertex();
-                buffer.pos(x, y, zLevel).tex(0, 0).endVertex();
+                buffer.vertex(x, y + height, zLevel).uv(0, 1).endVertex();
+                buffer.vertex(x + width, y + height, zLevel).uv(1, 1).endVertex();
+                buffer.vertex(x + width, y, zLevel).uv(1, (float) 0).endVertex();
+                buffer.vertex(x, y, zLevel).uv(0, 0).endVertex();
             }
         };
         element.setSize((columns * 18) + ((columns - 1) * spacing), (rows * 18) + ((rows - 1) * spacing));
@@ -339,7 +339,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 for (int i = 0; i < handler.getSlots(); i++) {
                     int finalI = i;
                     ContainerSlotLayout.SlotData data = slotLayout.getSlotData(PLAYER_EQUIPMENT, finalI);
-                    if (showFilter != null && !showFilter.test(data.slot.getStack())) {
+                    if (showFilter != null && !showFilter.test(data.slot.getItem())) {
                         data.setPos(-9999, -9999);
                         continue;
                     }
@@ -363,7 +363,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     //####################################################################################################
 
     public GuiButton createVanillaButton(String unlocalizedText, @Nullable GuiElement parent) {
-        GuiButton button = new GuiButton(I18n.format(unlocalizedText));
+        GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setHoverTextDelay(10);
         button.enableVanillaRender();
         if (parent != null) {
@@ -381,7 +381,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createBorderlessButton(@Nullable GuiElement parent, String unlocalizedText) {
-        GuiButton button = new GuiButton(I18n.format(unlocalizedText));
+        GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
         button.set3dText(true);
@@ -400,7 +400,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createButton(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
-        GuiButton button = new GuiButton(I18n.format(unlocalizedText));
+        GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
         if (inset3d) {
@@ -949,12 +949,12 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
 
         public GuiLabel addDynamicLabel(Supplier<String> stringSupplier, int ySize) {
-            Dimension dimension = new Dimension(fontRenderer.getStringWidth(stringSupplier.get()), ySize);
+            Dimension dimension = new Dimension(fontRenderer.width(stringSupplier.get()), ySize);
             GuiLabel label = new GuiLabel(stringSupplier) {
                 @Override
                 public boolean onUpdate() {
                     int lastWidth = dimension.width;
-                    dimension.width = fontRenderer.getStringWidth(stringSupplier.get());
+                    dimension.width = fontRenderer.width(stringSupplier.get());
 
                     if (dimension.width != lastWidth) {
                         updatePosSize();
@@ -971,27 +971,27 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         public GuiElement addLabeledValue(String labelText, int valueOffset, int lineHeight, Supplier<String> valueSupplier, boolean multiLine) {
             GuiElement container = new GuiElement();
             GuiLabel label = new GuiLabel(labelText).setAlignment(GuiAlign.LEFT);
-            label.setSize(multiLine ? fontRenderer.getStringWidth(labelText) : valueOffset, lineHeight);
+            label.setSize(multiLine ? fontRenderer.width(labelText) : valueOffset, lineHeight);
             label.setWrap(true);
             container.addChild(label);
             String value = valueSupplier.get();
-            int extraHeiht = fontRenderer.FONT_HEIGHT;
+            int extraHeiht = fontRenderer.lineHeight;
             if (value.contains("\n")) {
                 String[] strs = value.split("\n");
                 value = "";
                 for (String s : strs)
                     if (s.length() > value.length()) {
-                        extraHeiht += fontRenderer.FONT_HEIGHT;
+                        extraHeiht += fontRenderer.lineHeight;
                         value = s;
                     }
             }
-            extraHeiht -= fontRenderer.FONT_HEIGHT;
+            extraHeiht -= fontRenderer.lineHeight;
 
             Dimension dimension;
             if (multiLine) {
-                dimension = new Dimension(Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(value)), (lineHeight * 2) + extraHeiht);
+                dimension = new Dimension(Math.max(label.xSize(), valueOffset + fontRenderer.width(value)), (lineHeight * 2) + extraHeiht);
             } else {
-                dimension = new Dimension(valueOffset + fontRenderer.getStringWidth(value), lineHeight);
+                dimension = new Dimension(valueOffset + fontRenderer.width(value), lineHeight);
             }
 
             GuiLabel valueLabel = new GuiLabel() {
@@ -1005,9 +1005,9 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                         for (String s : strs) if (s.length() > value.length()) value = s;
                     }
                     if (multiLine) {
-                        dimension.width = Math.max(label.xSize(), valueOffset + fontRenderer.getStringWidth(value));
+                        dimension.width = Math.max(label.xSize(), valueOffset + fontRenderer.width(value));
                     } else {
-                        dimension.width = valueOffset + fontRenderer.getStringWidth(value);
+                        dimension.width = valueOffset + fontRenderer.width(value);
                     }
 
                     if (dimension.width != lastWidth) {
@@ -1087,7 +1087,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
             int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
 
             drawColouredRect(getter, xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
             drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 2, ySize(), col1);
@@ -1095,7 +1095,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             drawGradientRect(getter, xPos() + 1, yPos() + 1, xPos() + xSize() - 1, yPos() + ySize() - 1, col2, col3);
             drawColouredRect(getter, xPos() + 2, yPos() + 2, xSize() - 4, ySize() - 4, col1);
 
-            getter.finish();
+            getter.endBatch();
 
             for (GuiElement<?> element : childElements) {
                 if (element.isEnabled() && element != toggleButton) {

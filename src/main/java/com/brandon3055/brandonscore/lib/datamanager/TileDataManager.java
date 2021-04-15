@@ -84,7 +84,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
      * will see incorrect values until the next sync.
      */
     public void forceContainerSync(List<IContainerListener> listeners) {
-        if (!tile.getWorld().isRemote) {
+        if (!tile.getLevel().isClientSide) {
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncContainer) {
                     PacketCustom syncPacket = createSyncPacket();
@@ -97,7 +97,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     }
 
     public void forceSync() {
-        if (!tile.getWorld().isRemote) {
+        if (!tile.getLevel().isClientSide) {
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncTile) {
                     PacketCustom syncPacket = createSyncPacket();
@@ -110,7 +110,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     }
 
     public void forcePlayerSync(ServerPlayerEntity player) {
-        if (!tile.getWorld().isRemote) {
+        if (!tile.getLevel().isClientSide) {
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncContainer) {
                     PacketCustom syncPacket = createSyncPacket();
@@ -123,7 +123,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     }
 
     public void forceSync(IManagedData data) {
-        if (!tile.getWorld().isRemote) {
+        if (!tile.getLevel().isClientSide) {
             PacketCustom syncPacket = createSyncPacket();
             syncPacket.writeByte((byte) data.getIndex());
             data.toBytes(syncPacket);
@@ -134,7 +134,7 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     @Override
     public PacketCustom createSyncPacket() {
         PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.C_TILE_DATA_MANAGER);
-        packet.writePos(tile.getPos());
+        packet.writePos(tile.getBlockPos());
         return packet;
     }
 
@@ -145,8 +145,8 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
         if (data != null) {
             data.fromBytes(input);
             if (data.flags().triggerUpdate) {
-                BlockState state = tile.getWorld().getBlockState(tile.getPos());
-                tile.getWorld().notifyBlockUpdate(tile.getPos(), state, state, 3);
+                BlockState state = tile.getLevel().getBlockState(tile.getBlockPos());
+                tile.getLevel().sendBlockUpdated(tile.getBlockPos(), state, state, 3);
             }
         }
     }
@@ -178,8 +178,8 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
 
     @Override
     public void markDirty() {
-        if (tile.getWorld() != null && !tile.getWorld().isRemote) {
-            tile.markDirty();
+        if (tile.getLevel() != null && !tile.getLevel().isClientSide) {
+            tile.setChanged();
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncOnSet && data.isDirty(true)) {
                     PacketCustom syncPacket = createSyncPacket();
@@ -193,14 +193,14 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
 
     @Override
     public boolean isClientSide() {
-        return tile.hasWorld() && tile.getWorld().isRemote;
+        return tile.hasLevel() && tile.getLevel().isClientSide;
     }
 
     @Override
     public void sendToServer(IManagedData data) {
-        if (tile.getWorld().isRemote && data.flags().allowClientControl) {
+        if (tile.getLevel().isClientSide && data.flags().allowClientControl) {
             PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_DATA_MANAGER);
-            packet.writePos(tile.getPos());
+            packet.writePos(tile.getBlockPos());
             packet.writeByte((byte) data.getIndex());
             data.toBytes(packet);
             packet.sendToServer();

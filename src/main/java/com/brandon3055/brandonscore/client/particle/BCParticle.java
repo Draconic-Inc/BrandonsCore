@@ -65,12 +65,12 @@ public class BCParticle extends Particle {
     }
 
     public BCParticle setMaxAge(int age, int randAdditive) {
-        super.setMaxAge(age + rand.nextInt(randAdditive));
+        super.setLifetime(age + random.nextInt(randAdditive));
         return this;
     }
 
     public BCParticle setGravity(double gravity) {
-        this.particleGravity = (float) gravity;
+        this.gravity = (float) gravity;
         return this;
     }
 
@@ -82,37 +82,37 @@ public class BCParticle extends Particle {
     public BCParticle setSizeAndRandMotion(double scale, double xMotion, double yMotion, double zMotion) {
         baseScale = (float) scale;
 
-        this.motionX = (-0.5 + rand.nextDouble()) * xMotion;
-        this.motionY = (-0.5 + rand.nextDouble()) * yMotion;
-        this.motionZ = (-0.5 + rand.nextDouble()) * zMotion;
+        this.xd = (-0.5 + random.nextDouble()) * xMotion;
+        this.yd = (-0.5 + random.nextDouble()) * yMotion;
+        this.zd = (-0.5 + random.nextDouble()) * zMotion;
 
         return this;
     }
 
     public Vec3D getPos() {
-        return new Vec3D(posX, posY, posZ);
+        return new Vec3D(x, y, z);
     }
 
     public World getWorld() {
-        return world;
+        return level;
     }
 
     public BCParticle setPosition(Vec3D pos) {
-        setPosition(pos.x, pos.y, pos.z);
+        setPos(pos.x, pos.y, pos.z);
         return this;
     }
 
     public void moveEntityNoClip(double x, double y, double z) {
-        this.setBoundingBox(this.getBoundingBox().offset(0.0D, y, 0.0D));
-        this.setBoundingBox(this.getBoundingBox().offset(x, 0.0D, 0.0D));
-        this.setBoundingBox(this.getBoundingBox().offset(0.0D, 0.0D, z));
-        this.resetPositionToBB();
+        this.setBoundingBox(this.getBoundingBox().move(0.0D, y, 0.0D));
+        this.setBoundingBox(this.getBoundingBox().move(x, 0.0D, 0.0D));
+        this.setBoundingBox(this.getBoundingBox().move(0.0D, 0.0D, z));
+        this.setLocationFromBoundingbox();
     }
 
 
 
     @Override
-    public void renderParticle(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
+    public void render(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
 
     }
 

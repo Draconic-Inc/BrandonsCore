@@ -228,7 +228,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
 
     private PacketCustom createCapPacket(SerializationFlags<?> helper, int index) {
         PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.C_TILE_CAP_DATA);
-        packet.writePos(tile.getPos());
+        packet.writePos(tile.getBlockPos());
         packet.writeInt(index);
         if (helper.getData() instanceof IMCDataSerializable) {
             ((IMCDataSerializable) helper.getData()).serializeMCD(packet);

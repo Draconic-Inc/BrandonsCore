@@ -35,7 +35,7 @@ public class InfoHelper {
 
     public static boolean holdShiftForDetails(List<ITextComponent> list, boolean inverted) {
         if (isShiftKeyDown() == inverted){
-            list.add(new StringTextComponent(I18n.format("item_info.brandonscore.shift_for_details", TextFormatting.AQUA + "" + TextFormatting.ITALIC, TextFormatting.RESET + "" + TextFormatting.GRAY)).mergeStyle(TextFormatting.GRAY));
+            list.add(new StringTextComponent(I18n.get("item_info.brandonscore.shift_for_details", TextFormatting.AQUA + "" + TextFormatting.ITALIC, TextFormatting.RESET + "" + TextFormatting.GRAY)).withStyle(TextFormatting.GRAY));
         }
         return isShiftKeyDown();
     }

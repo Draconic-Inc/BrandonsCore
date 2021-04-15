@@ -124,7 +124,7 @@ public class TGuiBase implements IGuiTemplate {
             powerToggle.onPressed(chargeItem::invert);
         }
         powerToggle.setSize(14, 14);
-        powerToggle.setHoverText(element -> I18n.format("gui.bc." + (chargeItem.get() ? "charging" : "discharging") + "_item.txt"));
+        powerToggle.setHoverText(element -> I18n.get("gui.bc." + (chargeItem.get() ? "charging" : "discharging") + "_item.txt"));
         GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get(bellowBar ? "vertical_discharge" : "right_discharge"));
         toggleTex.setPos(powerToggle);
 
@@ -173,7 +173,7 @@ public class TGuiBase implements IGuiTemplate {
         powerSlot.addChild(bgTexture);
 
         if (slotData != null) {
-            bgTexture.setEnabledCallback(() -> !slotData.slot.getHasStack());
+            bgTexture.setEnabledCallback(() -> !slotData.slot.hasItem());
             powerSlot.addPosChangeListener((x, y) -> slotData.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
         }
         GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get("item_charge/" + ((bellowBar ? "vertical" : "right") + "_" + (chargeItem ? "charge" : "discharge"))));

@@ -120,9 +120,9 @@ public class StandardDialog<T> extends GuiSelectDialog<T> {
             int height = (d.getItems().size() * 10) + (heading == null ? 6 : 17);
             int width = d.getItems().stream()
                     .map(nameSupplier)
-                    .mapToInt(e -> fontRenderer.getStringWidth(e))
+                    .mapToInt(e -> fontRenderer.width(e))
                     .max().orElse(50);
-            width = Math.max(width, heading == null ? 0 : fontRenderer.getStringWidth(heading.getLabelText())) + (height > d.ySize() ? 15 : 10);
+            width = Math.max(width, heading == null ? 0 : fontRenderer.width(heading.getLabelText())) + (height > d.ySize() ? 15 : 10);
             d.setXSize(width);
         }, false);
         renderHeight = 10;
@@ -208,7 +208,7 @@ public class StandardDialog<T> extends GuiSelectDialog<T> {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
             int backgroundColor = 0xF0100010;
             int borderColorStart = 0x90FFFFFF;
             int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
@@ -226,7 +226,7 @@ public class StandardDialog<T> extends GuiSelectDialog<T> {
                 drawGradient(getter, xPos() + 2,       yPos() + 12,           xSize() - 4, 1, borderColorStart, borderColorStart);          // Heading Divider
             }
             //@formatter:on
-            getter.finish();
+            getter.endBatch();
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
     }
@@ -250,13 +250,13 @@ public class StandardDialog<T> extends GuiSelectDialog<T> {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
             if (background && (dragging.get() || isMouseOver(mouseX, mouseY))) {
                 drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x30b341ff);
             } else if (!background) {
                 drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x8cb341ff);
             }
-            getter.finish();
+            getter.endBatch();
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
     }

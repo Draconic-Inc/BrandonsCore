@@ -45,7 +45,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     //There is probably a much cleaner wau to do this... But i cant think of it right now.
     protected Function<T, GuiElement> rendererBuilder = t -> {
         GuiLabel label = new GuiLabel(String.valueOf(t)).setInsets(0, 2, 0, 2).setWrap(true).setShadow(false).setHoverableTextCol(hovering -> hovering ? 0x0000FF : 0);
-        label.setYSizeMod((guiLabel, integer) -> guiLabel.fontRenderer.getWordWrappedHeight(label.getLabelText(), Math.max(10, guiLabel.xSize() - label.getInsets().left - label.getInsets().right)) + 6);
+        label.setYSizeMod((guiLabel, integer) -> guiLabel.fontRenderer.wordWrapHeight(label.getLabelText(), Math.max(10, guiLabel.xSize() - label.getInsets().left - label.getInsets().right)) + 6);
         label.addChild(GuiTexture.newVanillaGuiTexture(0, 0).setYSizeMod((guiTexture, integer) -> label.ySize()).setPos(label).bindSize(label, false));
         return label;
     };

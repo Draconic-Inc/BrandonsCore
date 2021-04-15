@@ -94,7 +94,7 @@ public class JeiHelper {
     //    @Optional.Method(modid = "jei")
     private static int getRecipeKeyInternal(boolean usage) {
         try {
-            return usage ? KeyBindings.showUses.getKey().getKeyCode() : KeyBindings.showRecipe.getKey().getKeyCode();
+            return usage ? KeyBindings.showUses.getKey().getValue() : KeyBindings.showRecipe.getKey().getValue();
         }
         catch (Throwable e) {
             e.printStackTrace();

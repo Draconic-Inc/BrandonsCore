@@ -18,7 +18,7 @@ public class ResourceHelperBC {
     public static final String RESOURCE_PREFIX = BrandonsCore.MODID.toLowerCase() + ":";
 
     public static void bindTexture(ResourceLocation texture) {
-        Minecraft.getInstance().textureManager.bindTexture(texture);
+        Minecraft.getInstance().textureManager.bind(texture);
     }
 
     public static ResourceLocation getResource(String rs) {

@@ -45,7 +45,7 @@ public class BCEventHandler {
 //        ModConfigParser.disconnectFromServer();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
-            noClipPlayers.remove(mc.player.getUniqueID());
+            noClipPlayers.remove(mc.player.getUUID());
         }
     }
 
@@ -58,14 +58,14 @@ public class BCEventHandler {
 
     @SubscribeEvent
     public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        noClipPlayers.remove(event.getPlayer().getUniqueID());
+        noClipPlayers.remove(event.getPlayer().getUUID());
     }
 
     @SubscribeEvent
     public static void livingUpdate(LivingEvent.LivingUpdateEvent event) {
-        if (event.getEntity() instanceof PlayerEntity && noClipPlayers.contains(event.getEntity().getUniqueID())) {
-            event.getEntity().noClip = true;
-            ((PlayerEntity) event.getEntity()).abilities.isFlying = true;
+        if (event.getEntity() instanceof PlayerEntity && noClipPlayers.contains(event.getEntity().getUUID())) {
+            event.getEntity().noPhysics = true;
+            ((PlayerEntity) event.getEntity()).abilities.flying = true;
         }
     }
 }

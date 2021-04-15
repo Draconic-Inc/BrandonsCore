@@ -141,13 +141,13 @@ public class ImageElement extends MDElementBase<ImageElement> {
         RenderSystem.rotatef(-30, 1, 0, 0);
         RenderSystem.rotatef(45, 0, 1, 0);
         ScissorHelper.pushGuiScissor(mc, xPos(), maxYPos() - anim, xSize(), anim, screenWidth, screenHeight);
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.turnBackOn();
         RenderSystem.pushMatrix();
         double shrink = 1 - MathHelper.clip((anim - 64) / 10D, 0, 1);
         RenderSystem.scaled(shrink, shrink, shrink);
-        mc.getItemRenderer().renderItemIntoGUI(renderLoadingStack, 0, 0);//, ItemCameraTransforms.TransformType.FIXED);
+        mc.getItemRenderer().renderGuiItem(renderLoadingStack, 0, 0);//, ItemCameraTransforms.TransformType.FIXED);
         RenderSystem.popMatrix();
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
         ScissorHelper.popScissor();
 
         Cuboid6 cuboid6 = new Cuboid6(-0.251, -0.251, -0.251, 0.251, 0.251, 0.251);
@@ -172,8 +172,8 @@ public class ImageElement extends MDElementBase<ImageElement> {
         if (isMouseOver(mouseX, mouseY)) {
             if (!linkTo.isEmpty() && container.linkDisplayTarget != null) {
                 GuiElement e = container.linkDisplayTarget;
-                int width = fontRenderer.getStringWidth(linkTo);
-                int height = fontRenderer.getWordWrappedHeight(linkTo, e.xSize()) + 4;
+                int width = fontRenderer.width(linkTo);
+                int height = fontRenderer.wordWrapHeight(linkTo, e.xSize()) + 4;
                 zOffset += container.linkDisplayZOffset;
                 drawColouredRect(e.xPos(), e.maxYPos() - height, Math.min(Math.max(width + 4, e.xSize() / 2), e.xSize()), height, 0x90000000);
                 drawSplitString(fontRenderer, linkTo, e.xPos() + 2, e.maxYPos() - height + 2, e.xSize(), 0xc0c0c0, false);
@@ -182,10 +182,10 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
             List<String> tooltip = new ArrayList<>();
             if (resourceLocation.dlFailed) {
-                tooltip.add(TextFormatting.RED + I18n.format("gui.bc.downloading_image_failed.info"));
+                tooltip.add(TextFormatting.RED + I18n.get("gui.bc.downloading_image_failed.info"));
             }
             else if (!resourceLocation.dlFinished) {
-                tooltip.add(TextFormatting.GREEN + I18n.format("gui.bc.downloading_image.info"));
+                tooltip.add(TextFormatting.GREEN + I18n.get("gui.bc.downloading_image.info"));
             }
 
             if (enableTooltip && !this.tooltip.isEmpty()) {

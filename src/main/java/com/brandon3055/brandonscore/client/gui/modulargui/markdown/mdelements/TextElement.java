@@ -41,7 +41,7 @@ public class TextElement extends MDElementBase<TextElement> {
         toRemove.addAll(subParts);
         subParts.clear();
 
-        double fHeight = (fontRenderer.FONT_HEIGHT + 1) * textScale;
+        double fHeight = (fontRenderer.lineHeight + 1) * textScale;
         String text = this.text;
 
         boolean newln = false;
@@ -68,7 +68,7 @@ public class TextElement extends MDElementBase<TextElement> {
             }
 
             text = text.substring(nextSplit);
-            double nextWidth = fontRenderer.getStringWidth(nextPart) * textScale;
+            double nextWidth = fontRenderer.width(nextPart) * textScale;
 
             TextElementPart part = new TextElementPart(nextPart, textScale, shadow, colour);
             part.setSize((int) Math.ceil(nextWidth), (int) Math.ceil(fHeight));

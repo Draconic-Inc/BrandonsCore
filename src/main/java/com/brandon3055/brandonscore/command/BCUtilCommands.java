@@ -91,13 +91,13 @@ public class BCUtilCommands {
 
     private static ArgumentBuilder<CommandSource, ?> registerNBT() {
         return Commands.literal("nbt")
-                .requires(cs -> cs.hasPermissionLevel(0))
+                .requires(cs -> cs.hasPermission(0))
                 .executes(context -> functionNBT(context.getSource()));
     }
 
     private static ArgumentBuilder<CommandSource, ?> registerRegenChunk() {
         return Commands.literal("regenchunk")
-                .requires(cs -> cs.hasPermissionLevel(3))
+                .requires(cs -> cs.hasPermission(3))
                 .then(Commands.argument("radius", IntegerArgumentType.integer(1, 32))
                         .executes(ctx -> regenChunk(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "radius")))
                 );
@@ -105,22 +105,22 @@ public class BCUtilCommands {
 
     private static ArgumentBuilder<CommandSource, ?> registerNoClip() {
         return Commands.literal("noclip")
-                .requires(cs -> cs.hasPermissionLevel(3))
+                .requires(cs -> cs.hasPermission(3))
                 .executes(context -> toggleNoClip(context.getSource()));
     }
 
     private static ArgumentBuilder<CommandSource, ?> registerUUID() {
         return Commands.literal("uuid")
-                .requires(cs -> cs.hasPermissionLevel(0))
+                .requires(cs -> cs.hasPermission(0))
                 .then(Commands.argument("target", EntityArgument.player())
                         .executes(ctx -> getUUID(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))
                 )
-                .executes(ctx -> getUUID(ctx.getSource(), ctx.getSource().asPlayer()));
+                .executes(ctx -> getUUID(ctx.getSource(), ctx.getSource().getPlayerOrException()));
     }
 
     private static ArgumentBuilder<CommandSource, ?> registerPlayerAccess() {
         return Commands.literal("player_access")
-                .requires(cs -> cs.hasPermissionLevel(3))
+                .requires(cs -> cs.hasPermission(3))
                 .then(Commands.argument("target", reader -> StringArgumentType.string())
                         .suggests((context, builder) -> ISuggestionProvider.suggest(accessiblePlayers(context.getSource()).values().stream().map(GameProfile::getName), builder))
                         .executes(context -> playerAccess(context.getSource(), context.getArgument("target", String.class)))
@@ -132,13 +132,13 @@ public class BCUtilCommands {
 
     private static ArgumentBuilder<CommandSource, ?> registerDumpEvents() {
         return Commands.literal("dump_event_listeners")
-                .requires(cs -> cs.hasPermissionLevel(0))
+                .requires(cs -> cs.hasPermission(0))
                 .executes(ctx -> dumpEventListeners(ctx.getSource()));
     }
 
     private static ArgumentBuilder<CommandSource, ?> registerEggify() {
         return Commands.literal("eggify")
-                .requires(cs -> cs.hasPermissionLevel(3))
+                .requires(cs -> cs.hasPermission(3))
                 .then(Commands.argument("target", EntityArgument.entities())
                         .executes(ctx -> eggify(ctx, EntityArgument.getEntity(ctx, "target"))));
     }
@@ -158,7 +158,7 @@ public class BCUtilCommands {
 //    }
 
     private static int functionNBT(CommandSource source) throws CommandException, CommandSyntaxException {
-        PlayerEntity player = source.asPlayer();
+        PlayerEntity player = source.getPlayerOrException();
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
             throw new CommandException(new StringTextComponent("You are not holding an item!"));
@@ -172,7 +172,7 @@ public class BCUtilCommands {
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new StringTextComponent(s).mergeStyle(TextFormatting.GOLD)));
+        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new StringTextComponent(s).withStyle(TextFormatting.GOLD)));
         return 0;
     }
 
@@ -181,14 +181,14 @@ public class BCUtilCommands {
 
         for (int xOffset = -rad; xOffset <= rad; xOffset++) {
             for (int yOffset = -rad; yOffset <= rad; yOffset++) {
-                ServerWorld world = (ServerWorld) source.getWorld();
-                PlayerEntity player = source.asPlayer();
-                int chunkX = (int) player.chunkCoordX + xOffset;
-                int chunkZ = (int) player.chunkCoordZ + yOffset;
+                ServerWorld world = (ServerWorld) source.getLevel();
+                PlayerEntity player = source.getPlayerOrException();
+                int chunkX = (int) player.xChunk + xOffset;
+                int chunkZ = (int) player.zChunk + yOffset;
 
                 Chunk oldChunk = world.getChunk(chunkX, chunkZ);
-                ServerChunkProvider chunkProviderServer = world.getChunkProvider();
-                ChunkGenerator chunkGenerate = chunkProviderServer.getChunkGenerator();
+                ServerChunkProvider chunkProviderServer = world.getChunkSource();
+                ChunkGenerator chunkGenerate = chunkProviderServer.getGenerator();
 
 //                chunkGenerate.generateSurface(oldChunk);
 //                chunkGenerate.generateBiomes(oldChunk);
@@ -232,28 +232,28 @@ public class BCUtilCommands {
     }
 
     private static int toggleNoClip(CommandSource source) throws CommandException, CommandSyntaxException {
-        ServerPlayerEntity player = source.asPlayer();
-        boolean enabled = BCEventHandler.noClipPlayers.contains(player.getUniqueID());
+        ServerPlayerEntity player = source.getPlayerOrException();
+        boolean enabled = BCEventHandler.noClipPlayers.contains(player.getUUID());
 
         if (enabled) {
-            BCEventHandler.noClipPlayers.remove(player.getUniqueID());
+            BCEventHandler.noClipPlayers.remove(player.getUUID());
             BCoreNetwork.sendNoClip(player, false);
-            source.sendFeedback(new StringTextComponent("NoClip Disabled!"), true);
+            source.sendSuccess(new StringTextComponent("NoClip Disabled!"), true);
         } else {
-            BCEventHandler.noClipPlayers.add(player.getUniqueID());
+            BCEventHandler.noClipPlayers.add(player.getUUID());
             BCoreNetwork.sendNoClip(player, true);
-            source.sendFeedback(new StringTextComponent("NoClip Enabled!"), true);
+            source.sendSuccess(new StringTextComponent("NoClip Enabled!"), true);
         }
         return 0;
     }
 
     private static int getUUID(CommandSource source, ServerPlayerEntity player) throws CommandException {
-        StringTextComponent comp = new StringTextComponent(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUniqueID());
+        StringTextComponent comp = new StringTextComponent(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUUID());
         Style style = Style.EMPTY;
-        style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, player.getUniqueID().toString()));
-        style.setHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to get text")));
+        style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, player.getUUID().toString()));
+        style.withHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to get text")));
         comp.setStyle(style);
-        source.sendFeedback(comp, true);
+        source.sendSuccess(comp, true);
         return 0;
     }
 
@@ -285,7 +285,7 @@ public class BCUtilCommands {
 
         LogHelperBC.info(builder.toString());
         for (String s : builder.toString().split("\n")) {
-            source.sendFeedback(new StringTextComponent(s), true);
+            source.sendSuccess(new StringTextComponent(s), true);
         }
         return 0;
     }
@@ -326,18 +326,18 @@ public class BCUtilCommands {
     //endregion
 
     private static int eggify(CommandContext<CommandSource> ctx, Entity target) throws CommandException, CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().asPlayer();
+        ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
         Entity entity = target;
 
         if (entity == null) {
-            player.sendMessage(new StringTextComponent("You must be looking at an entity!"), Util.DUMMY_UUID);
+            player.sendMessage(new StringTextComponent("You must be looking at an entity!"), Util.NIL_UUID);
             return 1;
         }
 
-        ItemStack spawnEgg = new ItemStack(SpawnEggItem.getEgg(entity.getType()));
+        ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(entity.getType()));
         CompoundNBT data = entity.serializeNBT();
 //        data.putString("id", String.valueOf(EntityList.getKey(entity)));
-        spawnEgg.setTagInfo("EntityTag", data);
+        spawnEgg.addTagElement("EntityTag", data);
 
         data.remove("Pos");
         data.remove("Motion");
@@ -417,7 +417,7 @@ public class BCUtilCommands {
 
 
     private static int playerAccess(CommandSource source, String target) throws CommandException, CommandSyntaxException {
-        PlayerProfileCache cache = source.getServer().getPlayerProfileCache();
+        PlayerProfileCache cache = source.getServer().getProfileCache();
 //
 //        File playersFolder = new File(source.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
 //        File[] playerArray = playersFolder.listFiles((dir, name) -> name.endsWith(".dat"));
@@ -443,7 +443,7 @@ public class BCUtilCommands {
 //        }
 
         if (target == null) {
-            source.sendFeedback(new StringTextComponent("################## All Known Players ##################"), false);
+            source.sendSuccess(new StringTextComponent("################## All Known Players ##################"), false);
             for (UUID uuid : playerMap.keySet()) {
                 GameProfile profile = playerMap.get(uuid);
 
@@ -459,7 +459,7 @@ public class BCUtilCommands {
 
                 boolean offline = UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)).equals(uuid);
                 if (offline) {
-                    message.append(new StringTextComponent(" (Offline Account)").mergeStyle(TextFormatting.RED));
+                    message.append(new StringTextComponent(" (Offline Account)").withStyle(TextFormatting.RED));
                 }
 
                 ITextComponent messageHover = new StringTextComponent("Last Seen: " + "\n") //
@@ -467,22 +467,22 @@ public class BCUtilCommands {
                         .append(new StringTextComponent(TextFormatting.GOLD + "-Click to access player."));
 
                 Style msgStyle = Style.EMPTY;
-                msgStyle.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
-                msgStyle.setHoverEvent(new HoverEvent(SHOW_TEXT, messageHover));
+                msgStyle.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
+                msgStyle.withHoverEvent(new HoverEvent(SHOW_TEXT, messageHover));
                 message.setStyle(msgStyle);
-                source.sendFeedback(message, false);
+                source.sendSuccess(message, false);
             }
             return 0;
         }
         target = target.toLowerCase();
 
         GameProfile profile = null;
-        if (cache.usernameToProfileEntryMap.containsKey(target)) {
-            profile = cache.getGameProfileForUsername(target);
+        if (cache.profilesByName.containsKey(target)) {
+            profile = cache.get(target);
             target = profile.getId().toString();
         } else {
             try {
-                profile = cache.getProfileByUUID(UUID.fromString(target));
+                profile = cache.get(UUID.fromString(target));
             }
             catch (IllegalArgumentException ignored) {
             }
@@ -493,8 +493,8 @@ public class BCUtilCommands {
         }
 
         //Access Player
-        ServerPlayerEntity playerSender = source.asPlayer();
-        PlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayerByUUID(profile.getId());
+        ServerPlayerEntity playerSender = source.getPlayerOrException();
+        PlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayer(profile.getId());
         if (targetPlayer == null) {
             File playerFile = getPlayerFile(source.getServer(), target);
 //            targetPlayer = new OfflinePlayer(playerSender, source.getServer().getWorld(World.OVERWORLD), profile, playerFile);
@@ -557,12 +557,12 @@ public class BCUtilCommands {
     }
 
     public static void openPlayerAccessUI(MinecraftServer server, ServerPlayerEntity player, PlayerEntity playerAccess) {
-        player.getNextWindowId();
-        player.closeContainer();
-        int windowId = player.currentWindowId;
+        player.nextContainerCounter();
+        player.doCloseContainer();
+        int windowId = player.containerCounter;
         BCoreNetwork.sendOpenPlayerAccessUI(player, windowId);
         BCoreNetwork.sendPlayerAccessUIUpdate(player, playerAccess);
-        player.openContainer(new INamedContainerProvider() {
+        player.openMenu(new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
                 return new StringTextComponent("Player Access");
@@ -578,7 +578,7 @@ public class BCUtilCommands {
 //        player.openContainer = new ContainerPlayerAccess(player, playerAccess, server);
 //        player.openContainer.windowId = windowId;
 //        player.openContainer.addListener(player);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.containerMenu));
     }
 
 //    public static class OfflinePlayer extends PlayerEntity {

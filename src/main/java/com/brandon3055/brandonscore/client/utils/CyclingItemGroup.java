@@ -53,7 +53,7 @@ public class CyclingItemGroup extends ItemGroup {
 
     @Nonnull
     @Override
-    public ItemStack createIcon() {
+    public ItemStack makeIcon() {
         Object[] icons = iconSupplier.get();
         Object obj = icons[iconIndex % icons.length];
         ItemStack stack = obj instanceof ItemStack ? (ItemStack) obj : new ItemStack(obj instanceof Item ? (Item) obj : (Block) obj);
@@ -61,16 +61,16 @@ public class CyclingItemGroup extends ItemGroup {
             return stack;
         }
         this.iconIndex++;
-        return createIcon();
+        return makeIcon();
     }
 
     @Override
-    public ItemStack getIcon() {
+    public ItemStack getIconItem() {
         int index = ((TimeKeeper.getClientTick() + timeOffset) / cycleRate);
         if (icon == null || index != lastIndex) {
             lastIndex = index;
             this.iconIndex++;
-            icon = this.createIcon();
+            icon = this.makeIcon();
         }
 
         return icon;
@@ -82,17 +82,17 @@ public class CyclingItemGroup extends ItemGroup {
     }
 
     @Override
-    public void fill(NonNullList<ItemStack> items) {
+    public void fillItemList(NonNullList<ItemStack> items) {
         if (sortOrder != null) {
             NonNullList<ItemStack> sortedItems = NonNullList.create();
             for(Item item : Registry.ITEM) {
-                item.fillItemGroup(this, sortedItems);
+                item.fillItemCategory(this, sortedItems);
             }
             sortedItems.sort(Comparator.comparingInt(value -> sortOrder.indexOf(value.getItem().getRegistryName())));
             items.addAll(sortedItems);
         }
         else {
-            super.fill(items);
+            super.fillItemList(items);
         }
     }
 }

@@ -45,10 +45,10 @@ public class BlockToStackHelper {
         }
         itemCollection = new ArrayList<>();
 
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (state.removedByPlayer(world, pos, player, true, world.getFluidState(pos))){
-            state.getBlock().onPlayerDestroy(world, pos, state);
-            block.harvestBlock(world, player, pos, state, tile, player.getHeldItemMainhand());
+            state.getBlock().destroy(world, pos, state);
+            block.playerDestroy(world, player, pos, state, tile, player.getMainHandItem());
         }
 
         stacks.addAll(itemCollection);
@@ -73,7 +73,7 @@ public class BlockToStackHelper {
     public static FakePlayer getHarvester(ServerWorld world) {
         if (harvester == null) {
             harvester = FakePlayerFactory.get(world, new GameProfile(UUID.fromString("060e69c4-6aed-11e6-8b77-86f30ca893d3"), "[Brandons-Core]"));
-            harvester.setHeldItem(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
+            harvester.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
         }
 
         return harvester;

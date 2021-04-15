@@ -28,13 +28,13 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
 
     public GuiPlayerAccess(ContainerPlayerAccess container,  PlayerInventory player) {
         super(container, player, new StringTextComponent("Player Access"));
-        xSize = 220;
-        ySize = 250;
+        imageWidth = 220;
+        imageHeight = 250;
     }
 
     @Override
     public void addElements(GuiElementManager manager) {
-        GuiTexture bg = GuiTexture.newBCTexture(xSize, ySize);
+        GuiTexture bg = GuiTexture.newBCTexture(imageWidth, imageHeight);
         bg.setPos(guiLeft(), guiTop());
         manager.addChild(bg);
 
@@ -46,7 +46,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
 
         GuiElement accessSlots = buildSlotElement(bg);
         accessSlots.setPos(bg.xPos() + (bg.xSize() / 2) - (accessSlots.xSize() / 2), label.maxYPos() + 2);
-        LogHelperBC.dev((accessSlots.xPos() - guiLeft)+" "+(accessSlots.yPos() - guiTop));
+        LogHelperBC.dev((accessSlots.xPos() - leftPos)+" "+(accessSlots.yPos() - topPos));
 
         GuiLabel posLabel = new GuiLabel().setDisplaySupplier(() -> String.format("Pos: " + TextFormatting.BLUE + "X: %s, Y: %s, Z: %s, Dim: %s", pos.getX(), pos.getY(), pos.getZ(), dimension));
         posLabel.setShadow(false).setTextColour(0);
@@ -90,7 +90,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
 
         GuiElement playerSlots = buildSlotElement(bg);
         playerSlots.setPos(bg.xPos() + (bg.xSize() / 2) - (playerSlots.xSize() / 2), label2.maxYPos() + 2);
-        LogHelperBC.dev((playerSlots.xPos() - guiLeft)+" "+(playerSlots.yPos() - guiTop));
+        LogHelperBC.dev((playerSlots.xPos() - leftPos)+" "+(playerSlots.yPos() - topPos));
     }
 
     private GuiElement buildSlotElement(GuiElement bg) {

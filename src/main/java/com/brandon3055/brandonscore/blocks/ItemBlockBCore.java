@@ -25,7 +25,7 @@ public class ItemBlockBCore extends BlockItem {
     protected boolean placeBlock(BlockItemUseContext context, BlockState state) {
         boolean placed = super.placeBlock(context, state);
 
-        TileEntity tile = context.getWorld().getTileEntity(context.getPos());
+        TileEntity tile = context.getLevel().getBlockEntity(context.getClickedPos());
         if (placed && tile instanceof ITilePlaceListener) {
             ((ITilePlaceListener) tile).onTilePlaced(context, state);
         }

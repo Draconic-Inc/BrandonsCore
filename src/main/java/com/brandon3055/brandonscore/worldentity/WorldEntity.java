@@ -19,7 +19,7 @@ import java.util.UUID;
 public abstract class WorldEntity {
     private WorldEntityType<?> worldEntityType;
     protected final Random rand = new Random();
-    private UUID uniqueID = MathHelper.getRandomUUID(this.rand);
+    private UUID uniqueID = MathHelper.createInsecureUUID(this.rand);
     protected World world;
     protected boolean removed;
 
@@ -68,13 +68,13 @@ public abstract class WorldEntity {
             throw new RuntimeException(this.getClass() + " is missing a mapping! This is a bug!");
         } else {
             nbt.putString("id", resourcelocation.toString());
-            nbt.putUniqueId("UUID", this.getUniqueID());
+            nbt.putUUID("UUID", this.getUniqueID());
         }
     }
 
     private void readInternal(CompoundNBT nbt) {
-        if (nbt.hasUniqueId("UUID")) {
-            this.uniqueID = nbt.getUniqueId("UUID");
+        if (nbt.hasUUID("UUID")) {
+            this.uniqueID = nbt.getUUID("UUID");
         }
     }
 

@@ -46,7 +46,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
             error("[Broken recipe. No recipe's were found for " + stackString + "]");
         }
         else if (renderers.isEmpty() && false) {
-            error(I18n.format("pi.md.no_recipe_for_item.txt") + " (This message will only show in edit mode)");
+            error(I18n.get("pi.md.no_recipe_for_item.txt") + " (This message will only show in edit mode)");
         }
     }
 
@@ -153,7 +153,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                     return true;
                 }
                 //TODO Test this
-                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && PIHelper.getETGuiKey().matchesKey(keyCode, scanCode)) {
+                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && PIHelper.getETGuiKey().matches(keyCode, scanCode)) {
                     List<String> pages = PIHelper.getRelatedPages((ItemStack) o);
                     if (!pages.isEmpty()) {
                         PIHelper.openGui(modularGui.getScreen(), pages);

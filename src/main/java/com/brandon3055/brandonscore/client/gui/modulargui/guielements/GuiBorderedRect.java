@@ -35,7 +35,7 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         boolean hovering = isMouseOver(mouseX, mouseY);
-        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
         if (is3dEffect) {
             int fill = getFillColour(hovering);
             int topLeft = getBorderTopLeft(hovering);
@@ -48,7 +48,7 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
         } else {
             drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), borderWidth, getFillColour(hovering), getBorderColour(hovering));
         }
-        getter.finish();
+        getter.endBatch();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 

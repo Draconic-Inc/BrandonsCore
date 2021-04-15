@@ -1,6 +1,8 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette.Ctrl;
+import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette.SubItem;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
@@ -36,8 +38,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette.Ctrl;
-import static com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette.SubItem;
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
 import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
 
@@ -147,7 +147,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             background.setPos(this).setXSizeMod(this::xSize).setYSize(this.ySize());
             addChild(background);
 
-            nodeLabel = new GuiLabel(I18n.format(filterNameKey));
+            nodeLabel = new GuiLabel(I18n.get(filterNameKey));
             nodeLabel.setHoverableTextCol(hovering -> gui.nodeTitleColour.getColour());
             nodeLabel.setWidthFromText(10);
             nodeLabel.setShadow(false);
@@ -254,8 +254,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             matchButton.setDisplaySupplier(() -> TextFormatting.UNDERLINE + i18ni("and_group.button." + isAndNode()));
             matchButton.setHoverText((e) -> i18ni("and_group." + isAndNode()));
             matchButton.onPressed(() -> { if (getNode() != null) getNode().setAndGroup(!getNode().isAndGroup()); });
-            matchButton.setYPos(yPos() + 1).setXPosMod(() -> addButton.xPos() - fontRenderer.getStringWidth(matchButton.getDisplayString()) - 1);
-            matchButton.setXSizeMod(() -> fontRenderer.getStringWidth(matchButton.getDisplayString()));
+            matchButton.setYPos(yPos() + 1).setXPosMod(() -> addButton.xPos() - fontRenderer.width(matchButton.getDisplayString()) - 1);
+            matchButton.setXSizeMod(() -> fontRenderer.width(matchButton.getDisplayString()));
             addChild(matchButton);
 
             updateChildNodes();
@@ -473,7 +473,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addChild(nameLabel);
 
             GuiTextField nameField = new GuiTextField();
-            nameField.setValidator(ResourceLocation::isResouceNameValid);
+            nameField.setValidator(ResourceLocation::isValidResourceLocation);
 //            nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getEntityName());
             nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getEntityName(), s -> {
                 if (getNode() != null) {
@@ -482,11 +482,11 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     //TODO Test
                     EntityType<?> type = ForgeRegistries.ENTITIES.getValue(rs);
                     boolean exists = ForgeRegistries.ENTITIES.containsKey(rs);
-                    String name = exists ? type.getTranslationKey() : "unknown";
+                    String name = exists ? type.getDescriptionId() : "unknown";
                     nameField.setTextColor(exists ? 0x00FF00 : 0xFF0000);
                     Optional<? extends ModContainer> mod = ModList.get().getModContainerById(rs.getNamespace());
                     String modName = mod.isPresent() ? mod.get().getModInfo().getDisplayName() : "[unknown-mod]";
-                    String entityName = I18n.format(name);
+                    String entityName = I18n.get(name);
                     if (exists) {
                         nameField.setHoverText(entityName, TextFormatting.BLUE + "" + TextFormatting.ITALIC + modName);
                     } else {
@@ -520,8 +520,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     renderer.setPos(8, 2);
                     container.addChild(renderer);
                     EntityType type = ForgeRegistries.ENTITIES.getValue(rs);
-                    String name = type == null ? "unknown" : type.getName().getString();
-                    GuiLabel label = new GuiLabel(I18n.format(I18n.format(name)));
+                    String name = type == null ? "unknown" : type.getDescription().getString();
+                    GuiLabel label = new GuiLabel(I18n.get(I18n.get(name)));
                     label.setPos(renderer.maxXPos() + 6, container.yPos() + 2).setWrap(true).setYSize(container.ySize() - 4).setXSizeMod(() -> container.xSize() - (16 + 6 + 2 + 2));
                     container.addChild(label);
                     label.zOffset+=5;
@@ -541,8 +541,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 });
 
                 DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
-                    return e.getValue().create(mc.world) instanceof LivingEntity;
-                }, e -> dialog.addItem(e.getKey().getLocation()));
+                    return e.getValue().create(mc.level) instanceof LivingEntity;
+                }, e -> dialog.addItem(e.getKey().location()));
                 dialog.setSize(150, 190);
                 dialog.addBackGroundChild(new GuiBorderedRect().set3DGetters(SubItem::fill, SubItem::accentLight, SubItem::accentDark).setDoubleBorder(1).setBorderColourL(e -> SubItem.border3d()).setPosAndSize(dialog));
                 GuiTextField filter = new GuiTextField();
@@ -553,12 +553,12 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
                         EntityType<?> type = e.getValue();
                         boolean pass = s.isEmpty() || type.toString().toLowerCase().contains(s.toLowerCase());
-                        String name = type.getName().getString();
+                        String name = type.getDescription().getString();
                         if (!pass && name.toLowerCase().contains(s.toLowerCase())) {
                             pass = true;
                         }
-                        return pass && type.create(mc.world) instanceof LivingEntity;
-                    }, e -> dialog.addItem(e.getKey().getLocation()));
+                        return pass && type.create(mc.level) instanceof LivingEntity;
+                    }, e -> dialog.addItem(e.getKey().location()));
                 });
                 GuiLabel searchLabel = new GuiLabel(i18ni("search")).setTextColour(0xB0B0B0).setShadow(false);
                 searchLabel.setPosAndSize(filter).translate(0, 1);
@@ -609,11 +609,11 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             stackIcon.setClickListener(() -> {
                 if (getNode() != null) {
                     PlayerEntity player = Minecraft.getInstance().player;
-                    if (!player.inventory.getItemStack().isEmpty()) {
-                        ItemStack stack = player.inventory.getItemStack().copy();
+                    if (!player.inventory.getCarried().isEmpty()) {
+                        ItemStack stack = player.inventory.getCarried().copy();
                         stack.setCount(1);
                         getNode().setItemName(stack.getItem().getRegistryName().toString());
-                        getNode().setDamage(stack.isDamageable() ? stack.getDamage() : -1);
+                        getNode().setDamage(stack.isDamageableItem() ? stack.getDamageValue() : -1);
                         getNode().setNbt(stack.getTag());
                     } else {
                         getNode().setItemName("");
@@ -628,7 +628,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     ItemStack stack = ((ItemStack) e).copy();
                     stack.setCount(1);
                     getNode().setItemName(stack.getItem().getRegistryName().toString());
-                    getNode().setDamage(stack.isDamageable() ? stack.getDamage() : -1);
+                    getNode().setDamage(stack.isDamageableItem() ? stack.getDamageValue() : -1);
                     getNode().setNbt(stack.getTag());
                 }
             });
@@ -732,7 +732,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                         nbtField.setHoverText(i18ni("item.nbt.info"));
                     } else {
                         try {
-                            CompoundNBT compound = JsonToNBT.getTagFromJson(s);
+                            CompoundNBT compound = JsonToNBT.parseTag(s);
                             getNode().setNbt(compound);
                             nbtField.setTextColor(0xFFFFFF);
                             nbtField.setHoverText(i18ni("item.nbt.info"));
@@ -770,7 +770,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 } else {
                     StackReference stack = new StackReference(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
                     stackIcon.setStack(stack);
-                    List<ITextComponent> tooltip = stack.createStack().getTooltip(mc.player, mc.gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
+                    List<ITextComponent> tooltip = stack.createStack().getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ADVANCED : NORMAL);
                     tooltip.add(new StringTextComponent(TextFormatting.GRAY + "----------------------------"));
                     tooltip.add(new TranslationTextComponent("set_stack"));
                     stackIcon.setComponentHoverText(tooltip);

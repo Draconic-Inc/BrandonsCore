@@ -42,7 +42,7 @@ public class WorldEntitySaveData extends WorldSavedData {
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
+    public void load(CompoundNBT nbt) {
         ListNBT list = nbt.getList("entities", 10);
         for (INBT inbt : list) {
             entities.add(WorldEntity.readWorldEntity((CompoundNBT) inbt));
@@ -50,7 +50,7 @@ public class WorldEntitySaveData extends WorldSavedData {
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         ListNBT list = new ListNBT();
         for (WorldEntity entity : entities) {
             CompoundNBT entityTag = new CompoundNBT();

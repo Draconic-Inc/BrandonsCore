@@ -75,7 +75,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
         RenderSystem.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
         RenderSystem.scaled(scaledWidth, scaledHeight, 1);
-        minecraft.getItemRenderer().renderItemIntoGUI(getStack(), 0, 0);
+        minecraft.getItemRenderer().renderGuiItem(getStack(), 0, 0);
 
         if (getStack().getItem().showDurabilityBar(getStack())) {
             double health = getStack().getItem().getDurabilityForDisplay(getStack());
@@ -94,11 +94,11 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             String s = getStack().getCount() + "";
             RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
             zOffset += 45;
-            drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.getStringWidth(s)) - 1, fontRenderer.FONT_HEIGHT, 0xFFFFFF, true);
+            drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.width(s)) - 1, fontRenderer.lineHeight, 0xFFFFFF, true);
             zOffset -= 45;
         }
 
-        RenderHelper.disableStandardItemLighting();
+        RenderHelper.turnOff();
     }
 
     @Override

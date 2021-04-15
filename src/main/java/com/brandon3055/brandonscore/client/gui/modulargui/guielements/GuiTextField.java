@@ -162,7 +162,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     public void writeText(String textToWrite) {
         String s = "";
-        String s1 = SharedConstants.filterAllowedCharacters(textToWrite);
+        String s1 = SharedConstants.filterText(textToWrite);
         int selectStart = Math.min(this.cursorPosition, this.selectionEnd);
         int selectEnd = Math.max(this.cursorPosition, this.selectionEnd);
         int k = this.maxStringLength - this.text().length() - (selectStart - selectEnd);
@@ -318,16 +318,16 @@ public class GuiTextField extends GuiElement<GuiTextField> {
                 this.setSelectionPos(0);
                 return true;
             } else if (Screen.isCopy(keyCode)) {
-                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
+                Minecraft.getInstance().keyboardHandler.setClipboard(this.getSelectedText());
                 return true;
             } else if (Screen.isPaste(keyCode)) {
                 if (this.isFieldEnabled) {
-                    this.writeText(Minecraft.getInstance().keyboardListener.getClipboardString());
+                    this.writeText(Minecraft.getInstance().keyboardHandler.getClipboard());
                 }
 
                 return true;
             } else if (Screen.isCut(keyCode)) {
-                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
+                Minecraft.getInstance().keyboardHandler.setClipboard(this.getSelectedText());
                 if (this.isFieldEnabled) {
                     this.writeText("");
                 }
@@ -403,7 +403,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     public boolean charTyped(char charType, int charCode) {
         if (!this.isEditing()) {
             return false;
-        } else if (SharedConstants.isAllowedCharacter(charType)) {
+        } else if (SharedConstants.isAllowedChatCharacter(charType)) {
             if (this.isFieldEnabled) {
                 this.writeText(Character.toString(charType));
             }
@@ -428,8 +428,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
                 i -= 4;
             }
 
-            String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
-            this.setCursorPosition(this.fontRenderer.func_238412_a_(s, i).length() + this.lineScrollOffset);
+            String s = this.fontRenderer.plainSubstrByWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
+            this.setCursorPosition(this.fontRenderer.plainSubstrByWidth(s, i).length() + this.lineScrollOffset);
             return true;
         } else {
             return false;
@@ -465,7 +465,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         int i = this.isFieldEnabled ? getTextColor() : this.disabledColor;
         int j = this.cursorPosition - this.lineScrollOffset;
         int k = this.selectionEnd - this.lineScrollOffset;
-        String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
+        String s = this.fontRenderer.plainSubstrByWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
         boolean flag = j >= 0 && j <= s.length();
         boolean flag1 = this.isFocused() && this.cursorCounter / 10 % 2 == 0 && flag;
         int stringX = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
@@ -479,9 +479,9 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
             if (getShadow()) {
-                j1 = this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
+                j1 = this.fontRenderer.drawShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
             } else {
-                j1 = this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
+                j1 = this.fontRenderer.draw(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
             }
         }
 
@@ -498,17 +498,17 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
         if (!s.isEmpty() && flag && j < s.length()) {
             if (getShadow()) {
-                this.fontRenderer.drawStringWithShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
+                this.fontRenderer.drawShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
             } else {
-                this.fontRenderer.drawString(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
+                this.fontRenderer.draw(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
             }
         }
 
         if (!flag2 && this.suggestion != null) {
             if (getShadow()) {
-                this.fontRenderer.drawStringWithShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
+                this.fontRenderer.drawShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
             } else {
-                this.fontRenderer.drawString(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
+                this.fontRenderer.draw(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
             }
         }
 
@@ -517,15 +517,15 @@ public class GuiTextField extends GuiElement<GuiTextField> {
                 AbstractGui.fill(matrixStack, k1, stringY - 1, k1 + 1, stringY + 1 + 9, cursorColor);
             } else {
                 if (getShadow()) {
-                    this.fontRenderer.drawStringWithShadow(matrixStack, "_", (float) k1, (float) stringY, i);
+                    this.fontRenderer.drawShadow(matrixStack, "_", (float) k1, (float) stringY, i);
                 } else {
-                    this.fontRenderer.drawString(matrixStack, "_", (float) k1, (float) stringY, i);
+                    this.fontRenderer.draw(matrixStack, "_", (float) k1, (float) stringY, i);
                 }
             }
         }
 
         if (k != j) {
-            int l1 = stringX + this.fontRenderer.getStringWidth(s.substring(0, k));
+            int l1 = stringX + this.fontRenderer.width(s.substring(0, k));
             this.drawSelectionBox(k1, stringY - 1, l1 - 1, stringY + 1 + 9);
         }
         if (textZOffset != 0) matrixStack.translate(0, 0, -textZOffset);
@@ -557,17 +557,17 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         }
 
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
         RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
         RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-        bufferbuilder.pos(startX, endY, 0.0D).endVertex();
-        bufferbuilder.pos(endX, endY, 0.0D).endVertex();
-        bufferbuilder.pos(endX, startY, 0.0D).endVertex();
-        bufferbuilder.pos(startX, startY, 0.0D).endVertex();
-        tessellator.draw();
+        bufferbuilder.vertex(startX, endY, 0.0D).endVertex();
+        bufferbuilder.vertex(endX, endY, 0.0D).endVertex();
+        bufferbuilder.vertex(endX, startY, 0.0D).endVertex();
+        bufferbuilder.vertex(startX, startY, 0.0D).endVertex();
+        tessellator.end();
         RenderSystem.disableColorLogicOp();
         RenderSystem.enableTexture();
     }
@@ -690,10 +690,10 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             }
 
             int j = this.getAdjustedWidth();
-            String s = this.fontRenderer.func_238412_a_(this.text().substring(this.lineScrollOffset), j);
+            String s = this.fontRenderer.plainSubstrByWidth(this.text().substring(this.lineScrollOffset), j);
             int k = s.length() + this.lineScrollOffset;
             if (this.selectionEnd == this.lineScrollOffset) {
-                this.lineScrollOffset -= this.fontRenderer.func_238413_a_(this.text(), j, true).length();
+                this.lineScrollOffset -= this.fontRenderer.plainSubstrByWidth(this.text(), j, true).length();
             }
 
             if (this.selectionEnd > k) {

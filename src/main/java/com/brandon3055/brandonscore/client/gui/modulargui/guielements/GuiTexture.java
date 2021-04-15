@@ -83,9 +83,9 @@ public class GuiTexture extends GuiElement<GuiTexture> {
 
         RenderMaterial mat = getMaterial();
         if (mat != null) {
-            IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-            drawSprite(mat.getBuffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.getSprite());
-            getter.finish();
+            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+            drawSprite(mat.buffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+            getter.endBatch();
         } else {
             ResourceLocation texture = getTexture();
             if (texture != null) {
@@ -260,9 +260,9 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return new GuiTexture(null) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
-                drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), getMaterial().getSprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
-                getter.finish();
+                IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+                drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
+                getter.endBatch();
 
                 for (GuiElement element : childElements) {
                     if (element.isEnabled()) {

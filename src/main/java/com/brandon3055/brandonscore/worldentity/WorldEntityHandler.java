@@ -47,7 +47,7 @@ public class WorldEntityHandler {
     public static void worldLoad(WorldEvent.Load event) {
         if (!(event.getWorld() instanceof ServerWorld)) return;
         ServerWorld world = (ServerWorld) event.getWorld();
-        RegistryKey<World> key = world.getDimensionKey();
+        RegistryKey<World> key = world.dimension();
 
         //If the world was unloaded properly then this should always be null. But better safe
         List<WorldEntity> oldEntities = WORLD_ENTITY_MAP.remove(key);
@@ -58,7 +58,7 @@ public class WorldEntityHandler {
             WORLD_ENTITY_MAP.remove(key);
         }
 
-        WorldEntitySaveData data = world.getSavedData().getOrCreate(WorldEntitySaveData::new, WorldEntitySaveData.ID);
+        WorldEntitySaveData data = world.getDataStorage().computeIfAbsent(WorldEntitySaveData::new, WorldEntitySaveData.ID);
         data.setSaveCallback(() -> handleSave(data, key));
         for (WorldEntity entity : data.getEntities()) {
             addWorldEntity(world, entity);
@@ -74,7 +74,7 @@ public class WorldEntityHandler {
     public static void worldUnload(WorldEvent.Unload event) {
         if (!(event.getWorld() instanceof ServerWorld)) return;
         ServerWorld world = (ServerWorld) event.getWorld();
-        RegistryKey<World> key = world.getDimensionKey();
+        RegistryKey<World> key = world.dimension();
         TICKING_ENTITY_MAP.remove(key);
         List<WorldEntity> removed = WORLD_ENTITY_MAP.get(key);
         if (removed != null) {
@@ -92,13 +92,13 @@ public class WorldEntityHandler {
     public static void worldTick(TickEvent.WorldTickEvent event) {
         if (!(event.world instanceof ServerWorld)) return;
         World world = event.world;
-        RegistryKey<World> key = world.getDimensionKey();
+        RegistryKey<World> key = world.dimension();
 
         //Clear dead entities
         ID_ENTITY_MAP.entrySet().removeIf(entry -> {
             WorldEntity entity = entry.getValue();
             if (entity.isRemoved()) {
-                RegistryKey<World> removeKey = entity.world.getDimensionKey();
+                RegistryKey<World> removeKey = entity.world.dimension();
                 if (WORLD_ENTITY_MAP.containsKey(removeKey)) {
                     WORLD_ENTITY_MAP.get(removeKey).remove(entity);
                 }
@@ -152,7 +152,7 @@ public class WorldEntityHandler {
 
     public static void addWorldEntity(World world, WorldEntity entity) {
         if (!(world instanceof ServerWorld)) return;
-        RegistryKey<World> key = world.getDimensionKey();
+        RegistryKey<World> key = world.dimension();
         ADDED_WORLD_ENTITIES.computeIfAbsent(key, e -> new ArrayList<>()).add(entity);
         entity.setWorld(world);
     }
@@ -160,8 +160,8 @@ public class WorldEntityHandler {
     @Nullable
     public static WorldEntity getWorldEntity(World world, UUID id) {
         WorldEntity entity = ID_ENTITY_MAP.get(id);
-        if (entity == null && ADDED_WORLD_ENTITIES.containsKey(world.getDimensionKey())) {
-            entity = ADDED_WORLD_ENTITIES.get(world.getDimensionKey()).stream().filter(e -> e.getUniqueID().equals(id)).findAny().orElse(null);
+        if (entity == null && ADDED_WORLD_ENTITIES.containsKey(world.dimension())) {
+            entity = ADDED_WORLD_ENTITIES.get(world.dimension()).stream().filter(e -> e.getUniqueID().equals(id)).findAny().orElse(null);
         }
         return entity;
     }
@@ -177,7 +177,7 @@ public class WorldEntityHandler {
     }
 
     protected static void onEntityRemove(WorldEntity entity) {
-        RegistryKey<World> key = entity.getWorld().getDimensionKey();
+        RegistryKey<World> key = entity.getWorld().dimension();
         if (ADDED_WORLD_ENTITIES.containsKey(key)) {
             ADDED_WORLD_ENTITIES.get(key).remove(entity);
         }

@@ -73,19 +73,19 @@ public class ContainerBCore<D> extends Container {
     }
 
     @Override
-    public void addListener(IContainerListener listener) {
-        super.addListener(listener);
+    public void addSlotListener(IContainerListener listener) {
+        super.addSlotListener(listener);
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true;
     }
 
     //Note to self: This is called from a loop. As long as this does not return an empty stack the loop will continue.
     //Returning an empty stack essentially indicates that no more items can be transferred.
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity player, int i) {
+    public ItemStack quickMoveStack(PlayerEntity player, int i) {
         int playerSlots = 36;
         if (slotLayout != null) {
             playerSlots = slotLayout.getPlayerSlotCount();
@@ -95,28 +95,28 @@ public class ContainerBCore<D> extends Container {
             IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
             Slot slot = getSlot(i);
 
-            if (slot != null && slot.getHasStack()) {
-                ItemStack stack = slot.getStack();
+            if (slot != null && slot.hasItem()) {
+                ItemStack stack = slot.getItem();
                 ItemStack result = stack.copy();
 
                 //Transferring from tile to player
                 if (i >= playerSlots) {
-                    if (!mergeItemStack(stack, 0, playerSlots, false)) {
+                    if (!moveItemStackTo(stack, 0, playerSlots, false)) {
                         return ItemStack.EMPTY; //Return if failed to merge
                     }
                 }
                 else {
                     //Transferring from player to tile
-                    if (!mergeItemStack(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
+                    if (!moveItemStackTo(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
                         return ItemStack.EMPTY;  //Return if failed to merge
                     }
                 }
 
                 if (stack.getCount() == 0) {
-                    slot.putStack(ItemStack.EMPTY);
+                    slot.set(ItemStack.EMPTY);
                 }
                 else {
-                    slot.onSlotChanged();
+                    slot.setChanged();
                 }
 
                 slot.onTake(player, stack);
@@ -130,17 +130,17 @@ public class ContainerBCore<D> extends Container {
     //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
 
     @Override
-    public void putStackInSlot(int slotID, ItemStack stack) {
+    public void setItem(int slotID, ItemStack stack) {
         Slot slot = this.getSlot(slotID);
         if (slot != null) {
-            slot.putStack(stack);
+            slot.set(stack);
         }
     }
 
     @Override
     public Slot getSlot(int slotId) {
-        if (slotId < inventorySlots.size() && slotId >= 0) {
-            return inventorySlots.get(slotId);
+        if (slotId < slots.size() && slotId >= 0) {
+            return slots.get(slotId);
         }
         return null;
     }
@@ -151,7 +151,7 @@ public class ContainerBCore<D> extends Container {
         for (int i = 0; i < stacks.size(); ++i) {
             Slot slot = getSlot(i);
             if (slot != null) {
-                slot.putStack(stacks.get(i));
+                slot.set(stacks.get(i));
             }
         }
     }

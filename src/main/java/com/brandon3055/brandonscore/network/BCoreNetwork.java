@@ -63,7 +63,7 @@ public class BCoreNetwork {
     public static void sendPlayerAccessUIUpdate(ServerPlayerEntity player, PlayerEntity target) {
         PacketCustom packet = new PacketCustom(CHANNEL, C_PLAYER_ACCESS_UPDATE);
         packet.writeString(target.getGameProfile().getName());
-        packet.writePos(target.getPosition());
+        packet.writePos(target.blockPosition());
 //        packet.writeInt(target.dimension.getId());
 //        packet.sendToPlayer(player);
     }

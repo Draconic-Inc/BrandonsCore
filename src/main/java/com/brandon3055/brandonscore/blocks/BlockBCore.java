@@ -61,7 +61,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 //            stack.setItemDamage(getMetaFromState(state));
 //        }
 
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
 
         if (tile instanceof IDataRetainingTile && !BrandonsCore.proxy.isCTRLKeyDown()) {
             CompoundNBT tileData = new CompoundNBT();
@@ -72,7 +72,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
         }
 
         if (tile instanceof INameable && ((INameable) tile).hasCustomName()) {
-            stack.setDisplayName(((INameable) tile).getName());
+            stack.setHoverName(((INameable) tile).getName());
         }
 
         return stack;
@@ -127,7 +127,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     @Override
     public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
         if (hasTileEntity(state)) {
-            TileEntity tile = world.getTileEntity(pos);
+            TileEntity tile = world.getBlockEntity(pos);
             return tile instanceof IRedstoneEmitter;
         }
 
@@ -135,14 +135,14 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public boolean canProvidePower(BlockState state) {
+    public boolean isSignalSource(BlockState state) {
         return canProvidePower;
     }
 
     @Override
     public boolean shouldCheckWeakPower(BlockState state, IWorldReader world, BlockPos pos, Direction side) {
         if (hasTileEntity(state)) {
-            TileEntity tile = world.getTileEntity(pos);
+            TileEntity tile = world.getBlockEntity(pos);
             return tile instanceof IChangeListener;
         }
 
@@ -150,31 +150,31 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public int getWeakPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side) {
+    public int getSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side) {
         if (hasTileEntity(blockState)) {
-            TileEntity tile = blockAccess.getTileEntity(pos);
+            TileEntity tile = blockAccess.getBlockEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
                 return ((IRedstoneEmitter) tile).getWeakPower(blockState, side);
             }
         }
-        return super.getWeakPower(blockState, blockAccess, pos, side);
+        return super.getSignal(blockState, blockAccess, pos, side);
     }
 
     @Override
-    public int getStrongPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side) {
+    public int getDirectSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side) {
         if (hasTileEntity(blockState)) {
-            TileEntity tile = blockAccess.getTileEntity(pos);
+            TileEntity tile = blockAccess.getBlockEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
                 return ((IRedstoneEmitter) tile).getStrongPower(blockState, side);
             }
         }
-        return super.getStrongPower(blockState, blockAccess, pos, side);
+        return super.getDirectSignal(blockState, blockAccess, pos, side);
     }
 
     @Override
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (hasTileEntity(state)) {
-            TileEntity tile = world.getTileEntity(pos);
+            TileEntity tile = world.getBlockEntity(pos);
             if (tile instanceof IChangeListener) {
                 ((IChangeListener) tile).onNeighborChange(fromPos);
             }
@@ -185,35 +185,35 @@ public class BlockBCore extends Block implements IBCoreBlock {
     //IActivatableTile
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (hasTileEntity(state)) {
-            TileEntity tile = worldIn.getTileEntity(pos);
+            TileEntity tile = worldIn.getBlockEntity(pos);
             if (tile instanceof IActivatableTile) {
                 return ((IActivatableTile) tile).onBlockActivated(state, player, handIn, hit) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
             }
         }
 
-        return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+        return super.use(state, worldIn, pos, player, handIn, hit);
     }
 
     //IDataRetainingTile
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        TileEntity tile = world.getTileEntity(pos);
+    public void setPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        TileEntity tile = world.getBlockEntity(pos);
 
         if (tile instanceof IDataRetainingTile) {
             if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
-                ((IDataRetainingTile) tile).readFromItemStack(stack.getChildTag(BC_TILE_DATA_TAG));
+                ((IDataRetainingTile) tile).readFromItemStack(stack.getTagElement(BC_TILE_DATA_TAG));
             }
         }
 
-        if (tile instanceof TileBCore && stack.hasDisplayName()) {
-            ((TileBCore) tile).setCustomName(stack.getDisplayName().getString());
+        if (tile instanceof TileBCore && stack.hasCustomHoverName()) {
+            ((TileBCore) tile).setCustomName(stack.getHoverName().getString());
         }
     }
 
     @Override
-    public void harvestBlock(World world, PlayerEntity player, BlockPos pos, BlockState state, TileEntity te, ItemStack heldStack) {
+    public void playerDestroy(World world, PlayerEntity player, BlockPos pos, BlockState state, TileEntity te, ItemStack heldStack) {
         ItemStack stack = null;
 
         if (te instanceof IDataRetainingTile && ((IDataRetainingTile) te).saveToItem()) {
@@ -229,18 +229,18 @@ public class BlockBCore extends Block implements IBCoreBlock {
             if (stack == null) {
                 stack = new ItemStack(this, 1);//, damageDropped(state));
             }
-            stack.setDisplayName(((INameable) te).getName());
+            stack.setHoverName(((INameable) te).getName());
         }
 
         if (stack != null) {
-            player.addStat(Stats.BLOCK_MINED.get(this));
-            player.addExhaustion(0.005F);
+            player.awardStat(Stats.BLOCK_MINED.get(this));
+            player.causeFoodExhaustion(0.005F);
 
-            spawnAsEntity(world, pos, stack);
+            popResource(world, pos, stack);
             //Remove tile to make sure no one else can mess with it and dupe its contents.
-            world.removeTileEntity(pos);
+            world.removeBlockEntity(pos);
         } else {
-            super.harvestBlock(world, player, pos, state, te, heldStack);
+            super.playerDestroy(world, player, pos, state, te, heldStack);
         }
     }
 
@@ -270,9 +270,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     @Override
-    public boolean canDropFromExplosion(Explosion explosionIn) {
+    public boolean dropFromExplosion(Explosion explosionIn) {
         if (!isMobResistant) {
-            return super.canDropFromExplosion(explosionIn);
+            return super.dropFromExplosion(explosionIn);
         }
         return false;
     }
@@ -287,32 +287,32 @@ public class BlockBCore extends Block implements IBCoreBlock {
     //Utils
     public static int getRedstonePower(IWorldReader world, BlockPos pos, Direction facing) {
         BlockState blockstate = world.getBlockState(pos);
-        return blockstate.shouldCheckWeakPower(world, pos, facing) ? getStrongPower(world, pos) : blockstate.getWeakPower(world, pos, facing);
+        return blockstate.shouldCheckWeakPower(world, pos, facing) ? getStrongPower(world, pos) : blockstate.getSignal(world, pos, facing);
     }
 
     public static int getStrongPower(IWorldReader world, BlockPos pos) {
         int i = 0;
-        i = Math.max(i, world.getStrongPower(pos.down(), Direction.DOWN));
+        i = Math.max(i, world.getDirectSignal(pos.below(), Direction.DOWN));
         if (i >= 15) {
             return i;
         } else {
-            i = Math.max(i, world.getStrongPower(pos.up(), Direction.UP));
+            i = Math.max(i, world.getDirectSignal(pos.above(), Direction.UP));
             if (i >= 15) {
                 return i;
             } else {
-                i = Math.max(i, world.getStrongPower(pos.north(), Direction.NORTH));
+                i = Math.max(i, world.getDirectSignal(pos.north(), Direction.NORTH));
                 if (i >= 15) {
                     return i;
                 } else {
-                    i = Math.max(i, world.getStrongPower(pos.south(), Direction.SOUTH));
+                    i = Math.max(i, world.getDirectSignal(pos.south(), Direction.SOUTH));
                     if (i >= 15) {
                         return i;
                     } else {
-                        i = Math.max(i, world.getStrongPower(pos.west(), Direction.WEST));
+                        i = Math.max(i, world.getDirectSignal(pos.west(), Direction.WEST));
                         if (i >= 15) {
                             return i;
                         } else {
-                            i = Math.max(i, world.getStrongPower(pos.east(), Direction.EAST));
+                            i = Math.max(i, world.getDirectSignal(pos.east(), Direction.EAST));
                             return i >= 15 ? i : i;
                         }
                     }
@@ -322,9 +322,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     public static boolean isBlockPowered(IWorldReader world, BlockPos pos) {
-        if (getRedstonePower(world, pos.down(), Direction.DOWN) > 0) {
+        if (getRedstonePower(world, pos.below(), Direction.DOWN) > 0) {
             return true;
-        } else if (getRedstonePower(world, pos.up(), Direction.UP) > 0) {
+        } else if (getRedstonePower(world, pos.above(), Direction.UP) > 0) {
             return true;
         } else if (getRedstonePower(world, pos.north(), Direction.NORTH) > 0) {
             return true;
@@ -340,8 +340,8 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
         if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
             tooltip.add(new TranslationTextComponent("info.de.hasSavedData.txt"));
         }

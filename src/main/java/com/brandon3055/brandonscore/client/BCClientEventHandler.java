@@ -73,7 +73,7 @@ public class BCClientEventHandler {
         }
 
         elapsedTicks++;
-        if (Minecraft.getInstance().isGamePaused()) {
+        if (Minecraft.getInstance().isPaused()) {
             return;
         }
 
@@ -97,14 +97,14 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void renderScreen(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().currentScreen instanceof ChatScreen) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().screen instanceof ChatScreen) {
             return;
         }
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(0, 0, 600);
+        GlStateManager._pushMatrix();
+        GlStateManager._translated(0, 0, 600);
 
-        renderGraph(event.getMatrixStack(), 220, 0, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), overallTickTime, "Overall");
+        renderGraph(event.getMatrixStack(), 220, 0, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), overallTickTime, "Overall");
 
         int i = 0;
         for (RegistryKey<World> dim : sortingOrder) {
@@ -112,17 +112,17 @@ public class BCClientEventHandler {
                 continue;
             }
 
-            renderGraph(event.getMatrixStack(), 0, i, event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight(), dimTickTimes.get(dim), dim.getLocation().toString());
+            renderGraph(event.getMatrixStack(), 0, i, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), dimTickTimes.get(dim), dim.location().toString());
             i++;
         }
 
         if (debugTimeout < 190) {
-            FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-            fontRenderer.drawStringWithShadow(event.getMatrixStack(), "Server Stopped Sending Updates!", 0, event.getWindow().getScaledHeight() - 21, 0xFF0000);
-            fontRenderer.drawStringWithShadow(event.getMatrixStack(), "Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getScaledHeight() - 11, 0xFF0000);
+            FontRenderer fontRenderer = Minecraft.getInstance().font;
+            fontRenderer.drawShadow(event.getMatrixStack(), "Server Stopped Sending Updates!", 0, event.getWindow().getGuiScaledHeight() - 21, 0xFF0000);
+            fontRenderer.drawShadow(event.getMatrixStack(), "Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getGuiScaledHeight() - 11, 0xFF0000);
         }
 
-        GlStateManager.popMatrix();
+        GlStateManager._popMatrix();
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -132,18 +132,18 @@ public class BCClientEventHandler {
         float newFOV = originalFOV;
 
         int slotIndex = 2;
-        for (ItemStack stack : player.inventory.armorInventory) {
+        for (ItemStack stack : player.inventory.armor) {
             if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
                 newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.values()[slotIndex]);
             }
             slotIndex++;
         }
 
-        ItemStack stack = player.getHeldItemOffhand();
+        ItemStack stack = player.getOffhandItem();
         if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
             newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.OFFHAND);
         }
-        stack = player.getHeldItemMainhand();
+        stack = player.getMainHandItem();
         if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
             newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.MAINHAND);
         }
@@ -193,7 +193,7 @@ public class BCClientEventHandler {
 
     private void searchForPlayerMount() {
         if (remountTicksRemaining > 0) {
-            Entity e = Minecraft.getInstance().world.getEntityByID(remountEntityID);
+            Entity e = Minecraft.getInstance().level.getEntity(remountEntityID);
             if (e != null) {
                 Minecraft.getInstance().player.startRiding(e);
                 LogHelperBC.info("Successfully placed player on mount after " + (500 - remountTicksRemaining) + " ticks");
@@ -219,12 +219,12 @@ public class BCClientEventHandler {
         int yHeight = screenHeight - 23 - (y * 45);
 
         GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
-        FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
-        fontRenderer.drawStringWithShadow(matrix, name, x + 2, yHeight - 43, 0xFFFFFF);
+        FontRenderer fontRenderer = Minecraft.getInstance().font;
+        fontRenderer.drawShadow(matrix, name, x + 2, yHeight - 43, 0xFFFFFF);
         GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
         GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
-        fontRenderer.drawString(matrix, "50ms", x + 2, yHeight - 16, 0xFFFFFF);
-        fontRenderer.drawString(matrix, "100ms", x + 2, yHeight - 32, 0xFFFFFF);
+        fontRenderer.draw(matrix, "50ms", x + 2, yHeight - 16, 0xFFFFFF);
+        fontRenderer.draw(matrix, "100ms", x + 2, yHeight - 32, 0xFFFFFF);
 
         for (int i = 0; i < 200; i++) {
             int time = times[i] == null ? 0 : times[i];

@@ -97,7 +97,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
             LogHelperBC.error("ModularGui Display Level Out Of Bounds! Can not be greater than 950 " + displayZLevel);
         }
         toRemove.remove(element);
-        element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRenderer));
+        element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.font));
         element.displayZLevel = displayZLevel;
         if (first) {
             elements.addFirst(element);
@@ -438,7 +438,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         this.width = width;
         this.height = height;
         for (GuiElement element : elements) {
-            element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.fontRenderer));
+            element.applyGeneralElementData(parentGui, mc, width, height, BCFontRenderer.convert(mc.font));
         }
         reloadElements();
     }

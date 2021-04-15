@@ -32,7 +32,7 @@ public class EnergyUtils {
     // ================= Get Storage =================
 
     public static IOPStorage getStorage(TileEntity tile, Direction side) {
-        if (tile.getWorld().isRemote) {
+        if (tile.getLevel().isClientSide) {
             LogHelperBC.bigDev("Attempt to do energy operation client side!");
             return null;
         }
@@ -253,8 +253,8 @@ public class EnergyUtils {
         if (storage != null) {
             String energy = Utils.formatNumber(storage.getOPStored());
             String maxEnergy = Utils.formatNumber(storage.getMaxOPStored());
-            String postFix = Screen.hasShiftDown() ? "(" + I18n.format("op.brandonscore.operational_potential") + ")" : I18n.format("op.brandonscore.op");
-            list.add(new StringTextComponent(I18n.format("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).mergeStyle(GRAY));
+            String postFix = Screen.hasShiftDown() ? "(" + I18n.get("op.brandonscore.operational_potential") + ")" : I18n.get("op.brandonscore.op");
+            list.add(new StringTextComponent(I18n.get("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).withStyle(GRAY));
         }
     }
 }

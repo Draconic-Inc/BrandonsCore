@@ -141,15 +141,15 @@ public class Utils {
      * Determine the orientation of a blocks based on the position of the entity that placed it.
      */
     public static int determineOrientation(int x, int y, int z, LivingEntity entity) {
-        if (MathHelper.abs((float) entity.getPosX() - (float) x) < 2.0F && MathHelper.abs((float) entity.getPosZ() - (float) z) < 2.0F) {
-            double d0 = entity.getPosY() + 1.82D - (double) entity.getYOffset();
+        if (MathHelper.abs((float) entity.getX() - (float) x) < 2.0F && MathHelper.abs((float) entity.getZ() - (float) z) < 2.0F) {
+            double d0 = entity.getY() + 1.82D - (double) entity.getMyRidingOffset();
 
             if (d0 - (double) y > 2.0D) return 0;
 
             if ((double) y - d0 > 0.0D) return 1;
         }
 
-        int l = MathHelper.floor((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int l = MathHelper.floor((double) (entity.yRot * 4.0F / 360.0F) + 0.5D) & 3;
         return l == 0 ? 3 : (l == 1 ? 4 : (l == 2 ? 2 : (l == 3 ? 5 : 0)));
     }
 
@@ -258,11 +258,11 @@ public class Utils {
         double d0 = -1.0D;
         PlayerEntity closestPlayer = null;
 
-        for (int i = 0; i < world.getPlayers().size(); ++i) {
-            PlayerEntity player = world.getPlayers().get(i);
+        for (int i = 0; i < world.players().size(); ++i) {
+            PlayerEntity player = world.players().get(i);
 
             if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators)) {
-                double d1 = player.getDistanceSq(posX, posY, posZ);
+                double d1 = player.distanceToSqr(posX, posY, posZ);
 
                 if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0)) {
                     d0 = d1;
@@ -374,7 +374,7 @@ public class Utils {
             BiMap<Block, Fluid> tmp = HashBiMap.create();
             for (Fluid fluid : ForgeRegistries.FLUIDS.getValues())
             {
-                Block fluidBlock = fluid.getDefaultState().getBlockState().getBlock();
+                Block fluidBlock = fluid.defaultFluidState().createLegacyBlock().getBlock();
                 if (fluidBlock != Blocks.AIR)
                 {
                     tmp.put(fluidBlock, fluid);
@@ -392,9 +392,9 @@ public class Utils {
 
         while((i = stringIn.indexOf(167, i + 1)) != -1) {
             if (i < j - 1) {
-                TextFormatting textformatting = TextFormatting.fromFormattingCode(stringIn.charAt(i + 1));
+                TextFormatting textformatting = TextFormatting.getByCode(stringIn.charAt(i + 1));
                 if (textformatting != null) {
-                    if (!textformatting.isFancyStyling()) {
+                    if (!textformatting.isFormat()) {
                         stringbuilder.setLength(0);
                     }
 
@@ -415,8 +415,8 @@ public class Utils {
             return false;
         }
 
-        ChunkHolder.LocationType locationType = ((Chunk) ichunk).getLocationType();
-        return locationType.isAtLeast(minimum);
+        ChunkHolder.LocationType locationType = ((Chunk) ichunk).getFullStatus();
+        return locationType.isOrAfter(minimum);
     }
 }
 

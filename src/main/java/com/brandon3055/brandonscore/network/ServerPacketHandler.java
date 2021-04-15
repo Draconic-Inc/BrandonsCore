@@ -38,7 +38,7 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     private void handleTileMessage(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         try {
             BlockPos pos = packet.readPos();
-            TileEntity tile = sender.world.getTileEntity(pos);
+            TileEntity tile = sender.level.getBlockEntity(pos);
             if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
                 int id = packet.readByte() & 0xFF;
                 ((TileBCore) tile).receivePacketFromClient(packet, sender, id);
@@ -80,7 +80,7 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     private void handleTileDataManager(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         try {
             BlockPos pos = packet.readPos();
-            TileEntity tile = sender.world.getTileEntity(pos);
+            TileEntity tile = sender.level.getBlockEntity(pos);
             if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
                 ((TileBCore) tile).getDataManager().receiveDataFromClient(packet);
             }

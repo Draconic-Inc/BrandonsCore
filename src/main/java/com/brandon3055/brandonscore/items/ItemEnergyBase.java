@@ -39,8 +39,8 @@ public class ItemEnergyBase extends ItemBCore {
     //region Item
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
+    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+        if (this.allowdedIn(group)) {
             items.add(new ItemStack(this));
             ItemStack stack = new ItemStack(this);
             setEnergy(stack, getCapacity(stack));
@@ -156,7 +156,7 @@ public class ItemEnergyBase extends ItemBCore {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         InfoHelper.addEnergyInfo(stack, tooltip);
     }
 

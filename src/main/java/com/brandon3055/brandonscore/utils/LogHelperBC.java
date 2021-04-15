@@ -321,7 +321,7 @@ public class LogHelperBC {
     public static void buildNBT(StringBuilder builder, INBT nbt, String indent, String name, boolean comma) {
         if (nbt instanceof CompoundNBT) {
             builder.append("\n[NBT]: ").append(indent).append(name).append(":{");
-            Set<String> keys = ((CompoundNBT) nbt).keySet();
+            Set<String> keys = ((CompoundNBT) nbt).getAllKeys();
             int index = 0;
             for (String key : keys) {
                 index++;

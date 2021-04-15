@@ -14,7 +14,7 @@ public class SlotCheckValid extends SlotItemHandler {
     }
 
     @Override
-    public boolean isItemValid(ItemStack stack) {
+    public boolean mayPlace(ItemStack stack) {
         return getItemHandler().isItemValid(getSlotIndex(), stack);
     }
 
@@ -24,8 +24,8 @@ public class SlotCheckValid extends SlotItemHandler {
         }
 
         @Override
-        public boolean isItemValid(ItemStack stack) {
-            return inventory.isItemValidForSlot(getSlotIndex(), stack);
+        public boolean mayPlace(ItemStack stack) {
+            return container.canPlaceItem(getSlotIndex(), stack);
         }
 
     }

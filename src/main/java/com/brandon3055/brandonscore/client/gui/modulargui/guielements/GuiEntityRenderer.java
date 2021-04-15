@@ -83,7 +83,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         this.entityName = entity;
         this.entity = entityCache.computeIfAbsent(entity, resourceLocation -> {
             EntityType type = ForgeRegistries.ENTITIES.getValue(entity);
-            return type == null ? null : type.create(mc.world);
+            return type == null ? null : type.create(mc.level);
         });
         invalidEntity = false;
 
@@ -123,7 +123,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         try {
             if (entity != null) {
                 Rectangle rect = getInsetRect();
-                float scale = (float) (force2dSize ? (Math.min(rect.height / entity.getHeight(), rect.width / entity.getWidth())) : rect.height / entity.getHeight());
+                float scale = (float) (force2dSize ? (Math.min(rect.height / entity.getBbHeight(), rect.width / entity.getBbWidth())) : rect.height / entity.getBbHeight());
 
                 double zLevel = getRenderZLevel() + 100;
                 double posX = rect.x + (rect.width / 2D);
@@ -131,9 +131,9 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
 
                 float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
                 if (entity instanceof LivingEntity) {
-                    int eyeOffset = (int) ((entity.getHeight() - entity.getEyeHeight()) * scale);
+                    int eyeOffset = (int) ((entity.getBbHeight() - entity.getEyeHeight()) * scale);
                     RenderSystem.translated(0, 0, zLevel);
-                    InventoryScreen.drawEntityOnScreen((int)posX, yPos, (int)scale, (int)posX - mouseX, yPos - mouseY - eyeOffset, (LivingEntity) entity);
+                    InventoryScreen.renderEntityInInventory((int)posX, yPos, (int)scale, (int)posX - mouseX, yPos - mouseY - eyeOffset, (LivingEntity) entity);
                     RenderSystem.translated(0, 0, -zLevel);
 //                    InventoryScreen.drawEntityOnScreen(20, 20, (int)scale, mouseX, mouseY, (LivingEntity) entity);
 //                    drawEntityOnScreen(posX, rect.y, scale, (int) posX - mouseX, rect.y - mouseY + eyeOffset, (LivingEntity) entity, trackMouse, rotation, drawName, zLevel);
@@ -296,23 +296,23 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
 //    }
 
     public static PlayerEntity createRenderPlayer(ClientWorld world, String username) {
-        return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameProfile(new GameProfile(null, username))) {
+        return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameprofile(new GameProfile(null, username))) {
             @Override
-            public String getSkinType() {
-                return super.getSkinType();
+            public String getModelName() {
+                return super.getModelName();
             }
 
             @Override
-            public ResourceLocation getLocationSkin() {
+            public ResourceLocation getSkinTextureLocation() {
                 ResourceLocation resourcelocation;
 
                 Minecraft minecraft = Minecraft.getInstance();
-                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(getGameProfile());
+                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(getGameProfile());
 
                 if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                    resourcelocation = minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+                    resourcelocation = minecraft.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
                 } else {
-                    UUID uuid = PlayerEntity.getUUID(getGameProfile());
+                    UUID uuid = PlayerEntity.createPlayerUUID(getGameProfile());
                     resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
                 }
 
@@ -320,7 +320,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
             }
 
             @Override
-            public boolean isWearing(PlayerModelPart part) {
+            public boolean isModelPartShown(PlayerModelPart part) {
                 return true;
             }
         };

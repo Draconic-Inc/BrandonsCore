@@ -505,12 +505,12 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     public void playClickEvent(boolean released) {
         if (toggleMode) {
             if (released) {
-                mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, getToggleState() ? 1F : 0.9F));
+                mc.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, getToggleState() ? 1F : 0.9F));
             } else {
-                mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 0.85F));
+                mc.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 0.85F));
             }
         } else if (!released) {
-            mc.getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            mc.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
     }
 
@@ -521,7 +521,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
     @OnlyIn(Dist.CLIENT) //Because this is referenced in
     public static void playGenericClick() {
-        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     /**
@@ -599,12 +599,12 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
             int colour = getTextColour(mouseOver, isDisabled());
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 
-            int ySize = fontRenderer.FONT_HEIGHT;
+            int ySize = fontRenderer.lineHeight;
             if (wrap && !trim) {
-                ySize = fontRenderer.getWordWrappedHeight(displayString, widthLimit);
+                ySize = fontRenderer.wordWrapHeight(displayString, widthLimit);
             }
 
-            boolean wrap = this.wrap && fontRenderer.getStringWidth(displayString) > widthLimit;
+            boolean wrap = this.wrap && fontRenderer.width(displayString) > widthLimit;
 
             float xp = (float) screenWidth / displayWidth();
             float yp = (float) screenHeight / displayHeight();
@@ -640,12 +640,12 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     }
 
     protected void renderVanillaButton(Minecraft minecraft, int mouseX, int mouseY) {
-        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         RenderMaterial mat = BCSprites.getButton(getRenderState(hovered));
-        IVertexBuilder builder = mat.getBuffer(getter, location -> BCSprites.GUI_TEX_TYPE);
-        drawDynamicSprite(builder, mat.getSprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
-        getter.finish();
+        IVertexBuilder builder = mat.buffer(getter, location -> BCSprites.GUI_TEX_TYPE);
+        drawDynamicSprite(builder, mat.sprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
+        getter.endBatch();
     }
 
     //Must match the vanilla button texture

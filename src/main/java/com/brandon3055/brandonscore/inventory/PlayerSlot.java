@@ -38,7 +38,7 @@ public class PlayerSlot {
             this.slot = 0;
             this.category = EnumInvCategory.OFF_HAND;
         } else {
-            this.slot = player.inventory.currentItem;
+            this.slot = player.inventory.selected;
             this.category = EnumInvCategory.MAIN;
         }
     }
@@ -86,23 +86,23 @@ public class PlayerSlot {
 
     public void setStackInSlot(PlayerEntity player, ItemStack stack) {
         if (category == EnumInvCategory.ARMOR) {
-            if (slot < 0 || slot >= player.inventory.armorInventory.size()) {
+            if (slot < 0 || slot >= player.inventory.armor.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
-            player.inventory.armorInventory.set(slot, stack);
+            player.inventory.armor.set(slot, stack);
         } else if (category == EnumInvCategory.MAIN) {
-            if (slot < 0 || slot >= player.inventory.mainInventory.size()) {
+            if (slot < 0 || slot >= player.inventory.items.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
-            player.inventory.mainInventory.set(slot, stack);
+            player.inventory.items.set(slot, stack);
         } else if (category == EnumInvCategory.OFF_HAND) {
-            if (slot < 0 || slot >= player.inventory.offHandInventory.size()) {
+            if (slot < 0 || slot >= player.inventory.offhand.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
                 return;
             }
-            player.inventory.offHandInventory.set(slot, stack);
+            player.inventory.offhand.set(slot, stack);
         } else if (category == EnumInvCategory.EQUIPMENT && equipmentManager != null) {
             LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
             if (optional.isPresent()) {
@@ -117,20 +117,20 @@ public class PlayerSlot {
     }
 
     public static PlayerSlot findStack(PlayerInventory inv, Predicate<ItemStack> check) {
-        for (int i = 0; i < inv.mainInventory.size(); i++) {
-            ItemStack stack = inv.mainInventory.get(i);
+        for (int i = 0; i < inv.items.size(); i++) {
+            ItemStack stack = inv.items.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.MAIN);
             }
         }
-        for (int i = 0; i < inv.armorInventory.size(); i++) {
-            ItemStack stack = inv.armorInventory.get(i);
+        for (int i = 0; i < inv.armor.size(); i++) {
+            ItemStack stack = inv.armor.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.ARMOR);
             }
         }
-        for (int i = 0; i < inv.offHandInventory.size(); i++) {
-            ItemStack stack = inv.offHandInventory.get(i);
+        for (int i = 0; i < inv.offhand.size(); i++) {
+            ItemStack stack = inv.offhand.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.OFF_HAND);
             }
@@ -151,23 +151,23 @@ public class PlayerSlot {
     }
 
     public static PlayerSlot findStackActiveFirst(PlayerInventory inv, Predicate<ItemStack> check) {
-        if (!inv.getCurrentItem().isEmpty() && check.test(inv.getCurrentItem())) {
-            return new PlayerSlot(inv.currentItem, EnumInvCategory.MAIN);
+        if (!inv.getSelected().isEmpty() && check.test(inv.getSelected())) {
+            return new PlayerSlot(inv.selected, EnumInvCategory.MAIN);
         }
-        for (int i = 0; i < inv.offHandInventory.size(); i++) {
-            ItemStack stack = inv.offHandInventory.get(i);
+        for (int i = 0; i < inv.offhand.size(); i++) {
+            ItemStack stack = inv.offhand.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.OFF_HAND);
             }
         }
-        for (int i = 0; i < inv.armorInventory.size(); i++) {
-            ItemStack stack = inv.armorInventory.get(i);
+        for (int i = 0; i < inv.armor.size(); i++) {
+            ItemStack stack = inv.armor.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.ARMOR);
             }
         }
-        for (int i = 0; i < inv.mainInventory.size(); i++) {
-            ItemStack stack = inv.mainInventory.get(i);
+        for (int i = 0; i < inv.items.size(); i++) {
+            ItemStack stack = inv.items.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
                 return new PlayerSlot(i, EnumInvCategory.MAIN);
             }
@@ -208,11 +208,11 @@ public class PlayerSlot {
 
     public ItemStack getStackInSlot(PlayerEntity player) {
         if (category == EnumInvCategory.ARMOR) {
-            return player.inventory.armorInventory.get(slot);
+            return player.inventory.armor.get(slot);
         } else if (category == EnumInvCategory.MAIN) {
-            return player.inventory.mainInventory.get(slot);
+            return player.inventory.items.get(slot);
         } else if (category == EnumInvCategory.OFF_HAND) {
-            return player.inventory.offHandInventory.get(slot);
+            return player.inventory.offhand.get(slot);
         } else if (category == EnumInvCategory.EQUIPMENT && equipmentManager != null) {
             LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
             if (optional.isPresent()) {

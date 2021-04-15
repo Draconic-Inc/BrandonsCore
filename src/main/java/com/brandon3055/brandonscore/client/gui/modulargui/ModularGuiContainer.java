@@ -42,9 +42,9 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         this.container = container;
         this.minecraft = Minecraft.getInstance();
         this.itemRenderer = minecraft.getItemRenderer();
-        this.font = minecraft.fontRenderer;
-        this.width = minecraft.getMainWindow().getScaledWidth();
-        this.height = minecraft.getMainWindow().getScaledHeight();
+        this.font = minecraft.font;
+        this.width = minecraft.getWindow().getGuiScaledWidth();
+        this.height = minecraft.getWindow().getGuiScaledHeight();
         manager.setWorldAndResolution(minecraft, width, height);
     }
 
@@ -71,28 +71,28 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
     @Override
     public int xSize() {
-        return xSize;
+        return imageWidth;
     }
 
     @Override
     public int ySize() {
-        return ySize;
+        return imageHeight;
     }
 
     @Override
     public void setUISize(int xSize, int ySize) {
-        this.xSize = xSize;
-        this.ySize = ySize;
+        this.imageWidth = xSize;
+        this.imageHeight = ySize;
     }
 
     @Override
     public int guiLeft() {
-        return guiLeft;
+        return leftPos;
     }
 
     @Override
     public int guiTop() {
-        return guiTop;
+        return topPos;
     }
 
     public GuiElementManager getManager() {
@@ -150,23 +150,23 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         if (!dumbGui && manager.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         } else {
-            InputMappings.Input mouseKey = InputMappings.getInputByCode(keyCode, scanCode);
+            InputMappings.Input mouseKey = InputMappings.getKey(keyCode, scanCode);
             if (super.keyPressed(keyCode, scanCode, modifiers)) {
                 return true;
-            } else if (this.minecraft.gameSettings.keyBindInventory.isActiveAndMatches(mouseKey)) {
-                this.closeScreen();
+            } else if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey)) {
+                this.onClose();
                 return true;
             } else {
-                boolean handled = this.itemStackMoved(keyCode, scanCode);// Forge MC-146650: Needs to return true when the key is handled
-                if (this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
-                    if (this.minecraft.gameSettings.keyBindPickBlock.isActiveAndMatches(mouseKey)) {
-                        this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, 0, ClickType.CLONE);
+                boolean handled = this.checkHotbarKeyPressed(keyCode, scanCode);// Forge MC-146650: Needs to return true when the key is handled
+                if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
+                    if (this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey)) {
+                        this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 0, ClickType.CLONE);
                         handled = true;
-                    } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
-                        this.handleMouseClick(this.hoveredSlot, this.hoveredSlot.slotNumber, hasControlDown() ? 1 : 0, ClickType.THROW);
+                    } else if (this.minecraft.options.keyDrop.isActiveAndMatches(mouseKey)) {
+                        this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, hasControlDown() ? 1 : 0, ClickType.THROW);
                         handled = true;
                     }
-                } else if (this.minecraft.gameSettings.keyBindDrop.isActiveAndMatches(mouseKey)) {
+                } else if (this.minecraft.options.keyDrop.isActiveAndMatches(mouseKey)) {
                     handled = true; // Forge MC-146650: Emulate MC bug, so we don't drop from hotbar when pressing drop without hovering over a item.
                 }
 
@@ -200,11 +200,11 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     }
 
     public double getMouseX() {
-        return minecraft.mouseHelper.getMouseX() * (double) minecraft.getMainWindow().getScaledWidth() / (double) minecraft.getMainWindow().getWidth();
+        return minecraft.mouseHandler.xpos() * (double) minecraft.getWindow().getGuiScaledWidth() / (double) minecraft.getWindow().getScreenWidth();
     }
 
     public double getMouseY() {
-        return minecraft.mouseHelper.getMouseY() * (double) minecraft.getMainWindow().getScaledHeight() / (double) minecraft.getMainWindow().getHeight();
+        return minecraft.mouseHandler.ypos() * (double) minecraft.getWindow().getGuiScaledHeight() / (double) minecraft.getWindow().getScreenHeight();
     }
 
     //endregion
@@ -212,12 +212,12 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     //region Render
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
         renderBackgroundLayer(mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {}
+    protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {}
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
@@ -235,7 +235,7 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
 
         if (itemTooltipsEnabled) {
             RenderSystem.translated(0, 0, 400);
-            renderHoveredTooltip(matrixStack, mouseX, mouseY);
+            renderTooltip(matrixStack, mouseX, mouseY);
             RenderSystem.translated(0, 0, -400);
         }
     }
@@ -269,9 +269,9 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     //region Overriding vanilla stuff and things
 
     public void renderSuperScreen(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        int left = this.guiLeft;
-        int top = this.guiTop;
-        this.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
+        int left = this.leftPos;
+        int top = this.topPos;
+        this.renderBg(matrixStack, partialTicks, mouseX, mouseY);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawBackground(this, matrixStack, mouseX, mouseY));
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
@@ -290,19 +290,19 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         RenderSystem.glMultiTexCoord2f(33986, 240.0F, 240.0F);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-        for (int i1 = 0; i1 < this.container.inventorySlots.size(); ++i1) {
-            Slot slot = this.container.inventorySlots.get(i1);
-            if (slot.isEnabled()) {
+        for (int i1 = 0; i1 < this.container.slots.size(); ++i1) {
+            Slot slot = this.container.slots.get(i1);
+            if (slot.isActive()) {
                 this.drawSlot(matrixStack, slot);
             }
 
-            boolean occluded = manager.isAreaUnderElement(slot.xPos + guiLeft(), slot.yPos + guiTop(), 16, 16, 100);
+            boolean occluded = manager.isAreaUnderElement(slot.x + guiLeft(), slot.y + guiTop(), 16, 16, 100);
             if (!occluded || experimentalSlotOcclusion) {
-                if (!occluded && this.isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+                if (!occluded && this.isHovering(slot, mouseX, mouseY) && slot.isActive()) {
                     this.hoveredSlot = slot;
                     RenderSystem.disableDepthTest();
-                    int j1 = slot.xPos;
-                    int k1 = slot.yPos;
+                    int j1 = slot.x;
+                    int k1 = slot.y;
                     RenderSystem.colorMask(true, true, true, false);
                     int slotColor = this.getSlotColor(i1);
                     this.fillGradient(matrixStack, j1, k1, j1 + 16, k1 + 16, slotColor, slotColor);
@@ -313,40 +313,40 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
             }
         }
 
-        this.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+        this.renderLabels(matrixStack, mouseX, mouseY);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawForeground(this, matrixStack, mouseX, mouseY));
         PlayerInventory playerinventory = this.minecraft.player.inventory;
-        ItemStack itemstack = this.draggedStack.isEmpty() ? playerinventory.getItemStack() : this.draggedStack;
+        ItemStack itemstack = this.draggingItem.isEmpty() ? playerinventory.getCarried() : this.draggingItem;
         if (!itemstack.isEmpty()) {
             int j2 = 8;
-            int k2 = this.draggedStack.isEmpty() ? 8 : 16;
+            int k2 = this.draggingItem.isEmpty() ? 8 : 16;
             String s = null;
-            if (!this.draggedStack.isEmpty() && this.isRightMouseClick) {
+            if (!this.draggingItem.isEmpty() && this.isSplittingStack) {
                 itemstack = itemstack.copy();
                 itemstack.setCount(MathHelper.ceil((float) itemstack.getCount() / 2.0F));
-            } else if (this.dragSplitting && this.dragSplittingSlots.size() > 1) {
+            } else if (this.isQuickCrafting && this.quickCraftSlots.size() > 1) {
                 itemstack = itemstack.copy();
-                itemstack.setCount(this.dragSplittingRemnant);
+                itemstack.setCount(this.quickCraftingRemainder);
                 if (itemstack.isEmpty()) {
                     s = "" + TextFormatting.YELLOW + "0";
                 }
             }
 
-            this.drawItemStack(itemstack, mouseX - left - 8, mouseY - top - k2, s);
+            this.renderFloatingItem(itemstack, mouseX - left - 8, mouseY - top - k2, s);
         }
 
-        if (!this.returningStack.isEmpty()) {
-            float f = (float) (Util.milliTime() - this.returningStackTime) / 100.0F;
+        if (!this.snapbackItem.isEmpty()) {
+            float f = (float) (Util.getMillis() - this.snapbackTime) / 100.0F;
             if (f >= 1.0F) {
                 f = 1.0F;
-                this.returningStack = ItemStack.EMPTY;
+                this.snapbackItem = ItemStack.EMPTY;
             }
 
-            int l2 = this.returningStackDestSlot.xPos - this.touchUpX;
-            int i3 = this.returningStackDestSlot.yPos - this.touchUpY;
-            int l1 = this.touchUpX + (int) ((float) l2 * f);
-            int i2 = this.touchUpY + (int) ((float) i3 * f);
-            this.drawItemStack(this.returningStack, l1, i2, null);
+            int l2 = this.snapbackEnd.x - this.snapbackStartX;
+            int i3 = this.snapbackEnd.y - this.snapbackStartY;
+            int l1 = this.snapbackStartX + (int) ((float) l2 * f);
+            int i2 = this.snapbackStartY + (int) ((float) i3 * f);
+            this.renderFloatingItem(this.snapbackItem, l1, i2, null);
         }
 
         RenderSystem.popMatrix();
@@ -354,49 +354,49 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
     }
 
     private void drawSlot(MatrixStack matrixStack, Slot slotIn) {
-        int yPos = slotIn.yPos;
-        int xPos = slotIn.xPos;
+        int yPos = slotIn.y;
+        int xPos = slotIn.x;
 
         boolean occluded = manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100);
         if (occluded && !experimentalSlotOcclusion) {
             return;
         }
 
-        ItemStack itemstack = slotIn.getStack();
+        ItemStack itemstack = slotIn.getItem();
         boolean flag = false;
-        boolean flag1 = slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && !this.isRightMouseClick;
-        ItemStack itemstack1 = this.minecraft.player.inventory.getItemStack();
+        boolean flag1 = slotIn == this.clickedSlot && !this.draggingItem.isEmpty() && !this.isSplittingStack;
+        ItemStack itemstack1 = this.minecraft.player.inventory.getCarried();
         String s = null;
-        if (slotIn == this.clickedSlot && !this.draggedStack.isEmpty() && this.isRightMouseClick && !itemstack.isEmpty()) {
+        if (slotIn == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !itemstack.isEmpty()) {
             itemstack = itemstack.copy();
             itemstack.setCount(itemstack.getCount() / 2);
-        } else if (this.dragSplitting && this.dragSplittingSlots.contains(slotIn) && !itemstack1.isEmpty()) {
-            if (this.dragSplittingSlots.size() == 1) {
+        } else if (this.isQuickCrafting && this.quickCraftSlots.contains(slotIn) && !itemstack1.isEmpty()) {
+            if (this.quickCraftSlots.size() == 1) {
                 return;
             }
 
-            if (Container.canAddItemToSlot(slotIn, itemstack1, true) && this.container.canDragIntoSlot(slotIn)) {
+            if (Container.canItemQuickReplace(slotIn, itemstack1, true) && this.container.canDragTo(slotIn)) {
                 itemstack = itemstack1.copy();
                 flag = true;
-                Container.computeStackSize(this.dragSplittingSlots, this.dragSplittingLimit, itemstack, slotIn.getStack().isEmpty() ? 0 : slotIn.getStack().getCount());
-                int k = Math.min(itemstack.getMaxStackSize(), slotIn.getItemStackLimit(itemstack));
+                Container.getQuickCraftSlotCount(this.quickCraftSlots, this.quickCraftingType, itemstack, slotIn.getItem().isEmpty() ? 0 : slotIn.getItem().getCount());
+                int k = Math.min(itemstack.getMaxStackSize(), slotIn.getMaxStackSize(itemstack));
                 if (itemstack.getCount() > k) {
                     s = TextFormatting.YELLOW.toString() + k;
                     itemstack.setCount(k);
                 }
             } else {
-                this.dragSplittingSlots.remove(slotIn);
-                this.updateDragSplitting();
+                this.quickCraftSlots.remove(slotIn);
+                this.recalculateQuickCraftRemaining();
             }
         }
 
         this.setBlitOffset(100);
-        this.itemRenderer.zLevel = 100.0F;
-        if (itemstack.isEmpty() && slotIn.isEnabled()) {
-            Pair<ResourceLocation, ResourceLocation> pair = slotIn.getBackground();
+        this.itemRenderer.blitOffset = 100.0F;
+        if (itemstack.isEmpty() && slotIn.isActive()) {
+            Pair<ResourceLocation, ResourceLocation> pair = slotIn.getNoItemIcon();
             if (pair != null) {
-                TextureAtlasSprite textureatlassprite = this.minecraft.getAtlasSpriteGetter(pair.getFirst()).apply(pair.getSecond());
-                this.minecraft.getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getTextureLocation());
+                TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+                this.minecraft.getTextureManager().bind(textureatlassprite.atlas().location());
                 blit(matrixStack, xPos, yPos, this.getBlitOffset(), 16, 16, textureatlassprite);
                 flag1 = true;
             }
@@ -408,13 +408,13 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
             }
 
             RenderSystem.enableDepthTest();
-            this.itemRenderer.renderItemAndEffectIntoGUI(this.minecraft.player, itemstack, xPos, yPos);
+            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemstack, xPos, yPos);
             if (!occluded) {
-                this.itemRenderer.renderItemOverlayIntoGUI(this.font, itemstack, xPos, yPos, s);
+                this.itemRenderer.renderGuiItemDecorations(this.font, itemstack, xPos, yPos, s);
             }
         }
 
-        this.itemRenderer.zLevel = 0.0F;
+        this.itemRenderer.blitOffset = 0.0F;
         this.setBlitOffset(0);
     }
 

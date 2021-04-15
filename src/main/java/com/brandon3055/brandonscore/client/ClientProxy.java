@@ -59,17 +59,17 @@ import java.util.Base64;
 public class ClientProxy extends CommonProxy {
 
     public static final IParticleRenderType PARTICLE_NO_DEPTH = new IParticleRenderType() {
-        public void beginRender(BufferBuilder builder, TextureManager manager) {
+        public void begin(BufferBuilder builder, TextureManager manager) {
             RenderSystem.depthMask(false);
-            manager.bindTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE);
+            manager.bind(AtlasTexture.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.alphaFunc(516, 0.003921569F);
-            builder.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
+            builder.begin(7, DefaultVertexFormats.PARTICLE);
         }
 
-        public void finishRender(Tessellator tesselator) {
-            tesselator.draw();
+        public void end(Tessellator tesselator) {
+            tesselator.end();
 
         }
 
@@ -79,17 +79,17 @@ public class ClientProxy extends CommonProxy {
     };
 
     public static final IParticleRenderType PARTICLE_NO_DEPTH_NO_LIGHT = new IParticleRenderType() {
-        public void beginRender(BufferBuilder builder, TextureManager manager) {
+        public void begin(BufferBuilder builder, TextureManager manager) {
             RenderSystem.depthMask(false);
-            manager.bindTexture(AtlasTexture.LOCATION_PARTICLES_TEXTURE);
+            manager.bind(AtlasTexture.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.alphaFunc(516, 0.003921569F);
             builder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
         }
 
-        public void finishRender(Tessellator tesselator) {
-            tesselator.draw();
+        public void end(Tessellator tesselator) {
+            tesselator.end();
         }
 
         public String toString() {
@@ -106,7 +106,7 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void commonSetup(FMLCommonSetupEvent event) {
         super.commonSetup(event);
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new ModelUtils());
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new ModelUtils());
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
         DLRSCache.initialize();
         ProcessHandlerClient.init();
@@ -126,22 +126,22 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public World getClientWorld() {
-        return Minecraft.getInstance().world;
+        return Minecraft.getInstance().level;
     }
 
     @Override
     public boolean isJumpKeyDown() {
-        return Minecraft.getInstance().gameSettings.keyBindJump.isKeyDown();
+        return Minecraft.getInstance().options.keyJump.isDown();
     }
 
     @Override
     public boolean isSneakKeyDown() {
-        return Minecraft.getInstance().gameSettings.keyBindSneak.isKeyDown();
+        return Minecraft.getInstance().options.keyShift.isDown();
     }
 
     @Override
     public boolean isSprintKeyDown() {
-        return Minecraft.getInstance().gameSettings.keyBindSprint.isKeyDown();
+        return Minecraft.getInstance().options.keySprint.isDown();
     }
 
     @Override
@@ -188,15 +188,15 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void sendIndexedMessage(PlayerEntity player, ITextComponent message, int index) {
         if (message == null) {
-            Minecraft.getInstance().ingameGUI.getChatGUI().deleteChatLine(index);
+            Minecraft.getInstance().gui.getChat().removeById(index);
         } else {
-            Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(message, index);
+            Minecraft.getInstance().gui.getChat().addMessage(message, index);
         }
     }
 
     @Override
     public void setClipboardString(String text) {
-        Minecraft.getInstance().keyboardListener.setClipboardString(text);
+        Minecraft.getInstance().keyboardHandler.setClipboard(text);
     }
 
     @Override

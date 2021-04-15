@@ -34,37 +34,37 @@ public class CommandTPX {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
                 Commands.literal("tpx")
-                        .requires((p_198816_0_) -> p_198816_0_.hasPermissionLevel(2))
-                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), null, null))
+                        .requires((p_198816_0_) -> p_198816_0_.hasPermission(2))
+                        .then(Commands.argument("dimension", DimensionArgument.dimension())
+                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().getEntityOrException()), DimensionArgument.getDimension(ctx, "dimension"), null, null))
                                 .then(Commands.argument("location", Vec3Argument.vec3())
-                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
+                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().getEntityOrException()), DimensionArgument.getDimension(ctx, "dimension"), Vec3Argument.getCoordinates(ctx, "location"), null))
                                 )
                         )
                         .then(Commands.argument("destination", EntityArgument.entity())
-                                .executes(ctx -> teleportToEntity(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), EntityArgument.getEntity(ctx, "destination")))
+                                .executes(ctx -> teleportToEntity(ctx.getSource(), Collections.singleton(ctx.getSource().getEntityOrException()), EntityArgument.getEntity(ctx, "destination")))
                         )
                         .then(Commands.argument("targets", EntityArgument.entities())
                                         .then(Commands.argument("destination", EntityArgument.entity())
                                                 .executes(ctx -> teleportToEntity(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), EntityArgument.getEntity(ctx, "destination")))
                                         )
-                                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
-                                                .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimensionArgument(ctx, "dimension"), new EntityLocation(ctx.getSource().assertIsEntity()), null))
+                                        .then(Commands.argument("dimension", DimensionArgument.dimension())
+                                                .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimension(ctx, "dimension"), new EntityLocation(ctx.getSource().getEntityOrException()), null))
                                                 .then(Commands.argument("location", Vec3Argument.vec3())
-                                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), DimensionArgument.getDimensionArgument(ctx, "dimension"), Vec3Argument.getLocation(ctx, "location"), null))
+                                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().getEntityOrException()), DimensionArgument.getDimension(ctx, "dimension"), Vec3Argument.getCoordinates(ctx, "location"), null))
                                                 )
                                         )
 //                                .then(Commands.argument("location", Vec3Argument.vec3())
 //                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getWorld(), Vec3Argument.getLocation(ctx, "location"), null))
 //                                        .then(Commands.argument("dimension", DimensionArgument.getDimension())
-//                                                .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.func_212592_a(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
+//                                                .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.getDimension(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
 //                                        )
 //                                )
                         )
 //                        .then(Commands.argument("location", Vec3Argument.vec3())
 //                                .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().assertIsEntity()), ctx.getSource().getWorld(), Vec3Argument.getLocation(ctx, "location"), null))
 //                                .then(Commands.argument("dimension", DimensionArgument.getDimension())
-//                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.func_212592_a(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
+//                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), ctx.getSource().getServer().getWorld(DimensionArgument.getDimension(ctx, "dimension")), Vec3Argument.getLocation(ctx, "location"), null))
 //                                )
 //                        )
         );
@@ -72,13 +72,13 @@ public class CommandTPX {
 
     private static int teleportToEntity(CommandSource source, Collection<? extends Entity> targets, Entity destination) {
         for (Entity entity : targets) {
-            teleport(source, entity, (ServerWorld) destination.world, destination.getPosX(), destination.getPosY(), destination.getPosZ(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class), destination.rotationYaw, destination.rotationPitch);
+            teleport(source, entity, (ServerWorld) destination.level, destination.getX(), destination.getY(), destination.getZ(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class), destination.yRot, destination.xRot);
         }
 
         if (targets.size() == 1) {
-            source.sendFeedback(new TranslationTextComponent("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
+            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
         } else {
-            source.sendFeedback(new TranslationTextComponent("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
+            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
         }
 
         return targets.size();
@@ -91,15 +91,15 @@ public class CommandTPX {
             rand.setSeed(0);
             for (int i = 0; i < 1000; i++) {
                 pos = new BlockPos(-150 + rand.nextInt(300), 32 + rand.nextInt(80), -150 + rand.nextInt(300));
-                if (targetWorld.isAirBlock(pos)) {
-                    while (targetWorld.isAirBlock(pos.down())) {
-                        pos = pos.down();
+                if (targetWorld.isEmptyBlock(pos)) {
+                    while (targetWorld.isEmptyBlock(pos.below())) {
+                        pos = pos.below();
                     }
-                    BlockState state = targetWorld.getBlockState(pos.down());
+                    BlockState state = targetWorld.getBlockState(pos.below());
                     if (!state.getFluidState().isEmpty()) {
                         continue;
                     }
-                    if (state.getMaterial().blocksMovement()) {
+                    if (state.getMaterial().blocksMotion()) {
                         break;
                     }
                 }
@@ -137,16 +137,16 @@ public class CommandTPX {
 
         for (Entity entity : targets) {
             if (rotationIn == null) {
-                teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, entity.rotationYaw, entity.rotationPitch);
+                teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, entity.yRot, entity.xRot);
             } else {
                 teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, vec2f.y, vec2f.x);
             }
         }
 
         if (targets.size() == 1) {
-            source.sendFeedback(new TranslationTextComponent("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
         } else {
-            source.sendFeedback(new TranslationTextComponent("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
         }
 
         return targets.size();
@@ -155,28 +155,28 @@ public class CommandTPX {
     private static void teleport(CommandSource source, Entity entityIn, ServerWorld worldIn, double x, double y, double z, Set<SPlayerPositionLookPacket.Flags> relativeList, float yaw, float pitch) {
         if (entityIn instanceof ServerPlayerEntity) {
             ChunkPos chunkpos = new ChunkPos(new BlockPos(x, y, z));
-            worldIn.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getEntityId());
+            worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
             entityIn.stopRiding();
             if (((ServerPlayerEntity) entityIn).isSleeping()) {
-                ((ServerPlayerEntity) entityIn).wakeUp();
+                ((ServerPlayerEntity) entityIn).stopSleeping();
             }
 
-            if (worldIn == entityIn.world) {
-                ((ServerPlayerEntity) entityIn).connection.setPlayerLocation(x, y, z, yaw, pitch, relativeList);
+            if (worldIn == entityIn.level) {
+                ((ServerPlayerEntity) entityIn).connection.teleport(x, y, z, yaw, pitch, relativeList);
             } else {
-                ((ServerPlayerEntity) entityIn).teleport(worldIn, x, y, z, yaw, pitch);
+                ((ServerPlayerEntity) entityIn).teleportTo(worldIn, x, y, z, yaw, pitch);
             }
 
-            entityIn.setRotationYawHead(yaw);
+            entityIn.setYHeadRot(yaw);
         } else {
             float f1 = MathHelper.wrapDegrees(yaw);
             float f = MathHelper.wrapDegrees(pitch);
             f = MathHelper.clamp(f, -90.0F, 90.0F);
-            if (worldIn == entityIn.world) {
-                entityIn.setLocationAndAngles(x, y, z, f1, f);
-                entityIn.setRotationYawHead(f1);
+            if (worldIn == entityIn.level) {
+                entityIn.moveTo(x, y, z, f1, f);
+                entityIn.setYHeadRot(f1);
             } else {
-                entityIn.detach();
+                entityIn.unRide();
                 entityIn.changeDimension(worldIn);
                 Entity entity = entityIn;
                 entityIn = entityIn.getType().create(worldIn);
@@ -184,15 +184,15 @@ public class CommandTPX {
                     return;
                 }
 
-                entityIn.copyDataFromOld(entity);
-                entityIn.setLocationAndAngles(x, y, z, f1, f);
-                entityIn.setRotationYawHead(f1);
+                entityIn.restoreFrom(entity);
+                entityIn.moveTo(x, y, z, f1, f);
+                entityIn.setYHeadRot(f1);
                 worldIn.addFromAnotherDimension(entityIn);
             }
         }
 
-        if (!(entityIn instanceof LivingEntity) || !((LivingEntity) entityIn).isElytraFlying()) {
-            entityIn.setMotion(entityIn.getMotion().mul(1.0D, 0.0D, 1.0D));
+        if (!(entityIn instanceof LivingEntity) || !((LivingEntity) entityIn).isFallFlying()) {
+            entityIn.setDeltaMovement(entityIn.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D));
             entityIn.setOnGround(true);
         }
     }
@@ -216,7 +216,7 @@ public class CommandTPX {
 
         @Override
         public Vector3d getPosition(CommandSource source) {
-            return entity.getPositionVec();
+            return entity.position();
         }
 
         @Override
@@ -249,7 +249,7 @@ public class CommandTPX {
 
         @Override
         public Vector3d getPosition(CommandSource source) {
-            return Vector3d.copyCentered(pos);
+            return Vector3d.atCenterOf(pos);
         }
 
         @Override

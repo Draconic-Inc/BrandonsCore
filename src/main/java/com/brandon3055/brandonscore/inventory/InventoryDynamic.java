@@ -19,7 +19,7 @@ public class InventoryDynamic implements IInventory {
     public int xp = 0;
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void setItem(int index, ItemStack stack) {
         if (index < 0){
             return;
         }
@@ -38,7 +38,7 @@ public class InventoryDynamic implements IInventory {
     }
 
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize() {
         return stacks.size() + 1;
     }
 
@@ -48,20 +48,20 @@ public class InventoryDynamic implements IInventory {
     }
 
     @Override
-    public ItemStack getStackInSlot(int index) {
+    public ItemStack getItem(int index) {
         return index >= 0 && index < stacks.size() ? stacks.get(index) : ItemStack.EMPTY;
     }
 
-    public ItemStack decrStackSize(int index, int count) {
-        ItemStack itemstack = getStackInSlot(index);
+    public ItemStack removeItem(int index, int count) {
+        ItemStack itemstack = getItem(index);
 
         if (!itemstack.isEmpty()) {
             if (itemstack.getCount() <= count) {
-                setInventorySlotContents(index, ItemStack.EMPTY);
+                setItem(index, ItemStack.EMPTY);
             } else {
                 itemstack = itemstack.split(count);
                 if (itemstack.getCount() == 0) {
-                    setInventorySlotContents(index, ItemStack.EMPTY);
+                    setItem(index, ItemStack.EMPTY);
                 }
             }
         }
@@ -69,50 +69,50 @@ public class InventoryDynamic implements IInventory {
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
-        ItemStack stack = getStackInSlot(index);
+    public ItemStack removeItemNoUpdate(int index) {
+        ItemStack stack = getItem(index);
 
         if (!stack.isEmpty()) {
-            setInventorySlotContents(index, ItemStack.EMPTY);
+            setItem(index, ItemStack.EMPTY);
         }
 
         return stack;
     }
 
     @Override
-    public int getInventoryStackLimit() {
+    public int getMaxStackSize() {
         return 64;
     }
 
     @Override
-    public void markDirty() {
+    public void setChanged() {
         stacks.removeIf(ItemStack::isEmpty);
     }
 
     @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
+    public boolean stillValid(PlayerEntity player) {
         return true;
     }
 
     @Override
-    public void openInventory(PlayerEntity player) {
+    public void startOpen(PlayerEntity player) {
 
     }
 
     @Override
-    public void closeInventory(PlayerEntity player) {
+    public void stopOpen(PlayerEntity player) {
 
     }
 
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
+    public boolean canPlaceItem(int index, ItemStack stack) {
         return true;
     }
 
 
 
     @Override
-    public void clear() {
+    public void clearContent() {
         stacks.clear();
     }
 
@@ -124,7 +124,7 @@ public class InventoryDynamic implements IInventory {
         for (ItemStack stack : stacks) {
             if (!stack.isEmpty() && stack.getCount() > 0) {
                 CompoundNBT tag = new CompoundNBT();
-                stack.write(tag);
+                stack.save(tag);
                 list.add(tag);
             }
         }
@@ -137,7 +137,7 @@ public class InventoryDynamic implements IInventory {
         stacks.clear();
 
         for (int i = 0; i < list.size(); i++) {
-            stacks.add(ItemStack.read(list.getCompound(i)));
+            stacks.add(ItemStack.of(list.getCompound(i)));
         }
     }
 

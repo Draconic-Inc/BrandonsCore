@@ -144,16 +144,16 @@ public class ContainerSlotLayout {
             //'fake' layout just in case the server does not like multiple overlapping slots.
             this.slot = new SlotCheckValid(itemHandler, index, (index % 9) * 18, ((index / 9) + (type.isPlayer ? 0 : 5)) * 18) {
                 @Override
-                public boolean isItemValid(ItemStack stack) {
-                    return super.isItemValid(stack) && type != PLAYER_EQUIPMENT;
+                public boolean mayPlace(ItemStack stack) {
+                    return super.mayPlace(stack) && type != PLAYER_EQUIPMENT;
                 }
             };
             layout.slotDataMap.computeIfAbsent(type, slotType -> new HashMap<>()).put(index, this);
         }
 
         public void setPos(int xPos, int yPos) {
-            slot.xPos = xPos;
-            slot.yPos = yPos;
+            slot.x = xPos;
+            slot.y = yPos;
         }
     }
 

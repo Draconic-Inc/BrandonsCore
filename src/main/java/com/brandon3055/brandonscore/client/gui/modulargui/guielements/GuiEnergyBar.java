@@ -203,20 +203,20 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             RenderSystem.translated(barLength + (posY * 2), 0, 0);
             RenderSystem.rotatef(90, 0, 0, 1);
         }
-        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
         int light = darkMode ? 0xFFFFFFFF : 0xFFFFFFFF;
         int dark = darkMode ? 0xFF808080 : 0xFF505050;
         drawShadedRect(getter, posX, posY, barWidth, barLength, 1, 0, dark, light, midColour(light, dark));
-        getter.finish();
+        getter.endBatch();
 
         if (disabled.get()) {
             drawColouredRect(posX + 1, posY + 1, barWidth - 2, barLength - 2, 0xFF000000);
         } else if (!shaderEnabled.get()) {
             RenderMaterial matBase = BCSprites.get("bars/energy_empty");
             RenderMaterial matOverlay = BCSprites.get("bars/energy_full");
-            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + 1, barWidth - 2, barLength - 2, matBase.getSprite());
-            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, matOverlay.getSprite());
-            getter.finish();
+            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + 1, barWidth - 2, barLength - 2, matBase.sprite());
+            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, matOverlay.sprite());
+            getter.endBatch();
         }
         else {
             bindShader(horizontal ? barShaderH : barShaderV);
@@ -230,25 +230,25 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
         }
     }
     public void sliceSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, TextureAtlasSprite sprite) {
-        float texU = sprite.getMinU();
-        float texV = sprite.getMinV();
+        float texU = sprite.getU0();
+        float texV = sprite.getV0();
         int texWidth = sprite.getWidth();
         int texHeight = sprite.getHeight();
-        float uScale = (sprite.getMaxU() - texU) / texWidth;
-        float vScale = (sprite.getMaxV() - texV) / texHeight;
+        float uScale = (sprite.getU1() - texU) / texWidth;
+        float vScale = (sprite.getV1() - texV) / texHeight;
         for (int i = 0; i < ySize; i += Math.min(texHeight - 2, ySize - i)) {
             int partSize = Math.min(texHeight, ySize - i);
-            bufferRect(buffer, xPos, yPos + ySize - i, xSize, -partSize, sprite.getMinU(), sprite.getMinV(), xSize * uScale, partSize * vScale);
+            bufferRect(buffer, xPos, yPos + ySize - i, xSize, -partSize, sprite.getU0(), sprite.getV0(), xSize * uScale, partSize * vScale);
         }
     }
 
     private void bufferRect(IVertexBuilder buffer, float x, float y, float width, float height, float minU, float minV, float tWidth, float tHeight) {
         double zLevel = getRenderZLevel();
         //@formatter:off
-        buffer.pos(x,           y + height, zLevel).color(1F, 1F, 1F, 1F).tex(minU, minV + tHeight).endVertex();
-        buffer.pos(x + width,   y + height, zLevel).color(1F, 1F, 1F, 1F).tex(minU + tWidth, minV + tHeight).endVertex();
-        buffer.pos(x + width,   y,          zLevel).color(1F, 1F, 1F, 1F).tex(minU + tWidth, minV).endVertex();
-        buffer.pos(x,           y,          zLevel).color(1F, 1F, 1F, 1F).tex(minU, minV).endVertex();
+        buffer.vertex(x,           y + height, zLevel).color(1F, 1F, 1F, 1F).uv(minU, minV + tHeight).endVertex();
+        buffer.vertex(x + width,   y + height, zLevel).color(1F, 1F, 1F, 1F).uv(minU + tWidth, minV + tHeight).endVertex();
+        buffer.vertex(x + width,   y,          zLevel).color(1F, 1F, 1F, 1F).uv(minU + tWidth, minV).endVertex();
+        buffer.vertex(x,           y,          zLevel).color(1F, 1F, 1F, 1F).uv(minU, minV).endVertex();
         //@formatter:on
     }
 
@@ -277,7 +277,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             String percent = " (" + MathUtils.round(((double) energy / (double) maxEnergy) * 100D, 100) + "%)";
 
             StringBuilder builder = new StringBuilder();
-            builder.append(DARK_AQUA).append(I18n.format(title)).append("\n");
+            builder.append(DARK_AQUA).append(I18n.get(title)).append("\n");
 
             builder.append(GOLD).append(i18ni("capacity")).append(" ").append(GRAY).append(capString).append("\n");
             builder.append(GOLD).append(i18ni("stored")).append(" ").append(GRAY).append(storedString).append(percent).append("\n");

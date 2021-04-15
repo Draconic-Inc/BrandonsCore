@@ -119,7 +119,7 @@ public class FilterItem extends FilterBase {
                 }
                 else {
                     //TODO Test This
-                    Collection<ResourceLocation> tags = ItemTags.getCollection().getOwningTags(stack.getItem());
+                    Collection<ResourceLocation> tags = ItemTags.getAllTags().getMatchingTags(stack.getItem());
 //                    int[] ids = OreDictionary.getOreIDs(stack);
                     match = false;
                     for (ResourceLocation tag : tags) {
@@ -134,7 +134,7 @@ public class FilterItem extends FilterBase {
                 match = stack.getCount() == count;
             }
             if (match && damage != -1) {
-                match = stack.getDamage() == damage;
+                match = stack.getDamageValue() == damage;
             }
             if (match && nbt != null) {
                 match = nbt.equals(stack.getTag());

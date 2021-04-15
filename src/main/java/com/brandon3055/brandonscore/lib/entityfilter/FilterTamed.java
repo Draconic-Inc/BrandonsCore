@@ -45,7 +45,7 @@ public class FilterTamed extends FilterBase {
         boolean isTamable = entity instanceof TameableEntity;
         if (isTamable) {
             TameableEntity ownable = (TameableEntity) entity;
-            if (ownable.getOwnerId() != null) {
+            if (ownable.getOwnerUUID() != null) {
                 return whitelistTamed;
             }
             return includeTamable;

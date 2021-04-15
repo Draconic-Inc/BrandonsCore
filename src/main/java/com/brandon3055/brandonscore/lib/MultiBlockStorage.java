@@ -52,8 +52,8 @@ public class MultiBlockStorage {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
-                    if (!helper.checkBlock(blockStorage[x][y][z], world, pos.add(startPos))) {
-                        helper.invalidBlock = startPos.add(pos);
+                    if (!helper.checkBlock(blockStorage[x][y][z], world, pos.offset(startPos))) {
+                        helper.invalidBlock = startPos.offset(pos);
                         helper.expectedBlock = blockStorage[x][y][z];
                         return false;
                     }
@@ -74,7 +74,7 @@ public class MultiBlockStorage {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
-                    helper.setBlock(blockStorage[x][y][z], world, pos.add(startPos));
+                    helper.setBlock(blockStorage[x][y][z], world, pos.offset(startPos));
                 }
             }
         }
@@ -88,7 +88,7 @@ public class MultiBlockStorage {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
-                    helper.forBlock(blockStorage[x][y][z], world, pos.add(startPos), startPos, flag);
+                    helper.forBlock(blockStorage[x][y][z], world, pos.offset(startPos), startPos, flag);
                 }
             }
         }
@@ -99,7 +99,7 @@ public class MultiBlockStorage {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
                     if (!blockStorage[x][y][z].equals("")){
-                        consumer.accept(new BlockPos(x, y, z).add(startPos), blockStorage[x][y][z]);
+                        consumer.accept(new BlockPos(x, y, z).offset(startPos), blockStorage[x][y][z]);
                     }
                 }
             }

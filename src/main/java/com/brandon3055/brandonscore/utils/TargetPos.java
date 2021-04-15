@@ -55,12 +55,12 @@ public class TargetPos {
     }
 
     public void update(Entity player) {
-        x = player.getPosX();
-        y = player.getPosY();
-        z = player.getPosZ();
-        dimension = player.world.getDimensionKey();
-        pitch = player.rotationPitch;
-        yaw = player.rotationYaw;
+        x = player.getX();
+        y = player.getY();
+        z = player.getZ();
+        dimension = player.level.dimension();
+        pitch = player.xRot;
+        yaw = player.yRot;
     }
 
     public double getX() {
@@ -91,7 +91,7 @@ public class TargetPos {
         return "X: " + (int) Math.floor(x) +
                 ", Y: " + (int) Math.floor(y) +
                 ", Z: " + (int) Math.floor(z) +
-                ", " + (fullDim ? dimension.getLocation() : dimension.getLocation().getPath());
+                ", " + (fullDim ? dimension.location() : dimension.location().getPath());
     }
 
     public TargetPos setIncludeHeading(boolean includeHeading) {
@@ -133,7 +133,7 @@ public class TargetPos {
         nbt.putDouble("x", x);
         nbt.putDouble("y", y);
         nbt.putDouble("z", z);
-        nbt.putString("dim", dimension.getLocation().toString());
+        nbt.putString("dim", dimension.location().toString());
         nbt.putBoolean("heading", includeHeading);
         if (includeHeading) {
             nbt.putFloat("pitch", pitch);
@@ -150,7 +150,7 @@ public class TargetPos {
         x = nbt.getDouble("x");
         y = nbt.getDouble("y");
         z = nbt.getDouble("z");
-        dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(nbt.getString("dim")));
+        dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dim")));
         includeHeading = nbt.getBoolean("heading");
         if (includeHeading) {
             pitch = nbt.getFloat("pitch");
@@ -162,7 +162,7 @@ public class TargetPos {
         output.writeDouble(x);
         output.writeDouble(y);
         output.writeDouble(z);
-        output.writeResourceLocation(dimension.getLocation());
+        output.writeResourceLocation(dimension.location());
         output.writeBoolean(includeHeading);
         if (includeHeading) {
             output.writeFloat(pitch);
@@ -174,7 +174,7 @@ public class TargetPos {
         x = input.readDouble();
         y = input.readDouble();
         z = input.readDouble();
-        dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, input.readResourceLocation());
+        dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, input.readResourceLocation());
         includeHeading = input.readBoolean();
         if (includeHeading) {
             pitch = input.readFloat();

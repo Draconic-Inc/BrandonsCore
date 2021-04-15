@@ -23,11 +23,11 @@ public class GuiSpriteUploader extends SpriteUploader {
         super(Minecraft.getInstance().textureManager, BCSprites.LOCATION_GUI_ATLAS, "gui");
         this.registeredSprites = registeredSprites;
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) Minecraft.getInstance().getResourceManager();
-        resourceManager.addReloadListener(this);
+        resourceManager.registerReloadListener(this);
     }
 
     @Override
-    protected Stream<ResourceLocation> getResourceLocations() {
+    protected Stream<ResourceLocation> getResourcesToLoad() {
         return registeredSprites.stream();
     }
 

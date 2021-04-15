@@ -49,9 +49,9 @@ public class FeatureUtils {
 //        }
 
         ItemEntity entityItem = new ItemEntity(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
-        entityItem.setMotion(world.rand.nextGaussian() * 0.05, world.rand.nextGaussian() * 0.05 + 0.2F, world.rand.nextGaussian() * 0.05);
-        entityItem.setNoPickupDelay();
-        world.addEntity(entityItem);
+        entityItem.setDeltaMovement(world.random.nextGaussian() * 0.05, world.random.nextGaussian() * 0.05 + 0.2F, world.random.nextGaussian() * 0.05);
+        entityItem.setNoPickUpDelay();
+        world.addFreshEntity(entityItem);
     }
 
 }

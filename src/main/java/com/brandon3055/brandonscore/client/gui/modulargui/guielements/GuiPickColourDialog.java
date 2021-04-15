@@ -103,7 +103,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
             alphaSlider.setBarStyleBackground(0xFF000000).setSliderSize(3);
         }
 
-        addChild(selectButton = new GuiButton(xPos + 4, yPos + ySize - 14, cancelEnabled ? (xSize / 2) - 5 : xSize - 8, 10, I18n.format("generic.ok.txt")));
+        addChild(selectButton = new GuiButton(xPos + 4, yPos + ySize - 14, cancelEnabled ? (xSize / 2) - 5 : xSize - 8, 10, I18n.get("generic.ok.txt")));
         selectButton.onPressed(() -> {
             if (listener != null) {
                 listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), false, false), this);
@@ -113,7 +113,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
             }
             close();
         });
-        addChild(cancelButton = new GuiButton(selectButton.xPos() + selectButton.xSize() + 2, yPos + ySize - 14, (xSize / 2) - 5, 10, I18n.format("gui.back")));
+        addChild(cancelButton = new GuiButton(selectButton.xPos() + selectButton.xSize() + 2, yPos + ySize - 14, (xSize / 2) - 5, 10, I18n.get("gui.back")));
         cancelButton.onPressed(() -> {
             if (listener != null) {
                 listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), true, false), this);
@@ -130,7 +130,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         zOffset -= 1;
-        IRenderTypeBuffer.Impl getter = minecraft.getRenderTypeBuffers().getBufferSource();
+        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
         drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, 0xFFFFFFFF, 0xFF000000);
 
         int i = 0;
@@ -140,7 +140,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         }
 
         drawBorderedRect(getter, xPos() + 4, yPos() + ySize() - 22, xSize() - 8, 6, 0.5, includeAlpha ? colour.argb() : mixColours(0xFF000000, colour.argb()), 0xFF000000);
-        getter.finish();
+        getter.endBatch();
         zOffset += 1;
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }

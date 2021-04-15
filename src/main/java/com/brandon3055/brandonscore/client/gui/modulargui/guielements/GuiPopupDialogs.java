@@ -65,28 +65,28 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
         int buttonX = (dialog.xSize() / 2) - ((((type.buttons + 1) * buttonWidth) + type.buttons) / 2);
 
         if (type.yes) {
-            GuiButton button = new GuiButton(I18n.format("generic.yes.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("generic.yes.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
             dialog.addChild(dialog.yesButton = button);
         }
         if (type.no) {
-            GuiButton button = new GuiButton(I18n.format("generic.no.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("generic.no.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
             dialog.addChild(dialog.noButton = button);
         }
         if (type.ok) {
-            GuiButton button = new GuiButton(I18n.format("generic.ok.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("generic.ok.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
             dialog.addChild(dialog.okButton = button);
         }
         if (type.cancel) {
-            GuiButton button = new GuiButton(I18n.format("generic.cancel.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("generic.cancel.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;

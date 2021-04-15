@@ -66,36 +66,36 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     }
 
     @Override
-    public void onContainerClosed(PlayerEntity playerIn) {
-        super.onContainerClosed(playerIn);
+    public void removed(PlayerEntity playerIn) {
+        super.removed(playerIn);
         tile.onPlayerCloseContainer(playerIn);
     }
 
     @Override
-    public void detectAndSendChanges() {
-        super.detectAndSendChanges();
-        tile.detectAndSendChangesToListeners(listeners);
+    public void broadcastChanges() {
+        super.broadcastChanges();
+        tile.detectAndSendChangesToListeners(containerListeners);
     }
 
     @Override
-    public void addListener(IContainerListener listener) {
-        super.addListener(listener);
+    public void addSlotListener(IContainerListener listener) {
+        super.addSlotListener(listener);
         if (listener instanceof ServerPlayerEntity) {
             tile.getDataManager().forcePlayerSync((ServerPlayerEntity) listener);
         }
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
-        if (tile.getWorld().getTileEntity(tile.getPos()) != tile) {
+    public boolean stillValid(PlayerEntity playerIn) {
+        if (tile.getLevel().getBlockEntity(tile.getBlockPos()) != tile) {
             return false;
         } else {
-            return player.getDistanceSq((double) tile.getPos().getX() + 0.5D, (double) tile.getPos().getY() + 0.5D, (double) tile.getPos().getZ() + 0.5D) <= tile.getAccessDistanceSq();
+            return player.distanceToSqr((double) tile.getBlockPos().getX() + 0.5D, (double) tile.getBlockPos().getY() + 0.5D, (double) tile.getBlockPos().getZ() + 0.5D) <= tile.getAccessDistanceSq();
         }
     }
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity player, int i) {
+    public ItemStack quickMoveStack(PlayerEntity player, int i) {
         int playerSlots = 36;
         if (slotLayout != null) {
             playerSlots = slotLayout.getPlayerSlotCount();
@@ -105,26 +105,26 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
             IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
             Slot slot = getSlot(i);
 
-            if (slot != null && slot.getHasStack()) {
-                ItemStack stack = slot.getStack();
+            if (slot != null && slot.hasItem()) {
+                ItemStack stack = slot.getItem();
                 ItemStack result = stack.copy();
 
                 //Transferring from tile to player
                 if (i >= playerSlots) {
-                    if (!mergeItemStack(stack, 0, playerSlots, false)) {
+                    if (!moveItemStackTo(stack, 0, playerSlots, false)) {
                         return ItemStack.EMPTY; //Return if failed to merge
                     }
                 } else {
                     //Transferring from player to tile
-                    if (!mergeItemStack(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
+                    if (!moveItemStackTo(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
                         return ItemStack.EMPTY;  //Return if failed to merge
                     }
                 }
 
                 if (stack.getCount() == 0) {
-                    slot.putStack(ItemStack.EMPTY);
+                    slot.set(ItemStack.EMPTY);
                 } else {
-                    slot.onSlotChanged();
+                    slot.setChanged();
                 }
 
                 slot.onTake(player, stack);
@@ -138,17 +138,17 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
 
     @Override
-    public void putStackInSlot(int slotID, ItemStack stack) {
+    public void setItem(int slotID, ItemStack stack) {
         Slot slot = this.getSlot(slotID);
         if (slot != null) {
-            slot.putStack(stack);
+            slot.set(stack);
         }
     }
 
     @Override
     public Slot getSlot(int slotId) {
-        if (slotId < inventorySlots.size() && slotId >= 0) {
-            return inventorySlots.get(slotId);
+        if (slotId < slots.size() && slotId >= 0) {
+            return slots.get(slotId);
         }
         return null;
     }
@@ -159,7 +159,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
         for (int i = 0; i < stacks.size(); ++i) {
             Slot slot = getSlot(i);
             if (slot != null) {
-                slot.putStack(stacks.get(i));
+                slot.set(stacks.get(i));
             }
         }
     }
@@ -176,6 +176,6 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     }
 
     protected static <T extends TileEntity> T getClientTile(PacketBuffer extraData) {
-        return (T) Minecraft.getInstance().world.getTileEntity(extraData.readBlockPos());
+        return (T) Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());
     }
 }

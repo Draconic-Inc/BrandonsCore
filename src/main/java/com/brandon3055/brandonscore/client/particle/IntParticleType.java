@@ -22,7 +22,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
 
     private static IParticleData.IDeserializer<IntParticleData> DESERIALIZER = new IParticleData.IDeserializer<IntParticleData>() {
         @Override
-        public IntParticleData deserialize(ParticleType<IntParticleData> particleTypeIn, StringReader reader) throws CommandSyntaxException {
+        public IntParticleData fromCommand(ParticleType<IntParticleData> particleTypeIn, StringReader reader) throws CommandSyntaxException {
             List<Integer> list = new ArrayList<>();
             while (reader.peek() == ' ') {
                 reader.expect(' ');
@@ -33,7 +33,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
         }
 
         @Override
-        public IntParticleData read(ParticleType<IntParticleData> particleTypeIn, PacketBuffer buffer) {
+        public IntParticleData fromNetwork(ParticleType<IntParticleData> particleTypeIn, PacketBuffer buffer) {
             return new IntParticleData(particleTypeIn, buffer.readByte());
         }
     };
@@ -43,7 +43,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
     }
 
     @Override
-    public Codec<IntParticleData> func_230522_e_() {
+    public Codec<IntParticleData> codec() {
         return null;
     }
 
@@ -62,7 +62,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
         }
 
         @Override
-        public void write(PacketBuffer buffer) {
+        public void writeToNetwork(PacketBuffer buffer) {
             buffer.writeVarIntArray(data);
         }
 
@@ -71,7 +71,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
         }
 
         @Override
-        public String getParameters() {
+        public String writeToString() {
             return String.format(Locale.ROOT, "%s %sb", Registry.PARTICLE_TYPE.getKey(this.getType()), DataUtils.stringArrayConcat(DataUtils.arrayToString(data), " "));
         }
     }

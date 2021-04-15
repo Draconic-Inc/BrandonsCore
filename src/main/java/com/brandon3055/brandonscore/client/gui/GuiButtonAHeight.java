@@ -16,7 +16,7 @@ import net.minecraft.util.text.ITextComponent;
 public class GuiButtonAHeight extends Button {
 
 	public GuiButtonAHeight(int xPos, int yPos, int width, int hight, String displayString, IPressable onPress) {
-		super(xPos, yPos, width, hight, ITextComponent.getTextComponentOrEmpty(displayString), onPress);
+		super(xPos, yPos, width, hight, ITextComponent.nullToEmpty(displayString), onPress);
 	}
 
 	@Override
@@ -24,8 +24,8 @@ public class GuiButtonAHeight extends Button {
 		if (this.visible)
 		{
 			Minecraft mc = Minecraft.getInstance();
-			FontRenderer fontrenderer = mc.fontRenderer;
-			mc.getTextureManager().bindTexture(WIDGETS_LOCATION);
+			FontRenderer fontrenderer = mc.font;
+			mc.getTextureManager().bind(WIDGETS_LOCATION);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
 			int k = this.getYImage(this.isHovered);

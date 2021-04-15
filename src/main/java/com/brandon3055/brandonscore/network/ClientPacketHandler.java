@@ -23,7 +23,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
         switch (packet.getType()) {
             case BCoreNetwork.C_TILE_DATA_MANAGER: {
                 BlockPos pos = packet.readPos();
-                TileEntity tile = mc.world.getTileEntity(pos);
+                TileEntity tile = mc.level.getBlockEntity(pos);
                 if (tile instanceof IDataManagerProvider) {
                     ((IDataManagerProvider) tile).getDataManager().receiveSyncData(packet);
                 }
@@ -31,7 +31,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             }
             case BCoreNetwork.C_TILE_MESSAGE: {
                 BlockPos pos = packet.readPos();
-                TileEntity tile = mc.world.getTileEntity(pos);
+                TileEntity tile = mc.level.getBlockEntity(pos);
                 if (tile instanceof TileBCore) {
                     int id = packet.readByte() & 0xFF;
                     ((TileBCore) tile).receivePacketFromServer(packet, id);
@@ -44,9 +44,9 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             case BCoreNetwork.C_NO_CLIP:
                 boolean enable = packet.readBoolean();
                 if (enable) {
-                    BCEventHandler.noClipPlayers.add(mc.player.getUniqueID());
+                    BCEventHandler.noClipPlayers.add(mc.player.getUUID());
                 } else {
-                    BCEventHandler.noClipPlayers.add(mc.player.getUniqueID());
+                    BCEventHandler.noClipPlayers.add(mc.player.getUUID());
                 }
                 break;
             case BCoreNetwork.C_PLAYER_ACCESS:
@@ -57,7 +57,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
 //                mc.player.openContainer.windowId = windowID;
                 break;
             case BCoreNetwork.C_PLAYER_ACCESS_UPDATE:
-                GuiPlayerAccess gui = mc.currentScreen instanceof GuiPlayerAccess ? (GuiPlayerAccess) mc.currentScreen : null;
+                GuiPlayerAccess gui = mc.screen instanceof GuiPlayerAccess ? (GuiPlayerAccess) mc.screen : null;
                 if (gui != null) {
                     gui.name = packet.readString();
                     gui.pos = packet.readPos();
@@ -69,7 +69,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 break;
             case BCoreNetwork.C_TILE_CAP_DATA:
                 BlockPos pos = packet.readPos();
-                TileEntity tile = Minecraft.getInstance().world.getTileEntity(pos);
+                TileEntity tile = Minecraft.getInstance().level.getBlockEntity(pos);
                 if (tile instanceof TileBCore) {
                     ((TileBCore) tile).getCapManager().receiveCapSyncData(packet);
                 }
@@ -81,13 +81,13 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
     }
 
     private static void handlePlaySound(PacketCustom packet, Minecraft mc) {
-        if (mc.world == null) return;
+        if (mc.level == null) return;
         BlockPos pos = packet.readPos();
         SoundEvent sound = packet.readRegistryId();
         SoundCategory category = SoundCategory.values()[packet.readVarInt()];
         float volume = packet.readFloat();
         float pitch = packet.readFloat();
         boolean distanceDelay = packet.readBoolean();
-        mc.world.playSound(pos, sound, category, volume, pitch, distanceDelay);
+        mc.level.playLocalSound(pos, sound, category, volume, pitch, distanceDelay);
     }
 }

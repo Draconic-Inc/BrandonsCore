@@ -25,9 +25,9 @@ public class Vec3D {
     }
 
     public Vec3D(Entity entity) {
-        this.x = entity.getPosX();
-        this.y = entity.getPosY();
-        this.z = entity.getPosZ();
+        this.x = entity.getX();
+        this.y = entity.getY();
+        this.z = entity.getZ();
     }
 
     public Vec3D(double x, double y, double z) {
@@ -164,9 +164,9 @@ public class Vec3D {
     }
 
     public Vec3D offset(Direction direction, double offsetDistance) {
-        this.x += direction.getXOffset() * offsetDistance;
-        this.y += direction.getYOffset() * offsetDistance;
-        this.z += direction.getZOffset() * offsetDistance;
+        this.x += direction.getStepX() * offsetDistance;
+        this.y += direction.getStepY() * offsetDistance;
+        this.z += direction.getStepZ() * offsetDistance;
         return this;
     }
 
@@ -219,7 +219,7 @@ public class Vec3D {
     }
 
     public static Vec3D getCenter(TileEntity tile) {
-        return getCenter(tile.getPos());
+        return getCenter(tile.getBlockPos());
     }
 
     public double distXZ(Vec3D vec3D) {
