@@ -11,10 +11,22 @@ import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHandler {
 
@@ -77,6 +89,9 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             case BCoreNetwork.C_PLAY_SOUND:
                 handlePlaySound(packet, mc);
                 break;
+            case BCoreNetwork.C_SPAWN_ENTITY:
+                handleEntitySpawn(packet, mc);
+                break;
         }
     }
 
@@ -89,5 +104,34 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
         float pitch = packet.readFloat();
         boolean distanceDelay = packet.readBoolean();
         mc.level.playLocalSound(pos, sound, category, volume, pitch, distanceDelay);
+    }
+
+    private static void handleEntitySpawn(PacketCustom packet, Minecraft mc) {
+        if (mc.level == null) {
+            return;
+        }
+        EntityType<?> type = Registry.ENTITY_TYPE.byId(packet.readVarInt());
+        int entityID = packet.readInt();
+        UUID uuid = packet.readUUID();
+        double posX = packet.readDouble();
+        double posY = packet.readDouble();
+        double posZ = packet.readDouble();
+        byte yaw = packet.readByte();
+        byte pitch = packet.readByte();
+        byte headYaw = packet.readByte();
+        Vector3d velocity = new Vector3d(packet.readFloat(), packet.readFloat(), packet.readFloat());
+        Entity entity = type.create(mc.level);
+        if (entity == null) {
+            return;
+        }
+
+        entity.setPacketCoordinates(posX, posY, posZ);
+        entity.absMoveTo(posX, posY, posZ, (pitch * 360) / 256.0F, (yaw * 360) / 256.0F);
+        entity.setYHeadRot((headYaw * 360) / 256.0F);
+        entity.setYBodyRot((headYaw * 360) / 256.0F);
+        entity.setId(entityID);
+        entity.setUUID(uuid);
+        mc.level.putNonPlayerEntity(entityID, entity);
+        entity.lerpMotion(velocity.x, velocity.y, velocity.z);
     }
 }

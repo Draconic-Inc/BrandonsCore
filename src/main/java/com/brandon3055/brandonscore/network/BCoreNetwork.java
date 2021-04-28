@@ -4,16 +4,22 @@ import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.packet.PacketCustomChannelBuilder;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.event.EventNetworkChannel;
 
 /**
@@ -34,6 +40,7 @@ public class BCoreNetwork {
     public static final int C_INDEXED_MESSAGE = 7;
     public static final int C_TILE_CAP_DATA = 8;
     public static final int C_PLAY_SOUND = 9;
+    public static final int C_SPAWN_ENTITY = 10;
     //Client to server
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
@@ -81,7 +88,6 @@ public class BCoreNetwork {
         packet.sendToPlayer(player);
     }
 
-
     public static void sendSound(World world, int x, int y, int z, SoundEvent sound, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
         sendSound(world, new BlockPos(x, y, z), sound, category, volume, pitch, distanceDelay);
     }
@@ -97,6 +103,28 @@ public class BCoreNetwork {
         packet.sendToChunk(world, pos);
     }
 
+    /**
+     * This is a custom entity spawn packet that removes the min/max velocity constraints.
+     * @param entity The entity being spawned.
+     * @return A packet to return in {@link Entity#getAddEntityPacket()}
+     */
+    public static IPacket<?> getEntitySpawnPacket(Entity entity) {
+        PacketCustom packet = new PacketCustom(CHANNEL, C_SPAWN_ENTITY);
+        packet.writeVarInt(Registry.ENTITY_TYPE.getId(entity.getType()));
+        packet.writeInt(entity.getId());
+        packet.writeUUID(entity.getUUID());
+        packet.writeDouble(entity.getX());
+        packet.writeDouble(entity.getY());
+        packet.writeDouble(entity.getZ());
+        packet.writeByte((byte) MathHelper.floor(entity.xRot * 256.0F / 360.0F));
+        packet.writeByte((byte) MathHelper.floor(entity.yRot * 256.0F / 360.0F));
+        packet.writeByte((byte) (entity.getYHeadRot() * 256.0F / 360.0F));
+        Vector3d velocity = entity.getDeltaMovement();
+        packet.writeFloat((float) velocity.x);
+        packet.writeFloat((float) velocity.y);
+        packet.writeFloat((float) velocity.z);
+        return packet.toPacket(NetworkDirection.PLAY_TO_CLIENT);
+    }
 
     public static void init() {
         netChannel = PacketCustomChannelBuilder.named(CHANNEL)

@@ -64,23 +64,23 @@ minecraft {
     runs {
         client {
             workingDirectory file('run')
-            mods { enderstorage { source sourceSets.main } }
+            mods { brandonscore { source sourceSets.main } }
         }
         server {
             workingDirectory file('run')
-            mods { enderstorage { source sourceSets.main } }
+            mods { brandonscore { source sourceSets.main } }
         }
         data {
             workingDirectory file('run')
-            args '--mod', 'brandonscore', '--all', '--output', file("src/generated/resources")
-            mods { enderstorage { source sourceSets.main } }
+            args '--mod', 'brandonscore', '--all', '--output', file("src/generated/resources"), '--existing', file("src/main/resources")
+            mods { brandonscore { source sourceSets.main } }
         }
     }
 }
 
 repositories {
     mavenLocal()
-    maven { url = "http://chickenbones.net/maven" }
+    maven { url = "https://chickenbones.net/maven" }
     maven { url = "https://dvs1.progwml6.com/files/maven" }
 }
 
