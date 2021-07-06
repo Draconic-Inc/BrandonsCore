@@ -90,9 +90,13 @@ public class CommandTPX {
             BlockPos pos = new BlockPos(0, 127, 0);
             rand.setSeed(0);
             for (int i = 0; i < 1000; i++) {
-                pos = new BlockPos(-150 + rand.nextInt(300), 32 + rand.nextInt(80), -150 + rand.nextInt(300));
+                if (i > 500) {
+                    pos = new BlockPos(-150 + rand.nextInt(300), 32 + rand.nextInt(80), -150 + rand.nextInt(300));
+                }else {
+                    pos = new BlockPos(-250 + rand.nextInt(500), 256, -250 + rand.nextInt(500));
+                }
                 if (targetWorld.isEmptyBlock(pos)) {
-                    while (targetWorld.isEmptyBlock(pos.below())) {
+                    while (targetWorld.isEmptyBlock(pos.below()) && World.isInWorldBounds(pos.below())) {
                         pos = pos.below();
                     }
                     BlockState state = targetWorld.getBlockState(pos.below());
