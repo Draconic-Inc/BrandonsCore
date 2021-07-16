@@ -88,6 +88,9 @@ public class TGuiBase implements IGuiTemplate {
     }
 
     public void addPlayerSlots(boolean title, boolean armor, boolean offHand) {
+        if (playerSlots != null && playerSlots.getParent() != null) {
+            playerSlots.getParent().removeChild(playerSlots);
+        }
         playerSlots = toolkit.createPlayerSlots(background, title, armor, offHand);
         toolkit.placeInside(playerSlots, background, GuiToolkit.LayoutPos.BOTTOM_CENTER, 0, -7);
     }

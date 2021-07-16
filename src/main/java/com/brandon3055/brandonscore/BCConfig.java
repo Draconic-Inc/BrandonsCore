@@ -69,11 +69,13 @@ public class BCConfig {
                     .translation(BrandonsCore.MODID + ".config.use_shaders")
                     .define("use_shaders", true);
             assignStatic(use_shaders, e -> BCConfig.useShaders = e);
+//            useShaders = use_shaders.get();
             dark_mode = builder
                     .comment("Enable gui dark mode in GUI's. (This can also be toggled in game from any gui that supports dark mode)")
                     .translation(BrandonsCore.MODID + ".config.dark_mode")
                     .define("dark_mode", false);
             assignStatic(dark_mode, e -> BCConfig.darkMode = e);
+//            darkMode = dark_mode.get();
 
 //            builder.pop();
         }

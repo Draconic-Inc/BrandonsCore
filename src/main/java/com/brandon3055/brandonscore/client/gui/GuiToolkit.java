@@ -649,8 +649,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     //LayoutUtils
     public void center(GuiElement element, GuiElement centerOn, int xOffset, int yOffset) {
-        element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2));
-        element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2));
+        element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2) + xOffset);
+        element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2) + yOffset);
     }
 
     public void center(GuiElement element, int xPos, int yPos) {
@@ -659,11 +659,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public void centerX(GuiElement element, GuiElement centerOn, int xOffset) {
-        element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2));
+        element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2) + xOffset);
     }
 
     public void centerY(GuiElement element, GuiElement centerOn, int yOffset) {
-        element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2));
+        element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2) + yOffset);
     }
 
     //Templates

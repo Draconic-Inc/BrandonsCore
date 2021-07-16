@@ -477,12 +477,20 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (isPressed) {
             playClickEvent(true);
-            if (releaseListener != null) {
+            if (releaseListener != null && isMouseOver(mouseX, mouseY)) {
                 releaseListener.accept(button);
             }
         }
         isPressed = false;
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseMoved(double mouseX, double mouseY) {
+        if (isPressed && !isMouseOver(mouseX, mouseY)) {
+            isPressed = false;
+        }
+        return super.mouseMoved(mouseX, mouseY);
     }
 
     /**

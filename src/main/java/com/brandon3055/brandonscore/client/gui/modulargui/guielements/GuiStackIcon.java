@@ -8,6 +8,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -26,7 +30,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     public boolean drawToolTip = true;
     public boolean drawHoverHighlight = false;
     private GuiElement background = null;
-    protected List<String> toolTipOverride = null;
+    protected List<ITextComponent> toolTipOverride = null;
     private StackReference stackReference;
     private ItemStack stack = ItemStack.EMPTY;
     private Runnable clickListener = null;
@@ -65,6 +69,10 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         RenderSystem.popMatrix();
     }
 
+    public GuiStackIcon setDrawCount(boolean drawCount) {
+        this.drawCount = drawCount;
+        return this;
+    }
 
     private void renderStack(Minecraft minecraft) {
 //        RenderHelper.enableGUIStandardItemLighting();
@@ -104,8 +112,8 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && !getStack().isEmpty()) {
-            List<String> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItemString(getStack());
-            drawHoveringText(list, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
+            List<ITextComponent> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItem(getStack());
+            drawHoveringText(list, mouseX, mouseY, fontRenderer);
             return true;
         }
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
@@ -184,9 +192,9 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             if (stack.isEmpty()) {
                 stack = new ItemStack(Blocks.BARRIER);
                 toolTipOverride = new ArrayList<>();
-                toolTipOverride.add("Failed to load Item Stack");
-                toolTipOverride.add("This may mean the mod the stack belongs to is not installed");
-                toolTipOverride.add("Or its just broken...");
+                toolTipOverride.add(new StringTextComponent("Failed to load Item Stack"));
+                toolTipOverride.add(new StringTextComponent("This may mean the mod the stack belongs to is not installed"));
+                toolTipOverride.add(new StringTextComponent("Or its just broken..."));
             }
             stackCache.put(hash, stack);
         }
@@ -200,7 +208,13 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         return stack;
     }
 
+    @Deprecated
     public GuiStackIcon setToolTipOverride(List<String> toolTipOverride) {
+        this.toolTipOverride = toolTipOverride.stream().map(StringTextComponent::new).collect(Collectors.toList());
+        return this;
+    }
+
+    public GuiStackIcon setHoverOverride(List<ITextComponent> toolTipOverride) {
         this.toolTipOverride = toolTipOverride;
         return this;
     }

@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.*;
+import net.minecraft.util.text.TextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.gui.GuiUtils;
@@ -2678,21 +2679,19 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Simply draws a string with the given colour and no shadow.
      */
-    public float drawString(BCFontRenderer fontRenderer, ITextComponent text, float x, float y, int colour) {
+    public float drawString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int colour) {
         return drawString(fontRenderer, text, x, y, colour, false);
     }
 
     /**
      * Draws a string with the given colour and optional shadow.
      */
-    public float drawString(FontRenderer fontRenderer, ITextComponent text, float x, float y, int colour, boolean dropShadow) {
+    public float drawString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int colour, boolean dropShadow) {
         IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         MatrixStack textStack = new MatrixStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
-//        float i = fontRenderer.renderText(text.getVisualOrderText(), x, y, colour, false, textLocation, renderType, true, 0, 15728880);
-//        float i = fontRenderer.drawInternal(text.getVisualOrderText(), x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
-        float i = fontRenderer.drawInBatch(text, x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
+        float i = fontRenderer.drawInBatch(LanguageMap.getInstance().getVisualOrder(text), x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
         renderType.endBatch();
         return i;
     }
@@ -2794,11 +2793,35 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
+    public void drawCustomString(FontRenderer fr, ITextProperties text, float x, float y, int width, int colour, GuiAlign alignment, boolean wrap, boolean trim, boolean dropShadow) {
+        if (width <= 0) return;
+        boolean willTrim = trim && fr.width(text) > width;
+        if (willTrim) {
+            int dotW = fr.width("..");
+            Style style = text instanceof ITextComponent ? ((ITextComponent) text).getStyle() : Style.EMPTY;
+            text = fr.getSplitter().headByWidth(text, width - dotW, Style.EMPTY)/* + ".."*/;
+            text = ITextProperties.composite(text, new StringTextComponent("..").withStyle(style));
+        }
+
+        if (wrap) {
+            drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
+        } else {
+            float end = drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
+        }
+    }
+
     /**
      * Allows you to draw a split string aligned to the left, middle or right of the specified area.
      */
     public void drawAlignedSplitString(FontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
         for (String s : BCFontRenderer.listFormattedStringToWidth(text, width)) {
+            drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
+            y += fontRenderer.lineHeight;
+        }
+    }
+
+    public void drawAlignedSplitString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
+        for (ITextProperties s : fontRenderer.getSplitter().splitLines(text, width, Style.EMPTY)) {
             drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
             y += fontRenderer.lineHeight;
         }
@@ -2825,6 +2848,34 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 break;
         }
 //        drawString(fontRenderer, s, x, y, colour, dropShadow);
+    }
+
+    public float drawAlignedString(FontRenderer fr, ITextProperties text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
+        boolean willTrim = trim && fr.width(text) > width;
+        if (willTrim) {
+            int dotW = fr.width("..");
+            Style style = text instanceof ITextComponent ? ((ITextComponent) text).getStyle() : Style.EMPTY;
+            text = fr.getSplitter().headByWidth(text, width - dotW, Style.EMPTY)/* + ".."*/;
+            text = ITextProperties.composite(text, new StringTextComponent("..").withStyle(style));
+        }
+
+        float end = 0;
+        int stringWidth = fr.width(text);
+        switch (alignment) {
+            case LEFT:
+                end = drawString(fontRenderer, text, x, y, colour, dropShadow);
+                break;
+            case CENTER:
+                end = drawString(fontRenderer, text, x + (width - stringWidth) / 2, y, colour, dropShadow);
+                break;
+            case RIGHT:
+                end = drawString(fontRenderer, text, x + (width - stringWidth), y, colour, dropShadow);
+                break;
+        }
+//        if (willTrim) {
+//            end = drawString(fontRenderer, "..", end, y, colour, dropShadow);
+//        }
+        return end;
     }
 
     public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight) {

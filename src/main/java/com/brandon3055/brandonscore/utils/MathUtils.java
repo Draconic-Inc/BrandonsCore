@@ -107,4 +107,15 @@ public class MathUtils {
                 from.y + (to.y - from.y) * position,
                 from.z + (to.z - from.z) * position);
     }
+
+    public static double distanceSq(Vector3 vec1, Vector3 vec2) {
+        double dx = vec1.x - vec2.x;
+        double dy = vec1.y - vec2.y;
+        double dz = vec1.z - vec2.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public static double distance(Vector3 vec1, Vector3 vec2) {
+        return Math.sqrt(distanceSq(vec1, vec2));
+    }
 }
