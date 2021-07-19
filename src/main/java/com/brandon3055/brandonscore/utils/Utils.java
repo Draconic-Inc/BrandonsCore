@@ -95,6 +95,13 @@ public class Utils {
         return getDistanceAtoB(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
     }
 
+    public static int getCardinalDistance(BlockPos pos1, BlockPos pos2) {
+        int x = Math.abs(pos2.getX() - pos1.getX());
+        int y = Math.abs(pos2.getY() - pos1.getY());
+        int z = Math.abs(pos2.getZ() - pos1.getZ());
+        return Math.max(Math.max(x, y), z);
+    }
+
     public static boolean inRangeSphere(BlockPos posA, BlockPos posB, int range) {
         if (Math.abs(posA.getX() - posB.getX()) > range || Math.abs(posA.getY() - posB.getY()) > range || Math.abs(posA.getZ() - posB.getZ()) > range) {
             return false;

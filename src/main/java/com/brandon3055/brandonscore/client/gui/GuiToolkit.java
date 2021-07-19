@@ -445,10 +445,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     public GuiButton createThemeButton(GuiElement<?> parent) {
         GuiButton button = createThemedIconButton(parent, "theme");
         button.setHoverText(element -> darkMode ? i18ni("theme.light") : i18ni("theme.dark"));
-        button.onPressed(() -> {
-            BCConfig.CLIENT.dark_mode.set(!darkMode); //TODO check if this auto saves.
-            darkMode = BCConfig.CLIENT.dark_mode.get(); //it seems ModConfigEvent sometimes fails to fire. This is a workaround.
-        });
+        button.onPressed(() -> BCConfig.modifyClientProperty("darkMode", e -> e.setBoolean(!darkMode)));
         return button;
     }
 

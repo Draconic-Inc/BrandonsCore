@@ -86,4 +86,8 @@ public enum TechLevel {
     public int getHarvestLevel() {
         return harvestLevel;
     }
+
+    public static TechLevel byIndex(int index) {
+        return index >= 0 && index < VALUES.length ? VALUES[index] : DRACONIUM;
+    }
 }

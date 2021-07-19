@@ -80,11 +80,6 @@ public class BrandonsCore {
         MinecraftForge.EVENT_BUS.addListener(BrandonsCore::onServerStop);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(WorldEntityHandler::createRegistry);
-
-        ModLoadingContext modLoadingContext = ModLoadingContext.get();
-        modLoadingContext.registerConfig(ModConfig.Type.CLIENT, BCConfig.CLIENT_SPEC);
-        modLoadingContext.registerConfig(ModConfig.Type.SERVER, BCConfig.SERVER_SPEC);
-        modLoadingContext.registerConfig(ModConfig.Type.COMMON, BCConfig.COMMON_SPEC);
     }
 
     @SubscribeEvent
@@ -104,7 +99,9 @@ public class BrandonsCore {
 
     public static void registerCommands(RegisterCommandsEvent event) {
         BCUtilCommands.register(event.getDispatcher());
-        CommandTPX.register(event.getDispatcher());
+        if (BCConfig.enable_tpx){
+            CommandTPX.register(event.getDispatcher());
+        }
     }
 
     public static void onServerStop(FMLServerStoppedEvent event) {

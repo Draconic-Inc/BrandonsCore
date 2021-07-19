@@ -2,6 +2,8 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
+import codechicken.lib.util.SneakyUtils;
+import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
@@ -14,16 +16,21 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleType;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -92,6 +99,12 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             case BCoreNetwork.C_SPAWN_ENTITY:
                 handleEntitySpawn(packet, mc);
                 break;
+            case BCoreNetwork.C_SPAWN_PARTICLE:
+                handleParticleSpawn(packet, mc);
+                break;
+            case BCoreNetwork.C_ENTITY_VELOCITY:
+                handleEntityVelocity(packet, mc);
+                break;
         }
     }
 
@@ -133,5 +146,35 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
         entity.setUUID(uuid);
         mc.level.putNonPlayerEntity(entityID, entity);
         entity.lerpMotion(velocity.x, velocity.y, velocity.z);
+    }
+
+    private static void handleEntityVelocity(PacketCustom packet, Minecraft mc) {
+        if (mc.level == null) {
+            return;
+        }
+        int entityID = packet.readInt();
+        Entity entity = mc.level.getEntity(entityID);
+        if (entity != null) {
+            Vector3f motion = packet.readVec3f();
+            entity.lerpMotion(motion.x(), motion.y(), motion.z());
+            if (packet.readBoolean()) {
+                entity.xRot = packet.readFloat();
+                entity.yRot = packet.readFloat();
+                entity.setOnGround(packet.readBoolean());
+            }
+        }
+    }
+
+    private static void handleParticleSpawn(PacketCustom packet, Minecraft mc) {
+        if (mc.level == null) {
+            return;
+        }
+        ParticleType<?> type = packet.readRegistryId();
+        IParticleData data = type.getDeserializer().fromNetwork(SneakyUtils.unsafeCast(type), packet.toPacketBuffer());
+        Vector3 pos = packet.readVector();
+        Vector3 motion = packet.readVector();
+        boolean distanceOverride = packet.readBoolean();
+        ;
+        mc.level.addParticle(data, distanceOverride, pos.x, pos.y, pos.z, motion.x, motion.y, motion.z);
     }
 }

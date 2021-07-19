@@ -2,18 +2,21 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.packet.PacketCustomChannelBuilder;
+import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
@@ -41,6 +44,8 @@ public class BCoreNetwork {
     public static final int C_TILE_CAP_DATA = 8;
     public static final int C_PLAY_SOUND = 9;
     public static final int C_SPAWN_ENTITY = 10;
+    public static final int C_SPAWN_PARTICLE = 11;
+    public static final int C_ENTITY_VELOCITY = 12;
     //Client to server
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
@@ -92,15 +97,33 @@ public class BCoreNetwork {
         sendSound(world, new BlockPos(x, y, z), sound, category, volume, pitch, distanceDelay);
     }
 
+    public static void sendSound(World world, Entity entity, SoundEvent sound, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
+        sendSound(world, entity.blockPosition(), sound, category, volume, pitch, distanceDelay);
+    }
+
     public static void sendSound(World world, BlockPos pos, SoundEvent sound, SoundCategory category, float volume, float pitch, boolean distanceDelay) {
-        PacketCustom packet = new PacketCustom(CHANNEL, C_PLAY_SOUND);
-        packet.writePos(pos);
-        packet.writeRegistryId(sound);
-        packet.writeVarInt(category.ordinal());
-        packet.writeFloat(volume);
-        packet.writeFloat(pitch);
-        packet.writeBoolean(distanceDelay);
-        packet.sendToChunk(world, pos);
+        if (!world.isClientSide) {
+            PacketCustom packet = new PacketCustom(CHANNEL, C_PLAY_SOUND);
+            packet.writePos(pos);
+            packet.writeRegistryId(sound);
+            packet.writeVarInt(category.ordinal());
+            packet.writeFloat(volume);
+            packet.writeFloat(pitch);
+            packet.writeBoolean(distanceDelay);
+            packet.sendToChunk(world, pos);
+        }
+    }
+
+    public static void sendParticle(World world, IParticleData particleData, Vector3 pos, Vector3 motion, boolean distanceOverride) {
+        if (!world.isClientSide) {
+            PacketCustom packet = new PacketCustom(CHANNEL, C_SPAWN_PARTICLE);
+            packet.writeRegistryId(particleData.getType());
+            particleData.writeToNetwork(packet.toPacketBuffer());
+            packet.writeVector(pos);
+            packet.writeVector(motion);
+            packet.writeBoolean(distanceOverride);
+            packet.sendToChunk(world, pos.pos());
+        }
     }
 
     /**
@@ -123,6 +146,19 @@ public class BCoreNetwork {
         packet.writeFloat((float) velocity.x);
         packet.writeFloat((float) velocity.y);
         packet.writeFloat((float) velocity.z);
+        return packet.toPacket(NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    public static IPacket<?> sendEntityVelocity(Entity entity, boolean movement) {
+        PacketCustom packet = new PacketCustom(CHANNEL, C_ENTITY_VELOCITY);
+        packet.writeInt(entity.getId());
+        packet.writeVec3f(new Vector3f(entity.getDeltaMovement()));
+        packet.writeBoolean(movement);
+        if (movement) {
+            packet.writeFloat(entity.xRot);
+            packet.writeFloat(entity.yRot);
+            packet.writeBoolean(entity.isOnGround());
+        }
         return packet.toPacket(NetworkDirection.PLAY_TO_CLIENT);
     }
 

@@ -30,6 +30,7 @@ public class CommonProxy {
 
     public void construct() {
         BCoreNetwork.init();
+        BCConfig.load();
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {
