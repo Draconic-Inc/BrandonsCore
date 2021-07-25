@@ -5,13 +5,18 @@ import net.minecraft.block.PortalInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SSetPassengersPacket;
+import net.minecraft.network.play.server.*;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.IWorldInfo;
 import net.minecraftforge.common.ForgeHooks;
 
 import java.util.LinkedList;
@@ -175,53 +180,43 @@ public class TeleportUtils {
      * This is the black magic responsible for teleporting players between dimensions!
      */
     private static PlayerEntity teleportPlayerInterdimentional(ServerPlayerEntity player, MinecraftServer server, RegistryKey<World> targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
+        ServerWorld originWorld = player.getLevel();
         ServerWorld targetWorld = server.getLevel(targetDim);
         if (!player.isAlive() || targetWorld == null) {
             return player;
         }
+//        if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(player, targetWorld.dimension())) return player;
+        player.isChangingDimension = true;
+
+//        IWorldInfo worldInfo = targetWorld.getLevelData();
+//        player.connection.send(new SRespawnPacket(targetWorld.dimensionType(), targetWorld.dimension(), BiomeManager.obfuscateSeed(targetWorld.getSeed()), player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), true));
+//        player.connection.send(new SServerDifficultyPacket(worldInfo.getDifficulty(), worldInfo.isDifficultyLocked()));
+//        PlayerList playerlist = player.server.getPlayerList();
+//        playerlist.sendPlayerPermissionLevel(player);
+//        originWorld.removeEntity(player, true); //Forge: the player entity is moved to the new world, NOT cloned. So keep the data alive with no matching invalidate call.
+//        player.revive();
+//
+//        player.setLevel(targetWorld);
+//        targetWorld.addDuringPortalTeleport(player);
+//        player.absMoveTo(xCoord, yCoord, zCoord, yaw, pitch);
+//        player.setYHeadRot(yaw);
+//        player.connection.resetPosition();
+//
+//        player.gameMode.setLevel(targetWorld);
+//        player.connection.send(new SPlayerAbilitiesPacket(player.abilities));
+//        playerlist.sendLevelInfo(player, targetWorld);
+//        playerlist.sendAllPlayerInfo(player);
+//
+//        for (EffectInstance effectinstance : player.getActiveEffects()) {
+//            player.connection.send(new SPlayEntityEffectPacket(player.getId(), effectinstance));
+//        }
 
         player.teleportTo(targetWorld, xCoord, yCoord, zCoord, yaw, pitch);
 
-
-        //        ServerWorld sourceWorld = server.getWorld(sourceDim);
-//        ServerWorld targetWorld = server.getWorld(targetDim);
-//        PlayerList playerList = server.getPlayerList();
-//
-//        player.dimension = targetDim;
-//        player.connection.sendPacket(new SPacketRespawn(player.dimension, targetWorld.getDifficulty(), targetWorld.getWorldInfo().getTerrainType(), player.interactionManager.getGameType()));
-//        playerList.updatePermissionLevel(player);
-//        sourceWorld.removeEntityDangerously(player);
-//        player.isDead = false;
-//
-//        //region Transfer to world
-//
-//        player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-//        player.connection.setPlayerLocation(xCoord, yCoord, zCoord, yaw, pitch);
-//        targetWorld.spawnEntity(player);
-//        targetWorld.updateEntityWithOptionalForce(player, false);
-//        player.setWorld(targetWorld);
-//
-//        //endregion
-//
-//        playerList.preparePlayer(player, sourceWorld);
-//        player.connection.setPlayerLocation(xCoord, yCoord, zCoord, yaw, pitch);
-//        player.interactionManager.setWorld(targetWorld);
-//        player.connection.sendPacket(new SPacketPlayerAbilities(player.capabilities));
-//        player.invulnerableDimensionChange = true;
-//
-//        playerList.updateTimeAndWeatherForPlayer(player, targetWorld);
-//        playerList.syncPlayerInventory(player);
-//
-//        for (PotionEffect potioneffect : player.getActivePotionEffects()) {
-//            player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), potioneffect));
-//        }
-//        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, sourceDim, targetDim);
-//        player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-//
-//        //Fixes stat syncing
         player.lastSentExp = -1;
         player.lastSentHealth = -1.0F;
         player.lastSentFood = -1;
+//        net.minecraftforge.fml.hooks.BasicEventHooks.firePlayerChangedDimensionEvent(player, originWorld.dimension(), targetWorld.dimension());
 
         return player;
     }

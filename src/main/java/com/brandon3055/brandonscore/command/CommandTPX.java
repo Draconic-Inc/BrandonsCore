@@ -51,7 +51,7 @@ public class CommandTPX {
                                         .then(Commands.argument("dimension", DimensionArgument.dimension())
                                                 .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimension(ctx, "dimension"), new EntityLocation(ctx.getSource().getEntityOrException()), null))
                                                 .then(Commands.argument("location", Vec3Argument.vec3())
-                                                        .executes(ctx -> teleportToPos(ctx.getSource(), Collections.singleton(ctx.getSource().getEntityOrException()), DimensionArgument.getDimension(ctx, "dimension"), Vec3Argument.getCoordinates(ctx, "location"), null))
+                                                        .executes(ctx -> teleportToPos(ctx.getSource(), EntityArgument.getEntities(ctx, "targets"), DimensionArgument.getDimension(ctx, "dimension"), Vec3Argument.getCoordinates(ctx, "location"), null))
                                                 )
                                         )
 //                                .then(Commands.argument("location", Vec3Argument.vec3())
@@ -90,7 +90,7 @@ public class CommandTPX {
             BlockPos pos = new BlockPos(0, 127, 0);
             rand.setSeed(0);
             for (int i = 0; i < 1000; i++) {
-                if (i > 500) {
+                if (i < 500) {
                     pos = new BlockPos(-150 + rand.nextInt(300), 32 + rand.nextInt(80), -150 + rand.nextInt(300));
                 }else {
                     pos = new BlockPos(-250 + rand.nextInt(500), 256, -250 + rand.nextInt(500));

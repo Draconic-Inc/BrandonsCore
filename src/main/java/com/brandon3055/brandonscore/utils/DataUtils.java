@@ -367,9 +367,9 @@ public class DataUtils {
         return orDefault.get();
     }
 
-    public static <T> void ifPresent(List<T> list, int removeIndex, Consumer<T> callback) {
-        if (removeIndex >= 0 && removeIndex < list.size()) {
-            callback.accept(list.get(removeIndex));
+    public static <T> void ifPresent(List<T> list, int index, Consumer<T> callback) {
+        if (index >= 0 && index < list.size()) {
+            callback.accept(list.get(index));
         }
     }
 
