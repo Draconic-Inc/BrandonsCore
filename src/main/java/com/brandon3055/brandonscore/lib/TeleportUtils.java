@@ -106,91 +106,27 @@ public class TeleportUtils {
     }
 
     private static Entity teleportEntityInterdimentional(Entity entity, MinecraftServer server, int sourceDim, int targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
-        if (entity.isDead) {
+        if (!entity.isEntityAlive()) {
             return null;
         }
-
-        WorldServer sourceWorld = server.getWorld(sourceDim);
-        WorldServer targetWorld = server.getWorld(targetDim);
-
-        if (!entity.isDead && entity instanceof EntityMinecart) {
-            entity.setDropItemsWhenDead(false);
+        entity = entity.changeDimension(targetDim);
+        if (entity != null) {
+            entity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
         }
-
-        entity.dimension = targetDim;
-
-        sourceWorld.removeEntity(entity);
-        entity.isDead = false;
-        entity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-        sourceWorld.updateEntityWithOptionalForce(entity, false);
-
-        Entity newEntity = EntityList.newEntity(entity.getClass(), targetWorld);
-        if (newEntity != null) {
-            newEntity.copyDataFromOld(entity);
-            newEntity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-            boolean flag = newEntity.forceSpawn;
-            newEntity.forceSpawn = true;
-            targetWorld.spawnEntity(newEntity);
-            newEntity.forceSpawn = flag;
-            targetWorld.updateEntityWithOptionalForce(newEntity, false);
-        }
-
-        entity.isDead = true;
-        sourceWorld.resetUpdateEntityTick();
-        targetWorld.resetUpdateEntityTick();
-
-        return newEntity;
+        return entity;
     }
 
     /**
      * This is the black magic responsible for teleporting players between dimensions!
      */
     private static EntityPlayer teleportPlayerInterdimentional(EntityPlayerMP player, MinecraftServer server, int sourceDim, int targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
-        WorldServer sourceWorld = server.getWorld(sourceDim);
-        WorldServer targetWorld = server.getWorld(targetDim);
-        PlayerList playerList = server.getPlayerList();
-
-        player.dimension = targetDim;
-        player.connection.sendPacket(new SPacketRespawn(player.dimension, targetWorld.getDifficulty(), targetWorld.getWorldInfo().getTerrainType(), player.interactionManager.getGameType()));
-        playerList.updatePermissionLevel(player);
-        sourceWorld.removeEntityDangerously(player);
-        player.isDead = false;
-
-        //region Transfer to world
-
-        player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-        player.connection.setPlayerLocation(xCoord, yCoord, zCoord, yaw, pitch);
-        targetWorld.spawnEntity(player);
-        targetWorld.updateEntityWithOptionalForce(player, false);
-        player.setWorld(targetWorld);
-
-        //endregion
-
-        playerList.preparePlayer(player, sourceWorld);
-        player.connection.setPlayerLocation(xCoord, yCoord, zCoord, yaw, pitch);
-        player.interactionManager.setWorld(targetWorld);
-        player.connection.sendPacket(new SPacketPlayerAbilities(player.capabilities));
-        player.invulnerableDimensionChange = true;
-
-        playerList.updateTimeAndWeatherForPlayer(player, targetWorld);
-        playerList.syncPlayerInventory(player);
-
-        for (PotionEffect potioneffect : player.getActivePotionEffects()) {
-            player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), potioneffect));
+        if (!player.isEntityAlive()) {
+            return player;
         }
-
-        net.minecraft.entity.ai.attributes.AttributeMap attributemap = (net.minecraft.entity.ai.attributes.AttributeMap) player.getAttributeMap();
-        java.util.Collection<net.minecraft.entity.ai.attributes.IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
-        if (!watchedAttribs.isEmpty()) player.connection.sendPacket(new net.minecraft.network.play.server.SPacketEntityProperties(player.getEntityId(), watchedAttribs));
-
-        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, sourceDim, targetDim);
-        player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-
-        //Fixes stat syncing
-        player.lastExperience = -1;
-        player.lastHealth = -1.0F;
-        player.lastFoodLevel = -1;
-
+        player = (EntityPlayerMP) player.changeDimension(targetDim);
+        if(player != null) {
+            player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
+        }
         return player;
     }
 
