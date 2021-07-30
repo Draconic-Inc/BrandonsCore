@@ -123,10 +123,12 @@ public class TeleportUtils {
         if (!player.isEntityAlive()) {
             return player;
         }
-        player = (EntityPlayerMP) player.changeDimension(targetDim);
-        if(player != null) {
+        WorldServer worldServer = server.getWorld(targetDim);
+        server.getWorld(targetDim).getMinecraftServer().getPlayerList().transferPlayerToDimension(player, targetDim, new BrandonTeleporter(worldServer, xCoord, yCoord, zCoord));
+        // Logically, player cannot be null. We already called a method on the instance, and we are not reassigning to the instance.
+        // if(player != null) {
             player.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-        }
+        // }
         return player;
     }
 
@@ -239,6 +241,26 @@ public class TeleportUtils {
             }
 
             return null;
+        }
+    }
+    private static class BrandonTeleporter extends Teleporter {
+        private double x;
+        private double y;
+        private double z;
+
+
+        public BrandonTeleporter(WorldServer world, double x, double y, double z) {
+            super(world);
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        @Override
+        public void placeInPortal(Entity pEntity, float rotationYaw) {
+            pEntity.setPosition(this.x, this.y, this.z);
+            pEntity.motionX = 0.0f;
+            pEntity.motionY = 0.0f;
+            pEntity.motionZ = 0.0f;
         }
     }
 }
