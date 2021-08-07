@@ -343,7 +343,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     public void appendHoverText(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
         if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
-            tooltip.add(new TranslationTextComponent("info.de.hasSavedData.txt"));
+            tooltip.add(new TranslationTextComponent("info.brandonscore.block_has_saved_data"));
         }
     }
 

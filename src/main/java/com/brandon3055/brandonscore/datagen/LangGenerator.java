@@ -107,6 +107,9 @@ public class LangGenerator extends LanguageProvider {
 
         helper.setPrefix("item_info.brandonscore");
         helper.add("shift_for_details"                      ,"Hold %sShift%s for details");
+
+        helper.setPrefix("");
+        helper.add("info.brandonscore.block_has_saved_data" ,"Contents Saved.");
     }
 
 
