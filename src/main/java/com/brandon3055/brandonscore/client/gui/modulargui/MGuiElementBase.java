@@ -605,8 +605,8 @@ public class MGuiElementBase<E extends MGuiElementBase<E>> implements IMouseOver
      */
     public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         for (MGuiElementBase element : childElements) {
-            if (element.isEnabled() && element.mouseClicked(mouseX, mouseY, mouseButton)) {
-                return true;
+            if (element.isEnabled()) {
+                element.mouseClicked(mouseX, mouseY, mouseButton);
             }
         }
         return isMouseOver(mouseX, mouseY) && capturesClicks;
