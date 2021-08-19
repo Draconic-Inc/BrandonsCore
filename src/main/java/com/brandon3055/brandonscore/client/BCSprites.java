@@ -1,10 +1,14 @@
 package com.brandon3055.brandonscore.client;
 
+import codechicken.lib.render.buffer.TransformingVertexBuilder;
 import codechicken.lib.util.SneakyUtils;
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout;
 import com.brandon3055.brandonscore.client.render.GuiSpriteUploader;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.RenderMaterial;
@@ -42,10 +46,11 @@ public class BCSprites {
 //            .build(false)
 //    );
 
-    public static final RenderType GUI_TEX_TYPE = RenderType.create("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
+    public static final RenderType GUI_TYPE = RenderType.create("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
             .setTextureState(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
             .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
             .setCullState(RenderState.NO_CULL)
+            .setAlphaState(RenderState.DEFAULT_ALPHA)
             .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
             .createCompositeState(false)
     );
@@ -84,6 +89,8 @@ public class BCSprites {
         registerThemed(MODID, "grid_small");
         registerThemed(MODID, "grid_large");
         registerThemed(MODID, "item_config");
+        registerThemed(MODID, "hud_button");
+        registerThemed(MODID, "info_icon");
 
         register(MODID, "add");
         register(MODID, "delete");
@@ -159,6 +166,9 @@ public class BCSprites {
         return get(MODID, location);
     }
 
+    public static TextureAtlasSprite getSprite(String location) {
+        return get(location).sprite();
+    }
 
     public static Supplier<RenderMaterial> themedGetter(String modid, String location) {
         return () -> get(modid, (BCConfig.darkMode ? "dark/" : "light/") + location);
@@ -194,6 +204,13 @@ public class BCSprites {
                 .createCompositeState(false));
     }
 
+    public static IVertexBuilder builder(IRenderTypeBuffer getter, MatrixStack mStack) {
+        return new TransformingVertexBuilder(getter.getBuffer(BCSprites.GUI_TYPE), mStack);
+    }
+
+    public static IVertexBuilder builder(IRenderTypeBuffer getter) {
+        return getter.getBuffer(BCSprites.GUI_TYPE);
+    }
 
     @Deprecated //TODO remove this
     public static final ResourceLocation MODULAR_GUI = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/modular_gui.png");

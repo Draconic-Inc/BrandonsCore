@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
 import com.brandon3055.brandonscore.lib.ScissorHelper;
@@ -158,7 +158,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
             r = 0; g = 0; b = 0;
         }
 
-        GuiHelper.renderCuboid(cuboid6, r, g, b, 1);
+        GuiHelperOld.renderCuboid(cuboid6, r, g, b, 1);
 
         RenderSystem.enableTexture();
 

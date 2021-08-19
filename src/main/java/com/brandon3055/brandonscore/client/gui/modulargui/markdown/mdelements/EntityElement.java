@@ -2,12 +2,11 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
@@ -136,7 +135,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
             }
             int x = (int) (xPos() + xOffset + ((xSize() - width) / 2));
             int y = (int) (yPos() + (ySize() - height) + yOffset);
-            if (GuiHelper.isInRect(x, y, (int) width, (int) height, mouseX, mouseY)) {
+            if (GuiHelperOld.isInRect(x, y, (int) width, (int) height, mouseX, mouseY)) {
                 drawHoveringText(tooltip, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
                 return true;
             }

@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockPos;
  * Created by brandon3055 on 9/4/2016.
  * A class that holds 3 integers
  */
+@Deprecated //Migrating to CCL Vector3
 public class Vec3I {
 
     public int x;

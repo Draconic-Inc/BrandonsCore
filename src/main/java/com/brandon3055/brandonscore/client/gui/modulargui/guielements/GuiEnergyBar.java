@@ -214,8 +214,8 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
         } else if (!shaderEnabled.get()) {
             RenderMaterial matBase = BCSprites.get("bars/energy_empty");
             RenderMaterial matOverlay = BCSprites.get("bars/energy_full");
-            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + 1, barWidth - 2, barLength - 2, matBase.sprite());
-            sliceSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, matOverlay.sprite());
+            sliceSprite(getter.getBuffer(BCSprites.GUI_TYPE), posX + 1, posY + 1, barWidth - 2, barLength - 2, matBase.sprite());
+            sliceSprite(getter.getBuffer(BCSprites.GUI_TYPE), posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, matOverlay.sprite());
             getter.endBatch();
         }
         else {

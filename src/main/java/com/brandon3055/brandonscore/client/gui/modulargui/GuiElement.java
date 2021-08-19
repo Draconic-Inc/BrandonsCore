@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -29,10 +29,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.*;
-import net.minecraft.util.text.TextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.gui.GuiUtils;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -695,7 +693,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return GuiHelper.isInRect(xPos(), yPos(), xSize(), ySize(), mouseX, mouseY) && allowMouseOver(this, mouseX, mouseY);
+        return GuiHelperOld.isInRect(xPos(), yPos(), xSize(), ySize(), mouseX, mouseY) && allowMouseOver(this, mouseX, mouseY);
     }
 
     /**
@@ -2516,6 +2514,31 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
+    public void drawSideGradient(IRenderTypeBuffer getter, double xPos, double yPos, double xSize, double ySize, int leftColor, int rightColor) {
+        drawSideGradientRect(getter, xPos, yPos, xPos + xSize, yPos + ySize, leftColor, rightColor);
+    }
+
+    public void drawSideGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int leftColor, int rightColor) {
+        if (leftColor == rightColor && rightColor == 0) return;
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        float startAlpha = (float)(rightColor >> 24 & 255) / 255.0F;
+        float startRed   = (float)(rightColor >> 16 & 255) / 255.0F;
+        float startGreen = (float)(rightColor >>  8 & 255) / 255.0F;
+        float startBlue  = (float)(rightColor       & 255) / 255.0F;
+        float endAlpha   = (float)(leftColor   >> 24 & 255) / 255.0F;
+        float endRed     = (float)(leftColor   >> 16 & 255) / 255.0F;
+        float endGreen   = (float)(leftColor   >>  8 & 255) / 255.0F;
+        float endBlue    = (float)(leftColor         & 255) / 255.0F;
+
+        IVertexBuilder builder = getter.getBuffer(transColourType);
+        builder.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.vertex( left,    top, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.vertex(right, bottom, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        //@formatter:on
+    }
+
     public void drawMultiPassGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
         if (colour1 == colour2 && colour2 == 0) return;
         double zLevel = getRenderZLevel();
@@ -2537,7 +2560,23 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     public void drawColouredRect(IRenderTypeBuffer getter, double posX, double posY, double xSize, double ySize, int colour) {
-        drawGradientRect(getter, posX, posY, posX + xSize, posY + ySize, colour, colour);
+        drawColouredRectABS(getter, posX, posY, posX + xSize, posY + ySize, colour);
+    }
+
+    public void drawColouredRectABS(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int colour) {
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        float alpha = (float)(colour >> 24 & 255) / 255.0F;
+        float red   = (float)(colour >> 16 & 255) / 255.0F;
+        float green = (float)(colour >>  8 & 255) / 255.0F;
+        float blue  = (float)(colour       & 255) / 255.0F;
+
+        IVertexBuilder builder = getter.getBuffer(transColourType);
+        builder.vertex(right,    top, zLevel).color(red, green, blue, alpha).endVertex();
+        builder.vertex( left,    top, zLevel).color(red, green, blue, alpha).endVertex();
+        builder.vertex( left, bottom, zLevel).color(red, green, blue, alpha).endVertex();
+        builder.vertex(right, bottom, zLevel).color(red, green, blue, alpha).endVertex();
+        //@formatter:on
     }
 
     public void drawBorderedRect(IRenderTypeBuffer getter, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour) {

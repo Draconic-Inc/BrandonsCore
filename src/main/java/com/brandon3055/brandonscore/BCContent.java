@@ -21,21 +21,10 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 @Mod.EventBusSubscriber (modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BCContent {
 
-
-
-
     //region Container Types.
     @ObjectHolder ("player_access")
     public static ContainerType<ContainerPlayerAccess> containerPlayerAccess;
     //endregion
-
-
-
-
-
-
-
-
 
     @SubscribeEvent
     public static void onRegisterBlocks(RegistryEvent.Register<Block> event) {

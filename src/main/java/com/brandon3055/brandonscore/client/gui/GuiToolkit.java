@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.BCConfig;
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -23,27 +22,21 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlasSpriteStitcher;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
-import static com.brandon3055.brandonscore.BrandonsCore.LOGGER;
 import static com.brandon3055.brandonscore.BrandonsCore.equipmentManager;
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
 import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.*;
@@ -197,7 +190,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 RenderMaterial slot = BCSprites.getThemed("slot");
                 IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
-                IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TEX_TYPE);
+                IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TYPE);
 
                 for (int x = 0; x < columns; x++) {
                     for (int y = 0; y < rows; y++) {
@@ -498,12 +491,30 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<RenderMaterial> iconSupplier) {
+//        GuiButton button = new GuiButton();
+//        button.setHoverTextDelay(10);
+//        button.setSize(buttonSize, buttonSize);
+//        addHoverHighlight(button);
+//        GuiTexture icon = new GuiTexture(iconSize, iconSize, iconSupplier);
+//        icon.setPosModifiers(() -> button.xPos() + -((iconSize - buttonSize) / 2), () -> button.yPos() + -((iconSize - buttonSize) / 2));
+//        button.addChild(icon);
+//        if (parent != null) {
+//            parent.addChild(button);
+//        }
+        return createIconButton(parent, buttonSize, buttonSize, iconSize, iconSize, iconSupplier);
+    }
+
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
+        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCSprites.getter(iconString));
+    }
+
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<RenderMaterial> iconSupplier) {
         GuiButton button = new GuiButton();
         button.setHoverTextDelay(10);
-        button.setSize(buttonSize, buttonSize);
+        button.setSize(buttonWidth, buttonHeight);
         addHoverHighlight(button);
-        GuiTexture icon = new GuiTexture(iconSize, iconSize, iconSupplier);
-        icon.setPosModifiers(() -> button.xPos() + -((iconSize - buttonSize) / 2), () -> button.yPos() + -((iconSize - buttonSize) / 2));
+        GuiTexture icon = new GuiTexture(iconWidth, iconHeight, iconSupplier);
+        icon.setPosModifiers(() -> button.xPos() + -((iconWidth - buttonWidth) / 2), () -> button.yPos() + -((iconHeight - buttonHeight) / 2));
         button.addChild(icon);
         if (parent != null) {
             parent.addChild(button);

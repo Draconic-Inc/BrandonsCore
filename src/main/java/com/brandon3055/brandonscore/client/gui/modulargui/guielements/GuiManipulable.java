@@ -3,14 +3,9 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.client.CursorHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWImage;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.File;
 import java.util.function.Supplier;
 
 public class GuiManipulable extends GuiElement<GuiManipulable> {
@@ -29,7 +24,7 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
     protected Supplier<Boolean> canDrag = () -> true;
     protected Supplier<Boolean> canResizeV = () -> true;
     protected Supplier<Boolean> canResizeH = () -> true;
-    protected PositionValidator dragZone = (x, y) -> GuiHelper.isInRect(xPos(), yPos(), xSize(), 20, x, y);
+    protected PositionValidator dragZone = (x, y) -> GuiHelperOld.isInRect(xPos(), yPos(), xSize(), 20, x, y);
     protected PositionValidator topResizeZone = null;
     protected PositionValidator leftResizeZone = null;
     protected PositionValidator bottomResizeZone = null;
@@ -51,7 +46,7 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
     }
 
     public void setDragBarHeight(int dragBarHeight) {
-        dragZone = (x, y) -> GuiHelper.isInRect(xPos(), yPos(), xSize(), dragBarHeight, x, y);
+        dragZone = (x, y) -> GuiHelperOld.isInRect(xPos(), yPos(), xSize(), dragBarHeight, x, y);
     }
 
     public void setDragZone(PositionValidator dragZone) {
@@ -70,8 +65,9 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
         this.positionRestraint = positionRestraint;
     }
 
-    public void setEnableCursors(boolean enableCursors) {
+    public GuiManipulable setEnableCursors(boolean enableCursors) {
         this.enableCursors = enableCursors;
+        return this;
     }
 
     public void startDragging() {
@@ -276,14 +272,14 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
     }
 
     public GuiManipulable setHResizeBorders(int width) {
-        leftResizeZone = (x, y) -> GuiHelper.isInRect(xPos(), yPos(), width, ySize(), x, y);
-        rightResizeZone = (x, y) -> GuiHelper.isInRect(maxXPos() - width, yPos(), width, ySize(), x, y);
+        leftResizeZone = (x, y) -> GuiHelperOld.isInRect(xPos(), yPos(), width, ySize(), x, y);
+        rightResizeZone = (x, y) -> GuiHelperOld.isInRect(maxXPos() - width, yPos(), width, ySize(), x, y);
         return this;
     }
 
     public GuiManipulable setVResizeBorders(int width) {
-        topResizeZone = (x, y) -> GuiHelper.isInRect(xPos(), yPos(), xSize(), width, x, y);
-        bottomResizeZone = (x, y) -> GuiHelper.isInRect(xPos(), maxYPos() - width, xSize(), width, x, y);
+        topResizeZone = (x, y) -> GuiHelperOld.isInRect(xPos(), yPos(), xSize(), width, x, y);
+        bottomResizeZone = (x, y) -> GuiHelperOld.isInRect(xPos(), maxYPos() - width, xSize(), width, x, y);
         return this;
     }
 

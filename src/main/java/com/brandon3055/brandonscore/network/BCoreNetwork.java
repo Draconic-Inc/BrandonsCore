@@ -46,6 +46,7 @@ public class BCoreNetwork {
     public static final int C_SPAWN_ENTITY = 10;
     public static final int C_SPAWN_PARTICLE = 11;
     public static final int C_ENTITY_VELOCITY = 12;
+    public static final int C_OPEN_HUD_CONFIG = 13;
     //Client to server
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
@@ -128,6 +129,7 @@ public class BCoreNetwork {
 
     /**
      * This is a custom entity spawn packet that removes the min/max velocity constraints.
+     *
      * @param entity The entity being spawned.
      * @return A packet to return in {@link Entity#getAddEntityPacket()}
      */
@@ -162,13 +164,17 @@ public class BCoreNetwork {
         return packet.toPacket(NetworkDirection.PLAY_TO_CLIENT);
     }
 
+    public static void sendOpenHudConfig(ServerPlayerEntity player) {
+        new PacketCustom(CHANNEL, C_OPEN_HUD_CONFIG).sendToPlayer(player);
+    }
+
     public static void init() {
         netChannel = PacketCustomChannelBuilder.named(CHANNEL)
-                .networkProtocolVersion(() -> "1")//
-                .clientAcceptedVersions(e -> true)//
-                .serverAcceptedVersions(e -> true)//
-                .assignClientHandler(() -> ClientPacketHandler::new)//
-                .assignServerHandler(() -> ServerPacketHandler::new)//
+                .networkProtocolVersion(() -> "1")
+                .clientAcceptedVersions(e -> true)
+                .serverAcceptedVersions(e -> true)
+                .assignClientHandler(() -> ClientPacketHandler::new)
+                .assignServerHandler(() -> ServerPacketHandler::new)
                 .build();
     }
 }

@@ -7,6 +7,7 @@ import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
+import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
@@ -104,6 +105,9 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 break;
             case BCoreNetwork.C_ENTITY_VELOCITY:
                 handleEntityVelocity(packet, mc);
+                break;
+            case BCoreNetwork.C_OPEN_HUD_CONFIG:
+                mc.setScreen(new HudConfigGui());
                 break;
         }
     }

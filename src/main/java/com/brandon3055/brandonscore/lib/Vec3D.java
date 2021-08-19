@@ -15,6 +15,7 @@ import static net.minecraft.util.Direction.Axis.Y;
  * Created by brandon3055 on 9/4/2016.
  * A class that holds 3 doubles
  */
+@Deprecated //Migrating to CCL Vector3
 public class Vec3D {
 
     public double x;

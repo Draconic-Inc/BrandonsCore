@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
-import com.brandon3055.brandonscore.lib.datamanager.ManagedStack;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -16,7 +15,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -218,11 +216,11 @@ public class BCClientEventHandler {
     private void renderGraph(MatrixStack matrix, int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {
         int yHeight = screenHeight - 23 - (y * 45);
 
-        GuiHelper.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
+        GuiHelperOld.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
         FontRenderer fontRenderer = Minecraft.getInstance().font;
         fontRenderer.drawShadow(matrix, name, x + 2, yHeight - 43, 0xFFFFFF);
-        GuiHelper.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
-        GuiHelper.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
+        GuiHelperOld.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
+        GuiHelperOld.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
         fontRenderer.draw(matrix, "50ms", x + 2, yHeight - 16, 0xFFFFFF);
         fontRenderer.draw(matrix, "100ms", x + 2, yHeight - 32, 0xFFFFFF);
 
@@ -230,7 +228,7 @@ public class BCClientEventHandler {
             int time = times[i] == null ? 0 : times[i];
             int height = (int) (((time / 100D) / 100D) * 30D);
             int j1 = getFrameColor(MathHelper.clamp(height, 0, 30), 0, 15, 30);
-            GuiHelper.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 - height, 1, height, j1);
+            GuiHelperOld.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 - height, 1, height, j1);
         }
     }
 

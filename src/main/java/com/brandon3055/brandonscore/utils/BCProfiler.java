@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -66,7 +66,7 @@ public class BCProfiler {
         debug.addAll(tickDebug);
         debug.addAll(renderDebug);
         for (String s: debug) {
-            GuiHelper.drawColouredRect(0, y, mc.font.width(s) + 5, 10, 0x90000000);
+            GuiHelperOld.drawColouredRect(0, y, mc.font.width(s) + 5, 10, 0x90000000);
             mc.font.draw(event.getMatrixStack(), s, 2, y + 1, 0xFFFFFF);
             y += 10;
         }

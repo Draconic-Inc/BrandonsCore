@@ -26,7 +26,8 @@ import java.util.List;
 /**
  * Created by Brandon on 28/06/2014.
  */
-public class GuiHelper {
+@Deprecated //If possible convert to new rendering system and move to GuiHelperV2
+public class GuiHelperOld {
     public static final RenderType TRANS_TYPE = RenderType.create("gui_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.builder()
             .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
             .setAlphaState(RenderState.NO_ALPHA)

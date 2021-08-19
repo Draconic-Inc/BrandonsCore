@@ -50,9 +50,9 @@ public class Utils {
 
     public static String formatNumber(long value) {
         if (value < 1000L) return String.valueOf(value);
-        else if (value < 1000000L) return addCommas(value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
-        else if (value < 1000000000L) return String.valueOf(Math.round(value / 1000L) / 1000D) + "M";
-        else if (value < 1000000000000L) return String.valueOf(Math.round(value / 1000000L) / 1000D) + "G";
+        else if (value < 1000000L) return Utils.addCommas(value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
+        else if (value < 1000000000L) return String.valueOf(Math.round(value / 100000L) / 10D) + "M";
+        else if (value < 1000000000000L) return String.valueOf(Math.round(value / 100000000L) / 10D) + "G";
         else if (value < 1000000000000000L) return String.valueOf(Math.round(value / 1000000000L) / 1000D) + "T";
         else if (value < 1000000000000000000L) return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "P";
         else if (value <= Long.MAX_VALUE) return String.valueOf(Math.round(value / 1000000000000000L) / 1000D) + "E";
@@ -424,6 +424,14 @@ public class Utils {
 
         ChunkHolder.LocationType locationType = ((Chunk) ichunk).getFullStatus();
         return locationType.isOrAfter(minimum);
+    }
+
+    public static long safeAdd(long x, long y) {
+        long r = x + y;
+        if (((x ^ r) & (y ^ r)) < 0) {
+            return Long.MAX_VALUE;
+        }
+        return r;
     }
 }
 

@@ -110,15 +110,35 @@ public class LangGenerator extends LanguageProvider {
 
         helper.setPrefix("");
         helper.add("info.brandonscore.block_has_saved_data" ,"Contents Saved.");
+
+        add("hud.brandonscore.item_hud.name",               "Item info HUD");
+        add("hud.brandonscore.item_hud.info",               "Displays information about certain draconic items when you are holding them.\nDisabled by default");
+
+        add("hud.brandonscore.block_hud.name",              "Block info HUD");
+        add("hud.brandonscore.block_hud.info",              "Displays information about certain draconic blocks when you are looking at them.\nDisabled by default");
+
+        add("hud.brandonscore.block_item_hud.name",         "Combined Block & Item HUD");
+        add("hud.brandonscore.block_item_hud.info",         "Combines item info hud and block info hud into one for convenience.");
+    }
+
+    private void addGui(PrefixHelper helper) {
+        //Hud Config
+        helper.setPrefix("gui.brandonscore.hud_config");
+        helper.add("name"                                   ,"Draconic HUD Configuration");
+        helper.add("settings"                               ,"Open Settings");
+        helper.add("enabled.true"                           ,"Enabled");
+        helper.add("enabled.false"                          ,"Disabled");
     }
 
 
-    @Override
+
+        @Override
     protected void addTranslations() {
         PrefixHelper helper = new PrefixHelper(this);
         addModularGui(helper);
         addGuiToolkit(helper);
         addMisc(helper);
+            addGui(helper);
     }
 
     @Override

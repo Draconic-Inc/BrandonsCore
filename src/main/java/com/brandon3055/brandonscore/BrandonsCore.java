@@ -1,34 +1,21 @@
 package com.brandon3055.brandonscore;
 
-import codechicken.lib.reflect.ObfMapping;
-import codechicken.lib.reflect.ReflectionManager;
 import com.brandon3055.brandonscore.client.ClientProxy;
 import com.brandon3055.brandonscore.command.BCUtilCommands;
 import com.brandon3055.brandonscore.command.CommandTPX;
+import com.brandon3055.brandonscore.command.HudConfigCommand;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.lib.IEquipmentManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.worldentity.WorldEntityHandler;
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MainWindow;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.village.PointOfInterest;
-import net.minecraft.village.PointOfInterestType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
@@ -37,10 +24,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Mod(BrandonsCore.MODID)
@@ -52,6 +35,10 @@ public class BrandonsCore {
     public static CommonProxy proxy;
     public static boolean inDev = false;
     public static IEquipmentManager equipmentManager = null;
+
+    //    public static ForgeRegistry<ClientDataType?<?>> CLIENT_DATA_REGISTRY;
+
+
 
     public BrandonsCore() {
         FileHandler.init();
@@ -99,7 +86,8 @@ public class BrandonsCore {
 
     public static void registerCommands(RegisterCommandsEvent event) {
         BCUtilCommands.register(event.getDispatcher());
-        if (BCConfig.enable_tpx){
+        HudConfigCommand.register(event.getDispatcher());
+        if (BCConfig.enable_tpx) {
             CommandTPX.register(event.getDispatcher());
         }
     }
@@ -107,6 +95,16 @@ public class BrandonsCore {
     public static void onServerStop(FMLServerStoppedEvent event) {
         ProcessHandler.clearHandler();
         WorldEntityHandler.serverStopped();
+    }
+
+    @SubscribeEvent
+    public void createRegistries(RegistryEvent.NewRegistry event) {
+//        CLIENT_DATA_REGISTRY = SneakyUtils.unsafeCast(new RegistryBuilder<>()
+//                .setName(new ResourceLocation(BrandonsCore.MODID, "client_data"))
+//                .setType(SneakyUtils.unsafeCast(ClientData.class))
+//                .disableSaving()
+//                .create()
+//        );
     }
 }
 

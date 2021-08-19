@@ -261,7 +261,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
-                drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TEX_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
+                drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
                 getter.endBatch();
 
                 for (GuiElement element : childElements) {

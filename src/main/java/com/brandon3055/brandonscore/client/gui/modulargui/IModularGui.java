@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.brandon3055.brandonscore.api.IJEIClearance;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
-import com.brandon3055.brandonscore.client.utils.GuiHelper;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.Rectangle2d;
 import org.apache.commons.lang3.NotImplementedException;
@@ -53,7 +53,7 @@ public interface IModularGui<T extends Screen> extends IMouseOver, IJEIClearance
 
     @Override
     default boolean isMouseOver(double mouseX, double mouseY) {
-        return GuiHelper.isInRect(guiLeft(), guiTop(), xSize(), ySize(), mouseX, mouseY);
+        return GuiHelperOld.isInRect(guiLeft(), guiTop(), xSize(), ySize(), mouseX, mouseY);
     }
 
     @Override
