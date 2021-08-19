@@ -31,7 +31,7 @@ public interface IHudDisplay {
 
     @OnlyIn(Dist.CLIENT)
     default double computeHudHeight(Minecraft mc, List<ITextComponent> displayList) {
-        return (displayList.size() * 10) + 7;
+        return (displayList.size() * 10) + 6;
     }
 
     @OnlyIn(Dist.CLIENT)
