@@ -1,4 +1,4 @@
-//---- Entity Filter ----//
+//---- Фильтр существ ----//
 gui.entityFilter.filter.txt=Фильтр
 gui.entityFilter.button.passive=Пассивные
 gui.entityFilter.button.hostile=Враждебные
@@ -7,21 +7,21 @@ gui.entityFilter.button.other=Другие
 gui.entityFilter.button.whiteList=Белый список
 gui.entityFilter.button.blackList=Чёрный список
 gui.entityFilter.button.editList=Редактировать список
-gui.entityFilter.customTip.txt=Ник игрока должен быть в формате [player]:username
+gui.entityFilter.customTip.txt=Никнейм игрока должен быть в формате [игрок]:никнейм
 
-//---- Generic ----//
+//---- Главное ----//
 generic.de.Mode.txt=Режим
 generic.de.energyCost.txt=Затраты энергии
-generic.options.txt=Опции
-generic.ok.txt=OK
+generic.options.txt=Настройки
+generic.ok.txt=ОК
 generic.cancel.txt=Отмена
 generic.yes.txt=Да
 generic.no.txt=Нет
 generic.remove.txt=Удалить
-generic.edit.txt=Изменить
-generic.configureRedstone.txt=Настроить контроль редстоуном
+generic.edit.txt=Редактировать
+generic.configureRedstone.txt=Настроить управление красным камнем
 
-//---- Generic Gui Buttons ----//
+//---- Главные кнопки интерфейса ----//
 gui.de.button.start=Старт
 gui.de.button.extract=Извлечь
 gui.de.button.toggleOff=Выключить
@@ -30,6 +30,13 @@ gui.de.button.toggle=Переключить
 gui.de.button.close=Закрыть
 gui.button.save=Сохранить
 
-//---- Modular GUI ----//
-gui.bc.downloading_image.info=Загрузка изображения...
-gui.bc.downloading_image_failed.info=Загрузка изображения не удалась! Чтобы попробовать снова, нажмите Shift + ЛКМ.
+//---- Модульный интерфейс ----//
+gui.bc.downloading_image.info=Загрузить изображение
+gui.bc.downloading_image_failed.info=Ошибка загрузки изображения! Shift+ЛКМ для повторной попытки.
+
+//---- Команды ----//
+bc.commands.tpx.usage=/tpx [игрок-цель] <место назначение (игрок)> ИЛИ /tpx [игрок-цель] <место назначение (измерение)> ИЛИ /tpx [игрок-цель] <x> <y> <z> [измерение] [<уклон> <высота>]
+bc.commands.tpx.player_or_dim_not_found=Не получилось найти подходящего игрока или измерение %s
+bc.commands.tpx.invalid_dim=Указанное измерение не существует.
+bc.commands.tpx.success.dim=%s телепортирован в измерение: %s
+bc.commands.tpx.success.coordinates=%s телепортирован в %s, %s, %s, в измерении: %s
