@@ -8,6 +8,8 @@ import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.Locale;
+
 import static net.minecraft.item.Rarity.*;
 import static net.minecraft.util.text.TextFormatting.*;
 

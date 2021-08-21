@@ -7,6 +7,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import java.util.Locale;
+
 /**
  * Created by brandon3055 on 7/11/19.
  */

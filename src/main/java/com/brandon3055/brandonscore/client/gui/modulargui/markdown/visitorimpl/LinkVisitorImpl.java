@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.Li
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.LinkVisitor;
 
 import java.util.List;
+import java.util.Locale;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.LinkElement.Style.SOLID;
 import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.LinkElement.Style.TEXT;
