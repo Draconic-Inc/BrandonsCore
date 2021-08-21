@@ -18,10 +18,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import org.lwjgl.opengl.GL11;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -32,7 +29,7 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
  */
 public class BCSprites {
     public static final ResourceLocation LOCATION_GUI_ATLAS = new ResourceLocation(MODID, "textures/atlas/gui.png");
-    public static final String RESOURCE_PREFIX = MODID.toLowerCase() + ":";
+    public static final String RESOURCE_PREFIX = MODID.toLowerCase(Locale.ENGLISH) + ":";
 
     private static GuiSpriteUploader guiSpriteUploader;
     private static final Set<ResourceLocation> registeredSprites = new HashSet<>();

@@ -115,10 +115,10 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         addHoverHighlight(button);
         button.setHoverTextDelay(10);
         button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase()));
+        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
         button.addChild(icon);
         icon.setYPosMod(button::yPos);
-        button.setHoverText(element -> i18ni("rs_mode." + switchable.getRSMode().name().toLowerCase()));
+        button.setHoverText(element -> i18ni("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
         button.onButtonPressed((pressed) -> switchable.setRSMode(switchable.getRSMode().next(Screen.hasShiftDown() || pressed == 1)));
         return button;
     }

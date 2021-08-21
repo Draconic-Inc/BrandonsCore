@@ -548,7 +548,7 @@ public class PiMarkdownReader {
                         visitor.visitEnabledTooltip(parseBoolean(value));
                         break;
                     case "align":
-                        switch (value.toLowerCase()) {
+                        switch (value.toLowerCase(Locale.ENGLISH)) {
                             case "left":
                                 visitor.visitAlignment(LEFT);
                                 break;
@@ -563,7 +563,7 @@ public class PiMarkdownReader {
                         }
                         break;
                     case "vert_align":
-                        switch (value.toLowerCase()) {
+                        switch (value.toLowerCase(Locale.ENGLISH)) {
                             case "top":
                                 visitor.visitVertAlign(TOP);
                                 break;

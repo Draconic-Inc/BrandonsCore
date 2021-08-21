@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  */
 public class DLRSCache {
 
-    public static final DLResourceLocation DOWNLOADING_TEXTURE = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), "textures/loading_texture.png");
+    public static final DLResourceLocation DOWNLOADING_TEXTURE = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH), "textures/loading_texture.png");
     static {
         DOWNLOADING_TEXTURE.height = 16;
         DOWNLOADING_TEXTURE.width = 16;
@@ -33,10 +33,10 @@ public class DLRSCache {
 
 
     public static DLResourceLocation getResource(String url) {
-        String key = urlStripper.matcher(url).replaceAll("_").toLowerCase();
+        String key = urlStripper.matcher(url).replaceAll("_").toLowerCase(Locale.ENGLISH);
 
         if (!resourceCache.containsKey(key)) {
-            DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(), key);
+            DLResourceLocation resourceLocation = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH), key);
             TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
 
             File cache = new File(cacheFolder, "Cache#" + url.hashCode() + ".png");

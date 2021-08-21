@@ -474,7 +474,7 @@ public class BCUtilCommands {
             }
             return 0;
         }
-        target = target.toLowerCase();
+        target = target.toLowerCase(Locale.ENGLISH);
 
         GameProfile profile = null;
         if (cache.profilesByName.containsKey(target)) {

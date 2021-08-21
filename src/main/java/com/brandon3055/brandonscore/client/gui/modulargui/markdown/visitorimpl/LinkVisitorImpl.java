@@ -62,7 +62,7 @@ public class LinkVisitorImpl extends LinkVisitor {
 
     @Override
     public void visitLinkStyle(String linkStyle) {
-        linkStyle = linkStyle.toLowerCase();
+        linkStyle = linkStyle.toLowerCase(Locale.ENGLISH);
         element.linkStyle = linkStyle.equals("vanilla") ? VANILLA : linkStyle.equals("solid") ? SOLID : TEXT;
     }
 

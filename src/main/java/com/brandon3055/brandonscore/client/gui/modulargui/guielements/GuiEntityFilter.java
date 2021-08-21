@@ -223,7 +223,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 dialog.setListSpacing(1);
                 dialog.setInsets(2, 2, 2, 2);
                 dialog.setRendererBuilder(type -> {
-                    GuiButton button = new GuiButton(i18ni(type.name().toLowerCase())).set3dText(true);
+                    GuiButton button = new GuiButton(i18ni(type.name().toLowerCase(Locale.ENGLISH))).set3dText(true);
                     button.setInsets(5, 0, 5, 0);
                     button.setSize(dialog.getInsetRect().x, 14);
                     GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(1).setXPos(button.xPos()).setYSizeMod(button::ySize).bindSize(button, false);
@@ -552,9 +552,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     dialog.clearItems();
                     DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
                         EntityType<?> type = e.getValue();
-                        boolean pass = s.isEmpty() || type.toString().toLowerCase().contains(s.toLowerCase());
+                        boolean pass = s.isEmpty() || type.toString().toLowerCase(Locale.ENGLISH).contains(s.toLowerCase(Locale.ENGLISH));
                         String name = type.getDescription().getString();
-                        if (!pass && name.toLowerCase().contains(s.toLowerCase())) {
+                        if (!pass && name.toLowerCase(Locale.ENGLISH).contains(s.toLowerCase(Locale.ENGLISH))) {
                             pass = true;
                         }
                         return pass && type.create(mc.level) instanceof LivingEntity;
