@@ -11,6 +11,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -86,7 +87,7 @@ public class StackElement extends MDElementBase<StackElement> {
             RenderMaterial mat = BCSprites.get("light/slot");
             bindTexture(mat.atlasLocation());
             RenderSystem.color4f(1F, 1F, 1F, 1F);
-            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
             drawSprite(mat.buffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.sprite());
             getter.endBatch();
         }

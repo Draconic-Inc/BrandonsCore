@@ -21,6 +21,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
@@ -203,7 +204,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             RenderSystem.translated(barLength + (posY * 2), 0, 0);
             RenderSystem.rotatef(90, 0, 0, 1);
         }
-        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         int light = darkMode ? 0xFFFFFFFF : 0xFFFFFFFF;
         int dark = darkMode ? 0xFF808080 : 0xFF505050;
         drawShadedRect(getter, posX, posY, barWidth, barLength, 1, 0, dark, light, midColour(light, dark));

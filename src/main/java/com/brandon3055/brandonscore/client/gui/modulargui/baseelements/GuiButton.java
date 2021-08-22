@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
@@ -648,7 +649,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     }
 
     protected void renderVanillaButton(Minecraft minecraft, int mouseX, int mouseY) {
-        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         RenderMaterial mat = BCSprites.getButton(getRenderState(hovered));
         IVertexBuilder builder = mat.buffer(getter, location -> BCSprites.GUI_TYPE);

@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
 
 /**
  * Created by brandon3055 on 3/09/2016.
@@ -35,7 +36,7 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         boolean hovering = isMouseOver(mouseX, mouseY);
-        IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         if (is3dEffect) {
             int fill = getFillColour(hovering);
             int topLeft = getBorderTopLeft(hovering);

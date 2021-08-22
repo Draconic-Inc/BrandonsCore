@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.util.ResourceLocation;
 
@@ -83,7 +84,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
 
         RenderMaterial mat = getMaterial();
         if (mat != null) {
-            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
             drawSprite(mat.buffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.sprite());
             getter.endBatch();
         } else {
@@ -260,7 +261,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return new GuiTexture(null) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+                IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
                 drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
                 getter.endBatch();
 

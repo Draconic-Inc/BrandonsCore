@@ -21,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
@@ -189,7 +190,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 RenderMaterial slot = BCSprites.getThemed("slot");
-                IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+                IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
                 IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TYPE);
 
                 for (int x = 0; x < columns; x++) {
@@ -1095,7 +1096,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
             int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
-            IRenderTypeBuffer.Impl getter = minecraft.renderBuffers().bufferSource();
+            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
 
             drawColouredRect(getter, xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
             drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 2, ySize(), col1);

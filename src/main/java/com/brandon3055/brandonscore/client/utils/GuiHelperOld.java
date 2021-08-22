@@ -282,7 +282,7 @@ public class GuiHelperOld {
         RenderSystem.color4f(1F, 1F, 1F, 1F);
         RenderMaterial mat = BCSprites.getThemed("slot");
         ResourceHelperBC.bindTexture(mat.atlasLocation());
-        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().renderBuffers().bufferSource();
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
 
         if (center) {
             posX -= 81;
@@ -390,7 +390,7 @@ public class GuiHelperOld {
 
     public static void renderCuboid(Cuboid6 cuboid, float r, float g, float b, float a) {
         MatrixStack stack = new MatrixStack();
-        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().renderBuffers().bufferSource();
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         Matrix4 mat = new Matrix4(stack);
         IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(RenderType.lines()), mat);
         RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);
