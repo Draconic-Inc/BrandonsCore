@@ -1,8 +1,10 @@
 package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.packet.PacketCustom;
+import codechicken.lib.util.ResourceUtils;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.api.TimeKeeper;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
 import com.brandon3055.brandonscore.client.hud.HudManager;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
@@ -30,6 +32,9 @@ public class ClientProxy extends CommonProxy {
         super.construct();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(BCSprites::initialize);
         HudManager.init();
+
+        ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderH);
+        ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderV);
     }
 
     @Override
