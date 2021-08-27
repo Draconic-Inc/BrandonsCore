@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.util.ResourceUtils;
+import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
@@ -17,6 +18,7 @@ import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -31,10 +33,20 @@ public class ClientProxy extends CommonProxy {
     public void construct() {
         super.construct();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(BCSprites::initialize);
+        MinecraftForge.EVENT_BUS.addListener(this::registerShaderReloads);
         HudManager.init();
 
-        ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderH);
-        ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderV);
+
+
+
+
+    }
+
+    private void registerShaderReloads(ParticleFactoryRegisterEvent event) {
+        if (Minecraft.getInstance() != null && BCConfig.useShaders) {
+            ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderH);
+            ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderV);
+        }
     }
 
     @Override

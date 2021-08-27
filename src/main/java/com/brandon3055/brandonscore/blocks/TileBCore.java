@@ -603,6 +603,15 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         return true;
     }
 
+    public boolean hasRSSignal() {
+        return level.hasNeighborSignal(getBlockPos());
+    }
+
+    public int getRSSignal() {
+        return level.getBestNeighborSignal(getBlockPos());
+    }
+
+
     @Override
     public ITextComponent getName() {
         if (hasCustomName()) {

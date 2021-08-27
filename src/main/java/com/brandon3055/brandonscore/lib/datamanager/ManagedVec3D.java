@@ -13,6 +13,7 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
+@Deprecated
 public class ManagedVec3D extends AbstractManagedData<Vec3D> {
 
     private Vec3D value;

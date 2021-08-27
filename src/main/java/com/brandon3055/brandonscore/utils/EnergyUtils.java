@@ -241,7 +241,7 @@ public class EnergyUtils {
 
     private static class ImpossibleException extends RuntimeException {
         public ImpossibleException() {
-            super("This exception is impossible. If your seeing this in a crash report then... shit...");
+            super("This exception is impossible. If you're seeing this in a crash report then... shit...");
         }
     }
 

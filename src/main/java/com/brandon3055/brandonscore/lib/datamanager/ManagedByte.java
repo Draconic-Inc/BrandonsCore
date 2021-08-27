@@ -15,9 +15,9 @@ public class ManagedByte extends AbstractManagedData<Byte> {
     private byte value;
     protected Function<Byte, Byte> validator = null;
 
-    public ManagedByte(String name, byte defaultValue, DataFlags... flags) {
+    public ManagedByte(String name, int defaultValue, DataFlags... flags) {
         super(name, flags);
-        this.value = defaultValue;
+        this.value = (byte) defaultValue;
     }
 
     /**
@@ -27,11 +27,11 @@ public class ManagedByte extends AbstractManagedData<Byte> {
         this(name, (byte) 0, flags);
     }
 
-    public byte set(byte value) {
+    public int set(int value) {
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
             byte prev = this.value;
-            this.value = value;
+            this.value = (byte) value;
 
             if (dataManager.isClientSide() && flags.allowClientControl) {
                 dataManager.sendToServer(this);
@@ -40,7 +40,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
 
             if (set) {
                 markDirty();
-                notifyListeners(value);
+                notifyListeners((byte) value);
             }
             else {
                 this.value = prev;
@@ -50,7 +50,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
         return this.value;
     }
 
-    public byte get() {
+    public int get() {
         return value;
     }
 
@@ -109,7 +109,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      * @param add The value to add.
      * @return The new value stored in this data object.
      */
-    public byte add(byte add) {
+    public int add(int add) {
         return set((byte) (get() + add));
     }
 
@@ -122,7 +122,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      * @param subtract The value to subtract.
      * @return The new value stored in this data object.
      */
-    public byte subtract(byte subtract) {
+    public int subtract(int subtract) {
         return set((byte) (get() - subtract));
     }
 
@@ -135,7 +135,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      * @param multiplyBy The value to multiply by.
      * @return The new value stored in this data object.
      */
-    public byte multiply(byte multiplyBy) {
+    public int multiply(int multiplyBy) {
         return set((byte) (get() * multiplyBy));
     }
 
@@ -148,7 +148,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      * @param divideBy The value to divide by.
      * @return The new value stored in this data object.
      */
-    public byte divide(byte divideBy) {
+    public int divide(int divideBy) {
         return set((byte) (get() / divideBy));
     }
 
@@ -157,7 +157,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      *
      * @return zero.
      */
-    public byte zero() {
+    public int zero() {
         return set((byte) 0);
     }
 
@@ -166,7 +166,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      *
      * @return The new value stored in this data object.
      */
-    public byte inc() {
+    public int inc() {
         return add((byte) 1);
     }
 
@@ -175,7 +175,7 @@ public class ManagedByte extends AbstractManagedData<Byte> {
      *
      * @return The new value stored in this data object.
      */
-    public byte dec() {
+    public int dec() {
         return subtract((byte) 1);
     }
 }

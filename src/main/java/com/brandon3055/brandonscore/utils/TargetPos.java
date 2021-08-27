@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import com.google.common.base.Objects;
 import net.minecraft.entity.Entity;
@@ -13,9 +14,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 public class TargetPos {
-    private double x;
-    private double y;
-    private double z;
+    private Vector3 pos;
     private float yaw;
     private float pitch;
     private boolean includeHeading = true;
@@ -37,42 +36,45 @@ public class TargetPos {
     }
 
     public TargetPos(double x, double y, double z, RegistryKey<World> dimension) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.dimension = dimension;
-        this.pitch = 0;
-        this.yaw = 0;
+        this(new Vector3(x, y, z), dimension);
     }
 
     public TargetPos(double x, double y, double z, RegistryKey<World> dimension, float pitch, float yaw) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this(new Vector3(x, y, z), dimension, pitch, yaw);
+    }
+
+    public TargetPos(Vector3 pos, RegistryKey<World> dimension) {
+        this(pos, dimension, 0, 0);
+    }
+
+    public TargetPos(Vector3 pos, RegistryKey<World> dimension, float pitch, float yaw) {
+        this.pos = pos;
         this.dimension = dimension;
         this.pitch = pitch;
         this.yaw = yaw;
     }
 
     public void update(Entity player) {
-        x = player.getX();
-        y = player.getY();
-        z = player.getZ();
+        pos = Vector3.fromEntity(player);
         dimension = player.level.dimension();
         pitch = player.xRot;
         yaw = player.yRot;
     }
 
     public double getX() {
-        return x;
+        return pos.x;
     }
 
     public double getY() {
-        return y;
+        return pos.y;
     }
 
     public double getZ() {
-        return z;
+        return pos.z;
+    }
+
+    public Vector3 getPos() {
+        return pos;
     }
 
     public RegistryKey<World> getDimension() {
@@ -88,9 +90,9 @@ public class TargetPos {
     }
 
     public String getReadableName(boolean fullDim) {
-        return "X: " + (int) Math.floor(x) +
-                ", Y: " + (int) Math.floor(y) +
-                ", Z: " + (int) Math.floor(z) +
+        return "X: " + (int) Math.floor(pos.x) +
+                ", Y: " + (int) Math.floor(pos.y) +
+                ", Z: " + (int) Math.floor(pos.z) +
                 ", " + (fullDim ? dimension.location() : dimension.location().getPath());
     }
 
@@ -100,17 +102,22 @@ public class TargetPos {
     }
 
     public TargetPos setX(double x) {
-        this.x = x;
+        pos.x = x;
         return this;
     }
 
     public TargetPos setY(double y) {
-        this.y = y;
+        pos.y = y;
         return this;
     }
 
     public TargetPos setZ(double z) {
-        this.z = z;
+        pos.z = z;
+        return this;
+    }
+
+    public TargetPos setPos(Vector3 pos) {
+        this.pos = pos;
         return this;
     }
 
@@ -130,9 +137,7 @@ public class TargetPos {
     }
 
     public CompoundNBT writeToNBT(CompoundNBT nbt) {
-        nbt.putDouble("x", x);
-        nbt.putDouble("y", y);
-        nbt.putDouble("z", z);
+        pos.writeToNBT(nbt);
         nbt.putString("dim", dimension.location().toString());
         nbt.putBoolean("heading", includeHeading);
         if (includeHeading) {
@@ -147,9 +152,7 @@ public class TargetPos {
     }
 
     public void readFromNBT(CompoundNBT nbt) {
-        x = nbt.getDouble("x");
-        y = nbt.getDouble("y");
-        z = nbt.getDouble("z");
+        pos = Vector3.fromNBT(nbt);
         dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dim")));
         includeHeading = nbt.getBoolean("heading");
         if (includeHeading) {
@@ -159,9 +162,7 @@ public class TargetPos {
     }
 
     public void write(MCDataOutput output) {
-        output.writeDouble(x);
-        output.writeDouble(y);
-        output.writeDouble(z);
+        output.writeVector(pos);
         output.writeResourceLocation(dimension.location());
         output.writeBoolean(includeHeading);
         if (includeHeading) {
@@ -171,9 +172,7 @@ public class TargetPos {
     }
 
     public void read(MCDataInput input) {
-        x = input.readDouble();
-        y = input.readDouble();
-        z = input.readDouble();
+        pos = input.readVector();
         dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, input.readResourceLocation());
         includeHeading = input.readBoolean();
         if (includeHeading) {
@@ -184,8 +183,8 @@ public class TargetPos {
 
     public Entity teleport(Entity entity) {
         if (includeHeading) {
-            return TeleportUtils.teleportEntity(entity, dimension, x, y, z, yaw, pitch);
+            return TeleportUtils.teleportEntity(entity, dimension, pos, yaw, pitch);
         }
-        return TeleportUtils.teleportEntity(entity, dimension, x, y, z);
+        return TeleportUtils.teleportEntity(entity, dimension, pos);
     }
 }

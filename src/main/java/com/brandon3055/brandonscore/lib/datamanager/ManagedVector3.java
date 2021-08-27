@@ -2,12 +2,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import com.brandon3055.brandonscore.lib.Vec3I;
+import codechicken.lib.vec.Vector3;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -16,29 +12,30 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedPos extends AbstractManagedData<BlockPos> {
 
-    private BlockPos value;
-    private BlockPos defaultValue;
-    protected Function<BlockPos, BlockPos> validator = null;
+public class ManagedVector3 extends AbstractManagedData<Vector3> {
 
-    public ManagedPos(String name, @Nullable BlockPos defaultValue, DataFlags... flags) {
+    private Vector3 value;
+    private Vector3 defaultValue;
+    protected Function<Vector3, Vector3> validator = null;
+
+    public ManagedVector3(String name, @Nullable Vector3 defaultValue, DataFlags... flags) {
         super(name, flags);
         this.value = defaultValue;
-        this.defaultValue = defaultValue == null ? null : new BlockPos(defaultValue);
+        this.defaultValue = defaultValue == null ? null : defaultValue.copy();
     }
 
     /**
      * Default 0, 0, 0
      */
-    public ManagedPos(String name, DataFlags... flags) {
-        this(name, BlockPos.ZERO, flags);
+    public ManagedVector3(String name, DataFlags... flags) {
+        this(name, new Vector3(), flags);
     }
 
-    public BlockPos set(BlockPos value) {
+    public Vector3 set(Vector3 value) {
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
-            BlockPos prev = this.value;
+            Vector3 prev = this.value;
             this.value = value;
 
             if (dataManager.isClientSide() && flags.allowClientControl) {
@@ -49,7 +46,8 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
             if (set) {
                 markDirty();
                 notifyListeners(value);
-            } else {
+            }
+            else {
                 this.value = prev;
             }
         }
@@ -58,7 +56,7 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
     }
 
     @Nullable
-    public BlockPos get() {
+    public Vector3 get() {
         return value;
     }
 
@@ -68,7 +66,7 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      * @return
      */
-    public ManagedPos setValidator(Function<BlockPos, BlockPos> validator) {
+    public ManagedVector3 setValidator(Function<Vector3, Vector3> validator) {
         this.validator = validator;
         return this;
     }
@@ -84,15 +82,15 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
     public void toBytes(MCDataOutput output) {
         output.writeBoolean(value != null);
         if (value != null) {
-            output.writePos(value);
+            output.writeVector(value);
         }
     }
 
     @Override
     public void fromBytes(MCDataInput input) {
-        if (input.readBoolean()) {
-            value = input.readPos();
-        } else {
+        if (input.readBoolean()){
+            value = input.readVector();
+        }else {
             value = null;
         }
         notifyListeners(value);
@@ -100,9 +98,11 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
 
     @Override
     public void toNBT(CompoundNBT compound) {
-        CompoundNBT nbt = value == null ? new CompoundNBT() : NBTUtil.writeBlockPos(value);
+        CompoundNBT nbt = new CompoundNBT();
         if (value == null) {
             nbt.putBoolean("null", true);
+        } else {
+            value.writeToNBT(compound);
         }
         compound.put(name, nbt);
     }
@@ -110,13 +110,13 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
     @Override
     public void fromNBT(CompoundNBT compound) {
         if (!compound.contains(name, 10)) {
-            value = defaultValue == null ? null : new BlockPos(defaultValue);
-        }else {
+            value = defaultValue == null ? null : defaultValue.copy();
+        } else {
             CompoundNBT nbt = compound.getCompound(name);
-            if (nbt.contains("null")) {
+            if (nbt.contains("null")){
                 value = null;
             } else {
-                value = NBTUtil.readBlockPos(nbt);
+                value = Vector3.fromNBT(nbt);
             }
         }
         notifyListeners(value);
@@ -124,6 +124,6 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ":[" + getName() + "=" + value + "]";
+        return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
     }
 }

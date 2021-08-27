@@ -102,13 +102,14 @@ public class InventoryUtils {
             }
             inventory.setStackInSlot(slot, ItemStack.EMPTY);
         } else {
-            DataUtils.forEach(Hand.values(), enumHand -> {
-                ItemStack stack = player.getItemInHand(enumHand);
-                if (!stack.isEmpty() && inventory.isItemValid(slot, stack) && inventory.getStackInSlot(slot).isEmpty()) {
+            for (Hand hand : Hand.values()) {
+                ItemStack stack = player.getItemInHand(hand);
+                if (!stack.isEmpty() && inventory.isItemValid(slot, stack)) {
                     inventory.setStackInSlot(slot, stack);
-                    player.setItemInHand(enumHand, ItemStack.EMPTY);
+                    player.setItemInHand(hand, ItemStack.EMPTY);
+                    return;
                 }
-            });
+            }
         }
     }
 

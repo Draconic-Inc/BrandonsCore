@@ -79,6 +79,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     /**An uber function that returns all the correct values in all the correct places to make this a partial/transparent block*/
+    @Deprecated //No longer does anything. Use property settings
     public boolean isBlockFullCube() {
         return false;
     }
@@ -182,18 +183,29 @@ public class BlockBCore extends Block implements IBCoreBlock {
         super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
     }
 
-    //IActivatableTile
+    //IInteractTile
 
     @Override
-    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
         if (hasTileEntity(state)) {
-            TileEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof IActivatableTile) {
-                return ((IActivatableTile) tile).onBlockActivated(state, player, handIn, hit) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
+            TileEntity tile = world.getBlockEntity(pos);
+            if (tile instanceof IInteractTile) {
+                return ((IInteractTile) tile).onBlockUse(state, player, hand, hit);
             }
         }
 
-        return super.use(state, worldIn, pos, player, handIn, hit);
+        return super.use(state, world, pos, player, hand, hit);
+    }
+
+    @Override
+    public void attack(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+        if (hasTileEntity(state)) {
+            TileEntity tile = world.getBlockEntity(pos);
+            if (tile instanceof IInteractTile) {
+                ((IInteractTile) tile).onBlockAttack(state, player);
+            }
+        }
+        super.attack(state, world, pos, player);
     }
 
     //IDataRetainingTile
@@ -278,11 +290,6 @@ public class BlockBCore extends Block implements IBCoreBlock {
     }
 
     //endregion
-
-    @Override
-    public boolean propagatesSkylightDown(BlockState state, IBlockReader reader, BlockPos pos) {
-        return !isBlockFullCube();
-    }
 
     //Utils
     public static int getRedstonePower(IWorldReader world, BlockPos pos, Direction facing) {

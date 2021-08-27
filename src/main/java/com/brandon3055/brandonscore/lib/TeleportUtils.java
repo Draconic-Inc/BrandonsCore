@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
+import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.block.PortalInfo;
 import net.minecraft.entity.Entity;
@@ -69,11 +70,19 @@ public class TeleportUtils {
         return rider.entity;
     }
 
+    public static Entity teleportEntity(Entity entity, RegistryKey<World> dimension, Vector3 pos, float yaw, float pitch) {
+        return teleportEntity(entity, dimension, pos.x, pos.y, pos.z, yaw, pitch);
+    }
+
     /**
      * Convenience method that does not require pitch and yaw.
      */
     public static Entity teleportEntity(Entity entity, RegistryKey<World> dimension, double xCoord, double yCoord, double zCoord) {
         return teleportEntity(entity, dimension, xCoord, yCoord, zCoord, entity.yRot, entity.xRot);
+    }
+
+    public static Entity teleportEntity(Entity entity, RegistryKey<World> dimension, Vector3 pos) {
+        return teleportEntity(entity, dimension, pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
     }
 
     /**
@@ -216,6 +225,9 @@ public class TeleportUtils {
         player.lastSentExp = -1;
         player.lastSentHealth = -1.0F;
         player.lastSentFood = -1;
+
+        //Fixes issue where creative flight is reset client side after teleport
+        player.onUpdateAbilities();
 //        net.minecraftforge.fml.hooks.BasicEventHooks.firePlayerChangedDimensionEvent(player, originWorld.dimension(), targetWorld.dimension());
 
         return player;

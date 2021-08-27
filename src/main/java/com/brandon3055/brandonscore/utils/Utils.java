@@ -11,12 +11,15 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ChunkHolder;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -415,6 +418,7 @@ public class Utils {
         return stringbuilder.toString();
     }
 
+    @Deprecated //Use world.isLoaded or world this.getChunkSource().hasChunk
     public static boolean isAreaLoaded(World world, BlockPos pos, ChunkHolder.LocationType minimum) {
         ChunkPos chunkPos = new ChunkPos(pos);
         IChunk ichunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
@@ -432,6 +436,24 @@ public class Utils {
             return Long.MAX_VALUE;
         }
         return r;
+    }
+
+    public static int scaleToTPS(World world, int min, int max) {
+        if (!(world instanceof ServerWorld)) return max;
+        long[] times = world.getServer().getTickTime(world.dimension());
+        if (times == null) return max;
+
+        double worldTickTime = mean(times) * 0.000001;
+        double worldTPS = Math.min(1000.0 / worldTickTime, 20);
+
+        return codechicken.lib.math.MathHelper.clip((int) MathUtils.map(worldTPS, 5, 20, min, max), min, max);
+    }
+
+    public static long mean(long[] values) {
+        long sum = 0L;
+        for (long v : values)
+            sum += v;
+        return sum / values.length;
     }
 }
 

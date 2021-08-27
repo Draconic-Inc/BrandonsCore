@@ -1,5 +1,4 @@
 {
-  ".info.brandonscore.block_has_saved_data": "Contents Saved.",
   "gui.brandonscore.hud_config.enabled.false": "Disabled",
   "gui.brandonscore.hud_config.enabled.true": "Enabled",
   "gui.brandonscore.hud_config.name": "Draconic HUD Configuration",
@@ -21,6 +20,7 @@
   "hud.brandonscore.block_item_hud.name": "Combined Block & Item HUD",
   "hud.brandonscore.item_hud.info": "Displays information about certain draconic items when you are holding them.\nDisabled by default",
   "hud.brandonscore.item_hud.name": "Item info HUD",
+  "info.brandonscore.block_has_saved_data": "Contents Saved.",
   "item_info.brandonscore.shift_for_details": "Hold %sShift%s for details",
   "mod_gui.brandonscore.energy_bar.capacity": "Capacity",
   "mod_gui.brandonscore.energy_bar.input": "Input",
