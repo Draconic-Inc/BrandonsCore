@@ -2706,12 +2706,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a string with the given colour and optional shadow.
      */
     public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         MatrixStack textStack = new MatrixStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
-        int i = fontRenderer.drawInBatch(text, x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
-        renderType.endBatch();
+        int i = fontRenderer.drawInBatch(text, x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
+        getter.endBatch();
         return i;
     }
 
@@ -2726,12 +2726,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a string with the given colour and optional shadow.
      */
     public float drawString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int colour, boolean dropShadow) {
-        IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         MatrixStack textStack = new MatrixStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
-        float i = fontRenderer.drawInBatch(LanguageMap.getInstance().getVisualOrder(text), x, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
-        renderType.endBatch();
+        float i = fontRenderer.drawInBatch(LanguageMap.getInstance().getVisualOrder(text), x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
+        getter.endBatch();
         return i;
     }
 
@@ -2739,12 +2739,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a centered string
      */
     public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         MatrixStack textStack = new MatrixStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
-        fontRenderer.drawInBatch(text, x - fontRenderer.width(text) / 2F, y, colour, dropShadow, textLocation, renderType, false, 0, 15728880);
-        renderType.endBatch();
+        fontRenderer.drawInBatch(text, x - fontRenderer.width(text) / 2F, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
+        getter.endBatch();
     }
 
     /**

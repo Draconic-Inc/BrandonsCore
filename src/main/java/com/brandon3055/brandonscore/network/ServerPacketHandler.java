@@ -13,6 +13,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
@@ -93,7 +95,8 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
 
     //This is to assist things like grief prevention. If a player is not allowed to right click a block then they probably shouldn't be allowed to sent packets to is.
     private boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, Direction.UP);
+        BlockRayTraceResult fakeTrace = new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false);
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, fakeTrace);
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }
