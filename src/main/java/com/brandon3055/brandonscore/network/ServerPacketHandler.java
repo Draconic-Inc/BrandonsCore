@@ -93,10 +93,10 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    //This is to assist things like grief prevention. If a player is not allowed to right click a block then they probably shouldn't be allowed to sent packets to is.
+    //This is to assist things like grief prevention. If a player is not allowed to right click a block then they are not allowed to send packets to it.
     private boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
-        BlockRayTraceResult fakeTrace = new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false);
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, fakeTrace);
+        BlockRayTraceResult traceResult = new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false);
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, traceResult);
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }
