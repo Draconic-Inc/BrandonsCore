@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.handlers.IProcess;
  */
 public class DelayedTask {
 
+    @Deprecated //There are issues with then when for example i need to do server world stuff in single player. May need to switch to using effective side.
     public static void run(int delay, Runnable task) {
         BrandonsCore.proxy.runSidedProcess(new Task(delay, task));
     }
