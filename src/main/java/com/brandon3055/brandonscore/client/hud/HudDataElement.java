@@ -64,6 +64,9 @@ public class HudDataElement extends AbstractHudElement {
                 }
                 if (activeHud != null && ((IHudBlock) activeHud).shouldDisplayHudText(player.level, pos, player)) {
                     ((IHudBlock) activeHud).generateHudText(player.level, pos, player, displayList);
+                    if (displayList.isEmpty()) {
+                        activeHud = null;
+                    }
                 } else {
                     activeHud = null;
                 }
@@ -79,6 +82,9 @@ public class HudDataElement extends AbstractHudElement {
                 activeHud = (IHudItem) stack.getItem();
                 if (((IHudItem) activeHud).shouldDisplayHudText(stack, player)) {
                     ((IHudItem) activeHud).generateHudText(stack, player, displayList);
+                    if (displayList.isEmpty()) {
+                        activeHud = null;
+                    }
                 } else {
                     activeHud = null;
                 }

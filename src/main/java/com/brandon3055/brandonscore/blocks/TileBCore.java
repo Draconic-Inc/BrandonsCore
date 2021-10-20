@@ -585,8 +585,16 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     public void onNeighborChange(BlockPos neighbor) {
         if (this instanceof IRSSwitchable) {
+            boolean lastSignal = rsPowered.get();
             rsPowered.set(level.hasNeighborSignal(worldPosition));
+            if (rsPowered.get() != lastSignal) {
+                onSignalChange(rsPowered.get());
+            }
         }
+    }
+
+    public void onSignalChange(boolean newSignal) {
+
     }
 
     /**

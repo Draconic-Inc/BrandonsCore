@@ -3,6 +3,8 @@ package com.brandon3055.brandonscore.utils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 
+import java.util.UUID;
+
 
 public final class ItemNBTHelper {
 
@@ -53,6 +55,11 @@ public final class ItemNBTHelper {
         return stack;
     }
 
+    public static ItemStack setUUID(ItemStack stack, String tag, UUID uuid) {
+        getCompound(stack).putUUID(tag, uuid);
+        return stack;
+    }
+
     // GETTERS ///////////////////////////////////////////////////////////////////
 
     public static boolean verifyExistance(ItemStack stack, String tag) {
@@ -91,5 +98,9 @@ public final class ItemNBTHelper {
 
     public static String getString(ItemStack stack, String tag, String defaultExpected) {
         return verifyExistance(stack, tag) ? stack.getTag().getString(tag) : defaultExpected;
+    }
+
+    public static UUID getUUID(ItemStack stack, String tag, UUID defaultExpected) {
+        return verifyExistance(stack, tag) ? stack.getTag().getUUID(tag) : defaultExpected;
     }
 }
