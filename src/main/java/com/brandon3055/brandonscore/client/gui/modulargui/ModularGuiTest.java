@@ -96,7 +96,7 @@ public class ModularGuiTest extends ModularGuiScreen {
 
 //        int yOffset = element.maxYPos() + 1600;
 //
-//        EntityOtherPlayerMP player = new EntityOtherPlayerMP(mc.world, TileEntitySkull.updateGameprofile(new GameProfile(null, "brandon3055"))) {
+//        EntityOtherPlayerMP player = new EntityOtherPlayerMP(mc.level, TileEntitySkull.updateGameprofile(new GameProfile(null, "brandon3055"))) {
 //            @Override
 //            public String getSkinType() {
 //                return super.getSkinType();
@@ -242,10 +242,10 @@ public class ModularGuiTest extends ModularGuiScreen {
 //        scrollElement.addElement(new GuiElement() {
 //            @Override
 //            public boolean onUpdate() {
-//                Random rand = mc.world.rand;
+//                Random rand = mc.level.rand;
 //                //Ideally you may want to actually put some effort in to creating a popper custom particle but this will do for this demonstration.
 //                //For this demonstration i have just bound the vanilla particle sheet and i am randomly calcining through the SGA particles every tick.
-//                GuiEffect effect = new GuiEffect(mc.world,xPos() + rand.nextInt(xSize()), yPos() + rand.nextInt(ySize())) {
+//                GuiEffect effect = new GuiEffect(mc.level,xPos() + rand.nextInt(xSize()), yPos() + rand.nextInt(ySize())) {
 //                    @Override
 //                    public void onUpdate() {
 //                        super.onUpdate();

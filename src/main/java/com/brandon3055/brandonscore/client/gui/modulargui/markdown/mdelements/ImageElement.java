@@ -2,12 +2,15 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import codechicken.lib.math.MathHelper;
 import codechicken.lib.vec.Cuboid6;
+import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
@@ -19,7 +22,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeBuffers;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
@@ -38,12 +45,13 @@ public class ImageElement extends MDElementBase<ImageElement> {
     private static final List<Block> LOADING_BLOCKS = Lists.newArrayList(Blocks.STONE, Blocks.SAND, Blocks.GRASS, Blocks.COBBLESTONE, Blocks.OAK_LOG, Blocks.GLASS, Blocks.MYCELIUM, Blocks.CHEST, Blocks.ENCHANTING_TABLE, Blocks.CRAFTING_TABLE, Blocks.ANVIL, Blocks.BEACON, Blocks.BOOKSHELF, Blocks.DIAMOND_ORE, Blocks.OBSIDIAN, Blocks.DIRT, Blocks.DISPENSER, Blocks.FURNACE, Blocks.HAY_BLOCK);
     private ItemStack renderLoadingStack = ItemStack.EMPTY;
     private int loadingTime = 0;
-    private int maxLoadTime = 40;
+    private int maxLoadTime = 10;
     private boolean downloading = false;
 
-    private MDElementContainer container;
-    private String imageURL;
     private DLResourceLocation resourceLocation;
+    private MDElementContainer container;
+    private RenderType imageType;
+    private String imageURL;
     public String linkTo = "";
 
     public ImageElement(MDElementContainer container, String imageURL) {
@@ -54,6 +62,10 @@ public class ImageElement extends MDElementBase<ImageElement> {
     @Override
     public void layoutElement(LayoutHelper layout, List<MDElementBase> lineElement) {
         resourceLocation = DLRSCache.getResource(imageURL);
+        if (imageURL.equals("http://ss.brandon3055.com/c9982")) {
+            BrandonsCore.LOGGER.info("Layout: " + resourceLocation.dlFinished);
+        }
+
         int w = 0;
         int h = 0;
 
@@ -61,8 +73,8 @@ public class ImageElement extends MDElementBase<ImageElement> {
             w = 76;
             h = 76;
             downloading = true;
-        }
-        else {
+        } else {
+            imageType = GuiHelper.guiTextureType(resourceLocation);
             if (width == -1 && height == -1) {
                 width = 32;
             }
@@ -71,8 +83,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
                 if (height == -1) {
                     if (resourceLocation.sizeSet) {
                         h = (int) (((double) resourceLocation.height / (double) resourceLocation.width) * w);
-                    }
-                    else {
+                    } else {
                         h = w;
                     }
                 }
@@ -82,8 +93,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
                 if (width == -1) {
                     if (resourceLocation.sizeSet) {
                         w = (int) (((double) resourceLocation.width / (double) resourceLocation.height) * height);
-                    }
-                    else {
+                    } else {
                         w = height;
                     }
                 }
@@ -97,74 +107,96 @@ public class ImageElement extends MDElementBase<ImageElement> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.color4f(1, 1, 1, 1);
-        if (downloading) {
+        if (downloading || resourceLocation.dlFailed) {
             renderDownloading(partialTicks);
-        }
-        else {
-            ResourceHelperBC.bindTexture(resourceLocation);
-            boolean mouseOver = isMouseOver(mouseX, mouseY);
+        } else {
+            if (imageType != null) {
+                ResourceHelperBC.bindTexture(resourceLocation);
+                boolean mouseOver = isMouseOver(mouseX, mouseY);
 
-            if (hasColourBorder) {
-                drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | getColourBorder(mouseOver));
-            }
-            else if (hasColourBorderHover && mouseOver) {
-                drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | colourBorderHover);
-            }
+                if (hasColourBorder) {
+                    drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | getColourBorder(mouseOver));
+                } else if (hasColourBorderHover && mouseOver) {
+                    drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | colourBorderHover);
+                }
 
-            int w = xSize() - rightPad - leftPad;
-            int h = ySize() - bottomPad - topPad;
-            RenderSystem.enableBlend();
-            container.drawModalRectWithCustomSizedTexture(xPos() + leftPad, yPos() + topPad, 0, 0, w, h, w, h);
-            RenderSystem.disableBlend();
+                int w = xSize() - rightPad - leftPad;
+                int h = ySize() - bottomPad - topPad;
+                IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
+                GuiHelper.drawTexture(getter.getBuffer(imageType), xPos() + leftPad, yPos() + topPad, w, h);
+//                container.drawModalRectWithCustomSizedTexture(xPos() + leftPad, yPos() + topPad, 0, 0, w, h, w, h);
+                RenderUtils.endBatch(getter);
+            }
         }
 
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 
     private void renderDownloading(float partialTicks) {
+        IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
+
         boolean failed = resourceLocation.dlFailed;
+        RenderMaterial mat = failed ? BCSprites.get("download_failed") : BCSprites.get("downloading");
         float failTicks = failed ? 0 : partialTicks;
-        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
-        float anim = (64 + 10) * ((loadingTime + failTicks) / (float) maxLoadTime);
+        float anim = MathHelper.clip((loadingTime + failTicks) / (float) maxLoadTime, 0, 1);
 
-        bindTexture(BCSprites.MODULAR_GUI);
-        float texAnim = Math.max(0F, (1 - (anim / 64)) * 48);
-        float texX = xPos() + (xSize() / 2F) - 20;
-        float texY = Math.max(yPos() - 48 + ((48 - texAnim) * 2), yPos());
-        RenderSystem.pushMatrix();
-        RenderSystem.translated(0, 0, getRenderZLevel() + 200);
-        drawScaledCustomSizeModalRect(texX, texY + 1, failed ? 20 : 0, 18 + (24 - Math.min(24, 48 - texAnim)), 20, Math.min(Math.min(24, 48 - texAnim), texAnim), 40, Math.min(Math.min(48, (48 - texAnim) * 2), texAnim * 2), 256, 256);
+        drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
 
-        RenderSystem.translated(xPos() + xSize() / 2D, yPos() + ySize() - 32, 0);
-        RenderSystem.rotatef((BCClientEventHandler.elapsedTicks + partialTicks) * 3F, 0, 1, 0);
-        RenderSystem.scaled(-64, -64, -64);
-        RenderSystem.rotatef(-30, 1, 0, 0);
-        RenderSystem.rotatef(45, 0, 1, 0);
-        ScissorHelper.pushGuiScissor(mc, xPos(), maxYPos() - anim, xSize(), anim, screenWidth, screenHeight);
-        RenderHelper.turnBackOn();
-        RenderSystem.pushMatrix();
-        double shrink = 1 - MathHelper.clip((anim - 64) / 10D, 0, 1);
-        RenderSystem.scaled(shrink, shrink, shrink);
-        mc.getItemRenderer().renderGuiItem(renderLoadingStack, 0, 0);//, ItemCameraTransforms.TransformType.FIXED);
-        RenderSystem.popMatrix();
-        RenderHelper.turnOff();
-        ScissorHelper.popScissor();
-
-        Cuboid6 cuboid6 = new Cuboid6(-0.251, -0.251, -0.251, 0.251, 0.251, 0.251);
-        RenderSystem.disableTexture();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        float r = 1, g = 1, b = 1;
         if (failed) {
-            r = 0; g = 0; b = 0;
+            GuiHelper.drawSprite(BCSprites.builder(getter), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+        } else {
+            GuiHelper.drawPartialSprite(BCSprites.builder(getter), xPos(), yPos(), xSize(), ySize() * anim, mat.sprite(), 0, 0, 1, anim);
         }
 
-        GuiHelperOld.renderCuboid(cuboid6, r, g, b, 1);
+//        GuiHelper.drawSprite(BCSprites.builder(getter), xPos(), yPos(), xSize(), ySize(), mat.sprite());
 
-        RenderSystem.enableTexture();
+        RenderUtils.endBatch(getter);
 
-        //TODO font renderer changes
-//        RenderSystem.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
-        RenderSystem.popMatrix();
+
+//        float failTicks = failed ? 0 : partialTicks;
+
+
+//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
+//        float anim = (64 + 10) * ((loadingTime + failTicks) / (float) maxLoadTime);
+//
+//        bindTexture(BCSprites.MODULAR_GUI);
+//        float texAnim = Math.max(0F, (1 - (anim / 64)) * 48);
+//        float texX = xPos() + (xSize() / 2F) - 20;
+//        float texY = Math.max(yPos() - 48 + ((48 - texAnim) * 2), yPos());
+//        RenderSystem.pushMatrix();
+//        RenderSystem.translated(0, 0, getRenderZLevel() + 200);
+//        drawScaledCustomSizeModalRect(texX, texY + 1, failed ? 20 : 0, 18 + (24 - Math.min(24, 48 - texAnim)), 20, Math.min(Math.min(24, 48 - texAnim), texAnim), 40, Math.min(Math.min(48, (48 - texAnim) * 2), texAnim * 2), 256, 256);
+//
+//        RenderSystem.translated(xPos() + xSize() / 2D, yPos() + ySize() - 32, 0);
+//        RenderSystem.rotatef((BCClientEventHandler.elapsedTicks + partialTicks) * 3F, 0, 1, 0);
+//        RenderSystem.scaled(-64, -64, -64);
+//        RenderSystem.rotatef(-30, 1, 0, 0);
+//        RenderSystem.rotatef(45, 0, 1, 0);
+//        ScissorHelper.pushGuiScissor(mc, xPos(), maxYPos() - anim, xSize(), anim, screenWidth, screenHeight);
+//        RenderHelper.turnBackOn();
+//        RenderSystem.pushMatrix();
+//        double shrink = 1 - MathHelper.clip((anim - 64) / 10D, 0, 1);
+//        RenderSystem.scaled(shrink, shrink, shrink);
+//        mc.getItemRenderer().renderGuiItem(renderLoadingStack, 0, 0);//, ItemCameraTransforms.TransformType.FIXED);
+//        RenderSystem.popMatrix();
+//        RenderHelper.turnOff();
+//        ScissorHelper.popScissor();
+//
+//        Cuboid6 cuboid6 = new Cuboid6(-0.251, -0.251, -0.251, 0.251, 0.251, 0.251);
+//        RenderSystem.disableTexture();
+//        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+//        float r = 1, g = 1, b = 1;
+//        if (failed) {
+//            r = 0; g = 0; b = 0;
+//        }
+//
+//        GuiHelperOld.renderCuboid(cuboid6, r, g, b, 1);
+//
+//        RenderSystem.enableTexture();
+//
+//        //TODO font renderer changes
+////        RenderSystem.color4f(fontRenderer.red, fontRenderer.blue, fontRenderer.green, 1);
+//        RenderSystem.popMatrix();
     }
 
     @Override
@@ -183,8 +215,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
             List<String> tooltip = new ArrayList<>();
             if (resourceLocation.dlFailed) {
                 tooltip.add(TextFormatting.RED + I18n.get("gui.bc.downloading_image_failed.info"));
-            }
-            else if (!resourceLocation.dlFinished) {
+            } else if (!resourceLocation.dlFinished) {
                 tooltip.add(TextFormatting.GREEN + I18n.get("gui.bc.downloading_image.info"));
             }
 
@@ -204,17 +235,14 @@ public class ImageElement extends MDElementBase<ImageElement> {
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (isMouseOver(mouseX, mouseY)) {
             if (mouseButton == 0 && Screen.hasShiftDown()) {
-                DLRSCache.clearResourceCache(imageURL);
                 DLRSCache.clearFileCache(imageURL);
-                container.layoutMarkdownElements();
                 loadingTime = 0;
+                container.layoutMarkdownElements();
                 return true;
-            }
-            else if (mouseButton != 1 && !linkTo.isEmpty()) {
+            } else if (mouseButton != 1 && !linkTo.isEmpty()) {
                 container.handleLinkClick(linkTo, mouseButton);
                 return true;
-            }
-            else if (mouseButton == 1) {
+            } else if (mouseButton == 1) {
                 container.handleLinkClick(imageURL, mouseButton);
                 return true;
             }
@@ -225,35 +253,22 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
     @Override
     public boolean onUpdate() {
-        if (resourceLocation != null) {
-            if (!resourceLocation.dlFinished || resourceLocation.dlFailed || loadingTime > 0) {
-                if (loadingTime == 0) {
-                    renderLoadingStack = new ItemStack(LOADING_BLOCKS.get(rand.nextInt(LOADING_BLOCKS.size())));
-                }
-                loadingTime++;
-
-                if (resourceLocation.dlFailed && loadingTime == maxLoadTime / 2) {
-                    loadingTime = (maxLoadTime / 2) - 1;
-                }
-
-                if (loadingTime >= maxLoadTime) {
-                    loadingTime = 0;
-                }
-
-                if (resourceLocation.dlStateChanged()) {
-                    container.getTopLevelContainer().layoutMarkdownElements();
-                    downloading = false;
-                    return true;
-                }
-            }
-            else if (downloading){
-                loadingTime = 0;
+        if (resourceLocation != null && downloading) {
+            if (resourceLocation.dlFailed) {
                 downloading = false;
                 container.getTopLevelContainer().layoutMarkdownElements();
                 return true;
+            } else {
+                if (loadingTime++ > maxLoadTime) {
+                    loadingTime = 0;
+                    if (resourceLocation.dlFinished || resourceLocation.dlFailed) {
+                        container.getTopLevelContainer().layoutMarkdownElements();
+                        downloading = false;
+                        return true;
+                    }
+                }
             }
         }
-
         return super.onUpdate();
     }
 }

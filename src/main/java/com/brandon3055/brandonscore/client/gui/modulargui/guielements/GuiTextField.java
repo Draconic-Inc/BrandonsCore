@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
-import com.brandon3055.brandonscore.lib.datamanager.ManagedStack;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -116,6 +115,15 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
 
+    public GuiTextField setTextAndNotify(String textIn) {
+        boolean changed = !textIn.equals(getText());
+        setText(textIn);
+        if (changed) {
+            this.notifyListeners(textIn);
+        }
+        return this;
+    }
+
     public GuiTextField setText(String textIn) {
         if (this.validator.test(textIn)) {
             if (textIn.length() > this.maxStringLength) {
@@ -126,7 +134,6 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
             this.setCursorPositionEnd();
             this.setSelectionPos(this.cursorPosition);
-            this.notifyListeners(textIn);
         }
         return this;
     }

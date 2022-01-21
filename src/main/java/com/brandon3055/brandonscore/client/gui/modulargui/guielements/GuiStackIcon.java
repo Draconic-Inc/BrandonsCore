@@ -158,8 +158,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
                 removeChild(this.background);
                 this.background = null;
             }
-        }
-        else {
+        } else {
             if (this.background != null) {
                 removeChild(this.background);
             }
@@ -210,7 +209,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     @Deprecated
     public GuiStackIcon setToolTipOverride(List<String> toolTipOverride) {
-        this.toolTipOverride = toolTipOverride.stream().map(StringTextComponent::new).collect(Collectors.toList());
+        this.toolTipOverride = toolTipOverride == null ? null : toolTipOverride.stream().map(StringTextComponent::new).collect(Collectors.toList());
         return this;
     }
 

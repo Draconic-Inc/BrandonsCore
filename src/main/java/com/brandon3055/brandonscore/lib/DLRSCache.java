@@ -70,7 +70,8 @@ public class DLRSCache {
     }
 
     public static void clearResourceCache(String url) {
-        resourceCache.remove(url);
+        String key = urlStripper.matcher(url).replaceAll("_").toLowerCase(Locale.ENGLISH);
+        resourceCache.remove(key);
     }
 
     public static void clearFileCache(String url) {

@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.integration;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.recipe.IFocus;
@@ -162,12 +163,12 @@ public class JeiHelper {
                 recipeLayout.setPosition(xPos, yPos);
             }
 
-//            recipeLayout.drawRecipe(mouseX, mouseY);
+            recipeLayout.drawRecipe(new MatrixStack(), mouseX, mouseY);
         }
 
         @Override
         public void renderOverlay(Minecraft mc, int mouseX, int mouseY) {
-//            recipeLayout.drawOverlays(mouseX, mouseY);
+            recipeLayout.drawOverlays(new MatrixStack(), mouseX, mouseY);
         }
 
         @Override

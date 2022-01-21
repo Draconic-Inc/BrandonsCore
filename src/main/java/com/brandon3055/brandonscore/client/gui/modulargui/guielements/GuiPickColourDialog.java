@@ -64,7 +64,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         int xSize = xSize();
         int ySize = ySize();
 
-        addChild(hexField = new GuiTextField(xPos + 4, yPos + 4, xSize - 8, 12).setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb())));
+        addChild(hexField = new GuiTextField(xPos + 4, yPos + 4, xSize - 8, 12).setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb())));
         hexField.setChangeListener(this::onTextFieldChanged);
 
         hexField.setMaxStringLength(includeAlpha ? 8 : 6);
@@ -151,22 +151,22 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         boolean colourChanged = false;
         if (eventElement == redSlider) {
             colour.r = (byte) (redSlider.getPosition() * 255D);
-            hexField.setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == greenSlider) {
             colour.g = (byte) (greenSlider.getPosition() * 255D);
-            hexField.setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == blueSlider) {
             colour.b = (byte) (blueSlider.getPosition() * 255D);
-            hexField.setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == alphaSlider) {
             colour.a = (byte) (alphaSlider.getPosition() * 255D);
-            hexField.setText(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == hexField) {

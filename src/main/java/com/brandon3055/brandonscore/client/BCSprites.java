@@ -35,14 +35,6 @@ public class BCSprites {
     private static final Set<ResourceLocation> registeredSprites = new HashSet<>();
     private static final Map<String, RenderMaterial> matCache = new HashMap<>();
 
-//    public static final RenderType guiType = RenderType.makeType("gui", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-//            .texture(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
-//            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-//            .cull(RenderState.CULL_DISABLED)
-//            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-//            .build(false)
-//    );
-
     public static final RenderType GUI_TYPE = RenderType.create("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
             .setTextureState(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
             .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
@@ -130,6 +122,9 @@ public class BCSprites {
         register(MODID, "bars/food_full");
         register(MODID, "bars/energy_empty");
         register(MODID, "bars/energy_full");
+
+        register(MODID, "downloading");
+        register(MODID, "download_failed");
     }
 
     //region register

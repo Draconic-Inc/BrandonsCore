@@ -4,10 +4,12 @@ import codechicken.lib.colour.Colour;
 import codechicken.lib.colour.ColourARGB;
 import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Vector3;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.google.common.collect.Lists;
@@ -1978,13 +1980,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         RenderSystem.enableAlphaTest();
     }
 
-//    @Deprecated
-//    public void drawSprite(float xPos, float yPos, float width, float height, TextureAtlasSprite sprite) {
-//        IRenderTypeBuffer.Impl getter = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-//        drawSprite(getter.getBuffer(BCSprites.ge), xPos(), yPos(), xSize(), ySize(), mat.getSprite());
-//        getter.finish();
-//    }
-
     @Deprecated
     public void drawScaledCustomSizeModalRect(float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight) {
         RenderSystem.enableBlend();
@@ -2007,72 +2002,20 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Deprecated
     public void drawGradientRect(double left, double top, double right, double bottom, int startColor, int endColor) {
-        if (startColor == endColor && endColor == 0) return;
-        double zLevel = getRenderZLevel();
-        //@formatter:off
-        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
-        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
-        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
-        float startBlue  = (float)(startColor       & 255) / 255.0F;
-        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
-        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
-        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
-        float endBlue    = (float)(endColor         & 255) / 255.0F;
-
-        RenderSystem.disableTexture();
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.shadeModel(GL11.GL_SMOOTH);
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        buffer.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        buffer.vertex( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        buffer.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-        buffer.vertex(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-        tessellator.end();
-
-        RenderSystem.shadeModel(GL11.GL_FLAT);
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.enableTexture();
-
-        //@formatter:on
+        IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
+        MatrixStack mStack = new MatrixStack();
+        mStack.translate(0, 0, getRenderZLevel());
+        GuiHelper.drawGradientRect(getter, mStack, left, top, right, bottom, startColor, endColor);
+        RenderUtils.endBatch(getter);
     }
 
     @Deprecated
     public void drawMultiPassGradientRect(double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
-        if (colour1 == colour2 && colour2 == 0) return;
-        double zLevel = getRenderZLevel();
-        float alpha1 = (colour1 >> 24 & 255) / 255.0F;
-        float red1 = (float) (colour1 >> 16 & 255) / 255.0F;
-        float green1 = (float) (colour1 >> 8 & 255) / 255.0F;
-        float blue1 = (float) (colour1 & 255) / 255.0F;
-        float alpha2 = (colour2 >> 24 & 255) / 255.0F;
-        float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
-        float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
-        float blue2 = (float) (colour2 & 255) / 255.0F;
-        RenderSystem.disableTexture();
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.shadeModel(GL11.GL_SMOOTH);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        for (int i = 0; i < layers; i++) {
-            buffer.vertex(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
-            buffer.vertex(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
-            buffer.vertex(left, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
-            buffer.vertex(right, bottom, zLevel).color(red2, green2, blue2, alpha2).endVertex();
-        }
-        tessellator.end();
-        RenderSystem.shadeModel(GL11.GL_FLAT);
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.enableTexture();
+        IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
+        MatrixStack mStack = new MatrixStack();
+        mStack.translate(0, 0, getRenderZLevel());
+        GuiHelper.drawMultiPassGradientRect(getter, mStack, left, top, right, bottom, colour1, colour2, layers);
+        RenderUtils.endBatch(getter);
     }
 
     @Deprecated
@@ -2711,6 +2654,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
         int i = fontRenderer.drawInBatch(text, x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
+//        int i = fontRenderer.drawInBatch(LanguageMap.getInstance().getVisualOrder(new StringTextComponent(text)), x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
         getter.endBatch();
         return i;
     }
@@ -3062,7 +3006,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     public void drawHoveringText(@Nonnull final ItemStack stack, List<? extends ITextProperties> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FontRenderer font) {
         if (!textLines.isEmpty()) {
-            RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, new MatrixStack(), mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
+            MatrixStack mStack = new MatrixStack();
+            mStack.translate(0, 0, getRenderZLevel());
+            RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, mStack, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
             if (MinecraftForge.EVENT_BUS.post(event)) {
                 return;
             }
@@ -3166,7 +3112,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
             drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 
-            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, new MatrixStack(), tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
+            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, mStack, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
             int tooltipTop = tooltipY;
 
             for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
@@ -3189,7 +3135,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
             zOffset -= renderOffset;
 
-            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, new MatrixStack(), tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
+            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, mStack, tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
 
 //            RenderSystem.enableLighting();
             RenderSystem.enableDepthTest();

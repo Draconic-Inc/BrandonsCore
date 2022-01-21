@@ -206,7 +206,7 @@
 //                    container.addChild(renderer);
 //
 //                    GuiLabel label = new GuiLabel(30, 0, xSize() - 42, 20, name).setAlignment(GuiAlign.LEFT).setTrim(true);
-//                    if (fontRenderer.getStringWidth(name) > xSize() - 40) {
+//                    if (fontRenderer.getSplitter().stringWidth(name) > xSize() - 40) {
 //                        label.addChild(new MGuiHoverText(new String[]{name}, label));
 //                    }
 //
@@ -231,7 +231,7 @@
 //                for (String name : playerNames) {
 //                    name = "[player]:"+name;
 //                    GuiLabel label = new GuiLabel(0, 0, xSize() - 12, 20, name).setAlignment(GuiAlign.LEFT).setTrim(true);
-//                    if (fontRenderer.getStringWidth(name) > xSize() - 40) {
+//                    if (fontRenderer.getSplitter().stringWidth(name) > xSize() - 40) {
 //                        label.addChild(new MGuiHoverText(new String[] {name}, label));
 //                    }
 //                    label.setLinkedObject(name);
@@ -322,7 +322,7 @@
 //            ArrayList<Entity> listCantRender = new ArrayList<>();
 //
 //            for (ResourceLocation name : EntityList.getEntityNameList()) {
-//                Entity entity = EntityList.createEntityByIDFromName(name, mc.world);
+//                Entity entity = EntityList.createEntityByIDFromName(name, mc.level);
 //                if (entity == null) {
 //                    continue;
 //                }
@@ -374,7 +374,7 @@
 //                    label.addChild(new MGuiButtonSolid("REMOVE_ENTRY", list.xSize() - 22, 1, 10, 9, TextFormatting.RED + "x").setHoverText(new String[]{I18n.format("generic.remove.txt")}).setListener(this).setLinkedObject(name));
 //                    label.addChild(new MGuiButtonSolid("EDIT_ENTRY", list.xSize() - 32, 1, 10, 9, TextFormatting.GREEN + "e").setHoverText(new String[]{I18n.format("generic.edit.txt")}).setListener(this).setLinkedObject(name));
 //
-//                    if (fontRenderer.getStringWidth(name) > xSize() - 35) {
+//                    if (fontRenderer.getSplitter().stringWidth(name) > xSize() - 35) {
 //                        label.addChild(new MGuiHoverText(new String[]{name}, label));
 //                    }
 //

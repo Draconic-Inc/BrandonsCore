@@ -358,6 +358,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
                 element.preDraw(mc, mouseX, mouseY, partialTicks);
                 element.renderElement(mc, mouseX, mouseY, partialTicks);
                 element.postDraw(mc, mouseX, mouseY, partialTicks);
+                parentGui.setZLevel(0); //Reset this so that the final value does not inadvertently affect the overlay layer
             }
         }
     }

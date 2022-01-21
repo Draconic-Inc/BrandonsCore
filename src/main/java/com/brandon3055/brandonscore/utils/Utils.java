@@ -8,6 +8,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -329,15 +330,7 @@ public class Utils {
     }
 
     public static void openWebLink(URI url) {
-        try {
-            Class<?> oclass = Class.forName("java.awt.Desktop");
-            Object object = oclass.getMethod("getDesktop").invoke((Object) null);
-            oclass.getMethod("browse", URI.class).invoke(object, url);
-        }
-        catch (Throwable throwable1) {
-            Throwable throwable = throwable1.getCause();
-            LogHelperBC.error("Couldn't open link: {}", (Object) (throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
-        }
+        Util.getPlatform().openUri(url);
     }
 
     public static int parseColourRGB(String value) {

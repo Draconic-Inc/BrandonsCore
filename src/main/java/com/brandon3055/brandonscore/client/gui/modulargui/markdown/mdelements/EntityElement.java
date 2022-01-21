@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
@@ -7,9 +8,12 @@ import com.brandon3055.brandonscore.lib.StackReference;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
+import net.minecraft.client.gui.screen.inventory.InventoryScreen;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -25,8 +29,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.SkullTileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,40 +92,32 @@ public class EntityElement extends MDElementBase<EntityElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (errored) return;
+        if (errored || renderEntity == null) {
+            return;
+        }
         int xPos = xPos() + xOffset;
         int yPos = yPos() + yOffset;
 
+        int scale = (int) ((size / Math.max(renderEntity.getBbHeight(), renderEntity.getBbWidth())) * drawScale);
+        double posX = xPos + (size / 2D);
+        double entityRotation = rotation + ((BCClientEventHandler.elapsedTicks + partialTicks) * rotateSpeed);
+        renderEntity.tickCount = BCClientEventHandler.elapsedTicks;
+        double zLevel = 25 + getRenderZLevel() + scale;
+
         try {
-            int scale = (int) ((size / Math.max(renderEntity.getBbHeight(), renderEntity.getBbWidth())) * drawScale);
-            double posX = xPos + (size / 2D);
-            double entityRotation = rotation + ((BCClientEventHandler.elapsedTicks + partialTicks) * rotateSpeed);
-
-            renderEntity.tickCount = BCClientEventHandler.elapsedTicks;
-
-            RenderSystem.pushMatrix();
-            RenderSystem.translated(0, 0, 25 + getRenderZLevel() + scale);
-            RenderSystem.color4f(1, 1, 1, 1);
-
-            int eyeOffset = (int) ((renderEntity.getBbHeight() - renderEntity.getEyeHeight()) * scale);
             if (renderEntity instanceof LivingEntity) {
-                drawEntityOnScreen((int) posX, yPos + ySize(), scale, (int) posX - mouseX, yPos() - mouseY + eyeOffset, (LivingEntity) renderEntity, trackMouse, entityRotation, drawName);
+                int eyeOffset = (int) ((renderEntity.getBbHeight() - renderEntity.getEyeHeight()) * scale);
+                RenderSystem.translated(0, 0, zLevel);
+                renderEntityOnScreen((int) posX, yPos + ySize(), (int) scale, (int) posX - mouseX, yPos() - mouseY + eyeOffset, (LivingEntity) renderEntity, entityRotation, trackMouse, drawName);
+                RenderSystem.translated(0, 0, -zLevel);
             }
-            else {
-                drawEntityOnScreen((int) posX, yPos + ySize(), scale, renderEntity, entityRotation);
-            }
-
-            RenderSystem.popMatrix();
         }
         catch (Throwable e) {
-            LogHelperBC.error("Something went wrong while attempting to render an entity on the screen!");
-            LogHelperBC.error("Entity: " + renderEntity);
+            BrandonsCore.LOGGER.error("Something went wrong while attempting to render an entity on the screen!");
+            BrandonsCore.LOGGER.error("Entity: " + renderEntity);
             e.printStackTrace();
             errored = true;
         }
-
-        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
     }
 
     @Override
@@ -129,8 +128,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
             double height = size * drawScale;
             if (ar > 1) {
                 width *= renderEntity.getBbWidth() / renderEntity.getBbHeight();
-            }
-            else {
+            } else {
                 height *= ar;
             }
             int x = (int) (xPos() + xOffset + ((xSize() - width) / 2));
@@ -144,90 +142,52 @@ public class EntityElement extends MDElementBase<EntityElement> {
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
 
-    //TODO this also needs to be re written
-    public static void drawEntityOnScreen(int posX, int posY, int scale, Entity ent, double rotation) {
-        RenderSystem.enableColorMaterial();
+    public static void renderEntityOnScreen(int xPos, int yPos, int scale, float mouseX, float mouseY, LivingEntity entity, double rotation, boolean trackMouse, boolean drawName) {
+        float lookX = trackMouse ? (float) Math.atan((double) (mouseX / 40.0F)) : 0;
+        float lookY = trackMouse ? (float) Math.atan((double) (mouseY / 40.0F)) : 0;
+        if (drawName && entity instanceof RemoteClientPlayerEntity && Minecraft.getInstance().player != null) {
+            entity.setPos(Minecraft.getInstance().player.getX(), Minecraft.getInstance().player.getY(), Minecraft.getInstance().player.getZ());
+        } else if (entity instanceof RemoteClientPlayerEntity) {
+            entity.setPos(0, -1000, 0);
+        }
+
         RenderSystem.pushMatrix();
-        RenderSystem.translated((float) posX, (float) posY, 50.0F);
-        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
-        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        float f1 = ent.yRot;
-        float f2 = ent.xRot;
-        RenderSystem.rotatef(135.0F + (float) rotation, 0.0F, 1.0F, 0.0F);
-        RenderHelper.turnBackOn();
-        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-//        RenderSystem.rotate(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-//        ent.rotationYaw = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
-//        ent.rotationPitch = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
-        EntityRendererManager rendermanager = Minecraft.getInstance().getEntityRenderDispatcher();
-//        rendermanager.setPlayerViewY(180.0F);
-//        rendermanager.setRenderShadow(false);
-//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-//        rendermanager.setRenderShadow(true);
-        ent.yRot = f1;
-        ent.xRot = f2;
+        RenderSystem.translatef((float) xPos, (float) yPos, 1050.0F);
+        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+        MatrixStack matrixstack = new MatrixStack();
+        matrixstack.translate(0.0D, 0.0D, 1000.0D);
+        matrixstack.scale((float) scale, (float) scale, (float) scale);
+        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+        Quaternion quaternion1 = Vector3f.XP.rotationDegrees(lookY * 20.0F);
+        quaternion.mul(quaternion1);
+        matrixstack.mulPose(quaternion);
+        matrixstack.mulPose(Vector3f.YP.rotationDegrees((float) rotation));
+        float f2 = entity.yBodyRot;
+        float f3 = entity.yRot;
+        float f4 = entity.xRot;
+        float f5 = entity.yHeadRotO;
+        float f6 = entity.yHeadRot;
+        entity.yBodyRot = 180.0F + lookX * 20.0F;
+        entity.yRot = 180.0F + lookX * 40.0F;
+        entity.xRot = -lookY * 20.0F;
+        entity.yHeadRot = entity.yRot;
+        entity.yHeadRotO = entity.yRot;
+        EntityRendererManager rendererManager = Minecraft.getInstance().getEntityRenderDispatcher();
+        quaternion1.conj();
+        rendererManager.overrideCameraOrientation(quaternion1);
+        rendererManager.setRenderShadow(false);
+        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.runAsFancy(() -> {
+            rendererManager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880);
+        });
+        irendertypebuffer$impl.endBatch();
+        rendererManager.setRenderShadow(true);
+        entity.yBodyRot = f2;
+        entity.yRot = f3;
+        entity.xRot = f4;
+        entity.yHeadRotO = f5;
+        entity.yHeadRot = f6;
         RenderSystem.popMatrix();
-        RenderHelper.turnOff();
-        RenderSystem.disableRescaleNormal();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
-//        RenderSystem.disableTexture();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
-    }
-
-    public static void drawEntityOnScreen(int posX, int posY, int scale, float mouseX, float mouseY, LivingEntity ent, boolean trackMouse, double noTrackRotation, boolean drawName) {
-        float rotation = trackMouse ? 0 : (float) noTrackRotation;
-        if (!trackMouse) {
-            mouseX = 0;
-            mouseY = 0;
-        }
-
-        if (ent instanceof EnderDragonEntity && trackMouse) {
-            mouseY += scale * 16;
-        }
-
-        RenderSystem.enableColorMaterial();
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float) posX, (float) posY, 50.0F);
-        RenderSystem.scalef((float) (-scale), (float) scale, (float) scale);
-        RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-        float f = ent.yBodyRot;
-        float f1 = ent.yRot;
-        float f2 = ent.xRot;
-        float f3 = ent.yHeadRotO;
-        float f4 = ent.yHeadRot;
-        RenderSystem.rotatef(135.0F + rotation, 0.0F, 1.0F, 0.0F);
-        RenderHelper.turnBackOn();
-        RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-        RenderSystem.rotatef(-((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
-        ent.yBodyRot = (float) Math.atan((double) (mouseX / 40.0F)) * 20.0F;
-        ent.yRot = (float) Math.atan((double) (mouseX / 40.0F)) * 40.0F;
-        ent.xRot = -((float) Math.atan((double) (mouseY / 40.0F))) * 20.0F;
-        ent.yHeadRot = ent.yRot;
-        ent.yHeadRotO = ent.yRot;
-
-        if (ent instanceof EnderDragonEntity) {
-            RenderSystem.rotatef(ent.xRot, 1, 0, 0);
-            RenderSystem.rotatef(-ent.yHeadRot + 180, 0, 1, 0);
-        }
-
-        RenderSystem.translatef(0.0F, 0.0F, 0.0F);
-        EntityRendererManager rendermanager = Minecraft.getInstance().getEntityRenderDispatcher();
-//        rendermanager.setPlayerViewY(180.0F + rotation + (drawName ? 0 : 180));
-//        rendermanager.setRenderShadow(false);
-//        rendermanager.renderEntity(ent, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
-//        rendermanager.setRenderShadow(true);
-        ent.yBodyRot = f;
-        ent.yRot = f1;
-        ent.xRot = f2;
-        ent.yHeadRotO = f3;
-        ent.yHeadRot = f4;
-        RenderSystem.popMatrix();
-        RenderHelper.turnOff();
-        RenderSystem.disableRescaleNormal();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE1);
-//        RenderSystem.disableTexture();
-//        RenderSystem.activeTexture(GLX.GL_TEXTURE0);
     }
 
     public Entity getRenderEntity(ClientWorld world, String entityString, EquipmentHelper helper) {
@@ -243,8 +203,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
         Entity entity = null;
         if (entityString.startsWith("player:")) {
             entity = createRenderPlayer(world, entityString.replaceFirst("player:", ""));
-        }
-        else {
+        } else {
             EntityType type = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityString));
             if (type != null) {
                 entity = type.create(world);
@@ -257,8 +216,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
 
         if (entity instanceof LivingEntity && helper.hasEquipment) {
             helper.apply((LivingEntity) entity);
-        }
-        else if (helper.hasEquipment) {
+        } else if (helper.hasEquipment) {
             throw new IllegalArgumentException("The specified entity does not allow equipment!");
         }
 
@@ -284,8 +242,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
 
                 if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
                     resourcelocation = minecraft.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-                }
-                else {
+                } else {
                     UUID uuid = PlayerEntity.createPlayerUUID(getGameProfile());
                     resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
                 }
@@ -343,8 +300,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 StackReference stackRef = StackReference.fromString(element.mainHand);
                 if (stackRef == null || (helper.mainHand = stackRef.createStack()) == null) {
                     LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.mainHand);
-                }
-                else {
+                } else {
                     helper.hasEquipment = true;
                 }
             }
@@ -353,8 +309,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 StackReference stackRef = StackReference.fromString(element.offHand);
                 if (stackRef == null || (helper.offHand = stackRef.createStack()) == null) {
                     LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.offHand);
-                }
-                else {
+                } else {
                     helper.hasEquipment = true;
                 }
             }
@@ -363,8 +318,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 StackReference stackRef = StackReference.fromString(element.head);
                 if (stackRef == null || (helper.head = stackRef.createStack()) == null) {
                     LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.head);
-                }
-                else {
+                } else {
                     helper.hasEquipment = true;
                 }
             }
@@ -373,8 +327,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 StackReference stackRef = StackReference.fromString(element.chest);
                 if (stackRef == null || (helper.chest = stackRef.createStack()) == null) {
                     LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.chest);
-                }
-                else {
+                } else {
                     helper.hasEquipment = true;
                 }
             }
@@ -383,8 +336,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 StackReference stackRef = StackReference.fromString(element.legs);
                 if (stackRef == null || (helper.legs = stackRef.createStack()) == null) {
                     LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.legs);
-                }
-                else {
+                } else {
                     helper.hasEquipment = true;
                 }
             }
@@ -393,8 +345,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
                 StackReference stackRef = StackReference.fromString(element.boots);
                 if (stackRef == null || (helper.boots = stackRef.createStack()) == null) {
                     LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.boots);
-                }
-                else {
+                } else {
                     helper.hasEquipment = true;
                 }
             }

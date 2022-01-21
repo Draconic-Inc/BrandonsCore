@@ -3,8 +3,6 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 
@@ -59,7 +57,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
             close();
         });
         textField.setMaxStringLength(maxLength);
-        textField.setText(defaultText);
+        textField.setTextAndNotify(defaultText);
 
         if (validator != null) {
             textField.setValidator(validator);
@@ -89,7 +87,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
     public GuiTextFieldDialog setText(String text) {
         this.defaultText = text;
         if (textField != null) {
-            textField.setText(text);
+            textField.setTextAndNotify(text);
         }
         return this;
     }

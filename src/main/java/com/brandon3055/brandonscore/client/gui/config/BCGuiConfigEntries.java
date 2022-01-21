@@ -60,10 +60,10 @@
 //
 //                    // protects against language keys that are not defined in the .lang file
 //                    if (!I18n.format(configElement.getLanguageKey()).equals(configElement.getLanguageKey())) {
-//                        length = mc.fontRenderer.getStringWidth(I18n.format(configElement.getLanguageKey()));
+//                        length = mc.fontRenderer.getSplitter().stringWidth(I18n.format(configElement.getLanguageKey()));
 //                    }
 //                    else {
-//                        length = mc.fontRenderer.getStringWidth(configElement.getName());
+//                        length = mc.fontRenderer.getSplitter().stringWidth(configElement.getName());
 //                    }
 //
 //                    if (length > this.maxLabelTextWidth) {
@@ -686,11 +686,11 @@
 //                        }
 //                    };
 //
-//                    int undoGlyphWidth = mc.fontRenderer.getStringWidth(UNDO_CHAR) * 2;
-//                    int resetGlyphWidth = mc.fontRenderer.getStringWidth(RESET_CHAR) * 2;
-//                    int doneWidth = Math.max(mc.fontRenderer.getStringWidth(I18n.format("gui.done")) + 20, 100);
-//                    int undoWidth = mc.fontRenderer.getStringWidth(" " + I18n.format("fml.configgui.tooltip.undoChanges")) + undoGlyphWidth + 20;
-//                    int resetWidth = mc.fontRenderer.getStringWidth(" " + I18n.format("fml.configgui.tooltip.resetToDefault")) + resetGlyphWidth + 20;
+//                    int undoGlyphWidth = mc.fontRenderer.getSplitter().stringWidth(UNDO_CHAR) * 2;
+//                    int resetGlyphWidth = mc.fontRenderer.getSplitter().stringWidth(RESET_CHAR) * 2;
+//                    int doneWidth = Math.max(mc.fontRenderer.getSplitter().stringWidth(I18n.format("gui.done")) + 20, 100);
+//                    int undoWidth = mc.fontRenderer.getSplitter().stringWidth(" " + I18n.format("fml.configgui.tooltip.undoChanges")) + undoGlyphWidth + 20;
+//                    int resetWidth = mc.fontRenderer.getSplitter().stringWidth(" " + I18n.format("fml.configgui.tooltip.resetToDefault")) + resetGlyphWidth + 20;
 //                    int buttonWidthHalf = (doneWidth + 5 + undoWidth + 5 + resetWidth) / 2;
 //                    this.buttonList.add(btnDone = new GuiButtonExt(2000, this.width / 2 - buttonWidthHalf, this.height - 29, doneWidth, 20, I18n.format("gui.done")));
 //                    this.buttonList.add(btnDefault = new GuiUnicodeGlyphButton(2001, this.width / 2 - buttonWidthHalf + doneWidth + 5 + undoWidth + 5,
@@ -884,7 +884,7 @@
 //                return true;
 //            }
 //            if (this.btnValue.mousePressed(this.mc, x, y)) {
-//                btnValue.playPressSound(mc.getSoundHandler());
+//                btnValue.playPressSound(mc.getSoundManager());
 //                valueButtonPressed(index);
 //                updateValueButtonText();
 //                return true;
@@ -1223,7 +1223,7 @@
 //        @Override
 //        public boolean mousePressed(int index, int x, int y, int mouseEvent, int relativeX, int relativeY) {
 //            if (this.btnSelectCategory.mousePressed(this.mc, x, y)) {
-//                btnSelectCategory.playPressSound(mc.getSoundHandler());
+//                btnSelectCategory.playPressSound(mc.getSoundManager());
 //                Minecraft.getInstance().displayGuiScreen(childScreen);
 //                return true;
 //            }
@@ -1422,12 +1422,12 @@
 //                return true;
 //            }
 //            if (this.btnDefault.mousePressed(this.mc, x, y)) {
-//                btnDefault.playPressSound(mc.getSoundHandler());
+//                btnDefault.playPressSound(mc.getSoundManager());
 //                setToDefault();
 //                return true;
 //            }
 //            else if (this.btnUndoChanges.mousePressed(this.mc, x, y)) {
-//                btnUndoChanges.playPressSound(mc.getSoundHandler());
+//                btnUndoChanges.playPressSound(mc.getSoundManager());
 //                undoChanges();
 //                return true;
 //            }
@@ -1471,7 +1471,7 @@
 //
 //        @Override
 //        public int getLabelWidth() {
-//            return this.mc.fontRenderer.getStringWidth(this.name);
+//            return this.mc.fontRenderer.getSplitter().stringWidth(this.name);
 //        }
 //
 //        @Override

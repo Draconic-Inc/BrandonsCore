@@ -537,7 +537,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 dialog.setSelectionListener(rs -> {
                     GuiButton.playGenericClick(mc);
                     if (getNode() != null) {
-                        nameField.setText(rs.toString());
+                        nameField.setTextAndNotify(rs.toString());
                     }
                 });
 
@@ -724,7 +724,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             nbtField = new GuiTextField();
             nbtField.setHoverText(i18ni("item.nbt.info"));
-            nbtField.setText(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
+            nbtField.setTextAndNotify(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
             nbtField.setChangeListener(s -> {
                 if (getNode() != null) {
                     if (s.isEmpty()) {
@@ -782,7 +782,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
         @Override
         public boolean onUpdate() {
             if (getNode() != null && getNode().dataChanged) {
-                nbtField.setText(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
+                nbtField.setTextAndNotify(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
                 updateStackIcon();
                 getNode().dataChanged = false;
             }

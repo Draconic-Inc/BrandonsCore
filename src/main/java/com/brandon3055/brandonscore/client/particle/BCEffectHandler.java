@@ -213,8 +213,8 @@
 ////            return;
 ////        }
 ////
-////        if (currentWorld != mc.world && mc.world != null) {
-////            currentWorld = mc.world;
+////        if (currentWorld != mc.level && mc.level != null) {
+////            currentWorld = mc.level;
 ////            BrandonsCore.proxy.resetEffectRenderer(currentWorld);
 ////        }
 ////

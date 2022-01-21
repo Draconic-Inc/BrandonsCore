@@ -81,15 +81,6 @@ public class FileHandler {
         for (int i = 0; i < 5; i++) {
             url = url.replaceAll(" ", "%20");
             resourceUrl = new URL(url);
-//            URL url1 = new URL(url);
-//            URI uri;
-//            try {
-//                uri = new URI(url1.getProtocol(), url1.getUserInfo(), url1.getHost(), url1.getPort(), url1.getPath(), url1.getQuery(), url1.getRef());
-//                resourceUrl = new URL(uri.toASCIIString());
-//            }
-//            catch (URISyntaxException e) {
-//                resourceUrl = new URL(url);
-//            }
             if (proxy != null) {
                 conn = (HttpURLConnection) resourceUrl.openConnection(proxy);
             } else {

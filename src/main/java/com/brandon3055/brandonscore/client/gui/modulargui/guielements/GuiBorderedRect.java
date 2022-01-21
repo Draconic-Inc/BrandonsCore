@@ -61,6 +61,13 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
         return this;
     }
 
+    public GuiBorderedRect setColours(int fill, int border) {
+        setFillColour(fill);
+        setBorderColour(border);
+        return this;
+    }
+
+    @Deprecated //Seems this got renamed by accident
     public GuiBorderedRect setShadeColours(int fill, int border) {
         setFillColour(fill);
         setBorderColour(border);

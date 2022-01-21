@@ -90,7 +90,7 @@
 //            }
 //        }
 //        else if (button.id == 1) {
-//            this.mc.world.sendQuittingDisconnectingPacket();
+//            this.mc.level.sendQuittingDisconnectingPacket();
 //            this.mc.loadWorld(null);
 //            this.mc.displayGuiScreen(new GuiMultiplayer(new GuiMainMenu()));
 //        }
