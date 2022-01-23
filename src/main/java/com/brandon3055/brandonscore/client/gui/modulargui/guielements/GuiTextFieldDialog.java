@@ -63,7 +63,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
             textField.setValidator(validator);
         }
 
-        addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.get("generic.ok.txt")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777));
+        addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.get("mod_gui.brandonscore.button.ok")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777));
         okButton.onPressed(() -> {
             if (confirmCallBack != null) {
                 confirmCallBack.accept(textField.getText());

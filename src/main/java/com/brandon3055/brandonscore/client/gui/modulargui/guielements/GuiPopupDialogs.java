@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
@@ -65,28 +66,28 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
         int buttonX = (dialog.xSize() / 2) - ((((type.buttons + 1) * buttonWidth) + type.buttons) / 2);
 
         if (type.yes) {
-            GuiButton button = new GuiButton(I18n.get("generic.yes.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("mod_gui.brandonscore.button.yes")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
             dialog.addChild(dialog.yesButton = button);
         }
         if (type.no) {
-            GuiButton button = new GuiButton(I18n.get("generic.no.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("mod_gui.brandonscore.button.no")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
             dialog.addChild(dialog.noButton = button);
         }
         if (type.ok) {
-            GuiButton button = new GuiButton(I18n.get("generic.ok.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("mod_gui.brandonscore.button.ok")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
             dialog.addChild(dialog.okButton = button);
         }
         if (type.cancel) {
-            GuiButton button = new GuiButton(I18n.get("generic.cancel.txt")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
+            GuiButton button = new GuiButton(I18n.get("mod_gui.brandonscore.button.cancel")).setSize(buttonWidth, 14).setPos(buttonX, messageLabel.maxYPos() + 5);
             if (vanillaButtons) button.setVanillaButtonRender(true);
             else button.setRectColours(buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
             buttonX += buttonWidth + 1;
@@ -99,27 +100,27 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
-        return createDialog(parent, type, message, title, xSize, GuiTexture.newVanillaGuiTexture(0, 0), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
+        return createDialog(parent, type, message, title, xSize, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize) {
-        return createDialog(parent, type, message, title, xSize, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, title, xSize, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, int xSize) {
-        return createDialog(parent, type, message, "", xSize, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, "", xSize, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
-        return createDialog(parent, type, message, title, 200, GuiTexture.newVanillaGuiTexture(0, 0), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
+        return createDialog(parent, type, message, title, 200, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title) {
-        return createDialog(parent, type, message, title, 200, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, title, 200, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message) {
-        return createDialog(parent, type, message, "", 200, GuiTexture.newVanillaGuiTexture(0, 0), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, "", 200, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createPopOut(GuiElement parent, GuiElement popOutElement) {

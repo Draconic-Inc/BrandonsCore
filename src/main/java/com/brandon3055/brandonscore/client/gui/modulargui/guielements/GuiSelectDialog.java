@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
+import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
@@ -46,7 +47,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
     protected Function<T, GuiElement> rendererBuilder = t -> {
         GuiLabel label = new GuiLabel(String.valueOf(t)).setInsets(0, 2, 0, 2).setWrap(true).setShadow(false).setHoverableTextCol(hovering -> hovering ? 0x0000FF : 0);
         label.setYSizeMod((guiLabel, integer) -> guiLabel.fontRenderer.wordWrapHeight(label.getLabelText(), Math.max(10, guiLabel.xSize() - label.getInsets().left - label.getInsets().right)) + 6);
-        label.addChild(GuiTexture.newVanillaGuiTexture(0, 0).setYSizeMod((guiTexture, integer) -> label.ySize()).setPos(label).bindSize(label, false));
+        label.addChild(GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")).setYSizeMod((guiTexture, integer) -> label.ySize()).setPos(label).bindSize(label, false));
         return label;
     };
 

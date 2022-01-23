@@ -1,9 +1,18 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
+import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MarkdownTextRenderer;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TextProcessing;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -16,6 +25,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelem
 public class TextElement extends MDElementBase<TextElement> {
 
     private String text;
+    private MarkdownTextRenderer textRenderer;
     public Supplier<Integer> colour = null;
     public boolean shadow = false;
     private double textScale;
@@ -33,10 +43,12 @@ public class TextElement extends MDElementBase<TextElement> {
             heading = 7 - heading;
             textScale = 1D + (heading / 3D);
         }
+        textRenderer = new MarkdownTextRenderer(this, fontRenderer);
     }
 
     @Override
     public void layoutElement(LayoutHelper layout, List<MDElementBase> lineElement) {
+
         if (layout.getWidth() < 5) return;
         toRemove.addAll(subParts);
         subParts.clear();
@@ -70,7 +82,7 @@ public class TextElement extends MDElementBase<TextElement> {
             text = text.substring(nextSplit);
             double nextWidth = fontRenderer.width(nextPart) * textScale;
 
-            TextElementPart part = new TextElementPart(nextPart, textScale, shadow, colour);
+            TextElementPart part = new TextElementPart(this, nextPart, textScale, shadow, colour);
             part.setSize((int) Math.ceil(nextWidth), (int) Math.ceil(fHeight));
             addChild(part);
             subParts.add(part);
@@ -82,6 +94,7 @@ public class TextElement extends MDElementBase<TextElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        textRenderer.reset();
 //        fontRenderer.resetStyles(); //TODO font renderer changes
 //        BCFontRenderer.setStileToggleMode(true);
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
@@ -89,13 +102,17 @@ public class TextElement extends MDElementBase<TextElement> {
 //        fontRenderer.resetStyles();
     }
 
+
+
     private static class TextElementPart extends MDElementBase<TextElementPart> {
+        private TextElement element;
         private final String text;
         private final double scale;
         private boolean shadow;
         private Supplier<Integer> colour;
 
-        public TextElementPart(String text, double scale, boolean shadow, Supplier<Integer> colour) {
+        public TextElementPart(TextElement element, String text, double scale, boolean shadow, Supplier<Integer> colour) {
+            this.element = element;
             this.text = text;
             this.scale = scale;
             this.shadow = shadow;
@@ -115,7 +132,7 @@ public class TextElement extends MDElementBase<TextElement> {
             }
             else {
 //                fontRenderer.drawString(text, xPos(), yPos(), colour.get(), shadow);
-                drawString(fontRenderer, text, xPos(), yPos(), colour.get(), shadow);
+                element.textRenderer.drawFormattedString(text, xPos(), yPos(), colour.get(), shadow);
             }
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }

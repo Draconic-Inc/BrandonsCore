@@ -467,7 +467,6 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         }
 
         double zLevel = getRenderZLevel();
-        RenderSystem.translated(0, 0, zLevel);
 
         int i = this.isFieldEnabled ? getTextColor() : this.disabledColor;
         int j = this.cursorPosition - this.lineScrollOffset;
@@ -482,7 +481,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             k = s.length();
         }
 
-        if (textZOffset != 0) matrixStack.translate(0, 0, textZOffset);
+        matrixStack.translate(0, 0, textZOffset + zLevel);
         if (!s.isEmpty()) {
             String s1 = flag ? s.substring(0, j) : s;
             if (getShadow()) {
@@ -535,11 +534,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             int l1 = stringX + this.fontRenderer.width(s.substring(0, k));
             this.drawSelectionBox(k1, stringY - 1, l1 - 1, stringY + 1 + 9);
         }
-        if (textZOffset != 0) matrixStack.translate(0, 0, -textZOffset);
-
-        RenderSystem.translated(0, 0, -zLevel);
-
-//        }
+        matrixStack.translate(0, 0, -(textZOffset + zLevel));
     }
 
     private void drawSelectionBox(int startX, int startY, int endX, int endY) {

@@ -34,20 +34,20 @@ public class BCFontRenderer extends FontRenderer {
 
 
     @Override
-    protected int drawInternal(String text, float x, float y, int color, boolean p_238423_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean transparent, int p_238423_9_, int p_238423_10_, boolean p_238423_11_) {
-        if (p_238423_11_) {
+    protected int drawInternal(String text, float x, float y, int colour, boolean shadow, Matrix4f mat4f, IRenderTypeBuffer getter, boolean boolFalse, int int0, int int1, boolean biDirection) {
+        if (biDirection) {
             text = this.bidirectionalShaping(text);
         }
 
-        color = adjustColor(color);
-        Matrix4f matrix4f = matrix.copy();
-        if (p_238423_5_) {
-            this.renderText(text, x, y, color, true, matrix, buffer, transparent, p_238423_9_, p_238423_10_);
+        colour = adjustColor(colour);
+        Matrix4f matrix4f = mat4f.copy();
+        if (shadow) {
+            this.renderText(text, x, y, colour, true, mat4f, getter, boolFalse, int0, int1);
 //            matrix4f.translate(FONT_OFFSET);
         }
 
-        x = this.renderText(text, x, y, color, false, matrix4f, buffer, transparent, p_238423_9_, p_238423_10_);
-        return (int)x + (p_238423_5_ ? 1 : 0);
+        x = this.renderText(text, x, y, colour, false, matrix4f, getter, boolFalse, int0, int1);
+        return (int)x + (shadow ? 1 : 0);
     }
 
     @Override

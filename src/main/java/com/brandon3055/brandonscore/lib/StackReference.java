@@ -15,6 +15,7 @@ import net.minecraftforge.registries.ForgeRegistries;
  * Created by brandon3055 on 9/09/2016.
  * Stores a reference to an ItemStack which can be easily converted to and from a string.
  */
+@Deprecated //TODO Want to instead store item as a standard serialized item string/nbt
 public class StackReference {
 
     public static final StackReference EMPTY = new StackReference(ItemStack.EMPTY);

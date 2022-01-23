@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.command.CommandTPX;
 import com.brandon3055.brandonscore.command.HudConfigCommand;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.lib.IEquipmentManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.worldentity.WorldEntityHandler;
@@ -38,10 +39,9 @@ public class BrandonsCore {
 
     //    public static ForgeRegistry<ClientDataType?<?>> CLIENT_DATA_REGISTRY;
 
-
-
     public BrandonsCore() {
         FileHandler.init();
+        inDev = ModHelperBC.getModVersion(MODID).equals("version");
 
         //Knock Knock...
         Logger deLog = LogManager.getLogger("draconicevolution");

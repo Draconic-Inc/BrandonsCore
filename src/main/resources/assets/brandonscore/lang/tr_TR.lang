@@ -13,10 +13,10 @@ gui.entityFilter.customTip.txt=Oyuncu kullanıcı adları böyle yazılmalı= [p
 generic.de.Mode.txt=Mod
 generic.de.energyCost.txt=Enerji Masrafı
 generic.options.txt=Ayarlar
-generic.ok.txt=Tamam
-generic.cancel.txt=İptal
-generic.yes.txt=Evet
-generic.no.txt=Hayır
+mod_gui.brandonscore.button.ok=Tamam
+mod_gui.brandonscore.button.cancel=İptal
+mod_gui.brandonscore.button.yes=Evet
+mod_gui.brandonscore.button.no=Hayır
 generic.remove.txt=Kaldır
 generic.edit.txt=Düzenle
 generic.configureRedstone.txt=Kızıltaş Kontrolünü Düzenle

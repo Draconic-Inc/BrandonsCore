@@ -77,21 +77,27 @@ public class LangGenerator extends LanguageProvider {
         helper.add("delete.node",                   "Double-Click to delete filter node");
         helper.add("delete.all",                    "Tripple-Click to clear all nodes");
         helper.add("search",                        "Search...");
+
+        helper.setPrefix("mod_gui.brandonscore.button");
+        helper.add("yes"                                     ,"Yes");
+        helper.add("no"                                      ,"No");
+        helper.add("ok"                                      ,"Ok");
+        helper.add("cancel"                                  ,"Cancel");
     }
 
     private void addGuiToolkit(PrefixHelper helper) {
         helper.setPrefix("gui_tkt.brandonscore");
-        helper.add("theme.light"                                   ,"Light Theme");
-        helper.add("theme.dark"                                    ,"Dark Theme");
-        helper.add("info_panel"                                    ,"Display additional information");
-        helper.add("rs_mode.always_active"                         ,"Always active");
-        helper.add("rs_mode.active_high"                           ,"Active with redstone signal");
-        helper.add("rs_mode.active_low"                            ,"Active without redstone signal");
-        helper.add("rs_mode.never_active"                          ,"Never active");
-        helper.add("large_view"                                    ,"Large View");
-        helper.add("large_view.close"                              ,"Click outside or press Esc to close");
-        helper.add("your_inventory"                                ,"Inventory");
-        helper.add("click_out_close"                               ,"Click outside to close");
+        helper.add("theme.light"                                    ,"Light Theme");
+        helper.add("theme.dark"                                     ,"Dark Theme");
+        helper.add("info_panel"                                     ,"Display additional information");
+        helper.add("rs_mode.always_active"                          ,"Always active");
+        helper.add("rs_mode.active_high"                            ,"Active with redstone signal");
+        helper.add("rs_mode.active_low"                             ,"Active without redstone signal");
+        helper.add("rs_mode.never_active"                           ,"Never active");
+        helper.add("large_view"                                     ,"Large View");
+        helper.add("large_view.close"                               ,"Click outside or press Esc to close");
+        helper.add("your_inventory"                                 ,"Inventory");
+        helper.add("click_out_close"                                ,"Click outside to close");
     }
 
     private void addMisc(PrefixHelper helper) {

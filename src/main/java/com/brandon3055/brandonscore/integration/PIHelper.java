@@ -1,40 +1,47 @@
 package com.brandon3055.brandonscore.integration;
 
-//import com.brandon3055.projectintelligence.api.PiAPI;
+import com.brandon3055.projectintelligence.api.PiAPI;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by brandon3055 on 21/09/18.
  */
 public class PIHelper {
-    //TODO find an alternative to @Optional
 
     public static boolean isInstalled() {
         return ModList.get().isLoaded("projectintelligence");
     }
 
-//    @Optional.Method(modid = "projectintelligence")
     public static KeyBinding getETGuiKey() {
-//        return PiAPI.getETGuiKey();
-        return null;
+        assert isInstalled();
+        return _getETGuiKey();
     }
 
-//    @Optional.Method(modid = "projectintelligence")
+    private static KeyBinding _getETGuiKey() {
+        return PiAPI.getETGuiKey();
+    }
+
     public static List<String> getRelatedPages(ItemStack stack) {
-//        return PiAPI.getRelatedPages(stack);
-        return Collections.emptyList();
+        assert isInstalled();
+        return _getRelatedPages(stack);
     }
 
-//    @Optional.Method(modid = "projectintelligence")
+    private static List<String> _getRelatedPages(ItemStack stack) {
+        return PiAPI.getRelatedPages(stack);
+    }
+
     public static void openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
-//        PiAPI.openGui(parentScreen, pageURIs);
+        assert isInstalled();
+        _openGui(parentScreen, pageURIs);
     }
 
+    private static void _openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
+        PiAPI.openGui(parentScreen, pageURIs);
+    }
 }

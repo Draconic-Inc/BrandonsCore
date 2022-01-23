@@ -84,6 +84,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
     compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
+    compile "com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:deobf"
     compile fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 }
 
@@ -110,7 +111,8 @@ processResources { task ->
         task.doFirst {
             spec.expand 'version': config.mod_version,
                     'mc_version': config.mc_version,
-                    'ccl_version': "[${config.ccl_version.replace('.+', '')},${config.ccl_version_max})"
+                    'ccl_version': "[${config.ccl_version.replace('.+', '')},${config.ccl_version_max})",
+                    'pi_version': resolve("ProjectIntelligence")
         }
     }
 }

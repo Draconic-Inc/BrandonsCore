@@ -62,9 +62,6 @@ public class ImageElement extends MDElementBase<ImageElement> {
     @Override
     public void layoutElement(LayoutHelper layout, List<MDElementBase> lineElement) {
         resourceLocation = DLRSCache.getResource(imageURL);
-        if (imageURL.equals("http://ss.brandon3055.com/c9982")) {
-            BrandonsCore.LOGGER.info("Layout: " + resourceLocation.dlFinished);
-        }
 
         int w = 0;
         int h = 0;

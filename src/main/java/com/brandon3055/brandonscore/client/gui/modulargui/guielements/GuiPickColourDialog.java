@@ -104,7 +104,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
             alphaSlider.setBarStyleBackground(0xFF000000).setSliderSize(3);
         }
 
-        addChild(selectButton = new GuiButton(xPos + 4, yPos + ySize - 14, cancelEnabled ? (xSize / 2) - 5 : xSize - 8, 10, I18n.get("generic.ok.txt")));
+        addChild(selectButton = new GuiButton(xPos + 4, yPos + ySize - 14, cancelEnabled ? (xSize / 2) - 5 : xSize - 8, 10, I18n.get("mod_gui.brandonscore.button.ok")));
         selectButton.onPressed(() -> {
             if (listener != null) {
                 listener.onMGuiEvent(new GuiEvent.ColourEvent(this, getColourARGB(), false, false), this);

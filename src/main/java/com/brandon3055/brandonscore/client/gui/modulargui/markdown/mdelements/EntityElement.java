@@ -296,58 +296,64 @@ public class EntityElement extends MDElementBase<EntityElement> {
         public static EquipmentHelper create(EntityElement element) {
             EquipmentHelper helper = new EquipmentHelper();
 
-            if (!element.mainHand.isEmpty()) {
-                StackReference stackRef = StackReference.fromString(element.mainHand);
-                if (stackRef == null || (helper.mainHand = stackRef.createStack()) == null) {
-                    LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.mainHand);
-                } else {
-                    helper.hasEquipment = true;
+            try {
+                if (!element.mainHand.isEmpty()) {
+                    StackReference stackRef = StackReference.fromString(element.mainHand);
+                    if (stackRef == null || (helper.mainHand = stackRef.createStack()) == null) {
+                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.mainHand);
+                    } else {
+                        helper.hasEquipment = true;
+                    }
+                }
+
+                if (!element.offHand.isEmpty()) {
+                    StackReference stackRef = StackReference.fromString(element.offHand);
+                    if (stackRef == null || (helper.offHand = stackRef.createStack()) == null) {
+                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.offHand);
+                    } else {
+                        helper.hasEquipment = true;
+                    }
+                }
+
+                if (!element.head.isEmpty()) {
+                    StackReference stackRef = StackReference.fromString(element.head);
+                    if (stackRef == null || (helper.head = stackRef.createStack()) == null) {
+                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.head);
+                    } else {
+                        helper.hasEquipment = true;
+                    }
+                }
+
+                if (!element.chest.isEmpty()) {
+                    StackReference stackRef = StackReference.fromString(element.chest);
+                    if (stackRef == null || (helper.chest = stackRef.createStack()) == null) {
+                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.chest);
+                    } else {
+                        helper.hasEquipment = true;
+                    }
+                }
+
+                if (!element.legs.isEmpty()) {
+                    StackReference stackRef = StackReference.fromString(element.legs);
+                    if (stackRef == null || (helper.legs = stackRef.createStack()) == null) {
+                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.legs);
+                    } else {
+                        helper.hasEquipment = true;
+                    }
+                }
+
+                if (!element.boots.isEmpty()) {
+                    StackReference stackRef = StackReference.fromString(element.boots);
+                    if (stackRef == null || (helper.boots = stackRef.createStack()) == null) {
+                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.boots);
+                    } else {
+                        helper.hasEquipment = true;
+                    }
                 }
             }
-
-            if (!element.offHand.isEmpty()) {
-                StackReference stackRef = StackReference.fromString(element.offHand);
-                if (stackRef == null || (helper.offHand = stackRef.createStack()) == null) {
-                    LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.offHand);
-                } else {
-                    helper.hasEquipment = true;
-                }
-            }
-
-            if (!element.head.isEmpty()) {
-                StackReference stackRef = StackReference.fromString(element.head);
-                if (stackRef == null || (helper.head = stackRef.createStack()) == null) {
-                    LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.head);
-                } else {
-                    helper.hasEquipment = true;
-                }
-            }
-
-            if (!element.chest.isEmpty()) {
-                StackReference stackRef = StackReference.fromString(element.chest);
-                if (stackRef == null || (helper.chest = stackRef.createStack()) == null) {
-                    LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.chest);
-                } else {
-                    helper.hasEquipment = true;
-                }
-            }
-
-            if (!element.legs.isEmpty()) {
-                StackReference stackRef = StackReference.fromString(element.legs);
-                if (stackRef == null || (helper.legs = stackRef.createStack()) == null) {
-                    LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.legs);
-                } else {
-                    helper.hasEquipment = true;
-                }
-            }
-
-            if (!element.boots.isEmpty()) {
-                StackReference stackRef = StackReference.fromString(element.boots);
-                if (stackRef == null || (helper.boots = stackRef.createStack()) == null) {
-                    LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.boots);
-                } else {
-                    helper.hasEquipment = true;
-                }
+            catch (Throwable e) {
+                BrandonsCore.LOGGER.warn("[Entity Element] An error occurred while parsing stack string.");
+                e.printStackTrace();
             }
 
             return helper;
