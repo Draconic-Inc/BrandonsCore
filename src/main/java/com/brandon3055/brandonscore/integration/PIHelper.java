@@ -41,7 +41,16 @@ public class PIHelper {
         _openGui(parentScreen, pageURIs);
     }
 
+    public static void openMod(@Nullable Screen parentScreen, String modid)  {
+        assert isInstalled();
+        _openMod(parentScreen, modid);
+    }
+
     private static void _openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
         PiAPI.openGui(parentScreen, pageURIs);
+    }
+
+    private static void _openMod(@Nullable Screen parentScreen, String modid) {
+        PiAPI.openModPage(parentScreen, modid);
     }
 }
