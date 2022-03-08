@@ -4,7 +4,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
-import com.brandon3055.brandonscore.lib.StackReference;
+import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -28,10 +28,9 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
         this.boundless = true;
         this.colour = 0xc6c6c6;
         this.colourHover = -1;
-        StackReference stackRef = StackReference.fromString(stackString);
-        ItemStack stack;
+        ItemStack stack = StringyStacks.fromString(stackString);
 
-        if (stackRef == null || (stack = stackRef.createStack()).isEmpty()) {
+        if (stack.isEmpty()) {
             error("[Broken recipe. Specified Item or Block could not be found!]");
             return;
         }

@@ -9,7 +9,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScroll
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
-import com.brandon3055.brandonscore.lib.StackReference;
+import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.brandon3055.brandonscore.lib.entityfilter.*;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.Utils;
@@ -602,7 +602,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addChild(toggleWhiteList);
 
 
-            stackIcon = new GuiStackIcon(null);
+            stackIcon = new GuiStackIcon(ItemStack.EMPTY);
             updateStackIcon();
             stackIcon.setToolTip(false);
             stackIcon.addSlotBackground();
@@ -766,12 +766,12 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
         private void updateStackIcon() {
             if (getNode() != null) {
                 if (getNode().getItemName().isEmpty()) {
-                    stackIcon.setStack((StackReference) null);
+                    stackIcon.setStack(ItemStack.EMPTY);
                     stackIcon.setHoverText(i18ni("set_stack"));
                 } else {
-                    StackReference stack = new StackReference(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
+                    ItemStack stack = StringyStacks.legacyStackConverter(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
                     stackIcon.setStack(stack);
-                    List<ITextComponent> tooltip = stack.createStack().getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ADVANCED : NORMAL);
+                    List<ITextComponent> tooltip = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ADVANCED : NORMAL);
                     tooltip.add(new StringTextComponent(TextFormatting.GRAY + "----------------------------"));
                     tooltip.add(new TranslationTextComponent("set_stack"));
                     stackIcon.setComponentHoverText(tooltip);

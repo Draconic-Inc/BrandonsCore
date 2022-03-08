@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.Pair;
+import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.InventoryUtils;
@@ -24,6 +25,7 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -35,14 +37,12 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -79,6 +79,7 @@ public class BCUtilCommands {
         dispatcher.register(
                 Commands.literal("bcore_util")
                         .then(registerNBT())
+                        .then(registerStackString())
 //                        .then(registerRegenChunk())
                         .then(registerNoClip())
                         .then(registerUUID())
@@ -93,6 +94,31 @@ public class BCUtilCommands {
         return Commands.literal("nbt")
                 .requires(cs -> cs.hasPermission(0))
                 .executes(context -> functionNBT(context.getSource()));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> registerStackString() {
+        return Commands.literal("stack_string")
+                .then(Commands.literal("from_string")
+                        .requires(cs -> cs.hasPermission(2))
+                        .then(Commands.argument("give-to", EntityArgument.player())
+                                .then(Commands.argument("stack-string", StringArgumentType.greedyString())
+                                        .executes(ctx -> functionFromStackString(ctx.getSource(), EntityArgument.getPlayer(ctx, "give-to"), StringArgumentType.getString(ctx, "stack-string")))
+                                )))
+
+                .then(Commands.literal("to_string")
+                        .requires(cs -> cs.hasPermission(0))
+                        .then(Commands.literal("id_only")
+                                .executes(context -> functionToStackString(context.getSource(), false, false, false)))
+                        .then(Commands.literal("id_nbt")
+                                .executes(context -> functionToStackString(context.getSource(), false, true, false)))
+                        .then(Commands.literal("id_count")
+                                .executes(context -> functionToStackString(context.getSource(), true, false, false)))
+                        .then(Commands.literal("id_nbt_count")
+                                .executes(context -> functionToStackString(context.getSource(), true, true, false)))
+                        .then(Commands.literal("id_nbt_capabilities")
+                                .executes(context -> functionToStackString(context.getSource(), false, true, true)))
+                        .executes(context -> functionToStackString(context.getSource(), true, true, true))
+                );
     }
 
     private static ArgumentBuilder<CommandSource, ?> registerRegenChunk() {
@@ -173,6 +199,43 @@ public class BCUtilCommands {
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
         DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new StringTextComponent(s).withStyle(TextFormatting.GOLD)));
+        return 0;
+    }
+
+    private static int functionToStackString(CommandSource source, boolean count, boolean nbt, boolean caps) throws CommandException, CommandSyntaxException {
+        PlayerEntity player = source.getPlayerOrException();
+        ItemStack stack = HandHelper.getMainFirst(player);
+        if (stack.isEmpty()) {
+            throw new CommandException(new StringTextComponent("You are not holding an item!"));
+        }
+
+        String returnString = StringyStacks.toString(stack, nbt, count, caps);
+        ChatHelper.sendMessage(player, new StringTextComponent("# The following is stack string for the held stack (click to copy) #").withStyle(TextFormatting.BLUE));
+        IFormattableTextComponent textComponent = returnString.length() > 64 ? new StringTextComponent(returnString.substring(0, 64) + "... ").withStyle(TextFormatting.GOLD).append(new StringTextComponent("(Mouseover for full)").withStyle(TextFormatting.DARK_AQUA).withStyle(TextFormatting.UNDERLINE)) : new StringTextComponent(returnString).withStyle(TextFormatting.GOLD);
+        textComponent.setStyle(textComponent.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to copy to clipboard").withStyle(TextFormatting.BLUE).append(new StringTextComponent("\n" + returnString).withStyle(TextFormatting.GRAY)))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, returnString)));
+        ChatHelper.sendMessage(player, textComponent);
+        StringyStacks.LOGGER.info(returnString);
+        return 0;
+    }
+
+    private static int functionFromStackString(CommandSource source, ServerPlayerEntity player, String stackString) throws CommandException, CommandSyntaxException {
+        ItemStack stack = StringyStacks.fromString(stackString, null);
+        if (stack == null) {
+            throw new CommandException(new StringTextComponent("Invalid item string. You may find more details in the server console."));
+        }
+
+        boolean flag = player.inventory.add(stack);
+        if (flag && stack.isEmpty()) {
+            stack.setCount(1);
+            player.level.playSound((PlayerEntity)null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.inventoryMenu.broadcastChanges();
+        } else {
+            ItemEntity itementity = player.drop(stack, false);
+            if (itementity != null) {
+                itementity.setNoPickUpDelay();
+                itementity.setOwner(player.getUUID());
+            }
+        }
         return 0;
     }
 

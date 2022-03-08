@@ -2,16 +2,16 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
-import com.brandon3055.brandonscore.lib.StackReference;
+import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,36 +24,44 @@ import java.util.stream.Collectors;
  * Created by brandon3055 on 3/09/2016.
  */
 public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGui.JEITargetAdapter {
-    public static Map<Integer, ItemStack> stackCache = new HashMap<>();
+    public static Map<String, ItemStack> stackCache = new HashMap<>();
 
     public boolean drawCount = true;
     public boolean drawToolTip = true;
     public boolean drawHoverHighlight = false;
     private GuiElement background = null;
     protected List<ITextComponent> toolTipOverride = null;
-    private StackReference stackReference;
+    private String stackString;
     private ItemStack stack = ItemStack.EMPTY;
     private Runnable clickListener = null;
     private Consumer<Object> ingredientDropListener = null;
 
     public GuiStackIcon() {
-        this(null);
+        this(ItemStack.EMPTY);
     }
 
-    public GuiStackIcon(StackReference stackReference) {
-        this.stackReference = stackReference;
+    @Deprecated //Do i really need StackReference (now stackString)
+    public GuiStackIcon(String stackString) {
+        this.stackString = stackString;
         setSize(18, 18);
     }
 
-    public GuiStackIcon(int xPos, int yPos, StackReference stackReference) {
+    public GuiStackIcon(ItemStack stack) {
+        this.stack = stack;
+        setSize(18, 18);
+    }
+
+    @Deprecated
+    public GuiStackIcon(int xPos, int yPos, String stackString) {
         super(xPos, yPos);
-        this.stackReference = stackReference;
+        this.stackString = stackString;
         setSize(18, 18);
     }
 
-    public GuiStackIcon(int xPos, int yPos, int xSize, int ySize, StackReference stackReference) {
+    @Deprecated
+    public GuiStackIcon(int xPos, int yPos, int xSize, int ySize, String stackString) {
         super(xPos, yPos, xSize, ySize);
-        this.stackReference = stackReference;
+        this.stackString = stackString;
     }
 
     @Override
@@ -133,8 +141,9 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         this.clickListener = clickListener;
     }
 
-    public GuiStackIcon setStack(StackReference stackReference) {
-        this.stackReference = stackReference;
+    @Deprecated
+    public GuiStackIcon setStack(@Nullable String stackString) {
+        this.stackString = stackString;
         return this;
     }
 
@@ -182,29 +191,26 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     }
 
     public ItemStack getStack() {
-        if (stackReference == null) {
+        if (stackString == null) {
             return stack;
         }
-        int hash = stackReference.hashCode();
-        if (!stackCache.containsKey(hash)) {
-            ItemStack stack = stackReference.createStack();
-            if (stack.isEmpty()) {
+        else if (stackString.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        if (!stackCache.containsKey(stackString)) {
+            ItemStack stack = StringyStacks.fromString(stackString, null);
+            if (stack == null) {
                 stack = new ItemStack(Blocks.BARRIER);
                 toolTipOverride = new ArrayList<>();
                 toolTipOverride.add(new StringTextComponent("Failed to load Item Stack"));
                 toolTipOverride.add(new StringTextComponent("This may mean the mod the stack belongs to is not installed"));
                 toolTipOverride.add(new StringTextComponent("Or its just broken..."));
             }
-            stackCache.put(hash, stack);
-        }
-        ItemStack stack = stackCache.get(hash);
-
-        if (stack.isEmpty()) {
-            stack = new ItemStack(Blocks.BARRIER);
-            stackCache.remove(hash);
+            stackCache.put(stackString, stack);
         }
 
-        return stack;
+        return stackCache.get(stackString);
     }
 
     @Deprecated

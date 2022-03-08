@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.JeiHelper;
 import com.brandon3055.brandonscore.integration.PIHelper;
-import com.brandon3055.brandonscore.lib.StackReference;
+import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -46,11 +46,9 @@ public class StackElement extends MDElementBase<StackElement> {
 
         if (isOre) {
             baseStacks.addAll(tag.getValues().stream().map(ItemStack::new).collect(Collectors.toList()));
-        }
-        else {
-            StackReference stackRef = StackReference.fromString(stackString);
-            ItemStack stack;
-            if (stackRef == null || (stack = stackRef.createStack()).isEmpty()) {
+        } else {
+            ItemStack stack = StringyStacks.fromString(stackString, null);
+            if (stack == null) {
                 error("[Broken Stack. Specified Item or Block could not be found!]");
                 return;
             }
@@ -125,8 +123,7 @@ public class StackElement extends MDElementBase<StackElement> {
                 for (int i = 0; i < list.size(); ++i) {
                     if (i == 0) {
 //                        list.set(i, stack.getRarity().color + list.get(i));
-                    }
-                    else {
+                    } else {
 //                        list.set(i, TextFormatting.GRAY + list.get(i));
                     }
                 }
@@ -134,8 +131,7 @@ public class StackElement extends MDElementBase<StackElement> {
                 GuiUtils.preItemToolTip(stack);
                 this.drawHoveringText(stack, list, mouseX, mouseY, screenWidth, screenHeight, -1, fontRenderer);
                 GuiUtils.postItemToolTip();
-            }
-            else {
+            } else {
                 drawHoveringText(tooltip, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
             }
             return true;
@@ -164,8 +160,7 @@ public class StackElement extends MDElementBase<StackElement> {
             if (keyCode == JeiHelper.getRecipeKey(false)) {
                 JeiHelper.openJEIRecipe(stack, false);
                 return true;
-            }
-            else if (keyCode == JeiHelper.getRecipeKey(true)) {
+            } else if (keyCode == JeiHelper.getRecipeKey(true)) {
                 JeiHelper.openJEIRecipe(stack, true);
                 return true;
             }

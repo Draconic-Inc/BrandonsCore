@@ -1,27 +1,22 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
-import com.brandon3055.brandonscore.lib.StackReference;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
-import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -32,8 +27,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +39,7 @@ import java.util.UUID;
  * Created by brandon3055 on 5/31/2018.
  */
 public class EntityElement extends MDElementBase<EntityElement> {
+    private static final Logger LOGGER = LogManager.getLogger(EntityElement.class);
 
     private static Map<String, Entity> renderEntityCache = new HashMap<>();
     public int xOffset = 0;
@@ -113,8 +110,8 @@ public class EntityElement extends MDElementBase<EntityElement> {
             }
         }
         catch (Throwable e) {
-            BrandonsCore.LOGGER.error("Something went wrong while attempting to render an entity on the screen!");
-            BrandonsCore.LOGGER.error("Entity: " + renderEntity);
+            LOGGER.error("Something went wrong while attempting to render an entity on the screen!");
+            LOGGER.error("Entity: " + renderEntity);
             e.printStackTrace();
             errored = true;
         }
@@ -298,61 +295,61 @@ public class EntityElement extends MDElementBase<EntityElement> {
 
             try {
                 if (!element.mainHand.isEmpty()) {
-                    StackReference stackRef = StackReference.fromString(element.mainHand);
-                    if (stackRef == null || (helper.mainHand = stackRef.createStack()) == null) {
-                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.mainHand);
+                    helper.mainHand = StringyStacks.fromString(element.mainHand);
+                    if (helper.mainHand.isEmpty()) {
+                        LOGGER.warn("[MarkdownParser]: No matching item found for stack string: " + element.mainHand);
                     } else {
                         helper.hasEquipment = true;
                     }
                 }
 
                 if (!element.offHand.isEmpty()) {
-                    StackReference stackRef = StackReference.fromString(element.offHand);
-                    if (stackRef == null || (helper.offHand = stackRef.createStack()) == null) {
-                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.offHand);
+                    helper.offHand = StringyStacks.fromString(element.offHand);
+                    if (helper.offHand.isEmpty()) {
+                        LOGGER.warn("[MarkdownParser]: No matching item found for stack string: " + element.offHand);
                     } else {
                         helper.hasEquipment = true;
                     }
                 }
 
                 if (!element.head.isEmpty()) {
-                    StackReference stackRef = StackReference.fromString(element.head);
-                    if (stackRef == null || (helper.head = stackRef.createStack()) == null) {
-                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.head);
+                    helper.head = StringyStacks.fromString(element.head);
+                    if (helper.head.isEmpty()) {
+                        LOGGER.warn("[MarkdownParser]: No matching item found for stack string: " + element.head);
                     } else {
                         helper.hasEquipment = true;
                     }
                 }
 
                 if (!element.chest.isEmpty()) {
-                    StackReference stackRef = StackReference.fromString(element.chest);
-                    if (stackRef == null || (helper.chest = stackRef.createStack()) == null) {
-                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.chest);
+                    helper.chest = StringyStacks.fromString(element.chest);
+                    if (helper.chest.isEmpty()) {
+                        LOGGER.warn("[MarkdownParser]: No matching item found for stack string: " + element.chest);
                     } else {
                         helper.hasEquipment = true;
                     }
                 }
 
                 if (!element.legs.isEmpty()) {
-                    StackReference stackRef = StackReference.fromString(element.legs);
-                    if (stackRef == null || (helper.legs = stackRef.createStack()) == null) {
-                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.legs);
+                    helper.legs = StringyStacks.fromString(element.legs);
+                    if (helper.legs.isEmpty()) {
+                        LOGGER.warn("[MarkdownParser]: No matching item found for stack string: " + element.legs);
                     } else {
                         helper.hasEquipment = true;
                     }
                 }
 
                 if (!element.boots.isEmpty()) {
-                    StackReference stackRef = StackReference.fromString(element.boots);
-                    if (stackRef == null || (helper.boots = stackRef.createStack()) == null) {
-                        LogHelperBC.warn("[MarkdownParser]: No matching item found for stack string: " + element.boots);
+                    helper.boots = StringyStacks.fromString(element.boots);
+                    if (helper.boots.isEmpty()) {
+                        LOGGER.warn("[MarkdownParser]: No matching item found for stack string: " + element.boots);
                     } else {
                         helper.hasEquipment = true;
                     }
                 }
             }
             catch (Throwable e) {
-                BrandonsCore.LOGGER.warn("[Entity Element] An error occurred while parsing stack string.");
+                LOGGER.warn("[Entity Element] An error occurred while parsing stack string.");
                 e.printStackTrace();
             }
 
