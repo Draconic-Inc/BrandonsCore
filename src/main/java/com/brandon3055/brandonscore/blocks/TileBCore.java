@@ -14,6 +14,7 @@ import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.lib.IRSSwitchable.RSMode;
 import com.brandon3055.brandonscore.lib.datamanager.*;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
+import com.brandon3055.brandonscore.network.ServerPacketHandler;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -298,9 +299,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * Note: Packets from client to server do not need to be verified because that is already handled by the packet handler.
      */
     public boolean verifyPlayerPermission(PlayerEntity player) {
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, worldPosition, Direction.UP);
-        MinecraftForge.EVENT_BUS.post(event);
-        return !event.isCanceled();
+        return ServerPacketHandler.verifyPlayerPermission(player, getBlockPos());
     }
 
     /**

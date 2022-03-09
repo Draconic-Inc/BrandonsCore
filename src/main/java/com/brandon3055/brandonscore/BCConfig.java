@@ -35,6 +35,7 @@ public class BCConfig {
     }
 
     public static boolean enable_tpx;
+    public static boolean clientPermissionVerification;
 
     private static void loadServer() {
         serverTag = config.getTag("Server");
@@ -42,6 +43,14 @@ public class BCConfig {
                 .setComment("Allows you to disable the tpx command.")
                 .setDefaultBoolean(!ModList.get().isLoaded("mystcraft"))
                 .setSyncCallback((tag, type) -> enable_tpx = tag.getBoolean());
+
+        serverTag.getTag("clientPermissionVerification")
+                .setComment("Uses the right click block event to verify that players have permission to interact with BC / DE blocks.",
+                        "This ensures there is no possible way a player can interact with a BC block if a protection system is blocking the interaction",
+                        "In theory not even a modified client sending raw packets will be able to bypass this.",
+                        "I have added the ability to disable this feature because it seems in rare cases it blocks players who should have access and i have no idea why.")
+                .setDefaultBoolean(true)
+                .setSyncCallback((tag, type) -> clientPermissionVerification = tag.getBoolean());
     }
 
 

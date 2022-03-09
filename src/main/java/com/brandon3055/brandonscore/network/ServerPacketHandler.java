@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
@@ -94,7 +95,8 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     }
 
     //This is to assist things like grief prevention. If a player is not allowed to right click a block then they are not allowed to send packets to it.
-    private boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
+    public static boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
+        if (!BCConfig.clientPermissionVerification) return true;
         BlockRayTraceResult traceResult = new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false);
         PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, traceResult);
         MinecraftForge.EVENT_BUS.post(event);
