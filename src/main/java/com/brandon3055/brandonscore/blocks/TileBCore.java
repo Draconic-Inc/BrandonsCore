@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.blocks;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
@@ -171,7 +172,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     public void sendPacketToServer(Consumer<MCDataOutput> writer, int id) {
         PacketCustom packet = createServerBoundPacket(id);
         writer.accept(packet);
-        packet.sendToServer();
+        BrandonsCore.proxy.sendToServer(packet);
     }
 
     /**
