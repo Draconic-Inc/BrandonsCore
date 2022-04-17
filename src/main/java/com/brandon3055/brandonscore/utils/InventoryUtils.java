@@ -118,10 +118,21 @@ public class InventoryUtils {
         player.setItemInHand(hand, stack.getCount() > 0 ? stack.copy() : ItemStack.EMPTY);
     }
 
+    /**
+     * Will give the player the specified stack ether by placing it in their inventory or by dropping it on them
+     * if their inventory has no room.
+     * Will prioritize putting it in their hand if their hand is empty.
+     * */
     public static void givePlayerStack(PlayerEntity player, ItemStack stack) {
         if (player.level.isClientSide) {
             return;
         }
+
+        if (player.getItemInHand(Hand.MAIN_HAND).isEmpty()) {
+            player.setItemInHand(Hand.MAIN_HAND, stack);
+            return;
+        }
+
         player.inventory.add(stack);
         if (stack.getCount() > 0) {
             dropItemNoDelay(stack, player.level, Vector3.fromEntity(player));
@@ -132,7 +143,7 @@ public class InventoryUtils {
         ItemEntity item = new ItemEntity(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
         item.setDeltaMovement(world.random.nextGaussian() * 0.05, world.random.nextGaussian() * 0.05 + 0.2F, world.random.nextGaussian() * 0.05);
         world.addFreshEntity(item);
-        item.setPickUpDelay(0);
+        item.setNoPickUpDelay();
     }
 
     public static int findMatchingStack(IItemHandler itemHandler, TriPredicate<IItemHandler, ItemStack, Integer> predicate) {

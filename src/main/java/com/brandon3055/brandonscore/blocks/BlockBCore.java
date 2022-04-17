@@ -56,11 +56,6 @@ public class BlockBCore extends Block implements IBCoreBlock {
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         ItemStack stack = super.getPickBlock(state, target, world, pos, player);
-
-//        if (stack.getItem() == Item.getItemFromBlock(this) && stack.getItem().getHasSubtypes()) {
-//            stack.setItemDamage(getMetaFromState(state));
-//        }
-
         TileEntity tile = world.getBlockEntity(pos);
 
         if (tile instanceof IDataRetainingTile && !BrandonsCore.proxy.isCTRLKeyDown()) {
@@ -239,7 +234,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
         if (te instanceof INameable && ((INameable) te).hasCustomName()) {
             if (stack == null) {
-                stack = new ItemStack(this, 1);//, damageDropped(state));
+                stack = new ItemStack(this, 1);
             }
             stack.setHoverName(((INameable) te).getName());
         }

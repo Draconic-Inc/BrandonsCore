@@ -20,14 +20,14 @@ public interface IInteractTile {
     }
 
     /**
-     * Called when the hosed block is used (right clicked)
+     * Called when the host block is used (right clicked)
      */
     default ActionResultType onBlockUse(BlockState state, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
         return onBlockActivated(state, player, hand, hit) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
     }
 
     /**
-     * Called when the hosed block is attacked (left clicked)
+     * Called when the host block is attacked (left clicked)
      */
     default void onBlockAttack(BlockState state, PlayerEntity player) {}
 
