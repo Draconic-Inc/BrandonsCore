@@ -335,6 +335,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         if (!capTags.isEmpty()) {
             compound.put("bc_caps", capTags);
         }
+        writeExtraTileAndStack(compound);
     }
 
 
@@ -345,6 +346,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         if (compound.contains("bc_caps")) {
             capManager.deserialize(compound.getCompound("bc_caps"));
         }
+        readExtraTileAndStack(compound);
     }
 
     /**
@@ -364,6 +366,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         }
 
         savedDataObjects.forEach((tagName, serializable) -> compound.put(tagName, serializable.serializeNBT()));
+        writeExtraTileAndStack(compound);
     }
 
     public void readExtraNBT(CompoundNBT compound) {
@@ -376,7 +379,22 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         }
 
         savedDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(compound.getCompound(tagName)));
+        readExtraTileAndStack(compound);
     }
+
+    /**
+     * Convenience method that is called by both
+     * {@link #writeExtraNBT(CompoundNBT)} and
+     * {@link #writeToItemStack(CompoundNBT, boolean)}
+     */
+    public void writeExtraTileAndStack(CompoundNBT compound) {}
+
+    /**
+     * Convenience method that is called by both
+     * {@link #readExtraNBT(CompoundNBT)} and
+     * {@link #readFromItemStack(CompoundNBT)}
+     */
+    public void readExtraTileAndStack(CompoundNBT compound) {}
 
     @Override
     public final CompoundNBT save(CompoundNBT compound) {
@@ -646,12 +664,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     public void setCustomName(String customName) {
         this.customName = customName;
     }
-
-//    @Nullable
-//    @Override
-//    public ITextComponent getDisplayName() {
-//        return hasCustomName() ? new StringTextComponent(getName()) : new TextComponentTranslation(getName());
-//    }
 
     /**
      * If enabled a list of players currently accessing this tiles container will be available via {@link #getAccessingPlayers()}

@@ -652,7 +652,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         RenderMaterial mat = BCSprites.getButton(getRenderState(hovered));
-        IVertexBuilder builder = mat.buffer(getter, location -> BCSprites.GUI_TYPE);
+        IVertexBuilder builder = getter.getBuffer(mat.renderType(location -> BCSprites.GUI_TYPE));//mat.buffer(getter, location -> BCSprites.GUI_TYPE);
         drawDynamicSprite(builder, mat.sprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
         getter.endBatch();
     }

@@ -61,6 +61,7 @@ public class BCSprites {
         registerThemed(MODID, "button_borderless");
         registerThemed(MODID, "button_borderless_invert");
         registerThemed(MODID, "slot");
+        registerThemed(MODID, "slot_large");
         registerThemed(MODID, "resize");
         registerThemed(MODID, "reposition");
         registerThemed(MODID, "copy");
@@ -80,6 +81,12 @@ public class BCSprites {
         registerThemed(MODID, "item_config");
         registerThemed(MODID, "hud_button");
         registerThemed(MODID, "info_icon");
+        registerThemed(MODID, "prog_arrow_right");
+        registerThemed(MODID, "prog_arrow_right_over");
+        registerThemed(MODID, "prog_arrow_up");
+        registerThemed(MODID, "prog_arrow_up_over");
+        registerThemed(MODID, "prog_arrow_up_tall");
+        registerThemed(MODID, "prog_arrow_up_tall_over");
 
         register(MODID, "add");
         register(MODID, "delete");

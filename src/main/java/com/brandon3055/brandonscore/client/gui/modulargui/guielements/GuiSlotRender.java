@@ -33,7 +33,7 @@ public class GuiSlotRender extends GuiElement<GuiSlotRender> {
         RenderMaterial mat = BCSprites.getThemed("slot");
         bindTexture(mat.atlasLocation());
         IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        drawSprite(mat.buffer(getter, BCSprites::makeType), getInsetRect().x, getInsetRect().y, 18, 18, mat.sprite());
+        drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), getInsetRect().x, getInsetRect().y, 18, 18, mat.sprite());
         getter.endBatch();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }

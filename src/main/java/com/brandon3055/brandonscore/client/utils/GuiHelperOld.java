@@ -290,12 +290,12 @@ public class GuiHelperOld {
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                drawSprite(mat.buffer(getter, BCSprites::makeType), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
+                drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
             }
         }
 
         for (int x = 0; x < 9; x++) {
-            drawSprite(mat.buffer(getter, BCSprites::makeType), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
+            drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
         }
         getter.endBatch();
     }

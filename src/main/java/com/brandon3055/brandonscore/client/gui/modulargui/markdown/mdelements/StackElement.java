@@ -86,7 +86,7 @@ public class StackElement extends MDElementBase<StackElement> {
             bindTexture(mat.atlasLocation());
             RenderSystem.color4f(1F, 1F, 1F, 1F);
             IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-            drawSprite(mat.buffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+            drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), mat.sprite());
             getter.endBatch();
         }
 

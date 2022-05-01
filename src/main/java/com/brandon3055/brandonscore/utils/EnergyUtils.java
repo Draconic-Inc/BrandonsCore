@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
-//import cofh.redstoneflux.api.IEnergyContainerItem;
-//import cofh.redstoneflux.api.IEnergyHandler;
+
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.capability.OPWrappers;
@@ -12,7 +11,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -36,19 +34,13 @@ public class EnergyUtils {
             LogHelperBC.bigDev("Attempt to do energy operation client side!");
             return null;
         }
-//        if (tile instanceof IEnergyHandler) {
-//            return new OPWrappers.RF((IEnergyHandler) tile, side);
-//        }
+
         return getStorageFromProvider(tile, side);
     }
 
     public static IOPStorage getStorage(ItemStack stack) {
         if (!stack.isEmpty()) {
-//            if (stack.getItem() instanceof IEnergyContainerItem) {
-//                return new OPWrappers.RFItem((IEnergyContainerItem) stack.getItem(), stack);
-//            } else {
-                return getStorageFromProvider(stack, null);
-//            }
+            return getStorageFromProvider(stack, null);
         }
 
         return null;
@@ -178,17 +170,11 @@ public class EnergyUtils {
     // ================= Checks =================
 
     public static boolean canExtractEnergy(ItemStack stack) {
-//        if (stack.getItem() instanceof IEnergyContainerItem) {
-//            return true;
-//        }
         IOPStorage storage = getStorage(stack);
         return storage != null && storage.canExtract();
     }
 
     public static boolean canReceiveEnergy(ItemStack stack) {
-//        if (stack.getItem() instanceof IEnergyContainerItem) {
-//            return true;
-//        }
         IOPStorage storage = getStorage(stack);
         return storage != null && storage.canReceive();
     }

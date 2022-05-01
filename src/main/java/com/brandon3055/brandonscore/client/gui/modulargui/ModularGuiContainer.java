@@ -424,11 +424,15 @@ public abstract class ModularGuiContainer<T extends Container> extends Container
         this.experimentalSlotOcclusion = experimentalSlotOcclusion;
     }
 
+    @Override
     public int getGuiLeft() { return guiLeft(); }
 
+    @Override
     public int getGuiTop() { return guiTop(); }
 
+    @Override
     public int getXSize() { return xSize(); }
 
+    @Override
     public int getYSize() { return ySize(); }
 }

@@ -13,7 +13,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
-import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotData;
+import com.brandon3055.brandonscore.inventory.SlotMover;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -184,7 +184,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
      *
      * @param slotMapper (column, row, slotData)
      */
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotData> slotMapper, RenderMaterial background) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotMover> slotMapper, RenderMaterial background) {
         GuiElement element = new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
@@ -203,12 +203,12 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                     for (int x = 0; x < columns; x++) {
                         for (int y = 0; y < rows; y++) {
                             if (slotMapper != null) {
-                                SlotData data = slotMapper.apply(x, y);
+                                SlotMover data = slotMapper.apply(x, y);
                                 if (data != null && data.slot.hasItem()) {
                                     continue;
                                 }
                             }
-                            drawSprite(buffer, xPos() + (x * (18 + spacing)), yPos() + (y * (18 + spacing)), 18, 18, background.sprite());
+                            drawSprite(buffer, xPos() + (x * (18 + spacing)) + 1, yPos() + (y * (18 + spacing)) + 1, 16, 16, background.sprite());
                         }
                     }
                 }
@@ -222,7 +222,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 if (slotMapper != null) {
                     for (int x = 0; x < columns; x++) {
                         for (int y = 0; y < rows; y++) {
-                            SlotData data = slotMapper.apply(x, y);
+                            SlotMover data = slotMapper.apply(x, y);
                             if (data != null) {
                                 data.setPos((xPos() + (x * (18 + spacing))) - gui.guiLeft() + 1, (yPos() + (y * (18 + spacing))) - gui.guiTop() + 1);
                             }
@@ -230,14 +230,6 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                     }
                 }
                 return ret;
-            }
-
-            public void quad(BufferBuilder buffer, int x, int y, int width, int height) {
-                double zLevel = getRenderZLevel();
-                buffer.vertex(x, y + height, zLevel).uv(0, 1).endVertex();
-                buffer.vertex(x + width, y + height, zLevel).uv(1, 1).endVertex();
-                buffer.vertex(x + width, y, zLevel).uv(1, (float) 0).endVertex();
-                buffer.vertex(x, y, zLevel).uv(0, 0).endVertex();
             }
         };
         element.setSize((columns * 18) + ((columns - 1) * spacing), (rows * 18) + ((rows - 1) * spacing));
@@ -266,6 +258,40 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     public GuiElement createSlots(int columns, int rows) {
         return createSlots(null, columns, rows, 0);
+    }
+
+    public GuiElement createSlot(GuiElement parent, SlotMover slotMover, Supplier<RenderMaterial> background, boolean largeSlot) {
+        int size = largeSlot ? 26 : 18;
+        GuiElement element = new GuiElement() {
+            @Override
+            public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+                super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+                RenderMaterial slot = BCSprites.getThemed(largeSlot ? "slot_large" : "slot");
+                IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+                IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TYPE);
+                drawSprite(buffer, xPos(), yPos(), size, size, slot.sprite());
+                if (background != null && (slotMover == null || !slotMover.slot.hasItem())) {
+                    int offset = largeSlot ? 5 : 1;
+                    drawSprite(buffer, xPos() + offset, yPos() + offset, 16, 16, background.get().sprite());
+                }
+                getter.endBatch();
+            }
+
+            @Override
+            public GuiElement translate(int xAmount, int yAmount) {
+                GuiElement ret = super.translate(xAmount, yAmount);
+                if (slotMover != null) {
+                    slotMover.setPos(xPos() - gui.guiLeft() + (largeSlot ? 5 : 1), yPos() - gui.guiTop() + (largeSlot ? 5 : 1));
+                }
+                return ret;
+            }
+        };
+        element.setSize(size, size);
+        if (parent != null) {
+            parent.addChild(element);
+        }
+
+        return element;
     }
 
     /**
@@ -306,10 +332,32 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             element.setMaxYPos(bar.maxYPos(), false);
         }
 
-        Rectangle rect = container.getEnclosingRect();
-        container.setRawPos(rect.x, rect.y);
-        container.setSize(rect);
+        container.setBoundsToChildren();
 
+        if (parent != null) {
+            parent.addChild(container);
+        }
+
+        return container;
+    }
+
+    public GuiElement createPlayerSlotsManualMovers(GuiElement parent, boolean title, Function<Integer, SlotMover> slotGetter) {
+        GuiElement container = new GuiElement();
+        GuiElement main = createSlots(container, 9, 3, 0, (column, row) -> slotGetter.apply(column + row * 9 + 9), null);
+        GuiElement bar = createSlots(container, 9, 1, 0, (column, row) -> slotGetter.apply(column), null);
+        bar.setYPos(main.maxYPos() + 3);
+
+        if (title) {
+            GuiLabel invTitle = new GuiLabel(i18ni("your_inventory"));
+            invTitle.setAlignment(GuiAlign.LEFT).setHoverableTextCol(hovering -> Palette.BG.text());
+            invTitle.setShadowStateSupplier(() -> darkMode);
+            container.addChild(invTitle);
+            invTitle.setSize(main.xSize(), 8);
+            main.translate(0, 10);
+            bar.translate(0, 10);
+        }
+
+        container.setBoundsToChildren();
 
         if (parent != null) {
             parent.addChild(container);
@@ -332,7 +380,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                 int c = 0;
                 for (int i = 0; i < handler.getSlots(); i++) {
                     int finalI = i;
-                    ContainerSlotLayout.SlotData data = slotLayout.getSlotData(PLAYER_EQUIPMENT, finalI);
+                    SlotMover data = slotLayout.getSlotData(PLAYER_EQUIPMENT, finalI);
                     if (showFilter != null && !showFilter.test(data.slot.getItem())) {
                         data.setPos(-9999, -9999);
                         continue;
@@ -712,7 +760,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             case BOTTOM_RIGHT:  element.setRelPos(placeOutside, placeOutside.xSize() + xOffset, placeOutside.ySize() + yOffset); break;
             case BOTTOM_CENTER: element.setRelPos(placeOutside, ((placeOutside.xSize() - element.xSize()) / 2) + xOffset, placeOutside.ySize() + yOffset); break;
             case BOTTOM_LEFT:   element.setRelPos(placeOutside, -element.xSize() + xOffset, placeOutside.ySize() + yOffset); break;
-            case MIDDLE_LEFT:   element.setRelPos(-element.xSize() + xOffset, ((placeOutside.ySize() - element.ySize()) / 2) + yOffset); break;
+            case MIDDLE_LEFT:   element.setRelPos(placeOutside, -element.xSize() + xOffset, ((placeOutside.ySize() - element.ySize()) / 2) + yOffset); break;
         }
         //@formatter:on
     }

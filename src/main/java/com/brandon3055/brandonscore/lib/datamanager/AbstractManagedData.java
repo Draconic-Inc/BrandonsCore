@@ -16,6 +16,9 @@ public abstract class AbstractManagedData<T> implements IManagedData {
     protected String name = "";
     protected DataFlags flags = DataFlags.NONE;
     protected IDataManager dataManager;
+    /**
+     * @see #setCCSCS()
+     * */
     protected boolean ccscsFlag = false; //clientControlSetClientSide
     protected List<Consumer<T>> valueListeners = new ArrayList<>();
 
@@ -72,6 +75,14 @@ public abstract class AbstractManagedData<T> implements IManagedData {
         return flags;
     }
 
+    /**
+     * Applies when using the client control flag to set the value from the client side.
+     * By default, the client sends a packet to the server, then once the new value is set server side
+     * that new value is sent back to the client where it is then applied.
+     * This is the most reliable method as it means the server is still driving the client side value but it can introduce a delay client side.
+     *
+     * Setting this flag to true will force the client to apply the new value immediately before waiting for confirmation from the server.
+     * */
     public void setCCSCS() {
         this.ccscsFlag = true;
     }

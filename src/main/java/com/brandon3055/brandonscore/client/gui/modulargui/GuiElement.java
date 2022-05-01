@@ -4,6 +4,7 @@ import codechicken.lib.colour.Colour;
 import codechicken.lib.colour.ColourARGB;
 import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Vector3;
+import codechicken.lib.vec.uv.UVRotation;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
@@ -1263,6 +1264,14 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return setYPosMod((e, integer) -> yMod.get());
     }
 
+    public E bindPosition(GuiElement<?> element) {
+        return setPosModifiers(element::xPos, element::yPos);
+    }
+
+    public E bindPosition(GuiElement<?> element, int xOffset, int yOffset) {
+        return setPosModifiers(() -> element.xPos() + xOffset, () -> element.yPos() + yOffset);
+    }
+
     /**
      * Set the position of this element relative to its parent.
      * If parent has not yet been assigned this will be applied when the parent is assigned.
@@ -1591,9 +1600,23 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     /**
-     * Expands the bounds of the given rectangle (if needed) so that they enclose this element.
-     * And all of its child elements recursively.
-     */
+     * Computes a rectangle that encloses all child elements of this element then updates the raw position
+     * and dimensions to match that rectangle.
+     * */
+    public void setBoundsToChildren(int topMargin, int leftMargin, int bottomMargin, int rightMargin) {
+        Rectangle rect = getEnclosingRect();
+        setRawPos(rect.x - leftMargin, rect.y - topMargin);
+        setSize(rect.width + leftMargin + rightMargin, rect.height + topMargin + bottomMargin);
+    }
+
+    public void setBoundsToChildren() {
+        setBoundsToChildren(0, 0, 0, 0);
+    }
+
+        /**
+         * Expands the bounds of the given rectangle (if needed) so that they enclose this element.
+         * And all of its child elements recursively.
+         */
     public Rectangle addBoundsToRect(Rectangle enclosingRect) {
         if (!boundless) {
             int enRectMaxX = (int) enclosingRect.getMaxX();
@@ -2195,6 +2218,18 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         builder.vertex(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();
         builder.vertex(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV0()).endVertex();
         builder.vertex(x,          y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV0()).endVertex();
+        //@formatter:on
+    }
+
+    public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, int rotation, TextureAtlasSprite sprite) {
+        double zLevel = getRenderZLevel();
+        float[] u = {sprite.getU0(), sprite.getU1(), sprite.getU1(), sprite.getU0()};
+        float[] v = {sprite.getV1(), sprite.getV1(), sprite.getV0(), sprite.getV0()};
+        //@formatter:off
+        builder.vertex(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).uv(u[(0 + rotation) % 4], v[(0 + rotation) % 4]).endVertex();
+        builder.vertex(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).uv(u[(1 + rotation) % 4], v[(1 + rotation) % 4]).endVertex();
+        builder.vertex(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).uv(u[(2 + rotation) % 4], v[(2 + rotation) % 4]).endVertex();
+        builder.vertex(x,          y,          zLevel).color(1F, 1F, 1F, 1F).uv(u[(3 + rotation) % 4], v[(3 + rotation) % 4]).endVertex();
         //@formatter:on
     }
 

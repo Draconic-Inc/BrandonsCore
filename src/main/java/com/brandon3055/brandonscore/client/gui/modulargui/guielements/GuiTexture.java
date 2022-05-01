@@ -1,14 +1,23 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
+import codechicken.lib.render.buffer.TransformingVertexBuilder;
+import com.brandon3055.brandonscore.api.TimeKeeper;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
+import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Quaternion;
 
 import java.util.function.Supplier;
 
@@ -25,6 +34,9 @@ public class GuiTexture extends GuiElement<GuiTexture> {
     private boolean texSizeOverride = false;
     private Supplier<Integer> texXGetter = null;
     private Supplier<Integer> texYGetter = null;
+    private float rotation = 0;
+    private boolean flipX = false;
+    private boolean flipY = false;
 
     public RenderMaterial material;
     public Supplier<RenderMaterial> materialSupplier;
@@ -61,6 +73,11 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         this.material = material;
     }
 
+    public GuiTexture(int xPos, int yPos, int xSize, int ySize, Supplier<RenderMaterial> materialSupplier) {
+        super(xPos, yPos, xSize, ySize);
+        this.materialSupplier = materialSupplier;
+    }
+
     public GuiTexture(int xSize, int ySize, RenderMaterial material) {
         super(0, 0, xSize, ySize);
         this.material = material;
@@ -84,8 +101,23 @@ public class GuiTexture extends GuiElement<GuiTexture> {
 
         RenderMaterial mat = getMaterial();
         if (mat != null) {
-            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-            drawSprite(mat.buffer(getter, BCSprites::makeType), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+            IRenderTypeBuffer.Impl getter = RenderUtils.getTypeBuffer();
+            if (rotation != 0 || flipX || flipY) {
+                MatrixStack mStack = new MatrixStack();
+                mStack.translate(xPos(), yPos(), 0);
+                mStack.translate(xSize() / 2D, ySize() / 2D, 0);
+                if (flipX || flipY) {
+                    mStack.scale(flipX ? -1 : 1, flipY ? -1 : 1, 1);
+                }
+                if (rotation != 0) {
+                    mStack.mulPose(new Quaternion(0, 0, rotation, true));
+                }
+                mStack.translate(-(xSize() / 2D), -(ySize() / 2D), 0);
+                IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(mat.renderType(BCSprites::makeType)), mStack);
+                drawSprite(builder, 0, 0, xSize(), ySize(), mat.sprite());
+            } else {
+                drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+            }
             getter.endBatch();
         } else {
             ResourceLocation texture = getTexture();
@@ -101,6 +133,21 @@ public class GuiTexture extends GuiElement<GuiTexture> {
 
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFFFFFF00);
+    }
+
+    public GuiTexture setRotation(float rotation) {
+        this.rotation = rotation;
+        return this;
+    }
+
+    public GuiTexture flipX() {
+        this.flipX = true;
+        return this;
+    }
+
+    public GuiTexture flipY() {
+        this.flipY = true;
+        return this;
     }
 
     /**

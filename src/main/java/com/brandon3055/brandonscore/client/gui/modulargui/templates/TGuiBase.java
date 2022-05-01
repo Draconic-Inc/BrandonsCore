@@ -12,7 +12,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSlotRender;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
-import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotData;
+import com.brandon3055.brandonscore.inventory.SlotMover;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedBool;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,7 +20,6 @@ import net.minecraft.client.resources.I18n;
 
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.util.stream.Stream;
 
 /**
  * Created by brandon3055 on 9/7/19.
@@ -109,7 +108,8 @@ public class TGuiBase implements IGuiTemplate {
         addEnergyBar(opStorage, !toolkit.getLayout().isWide());
     }
 
-    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar, SlotData slotData) {
+    @Deprecated //Needs Fix (Textures broken)
+    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar, SlotMover slotMover) {
         if (energyBar == null) {
             throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
         }
@@ -118,8 +118,8 @@ public class TGuiBase implements IGuiTemplate {
         GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slot_energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 
-        if (slotData != null) {
-            powerSlot.addPosChangeListener((x, y) -> slotData.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
+        if (slotMover != null) {
+            powerSlot.addPosChangeListener((x, y) -> slotMover.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
         }
         GuiButton powerToggle = new GuiButton();
         powerToggle.setFillColours(0, 0x4000FF00);
@@ -154,19 +154,22 @@ public class TGuiBase implements IGuiTemplate {
         }
     }
 
+    @Deprecated //Needs Fix
     public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar) {
         addEnergyItemSlot(chargeItem, bellowBar, null);
     }
 
-    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, SlotData slotData) {
+    @Deprecated //Needs Fix
+    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, SlotMover slotMover) {
         addEnergyItemSlot(chargeItem, toolkit.getLayout().isTall());
     }
 
+    @Deprecated //Needs Fix
     public void addEnergyItemSlot(@Nullable ManagedBool chargeItem) {
         addEnergyItemSlot(chargeItem, null);
     }
 
-    public void addEnergyItemSlot(boolean chargeItem, boolean bellowBar, SlotData slotData) {
+    public void addEnergyItemSlot(boolean chargeItem, boolean bellowBar, SlotMover slotMover) {
         if (energyBar == null) {
             throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
         }
@@ -175,9 +178,9 @@ public class TGuiBase implements IGuiTemplate {
         GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slots/energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 
-        if (slotData != null) {
-            bgTexture.setEnabledCallback(() -> !slotData.slot.hasItem());
-            powerSlot.addPosChangeListener((x, y) -> slotData.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
+        if (slotMover != null) {
+            bgTexture.setEnabledCallback(() -> !slotMover.slot.hasItem());
+            powerSlot.addPosChangeListener((x, y) -> slotMover.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
         }
         GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get("item_charge/" + ((bellowBar ? "vertical" : "right") + "_" + (chargeItem ? "charge" : "discharge"))));
 
@@ -206,8 +209,8 @@ public class TGuiBase implements IGuiTemplate {
         addEnergyItemSlot(chargeItem, null);
     }
 
-    public void addEnergyItemSlot(boolean chargeItem, SlotData slotData) {
-        addEnergyItemSlot(chargeItem, toolkit.getLayout().isTall(), slotData);
+    public void addEnergyItemSlot(boolean chargeItem, SlotMover slotMover) {
+        addEnergyItemSlot(chargeItem, toolkit.getLayout().isTall(), slotMover);
     }
 
     private boolean checkInit() {
@@ -217,7 +220,7 @@ public class TGuiBase implements IGuiTemplate {
         return isInitialized;
     }
 
-    protected String getTitle() {
+    public String getTitle() {
         return gui.getTitle().getString();
     }
 }

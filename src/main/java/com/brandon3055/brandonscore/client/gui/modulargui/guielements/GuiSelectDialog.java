@@ -277,6 +277,7 @@ public class GuiSelectDialog<T> extends GuiPopUpDialogBase<GuiSelectDialog<T>> i
      */
     public GuiSelectDialog<T> setRendererBuilder(Function<T, GuiElement> rendererBuilder) {
         this.rendererBuilder = rendererBuilder;
+        sectionElements.replaceAll((t, element) -> buildRenderer(t));
         return this;
     }
 

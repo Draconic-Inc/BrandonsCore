@@ -1,10 +1,8 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -25,14 +23,14 @@ import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotTyp
  */
 public class ContainerSlotLayout {
 
-    private List<SlotData> slotDataList = new ArrayList<>();
-    private Map<SlotType, Map<Integer, SlotData>> slotDataMap = new HashMap<>();
+    private List<SlotMover> slotMoverList = new ArrayList<>();
+    private Map<SlotType, Map<Integer, SlotMover>> slotDataMap = new HashMap<>();
 
     public ContainerSlotLayout() {}
 
     protected ContainerSlotLayout retrieveSlotsForContainer(Consumer<Slot> slotConsumer) {
         for (SlotType type : SlotType.values()) {
-            slotDataMap.getOrDefault(type, new HashMap<>()).forEach((integer, slotData) -> slotConsumer.accept(slotData.slot));
+            slotDataMap.getOrDefault(type, new HashMap<>()).forEach((integer, slotMover) -> slotConsumer.accept(slotMover.slot));
         }
         return this;
     }
@@ -45,12 +43,12 @@ public class ContainerSlotLayout {
 
         optionalHandler.ifPresent(itemHandler -> {
             for (int x = 0; x < 9; x++) {
-                slotDataList.add(new SlotData(this, PLAYER_INV, itemHandler, x));
+                slotMoverList.add(new LayoutSlotData(this, PLAYER_INV, itemHandler, x));
             }
 
             for (int y = 0; y < 3; y++) {
                 for (int x = 0; x < 9; x++) {
-                    slotDataList.add(new SlotData(this, PLAYER_INV, itemHandler, x + y * 9 + 9));
+                    slotMoverList.add(new LayoutSlotData(this, PLAYER_INV, itemHandler, x + y * 9 + 9));
                 }
             }
         });
@@ -64,7 +62,7 @@ public class ContainerSlotLayout {
             throw new IllegalStateException("All player slots must be added before tile slots.");
         }
         LazyOptional<IItemHandler> optionalHandler  = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.NORTH);
-        optionalHandler.ifPresent(itemHandler -> slotDataList.add(new SlotData(this, equipmentSlot < 4 ? PLAYER_ARMOR : PLAYER_OFF_HAND, itemHandler, equipmentSlot)));
+        optionalHandler.ifPresent(itemHandler -> slotMoverList.add(new LayoutSlotData(this, equipmentSlot < 4 ? PLAYER_ARMOR : PLAYER_OFF_HAND, itemHandler, equipmentSlot)));
         return this;
     }
 
@@ -83,7 +81,7 @@ public class ContainerSlotLayout {
             LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
             optional.ifPresent(handler -> {
                 for (int i = 0; i < handler.getSlots(); i++) {
-                    slotDataList.add(new SlotData(this, PLAYER_EQUIPMENT, handler, i));
+                    slotMoverList.add(new LayoutSlotData(this, PLAYER_EQUIPMENT, handler, i));
                 }
             });
         }
@@ -96,7 +94,7 @@ public class ContainerSlotLayout {
     }
 
     public ContainerSlotLayout tile(IItemHandler tileItemHandler, int slot) {
-        slotDataList.add(new SlotData(this, TILE_INV, tileItemHandler, slot));
+        slotMoverList.add(new LayoutSlotData(this, TILE_INV, tileItemHandler, slot));
         return this;
     }
 
@@ -107,12 +105,12 @@ public class ContainerSlotLayout {
         return this;
     }
 
-    public SlotData getSlotData(SlotType type, int index) {
+    public SlotMover getSlotData(SlotType type, int index) {
         return slotDataMap.containsKey(type) ? slotDataMap.get(type).get(index) : null;
     }
 
     public int getPlayerSlotCount() {
-        return (int) slotDataList.stream().filter(e -> e.type.isPlayer).count();
+        return (int) slotMoverList.stream().filter(e -> e instanceof LayoutSlotData && ((LayoutSlotData) e).type.isPlayer).count();
     }
 
     public enum SlotType {
@@ -129,18 +127,14 @@ public class ContainerSlotLayout {
         }
     }
 
-    public static class SlotData {
+    private static class LayoutSlotData extends SlotMover {
         protected ContainerSlotLayout layout;
         protected final SlotType type;
         protected IItemHandler itemHandler;
-        protected final int index;
-        public Slot slot;
 
-        public SlotData(ContainerSlotLayout layout, SlotType type, IItemHandler itemHandler, int index) {
+        public LayoutSlotData(ContainerSlotLayout layout, SlotType type, IItemHandler itemHandler, int index) {
             this.layout = layout;
             this.type = type;
-            this.itemHandler = itemHandler;
-            this.index = index;
             //'fake' layout just in case the server does not like multiple overlapping slots.
             this.slot = new SlotCheckValid(itemHandler, index, (index % 9) * 18, ((index / 9) + (type.isPlayer ? 0 : 5)) * 18) {
                 @Override
@@ -149,11 +143,6 @@ public class ContainerSlotLayout {
                 }
             };
             layout.slotDataMap.computeIfAbsent(type, slotType -> new HashMap<>()).put(index, this);
-        }
-
-        public void setPos(int xPos, int yPos) {
-            slot.x = xPos;
-            slot.y = yPos;
         }
     }
 
