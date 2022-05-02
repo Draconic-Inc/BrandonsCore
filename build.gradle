@@ -2,10 +2,10 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url = "https://maven.minecraftforge.net/" }
+        maven { url "https://maven.minecraftforge.net/" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:4.1.+'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
     }
 }
 
@@ -16,14 +16,14 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
 group = "com.brandon3055.brandonscore"
 archivesBaseName = "BrandonsCore"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(8) //
 
-//Add generated resources to main resources.
-sourceSets.main.resources.srcDirs += "src/generated/resources"
+sourceSets.main.resources.srcDirs += "src/main/generated"
 
 file('build.properties').withReader {
     def prop = new Properties()
@@ -69,7 +69,7 @@ minecraft {
         }
         data {
             workingDirectory file('run')
-            args '--mod', 'brandonscore', '--all', '--output', file("src/generated/resources"), '--existing', file("src/main/resources")
+            args '--mod', 'brandonscore', '--all', '--output', file("src/main/generated"), '--existing', file("src/main/resources")
             mods { brandonscore { source sourceSets.main } }
         }
     }
@@ -83,9 +83,10 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
-    compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-    compile "com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:deobf"
-    compile fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
+
+    implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
+    implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
+    implementation fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 }
 
 signing {
@@ -102,25 +103,24 @@ signing {
     }
 }
 
-processResources { task ->
+processResources {
     inputs.property 'mod_version', config.mod_version
     inputs.property 'mc_version', config.mc_version
+    inputs.property 'ccl_version', config.ccl_version
 
-    from(sourceSets.main.resources.srcDirs) { spec ->
-        spec.include 'META-INF/mods.toml'
-        task.doFirst {
-            spec.expand 'version': config.mod_version,
-                    'mc_version': config.mc_version,
-                    'ccl_version': "[${config.ccl_version.replace('.+', '')},${config.ccl_version_max})",
-                    'pi_version': resolve("ProjectIntelligence")
-        }
+    filesMatching('META-INF/mods.toml') {
+        expand 'file': ['jarVersion': config.mod_version],
+                'mc_version': config.mc_version,
+                'forge_version': config.forge_version,
+                'pi_version': config.pi_version,
+                'lang_version': config.forge_version.split('\\.')[0],
+                'ccl_version': "[${config.ccl_version.replace(".+", "")},${config.ccl_version_max})"
     }
 }
 
 jar {
     finalizedBy 'reobfJar'
     classifier = 'universal'
-    from file("LICENSE")
     manifest {
         attributes 'Specification-Title': archivesBaseName
         attributes 'Specification-Vendor': 'brandon3055'
@@ -130,7 +130,9 @@ jar {
         attributes 'Implementation-Version': version
         attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
     }
+    from file("LICENSE")
 }
+
 
 task srcJar(type: Jar) {
     build.dependsOn it
@@ -139,12 +141,12 @@ task srcJar(type: Jar) {
     from file("LICENSE")
 }
 
-task deobfJar(type: Jar) {
-    build.dependsOn it
-    from sourceSets.main.output
-    classifier = 'deobf'
-    from file("LICENSE")
-}
+//task deobfJar(type: Jar) {
+//    build.dependsOn it
+//    from sourceSets.main.output
+//    classifier = 'deobf'
+//    from file("LICENSE")
+//}
 
 publishing {
     repositories {
@@ -165,7 +167,7 @@ publishing {
             version project.version
             artifact jar
             artifact srcJar
-            artifact deobfJar
+//            artifact deobfJar
 
             pom {
                 name = archivesBaseName
@@ -201,32 +203,32 @@ publishing {
 }
 
 
-/**
- * Polls the 'compile' configuration for a dependency with the given module name
- * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
- *
- * @param module The module to search for.
- * @param chop If the string should be chopped on the last '-' in its string.
- * @param configuration The name of the configuration to search.
- * @param errorMissing If an error should be thrown if it can't be found.
- * @return The version string, '0' if 'errorMissing' is false and nothing was found.
- */
-def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
-    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
-    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
-            .findAll { it.id.componentIdentifier.module == module }
-            .collect { it.id.componentIdentifier.version }
-    if (filtered.size() > 1) {
-        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
-    }
-    if (errorMissing && filtered.isEmpty()) {
-        throw new RuntimeException("Failed resolve dependency version for '${module}'")
-    }
-    if (filtered.isEmpty()) return "0"
-    def version = filtered.first() as String
-    if (chop) {
-        def idx = version.lastIndexOf('-')
-        return version.substring(idx + 1)
-    }
-    return version
-}
+///**
+// * Polls the 'compile' configuration for a dependency with the given module name
+// * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
+// *
+// * @param module The module to search for.
+// * @param chop If the string should be chopped on the last '-' in its string.
+// * @param configuration The name of the configuration to search.
+// * @param errorMissing If an error should be thrown if it can't be found.
+// * @return The version string, '0' if 'errorMissing' is false and nothing was found.
+// */
+//def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
+//    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
+//    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
+//            .findAll { it.id.componentIdentifier.module == module }
+//            .collect { it.id.componentIdentifier.version }
+//    if (filtered.size() > 1) {
+//        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
+//    }
+//    if (errorMissing && filtered.isEmpty()) {
+//        throw new RuntimeException("Failed resolve dependency version for '${module}'")
+//    }
+//    if (filtered.isEmpty()) return "0"
+//    def version = filtered.first() as String
+//    if (chop) {
+//        def idx = version.lastIndexOf('-')
+//        return version.substring(idx + 1)
+//    }
+//    return version
+//}
