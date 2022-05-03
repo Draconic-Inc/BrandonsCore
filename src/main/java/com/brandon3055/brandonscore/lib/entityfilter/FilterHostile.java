@@ -2,9 +2,9 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Enemy;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -30,7 +30,7 @@ public class FilterHostile extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        boolean isHostile = entity instanceof IMob;
+        boolean isHostile = entity instanceof Enemy;
         return isHostile == whitelistHostile;
     }
 
@@ -40,14 +40,14 @@ public class FilterHostile extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("include", whitelistHostile);
         return compound;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         whitelistHostile = nbt.getBoolean("include");
     }

@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.integration;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +14,7 @@ public interface IRecipeRenderer {
 
     int getHeight();
 
-    String getTitle();
+    Component getTitle();
 
     void render(Minecraft mc, int xPos, int yPos, int mouseX, int mouseY);
 

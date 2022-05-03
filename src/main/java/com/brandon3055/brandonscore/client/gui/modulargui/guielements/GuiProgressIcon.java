@@ -1,36 +1,35 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import codechicken.lib.math.MathHelper;
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.model.Material;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class GuiProgressIcon extends GuiElement<GuiProgressIcon> {
-    private RenderMaterial baseTexture;
-    private RenderMaterial overlayTexture;
-    private Supplier<RenderMaterial> baseTextureSupplier;
-    private Supplier<RenderMaterial> overlayTextureSupplier;
+    private Material baseTexture;
+    private Material overlayTexture;
+    private Supplier<Material> baseTextureSupplier;
+    private Supplier<Material> overlayTextureSupplier;
     private Direction direction;
     private Supplier<Double> progressSupplier = () -> 0D;
     private int upperMargin = 0;
     private int lowerMargin = 0;
 
-    public GuiProgressIcon(RenderMaterial baseTexture, RenderMaterial overlayTexture, Direction animDirection) {
+    public GuiProgressIcon(Material baseTexture, Material overlayTexture, Direction animDirection) {
         super();
         this.baseTexture = baseTexture;
         this.overlayTexture = overlayTexture;
         this.direction = animDirection;
     }
 
-    public GuiProgressIcon(Supplier<RenderMaterial> baseTexture, Supplier<RenderMaterial> overlayTexture, Direction animDirection) {
+    public GuiProgressIcon(Supplier<Material> baseTexture, Supplier<Material> overlayTexture, Direction animDirection) {
         super();
         this.baseTextureSupplier = baseTexture;
         this.overlayTextureSupplier = overlayTexture;
@@ -71,15 +70,15 @@ public class GuiProgressIcon extends GuiElement<GuiProgressIcon> {
         return MathHelper.clip((lowerMargin + Math.ceil(size * progress)) / axis, 0, 1);
     }
 
-    private RenderMaterial getOverlay() {
+    private Material getOverlay() {
         return overlayTextureSupplier == null ? overlayTexture : overlayTextureSupplier.get();
     }
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        RenderMaterial base = baseTextureSupplier == null ? baseTexture : baseTextureSupplier.get();
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        Material base = baseTextureSupplier == null ? baseTexture : baseTextureSupplier.get();
         drawSprite(getter.getBuffer(base.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), base.sprite());
         direction.draw(this, getter);
         getter.endBatch();
@@ -103,13 +102,13 @@ public class GuiProgressIcon extends GuiElement<GuiProgressIcon> {
          */
         RIGHT((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCSprites::makeType)), icon.xPos(), icon.yPos(), icon.xSize() * icon.getRenderState(), icon.ySize(), icon.getOverlay().sprite(), 0, 0, icon.getRenderState(), 1));
 
-        private BiConsumer<GuiProgressIcon, IRenderTypeBuffer.Impl> drawFunc;
+        private BiConsumer<GuiProgressIcon, MultiBufferSource.BufferSource> drawFunc;
 
-        Direction(BiConsumer<GuiProgressIcon, IRenderTypeBuffer.Impl> drawFunc) {
+        Direction(BiConsumer<GuiProgressIcon, MultiBufferSource.BufferSource> drawFunc) {
             this.drawFunc = drawFunc;
         }
 
-        private void draw(GuiProgressIcon icon, IRenderTypeBuffer.Impl getter) {
+        private void draw(GuiProgressIcon icon, MultiBufferSource.BufferSource getter) {
             drawFunc.accept(icon, getter);
         }
     }

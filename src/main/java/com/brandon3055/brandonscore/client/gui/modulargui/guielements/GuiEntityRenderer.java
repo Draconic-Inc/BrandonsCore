@@ -3,33 +3,18 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
-import net.minecraft.client.gui.screen.inventory.InventoryScreen;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerModelPart;
-import net.minecraft.tileentity.SkullTileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 23/10/2016.
@@ -133,9 +118,9 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
                 float rotation = isRotationLocked() ? getLockedRotation() : (BCClientEventHandler.elapsedTicks + partialTicks) * getRotationSpeedMultiplier();
                 if (entity instanceof LivingEntity) {
                     int eyeOffset = (int) ((entity.getBbHeight() - entity.getEyeHeight()) * scale);
-                    RenderSystem.translated(0, 0, zLevel);
-                    renderEntityOnScreen((int) posX, yPos, (int) scale, (int) posX - mouseX, yPos() - mouseY + eyeOffset, (LivingEntity) entity, rotation, trackMouse, drawName);
-                    RenderSystem.translated(0, 0, -zLevel);
+//                    RenderSystem.translated(0, 0, zLevel);
+//                    renderEntityOnScreen((int) posX, yPos, (int) scale, (int) posX - mouseX, yPos() - mouseY + eyeOffset, (LivingEntity) entity, rotation, trackMouse, drawName);
+//                    RenderSystem.translated(0, 0, -zLevel);
                 } else {
 //                    drawEntityOnScreen(posX, rect.y, scale, entity, rotation, zLevel);
                 }
@@ -192,82 +177,82 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         return rotationSpeed;
     }
 
-    public static void renderEntityOnScreen(int xPos, int yPos, int scale, float mouseX, float mouseY, LivingEntity entity, double rotation, boolean trackMouse, boolean drawName) {
-        float lookX = trackMouse ? (float) Math.atan((double) (mouseX / 40.0F)) : 0;
-        float lookY = trackMouse ? (float) Math.atan((double) (mouseY / 40.0F)) : 0;
-        if (drawName && entity instanceof RemoteClientPlayerEntity && Minecraft.getInstance().player != null) {
-            entity.setPos(Minecraft.getInstance().player.getX(), Minecraft.getInstance().player.getY(), Minecraft.getInstance().player.getZ());
-        } else if (entity instanceof RemoteClientPlayerEntity) {
-            entity.setPos(0, -1000, 0);
-        }
+//    public static void renderEntityOnScreen(int xPos, int yPos, int scale, float mouseX, float mouseY, LivingEntity entity, double rotation, boolean trackMouse, boolean drawName) {
+//        float lookX = trackMouse ? (float) Math.atan((double) (mouseX / 40.0F)) : 0;
+//        float lookY = trackMouse ? (float) Math.atan((double) (mouseY / 40.0F)) : 0;
+//        if (drawName && entity instanceof RemotePlayer && Minecraft.getInstance().player != null) {
+//            entity.setPos(Minecraft.getInstance().player.getX(), Minecraft.getInstance().player.getY(), Minecraft.getInstance().player.getZ());
+//        } else if (entity instanceof RemotePlayer) {
+//            entity.setPos(0, -1000, 0);
+//        }
+//
+//        RenderSystem.pushMatrix();
+//        RenderSystem.translatef((float) xPos, (float) yPos, 1050.0F);
+//        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+//        PoseStack matrixstack = new PoseStack();
+//        matrixstack.translate(0.0D, 0.0D, 1000.0D);
+//        matrixstack.scale((float) scale, (float) scale, (float) scale);
+//        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+//        Quaternion quaternion1 = Vector3f.XP.rotationDegrees(lookY * 20.0F);
+//        quaternion.mul(quaternion1);
+//        matrixstack.mulPose(quaternion);
+//        matrixstack.mulPose(Vector3f.YP.rotationDegrees((float) rotation));
+//        float f2 = entity.yBodyRot;
+//        float f3 = entity.yRot;
+//        float f4 = entity.xRot;
+//        float f5 = entity.yHeadRotO;
+//        float f6 = entity.yHeadRot;
+//        entity.yBodyRot = 180.0F + lookX * 20.0F;
+//        entity.yRot = 180.0F + lookX * 40.0F;
+//        entity.xRot = -lookY * 20.0F;
+//        entity.yHeadRot = entity.yRot;
+//        entity.yHeadRotO = entity.yRot;
+//        EntityRenderDispatcher rendererManager = Minecraft.getInstance().getEntityRenderDispatcher();
+//        quaternion1.conj();
+//        rendererManager.overrideCameraOrientation(quaternion1);
+//        rendererManager.setRenderShadow(false);
+//        MultiBufferSource.BufferSource irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+//        RenderSystem.runAsFancy(() -> {
+//            rendererManager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880);
+//        });
+//        irendertypebuffer$impl.endBatch();
+//        rendererManager.setRenderShadow(true);
+//        entity.yBodyRot = f2;
+//        entity.yRot = f3;
+//        entity.xRot = f4;
+//        entity.yHeadRotO = f5;
+//        entity.yHeadRot = f6;
+//        RenderSystem.popMatrix();
+//    }
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float) xPos, (float) yPos, 1050.0F);
-        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
-        MatrixStack matrixstack = new MatrixStack();
-        matrixstack.translate(0.0D, 0.0D, 1000.0D);
-        matrixstack.scale((float) scale, (float) scale, (float) scale);
-        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion quaternion1 = Vector3f.XP.rotationDegrees(lookY * 20.0F);
-        quaternion.mul(quaternion1);
-        matrixstack.mulPose(quaternion);
-        matrixstack.mulPose(Vector3f.YP.rotationDegrees((float) rotation));
-        float f2 = entity.yBodyRot;
-        float f3 = entity.yRot;
-        float f4 = entity.xRot;
-        float f5 = entity.yHeadRotO;
-        float f6 = entity.yHeadRot;
-        entity.yBodyRot = 180.0F + lookX * 20.0F;
-        entity.yRot = 180.0F + lookX * 40.0F;
-        entity.xRot = -lookY * 20.0F;
-        entity.yHeadRot = entity.yRot;
-        entity.yHeadRotO = entity.yRot;
-        EntityRendererManager rendererManager = Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternion1.conj();
-        rendererManager.overrideCameraOrientation(quaternion1);
-        rendererManager.setRenderShadow(false);
-        IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderSystem.runAsFancy(() -> {
-            rendererManager.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrixstack, irendertypebuffer$impl, 15728880);
-        });
-        irendertypebuffer$impl.endBatch();
-        rendererManager.setRenderShadow(true);
-        entity.yBodyRot = f2;
-        entity.yRot = f3;
-        entity.xRot = f4;
-        entity.yHeadRotO = f5;
-        entity.yHeadRot = f6;
-        RenderSystem.popMatrix();
-    }
-
-    public static PlayerEntity createRenderPlayer(ClientWorld world, String username) {
-        return new RemoteClientPlayerEntity(world, SkullTileEntity.updateGameprofile(new GameProfile(null, username))) {
-            @Override
-            public String getModelName() {
-                return super.getModelName();
-            }
-
-            @Override
-            public ResourceLocation getSkinTextureLocation() {
-                ResourceLocation resourcelocation;
-
-                Minecraft minecraft = Minecraft.getInstance();
-                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(getGameProfile());
-
-                if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                    resourcelocation = minecraft.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-                } else {
-                    UUID uuid = PlayerEntity.createPlayerUUID(getGameProfile());
-                    resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
-                }
-
-                return resourcelocation;
-            }
-
-            @Override
-            public boolean isModelPartShown(PlayerModelPart part) {
-                return true;
-            }
-        };
-    }
+//    public static Player createRenderPlayer(ClientLevel world, String username) {
+//        return new RemotePlayer(world, SkullBlockEntity.updateGameprofile(new GameProfile(null, username))) {
+//            @Override
+//            public String getModelName() {
+//                return super.getModelName();
+//            }
+//
+//            @Override
+//            public ResourceLocation getSkinTextureLocation() {
+//                ResourceLocation resourcelocation;
+//
+//                Minecraft minecraft = Minecraft.getInstance();
+//                Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(getGameProfile());
+//
+//                if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
+//                    resourcelocation = minecraft.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+//                } else {
+//                    UUID uuid = Player.createPlayerUUID(getGameProfile());
+//                    resourcelocation = DefaultPlayerSkin.getDefaultSkin(uuid);
+//                }
+//
+//                return resourcelocation;
+//            }
+//
+//            @Override
+//            public boolean isModelPartShown(PlayerModelPart part) {
+//                return true;
+//            }
+//        };
+//    }
 }

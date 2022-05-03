@@ -1,12 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.util.ArrayUtils;
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.datasync.IDataSerializer;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraft.ChatFormatting;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -278,7 +273,7 @@ public class DataUtils {
         return result;
     }
 
-    public static int formatColour(TextFormatting formatting) {
+    public static int formatColour(ChatFormatting formatting) {
         switch (formatting) {
             case BLACK:
                 return 0x000000;

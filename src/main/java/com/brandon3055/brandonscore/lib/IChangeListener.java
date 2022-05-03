@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 /**
  * Created by brandon3055 on 23/10/2016.

@@ -2,12 +2,9 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import com.brandon3055.brandonscore.lib.Vec3I;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -99,8 +96,8 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
     }
 
     @Override
-    public void toNBT(CompoundNBT compound) {
-        CompoundNBT nbt = value == null ? new CompoundNBT() : NBTUtil.writeBlockPos(value);
+    public void toNBT(CompoundTag compound) {
+        CompoundTag nbt = value == null ? new CompoundTag() : NbtUtils.writeBlockPos(value);
         if (value == null) {
             nbt.putBoolean("null", true);
         }
@@ -108,15 +105,15 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
     }
 
     @Override
-    public void fromNBT(CompoundNBT compound) {
+    public void fromNBT(CompoundTag compound) {
         if (!compound.contains(name, 10)) {
             value = defaultValue == null ? null : new BlockPos(defaultValue);
         }else {
-            CompoundNBT nbt = compound.getCompound(name);
+            CompoundTag nbt = compound.getCompound(name);
             if (nbt.contains("null")) {
                 value = null;
             } else {
-                value = NBTUtil.readBlockPos(nbt);
+                value = NbtUtils.readBlockPos(nbt);
             }
         }
         notifyListeners(value);

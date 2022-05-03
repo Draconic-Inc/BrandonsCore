@@ -3,16 +3,15 @@ package com.brandon3055.brandonscore.inventory;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
@@ -34,24 +33,24 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
      */
     public T tile;
 
-    public ContainerBCTile(@Nullable ContainerType<?> type, int windowId, PlayerInventory playerInv, PacketBuffer extraData) {
+    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory playerInv, FriendlyByteBuf extraData) {
         super(type, windowId, playerInv, extraData);
         this.tile = getClientTile(extraData);
     }
 
-    public ContainerBCTile(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, PacketBuffer extraData, LayoutFactory<T> factory) {
+    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<T> factory) {
         super(type, windowId, player, extraData, factory);
         this.tile = getClientTile(extraData);
         this.buildSlotLayout();
     }
 
-    public ContainerBCTile(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, T tile) {
+    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile) {
         super(type, windowId, player);
         this.tile = tile;
         this.tile.onPlayerOpenContainer(player.player);
     }
 
-    public ContainerBCTile(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, T tile, LayoutFactory<T> factory) {
+    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile, LayoutFactory<T> factory) {
         super(type, windowId, player, factory);
         this.tile = tile;
         this.tile.onPlayerOpenContainer(player.player);
@@ -66,7 +65,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     }
 
     @Override
-    public void removed(PlayerEntity playerIn) {
+    public void removed(Player playerIn) {
         super.removed(playerIn);
         tile.onPlayerCloseContainer(playerIn);
     }
@@ -78,15 +77,15 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     }
 
     @Override
-    public void addSlotListener(IContainerListener listener) {
+    public void addSlotListener(ContainerListener listener) {
         super.addSlotListener(listener);
-        if (listener instanceof ServerPlayerEntity) {
-            tile.getDataManager().forcePlayerSync((ServerPlayerEntity) listener);
+        if (listener instanceof ServerPlayer) {
+            tile.getDataManager().forcePlayerSync((ServerPlayer) listener);
         }
     }
 
     @Override
-    public boolean stillValid(PlayerEntity playerIn) {
+    public boolean stillValid(Player playerIn) {
         if (tile.getLevel().getBlockEntity(tile.getBlockPos()) != tile) {
             return false;
         } else {
@@ -95,7 +94,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     }
 
     @Override
-    public ItemStack quickMoveStack(PlayerEntity player, int i) {
+    public ItemStack quickMoveStack(Player player, int i) {
         int playerSlots = 36;
         if (slotLayout != null) {
             playerSlots = slotLayout.getPlayerSlotCount();
@@ -138,30 +137,11 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
 
     @Override
-    public void setItem(int slotID, ItemStack stack) {
-        Slot slot = this.getSlot(slotID);
-        if (slot != null) {
-            slot.set(stack);
-        }
-    }
-
-    @Override
     public Slot getSlot(int slotId) {
         if (slotId < slots.size() && slotId >= 0) {
             return slots.get(slotId);
         }
         return null;
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void setAll(List<ItemStack> stacks) {
-        for (int i = 0; i < stacks.size(); ++i) {
-            Slot slot = getSlot(i);
-            if (slot != null) {
-                slot.set(stacks.get(i));
-            }
-        }
     }
 
     /**
@@ -175,7 +155,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
         return slotLayout;
     }
 
-    protected static <T extends TileEntity> T getClientTile(PacketBuffer extraData) {
+    protected static <T extends BlockEntity> T getClientTile(FriendlyByteBuf extraData) {
         return (T) Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());
     }
 }

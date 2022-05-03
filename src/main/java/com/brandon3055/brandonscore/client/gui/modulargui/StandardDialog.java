@@ -4,9 +4,9 @@ import com.brandon3055.brandonscore.client.gui.GuiToolkit;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSelectDialog;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -16,12 +16,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LEFT;
-import static net.minecraft.util.text.TextFormatting.GRAY;
-import static net.minecraft.util.text.TextFormatting.YELLOW;
+import static net.minecraft.ChatFormatting.GRAY;
+import static net.minecraft.ChatFormatting.YELLOW;
 
 /**
- * Created by brandon3055 on 18/5/20.
- * This will be the standard vanilla-ish style popup dialog used by my mods in 1.15+
+ * Creatnet.minecraft.ChatFormattingwill be the standard vanilla-ish style popup dialog used by my mods in 1.15+
  * There are several helpers in {@link GuiToolkit} that can be used to create an instance of this dialog.
  */
 public class StandardDialog<T> extends GuiSelectDialog<T> {
@@ -208,7 +207,7 @@ public class StandardDialog<T> extends GuiSelectDialog<T> {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             int backgroundColor = 0xF0100010;
             int borderColorStart = 0x90FFFFFF;
             int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
@@ -250,7 +249,7 @@ public class StandardDialog<T> extends GuiSelectDialog<T> {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             if (background && (dragging.get() || isMouseOver(mouseX, mouseY))) {
                 drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 1, ySize(), 0x30b341ff);
             } else if (!background) {

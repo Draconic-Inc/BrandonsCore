@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.TableDefinition;
-import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.TableVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.MarkdownVisitor;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.visitor.property.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.visitorimpl.*;

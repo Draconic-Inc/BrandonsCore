@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.capability;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -9,7 +9,6 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -17,18 +16,18 @@ import java.util.Objects;
 /**
  * Created by brandon3055 on 17/4/20.
  */
-public class MultiCapabilityProvider implements ICapabilitySerializable<CompoundNBT> {
+public class MultiCapabilityProvider implements ICapabilitySerializable<CompoundTag> {
 
     private Map<Capability<?>, Object> capabilityMap = new HashMap<>();
-    private Map<String, INBTSerializable<CompoundNBT>> nameMap = new HashMap<>();
+    private Map<String, INBTSerializable<CompoundTag>> nameMap = new HashMap<>();
 
     public MultiCapabilityProvider() {}
 
-    public MultiCapabilityProvider(INBTSerializable<CompoundNBT> capInstance, String name, Capability<?>... capabilities) {
+    public MultiCapabilityProvider(INBTSerializable<CompoundTag> capInstance, String name, Capability<?>... capabilities) {
         addCapability(capInstance, name, capabilities);
     }
 
-    public void addCapability(INBTSerializable<CompoundNBT> capInstance, String name, Capability<?>... capabilities) {
+    public void addCapability(INBTSerializable<CompoundTag> capInstance, String name, Capability<?>... capabilities) {
         if (CapabilityOP.OP == null) return;
         this.nameMap.put(name, capInstance);
         for (Capability<?> cap : capabilities) {
@@ -52,14 +51,14 @@ public class MultiCapabilityProvider implements ICapabilitySerializable<Compound
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
         nameMap.forEach((s, t) -> tag.put(s, t.serializeNBT()));
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         nameMap.forEach((s, t) -> t.deserializeNBT(nbt.getCompound(s)));
     }
 }

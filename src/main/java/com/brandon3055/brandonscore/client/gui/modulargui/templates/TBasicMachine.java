@@ -2,12 +2,11 @@ package com.brandon3055.brandonscore.client.gui.modulargui.templates;
 
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit;
-import com.brandon3055.brandonscore.client.gui.GuiToolkit.InfoPanel;
 import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 /**
  * Created by brandon3055 on 9/7/19.

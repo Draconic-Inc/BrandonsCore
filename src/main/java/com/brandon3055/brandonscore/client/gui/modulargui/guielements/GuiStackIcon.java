@@ -3,13 +3,14 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.lib.StringyStacks;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.block.Blocks;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -30,7 +31,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     public boolean drawToolTip = true;
     public boolean drawHoverHighlight = false;
     private GuiElement background = null;
-    protected List<ITextComponent> toolTipOverride = null;
+    protected List<Component> toolTipOverride = null;
     private String stackString;
     private ItemStack stack = ItemStack.EMPTY;
     private Runnable clickListener = null;
@@ -72,9 +73,9 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             drawColouredRect(xPos(), yPos(), xSize(), ySize(), -2130706433);
         }
 
-        RenderSystem.pushMatrix();
-        renderStack(minecraft);
-        RenderSystem.popMatrix();
+//        RenderSystem.pushMatrix();
+//        renderStack(minecraft);
+//        RenderSystem.popMatrix();
     }
 
     public GuiStackIcon setDrawCount(boolean drawCount) {
@@ -82,46 +83,48 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         return this;
     }
 
-    private void renderStack(Minecraft minecraft) {
-//        RenderHelper.enableGUIStandardItemLighting();
-        if (getStack().isEmpty()) return;
-
-        double scaledWidth = xSize() / 18D;
-        double scaledHeight = ySize() / 18D;
-
-        RenderSystem.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
-        RenderSystem.scaled(scaledWidth, scaledHeight, 1);
-        minecraft.getItemRenderer().renderGuiItem(getStack(), 0, 0);
-
-        if (getStack().getItem().showDurabilityBar(getStack())) {
-            double health = getStack().getItem().getDurabilityForDisplay(getStack());
-            int rgbfordisplay = getStack().getItem().getRGBDurabilityForDisplay(getStack());
-            int i = Math.round(13.0F - (float) health * 13.0F);
-
-            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
-            zOffset += 45;
-            drawColouredRect(2, 13, 13, 2, 0xFF000000);
-            drawColouredRect(2, 13, i, 1, rgbfordisplay | 0xFF000000);
-            zOffset -= 45;
-            RenderSystem.translated(0, 0, (getRenderZLevel() - 80));
-        }
-
-        if (drawCount && getStack().getCount() > 1) {
-            String s = getStack().getCount() + "";
-            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
-            zOffset += 45;
-            drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.width(s)) - 1, fontRenderer.lineHeight, 0xFFFFFF, true);
-            zOffset -= 45;
-        }
-
-        RenderHelper.turnOff();
-    }
+//    private void renderStack(Minecraft minecraft) {
+////        RenderHelper.enableGUIStandardItemLighting();
+//        if (getStack().isEmpty()) return;
+//
+//        double scaledWidth = xSize() / 18D;
+//        double scaledHeight = ySize() / 18D;
+//
+//        RenderSystem.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
+//        RenderSystem.scaled(scaledWidth, scaledHeight, 1);
+//        minecraft.getItemRenderer().renderGuiItem(getStack(), 0, 0);
+//
+//        if (getStack().getItem().showDurabilityBar(getStack())) {
+//            double health = getStack().getItem().getDurabilityForDisplay(getStack());
+//            int rgbfordisplay = getStack().getItem().getRGBDurabilityForDisplay(getStack());
+//            int i = Math.round(13.0F - (float) health * 13.0F);
+//
+//            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
+//            zOffset += 45;
+//            drawColouredRect(2, 13, 13, 2, 0xFF000000);
+//            drawColouredRect(2, 13, i, 1, rgbfordisplay | 0xFF000000);
+//            zOffset -= 45;
+//            RenderSystem.translated(0, 0, (getRenderZLevel() - 80));
+//        }
+//
+//        if (drawCount && getStack().getCount() > 1) {
+//            String s = getStack().getCount() + "";
+//            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
+//            zOffset += 45;
+//            drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.width(s)) - 1, fontRenderer.lineHeight, 0xFFFFFF, true);
+//            zOffset -= 45;
+//        }
+//
+//        Lighting.turnOff();
+//    }
 
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (getInsetRect().contains(mouseX, mouseY) && (drawToolTip || toolTipOverride != null) && !getStack().isEmpty()) {
-            List<ITextComponent> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItem(getStack());
-            drawHoveringText(list, mouseX, mouseY, fontRenderer);
+            List<Component> list = toolTipOverride != null ? toolTipOverride : getTooltipFromItem(getStack());
+            PoseStack poseStack = new PoseStack();
+            poseStack.translate(0, 0, getRenderZLevel());
+            renderTooltip(poseStack, list, mouseX, mouseY);
             return true;
         }
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
@@ -203,9 +206,9 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             if (stack == null) {
                 stack = new ItemStack(Blocks.BARRIER);
                 toolTipOverride = new ArrayList<>();
-                toolTipOverride.add(new StringTextComponent("Failed to load Item Stack"));
-                toolTipOverride.add(new StringTextComponent("This may mean the mod the stack belongs to is not installed"));
-                toolTipOverride.add(new StringTextComponent("Or its just broken..."));
+                toolTipOverride.add(new TextComponent("Failed to load Item Stack"));
+                toolTipOverride.add(new TextComponent("This may mean the mod the stack belongs to is not installed"));
+                toolTipOverride.add(new TextComponent("Or its just broken..."));
             }
             stackCache.put(stackString, stack);
         }
@@ -215,11 +218,11 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     @Deprecated
     public GuiStackIcon setToolTipOverride(List<String> toolTipOverride) {
-        this.toolTipOverride = toolTipOverride == null ? null : toolTipOverride.stream().map(StringTextComponent::new).collect(Collectors.toList());
+        this.toolTipOverride = toolTipOverride == null ? null : toolTipOverride.stream().map(TextComponent::new).collect(Collectors.toList());
         return this;
     }
 
-    public GuiStackIcon setHoverOverride(List<ITextComponent> toolTipOverride) {
+    public GuiStackIcon setHoverOverride(List<Component> toolTipOverride) {
         this.toolTipOverride = toolTipOverride;
         return this;
     }

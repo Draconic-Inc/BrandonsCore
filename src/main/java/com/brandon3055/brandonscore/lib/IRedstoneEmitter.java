@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Created by brandon3055 on 21/10/2016.

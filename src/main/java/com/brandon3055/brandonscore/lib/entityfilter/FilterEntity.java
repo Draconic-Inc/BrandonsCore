@@ -2,9 +2,9 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -56,15 +56,15 @@ public class FilterEntity extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("include", whitelistEntity);
         compound.putString("name", entityName);
         return compound;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         whitelistEntity = nbt.getBoolean("include");
         entityName = nbt.getString("name");

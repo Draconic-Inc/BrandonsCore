@@ -2,26 +2,20 @@ package com.brandon3055.brandonscore;
 
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.animation.ITimeValue;
-import net.minecraftforge.common.model.animation.IAnimationStateMachine;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 /**
  * Created by Brandon on 14/5/2015.
@@ -40,7 +34,6 @@ public class CommonProxy {
 //        MinecraftForge.EVENT_BUS.register(new ModFeatureParser());
         MinecraftForge.EVENT_BUS.register(new ProcessHandler());
         ModHelperBC.init();
-        CapabilityOP.register();
     }
 
     public void clientSetup(FMLClientSetupEvent event) {}
@@ -53,7 +46,7 @@ public class CommonProxy {
         return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public World getClientWorld() {
+    public Level getClientWorld() {
         return null;
     }
 
@@ -84,7 +77,7 @@ public class CommonProxy {
         return false;
     }
 
-    public PlayerEntity getClientPlayer() {
+    public Player getClientPlayer() {
         return null;
     }
 
@@ -106,20 +99,16 @@ public class CommonProxy {
         ProcessHandler.addProcess(process);
     }
 
-    public void resetEffectRenderer(World world) {
+    public void resetEffectRenderer(Level world) {
 
-    }
-
-    public IAnimationStateMachine loadASM(ResourceLocation location, ImmutableMap<String, ITimeValue> customParameters) {
-        return null;
     }
 
     public int tickTimer() {
         return TimeKeeper.getServerTick();
     }
 
-    public void sendIndexedMessage(PlayerEntity player, ITextComponent message, int index) {
-        BCoreNetwork.sendIndexedMessage((ServerPlayerEntity) player, message, index);
+    public void sendIndexedMessage(Player player, Component message, int index) {
+        BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, index);
     }
 
     public void setClipboardString(String text) {}

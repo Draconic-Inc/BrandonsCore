@@ -1,12 +1,10 @@
 package com.brandon3055.brandonscore.worldentity;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -19,19 +17,19 @@ import java.util.UUID;
 public abstract class WorldEntity {
     private WorldEntityType<?> worldEntityType;
     protected final Random rand = new Random();
-    private UUID uniqueID = MathHelper.createInsecureUUID(this.rand);
-    protected World world;
+    private UUID uniqueID = Mth.createInsecureUUID(this.rand);
+    protected Level world;
     protected boolean removed;
 
     protected WorldEntity(WorldEntityType<?> worldEntityType) {
         this.worldEntityType = worldEntityType;
     }
 
-    public void setWorld(World world) {
+    public void setWorld(Level world) {
         this.world = world;
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return world;
     }
 
@@ -54,15 +52,15 @@ public abstract class WorldEntity {
         WorldEntityHandler.onEntityRemove(this);
     }
 
-    public void read(CompoundNBT nbt) {
+    public void read(CompoundTag nbt) {
         readInternal(nbt);
     }
 
-    public void write(CompoundNBT nbt) {
+    public void write(CompoundTag nbt) {
         writeInternal(nbt);
     }
 
-    private void writeInternal(CompoundNBT nbt) {
+    private void writeInternal(CompoundTag nbt) {
         ResourceLocation resourcelocation = WorldEntityType.getId(this.getType());
         if (resourcelocation == null) {
             throw new RuntimeException(this.getClass() + " is missing a mapping! This is a bug!");
@@ -72,7 +70,7 @@ public abstract class WorldEntity {
         }
     }
 
-    private void readInternal(CompoundNBT nbt) {
+    private void readInternal(CompoundTag nbt) {
         if (nbt.hasUUID("UUID")) {
             this.uniqueID = nbt.getUUID("UUID");
         }
@@ -80,7 +78,7 @@ public abstract class WorldEntity {
 
 
     @Nullable
-    public static WorldEntity readWorldEntity(CompoundNBT nbt) {
+    public static WorldEntity readWorldEntity(CompoundTag nbt) {
         String id = nbt.getString("id");
         return Optional.ofNullable(WorldEntityHandler.REGISTRY.getValue(new ResourceLocation(id)))
                 .map(e -> {

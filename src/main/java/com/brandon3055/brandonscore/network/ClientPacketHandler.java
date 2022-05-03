@@ -2,48 +2,38 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
-import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
 import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
-import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
+import com.mojang.math.Vector3f;
+import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.play.IClientPlayNetHandler;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleType;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHandler {
 
     @Override
-    public void handlePacket(PacketCustom packet, Minecraft mc, IClientPlayNetHandler handler) {
+    public void handlePacket(PacketCustom packet, Minecraft mc, ClientPacketListener handler) {
         switch (packet.getType()) {
             case BCoreNetwork.C_TILE_DATA_MANAGER: {
                 BlockPos pos = packet.readPos();
-                TileEntity tile = mc.level.getBlockEntity(pos);
+                BlockEntity tile = mc.level.getBlockEntity(pos);
                 if (tile instanceof IDataManagerProvider) {
                     ((IDataManagerProvider) tile).getDataManager().receiveSyncData(packet);
                 }
@@ -51,7 +41,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             }
             case BCoreNetwork.C_TILE_MESSAGE: {
                 BlockPos pos = packet.readPos();
-                TileEntity tile = mc.level.getBlockEntity(pos);
+                BlockEntity tile = mc.level.getBlockEntity(pos);
                 if (tile instanceof TileBCore) {
                     int id = packet.readByte() & 0xFF;
                     ((TileBCore) tile).receivePacketFromServer(packet, id);
@@ -89,7 +79,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 break;
             case BCoreNetwork.C_TILE_CAP_DATA:
                 BlockPos pos = packet.readPos();
-                TileEntity tile = Minecraft.getInstance().level.getBlockEntity(pos);
+                BlockEntity tile = Minecraft.getInstance().level.getBlockEntity(pos);
                 if (tile instanceof TileBCore) {
                     ((TileBCore) tile).getCapManager().receiveCapSyncData(packet);
                 }
@@ -116,7 +106,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
         if (mc.level == null) return;
         BlockPos pos = packet.readPos();
         SoundEvent sound = packet.readRegistryId();
-        SoundCategory category = SoundCategory.values()[packet.readVarInt()];
+        SoundSource category = SoundSource.values()[packet.readVarInt()];
         float volume = packet.readFloat();
         float pitch = packet.readFloat();
         boolean distanceDelay = packet.readBoolean();
@@ -136,7 +126,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
         byte yaw = packet.readByte();
         byte pitch = packet.readByte();
         byte headYaw = packet.readByte();
-        Vector3d velocity = new Vector3d(packet.readFloat(), packet.readFloat(), packet.readFloat());
+        Vec3 velocity = new Vec3(packet.readFloat(), packet.readFloat(), packet.readFloat());
         Entity entity = type.create(mc.level);
         if (entity == null) {
             return;
@@ -162,8 +152,8 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             Vector3f motion = packet.readVec3f();
             entity.lerpMotion(motion.x(), motion.y(), motion.z());
             if (packet.readBoolean()) {
-                entity.xRot = packet.readFloat();
-                entity.yRot = packet.readFloat();
+                entity.setXRot(packet.readFloat());
+                entity.setYRot(packet.readFloat());
                 entity.setOnGround(packet.readBoolean());
             }
         }
@@ -174,7 +164,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             return;
         }
         ParticleType<?> type = packet.readRegistryId();
-        IParticleData data = type.getDeserializer().fromNetwork(SneakyUtils.unsafeCast(type), packet.toPacketBuffer());
+        ParticleOptions data = type.getDeserializer().fromNetwork(SneakyUtils.unsafeCast(type), packet.toPacketBuffer());
         Vector3 pos = packet.readVector();
         Vector3 motion = packet.readVector();
         boolean distanceOverride = packet.readBoolean();

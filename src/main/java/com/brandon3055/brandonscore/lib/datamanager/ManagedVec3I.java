@@ -3,9 +3,9 @@ package com.brandon3055.brandonscore.lib.datamanager;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.lib.Vec3I;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -108,19 +108,19 @@ public class ManagedVec3I extends AbstractManagedData<Vec3I> {
     }
 
     @Override
-    public void toNBT(CompoundNBT compound) {
-        ListNBT list = new ListNBT();
-        list.add(IntNBT.valueOf(value.x));
-        list.add(IntNBT.valueOf(value.y));
-        list.add(IntNBT.valueOf(value.z));
+    public void toNBT(CompoundTag compound) {
+        ListTag list = new ListTag();
+        list.add(IntTag.valueOf(value.x));
+        list.add(IntTag.valueOf(value.y));
+        list.add(IntTag.valueOf(value.z));
         compound.put(name, list);
     }
 
     @Override
-    public void fromNBT(CompoundNBT compound) {
+    public void fromNBT(CompoundTag compound) {
         value = new Vec3I();
         if (compound.getList(name, 3).size() == 3) {
-            ListNBT list = compound.getList(name, 3);
+            ListTag list = compound.getList(name, 3);
             value.x = list.getInt(0);
             value.y = list.getInt(1);
             value.z = list.getInt(2);

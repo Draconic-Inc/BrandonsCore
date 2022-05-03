@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.items;
 
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 /**
  * Created by brandon3055 on 18/3/2016.

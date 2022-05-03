@@ -8,14 +8,9 @@ import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import net.minecraft.data.NBTToSNBTConverter;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -56,7 +51,7 @@ public class HudData {
         try (JsonWriter fileWriter = new JsonWriter(new FileWriter(settingsPath.toFile()))) {
             fileWriter.setIndent("    ");
             for (ResourceLocation key : hudElements.keySet()) {
-                CompoundNBT nbt = new CompoundNBT();
+                CompoundTag nbt = new CompoundTag();
                 hudElements.get(key).writeNBT(nbt);
                 storage.addProperty(key.toString(), nbt.toString());
             }
@@ -84,7 +79,7 @@ public class HudData {
             for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
                 ResourceLocation key = new ResourceLocation(entry.getKey());
                 if (hudElements.containsKey(key)) {
-                    CompoundNBT nbt = JsonToNBT.parseTag(entry.getValue().getAsString());
+                    CompoundTag nbt = TagParser.parseTag(entry.getValue().getAsString());
                     hudElements.get(key).readNBT(nbt);
                 }
             }

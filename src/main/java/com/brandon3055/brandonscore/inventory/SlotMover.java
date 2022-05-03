@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.inventory;
 
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.world.inventory.Slot;
 
 /**
  * Created by brandon3055 on 19/04/2022

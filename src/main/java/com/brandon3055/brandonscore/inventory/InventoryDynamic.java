@@ -1,10 +1,10 @@
 package com.brandon3055.brandonscore.inventory;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.LinkedList;
 import java.util.function.Predicate;
@@ -14,7 +14,7 @@ import java.util.function.Predicate;
  * This is a dynamic inventory that will automatically expand its size to told any number of item stacks.
  */
 @Deprecated //Old IInventory stuff i probably dont need. Though i may need a dynamic IItemHandler at some point?
-public class InventoryDynamic implements IInventory {
+public class InventoryDynamic implements Container {
 
     private LinkedList<ItemStack> stacks = new LinkedList<ItemStack>();
     public int xp = 0;
@@ -91,17 +91,17 @@ public class InventoryDynamic implements IInventory {
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return true;
     }
 
     @Override
-    public void startOpen(PlayerEntity player) {
+    public void startOpen(Player player) {
 
     }
 
     @Override
-    public void stopOpen(PlayerEntity player) {
+    public void stopOpen(Player player) {
 
     }
 
@@ -119,12 +119,12 @@ public class InventoryDynamic implements IInventory {
 
 
 
-    public void writeToNBT(CompoundNBT compound) {
-        ListNBT list = new ListNBT();
+    public void writeToNBT(CompoundTag compound) {
+        ListTag list = new ListTag();
 
         for (ItemStack stack : stacks) {
             if (!stack.isEmpty() && stack.getCount() > 0) {
-                CompoundNBT tag = new CompoundNBT();
+                CompoundTag tag = new CompoundTag();
                 stack.save(tag);
                 list.add(tag);
             }
@@ -133,8 +133,8 @@ public class InventoryDynamic implements IInventory {
         compound.put("InvItems", list);
     }
 
-    public void readFromNBT(CompoundNBT compound) {
-        ListNBT list = compound.getList("InvItems", 10);
+    public void readFromNBT(CompoundTag compound) {
+        ListTag list = compound.getList("InvItems", 10);
         stacks.clear();
 
         for (int i = 0; i < list.size(); i++) {

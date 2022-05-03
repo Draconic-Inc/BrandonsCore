@@ -3,42 +3,38 @@ package com.brandon3055.brandonscore.inventory;
 import codechicken.lib.inventory.InventorySimple;
 import com.brandon3055.brandonscore.BCContent;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
-import static net.minecraft.inventory.EquipmentSlotType.*;
-import static net.minecraft.util.text.TextFormatting.RED;
-import static net.minecraft.util.text.TextFormatting.WHITE;
+import static net.minecraft.world.entity.EquipmentSlot.*;
 
 /**
  * Created by brandon3055 on 6/23/2018.
  */
-public class ContainerPlayerAccess extends Container {
+public class ContainerPlayerAccess extends AbstractContainerMenu {
 
-    private static final EquipmentSlotType[] VALID_EQUIPMENT_SLOTS = new EquipmentSlotType[]{HEAD, CHEST, LEGS, FEET};
-    public PlayerEntity player;
-    public PlayerEntity playerAccess;
-    private IInventory targetInventory;
+    private static final EquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EquipmentSlot[]{HEAD, CHEST, LEGS, FEET};
+    public Player player;
+    public Player playerAccess;
+    private Container targetInventory;
     private MinecraftServer server;
     private int tick = 0;
 
     //Client Side Constructor
-    public ContainerPlayerAccess(int id, PlayerInventory playerInv) {
+    public ContainerPlayerAccess(int id, Inventory playerInv) {
         super(BCContent.containerPlayerAccess, id);
         this.player = playerInv.player;
         playerAccess = null;
@@ -46,7 +42,7 @@ public class ContainerPlayerAccess extends Container {
         layoutSlots();
     }
 
-    public ContainerPlayerAccess(int id, PlayerInventory playerInv, PlayerEntity playerAccess, MinecraftServer server) {
+    public ContainerPlayerAccess(int id, Inventory playerInv, Player playerAccess, MinecraftServer server) {
         super(BCContent.containerPlayerAccess, id);
         this.player = playerInv.player;
         this.playerAccess = playerAccess;
@@ -73,8 +69,8 @@ public class ContainerPlayerAccess extends Container {
 //            }
 //        }
 
-        if (tick++ % 10 == 0 && player instanceof ServerPlayerEntity && playerAccess != null) {
-            BCoreNetwork.sendPlayerAccessUIUpdate((ServerPlayerEntity) player, playerAccess);
+        if (tick++ % 10 == 0 && player instanceof ServerPlayer && playerAccess != null) {
+            BCoreNetwork.sendPlayerAccessUIUpdate((ServerPlayer) player, playerAccess);
         }
 
         super.broadcastChanges();
@@ -120,20 +116,20 @@ public class ContainerPlayerAccess extends Container {
     }
 
     @Override
-    public boolean stillValid(PlayerEntity playerIn) {
+    public boolean stillValid(Player playerIn) {
         return true;
     }
 
     @Override
-    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(Player playerIn, int index) {
         return ItemStack.EMPTY;
     }
 
     private static class ArmorSlot extends Slot {
-        private final EquipmentSlotType eSlot;
-        private final PlayerEntity aPlayer;
+        private final EquipmentSlot eSlot;
+        private final Player aPlayer;
 
-        public ArmorSlot(IInventory inventoryIn, int index, int xPosition, int yPosition, EquipmentSlotType eSlot, PlayerEntity aPlayer) {
+        public ArmorSlot(Container inventoryIn, int index, int xPosition, int yPosition, EquipmentSlot eSlot, Player aPlayer) {
             super(inventoryIn, index, xPosition, yPosition);
             this.eSlot = eSlot;
             this.aPlayer = aPlayer;
@@ -147,7 +143,7 @@ public class ContainerPlayerAccess extends Container {
             return true;//stack.getItem().isValidArmor(stack, eSlot, aPlayer);
         }
 
-        public boolean mayPickup(PlayerEntity playerIn) {
+        public boolean mayPickup(Player playerIn) {
             ItemStack itemstack = this.getItem();
             return (itemstack.isEmpty() || playerIn.isCreative() || !EnchantmentHelper.hasBindingCurse(itemstack)) && super.mayPickup(playerIn);
         }
@@ -156,12 +152,12 @@ public class ContainerPlayerAccess extends Container {
         @OnlyIn(Dist.CLIENT)
         public String getSlotTexture() {
 //            return PlayerContainer.ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
-            return PlayerContainer.EMPTY_ARMOR_SLOT_BOOTS.toString();//TODO ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
+            return InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS.toString();//TODO ARMOR_SLOT_TEXTURES[eSlot.getIndex()];
         }
     }
 
     private static class OffhandSlot extends Slot {
-        public OffhandSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {
+        public OffhandSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
             super(inventoryIn, index, xPosition, yPosition);
         }
 

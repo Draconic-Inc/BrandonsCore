@@ -1,10 +1,9 @@
 package com.brandon3055.brandonscore.api.hud;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -22,22 +21,22 @@ public interface IHudBlock extends IHudDisplay {
 
     /**
      * Note: The hud is entirely handled client side so your hud data must be available on the client.
-     * Each {@link ITextComponent} will be rendered as its own line on the hud. There is no line wrapping.
+     * Each {@link Component} will be rendered as its own line on the hud. There is no line wrapping.
      *
      * @param world       The world.
      * @param pos         The position of this block.
      * @param player      The player.
      * @param displayList The list to which hud info should be added.
      */
-    void generateHudText(World world, BlockPos pos, PlayerEntity player, List<ITextComponent> displayList);
+    void generateHudText(Level world, BlockPos pos, Player player, List<Component> displayList);
 
     /**
-     * @param world       The world.
-     * @param pos         The position of this block.
-     * @param player      The player.
+     * @param world  The world.
+     * @param pos    The position of this block.
+     * @param player The player.
      * @return True if the hud data for this block should be rendered.
      */
-    default boolean shouldDisplayHudText(World world, BlockPos pos, PlayerEntity player) {
+    default boolean shouldDisplayHudText(Level world, BlockPos pos, Player player) {
         return true;
     }
 }

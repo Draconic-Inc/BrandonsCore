@@ -1,14 +1,12 @@
 package com.brandon3055.brandonscore.utils;
 
-import net.minecraft.client.audio.Sound;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.minecraft.util.Direction.*;
+import static net.minecraft.core.Direction.*;
 
 /**
  * Created by brandon3055 on 24/4/2016.

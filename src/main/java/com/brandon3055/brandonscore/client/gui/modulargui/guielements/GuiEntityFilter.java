@@ -16,19 +16,19 @@ import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -39,8 +39,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
-import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
+import static net.minecraft.world.item.TooltipFlag.Default.ADVANCED;
+import static net.minecraft.world.item.TooltipFlag.Default.NORMAL;
 
 /**
  * Created by brandon3055 on 18/11/19.
@@ -252,7 +252,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addButton.setEnabledCallback(() -> gui.entityFilter.nodeMap.size() < gui.entityFilter.maxFilters);
 
             GuiButton matchButton = new GuiButton().setShadow(true).setYSize(10).setInsets(0, 0, 0, 0);
-            matchButton.setDisplaySupplier(() -> TextFormatting.UNDERLINE + i18ni("and_group.button." + isAndNode()));
+            matchButton.setDisplaySupplier(() -> ChatFormatting.UNDERLINE + i18ni("and_group.button." + isAndNode()));
             matchButton.setHoverText((e) -> i18ni("and_group." + isAndNode()));
             matchButton.onPressed(() -> { if (getNode() != null) getNode().setAndGroup(!getNode().isAndGroup()); });
             matchButton.setYPos(yPos() + 1).setXPosMod(() -> addButton.xPos() - fontRenderer.width(matchButton.getDisplayString()) - 1);
@@ -489,9 +489,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     String modName = mod.isPresent() ? mod.get().getModInfo().getDisplayName() : "[unknown-mod]";
                     String entityName = I18n.get(name);
                     if (exists) {
-                        nameField.setHoverText(entityName, TextFormatting.BLUE + "" + TextFormatting.ITALIC + modName);
+                        nameField.setHoverText(entityName, ChatFormatting.BLUE + "" + ChatFormatting.ITALIC + modName);
                     } else {
-                        nameField.setHoverText(TextFormatting.RED + "Unknown entity string");
+                        nameField.setHoverText(ChatFormatting.RED + "Unknown entity string");
                     }
                 }
             }); //TODO Test
@@ -609,9 +609,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             stackIcon.setPos(xPos() + 2, yPos() + 11);
             stackIcon.setClickListener(() -> {
                 if (getNode() != null) {
-                    PlayerEntity player = Minecraft.getInstance().player;
-                    if (!player.inventory.getCarried().isEmpty()) {
-                        ItemStack stack = player.inventory.getCarried().copy();
+                    Player player = Minecraft.getInstance().player;
+                    if (!player.inventoryMenu.getCarried().isEmpty()) {
+                        ItemStack stack = player.inventoryMenu.getCarried().copy();
                         stack.setCount(1);
                         getNode().setItemName(stack.getItem().getRegistryName().toString());
                         getNode().setDamage(stack.isDamageableItem() ? stack.getDamageValue() : -1);
@@ -733,7 +733,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                         nbtField.setHoverText(i18ni("item.nbt.info"));
                     } else {
                         try {
-                            CompoundNBT compound = JsonToNBT.parseTag(s);
+                            CompoundTag compound = TagParser.parseTag(s);
                             getNode().setNbt(compound);
                             nbtField.setTextColor(0xFFFFFF);
                             nbtField.setHoverText(i18ni("item.nbt.info"));
@@ -771,9 +771,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 } else {
                     ItemStack stack = StringyStacks.legacyStackConverter(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
                     stackIcon.setStack(stack);
-                    List<ITextComponent> tooltip = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ADVANCED : NORMAL);
-                    tooltip.add(new StringTextComponent(TextFormatting.GRAY + "----------------------------"));
-                    tooltip.add(new TranslationTextComponent("set_stack"));
+                    List<Component> tooltip = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ADVANCED : NORMAL);
+                    tooltip.add(new TextComponent(ChatFormatting.GRAY + "----------------------------"));
+                    tooltip.add(new TranslatableComponent("set_stack"));
                     stackIcon.setComponentHoverText(tooltip);
                 }
             }

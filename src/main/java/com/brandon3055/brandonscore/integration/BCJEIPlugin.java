@@ -11,9 +11,9 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +42,7 @@ public class BCJEIPlugin implements IModPlugin {
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler() { //TODO figure out why this wont compile when done proeprly
             @Override
-            public List<Rectangle2d> getGuiExtraAreas(ContainerScreen containerScreen) {
+            public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen containerScreen) {
                 return ((ModularGuiContainer)containerScreen).getManager().getJeiExclusions();
             }
         });
@@ -60,7 +60,7 @@ public class BCJEIPlugin implements IModPlugin {
                 //noinspection unchecked
                 return ((Stream<JEITargetAdapter>) gui.getJEIDropTargets().stream()).filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {
                     @Override
-                    public Rectangle2d getArea() {
+                    public Rect2i getArea() {
                         return adaptor.getMCRect();
                     }
 
@@ -82,7 +82,7 @@ public class BCJEIPlugin implements IModPlugin {
             public <I> java.util.List<Target<I>> getTargets(ModularGuiScreen gui, I ingredient, boolean doStart) {
                 return gui.getJEIDropTargets().stream().filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {
                     @Override
-                    public Rectangle2d getArea() {
+                    public Rect2i getArea() {
                         return adaptor.getMCRect();
                     }
 

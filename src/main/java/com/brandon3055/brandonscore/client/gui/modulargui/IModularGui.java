@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 import com.brandon3055.brandonscore.api.IJEIClearance;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IMouseOver;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.Rectangle2d;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.Rect2i;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.awt.*;
@@ -57,7 +57,7 @@ public interface IModularGui<T extends Screen> extends IMouseOver, IJEIClearance
     }
 
     @Override
-    default List<Rectangle2d> getGuiExtraAreas() {
+    default List<Rect2i> getGuiExtraAreas() {
         return getManager().getJeiExclusions();
     }
 
@@ -69,9 +69,9 @@ public interface IModularGui<T extends Screen> extends IMouseOver, IJEIClearance
 
         Rectangle getArea();
 
-        default Rectangle2d getMCRect() {
+        default Rect2i getMCRect() {
             Rectangle rect = getArea();
-            return new Rectangle2d(rect.x, rect.y, rect.width, rect.height);
+            return new Rect2i(rect.x, rect.y, rect.width, rect.height);
         }
 
         @Override

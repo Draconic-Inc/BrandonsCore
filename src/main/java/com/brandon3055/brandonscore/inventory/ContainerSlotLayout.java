@@ -1,9 +1,9 @@
 package com.brandon3055.brandonscore.inventory;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -35,7 +35,7 @@ public class ContainerSlotLayout {
         return this;
     }
 
-    public ContainerSlotLayout playerMain(PlayerEntity player) {
+    public ContainerSlotLayout playerMain(Player player) {
         if (slotDataMap.keySet().stream().anyMatch(slotType -> !slotType.isPlayer)) {
             throw new IllegalStateException("All player slots must be added before tile slots.");
         }
@@ -57,7 +57,7 @@ public class ContainerSlotLayout {
     }
 
     //Armor and off hand
-    public ContainerSlotLayout playerEquipSlot(PlayerEntity player, int equipmentSlot) {
+    public ContainerSlotLayout playerEquipSlot(Player player, int equipmentSlot) {
         if (slotDataMap.keySet().stream().anyMatch(slotType -> !slotType.isPlayer)) {
             throw new IllegalStateException("All player slots must be added before tile slots.");
         }
@@ -66,14 +66,14 @@ public class ContainerSlotLayout {
         return this;
     }
 
-    public ContainerSlotLayout playerArmor(PlayerEntity player) {
+    public ContainerSlotLayout playerArmor(Player player) {
         for (int i = 0; i < 4; i++) {
             playerEquipSlot(player, i);
         }
         return this;
     }
 
-    public ContainerSlotLayout playerEquipMod(PlayerEntity player) {
+    public ContainerSlotLayout playerEquipMod(Player player) {
         if (slotDataMap.keySet().stream().anyMatch(slotType -> !slotType.isPlayer)) {
             throw new IllegalStateException("All player slots must be added before tile slots.");
         }
@@ -88,7 +88,7 @@ public class ContainerSlotLayout {
         return this;
     }
 
-    public ContainerSlotLayout playerOffHand(PlayerEntity player) {
+    public ContainerSlotLayout playerOffHand(Player player) {
         playerEquipSlot(player, 4);
         return this;
     }
@@ -147,6 +147,6 @@ public class ContainerSlotLayout {
     }
 
     public interface LayoutFactory<T> {
-        ContainerSlotLayout buildLayout(PlayerEntity player, T data);
+        ContainerSlotLayout buildLayout(Player player, T data);
     }
 }

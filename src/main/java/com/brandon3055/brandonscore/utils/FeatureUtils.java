@@ -2,9 +2,9 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.util.ItemUtils;
 import codechicken.lib.vec.Vector3;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
  * Created by brandon3055 on 20/07/2016.
@@ -20,7 +20,7 @@ public class FeatureUtils {
      * @param world        The world
      * @param dropLocation The location
      */
-    public static void dropItem(ItemStack stack, World world, Vector3 dropLocation) {
+    public static void dropItem(ItemStack stack, Level world, Vector3 dropLocation) {
         if (stack.isEmpty()) {
             return;
         }
@@ -36,7 +36,7 @@ public class FeatureUtils {
         ItemUtils.dropItem(stack, world, dropLocation);
     }
 
-    public static void dropItemNoDellay(ItemStack stack, World world, Vector3 dropLocation) {
+    public static void dropItemNoDellay(ItemStack stack, Level world, Vector3 dropLocation) {
         if (stack.isEmpty()) {
             return;
         }

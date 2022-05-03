@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -10,13 +10,13 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedNBT extends AbstractManagedData<CompoundNBT> {
+public class ManagedNBT extends AbstractManagedData<CompoundTag> {
 
-    private CompoundNBT value;
-    private CompoundNBT lastValue;
-    protected Function<CompoundNBT, CompoundNBT> validator = null;
+    private CompoundTag value;
+    private CompoundTag lastValue;
+    protected Function<CompoundTag, CompoundTag> validator = null;
 
-    public ManagedNBT(String name, CompoundNBT defaultValue, DataFlags... flags) {
+    public ManagedNBT(String name, CompoundTag defaultValue, DataFlags... flags) {
         super(name, flags);
         this.value = defaultValue;
         lastValue = defaultValue.copy();
@@ -26,14 +26,14 @@ public class ManagedNBT extends AbstractManagedData<CompoundNBT> {
      * Default empty {@link CompoundNBT}
      */
     public ManagedNBT(String name, DataFlags... flags) {
-        this(name, new CompoundNBT(), flags);
+        this(name, new CompoundTag(), flags);
     }
 
-    public CompoundNBT set(CompoundNBT value) {
+    public CompoundTag set(CompoundTag value) {
         lastValue = value.copy();
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
-            CompoundNBT prev = this.value;
+            CompoundTag prev = this.value;
             this.value = value;
 
             if (dataManager.isClientSide() && flags.allowClientControl) {
@@ -53,7 +53,7 @@ public class ManagedNBT extends AbstractManagedData<CompoundNBT> {
         return this.value;
     }
 
-    public CompoundNBT get() {
+    public CompoundTag get() {
         return value;
     }
 
@@ -63,7 +63,7 @@ public class ManagedNBT extends AbstractManagedData<CompoundNBT> {
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      * @return
      */
-    public ManagedNBT setValidator(Function<CompoundNBT, CompoundNBT> validator) {
+    public ManagedNBT setValidator(Function<CompoundTag, CompoundTag> validator) {
         this.validator = validator;
         return this;
     }
@@ -99,12 +99,12 @@ public class ManagedNBT extends AbstractManagedData<CompoundNBT> {
     }
 
     @Override
-    public void toNBT(CompoundNBT compound) {
+    public void toNBT(CompoundTag compound) {
         compound.put(name, value);
     }
 
     @Override
-    public void fromNBT(CompoundNBT compound) {
+    public void fromNBT(CompoundTag compound) {
         value = compound.getCompound(name);
         notifyListeners(value);
     }

@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.handlers;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Created by brandon3055 on 25/3/2016.
@@ -13,7 +13,7 @@ public class HandHelper {
     /**
      * Returns the first item found in ether of the players hands starting with the main hand
      */
-    public static ItemStack getMainFirst(PlayerEntity player) {
+    public static ItemStack getMainFirst(Player player) {
         if (!player.getMainHandItem().isEmpty()) {
             return player.getMainHandItem();
         }
@@ -23,7 +23,7 @@ public class HandHelper {
     /**
      * Returns the first item found in ether of the players hands starting with the off hand
      */
-    public static ItemStack getOffFirst(PlayerEntity player) {
+    public static ItemStack getOffFirst(Player player) {
         if (!player.getOffhandItem().isEmpty()) {
             return player.getOffhandItem();
         }
@@ -33,7 +33,7 @@ public class HandHelper {
     /**
      * Returns the first item found in ether of the players hands that is the same as the given item
      */
-    public static ItemStack getItem(PlayerEntity player, Item item) {
+    public static ItemStack getItem(Player player, Item item) {
         if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().getItem() == item) {
             return player.getMainHandItem();
         }
@@ -53,7 +53,7 @@ public class HandHelper {
 //        return ItemStack.EMPTY;
 //    }
 
-    public static boolean isHoldingItemEther(PlayerEntity player, Item item) {
+    public static boolean isHoldingItemEther(Player player, Item item) {
         if (!player.getMainHandItem().isEmpty() && player.getMainHandItem().getItem() == item) {
             return true;
         }

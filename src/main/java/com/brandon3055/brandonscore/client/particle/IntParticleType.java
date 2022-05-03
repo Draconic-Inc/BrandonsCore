@@ -4,12 +4,10 @@ import com.brandon3055.brandonscore.utils.DataUtils;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleType;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +18,7 @@ import java.util.Locale;
  */
 public class IntParticleType extends ParticleType<IntParticleType.IntParticleData> {
 
-    private static IParticleData.IDeserializer<IntParticleData> DESERIALIZER = new IParticleData.IDeserializer<IntParticleData>() {
+    private static ParticleOptions.Deserializer<IntParticleData> DESERIALIZER = new ParticleOptions.Deserializer<>() {
         @Override
         public IntParticleData fromCommand(ParticleType<IntParticleData> particleTypeIn, StringReader reader) throws CommandSyntaxException {
             List<Integer> list = new ArrayList<>();
@@ -33,7 +31,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
         }
 
         @Override
-        public IntParticleData fromNetwork(ParticleType<IntParticleData> particleTypeIn, PacketBuffer buffer) {
+        public IntParticleData fromNetwork(ParticleType<IntParticleData> particleTypeIn, FriendlyByteBuf buffer) {
             return new IntParticleData(particleTypeIn, buffer.readByte());
         }
     };
@@ -47,7 +45,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
         return null;
     }
 
-    public static class IntParticleData implements IParticleData {
+    public static class IntParticleData implements ParticleOptions {
         private ParticleType<?> type;
         private int[] data;
 
@@ -62,7 +60,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
         }
 
         @Override
-        public void writeToNetwork(PacketBuffer buffer) {
+        public void writeToNetwork(FriendlyByteBuf buffer) {
             buffer.writeVarIntArray(data);
         }
 

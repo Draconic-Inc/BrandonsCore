@@ -3,10 +3,10 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraftforge.fml.client.gui.GuiUtils;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraftforge.client.gui.GuiUtils;
 
 /**
  * Created by brandon3055 on 29/04/2022
@@ -29,8 +29,8 @@ public class GuiTooltipBackground extends GuiElement<GuiTooltipBackground> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        IRenderTypeBuffer.Impl getter = RenderUtils.getTypeBuffer();
-        GuiHelper.drawHoverRect(getter, new MatrixStack(), xPos(), yPos(), xSize(), ySize(), backgroundColor, borderColor);
+        MultiBufferSource.BufferSource getter = RenderUtils.getTypeBuffer();
+        GuiHelper.drawHoverRect(getter, new PoseStack(), xPos(), yPos(), xSize(), ySize(), backgroundColor, borderColor);
         getter.endBatch();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }

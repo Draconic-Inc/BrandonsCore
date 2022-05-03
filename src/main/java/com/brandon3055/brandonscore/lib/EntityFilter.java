@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -61,21 +61,21 @@ public abstract class EntityFilter {
      * @return Returns true if the given entity matches this filter.
      */
     public boolean isMatch(Entity entity) {
-        if ((entity instanceof AnimalEntity && !(entity instanceof IMob)) && !detectPassive) {
+        if ((entity instanceof Animal && !(entity instanceof Enemy)) && !detectPassive) {
             return false;
         }
 
         if (isTypeSelectionEnabled()) {
-            if ((entity instanceof MobEntity || entity instanceof IMob) && !detectHostile) {
+            if ((entity instanceof Mob || entity instanceof Enemy) && !detectHostile) {
                 return false;
             }
 
-            if (entity instanceof PlayerEntity && !detectPlayer) {
+            if (entity instanceof Player && !detectPlayer) {
                 return false;
             }
         }
 
-        if (!(entity instanceof MobEntity || entity instanceof IMob) && !(entity instanceof PlayerEntity) && (!detectOther || !isOtherSelectorEnabled())) {
+        if (!(entity instanceof Mob || entity instanceof Enemy) && !(entity instanceof Player) && (!detectOther || !isOtherSelectorEnabled())) {
             return false;
         }
 
@@ -83,7 +83,7 @@ public abstract class EntityFilter {
             return true;
         }
 
-        if (entity instanceof PlayerEntity && entityList.contains("[player]:" + entity.getName())) {
+        if (entity instanceof Player && entityList.contains("[player]:" + entity.getName())) {
             return isWhiteList;
         }
 
@@ -94,14 +94,14 @@ public abstract class EntityFilter {
         return !isWhiteList;
     }
 
-    public CompoundNBT writeToNBT(CompoundNBT compound) {
+    public CompoundTag writeToNBT(CompoundTag compound) {
         compound.putBoolean("detectPassive", detectPassive);
         compound.putBoolean("detectHostile", detectHostile);
         compound.putBoolean("detectPlayer", detectPlayer);
         compound.putBoolean("detectOther", detectOther);
         compound.putBoolean("isWhiteList", isWhiteList);
 
-        ListNBT list = new ListNBT();
+        ListTag list = new ListTag();
         for (String entity : entityList) {
 //            list.appendTag(new NBTTagString(entity));
         }
@@ -110,7 +110,7 @@ public abstract class EntityFilter {
         return compound;
     }
 
-    public CompoundNBT readFromNBT(CompoundNBT compound) {
+    public CompoundTag readFromNBT(CompoundTag compound) {
         detectPassive = compound.getBoolean("detectPassive");
         detectHostile = compound.getBoolean("detectHostile");
         detectPlayer = compound.getBoolean("detectPlayer");
@@ -129,14 +129,14 @@ public abstract class EntityFilter {
     }
 
     public void sendConfigToServer() {
-        CompoundNBT compound = new CompoundNBT();
+        CompoundTag compound = new CompoundTag();
         compound.putBoolean("detectPassive", detectPassive);
         compound.putBoolean("detectHostile", detectHostile);
         compound.putBoolean("detectPlayer", detectPlayer);
         compound.putBoolean("detectOther", detectOther);
         compound.putBoolean("isWhiteList", isWhiteList);
 
-        ListNBT list = new ListNBT();
+        ListTag list = new ListTag();
         for (String entity : entityList) {
 //            list.appendTag(new NBTTagString(entity));
         }
@@ -148,9 +148,9 @@ public abstract class EntityFilter {
     /**
      * Used by the GUI to send the config to the server.
      * */
-    protected abstract void sendConfigToServer(CompoundNBT compound);
+    protected abstract void sendConfigToServer(CompoundTag compound);
 
-    public void receiveConfigFromClient(CompoundNBT compound) {
+    public void receiveConfigFromClient(CompoundTag compound) {
         if (isTypeSelectionEnabled()) {
             detectPassive = compound.getBoolean("detectPassive");
             detectHostile = compound.getBoolean("detectHostile");

@@ -1,18 +1,19 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.SharedConstants;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -304,7 +305,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public void updateCursor(int pos) {
-        this.cursorPosition = MathHelper.clamp(pos, 0, this.text().length());
+        this.cursorPosition = Mth.clamp(pos, 0, this.text().length());
     }
 
     public void setCursorPositionZero() {
@@ -430,7 +431,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
         }
 
         if (this.isFocused() && mouseOver && button == 0) {
-            int i = MathHelper.floor(mouseX) - this.xPos();
+            int i = Mth.floor(mouseX) - this.xPos();
             if (this.enableBackgroundDrawing) {
                 i -= 4;
             }
@@ -460,118 +461,119 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 ////        if (!isFocused) setCursorPosition(0);
 //    }
 
-    public void drawTextBox(MatrixStack matrixStack, boolean mouseOver) {
-//        if (this.isEnabled()) {
-        if (this.getEnableBackgroundDrawing()) {
-            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, getFillColour(mouseOver), getBorderColour(mouseOver));
-        }
-
-        double zLevel = getRenderZLevel();
-
-        int i = this.isFieldEnabled ? getTextColor() : this.disabledColor;
-        int j = this.cursorPosition - this.lineScrollOffset;
-        int k = this.selectionEnd - this.lineScrollOffset;
-        String s = this.fontRenderer.plainSubstrByWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
-        boolean flag = j >= 0 && j <= s.length();
-        boolean flag1 = this.isFocused() && this.cursorCounter / 10 % 2 == 0 && flag;
-        int stringX = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
-        int stringY = this.enableBackgroundDrawing ? this.yPos() + (this.ySize() - 8) / 2 : this.yPos();
-        int j1 = stringX;
-        if (k > s.length()) {
-            k = s.length();
-        }
-
-        matrixStack.translate(0, 0, textZOffset + zLevel);
-        if (!s.isEmpty()) {
-            String s1 = flag ? s.substring(0, j) : s;
-            if (getShadow()) {
-                j1 = this.fontRenderer.drawShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
-            } else {
-                j1 = this.fontRenderer.draw(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
-            }
-        }
-
-        boolean flag2 = this.cursorPosition < this.text().length() || this.text().length() >= this.getMaxStringLength();
-        int k1 = j1;
-        if (!flag) {
-            k1 = j > 0 ? stringX + this.xSize() : stringX;
-        } else if (flag2) {
-            k1 = j1 - 1;
-            if (getShadow()) {
-                --j1;
-            }
-        }
-
-        if (!s.isEmpty() && flag && j < s.length()) {
-            if (getShadow()) {
-                this.fontRenderer.drawShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
-            } else {
-                this.fontRenderer.draw(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
-            }
-        }
-
-        if (!flag2 && this.suggestion != null) {
-            if (getShadow()) {
-                this.fontRenderer.drawShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
-            } else {
-                this.fontRenderer.draw(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
-            }
-        }
-
-        if (flag1) {
-            if (flag2) {
-                AbstractGui.fill(matrixStack, k1, stringY - 1, k1 + 1, stringY + 1 + 9, cursorColor);
-            } else {
-                if (getShadow()) {
-                    this.fontRenderer.drawShadow(matrixStack, "_", (float) k1, (float) stringY, i);
-                } else {
-                    this.fontRenderer.draw(matrixStack, "_", (float) k1, (float) stringY, i);
-                }
-            }
-        }
-
-        if (k != j) {
-            int l1 = stringX + this.fontRenderer.width(s.substring(0, k));
-            this.drawSelectionBox(k1, stringY - 1, l1 - 1, stringY + 1 + 9);
-        }
-        matrixStack.translate(0, 0, -(textZOffset + zLevel));
+    public void drawTextBox(PoseStack matrixStack, boolean mouseOver) {
+        BrandonsCore.LOGGER.info("FIIIIIX MEEEEEE GuiTextField");
+////        if (this.isEnabled()) {
+//        if (this.getEnableBackgroundDrawing()) {
+//            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, getFillColour(mouseOver), getBorderColour(mouseOver));
+//        }
+//
+//        double zLevel = getRenderZLevel();
+//
+//        int i = this.isFieldEnabled ? getTextColor() : this.disabledColor;
+//        int j = this.cursorPosition - this.lineScrollOffset;
+//        int k = this.selectionEnd - this.lineScrollOffset;
+//        String s = this.fontRenderer.plainSubstrByWidth(this.text().substring(this.lineScrollOffset), this.getAdjustedWidth());
+//        boolean flag = j >= 0 && j <= s.length();
+//        boolean flag1 = this.isFocused() && this.cursorCounter / 10 % 2 == 0 && flag;
+//        int stringX = this.enableBackgroundDrawing ? this.xPos() + 4 : this.xPos();
+//        int stringY = this.enableBackgroundDrawing ? this.yPos() + (this.ySize() - 8) / 2 : this.yPos();
+//        int j1 = stringX;
+//        if (k > s.length()) {
+//            k = s.length();
+//        }
+//
+//        matrixStack.translate(0, 0, textZOffset + zLevel);
+//        if (!s.isEmpty()) {
+//            String s1 = flag ? s.substring(0, j) : s;
+//            if (getShadow()) {
+//                j1 = this.fontRenderer.drawShadow(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
+//            } else {
+//                j1 = this.fontRenderer.draw(matrixStack, this.textFormatter.apply(s1, this.lineScrollOffset), (float) stringX, (float) stringY, i);
+//            }
+//        }
+//
+//        boolean flag2 = this.cursorPosition < this.text().length() || this.text().length() >= this.getMaxStringLength();
+//        int k1 = j1;
+//        if (!flag) {
+//            k1 = j > 0 ? stringX + this.xSize() : stringX;
+//        } else if (flag2) {
+//            k1 = j1 - 1;
+//            if (getShadow()) {
+//                --j1;
+//            }
+//        }
+//
+//        if (!s.isEmpty() && flag && j < s.length()) {
+//            if (getShadow()) {
+//                this.fontRenderer.drawShadow(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
+//            } else {
+//                this.fontRenderer.draw(matrixStack, this.textFormatter.apply(s.substring(j), this.cursorPosition), (float) j1, (float) stringY, i);
+//            }
+//        }
+//
+//        if (!flag2 && this.suggestion != null) {
+//            if (getShadow()) {
+//                this.fontRenderer.drawShadow(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
+//            } else {
+//                this.fontRenderer.draw(matrixStack, this.suggestion, (float) (k1 - 1), (float) stringY, 0xff808080);
+//            }
+//        }
+//
+//        if (flag1) {
+//            if (flag2) {
+//                GuiComponent.fill(matrixStack, k1, stringY - 1, k1 + 1, stringY + 1 + 9, cursorColor);
+//            } else {
+//                if (getShadow()) {
+//                    this.fontRenderer.drawShadow(matrixStack, "_", (float) k1, (float) stringY, i);
+//                } else {
+//                    this.fontRenderer.draw(matrixStack, "_", (float) k1, (float) stringY, i);
+//                }
+//            }
+//        }
+//
+//        if (k != j) {
+//            int l1 = stringX + this.fontRenderer.width(s.substring(0, k));
+//            this.drawSelectionBox(k1, stringY - 1, l1 - 1, stringY + 1 + 9);
+//        }
+//        matrixStack.translate(0, 0, -(textZOffset + zLevel));
     }
 
     private void drawSelectionBox(int startX, int startY, int endX, int endY) {
-        if (startX < endX) {
-            int i = startX;
-            startX = endX;
-            endX = i;
-        }
-
-        if (startY < endY) {
-            int j = startY;
-            startY = endY;
-            endY = j;
-        }
-
-        if (endX > this.xPos() + this.xSize()) {
-            endX = this.xPos() + this.xSize();
-        }
-
-        if (startX > this.xPos() + this.xSize()) {
-            startX = this.xPos() + this.xSize();
-        }
-
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
-        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-        RenderSystem.disableTexture();
-        RenderSystem.enableColorLogicOp();
-        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-        bufferbuilder.vertex(startX, endY, 0.0D).endVertex();
-        bufferbuilder.vertex(endX, endY, 0.0D).endVertex();
-        bufferbuilder.vertex(endX, startY, 0.0D).endVertex();
-        bufferbuilder.vertex(startX, startY, 0.0D).endVertex();
-        tessellator.end();
-        RenderSystem.disableColorLogicOp();
-        RenderSystem.enableTexture();
+//        if (startX < endX) {
+//            int i = startX;
+//            startX = endX;
+//            endX = i;
+//        }
+//
+//        if (startY < endY) {
+//            int j = startY;
+//            startY = endY;
+//            endY = j;
+//        }
+//
+//        if (endX > this.xPos() + this.xSize()) {
+//            endX = this.xPos() + this.xSize();
+//        }
+//
+//        if (startX > this.xPos() + this.xSize()) {
+//            startX = this.xPos() + this.xSize();
+//        }
+//
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder bufferbuilder = tessellator.getBuilder();
+//        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+//        RenderSystem.disableTexture();
+//        RenderSystem.enableColorLogicOp();
+//        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+//        bufferbuilder.begin(7, DefaultVertexFormat.POSITION);
+//        bufferbuilder.vertex(startX, endY, 0.0D).endVertex();
+//        bufferbuilder.vertex(endX, endY, 0.0D).endVertex();
+//        bufferbuilder.vertex(endX, startY, 0.0D).endVertex();
+//        bufferbuilder.vertex(startX, startY, 0.0D).endVertex();
+//        tessellator.end();
+//        RenderSystem.disableColorLogicOp();
+//        RenderSystem.enableTexture();
     }
 
 
@@ -685,7 +687,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     public void setSelectionPos(int position) {
         int texLen = this.text().length();
-        this.selectionEnd = MathHelper.clamp(position, 0, texLen);
+        this.selectionEnd = Mth.clamp(position, 0, texLen);
         if (this.fontRenderer != null) {
             if (this.lineScrollOffset > texLen) {
                 this.lineScrollOffset = texLen;
@@ -704,7 +706,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
                 this.lineScrollOffset -= this.lineScrollOffset - this.selectionEnd;
             }
 
-            this.lineScrollOffset = MathHelper.clamp(this.lineScrollOffset, 0, texLen);
+            this.lineScrollOffset = Mth.clamp(this.lineScrollOffset, 0, texLen);
         }
 
     }
@@ -767,7 +769,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        drawTextBox(new MatrixStack(), isMouseOver(mouseX, mouseY));
+        drawTextBox(new PoseStack(), isMouseOver(mouseX, mouseY));
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 

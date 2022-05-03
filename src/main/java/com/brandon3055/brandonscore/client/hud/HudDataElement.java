@@ -6,18 +6,18 @@ import com.brandon3055.brandonscore.api.hud.IHudDisplay;
 import com.brandon3055.brandonscore.api.hud.IHudItem;
 import com.brandon3055.brandonscore.api.math.Vector2;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.block.BlockState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class HudDataElement extends AbstractHudElement {
     private final boolean iHudBlock;
 
     private IHudDisplay activeHud = null;
-    private List<ITextComponent> displayList = new ArrayList<>();
+    private List<Component> displayList = new ArrayList<>();
 
     public HudDataElement(Vector2 defaultPos, boolean iHudItem, boolean iHudBlock) {
         super(defaultPos);
@@ -48,15 +48,15 @@ public class HudDataElement extends AbstractHudElement {
             return;
         }
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null) return;
 
         if (iHudBlock) {
-            RayTraceResult traceResult = Minecraft.getInstance().player.pick(5, 0, false);
-            if (traceResult instanceof BlockRayTraceResult && traceResult.getType() != RayTraceResult.Type.MISS) {
-                BlockPos pos = ((BlockRayTraceResult) traceResult).getBlockPos();
+            HitResult traceResult = Minecraft.getInstance().player.pick(5, 0, false);
+            if (traceResult instanceof BlockHitResult && traceResult.getType() != HitResult.Type.MISS) {
+                BlockPos pos = ((BlockHitResult) traceResult).getBlockPos();
                 BlockState state = player.level.getBlockState(pos);
-                TileEntity tile = player.level.getBlockEntity(pos);
+                BlockEntity tile = player.level.getBlockEntity(pos);
                 if (state.getBlock() instanceof IHudBlock) {
                     activeHud = (IHudBlock) state.getBlock();
                 } else if (tile instanceof IHudBlock) {
@@ -99,9 +99,9 @@ public class HudDataElement extends AbstractHudElement {
     }
 
     @Override
-    public void render(MatrixStack mStack, float partialTicks, boolean configuring) {
+    public void render(PoseStack mStack, float partialTicks, boolean configuring) {
         if (!enabled || (activeHud == null && !configuring)) return;
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         mStack.translate(xPos(), yPos(), 0);
         if (activeHud == null) {
             GuiHelper.drawHoverRect(getter, mStack, 0, 0, width(), height());

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.capability;
 
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;

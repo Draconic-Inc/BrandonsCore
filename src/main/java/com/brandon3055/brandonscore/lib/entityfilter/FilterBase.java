@@ -3,8 +3,8 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.lib.IMCDataSerializable;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Locale;
@@ -12,7 +12,7 @@ import java.util.Locale;
 /**
  * Created by brandon3055 on 7/11/19.
  */
-public abstract class FilterBase implements INBTSerializable<CompoundNBT>, IMCDataSerializable {
+public abstract class FilterBase implements INBTSerializable<CompoundTag>, IMCDataSerializable {
     private final EntityFilter filter;
     protected int nodeID = -1;
     private FilterGroup parent;
@@ -54,14 +54,14 @@ public abstract class FilterBase implements INBTSerializable<CompoundNBT>, IMCDa
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = new CompoundTag();
         compound.putInt("node_id", nodeID);
         return compound;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT compound) {
+    public void deserializeNBT(CompoundTag compound) {
         nodeID = compound.getInt("node_id");
         getFilter().trackNode(this);
     }

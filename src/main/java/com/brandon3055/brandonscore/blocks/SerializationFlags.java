@@ -2,13 +2,13 @@ package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.lib.IMCDataSerializable;
 import com.brandon3055.brandonscore.lib.IValueHashable;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 /**
  * Created by brandon3055 on 18/12/19.
  */
-public class SerializationFlags<D extends INBTSerializable<CompoundNBT>> {
+public class SerializationFlags<D extends INBTSerializable<CompoundTag>> {
     protected final String tagName;
     protected final D serializableInstance;
     protected Object lastData;

@@ -1,17 +1,17 @@
 package com.brandon3055.brandonscore.api.hud;
 
 import com.brandon3055.brandonscore.api.math.Vector2;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase.PopoutDialog;
-import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
@@ -76,7 +76,7 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
      * @param mStack      The matrix stack.
      * @param configuring This will be true when the hud config gui is open.
      */
-    public abstract void render(MatrixStack mStack, float partialTicks, boolean configuring);
+    public abstract void render(PoseStack mStack, float partialTicks, boolean configuring);
 
     public boolean shouldRender(ElementType type, boolean preRenderEvent) {
         //TODO maybe refine this a bit
@@ -110,8 +110,8 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
     public GuiElement<?> createConfigDialog(GuiElement<?> parentElement) {
         PopoutDialog dialog = new PopoutDialog(parentElement).setCloseOnOutsideClick(false);
         dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> {
-            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-            GuiHelper.drawHoverRect(getter, new MatrixStack(), dialog.xPos(), dialog.yPos(), dialog.xSize(), dialog.ySize(), 0xFF100010, 0x500000FF, false);
+            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            GuiHelper.drawHoverRect(getter, new PoseStack(), dialog.xPos(), dialog.yPos(), dialog.xSize(), dialog.ySize(), 0xFF100010, 0x500000FF, false);
             getter.endBatch();
         });
 
@@ -170,13 +170,13 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
         return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
 
-    public void writeNBT(CompoundNBT nbt) {
+    public void writeNBT(CompoundTag nbt) {
         nbt.putBoolean("enabled", enabled);
         nbt.putDouble("pos_x", rawPos.x);
         nbt.putDouble("pos_y", rawPos.y);
     }
 
-    public void readNBT(CompoundNBT nbt) {
+    public void readNBT(CompoundTag nbt) {
         enabled = nbt.getBoolean("enabled");
         rawPos.x = nbt.getDouble("pos_x");
         rawPos.y = nbt.getDouble("pos_y");
@@ -200,8 +200,8 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
     public void onDragged(double mouseX, double mouseY) {
         double xMove = (int) ((mouseX - dragXOffset) - xPos());
         double yMove = (int) ((mouseY - dragYOffset) - yPos());
-        rawPos.x = MathHelper.clamp(rawPos.x + (xMove / screenWidth()), 0D, 1D);
-        rawPos.y = MathHelper.clamp(rawPos.y + (yMove / screenHeight()), 0D, 1D);
+        rawPos.x = Mth.clamp(rawPos.x + (xMove / screenWidth()), 0D, 1D);
+        rawPos.y = Mth.clamp(rawPos.y + (yMove / screenHeight()), 0D, 1D);
     }
 
     public void stopMoving() {

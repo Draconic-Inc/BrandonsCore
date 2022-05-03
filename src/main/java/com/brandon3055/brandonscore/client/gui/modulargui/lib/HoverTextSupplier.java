@@ -1,38 +1,40 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 5/07/2017.
  * Used to supply hover text for an element. Accepted types for T are String, String[] and List<String>
  */
+@Deprecated //I need to figure out a better solution to this that better handles Components
 public interface HoverTextSupplier<E extends GuiElement<?>> {
 
     Object getText(E element);
 
-    default List<String> getHoverText(E element) {
+    default List<Component> getHoverText(E element) {
         Object hoverText = getText(element);
         if (hoverText instanceof String) {
-            if (((String) hoverText).isEmpty()) {
+            String text = (String) hoverText;
+            if (text.isEmpty()) {
                 return Collections.emptyList();
+            } else if (text.contains("\n")) {
+                return Arrays.stream(text.split("\n")).map(TextComponent::new).collect(Collectors.toList());
             }
-            if (((String) hoverText).contains("\n")) {
-                return Arrays.asList(((String) hoverText).split("\n"));
-            }
-            return Collections.singletonList((String) hoverText);
+            return Collections.singletonList(new TextComponent(text));
         }
         else if (hoverText instanceof String[]) {
-            return splitNewLines(Arrays.asList((String[]) hoverText));
+            return splitNewLines(Arrays.asList((String[]) hoverText)).stream().map(TextComponent::new).collect(Collectors.toList());
         }
         else if (hoverText instanceof List) {
-            return splitNewLines((List<String>) hoverText);
+            return splitNewLines((List<String>) hoverText).stream().map(TextComponent::new).collect(Collectors.toList());
         }
-        else if (hoverText instanceof ITextComponent) {
-            return Collections.singletonList(((ITextComponent) hoverText).getString());
+        else if (hoverText instanceof Component) {
+            return Collections.singletonList(((Component) hoverText));
         }
         return Collections.emptyList();
     }

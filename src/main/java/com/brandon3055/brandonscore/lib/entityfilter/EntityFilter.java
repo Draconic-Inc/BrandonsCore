@@ -5,11 +5,11 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class EntityFilter extends FilterGroup {
     public int maxFilters = 256;
 
     /**
-     * @param livingOnly If true this filter will always return false for any entity that does is not an instance of {@link net.minecraft.entity.LivingEntity}
+     * @param livingOnly If true this filter will always return false for any entity that does is not an instance of {@link LivingEntity}
      */
     public EntityFilter(boolean livingOnly, FilterType... allowedFilters) {
         super(null);
@@ -61,7 +61,7 @@ public class EntityFilter extends FilterGroup {
     /**
      * @param player Send full synchronization data package to the specified client.
      */
-    public void syncClient(ServerPlayerEntity player) {
+    public void syncClient(ServerPlayer player) {
         PacketCustom output = (PacketCustom) serverPacketProvider.get();
         output.writeByte(0);
         serializeMCD(output);
@@ -358,13 +358,13 @@ public class EntityFilter extends FilterGroup {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         return compound;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         nodeMap.clear();
         super.deserializeNBT(nbt);
         trackNode(this);

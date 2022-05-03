@@ -4,8 +4,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MDElementBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements.MarkerElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -135,7 +133,7 @@ public class MDElementContainer extends GuiElement<MDElementContainer> {
         List<MDElementBase> currentLine = new ArrayList<>();
 
         //Layout Pass
-        for (MDElementBase element: elements) {
+        for (MDElementBase element : elements) {
             boolean endOfLine = false;
             if (element instanceof MarkerElement) {
                 if (((MarkerElement) element).getType() == MarkerElement.Type.NEW_LINE) {
@@ -146,8 +144,7 @@ public class MDElementContainer extends GuiElement<MDElementContainer> {
             element.layoutElement(layout, currentLine);
             if (endOfLine) {
                 currentLine.clear();
-            }
-            else {
+            } else {
                 currentLine.add(element);
             }
         }
@@ -168,8 +165,7 @@ public class MDElementContainer extends GuiElement<MDElementContainer> {
                 if (((MarkerElement) element).isAlign()) {
                     currentAlignment = ((MarkerElement) element).getAlign();
                 }
-            }
-            else if (element.yPos() > lineY || last == element || newLine) {
+            } else if (element.yPos() > lineY || last == element || newLine) {
                 if (currentAlignment != HAlign.LEFT) {
                     int lineWidth = 0;
                     for (MDElementBase lineElement : currentLine) {
@@ -254,11 +250,10 @@ public class MDElementContainer extends GuiElement<MDElementContainer> {
      */
     public LinkedList<MDElementBase> getDisplayElements() {
         LinkedList<MDElementBase> displayElements = new LinkedList<>();
-        for (MDElementBase element: elements) {
+        for (MDElementBase element : elements) {
             if (element.hasSubParts) {
                 displayElements.addAll(element.subParts);
-            }
-            else {
+            } else {
                 displayElements.add(element);
             }
         }
@@ -268,14 +263,6 @@ public class MDElementContainer extends GuiElement<MDElementContainer> {
     @Override
     public boolean onUpdate() {
         return super.onUpdate();
-    }
-
-    @Override
-    public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        RenderSystem.color4f(1, 1, 1, 1);
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
-//        drawBorderedRect(getInsetRect().x, getInsetRect().y, getInsetRect().width, getInsetRect().height, 1, 0, 0x8000FF00);
     }
 
     @Override

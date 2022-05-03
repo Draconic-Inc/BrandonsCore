@@ -3,11 +3,11 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.regex.Pattern;
 
@@ -50,13 +50,13 @@ public class FilterPlayer extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        boolean isPlayer = entity instanceof PlayerEntity;
+        boolean isPlayer = entity instanceof Player;
         if (isPlayer) {
             if (playerName.isEmpty()) {
                 return whitelistPlayers;
             }
             else {
-                return isPlayerMatch((PlayerEntity) entity) == whitelistPlayers;
+                return isPlayerMatch((Player) entity) == whitelistPlayers;
             }
         }
         else {
@@ -64,8 +64,8 @@ public class FilterPlayer extends FilterBase {
         }
     }
 
-    private boolean isPlayerMatch(PlayerEntity player) {
-        if (!(player instanceof ServerPlayerEntity)) {
+    private boolean isPlayerMatch(Player player) {
+        if (!(player instanceof ServerPlayer)) {
             return player.getGameProfile().getName().equalsIgnoreCase(playerName);
         }
         else if (!playerUUID.isEmpty()) {
@@ -73,7 +73,7 @@ public class FilterPlayer extends FilterBase {
         }
         MinecraftServer server = player.getServer();
         if (server != null){
-            GameProfile profile = server.getProfileCache().get(playerName);
+            GameProfile profile = server.getProfileCache().get(playerName).orElse(null);
             if (profile != null) {
                 playerUUID = profile.getId().toString();
                 return player.getUUID().toString().equals(playerUUID);
@@ -88,8 +88,8 @@ public class FilterPlayer extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("include", whitelistPlayers);
         compound.putString("name", playerName);
         compound.putString("uuid", playerUUID);
@@ -97,7 +97,7 @@ public class FilterPlayer extends FilterBase {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         whitelistPlayers = nbt.getBoolean("include");
         playerName = nbt.getString("name");

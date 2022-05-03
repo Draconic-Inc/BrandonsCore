@@ -1,9 +1,5 @@
 package com.brandon3055.brandonscore.client.utils;
 
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-
-import java.net.URI;
-
 /**
  * Created by brandon3055 on 11/11/2015.
  */

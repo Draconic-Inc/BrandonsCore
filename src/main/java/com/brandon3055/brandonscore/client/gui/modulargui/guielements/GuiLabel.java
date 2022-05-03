@@ -6,8 +6,12 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotat
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.function.Supplier;
 
@@ -161,7 +165,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
         return this;
     }
 
-    public GuiLabel setTextColour(TextFormatting colour, TextFormatting colourHover) {
+    public GuiLabel setTextColour(ChatFormatting colour, ChatFormatting colourHover) {
         return setTextColour(colour.getColor(), colourHover.getColor());
     }
 
@@ -180,7 +184,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
         return this;
     }
 
-    public GuiLabel setTextColour(TextFormatting colour) {
+    public GuiLabel setTextColour(ChatFormatting colour) {
         setTextColour(colour.getColor());
         return this;
     }
@@ -197,6 +201,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
         String displayString = getLabelText();
         if (!displayString.isEmpty()) {
+            Component component = new TextComponent(displayString);
             int colour = getTextColour(mouseOver);
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 
@@ -212,23 +217,22 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
             switch (rotation) {
                 case NORMAL:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
+                    drawCustomString(fontRenderer, component, xPos, yPos, widthLimit, colour, getAlignment(), wrap, trim, midTrim, hasShadow());
                     break;
                 case ROT_CC:
                     xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
                     yPos = getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
+                    drawCustomString(fontRenderer, component, xPos, yPos, widthLimit, colour, getAlignment(), wrap, trim, midTrim, hasShadow());
                     break;
                 case ROT_C:
                     xPos = (getInsetRect().x + (getInsetRect().width / 2)) - (ySize / 2);
                     yPos = getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
+                    drawCustomString(fontRenderer, component, xPos + ySize, yPos, widthLimit, colour, getAlignment(), wrap, trim, midTrim, hasShadow());
                     break;
                 case ROT_180:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, midTrim, hasShadow());
+                    drawCustomString(fontRenderer, component, xPos, yPos, widthLimit, colour, getAlignment(), wrap, trim, midTrim, hasShadow());
                     break;
             }
-            RenderSystem.color4f(1, 1, 1, 1);
         }
 //        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0x8000FFFF);
     }

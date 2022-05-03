@@ -1,19 +1,20 @@
 package com.brandon3055.brandonscore.api.render;
 
 import codechicken.lib.math.MathHelper;
-import codechicken.lib.render.buffer.TransformingVertexBuilder;
-import codechicken.lib.util.SneakyUtils;
+import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.netty.util.internal.UnstableApi;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.gui.GuiUtils;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.gui.GuiUtils;
 
 /**
  * Created by brandon3055 on 12/8/21
@@ -26,13 +27,16 @@ public class GuiHelper {
     /**
      * Used to draw any solid colour elements that need to support transparency.
      */
-    public static final RenderType transColourType = RenderType.create("ghv2_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.builder()
-            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .setCullState(RenderState.NO_CULL)
-            .setShadeModelState(RenderState.SMOOTH_SHADE)
-            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .createCompositeState(false)
+    public static final RenderType transColourType = RenderType.create("ghv2_trans_colour", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(RenderStateShard.NO_CULL)
+//            .setShadeModelState(RenderStateShard.SMOOTH_SHADE)
+//            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+                    .createCompositeState(false)
     );
+
 
     //#######################################################################
     //# Backgrounds
@@ -41,7 +45,7 @@ public class GuiHelper {
     /**
      * Draws a rectangle / background with a style matching vanilla tool tips.
      */
-    public static void drawHoverRect(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColorStart, int borderColorEnd, boolean empty) {
+    public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColorStart, int borderColorEnd, boolean empty) {
         //@formatter:off
         drawGradient(getter, mStack, x + 1,           y,                width - 2, 1,   backgroundColor, backgroundColor);             // Top
         drawGradient(getter, mStack, x + 1,           y + height - 1,   width - 2, 1,   backgroundColor, backgroundColor);             // Bottom
@@ -57,21 +61,21 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawHoverRect(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColor, boolean empty) {
+    public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColor, boolean empty) {
         int borderColorEnd = (borderColor & 0xFEFEFE) >> 1 | borderColor & 0xFF000000;
         drawHoverRect(getter, mStack, x, y, width, height, backgroundColor, borderColor, borderColorEnd, empty);
     }
 
-    public static void drawHoverRect(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height, boolean empty) {
+    public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, boolean empty) {
         drawHoverRect(getter, mStack, x, y, width, height, GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, empty);
     }
 
-    public static void drawHoverRect(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColor) {
+    public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColor) {
         int borderColorEnd = (borderColor & 0xFEFEFE) >> 1 | borderColor & 0xFF000000;
         drawHoverRect(getter, mStack, x, y, width, height, backgroundColor, borderColor, borderColorEnd, false);
     }
 
-    public static void drawHoverRect(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height) {
+    public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height) {
         drawHoverRect(getter, mStack, x, y, width, height, GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, false);
     }
 
@@ -79,15 +83,15 @@ public class GuiHelper {
     //# Simple solids and gradients
     //#######################################################################
 
-    public static void drawGradient(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height, int startColor, int endColor) {
+    public static void drawGradient(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, int startColor, int endColor) {
         drawGradientRect(getter, mStack, x, y, x + width, y + height, startColor, endColor);
     }
 
-    public static void drawRect(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double width, double height, int colour) {
+    public static void drawRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, int colour) {
         drawGradientRect(getter, mStack, x, y, x + width, y + height, colour, colour);
     }
 
-    public static void drawGradientRect(IRenderTypeBuffer getter, MatrixStack mStack, double left, double top, double right, double bottom, int startColor, int endColor) {
+    public static void drawGradientRect(MultiBufferSource getter, PoseStack mStack, double left, double top, double right, double bottom, int startColor, int endColor) {
         if (startColor == endColor && endColor == 0) return;
         //@formatter:off
         float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
@@ -99,7 +103,7 @@ public class GuiHelper {
         float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(endColor         & 255) / 255.0F;
 
-        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(transColourType), mStack);
+        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(transColourType), mStack);
         builder.vertex(right,    top, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
         builder.vertex( left,    top, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
         builder.vertex( left, bottom, 0).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
@@ -107,7 +111,7 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawMultiPassGradientRect(IRenderTypeBuffer getter, MatrixStack mStack, double left, double top, double right, double bottom, int startColor, int endColor, int layers) {
+    public static void drawMultiPassGradientRect(MultiBufferSource getter, PoseStack mStack, double left, double top, double right, double bottom, int startColor, int endColor, int layers) {
         if (startColor == endColor && endColor == 0) return;
         //@formatter:off
         float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
@@ -119,7 +123,7 @@ public class GuiHelper {
         float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(endColor         & 255) / 255.0F;
 
-        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(transColourType), mStack);
+        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(transColourType), mStack);
         for (int i = 0; i < layers; i++) {
             builder.vertex(right,    top, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
             builder.vertex( left,    top, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
@@ -133,7 +137,7 @@ public class GuiHelper {
     //# Sprites
     //#######################################################################
 
-    public static void drawSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite) {
+    public static void drawSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite) {
         //@formatter:off
         builder.vertex(x,          y + height, 0).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
         builder.vertex(x + width,  y + height, 0).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();
@@ -142,7 +146,7 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite, int colour) {
+    public static void drawSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite, int colour) {
         //@formatter:off
         float alpha = (float)(colour >> 24 & 255) / 255.0F;
         float red   = (float)(colour >> 16 & 255) / 255.0F;
@@ -152,7 +156,7 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite, float red, float green, float blue, float alpha) {
+    public static void drawSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite, float red, float green, float blue, float alpha) {
         //@formatter:off
         builder.vertex(x,          y + height, 0).color(red, green, blue, alpha).uv(sprite.getU0(), sprite.getV1()).endVertex();
         builder.vertex(x + width,  y + height, 0).color(red, green, blue, alpha).uv(sprite.getU1(), sprite.getV1()).endVertex();
@@ -161,7 +165,7 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawPartialSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV) {
+    public static void drawPartialSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV) {
         float sW = sprite.getU1() - sprite.getU0();
         float sH = sprite.getV1() - sprite.getV0();
 
@@ -178,11 +182,11 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawPartialSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV, double texWidth, double texHeight) {
+    public static void drawPartialSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV, double texWidth, double texHeight) {
         drawPartialSprite(builder, x, y, width, height, sprite, minU / texHeight, minV / texHeight, maxU / texWidth, maxV / texHeight);
     }
 
-    public static void drawPartialSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV, float red, float green, float blue, float alpha) {
+    public static void drawPartialSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV, float red, float green, float blue, float alpha) {
         float sW = sprite.getU1() - sprite.getU0();
         float sH = sprite.getV1() - sprite.getV0();
 
@@ -199,7 +203,7 @@ public class GuiHelper {
         //@formatter:on
     }
 
-    public static void drawPartialSprite(IVertexBuilder builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV, double texWidth, double texHeight, int colour) {
+    public static void drawPartialSprite(VertexConsumer builder, double x, double y, double width, double height, TextureAtlasSprite sprite, double minU, double minV, double maxU, double maxV, double texWidth, double texHeight, int colour) {
         float alpha = (float) (colour >> 24 & 255) / 255.0F;
         float red = (float) (colour >> 16 & 255) / 255.0F;
         float green = (float) (colour >> 8 & 255) / 255.0F;
@@ -211,7 +215,7 @@ public class GuiHelper {
     //# Texture Rendering
     //#######################################################################
 
-    public static void drawTexture(IVertexBuilder builder, double x, double y, double width, double height) {
+    public static void drawTexture(VertexConsumer builder, double x, double y, double width, double height) {
         //@formatter:off
         builder.vertex(x,          y + height, 0).color(1F, 1F, 1F, 1F).uv(0, 1).endVertex();
         builder.vertex(x + width,  y + height, 0).color(1F, 1F, 1F, 1F).uv(1, 1).endVertex();
@@ -258,13 +262,13 @@ public class GuiHelper {
     //# Progress Rendering
     //#######################################################################
 
-    public static void drawPieProgress(IRenderTypeBuffer getter, MatrixStack mStack, double x, double y, double diameter, double progress, double offsetAngle, int colour) {
+    public static void drawPieProgress(MultiBufferSource getter, PoseStack mStack, double x, double y, double diameter, double progress, double offsetAngle, int colour) {
         float alpha = (float) (colour >> 24 & 255) / 255.0F;
         float red = (float) (colour >> 16 & 255) / 255.0F;
         float green = (float) (colour >> 8 & 255) / 255.0F;
         float blue = (float) (colour & 255) / 255.0F;
         double radius = diameter / 2;
-        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(GuiHelperOld.FAN_TYPE), mStack);
+        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(GuiHelperOld.FAN_TYPE), mStack);
         builder.vertex(x + radius, y + radius, 0).color(0, 255, 255, 64).endVertex();
         for (double d = 0; d <= 1; d += 1D / 30D) {
             double angle = (d * progress) + 0.5 - progress;
@@ -289,13 +293,15 @@ public class GuiHelper {
     }
 
     public static RenderType guiTextureType(ResourceLocation resource) {
-        return RenderType.create("gui_resource", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
-                .setTextureState(new RenderState.TextureState(resource, false, false))
-                .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-                .setCullState(RenderState.NO_CULL)
-                .setAlphaState(RenderState.DEFAULT_ALPHA)
-                .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-                .createCompositeState(false)
+        return RenderType.create("gui_resource", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, 256,
+                RenderType.CompositeState.builder()
+                        .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorTexShader))
+                        .setTextureState(new RenderStateShard.TextureStateShard(resource, false, false))
+                        .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                        .setCullState(RenderStateShard.NO_CULL)
+//                .setAlphaState(RenderStateShard.DEFAULT_ALPHA)
+//                .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+                        .createCompositeState(false)
         );
     }
 }

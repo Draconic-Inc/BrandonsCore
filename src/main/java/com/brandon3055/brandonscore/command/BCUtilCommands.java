@@ -19,43 +19,40 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandRuntimeException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.*;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.EventBus;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.apache.commons.io.IOUtils;
-
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -65,17 +62,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static net.minecraft.util.text.event.HoverEvent.Action.SHOW_TEXT;
+import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
+
+;
 
 /**
  * Created by brandon3055 on 23/06/2017.
  */
 //TODO Test all these commands!
-public class BCUtilCommands {
+ public class BCUtilCommands {
 
     private static Random rand = new Random();
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("bcore_util")
                         .then(registerNBT())
@@ -90,13 +89,13 @@ public class BCUtilCommands {
     }
 
 
-    private static ArgumentBuilder<CommandSource, ?> registerNBT() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerNBT() {
         return Commands.literal("nbt")
                 .requires(cs -> cs.hasPermission(0))
                 .executes(context -> functionNBT(context.getSource()));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerStackString() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerStackString() {
         return Commands.literal("stack_string")
                 .then(Commands.literal("from_string")
                         .requires(cs -> cs.hasPermission(2))
@@ -121,7 +120,7 @@ public class BCUtilCommands {
                 );
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerRegenChunk() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerRegenChunk() {
         return Commands.literal("regenchunk")
                 .requires(cs -> cs.hasPermission(3))
                 .then(Commands.argument("radius", IntegerArgumentType.integer(1, 32))
@@ -129,13 +128,13 @@ public class BCUtilCommands {
                 );
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerNoClip() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerNoClip() {
         return Commands.literal("noclip")
                 .requires(cs -> cs.hasPermission(3))
                 .executes(context -> toggleNoClip(context.getSource()));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerUUID() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerUUID() {
         return Commands.literal("uuid")
                 .requires(cs -> cs.hasPermission(0))
                 .then(Commands.argument("target", EntityArgument.player())
@@ -144,11 +143,11 @@ public class BCUtilCommands {
                 .executes(ctx -> getUUID(ctx.getSource(), ctx.getSource().getPlayerOrException()));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerPlayerAccess() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerPlayerAccess() {
         return Commands.literal("player_access")
                 .requires(cs -> cs.hasPermission(3))
                 .then(Commands.argument("target", reader -> StringArgumentType.string())
-                        .suggests((context, builder) -> ISuggestionProvider.suggest(accessiblePlayers(context.getSource()).values().stream().map(GameProfile::getName), builder))
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(accessiblePlayers(context.getSource()).values().stream().map(GameProfile::getName), builder))
                         .executes(context -> playerAccess(context.getSource(), context.getArgument("target", String.class)))
                 )
                 .then(Commands.literal("list")
@@ -156,13 +155,13 @@ public class BCUtilCommands {
                 );
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerDumpEvents() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerDumpEvents() {
         return Commands.literal("dump_event_listeners")
                 .requires(cs -> cs.hasPermission(0))
                 .executes(ctx -> dumpEventListeners(ctx.getSource()));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> registerEggify() {
+    private static ArgumentBuilder<CommandSourceStack, ?> registerEggify() {
         return Commands.literal("eggify")
                 .requires(cs -> cs.hasPermission(3))
                 .then(Commands.argument("target", EntityArgument.entities())
@@ -183,51 +182,51 @@ public class BCUtilCommands {
 ////        ChatHelper.message(sender, "-", TextFormatting.GRAY);
 //    }
 
-    private static int functionNBT(CommandSource source) throws CommandException, CommandSyntaxException {
-        PlayerEntity player = source.getPlayerOrException();
+    private static int functionNBT(CommandSourceStack source) throws CommandRuntimeException, CommandSyntaxException {
+        Player player = source.getPlayerOrException();
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
-            throw new CommandException(new StringTextComponent("You are not holding an item!"));
+            throw new CommandRuntimeException(new TextComponent("You are not holding an item!"));
         } else if (!stack.hasTag()) {
-            throw new CommandException(new StringTextComponent("That stack has no NBT tag!"));
+            throw new CommandRuntimeException(new TextComponent("That stack has no NBT tag!"));
         }
 
-        CompoundNBT compound = stack.getTag();
+        CompoundTag compound = stack.getTag();
         LogHelperBC.logNBT(compound);
         LogHelperBC.info(compound);
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new StringTextComponent(s).withStyle(TextFormatting.GOLD)));
+        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new TextComponent(s).withStyle(ChatFormatting.GOLD)));
         return 0;
     }
 
-    private static int functionToStackString(CommandSource source, boolean count, boolean nbt, boolean caps) throws CommandException, CommandSyntaxException {
-        PlayerEntity player = source.getPlayerOrException();
+    private static int functionToStackString(CommandSourceStack source, boolean count, boolean nbt, boolean caps) throws CommandRuntimeException, CommandSyntaxException {
+        Player player = source.getPlayerOrException();
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
-            throw new CommandException(new StringTextComponent("You are not holding an item!"));
+            throw new CommandRuntimeException(new TextComponent("You are not holding an item!"));
         }
 
         String returnString = StringyStacks.toString(stack, nbt, count, caps);
-        ChatHelper.sendMessage(player, new StringTextComponent("# The following is stack string for the held stack (click to copy) #").withStyle(TextFormatting.BLUE));
-        IFormattableTextComponent textComponent = returnString.length() > 64 ? new StringTextComponent(returnString.substring(0, 64) + "... ").withStyle(TextFormatting.GOLD).append(new StringTextComponent("(Mouseover for full)").withStyle(TextFormatting.DARK_AQUA).withStyle(TextFormatting.UNDERLINE)) : new StringTextComponent(returnString).withStyle(TextFormatting.GOLD);
-        textComponent.setStyle(textComponent.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to copy to clipboard").withStyle(TextFormatting.BLUE).append(new StringTextComponent("\n" + returnString).withStyle(TextFormatting.GRAY)))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, returnString)));
+        ChatHelper.sendMessage(player, new TextComponent("# The following is stack string for the held stack (click to copy) #").withStyle(ChatFormatting.BLUE));
+        MutableComponent textComponent = returnString.length() > 64 ? new TextComponent(returnString.substring(0, 64) + "... ").withStyle(ChatFormatting.GOLD).append(new TextComponent("(Mouseover for full)").withStyle(ChatFormatting.DARK_AQUA).withStyle(ChatFormatting.UNDERLINE)) : new TextComponent(returnString).withStyle(ChatFormatting.GOLD);
+        textComponent.setStyle(textComponent.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, new TextComponent("Click to copy to clipboard").withStyle(ChatFormatting.BLUE).append(new TextComponent("\n" + returnString).withStyle(ChatFormatting.GRAY)))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, returnString)));
         ChatHelper.sendMessage(player, textComponent);
         StringyStacks.LOGGER.info(returnString);
         return 0;
     }
 
-    private static int functionFromStackString(CommandSource source, ServerPlayerEntity player, String stackString) throws CommandException, CommandSyntaxException {
+    private static int functionFromStackString(CommandSourceStack source, ServerPlayer player, String stackString) throws CommandRuntimeException, CommandSyntaxException {
         ItemStack stack = StringyStacks.fromString(stackString, null);
         if (stack == null) {
-            throw new CommandException(new StringTextComponent("Invalid item string. You may find more details in the server console."));
+            throw new CommandRuntimeException(new TextComponent("Invalid item string. You may find more details in the server console."));
         }
 
-        boolean flag = player.inventory.add(stack);
+        boolean flag = player.getInventory().add(stack);
         if (flag && stack.isEmpty()) {
             stack.setCount(1);
-            player.level.playSound((PlayerEntity)null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.level.playSound((Player)null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
             player.inventoryMenu.broadcastChanges();
         } else {
             ItemEntity itementity = player.drop(stack, false);
@@ -239,18 +238,18 @@ public class BCUtilCommands {
         return 0;
     }
 
-    private static int regenChunk(CommandSource source, int rad) throws CommandException, CommandSyntaxException {
+    private static int regenChunk(CommandSourceStack source, int rad) throws CommandRuntimeException, CommandSyntaxException {
 //        LogHelperBC.dev(rad);
 
         for (int xOffset = -rad; xOffset <= rad; xOffset++) {
             for (int yOffset = -rad; yOffset <= rad; yOffset++) {
-                ServerWorld world = (ServerWorld) source.getLevel();
-                PlayerEntity player = source.getPlayerOrException();
-                int chunkX = (int) player.xChunk + xOffset;
-                int chunkZ = (int) player.zChunk + yOffset;
+                ServerLevel world = (ServerLevel) source.getLevel();
+                Player player = source.getPlayerOrException();
+//                int chunkX = (int) player.xChunk + xOffset;
+//                int chunkZ = (int) player.zChunk + yOffset;
 
-                Chunk oldChunk = world.getChunk(chunkX, chunkZ);
-                ServerChunkProvider chunkProviderServer = world.getChunkSource();
+//                LevelChunk oldChunk = world.getChunk(chunkX, chunkZ);
+                ServerChunkCache chunkProviderServer = world.getChunkSource();
                 ChunkGenerator chunkGenerate = chunkProviderServer.getGenerator();
 
 //                chunkGenerate.generateSurface(oldChunk);
@@ -294,35 +293,33 @@ public class BCUtilCommands {
         return 0;
     }
 
-    private static int toggleNoClip(CommandSource source) throws CommandException, CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrException();
+    private static int toggleNoClip(CommandSourceStack source) throws CommandRuntimeException, CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
         boolean enabled = BCEventHandler.noClipPlayers.contains(player.getUUID());
 
         if (enabled) {
             BCEventHandler.noClipPlayers.remove(player.getUUID());
             BCoreNetwork.sendNoClip(player, false);
-            source.sendSuccess(new StringTextComponent("NoClip Disabled!"), true);
+            source.sendSuccess(new TextComponent("NoClip Disabled!"), true);
         } else {
             BCEventHandler.noClipPlayers.add(player.getUUID());
             BCoreNetwork.sendNoClip(player, true);
-            source.sendSuccess(new StringTextComponent("NoClip Enabled!"), true);
+            source.sendSuccess(new TextComponent("NoClip Enabled!"), true);
         }
         return 0;
     }
 
-    private static int getUUID(CommandSource source, ServerPlayerEntity player) throws CommandException {
-        StringTextComponent comp = new StringTextComponent(player.getName() + "'s UUID: " + TextFormatting.UNDERLINE + player.getUUID());
-        Style style = Style.EMPTY;
-        style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, player.getUUID().toString()));
-        style.withHoverEvent(new HoverEvent(SHOW_TEXT, new StringTextComponent("Click to get text")));
-        comp.setStyle(style);
+    private static int getUUID(CommandSourceStack source, ServerPlayer player) throws CommandRuntimeException {
+        TextComponent comp = new TextComponent(player.getName().getString() + "'s UUID: " + ChatFormatting.UNDERLINE + player.getUUID());
+        comp.setStyle(comp.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, player.getUUID().toString())));
+        comp.setStyle(comp.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, new TextComponent("Click to copy to clipboard"))));
         source.sendSuccess(comp, true);
         return 0;
     }
 
     //region Dump Event Handlers
 
-    public static int dumpEventListeners(CommandSource source) throws CommandException {
+    public static int dumpEventListeners(CommandSourceStack source) throws CommandRuntimeException {
         Map<String, Map<Class<?>, List<Pair<EventPriority, Method>>>> eventListenerMap = new HashMap<>();
         dumpBus("EVENT_BUS", (EventBus) MinecraftForge.EVENT_BUS, eventListenerMap);
 //        dumpBus("ORE_GEN_BUS", MinecraftForge.ORE_GEN_BUS, eventListenerMap);
@@ -348,7 +345,7 @@ public class BCUtilCommands {
 
         LogHelperBC.info(builder.toString());
         for (String s : builder.toString().split("\n")) {
-            source.sendSuccess(new StringTextComponent(s), true);
+            source.sendSuccess(new TextComponent(s), true);
         }
         return 0;
     }
@@ -362,7 +359,7 @@ public class BCUtilCommands {
         return sb.toString();
     }
 
-    private static void dumpBus(String name, EventBus bus, Map<String, Map<Class<?>, List<Pair<EventPriority, Method>>>> baseMap) throws CommandException {
+    private static void dumpBus(String name, EventBus bus, Map<String, Map<Class<?>, List<Pair<EventPriority, Method>>>> baseMap) throws CommandRuntimeException {
         Map<Class<?>, List<Pair<EventPriority, Method>>> map = baseMap.computeIfAbsent(name, eventBus -> new HashMap<>());
 
         try {
@@ -382,23 +379,23 @@ public class BCUtilCommands {
         }
         catch (Throwable e) {
             e.printStackTrace();
-            throw new CommandException(new StringTextComponent(e.getMessage()));
+            throw new CommandRuntimeException(new TextComponent(e.getMessage()));
         }
     }
 
     //endregion
 
-    private static int eggify(CommandContext<CommandSource> ctx, Entity target) throws CommandException, CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
+    private static int eggify(CommandContext<CommandSourceStack> ctx, Entity target) throws CommandRuntimeException, CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
         Entity entity = target;
 
         if (entity == null) {
-            player.sendMessage(new StringTextComponent("You must be looking at an entity!"), Util.NIL_UUID);
+            player.sendMessage(new TextComponent("You must be looking at an entity!"), Util.NIL_UUID);
             return 1;
         }
 
         ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(entity.getType()));
-        CompoundNBT data = entity.serializeNBT();
+        CompoundTag data = entity.serializeNBT();
 //        data.putString("id", String.valueOf(EntityList.getKey(entity)));
         spawnEgg.addTagElement("EntityTag", data);
 
@@ -419,7 +416,7 @@ public class BCUtilCommands {
     }
 
     @Nullable
-    protected static Entity traceEntity(PlayerEntity player) {
+    protected static Entity traceEntity(Player player) {
         Entity entity = null;
 //        List<Entity> list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getBoundingBox().grow(20.0D));
 //        double d0 = 0.0D;
@@ -450,7 +447,7 @@ public class BCUtilCommands {
 
     //region Player Access Command
 
-    private static Map<UUID, GameProfile> accessiblePlayers(CommandSource source) throws CommandException {
+    private static Map<UUID, GameProfile> accessiblePlayers(CommandSourceStack source) throws CommandRuntimeException {
 //        PlayerProfileCache cache = source.getServer().getPlayerProfileCache();
 //
 //        File playersFolder = new File(source.getServer().getWorld(World.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
@@ -479,8 +476,8 @@ public class BCUtilCommands {
     }
 
 
-    private static int playerAccess(CommandSource source, String target) throws CommandException, CommandSyntaxException {
-        PlayerProfileCache cache = source.getServer().getProfileCache();
+    private static int playerAccess(CommandSourceStack source, String target) throws CommandRuntimeException, CommandSyntaxException {
+        GameProfileCache cache = source.getServer().getProfileCache();
 //
 //        File playersFolder = new File(source.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
 //        File[] playerArray = playersFolder.listFiles((dir, name) -> name.endsWith(".dat"));
@@ -506,28 +503,28 @@ public class BCUtilCommands {
 //        }
 
         if (target == null) {
-            source.sendSuccess(new StringTextComponent("################## All Known Players ##################"), false);
+            source.sendSuccess(new TextComponent("################## All Known Players ##################"), false);
             for (UUID uuid : playerMap.keySet()) {
                 GameProfile profile = playerMap.get(uuid);
 
                 boolean online = false;
-                for (PlayerEntity player : source.getServer().getPlayerList().getPlayers()) {
+                for (Player player : source.getServer().getPlayerList().getPlayers()) {
                     if (player.getGameProfile().getId().equals(uuid)) {
                         online = true;
                         break;
                     }
                 }
 
-                TextComponent message = new StringTextComponent((online ? TextFormatting.GREEN + "[Online]: " : TextFormatting.GRAY + "[Offline]: ") + profile.getName());
+                BaseComponent message = new TextComponent((online ? ChatFormatting.GREEN + "[Online]: " : ChatFormatting.GRAY + "[Offline]: ") + profile.getName());
 
                 boolean offline = UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)).equals(uuid);
                 if (offline) {
-                    message.append(new StringTextComponent(" (Offline Account)").withStyle(TextFormatting.RED));
+                    message.append(new TextComponent(" (Offline Account)").withStyle(ChatFormatting.RED));
                 }
 
-                ITextComponent messageHover = new StringTextComponent("Last Seen: " + "\n") //
-                        .append(new StringTextComponent(TextFormatting.GRAY + "UUID: " + uuid + "\n")) //
-                        .append(new StringTextComponent(TextFormatting.GOLD + "-Click to access player."));
+                Component messageHover = new TextComponent("Last Seen: " + "\n") //
+                        .append(new TextComponent(ChatFormatting.GRAY + "UUID: " + uuid + "\n")) //
+                        .append(new TextComponent(ChatFormatting.GOLD + "-Click to access player."));
 
                 Style msgStyle = Style.EMPTY;
                 msgStyle.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
@@ -540,37 +537,37 @@ public class BCUtilCommands {
         target = target.toLowerCase(Locale.ENGLISH);
 
         GameProfile profile = null;
-        if (cache.profilesByName.containsKey(target)) {
-            profile = cache.get(target);
+        if (cache.get(target).isPresent()) {
+            profile = cache.get(target).get();
             target = profile.getId().toString();
         } else {
             try {
-                profile = cache.get(UUID.fromString(target));
+                profile = cache.get(UUID.fromString(target)).orElse(null);
             }
             catch (IllegalArgumentException ignored) {
             }
 
             if (profile == null) {
-                throw new CommandException(new StringTextComponent("Could not find the specified player name or uuid!"));
+                throw new CommandRuntimeException(new TextComponent("Could not find the specified player name or uuid!"));
             }
         }
 
         //Access Player
-        ServerPlayerEntity playerSender = source.getPlayerOrException();
-        PlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayer(profile.getId());
+        ServerPlayer playerSender = source.getPlayerOrException();
+        Player targetPlayer = source.getServer().getPlayerList().getPlayer(profile.getId());
         if (targetPlayer == null) {
             File playerFile = getPlayerFile(source.getServer(), target);
 //            targetPlayer = new OfflinePlayer(playerSender, source.getServer().getWorld(World.OVERWORLD), profile, playerFile);
         }
 
         if (playerSender == targetPlayer) {
-            throw new CommandException(new StringTextComponent("This command only works on other players!"));
+            throw new CommandRuntimeException(new TextComponent("This command only works on other players!"));
         }
         openPlayerAccessUI(source.getServer(), playerSender, targetPlayer);
         return 0;
     }
 
-    public static File getPlayerFile(MinecraftServer server, String uuid) throws CommandException {
+    public static File getPlayerFile(MinecraftServer server, String uuid) throws CommandRuntimeException {
 //        File playerFolder = new File(server.getWorld(World.OVERWORLD).getSaveHandler().getWorldDirectory(), "playerdata");
 //        File[] playerArray = playerFolder.listFiles();
 //        if (playerArray == null) {
@@ -583,31 +580,31 @@ public class BCUtilCommands {
 //            }
 //        }
 
-        throw new CommandException(new StringTextComponent("Could not find a data file for the specified player!"));
+        throw new CommandRuntimeException(new TextComponent("Could not find a data file for the specified player!"));
     }
 
-    public static CompoundNBT readPlayerCompound(File playerData) throws CommandException {
+    public static CompoundTag readPlayerCompound(File playerData) throws CommandRuntimeException {
         DataInputStream is = null;
         try {
             is = new DataInputStream(new GZIPInputStream(new FileInputStream(playerData)));
-            CompoundNBT compound = CompressedStreamTools.read(is);
+            CompoundTag compound = NbtIo.read(is);
             IOUtils.closeQuietly(is);
             return compound;
         }
         catch (Exception e) {
             e.printStackTrace();
-            throw new CommandException(new StringTextComponent(e.toString()));
+            throw new CommandRuntimeException(new TextComponent(e.toString()));
         }
         finally {
             IOUtils.closeQuietly(is);
         }
     }
 
-    public static void writePlayerCompound(File playerFile, CompoundNBT playerCompound) throws IOException {
+    public static void writePlayerCompound(File playerFile, CompoundTag playerCompound) throws IOException {
         DataOutputStream os = null;
         try {
             os = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(playerFile)));
-            CompressedStreamTools.write(playerCompound, os);
+            NbtIo.write(playerCompound, os);
             IOUtils.closeQuietly(os);
         }
         catch (Exception e) {
@@ -619,21 +616,21 @@ public class BCUtilCommands {
         }
     }
 
-    public static void openPlayerAccessUI(MinecraftServer server, ServerPlayerEntity player, PlayerEntity playerAccess) {
+    public static void openPlayerAccessUI(MinecraftServer server, ServerPlayer player, Player playerAccess) {
         player.nextContainerCounter();
         player.doCloseContainer();
         int windowId = player.containerCounter;
         BCoreNetwork.sendOpenPlayerAccessUI(player, windowId);
         BCoreNetwork.sendPlayerAccessUIUpdate(player, playerAccess);
-        player.openMenu(new INamedContainerProvider() {
+        player.openMenu(new MenuProvider() {
             @Override
-            public ITextComponent getDisplayName() {
-                return new StringTextComponent("Player Access");
+            public Component getDisplayName() {
+                return new TextComponent("Player Access");
             }
 
             @Nullable
             @Override
-            public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+            public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player playerEntity) {
                 ContainerPlayerAccess access = new ContainerPlayerAccess(id, playerInventory, playerAccess, server);
                 return access;
             }

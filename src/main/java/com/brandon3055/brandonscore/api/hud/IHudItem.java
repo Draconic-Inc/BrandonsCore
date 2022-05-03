@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.api.hud;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -23,14 +23,14 @@ public interface IHudItem extends IHudDisplay {
      * @param player      The player holding the item.
      * @param displayList The list to which hud info should be added.
      */
-    void generateHudText(ItemStack stack, PlayerEntity player, List<ITextComponent> displayList);
+    void generateHudText(ItemStack stack, Player player, List<Component> displayList);
 
     /**
      * @param stack  The ItemStack the player is holding (this item)
      * @param player The player holding the item.
      * @return True if the hud data for this item should be rendered.
      */
-    default boolean shouldDisplayHudText(ItemStack stack, PlayerEntity player) {
+    default boolean shouldDisplayHudText(ItemStack stack, Player player) {
         return true;
     }
 }

@@ -1,15 +1,12 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.lib.IEquipmentManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
@@ -33,8 +30,8 @@ public class PlayerSlot {
         this.category = category;
     }
 
-    public PlayerSlot(PlayerEntity player, Hand hand) {
-        if (hand == Hand.OFF_HAND) {
+    public PlayerSlot(Player player, InteractionHand hand) {
+        if (hand == InteractionHand.OFF_HAND) {
             this.slot = 0;
             this.category = EnumInvCategory.OFF_HAND;
         } else {
@@ -84,7 +81,7 @@ public class PlayerSlot {
         }
     }
 
-    public void setStackInSlot(PlayerEntity player, ItemStack stack) {
+    public void setStackInSlot(Player player, ItemStack stack) {
         if (category == EnumInvCategory.ARMOR) {
             if (slot < 0 || slot >= player.inventory.armor.size()) {
                 LogHelperBC.error("PlayerSlot: Could not insert into the specified slot because the specified slot does not exist! Slot: " + slot + ", Inventory: " + category + ", Stack: " + stack);
@@ -116,7 +113,7 @@ public class PlayerSlot {
         }
     }
 
-    public static PlayerSlot findStack(PlayerInventory inv, Predicate<ItemStack> check) {
+    public static PlayerSlot findStack(Inventory inv, Predicate<ItemStack> check) {
         for (int i = 0; i < inv.items.size(); i++) {
             ItemStack stack = inv.items.get(i);
             if (!stack.isEmpty() && check.test(stack)) {
@@ -150,7 +147,7 @@ public class PlayerSlot {
         return null;
     }
 
-    public static PlayerSlot findStackActiveFirst(PlayerInventory inv, Predicate<ItemStack> check) {
+    public static PlayerSlot findStackActiveFirst(Inventory inv, Predicate<ItemStack> check) {
         if (!inv.getSelected().isEmpty() && check.test(inv.getSelected())) {
             return new PlayerSlot(inv.selected, EnumInvCategory.MAIN);
         }
@@ -188,25 +185,25 @@ public class PlayerSlot {
     }
 
     @Nullable
-    public EquipmentSlotType getEquipmentSlot() {
+    public EquipmentSlot getEquipmentSlot() {
         if (category == EnumInvCategory.ARMOR) {
             switch (slot) {
                 case 0:
-                    return EquipmentSlotType.FEET;
+                    return EquipmentSlot.FEET;
                 case 1:
-                    return EquipmentSlotType.LEGS;
+                    return EquipmentSlot.LEGS;
                 case 2:
-                    return EquipmentSlotType.CHEST;
+                    return EquipmentSlot.CHEST;
                 case 3:
-                    return EquipmentSlotType.HEAD;
+                    return EquipmentSlot.HEAD;
             }
         } else if (category == EnumInvCategory.OFF_HAND) {
-            return EquipmentSlotType.OFFHAND;
+            return EquipmentSlot.OFFHAND;
         }
         return null;
     }
 
-    public ItemStack getStackInSlot(PlayerEntity player) {
+    public ItemStack getStackInSlot(Player player) {
         if (category == EnumInvCategory.ARMOR) {
             return player.inventory.armor.get(slot);
         } else if (category == EnumInvCategory.MAIN) {

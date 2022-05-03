@@ -21,7 +21,7 @@ apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remappe
 group = "com.brandon3055.brandonscore"
 archivesBaseName = "BrandonsCore"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) //
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 
@@ -53,7 +53,7 @@ if (System.getenv("KEY_STORE")) {
 config.mod_version = "${config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "9999")
 version = "${config.mc_version}-${config.mod_version}"
 println "Starting build of ${archivesBaseName}, Version: ${config.mod_version}"
-println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}, with Mappings: ${config.mappings}"
+println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}, with Mappings: 'official'"
 
 minecraft {
     mappings channel: 'official', version: config.mc_version
@@ -84,7 +84,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
 
-    implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
+//     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
     implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
     implementation fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 }

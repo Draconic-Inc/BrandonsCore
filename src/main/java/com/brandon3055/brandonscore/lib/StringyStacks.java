@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,7 +105,7 @@ public class StringyStacks {
         }
         stackStr = stackString.substring(itemID.length());
 
-        CompoundNBT tagNBT = null;
+        CompoundTag tagNBT = null;
         if (stackStr.startsWith("{")) {
             if (!stackString.contains("}") || stackStr.lastIndexOf("}") < stackString.indexOf("{")) {
                 LOGGER.warn("Detected invalid NBT definition on stack string - " + stackString);
@@ -113,7 +113,7 @@ public class StringyStacks {
             } else {
                 String tag = stackStr.substring(0, stackStr.lastIndexOf("}") + 1);
                 try {
-                    tagNBT = JsonToNBT.parseTag(tag);
+                    tagNBT = TagParser.parseTag(tag);
                 }
                 catch (Throwable e) {
                     LOGGER.warn("Failed to parse stack nbt from string - " + tag + ", on stack string - " + stackString + ". error: " + e.getMessage());
@@ -134,16 +134,16 @@ public class StringyStacks {
             }
         }
 
-        CompoundNBT stackNBT = new CompoundNBT();
+        CompoundTag stackNBT = new CompoundTag();
         stackNBT.putString("id", itemID);
         stackNBT.putByte("Count", (byte) count);
         if (tagNBT != null && !tagNBT.isEmpty()) {
             if (tagNBT.size() == 2 && tagNBT.contains("tag", 10) && tagNBT.contains("ForgeCaps")) {
-                CompoundNBT tag = tagNBT.getCompound("tag");
+                CompoundTag tag = tagNBT.getCompound("tag");
                 if (!tag.isEmpty()) {
                     stackNBT.put("tag", tag);
                 }
-                CompoundNBT caps = tagNBT.getCompound("ForgeCaps");
+                CompoundTag caps = tagNBT.getCompound("ForgeCaps");
                 if (!caps.isEmpty()) {
                     stackNBT.put("ForgeCaps", caps);
                 }
@@ -204,7 +204,7 @@ public class StringyStacks {
 
         int count = 1;
         int meta = 0;
-        CompoundNBT compound = null;
+        CompoundTag compound = null;
 
         if (countString.length() > 0) {
             try {
@@ -226,7 +226,7 @@ public class StringyStacks {
         }
         if (nbt.length() > 0) {
             try {
-                compound = JsonToNBT.parseTag(nbt);
+                compound = TagParser.parseTag(nbt);
             }
             catch (Exception e) {
                 LOGGER.warn("Failed to parse stack nbt from string - " + nbt + " error: " + e.getMessage());
@@ -263,22 +263,22 @@ public class StringyStacks {
         String stackString = stack.getItem().getRegistryName().toString();
 
         if (withNBT || withForgeCaps) {
-            CompoundNBT stackTag = stack.serializeNBT();
-            CompoundNBT nbt = null;
-            CompoundNBT caps = null;
+            CompoundTag stackTag = stack.serializeNBT();
+            CompoundTag nbt = null;
+            CompoundTag caps = null;
             if (withNBT && stackTag.contains("tag", 10)) {
                 nbt = stackTag.getCompound("tag");
             }
             if (withForgeCaps && stackTag.contains("ForgeCaps")) {
                 caps = stackTag.getCompound("ForgeCaps");
             }
-            CompoundNBT stringTag = null;
+            CompoundTag stringTag = null;
             if (nbt != null && caps == null) {
                 stringTag = nbt;
             } else if (caps != null) {
-                stringTag = new CompoundNBT();
+                stringTag = new CompoundTag();
                 stringTag.put("ForgeCaps", caps);
-                stringTag.put("tag", nbt == null ? new CompoundNBT() : nbt);
+                stringTag.put("tag", nbt == null ? new CompoundTag() : nbt);
             }
 
             if (stringTag != null && !stringTag.isEmpty()) {
@@ -308,7 +308,7 @@ public class StringyStacks {
     }
 
     @Deprecated
-    public static ItemStack legacyStackConverter(String itemString, int count, int damage, @Nullable CompoundNBT nbt) {
+    public static ItemStack legacyStackConverter(String itemString, int count, int damage, @Nullable CompoundTag nbt) {
         try {
             ResourceLocation itemID = new ResourceLocation(itemString);
             Item item = ForgeRegistries.ITEMS.getValue(itemID);

@@ -2,14 +2,14 @@ package com.brandon3055.brandonscore.blocks;
 
 import com.brandon3055.brandonscore.lib.IBCoreBlock;
 import com.brandon3055.brandonscore.lib.ITilePlaceListener;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Created by brandon3055 on 18/3/2016.
@@ -22,10 +22,10 @@ public class ItemBlockBCore extends BlockItem {
     }
 
     @Override
-    protected boolean placeBlock(BlockItemUseContext context, BlockState state) {
+    protected boolean placeBlock(BlockPlaceContext context, BlockState state) {
         boolean placed = super.placeBlock(context, state);
 
-        TileEntity tile = context.getLevel().getBlockEntity(context.getClickedPos());
+        BlockEntity tile = context.getLevel().getBlockEntity(context.getClickedPos());
         if (placed && tile instanceof ITilePlaceListener) {
             ((ITilePlaceListener) tile).onTilePlaced(context, state);
         }
@@ -34,7 +34,7 @@ public class ItemBlockBCore extends BlockItem {
     }
 
     @Override
-    public CompoundNBT getShareTag(ItemStack stack) {
+    public CompoundTag getShareTag(ItemStack stack) {
         if (getBlock() instanceof IBCoreBlock && ((IBCoreBlock) getBlock()).overrideShareTag()) {
             return ((IBCoreBlock) getBlock()).getNBTShareTag(stack);
         }

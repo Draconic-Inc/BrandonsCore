@@ -4,21 +4,19 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
-import com.google.common.base.Objects;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 public class TargetPos {
     private Vector3 pos;
     private float yaw;
     private float pitch;
     private boolean includeHeading = true;
-    private RegistryKey<World> dimension;
+    private ResourceKey<Level> dimension;
 
     public TargetPos() {}
 
@@ -26,7 +24,7 @@ public class TargetPos {
         this(entity, true);
     }
 
-    public TargetPos(CompoundNBT nbt) {
+    public TargetPos(CompoundTag nbt) {
         readFromNBT(nbt);
     }
 
@@ -35,19 +33,19 @@ public class TargetPos {
         this.includeHeading = includeHeading;
     }
 
-    public TargetPos(double x, double y, double z, RegistryKey<World> dimension) {
+    public TargetPos(double x, double y, double z, ResourceKey<Level> dimension) {
         this(new Vector3(x, y, z), dimension);
     }
 
-    public TargetPos(double x, double y, double z, RegistryKey<World> dimension, float pitch, float yaw) {
+    public TargetPos(double x, double y, double z, ResourceKey<Level> dimension, float pitch, float yaw) {
         this(new Vector3(x, y, z), dimension, pitch, yaw);
     }
 
-    public TargetPos(Vector3 pos, RegistryKey<World> dimension) {
+    public TargetPos(Vector3 pos, ResourceKey<Level> dimension) {
         this(pos, dimension, 0, 0);
     }
 
-    public TargetPos(Vector3 pos, RegistryKey<World> dimension, float pitch, float yaw) {
+    public TargetPos(Vector3 pos, ResourceKey<Level> dimension, float pitch, float yaw) {
         this.pos = pos;
         this.dimension = dimension;
         this.pitch = pitch;
@@ -57,8 +55,8 @@ public class TargetPos {
     public void update(Entity player) {
         pos = Vector3.fromEntity(player);
         dimension = player.level.dimension();
-        pitch = player.xRot;
-        yaw = player.yRot;
+        pitch = player.getXRot();
+        yaw = player.getYRot();
     }
 
     public double getX() {
@@ -77,7 +75,7 @@ public class TargetPos {
         return pos;
     }
 
-    public RegistryKey<World> getDimension() {
+    public ResourceKey<Level> getDimension() {
         return dimension;
     }
 
@@ -121,7 +119,7 @@ public class TargetPos {
         return this;
     }
 
-    public TargetPos setDimension(RegistryKey<World> d) {
+    public TargetPos setDimension(ResourceKey<Level> d) {
         dimension = d;
         return this;
     }
@@ -136,7 +134,7 @@ public class TargetPos {
         return this;
     }
 
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundTag writeToNBT(CompoundTag nbt) {
         pos.writeToNBT(nbt);
         nbt.putString("dim", dimension.location().toString());
         nbt.putBoolean("heading", includeHeading);
@@ -147,13 +145,13 @@ public class TargetPos {
         return nbt;
     }
 
-    public CompoundNBT writeToNBT() {
-        return writeToNBT(new CompoundNBT());
+    public CompoundTag writeToNBT() {
+        return writeToNBT(new CompoundTag());
     }
 
-    public void readFromNBT(CompoundNBT nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         pos = Vector3.fromNBT(nbt);
-        dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dim")));
+        dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dim")));
         includeHeading = nbt.getBoolean("heading");
         if (includeHeading) {
             pitch = nbt.getFloat("pitch");
@@ -173,7 +171,7 @@ public class TargetPos {
 
     public void read(MCDataInput input) {
         pos = input.readVector();
-        dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, input.readResourceLocation());
+        dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, input.readResourceLocation());
         includeHeading = input.readBoolean();
         if (includeHeading) {
             pitch = input.readFloat();

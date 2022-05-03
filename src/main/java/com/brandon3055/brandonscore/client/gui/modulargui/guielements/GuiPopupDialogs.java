@@ -6,8 +6,8 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
 
 /**
  * Created by brandon3055 on 15/08/2017.
@@ -45,14 +45,14 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize, GuiElement background, boolean vanillaButtons, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
         GuiPopupDialogs dialog = new GuiPopupDialogs(parent);
-        dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> RenderSystem.color4f(1, 1, 1, 1));
+//        dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> RenderSystem.color4f(1, 1, 1, 1));
         dialog.setXSize(xSize);
         dialog.setDragBar(12);
         dialog.addChild(background);
 
         boolean hasTitle = title != null && !title.isEmpty();
         if (hasTitle) {
-            dialog.addChild(new GuiLabel(TextFormatting.UNDERLINE + title).setSize(dialog.xSize() - 10, 10).setRelPos(5, 4).setTextColour(0).setShadow(false).setAlignment(GuiAlign.LEFT));
+            dialog.addChild(new GuiLabel(ChatFormatting.UNDERLINE + title).setSize(dialog.xSize() - 10, 10).setRelPos(5, 4).setTextColour(0).setShadow(false).setAlignment(GuiAlign.LEFT));
         }
 
         GuiLabel messageLabel = new GuiLabel(message).setWrap(true).setHeightForText(dialog.xSize() - 10).setPos(5, hasTitle ? 20 : 4);

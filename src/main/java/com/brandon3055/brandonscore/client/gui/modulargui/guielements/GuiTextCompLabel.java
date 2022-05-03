@@ -2,18 +2,8 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.Supplier;
 
@@ -28,8 +18,8 @@ public class GuiTextCompLabel extends GuiElement<GuiTextCompLabel> {
     protected boolean wrap = false;
     protected boolean dropShadow = true;
     protected GuiAlign alignment = GuiAlign.CENTER;
-    private ITextComponent textComponent = null;
-    private Supplier<ITextComponent> textSupplier;
+    private Component textComponent = null;
+    private Supplier<Component> textSupplier;
     private Supplier<Boolean> shadowStateSupplier;
 
     public GuiTextCompLabel() {}
@@ -42,37 +32,37 @@ public class GuiTextCompLabel extends GuiElement<GuiTextCompLabel> {
         super(xPos, yPos, xSize, ySize);
     }
 
-    public GuiTextCompLabel(ITextComponent textComponent) {
+    public GuiTextCompLabel(Component textComponent) {
         this.textComponent = textComponent;
     }
 
-    public GuiTextCompLabel(Supplier<ITextComponent> displayStringSupplier) {
+    public GuiTextCompLabel(Supplier<Component> displayStringSupplier) {
         this.setTextSupplier(displayStringSupplier);
     }
 
-    public GuiTextCompLabel(int xPos, int yPos, ITextComponent textComponent) {
+    public GuiTextCompLabel(int xPos, int yPos, Component textComponent) {
         this(xPos, yPos);
         this.textComponent = textComponent;
     }
 
-    public GuiTextCompLabel(int xPos, int yPos, int xSize, int ySize, ITextComponent textComponent) {
+    public GuiTextCompLabel(int xPos, int yPos, int xSize, int ySize, Component textComponent) {
         this(xPos, yPos, xSize, ySize);
         this.textComponent = textComponent;
     }
 
     //region Display String
 
-    public GuiTextCompLabel setTextComponent(ITextComponent textComponent) {
+    public GuiTextCompLabel setTextComponent(Component textComponent) {
         this.textComponent = textComponent;
         return this;
     }
 
-    public GuiTextCompLabel setTextSupplier(Supplier<ITextComponent> textSupplier) {
+    public GuiTextCompLabel setTextSupplier(Supplier<Component> textSupplier) {
         this.textSupplier = textSupplier;
         return this;
     }
 
-    public ITextComponent getText() {
+    public Component getText() {
         if (textSupplier != null) {
             return textSupplier.get();
         }
@@ -137,7 +127,7 @@ public class GuiTextCompLabel extends GuiElement<GuiTextCompLabel> {
 //        boolean mouseOver = isMouseOver(mouseX, mouseY);
 
         super.renderElement(mc, mouseX, mouseY, partialTicks);
-        ITextComponent text = getText();
+        Component text = getText();
         if (text != null) {
             int widthLimit = getInsetRect().width;
 

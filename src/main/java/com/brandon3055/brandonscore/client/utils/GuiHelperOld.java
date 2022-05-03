@@ -1,46 +1,38 @@
 package com.brandon3055.brandonscore.client.utils;
 
 import codechicken.lib.colour.ColourARGB;
-import codechicken.lib.render.RenderUtils;
-import codechicken.lib.render.buffer.TransformingVertexBuilder;
-import codechicken.lib.util.SneakyUtils;
-import codechicken.lib.vec.Cuboid6;
-import codechicken.lib.vec.Matrix4;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import org.lwjgl.opengl.GL11;
-
-import java.util.List;
+import net.minecraft.client.resources.model.Material;
 
 /**
  * Created by Brandon on 28/06/2014.
  */
 @Deprecated //If possible convert to new rendering system and move to GuiHelperV2
 public class GuiHelperOld {
-    public static final RenderType TRANS_TYPE = RenderType.create("gui_trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.builder()
-            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .setAlphaState(RenderState.NO_ALPHA)
-            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .createCompositeState(false)
-    );
+//    public static final RenderType TRANS_TYPE = RenderType.create("gui_trans_colour", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, RenderType.CompositeState.builder()
+//                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+//            .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+////            .setAlphaState(RenderStateShard.NO_ALPHA)
+////            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+//            .createCompositeState(false)
+//    );
 
     //Triangle Fan Type
-    public static RenderType FAN_TYPE = RenderType.create("tri_fan_type", DefaultVertexFormats.POSITION_COLOR, GL11.GL_TRIANGLE_FAN, 256, RenderType.State.builder()
-            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .setAlphaState(RenderState.NO_ALPHA)
-            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .createCompositeState(false)
+    public static RenderType FAN_TYPE = RenderType.create("tri_fan_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_FAN, 256, RenderType.CompositeState.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+//            .setAlphaState(RenderStateShard.NO_ALPHA)
+//            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+                    .createCompositeState(false)
     );
 
     public static final float PXL128 = 0.0078125F;
@@ -55,9 +47,9 @@ public class GuiHelperOld {
     }
 
     public static void drawTexturedRect(float x, float y, float width, float height, int u, int v, int uSize, int vSize, float zLevel, float pxl) {
-        Tessellator tessellator = Tessellator.getInstance();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder vertexBuffer = tessellator.getBuilder();
-        vertexBuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
+        vertexBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         vertexBuffer.vertex(x, y + height, zLevel).uv(u * pxl, (v + vSize) * pxl).endVertex();
         vertexBuffer.vertex(x + width, y + height, zLevel).uv((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
         vertexBuffer.vertex(x + width, y, zLevel).uv((u + uSize) * pxl, v * pxl).endVertex();
@@ -70,9 +62,9 @@ public class GuiHelperOld {
         int trimHeight = texHeight - topTrim - bottomTrim;
         if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
 
-        Tessellator tessellator = Tessellator.getInstance();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         for (int x = 0; x < xSize; ) {
             int rWidth = Math.min(xSize - x, trimWidth);
@@ -105,116 +97,116 @@ public class GuiHelperOld {
     }
 
     private static void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height, double zLevel) {
-        buffer.vertex(x, y + height, zLevel).uv( ((float) (textureX) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.vertex(x + width, y + height, zLevel).uv( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.vertex(x + width, y, zLevel).uv( ((float) (textureX + width) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
-        buffer.vertex(x, y, zLevel).uv( ((float) (textureX) * 0.00390625F),  ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.vertex(x, y + height, zLevel).uv(((float) (textureX) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.vertex(x + width, y + height, zLevel).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
+        buffer.vertex(x + width, y, zLevel).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY) * 0.00390625F)).endVertex();
+        buffer.vertex(x, y, zLevel).uv(((float) (textureX) * 0.00390625F), ((float) (textureY) * 0.00390625F)).endVertex();
     }
 
 //    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
 //        net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
 //    }
 
-    public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, FontRenderer font, float fade, double scale, int guiWidth, int guiHeight) {
-        MatrixStack matrixstack = new MatrixStack();
-        if (!list.isEmpty()) {
-            RenderSystem.pushMatrix();
-            RenderSystem.disableRescaleNormal();
-            RenderHelper.turnOff();
-            RenderSystem.disableLighting();
-            RenderSystem.disableDepthTest();
-            RenderSystem.scaled(scale, scale, 1);
-            mouseX = (int) (mouseX / scale);
-            mouseY = (int) (mouseY / scale);
-
-            int tooltipTextWidth = 0;
-
-            for (Object aList : list) {
-                String s = (String) aList;
-                int l = font.width(s);
-
-                if (l > tooltipTextWidth) {
-                    tooltipTextWidth = l;
-                }
-            }
-
-            int tooltipX = mouseX + 12;
-            int tooltipY = mouseY - 12;
-            int tooltipHeight = 6;
-
-            if (list.size() > 1) {
-                tooltipHeight += 2 + (list.size() - 1) * 10;
-            }
-
-            if (tooltipX + tooltipTextWidth > (int) (guiWidth / scale)) {
-                tooltipX -= 28 + tooltipTextWidth;
-            }
-
-            if (tooltipY + tooltipHeight + 6 > (int) (guiHeight / scale)) {
-                tooltipY = (int) (guiHeight / scale) - tooltipHeight - 6;
-            }
-
-            int backgroundColor = -267386864;
-            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor, fade, scale);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor, fade, scale);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
-            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
-            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
-            int k1 = 1347420415;
-            int l1 = (k1 & 16711422) >> 1 | k1 & -16777216;
-            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, k1, l1, fade, scale);
-            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, k1, l1, fade, scale);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, k1, k1, fade, scale);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, l1, l1, fade, scale);
-
-            int i2 = 0;
-            while (i2 < list.size()) {
-                String s1 = (String) list.get(i2);
-                RenderSystem.enableBlend();
-                RenderSystem.disableAlphaTest();
-                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-                font.drawShadow(matrixstack, s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
-                RenderSystem.enableAlphaTest();
-                tooltipY += 10;
-                ++i2;
-            }
-
-            RenderSystem.enableLighting();
-            RenderSystem.enableDepthTest();
-            RenderHelper.turnBackOn();
-            RenderSystem.enableRescaleNormal();
-            RenderSystem.popMatrix();
-        }
-    }
-
-    @Deprecated
-    public static void drawGradientRect(float left, float top, float right, float bottom, int colour1, int colour2, float fade, double zLevel) {
-        float f = ((colour1 >> 24 & 255) / 255.0F) * fade;
-        float f1 = (float) (colour1 >> 16 & 255) / 255.0F;
-        float f2 = (float) (colour1 >> 8 & 255) / 255.0F;
-        float f3 = (float) (colour1 & 255) / 255.0F;
-        float f4 = ((colour2 >> 24 & 255) / 255.0F) * fade;
-        float f5 = (float) (colour2 >> 16 & 255) / 255.0F;
-        float f6 = (float) (colour2 >> 8 & 255) / 255.0F;
-        float f7 = (float) (colour2 & 255) / 255.0F;
-        RenderSystem.disableTexture();
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.shadeModel(GL11.GL_SMOOTH);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder vertexbuffer = tessellator.getBuilder();
-        vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        vertexbuffer.vertex(right, top, zLevel).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.vertex(left, top, zLevel).color(f1, f2, f3, f).endVertex();
-        vertexbuffer.vertex(left, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        vertexbuffer.vertex(right, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        tessellator.end();
-        RenderSystem.shadeModel(GL11.GL_FLAT);
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.enableTexture();
-    }
+//    public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, Font font, float fade, double scale, int guiWidth, int guiHeight) {
+//        PoseStack matrixstack = new PoseStack();
+//        if (!list.isEmpty()) {
+//            RenderSystem.pushMatrix();
+//            RenderSystem.disableRescaleNormal();
+//            Lighting.turnOff();
+//            RenderSystem.disableLighting();
+//            RenderSystem.disableDepthTest();
+//            RenderSystem.scaled(scale, scale, 1);
+//            mouseX = (int) (mouseX / scale);
+//            mouseY = (int) (mouseY / scale);
+//
+//            int tooltipTextWidth = 0;
+//
+//            for (Object aList : list) {
+//                String s = (String) aList;
+//                int l = font.width(s);
+//
+//                if (l > tooltipTextWidth) {
+//                    tooltipTextWidth = l;
+//                }
+//            }
+//
+//            int tooltipX = mouseX + 12;
+//            int tooltipY = mouseY - 12;
+//            int tooltipHeight = 6;
+//
+//            if (list.size() > 1) {
+//                tooltipHeight += 2 + (list.size() - 1) * 10;
+//            }
+//
+//            if (tooltipX + tooltipTextWidth > (int) (guiWidth / scale)) {
+//                tooltipX -= 28 + tooltipTextWidth;
+//            }
+//
+//            if (tooltipY + tooltipHeight + 6 > (int) (guiHeight / scale)) {
+//                tooltipY = (int) (guiHeight / scale) - tooltipHeight - 6;
+//            }
+//
+//            int backgroundColor = -267386864;
+//            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor, fade, scale);
+//            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor, fade, scale);
+//            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
+//            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
+//            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, fade, scale);
+//            int k1 = 1347420415;
+//            int l1 = (k1 & 16711422) >> 1 | k1 & -16777216;
+//            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, k1, l1, fade, scale);
+//            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, k1, l1, fade, scale);
+//            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, k1, k1, fade, scale);
+//            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, l1, l1, fade, scale);
+//
+//            int i2 = 0;
+//            while (i2 < list.size()) {
+//                String s1 = (String) list.get(i2);
+//                RenderSystem.enableBlend();
+//                RenderSystem.disableAlphaTest();
+//                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+//                font.drawShadow(matrixstack, s1, tooltipX, tooltipY, ((int) (fade * 240F) + 0x10 << 24) | 0x00FFFFFF);
+//                RenderSystem.enableAlphaTest();
+//                tooltipY += 10;
+//                ++i2;
+//            }
+//
+//            RenderSystem.enableLighting();
+//            RenderSystem.enableDepthTest();
+//            Lighting.turnBackOn();
+//            RenderSystem.enableRescaleNormal();
+//            RenderSystem.popMatrix();
+//        }
+//    }
+//
+//    @Deprecated
+//    public static void drawGradientRect(float left, float top, float right, float bottom, int colour1, int colour2, float fade, double zLevel) {
+//        float f = ((colour1 >> 24 & 255) / 255.0F) * fade;
+//        float f1 = (float) (colour1 >> 16 & 255) / 255.0F;
+//        float f2 = (float) (colour1 >> 8 & 255) / 255.0F;
+//        float f3 = (float) (colour1 & 255) / 255.0F;
+//        float f4 = ((colour2 >> 24 & 255) / 255.0F) * fade;
+//        float f5 = (float) (colour2 >> 16 & 255) / 255.0F;
+//        float f6 = (float) (colour2 >> 8 & 255) / 255.0F;
+//        float f7 = (float) (colour2 & 255) / 255.0F;
+//        RenderSystem.disableTexture();
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableAlphaTest();
+//        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        RenderSystem.shadeModel(GL11.GL_SMOOTH);
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder vertexbuffer = tessellator.getBuilder();
+//        vertexbuffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
+//        vertexbuffer.vertex(right, top, zLevel).color(f1, f2, f3, f).endVertex();
+//        vertexbuffer.vertex(left, top, zLevel).color(f1, f2, f3, f).endVertex();
+//        vertexbuffer.vertex(left, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+//        vertexbuffer.vertex(right, bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+//        tessellator.end();
+//        RenderSystem.shadeModel(GL11.GL_FLAT);
+//        RenderSystem.disableBlend();
+//        RenderSystem.enableAlphaTest();
+//        RenderSystem.enableTexture();
+//    }
 
 //    /**
 //     * Draws a simple vertical energy bar with no tool tip
@@ -263,10 +255,10 @@ public class GuiHelperOld {
 //        }
 //    }
 
-    public static void drawGuiBaseBackground(AbstractGui gui, int posX, int posY, int xSize, int ySize) {
+    public static void drawGuiBaseBackground(GuiComponent gui, int posX, int posY, int xSize, int ySize) {
         ResourceHelperBC.bindTexture("textures/gui/light/background_dynamic.png");
-        RenderSystem.color3f(1F, 1F, 1F);
-        MatrixStack matrixstack = new MatrixStack();
+//        RenderSystem.color3f(1F, 1F, 1F);
+        PoseStack matrixstack = new PoseStack();
         gui.blit(matrixstack, posX, posY, 0, 0, xSize - 4, ySize - 4);
         gui.blit(matrixstack, posX + xSize - 4, posY, 252, 0, 4, ySize - 4);
         gui.blit(matrixstack, posX, posY + ySize - 4, 0, 252, xSize - 4, 4);
@@ -278,11 +270,11 @@ public class GuiHelperOld {
      * note. X-Size is 162
      */
     @Deprecated
-    public static void drawPlayerSlots(AbstractGui gui, int posX, int posY, boolean center) {
-        RenderSystem.color4f(1F, 1F, 1F, 1F);
-        RenderMaterial mat = BCSprites.getThemed("slot");
+    public static void drawPlayerSlots(GuiComponent gui, int posX, int posY, boolean center) {
+//        RenderSystem.color4f(1F, 1F, 1F, 1F);
+        Material mat = BCSprites.getThemed("slot");
         ResourceHelperBC.bindTexture(mat.atlasLocation());
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
         if (center) {
             posX -= 81;
@@ -301,8 +293,8 @@ public class GuiHelperOld {
     }
 
     @Deprecated
-    public static void drawCenteredString(FontRenderer fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
-        MatrixStack matrixstack = new MatrixStack();
+    public static void drawCenteredString(Font fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
+        PoseStack matrixstack = new PoseStack();
         if (dropShadow) {
             fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
         } else {
@@ -310,7 +302,7 @@ public class GuiHelperOld {
         }
     }
 
-    public static void drawCenteredString(FontRenderer fontRenderer, MatrixStack matrixstack, String text, int x, int y, int color, boolean dropShadow) {
+    public static void drawCenteredString(Font fontRenderer, PoseStack matrixstack, String text, int x, int y, int color, boolean dropShadow) {
         if (dropShadow) {
             fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
         } else {
@@ -318,8 +310,8 @@ public class GuiHelperOld {
         }
     }
 
-    public static void drawBackgroundString(IVertexBuilder vertexBuilder, FontRenderer font, String text, float x, float y, int color, int background, int padding, boolean shadow, boolean centered) {
-        MatrixStack matrixstack = new MatrixStack();
+    public static void drawBackgroundString(VertexConsumer vertexBuilder, Font font, String text, float x, float y, int color, int background, int padding, boolean shadow, boolean centered) {
+        PoseStack matrixstack = new PoseStack();
         int width = font.width(text);
         x = centered ? x - width / 2F : x;
         drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.lineHeight - 2 + padding * 2, background, 0);
@@ -368,42 +360,38 @@ public class GuiHelperOld {
 //        RenderSystem.popMatrix();
 //    }
 
-    public static void drawGradientRect(int posX, int posY, int xSize, int ySize, int colour, int colour2) {
-        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour2, 1F, 0);
-    }
-
-    @Deprecated
-    public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour) {
-        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour, 1F, 0);
-    }
-
-    @Deprecated
-    public static void drawBorderedRect(int posX, int posY, int xSize, int ySize, int borderWidth, int fillColour, int borderColour) {
-        drawColouredRect(posX, posY, xSize, borderWidth, borderColour);
-        drawColouredRect(posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
-
-        drawColouredRect(posX, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
-        drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
-
-        drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), fillColour);
-    }
-
-    public static void renderCuboid(Cuboid6 cuboid, float r, float g, float b, float a) {
-        MatrixStack stack = new MatrixStack();
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        Matrix4 mat = new Matrix4(stack);
-        IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(RenderType.lines()), mat);
-        RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);
-    }
-
-
-
-
+//    public static void drawGradientRect(int posX, int posY, int xSize, int ySize, int colour, int colour2) {
+//        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour2, 1F, 0);
+//    }
+//
+//    @Deprecated
+//    public static void drawColouredRect(int posX, int posY, int xSize, int ySize, int colour) {
+//        drawGradientRect(posX, posY, posX + xSize, posY + ySize, colour, colour, 1F, 0);
+//    }
+//
+//    @Deprecated
+//    public static void drawBorderedRect(int posX, int posY, int xSize, int ySize, int borderWidth, int fillColour, int borderColour) {
+//        drawColouredRect(posX, posY, xSize, borderWidth, borderColour);
+//        drawColouredRect(posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
+//
+//        drawColouredRect(posX, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
+//        drawColouredRect(posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - (2 * borderWidth), borderColour);
+//
+//        drawColouredRect(posX + borderWidth, posY + borderWidth, xSize - (2 * borderWidth), ySize - (2 * borderWidth), fillColour);
+//    }
+//
+//    public static void renderCuboid(Cuboid6 cuboid, float r, float g, float b, float a) {
+//        PoseStack stack = new PoseStack();
+//        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+//        Matrix4 mat = new Matrix4(stack);
+//        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(RenderType.lines()), mat);
+//        RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);
+//    }
 
 
     //New Stuff
 
-    public static void drawShadedRect(IVertexBuilder builder, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour, double zLevel) {
+    public static void drawShadedRect(VertexConsumer builder, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour, double zLevel) {
         //Fill
         drawColouredRect(builder, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill, zLevel);
         //Top
@@ -420,11 +408,11 @@ public class GuiHelperOld {
         drawColouredRect(builder, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour, zLevel);
     }
 
-    public static void drawColouredRect(IVertexBuilder builder, double posX, double posY, double xSize, double ySize, int colour, double zLevel) {
+    public static void drawColouredRect(VertexConsumer builder, double posX, double posY, double xSize, double ySize, int colour, double zLevel) {
         drawGradientRect(builder, posX, posY, posX + xSize, posY + ySize, colour, colour, zLevel);
     }
 
-    public static void drawGradientRect(IVertexBuilder builder, double left, double top, double right, double bottom, int startColor, int endColor, double zLevel) {
+    public static void drawGradientRect(VertexConsumer builder, double left, double top, double right, double bottom, int startColor, int endColor, double zLevel) {
         if (startColor == endColor && endColor == 0) return;
         //@formatter:off
         float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
@@ -442,7 +430,7 @@ public class GuiHelperOld {
         //@formatter:on
     }
 
-    public static void drawBorderedRect(IVertexBuilder builder, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour, double zLevel) {
+    public static void drawBorderedRect(VertexConsumer builder, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour, double zLevel) {
         drawColouredRect(builder, posX, posY, xSize, borderWidth, borderColour, zLevel);
         drawColouredRect(builder, posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour, zLevel);
         drawColouredRect(builder, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
@@ -450,7 +438,7 @@ public class GuiHelperOld {
         drawColouredRect(builder, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour, zLevel);
     }
 
-    public static void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour, double zLevel) {
+    public static void drawDynamicSprite(VertexConsumer builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour, double zLevel) {
         int texWidth = tex.getWidth();
         int texHeight = tex.getHeight();
         int trimWidth = texWidth - leftTrim - rightTrim;
@@ -500,7 +488,7 @@ public class GuiHelperOld {
         }
     }
 
-    private static void bufferTexturedModalRect(IVertexBuilder builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour, double zLevel) {
+    private static void bufferTexturedModalRect(VertexConsumer builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour, double zLevel) {
         int w = tex.getWidth();
         int h = tex.getHeight();
         int[] colours = ColourARGB.unpack(colour);
@@ -512,7 +500,7 @@ public class GuiHelperOld {
         //@formatter:on
     }
 
-    public static void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite, double zLevel) {
+    public static void drawSprite(VertexConsumer builder, float x, float y, float width, float height, TextureAtlasSprite sprite, double zLevel) {
         //@formatter:off
         builder.vertex(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
         builder.vertex(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();

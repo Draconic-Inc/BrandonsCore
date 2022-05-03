@@ -6,7 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBordere
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement.TreeNode;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LEFT;
 
@@ -14,8 +14,8 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LE
  * Created by brandon3055 on 2/07/2017.
  */
 public class ModularGuiTest extends ModularGuiScreen {
-    public ModularGuiTest(ITextComponent titleIn) {
-        super(titleIn, 550, 300);
+    public ModularGuiTest(Component titleIn) {
+        super(titleIn, 400, 200);
     }
 
 

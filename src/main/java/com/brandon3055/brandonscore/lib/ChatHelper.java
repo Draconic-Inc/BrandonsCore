@@ -2,11 +2,11 @@ package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.Util;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Created by brandon3055 on 15/12/2020.
@@ -20,7 +20,7 @@ public class ChatHelper {
      * @param player  The player.
      * @param message The message.
      */
-    public static void sendMessage(PlayerEntity player, ITextComponent message) {
+    public static void sendMessage(Player player, Component message) {
         player.sendMessage(message, Util.NIL_UUID);
     }
 
@@ -40,7 +40,7 @@ public class ChatHelper {
      * @param message The message
      * @param index   message index.
      */
-    public static void sendIndexed(PlayerEntity player, ITextComponent message, int index) {
+    public static void sendIndexed(Player player, Component message, int index) {
         //0xE3055000 is an arbitrary number. Combine that with the relatively limited range and chances if my indexes conflicting with
         //another mod doing something similar are pretty low. But even if there is a conflict its hardly a game breaking issue. 
         if (index < -1000 || index > 1000) LogHelperBC.bigWarn("Message index is out of bounds. Message: " + message.getString());
@@ -56,8 +56,8 @@ public class ChatHelper {
      * @param player  The player.
      * @param message The message.
      */
-    public static void sendDeDupeMessage(PlayerEntity player, ITextComponent message) {
-        if (player instanceof ServerPlayerEntity) {
+    public static void sendDeDupeMessage(Player player, Component message) {
+        if (player instanceof ServerPlayer) {
             sendMessage(player, message);
         }
     }
@@ -73,8 +73,8 @@ public class ChatHelper {
      * @param index   message index.
      * @see #sendIndexed(PlayerEntity, ITextComponent, int) 
      */
-    public static void sendDeDupeIndexed(PlayerEntity player, ITextComponent message, int index) {
-        if (player instanceof ServerPlayerEntity) {
+    public static void sendDeDupeIndexed(Player player, Component message, int index) {
+        if (player instanceof ServerPlayer) {
             sendIndexed(player, message, index);
         }
     }
@@ -87,8 +87,8 @@ public class ChatHelper {
      * @param player  The player.
      * @param message The message.
      */
-    public static void sendDeDupeMessageClient(PlayerEntity player, ITextComponent message) {
-        if (player instanceof ClientPlayerEntity) {
+    public static void sendDeDupeMessageClient(Player player, Component message) {
+        if (player instanceof LocalPlayer) {
             sendMessage(player, message);
         }
     }
@@ -103,8 +103,8 @@ public class ChatHelper {
      * @param index   message index.
      * @see #sendIndexed(PlayerEntity, ITextComponent, int)
      */
-    public static void sendDeDupeIndexedClient(PlayerEntity player, ITextComponent message, int index) {
-        if (player instanceof ClientPlayerEntity) {
+    public static void sendDeDupeIndexedClient(Player player, Component message, int index) {
+        if (player instanceof LocalPlayer) {
             sendIndexed(player, message, index);
         }
     }

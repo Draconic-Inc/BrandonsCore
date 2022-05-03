@@ -3,26 +3,22 @@ package com.brandon3055.brandonscore.utils;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.server.ChunkHolder;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,7 +29,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
 import java.text.DecimalFormat;
-import java.util.Random;
 
 /**
  * Created by Brandon on 25/07/2014.
@@ -152,7 +147,7 @@ public class Utils {
      * Determine the orientation of a blocks based on the position of the entity that placed it.
      */
     public static int determineOrientation(int x, int y, int z, LivingEntity entity) {
-        if (MathHelper.abs((float) entity.getX() - (float) x) < 2.0F && MathHelper.abs((float) entity.getZ() - (float) z) < 2.0F) {
+        if (Mth.abs((float) entity.getX() - (float) x) < 2.0F && Mth.abs((float) entity.getZ() - (float) z) < 2.0F) {
             double d0 = entity.getY() + 1.82D - (double) entity.getMyRidingOffset();
 
             if (d0 - (double) y > 2.0D) return 0;
@@ -160,7 +155,7 @@ public class Utils {
             if ((double) y - d0 > 0.0D) return 1;
         }
 
-        int l = MathHelper.floor((double) (entity.yRot * 4.0F / 360.0F) + 0.5D) & 3;
+        int l = Mth.floor((double) (entity.getYRot() * 4.0F / 360.0F) + 0.5D) & 3;
         return l == 0 ? 3 : (l == 1 ? 4 : (l == 2 ? 2 : (l == 3 ? 5 : 0)));
     }
 
@@ -253,24 +248,24 @@ public class Utils {
     }
 
     @Nullable
-    public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance) {
+    public static Player getClosestPlayer(Level world, double posX, double posY, double posZ, double distance) {
         return getClosestPlayer(world, posX, posY, posZ, distance, true);
     }
 
     @Nullable
-    public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative) {
+    public static Player getClosestPlayer(Level world, double posX, double posY, double posZ, double distance, boolean includeCreative) {
         return getClosestPlayer(world, posX, posY, posZ, distance, includeCreative, false);
     }
 
 
     @Nullable
     @Deprecated //Check the world method
-    public static PlayerEntity getClosestPlayer(World world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
+    public static Player getClosestPlayer(Level world, double posX, double posY, double posZ, double distance, boolean includeCreative, boolean includeSpectators) {
         double d0 = -1.0D;
-        PlayerEntity closestPlayer = null;
+        Player closestPlayer = null;
 
         for (int i = 0; i < world.players().size(); ++i) {
-            PlayerEntity player = world.players().get(i);
+            Player player = world.players().get(i);
 
             if ((!player.isCreative() || includeCreative) && (!player.isSpectator() || includeSpectators)) {
                 double d1 = player.distanceToSqr(posX, posY, posZ);
@@ -395,13 +390,13 @@ public class Utils {
 
         while((i = stringIn.indexOf(167, i + 1)) != -1) {
             if (i < j - 1) {
-                TextFormatting textformatting = TextFormatting.getByCode(stringIn.charAt(i + 1));
+                ChatFormatting textformatting = ChatFormatting.getByCode(stringIn.charAt(i + 1));
                 if (textformatting != null) {
                     if (!textformatting.isFormat()) {
                         stringbuilder.setLength(0);
                     }
 
-                    if (textformatting != TextFormatting.RESET) {
+                    if (textformatting != ChatFormatting.RESET) {
                         stringbuilder.append((Object)textformatting);
                     }
                 }
@@ -412,14 +407,14 @@ public class Utils {
     }
 
     @Deprecated //Use world.isLoaded or world this.getChunkSource().hasChunk
-    public static boolean isAreaLoaded(World world, BlockPos pos, ChunkHolder.LocationType minimum) {
+    public static boolean isAreaLoaded(Level world, BlockPos pos, ChunkHolder.FullChunkStatus minimum) {
         ChunkPos chunkPos = new ChunkPos(pos);
-        IChunk ichunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
-        if (!(ichunk instanceof Chunk)) {
+        ChunkAccess ichunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
+        if (!(ichunk instanceof LevelChunk)) {
             return false;
         }
 
-        ChunkHolder.LocationType locationType = ((Chunk) ichunk).getFullStatus();
+        ChunkHolder.FullChunkStatus locationType = ((LevelChunk) ichunk).getFullStatus();
         return locationType.isOrAfter(minimum);
     }
 
@@ -431,8 +426,8 @@ public class Utils {
         return r;
     }
 
-    public static int scaleToTPS(World world, int min, int max) {
-        if (!(world instanceof ServerWorld)) return max;
+    public static int scaleToTPS(Level world, int min, int max) {
+        if (!(world instanceof ServerLevel)) return max;
         long[] times = world.getServer().getTickTime(world.dimension());
         if (times == null) return max;
 

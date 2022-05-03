@@ -2,10 +2,10 @@ package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.BrandonsCore;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -287,11 +287,11 @@ public class LogHelperBC {
 
     //region formatted NBT log output
 
-    public static void logNBTDev(CompoundNBT compound) {
+    public static void logNBTDev(CompoundTag compound) {
         logNBT(compound, true);
     }
 
-    public static void logNBT(CompoundNBT compound) {
+    public static void logNBT(CompoundTag compound) {
         logNBT(compound, false);
     }
 
@@ -303,7 +303,7 @@ public class LogHelperBC {
         logNBTDev(stack.getTag());
     }
 
-    public static void logNBT(CompoundNBT compound, boolean debug) {
+    public static void logNBT(CompoundTag compound, boolean debug) {
         if (debug && (BrandonsCore.inDev || BCConfig.devLog)) {
             return;
         }
@@ -318,22 +318,22 @@ public class LogHelperBC {
         info(builder.toString());
     }
 
-    public static void buildNBT(StringBuilder builder, INBT nbt, String indent, String name, boolean comma) {
-        if (nbt instanceof CompoundNBT) {
+    public static void buildNBT(StringBuilder builder, Tag nbt, String indent, String name, boolean comma) {
+        if (nbt instanceof CompoundTag) {
             builder.append("\n[NBT]: ").append(indent).append(name).append(":{");
-            Set<String> keys = ((CompoundNBT) nbt).getAllKeys();
+            Set<String> keys = ((CompoundTag) nbt).getAllKeys();
             int index = 0;
             for (String key : keys) {
                 index++;
-                buildNBT(builder, ((CompoundNBT) nbt).get(key), indent + "|  ", key, index < keys.size());
+                buildNBT(builder, ((CompoundTag) nbt).get(key), indent + "|  ", key, index < keys.size());
             }
             builder.append("\n[NBT]: ").append(indent).append("}").append(comma ? "," : "");
         }
-        else if (nbt instanceof ListNBT) {
+        else if (nbt instanceof ListTag) {
             builder.append("\n[NBT]: ").append(indent).append(name).append(":[");
-            int tacCount = ((ListNBT)nbt).size();
+            int tacCount = ((ListTag)nbt).size();
             for (int i = 0; i < tacCount; i++) {
-                INBT base = ((ListNBT) nbt).get(i);
+                Tag base = ((ListTag) nbt).get(i);
                 buildNBT(builder, base , indent + "|  ", i+"", (i + 1) < tacCount);
             }
             builder.append("\n[NBT]: ").append(indent).append("]").append(comma ? "," : "");

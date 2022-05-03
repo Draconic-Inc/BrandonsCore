@@ -3,11 +3,13 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 5/31/2018.
@@ -53,28 +55,26 @@ public class LinkElement extends MDElementBase<LinkElement> {
         int drawX = xPos() + leftPad;
         int drawWidth = xSize() - leftPad - rightPad;
 
-        if (linkStyle == Style.TEXT) {
-            String text = TextFormatting.UNDERLINE + displayText;
-            if (isMouseOver) {
-                text = TextFormatting.ITALIC + text;
-            }
-
-            drawCenteredSplitString(fontRenderer, text, drawX + drawWidth / 2, yPos() + topPad, xSize() - leftPad - rightPad, colour, shadow);
-        }
-        else {
-            int textColour;
-
-            if (linkStyle == Style.VANILLA) {
-                renderVanillaButtonTexture(xPos(), yPos(), xSize(), ySize(), isMouseOver, false);
-                textColour = colour;
-            }
-            else {
-                drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0xFF000000 | colour, 0xFF000000 | colourBorder);
-                textColour = defaultColour.get();
-            }
-
-            drawCenteredSplitString(fontRenderer, displayText, drawX + drawWidth / 2, yPos() + topPad, xSize() - leftPad - rightPad, textColour, shadow);
-        }
+//        if (linkStyle == Style.TEXT) {
+//            String text = ChatFormatting.UNDERLINE + displayText;
+//            if (isMouseOver) {
+//                text = ChatFormatting.ITALIC + text;
+//            }
+//
+//            drawCenteredSplitString(fontRenderer, text, drawX + drawWidth / 2, yPos() + topPad, xSize() - leftPad - rightPad, colour, shadow);
+//        } else {
+//            int textColour;
+//
+//            if (linkStyle == Style.VANILLA) {
+//                renderVanillaButtonTexture(xPos(), yPos(), xSize(), ySize(), isMouseOver, false);
+//                textColour = colour;
+//            } else {
+//                drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0xFF000000 | colour, 0xFF000000 | colourBorder);
+//                textColour = defaultColour.get();
+//            }
+//
+//            drawCenteredSplitString(fontRenderer, displayText, drawX + drawWidth / 2, yPos() + topPad, xSize() - leftPad - rightPad, textColour, shadow);
+//        }
 
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
@@ -93,7 +93,9 @@ public class LinkElement extends MDElementBase<LinkElement> {
             }
 
             if (enableTooltip && !tooltip.isEmpty()) {
-                drawHoveringText(tooltip, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
+                PoseStack poseStack = new PoseStack();
+                poseStack.translate(0, 0, getRenderZLevel());
+                renderTooltip(poseStack, tooltip.stream().map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
             }
             return true;
         }

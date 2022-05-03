@@ -1,12 +1,11 @@
 package com.brandon3055.brandonscore.utils;
 
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class InfoHelper {
     @Deprecated
     public static final int GUI_TITLE = 0x00FFFF;
 
-    public static void addEnergyInfo(ItemStack stack, List<ITextComponent> list) {
+    public static void addEnergyInfo(ItemStack stack, List<Component> list) {
 //		String energy = Utils.formatNumber(EnergyUtils.getEnergyStored(stack));
 //        String maxEnergy = Utils.formatNumber(EnergyUtils.getMaxEnergyStored(stack));
 //		list.add(new StringTextComponent(I18n.format("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + I18n.format("op.brandonscore." + (isShiftKeyDown() ? "operational_potential" : "op"))));
@@ -33,14 +32,14 @@ public class InfoHelper {
         return Screen.hasControlDown();
     }
 
-    public static boolean holdShiftForDetails(List<ITextComponent> list, boolean inverted) {
+    public static boolean holdShiftForDetails(List<Component> list, boolean inverted) {
         if (isShiftKeyDown() == inverted){
-            list.add(new StringTextComponent(I18n.get("item_info.brandonscore.shift_for_details", TextFormatting.AQUA + "" + TextFormatting.ITALIC, TextFormatting.RESET + "" + TextFormatting.GRAY)).withStyle(TextFormatting.GRAY));
+            list.add(new TextComponent(I18n.get("item_info.brandonscore.shift_for_details", ChatFormatting.AQUA + "" + ChatFormatting.ITALIC, ChatFormatting.RESET + "" + ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
         }
         return isShiftKeyDown();
     }
 
-    public static boolean holdShiftForDetails(List<ITextComponent> list) {
+    public static boolean holdShiftForDetails(List<Component> list) {
         return holdShiftForDetails(list, false);
     }
 
@@ -49,7 +48,7 @@ public class InfoHelper {
      */
     @Deprecated //I would rather have colour built into modular GUI elements in most cases.
     public static String ITC() {
-        return "" + TextFormatting.RESET + "" + TextFormatting.DARK_AQUA;
+        return "" + ChatFormatting.RESET + "" + ChatFormatting.DARK_AQUA;
     }
 
     /**
@@ -57,7 +56,7 @@ public class InfoHelper {
      */
     @Deprecated //I would rather have colour built into modular GUI elements in most cases.
     public static String HITC() {
-        return "" + TextFormatting.RESET + "" + TextFormatting.ITALIC + "" + TextFormatting.GOLD;
+        return "" + ChatFormatting.RESET + "" + ChatFormatting.ITALIC + "" + ChatFormatting.GOLD;
     }
 
 

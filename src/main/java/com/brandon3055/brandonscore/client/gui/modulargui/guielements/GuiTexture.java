@@ -1,23 +1,17 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import codechicken.lib.render.buffer.TransformingVertexBuilder;
-import com.brandon3055.brandonscore.api.TimeKeeper;
-import com.brandon3055.brandonscore.api.render.GuiHelper;
+
+import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import com.brandon3055.brandonscore.client.BCSprites;
-import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
-import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.model.Material;
 
 import java.util.function.Supplier;
 
@@ -38,72 +32,41 @@ public class GuiTexture extends GuiElement<GuiTexture> {
     private boolean flipX = false;
     private boolean flipY = false;
 
-    public RenderMaterial material;
-    public Supplier<RenderMaterial> materialSupplier;
+    public Material material;
+    public Supplier<Material> materialSupplier;
 
-    @Deprecated
-    public ResourceLocation texture;
-    @Deprecated
-    public Supplier<ResourceLocation> textureSupplier;
-
-    @Deprecated
-    public GuiTexture(int xPos, int yPos, int textureX, int textureY, int xSize, int ySize, ResourceLocation texture) {
-        super(xPos, yPos, xSize, ySize);
-        this.texU = textureX;
-        this.texV = textureY;
-        this.texture = texture;
-    }
-
-    @Deprecated
-    public GuiTexture(int textureX, int textureY, int xSize, int ySize, ResourceLocation texture) {
-        super(0, 0, xSize, ySize);
-        this.texU = textureX;
-        this.texV = textureY;
-        this.texture = texture;
-    }
-
-    @Deprecated
-    public GuiTexture(int xSize, int ySize, ResourceLocation texture) {
-        super(0, 0, xSize, ySize);
-        this.texture = texture;
-    }
-
-    public GuiTexture(int xPos, int yPos, int xSize, int ySize, RenderMaterial material) {
+    public GuiTexture(int xPos, int yPos, int xSize, int ySize, Material material) {
         super(xPos, yPos, xSize, ySize);
         this.material = material;
     }
 
-    public GuiTexture(int xPos, int yPos, int xSize, int ySize, Supplier<RenderMaterial> materialSupplier) {
+    public GuiTexture(int xPos, int yPos, int xSize, int ySize, Supplier<Material> materialSupplier) {
         super(xPos, yPos, xSize, ySize);
         this.materialSupplier = materialSupplier;
     }
 
-    public GuiTexture(int xSize, int ySize, RenderMaterial material) {
+    public GuiTexture(int xSize, int ySize, Material material) {
         super(0, 0, xSize, ySize);
         this.material = material;
     }
 
-    public GuiTexture(int xSize, int ySize, Supplier<RenderMaterial> materialSupplier) {
+    public GuiTexture(int xSize, int ySize, Supplier<Material> materialSupplier) {
         super(0, 0, xSize, ySize);
         this.materialSupplier = materialSupplier;
     }
 
-    public GuiTexture(Supplier<RenderMaterial> materialSupplier) {
+    public GuiTexture(Supplier<Material> materialSupplier) {
         super(0, 0);
         this.materialSupplier = materialSupplier;
     }
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (preDrawCallback == null) {
-            RenderSystem.color4f(1, 1, 1, 1);
-        }
-
-        RenderMaterial mat = getMaterial();
+        Material mat = getMaterial();
         if (mat != null) {
-            IRenderTypeBuffer.Impl getter = RenderUtils.getTypeBuffer();
+            MultiBufferSource.BufferSource getter = RenderUtils.getTypeBuffer();
             if (rotation != 0 || flipX || flipY) {
-                MatrixStack mStack = new MatrixStack();
+                PoseStack mStack = new PoseStack();
                 mStack.translate(xPos(), yPos(), 0);
                 mStack.translate(xSize() / 2D, ySize() / 2D, 0);
                 if (flipX || flipY) {
@@ -113,26 +76,15 @@ public class GuiTexture extends GuiElement<GuiTexture> {
                     mStack.mulPose(new Quaternion(0, 0, rotation, true));
                 }
                 mStack.translate(-(xSize() / 2D), -(ySize() / 2D), 0);
-                IVertexBuilder builder = new TransformingVertexBuilder(getter.getBuffer(mat.renderType(BCSprites::makeType)), mStack);
+                VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(mat.renderType(BCSprites::makeType)), mStack);
                 drawSprite(builder, 0, 0, xSize(), ySize(), mat.sprite());
             } else {
                 drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), mat.sprite());
             }
             getter.endBatch();
-        } else {
-            ResourceLocation texture = getTexture();
-            if (texture != null) {
-                bindTexture(texture);
-                if (texSizeOverride) {
-                    drawScaledCustomSizeModalRect(xPos(), yPos(), getTexU(), getTexV(), texUSize, texVSize, xSize(), ySize(), textSheetSizeX, textSheetSizeY);
-                } else {
-                    drawModalRectWithCustomSizedTexture(xPos(), yPos(), getTexU(), getTexV(), xSize(), ySize(), textSheetSizeX, textSheetSizeY);
-                }
-            }
         }
 
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFFFFFF00);
     }
 
     public GuiTexture setRotation(float rotation) {
@@ -162,40 +114,17 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return this;
     }
 
-    @Deprecated
-    public GuiTexture setTexture(ResourceLocation texture) {
-        this.texture = texture;
-        return this;
-    }
-
-    @Deprecated
-    public GuiTexture setTextureSupplier(Supplier<ResourceLocation> textureSupplier) {
-        this.textureSupplier = textureSupplier;
-        return this;
-    }
-
-    public GuiTexture setMaterial(RenderMaterial material) {
+    public GuiTexture setMaterial(Material material) {
         this.material = material;
         return this;
     }
 
-    public RenderMaterial getMaterial() {
+    public Material getMaterial() {
         return materialSupplier == null ? material : materialSupplier.get();
     }
 
-    public GuiTexture setMaterialSupplier(Supplier<RenderMaterial> materialSupplier) {
+    public GuiTexture setMaterialSupplier(Supplier<Material> materialSupplier) {
         this.materialSupplier = materialSupplier;
-        return this;
-    }
-
-    @Deprecated
-    public ResourceLocation getTexture() {
-        return textureSupplier == null ? texture : textureSupplier.get();
-    }
-
-    @Deprecated
-    public GuiTexture setTexture(String texture) {
-        this.texture = ResourceHelperBC.getResourceRAW(texture);
         return this;
     }
 
@@ -251,15 +180,15 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return texYGetter == null ? texV : texYGetter.get();
     }
 
-    public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<RenderMaterial> materialSupplier) {
+    public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<Material> materialSupplier) {
         return newDynamicTexture(materialSupplier).setSize(xSize, ySize);
     }
 
-    public static GuiTexture newDynamicTexture(Supplier<RenderMaterial> materialSupplier) {
+    public static GuiTexture newDynamicTexture(Supplier<Material> materialSupplier) {
         return new GuiTexture(null) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+                MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                 drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
                 getter.endBatch();
 

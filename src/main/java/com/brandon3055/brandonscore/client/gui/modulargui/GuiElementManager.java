@@ -7,10 +7,9 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatche
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.resources.ResourceLocation;
 
 import java.awt.*;
 import java.util.List;
@@ -351,7 +350,6 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
     //region Render
 
     public void renderElements(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.color4f(1F, 1F, 1F, 1F);
         for (GuiElement element : elements) {
             if (element.isEnabled()) {
                 parentGui.setZLevel(element.displayZLevel);
@@ -474,13 +472,13 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         this.jeiExclusions = exclusions;
     }
 
-    public List<Rectangle2d> getJeiExclusions() {
+    public List<Rect2i> getJeiExclusions() {
         if (jeiExclusions == null) {
             return Collections.emptyList();
         }
         return jeiExclusions.get().stream().map(elementBase -> {
             Rectangle rect = elementBase.getRect();
-            return new Rectangle2d(rect.x, rect.y, rect.width, rect.height);
+            return new Rect2i(rect.x, rect.y, rect.width, rect.height);
         }).collect(Collectors.toList());
     }
 

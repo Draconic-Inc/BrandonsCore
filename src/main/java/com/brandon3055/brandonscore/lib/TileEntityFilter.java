@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
-import com.brandon3055.brandonscore.blocks.TileBCBase;
-import net.minecraft.nbt.CompoundNBT;
+import com.brandon3055.brandonscore.blocks.TileBCore;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Created by brandon3055 on 23/10/2016.
@@ -11,23 +11,23 @@ import net.minecraft.nbt.CompoundNBT;
 public class TileEntityFilter extends EntityFilter {
 
     public byte packetID;
-    private TileBCBase tile;
+    private TileBCore tile;
     public boolean isListEnabled;
     public boolean isTypeSelectionEnabled;
     public boolean isOtherSelectorEnabled;
 
-    public TileEntityFilter(TileBCBase tile, byte packetID) {
+    public TileEntityFilter(TileBCore tile, byte packetID) {
         this.tile = tile;
         this.packetID = packetID;
     }
 
     @Override
-    public void sendConfigToServer(CompoundNBT compound) {
+    public void sendConfigToServer(CompoundTag compound) {
         tile.sendPacketToServer(output -> output.writeCompoundNBT(compound), packetID);
     }
 
     @Override
-    public void receiveConfigFromClient(CompoundNBT compound) {
+    public void receiveConfigFromClient(CompoundTag compound) {
         super.receiveConfigFromClient(compound);
         tile.updateBlock();
         tile.setChanged();

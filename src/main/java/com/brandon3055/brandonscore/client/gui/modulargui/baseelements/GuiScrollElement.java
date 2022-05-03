@@ -8,7 +8,7 @@ import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.awt.*;
 import java.util.LinkedList;

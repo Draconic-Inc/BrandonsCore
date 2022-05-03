@@ -2,14 +2,14 @@ package com.brandon3055.brandonscore.lib;
 
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.utils.Utils;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-import static net.minecraft.util.Direction.Axis.X;
-import static net.minecraft.util.Direction.Axis.Y;
+import static net.minecraft.core.Direction.Axis.X;
+import static net.minecraft.core.Direction.Axis.Y;
 
 /**
  * Created by brandon3055 on 9/4/2016.
@@ -219,7 +219,7 @@ public class Vec3D {
         return new Vec3D(pos).add(0.5, 0.5, 0.5);
     }
 
-    public static Vec3D getCenter(TileEntity tile) {
+    public static Vec3D getCenter(BlockEntity tile) {
         return getCenter(tile.getBlockPos());
     }
 
@@ -240,14 +240,14 @@ public class Vec3D {
     }
 
     public int floorX() {
-        return MathHelper.floor(x);
+        return Mth.floor(x);
     }
 
     public int floorY() {
-        return MathHelper.floor(y);
+        return Mth.floor(y);
     }
 
     public int floorZ() {
-        return MathHelper.floor(z);
+        return Mth.floor(z);
     }
 }

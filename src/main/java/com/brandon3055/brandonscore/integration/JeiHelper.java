@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.integration;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.recipe.IFocus;
@@ -8,9 +8,8 @@ import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.config.KeyBindings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.StringUtils;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,8 +21,6 @@ import java.util.List;
  */
 public class JeiHelper {
 
-    //region JEI Checks
-
     public static boolean jeiAvailable() {
         if (!ModHelperBC.isJEIInstalled) {
             return false;
@@ -32,14 +29,9 @@ public class JeiHelper {
         return checkJEIRuntime();
     }
 
-    //    @Optional.Method(modid = "jei")
     public static boolean checkJEIRuntime() {
         return BCJEIPlugin.jeiRuntime != null;
     }
-
-    //endregion
-
-    //region Get Renderers
 
     public static List<IRecipeRenderer> getRecipeRenderers(ItemStack result) {
         if (!jeiAvailable()) {
@@ -49,15 +41,14 @@ public class JeiHelper {
         return getRenderers(result);
     }
 
-    //    @Optional.Method(modid = "jei")
     private static List<IRecipeRenderer> getRenderers(ItemStack result) {
         List<IRecipeRenderer> renderers = new ArrayList<>();
 
         IRecipeManager registry = BCJEIPlugin.jeiRuntime.getRecipeManager();
-        List<IRecipeCategory> categories = new LinkedList<>(registry.getRecipeCategories(registry.createFocus(IFocus.Mode.OUTPUT, result)));
+        List<IRecipeCategory<?>> categories = new LinkedList<IRecipeCategory<?>>(registry.getRecipeCategories(registry.createFocus(IFocus.Mode.OUTPUT, result), true));
 
         for (IRecipeCategory category : categories) {
-            List wrappers = registry.getRecipes(category, registry.createFocus(IFocus.Mode.OUTPUT, result));
+            List wrappers = registry.getRecipes(category, registry.createFocus(IFocus.Mode.OUTPUT, result), true);
             for (Object wrapper : wrappers) {
                 try {
                     renderers.add(new RecipeRenderer(category, wrapper, result));
@@ -77,7 +68,6 @@ public class JeiHelper {
         }
     }
 
-    //    @Optional.Method(modid = "jei")
     private static void openJEIRecipeInternal(ItemStack stack, boolean usage) {
         if (checkJEIRuntime()) {
             IFocus f = BCJEIPlugin.jeiRuntime.getRecipeManager().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, stack);
@@ -92,19 +82,15 @@ public class JeiHelper {
         return -1;
     }
 
-    //    @Optional.Method(modid = "jei")
     private static int getRecipeKeyInternal(boolean usage) {
         try {
-            return usage ? KeyBindings.showUses.getKey().getValue() : KeyBindings.showRecipe.getKey().getValue();
+            return usage ? KeyBindings.showUses.get(0).getKey().getValue() : KeyBindings.showRecipe.get(0).getKey().getValue();
         }
         catch (Throwable e) {
             e.printStackTrace();
             return 01;
         }
     }
-
-
-    //endregion
 
     @Nullable //Because reasons!
     public static ItemStack getPanelItemUnderMouse() {
@@ -132,7 +118,7 @@ public class JeiHelper {
         private int height;
         private int xPos = 0;
         private int yPos = 0;
-        private String title;
+        private Component title;
 
         public RecipeRenderer(IRecipeCategory category, Object wrapper, ItemStack result) {
             IFocus<?> f = BCJEIPlugin.jeiRuntime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, result);//new Focus<Object>(result);
@@ -140,9 +126,6 @@ public class JeiHelper {
             this.width = category.getBackground().getWidth();
             this.height = category.getBackground().getHeight();
             this.title = category.getTitle();
-            if (StringUtils.isNullOrEmpty(this.title)) {
-                this.title = "[Unknown Crafting Type]";
-            }
         }
 
         @Override
@@ -163,17 +146,17 @@ public class JeiHelper {
                 recipeLayout.setPosition(xPos, yPos);
             }
 
-            recipeLayout.drawRecipe(new MatrixStack(), mouseX, mouseY);
+            recipeLayout.drawRecipe(new PoseStack(), mouseX, mouseY);
         }
 
         @Override
         public void renderOverlay(Minecraft mc, int mouseX, int mouseY) {
-            recipeLayout.drawOverlays(new MatrixStack(), mouseX, mouseY);
+            recipeLayout.drawOverlays(new PoseStack(), mouseX, mouseY);
         }
 
         @Override
         public boolean handleRecipeClick(Minecraft minecraft, double mouseX, double mouseY, boolean usage) {
-            Object clicked = recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY);
+            Object clicked = recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY, () -> Object.class);
 
             if (clicked != null) {
                 IFocus f = BCJEIPlugin.jeiRuntime.getRecipeManager().createFocus(usage ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, clicked);
@@ -186,11 +169,11 @@ public class JeiHelper {
         @Nullable
         @Override
         public Object getIngredientUnderMouse(double mouseX, double mouseY) {
-            return recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY);
+            return recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY, () -> Object.class);
         }
 
         @Override
-        public String getTitle() {
+        public Component getTitle() {
             return title;
         }
     }

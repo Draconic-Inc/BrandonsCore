@@ -16,17 +16,16 @@ import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.SlotMover;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.utils.MathUtils;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
@@ -35,7 +34,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static com.brandon3055.brandonscore.BrandonsCore.equipmentManager;
@@ -184,14 +186,14 @@ public class GuiToolkit<T extends Screen & IModularGui> {
      *
      * @param slotMapper (column, row, slotData)
      */
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotMover> slotMapper, RenderMaterial background) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotMover> slotMapper, Material background) {
         GuiElement element = new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                RenderMaterial slot = BCSprites.getThemed("slot");
-                IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-                IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TYPE);
+                Material slot = BCSprites.getThemed("slot");
+                MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                VertexConsumer buffer = getter.getBuffer(BCSprites.GUI_TYPE);
 
                 for (int x = 0; x < columns; x++) {
                     for (int y = 0; y < rows; y++) {
@@ -248,11 +250,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createSlots(parent, columns, rows, 0);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, RenderMaterial slotTexture) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, Material slotTexture) {
         return createSlots(parent, columns, rows, spacing, null, slotTexture);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, RenderMaterial slotTexture) {
+    public GuiElement createSlots(GuiElement parent, int columns, int rows, Material slotTexture) {
         return createSlots(parent, columns, rows, 0, null, slotTexture);
     }
 
@@ -260,15 +262,15 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createSlots(null, columns, rows, 0);
     }
 
-    public GuiElement createSlot(GuiElement parent, SlotMover slotMover, Supplier<RenderMaterial> background, boolean largeSlot) {
+    public GuiElement createSlot(GuiElement parent, SlotMover slotMover, Supplier<Material> background, boolean largeSlot) {
         int size = largeSlot ? 26 : 18;
         GuiElement element = new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                RenderMaterial slot = BCSprites.getThemed(largeSlot ? "slot_large" : "slot");
-                IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-                IVertexBuilder buffer = getter.getBuffer(BCSprites.GUI_TYPE);
+                Material slot = BCSprites.getThemed(largeSlot ? "slot_large" : "slot");
+                MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                VertexConsumer buffer = getter.getBuffer(BCSprites.GUI_TYPE);
                 drawSprite(buffer, xPos(), yPos(), size, size, slot.sprite());
                 if (background != null && (slotMover == null || !slotMover.slot.hasItem())) {
                     int offset = largeSlot ? 5 : 1;
@@ -366,7 +368,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return container;
     }
 
-    public GuiElement createEquipModSlots(GuiElement parent, PlayerEntity player, boolean jeiExclude, Predicate<ItemStack> showFilter) {
+    public GuiElement createEquipModSlots(GuiElement parent, Player player, boolean jeiExclude, Predicate<ItemStack> showFilter) {
         GuiElement fallback = new GuiElement();
         if (equipmentManager != null) {
             LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
@@ -531,7 +533,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createIconButton(parent, size, BCSprites.themedGetter(iconString));
     }
 
-    public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<RenderMaterial> iconSupplier) {
+    public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<Material> iconSupplier) {
         return createIconButton(parent, size, size, iconSupplier);
     }
 
@@ -539,7 +541,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createIconButton(parent, buttonSize, iconSize, BCSprites.getter(iconString));
     }
 
-    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<RenderMaterial> iconSupplier) {
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
 //        GuiButton button = new GuiButton();
 //        button.setHoverTextDelay(10);
 //        button.setSize(buttonSize, buttonSize);
@@ -557,7 +559,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCSprites.getter(iconString));
     }
 
-    public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<RenderMaterial> iconSupplier) {
+    public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {
         GuiButton button = new GuiButton();
         button.setHoverTextDelay(10);
         button.setSize(buttonWidth, buttonHeight);
@@ -597,7 +599,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return rect;
     }
 
-    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<RenderMaterial> matSupplier) {
+    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier) {
         GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
         GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
         addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> base.getHoverTime() > 0);
@@ -606,7 +608,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return base;
     }
 
-    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<RenderMaterial> matSupplier, Function<GuiElement, Boolean> highlight) {
+    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier, Function<GuiElement, Boolean> highlight) {
         GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
         GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
         addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> highlight.apply(base));
@@ -1144,7 +1146,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
             int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
-            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
             drawColouredRect(getter, xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
             drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 2, ySize(), col1);

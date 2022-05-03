@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[32,)"
+loaderVersion="[${lang_version},)"
 license="CoFH \"Don't Be a Jerk\" License"
 
 [[mods]]
@@ -13,13 +13,13 @@ license="CoFH \"Don't Be a Jerk\" License"
 [[dependencies.brandonscore]]
     modId="forge"
     mandatory=true
-    versionRange="[35.1,)"
+    versionRange="[${forge_version},)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.brandonscore]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16,)"
+    versionRange="[1.18.2]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.brandonscore]]

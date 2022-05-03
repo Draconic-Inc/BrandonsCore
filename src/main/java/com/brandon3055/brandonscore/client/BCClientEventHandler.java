@@ -1,22 +1,16 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
-import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.brandon3055.brandonscore.utils.MathUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.FOVUpdateEvent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.client.event.FOVModifierEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -36,15 +30,15 @@ public class BCClientEventHandler {
     private static int remountTicksRemaining = 0;
     private static int remountEntityID = 0;
     private static int debugTimeout = 0;
-    private static Map<RegistryKey<World>, Integer[]> dimTickTimes = new HashMap<>();
+    private static Map<ResourceKey<Level>, Integer[]> dimTickTimes = new HashMap<>();
     private static Integer[] overallTickTime = new Integer[200];
     private static int renderIndex = 0;
-    private static LinkedList<RegistryKey<World>> sortingOrder = new LinkedList<>();
+    private static LinkedList<ResourceKey<Level>> sortingOrder = new LinkedList<>();
     public static int elapsedTicks = 0;
 
     //region sorter
 
-    private static Comparator<RegistryKey<World>> sorter = (value, compare) -> {
+    private static Comparator<ResourceKey<Level>> sorter = (value, compare) -> {
         long totalValue = 0;
         for (Integer time : dimTickTimes.get(value)) {
             totalValue += time;
@@ -95,55 +89,55 @@ public class BCClientEventHandler {
 
     @SubscribeEvent
     public void renderScreen(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().screen instanceof ChatScreen) {
-            return;
-        }
-
-        GlStateManager._pushMatrix();
-        GlStateManager._translated(0, 0, 600);
-
-        renderGraph(event.getMatrixStack(), 220, 0, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), overallTickTime, "Overall");
-
-        int i = 0;
-        for (RegistryKey<World> dim : sortingOrder) {
-            if (dimTickTimes.get(dim) == null || dim == null) {
-                continue;
-            }
-
-            renderGraph(event.getMatrixStack(), 0, i, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), dimTickTimes.get(dim), dim.location().toString());
-            i++;
-        }
-
-        if (debugTimeout < 190) {
-            FontRenderer fontRenderer = Minecraft.getInstance().font;
-            fontRenderer.drawShadow(event.getMatrixStack(), "Server Stopped Sending Updates!", 0, event.getWindow().getGuiScaledHeight() - 21, 0xFF0000);
-            fontRenderer.drawShadow(event.getMatrixStack(), "Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getGuiScaledHeight() - 11, 0xFF0000);
-        }
-
-        GlStateManager._popMatrix();
+//        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || debugTimeout <= 0 ||  Minecraft.getInstance().screen instanceof ChatScreen) {
+//            return;
+//        }
+//
+//        GlStateManager._pushMatrix();
+//        GlStateManager._translated(0, 0, 600);
+//
+//        renderGraph(event.getMatrixStack(), 220, 0, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), overallTickTime, "Overall");
+//
+//        int i = 0;
+//        for (ResourceKey<Level> dim : sortingOrder) {
+//            if (dimTickTimes.get(dim) == null || dim == null) {
+//                continue;
+//            }
+//
+//            renderGraph(event.getMatrixStack(), 0, i, event.getWindow().getGuiScaledWidth(), event.getWindow().getGuiScaledHeight(), dimTickTimes.get(dim), dim.location().toString());
+//            i++;
+//        }
+//
+//        if (debugTimeout < 190) {
+//            Font fontRenderer = Minecraft.getInstance().font;
+//            fontRenderer.drawShadow(event.getMatrixStack(), "Server Stopped Sending Updates!", 0, event.getWindow().getGuiScaledHeight() - 21, 0xFF0000);
+//            fontRenderer.drawShadow(event.getMatrixStack(), "Display will time out in " + MathUtils.round((debugTimeout / 20D), 10), 0, event.getWindow().getGuiScaledHeight() - 11, 0xFF0000);
+//        }
+//
+//        GlStateManager._popMatrix();
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public void fovUpdate(FOVUpdateEvent event) {
-        PlayerEntity player = event.getEntity();
+    public void fovUpdate(FOVModifierEvent event) {
+        Player player = event.getEntity();
         float originalFOV = event.getFov();
         float newFOV = originalFOV;
 
         int slotIndex = 2;
         for (ItemStack stack : player.inventory.armor) {
             if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
-                newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.values()[slotIndex]);
+                newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlot.values()[slotIndex]);
             }
             slotIndex++;
         }
 
         ItemStack stack = player.getOffhandItem();
         if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
-            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.OFFHAND);
+            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlot.OFFHAND);
         }
         stack = player.getMainHandItem();
         if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
-            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlotType.MAINHAND);
+            newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlot.MAINHAND);
         }
 
         if (newFOV != originalFOV) {
@@ -213,24 +207,24 @@ public class BCClientEventHandler {
         LogHelperBC.info("Started checking for player mount"); //Todo move to core as this is part of the teleporter
     }
 
-    private void renderGraph(MatrixStack matrix, int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {
-        int yHeight = screenHeight - 23 - (y * 45);
-
-        GuiHelperOld.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
-        FontRenderer fontRenderer = Minecraft.getInstance().font;
-        fontRenderer.drawShadow(matrix, name, x + 2, yHeight - 43, 0xFFFFFF);
-        GuiHelperOld.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
-        GuiHelperOld.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
-        fontRenderer.draw(matrix, "50ms", x + 2, yHeight - 16, 0xFFFFFF);
-        fontRenderer.draw(matrix, "100ms", x + 2, yHeight - 32, 0xFFFFFF);
-
-        for (int i = 0; i < 200; i++) {
-            int time = times[i] == null ? 0 : times[i];
-            int height = (int) (((time / 100D) / 100D) * 30D);
-            int j1 = getFrameColor(MathHelper.clamp(height, 0, 30), 0, 15, 30);
-            GuiHelperOld.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 - height, 1, height, j1);
-        }
-    }
+//    private void renderGraph(PoseStack matrix, int x, int y, int screenWidth, int screenHeight, Integer[] times, String name) {
+//        int yHeight = screenHeight - 23 - (y * 45);
+//
+//        GuiHelperOld.drawColouredRect(x, yHeight - 34, 202, 32, 0xAA000000);
+//        Font fontRenderer = Minecraft.getInstance().font;
+//        fontRenderer.drawShadow(matrix, name, x + 2, yHeight - 43, 0xFFFFFF);
+//        GuiHelperOld.drawBorderedRect(x, yHeight - 34, 202, 17, 1, 0x44AA0000, 0xAACCCCCC);
+//        GuiHelperOld.drawBorderedRect(x, yHeight - 18, 202, 17, 1, 0x4400AA00, 0xAACCCCCC);
+//        fontRenderer.draw(matrix, "50ms", x + 2, yHeight - 16, 0xFFFFFF);
+//        fontRenderer.draw(matrix, "100ms", x + 2, yHeight - 32, 0xFFFFFF);
+//
+//        for (int i = 0; i < 200; i++) {
+//            int time = times[i] == null ? 0 : times[i];
+//            int height = (int) (((time / 100D) / 100D) * 30D);
+//            int j1 = getFrameColor(Mth.clamp(height, 0, 30), 0, 15, 30);
+//            GuiHelperOld.drawColouredRect(x + ((i - renderIndex) % 200) + 200, yHeight - 2 - height, 1, height, j1);
+//        }
+//    }
 
 //TODO    public static void handleTickPacket(PacketTickTime packet) {
 //        debugTimeout = 200;
@@ -286,10 +280,10 @@ public class BCClientEventHandler {
         int j1 = p_181553_2_ >> 16 & 255;
         int k1 = p_181553_2_ >> 8 & 255;
         int l1 = p_181553_2_ & 255;
-        int i2 = MathHelper.clamp((int) ((float) i + (float) (i1 - i) * p_181553_3_), 0, 255);
-        int j2 = MathHelper.clamp((int) ((float) j + (float) (j1 - j) * p_181553_3_), 0, 255);
-        int k2 = MathHelper.clamp((int) ((float) k + (float) (k1 - k) * p_181553_3_), 0, 255);
-        int l2 = MathHelper.clamp((int) ((float) l + (float) (l1 - l) * p_181553_3_), 0, 255);
+        int i2 = Mth.clamp((int) ((float) i + (float) (i1 - i) * p_181553_3_), 0, 255);
+        int j2 = Mth.clamp((int) ((float) j + (float) (j1 - j) * p_181553_3_), 0, 255);
+        int k2 = Mth.clamp((int) ((float) k + (float) (k1 - k) * p_181553_3_), 0, 255);
+        int l2 = Mth.clamp((int) ((float) l + (float) (l1 - l) * p_181553_3_), 0, 255);
         return i2 << 24 | j2 << 16 | k2 << 8 | l2;
     }
 

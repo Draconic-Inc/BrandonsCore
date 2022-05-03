@@ -10,14 +10,16 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventDispatche
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.client.Minecraft;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Created by brandon3055 on 10/09/2016.

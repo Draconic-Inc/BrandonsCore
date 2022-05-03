@@ -2,9 +2,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -13,12 +12,12 @@ import java.util.function.Function;
 /**
  * Created by brandon3055 on 12/06/2017.
  */
-public class ManagedTextComponent extends AbstractManagedData<ITextComponent> {
+public class ManagedTextComponent extends AbstractManagedData<Component> {
 
-    private ITextComponent value;
-    protected Function<ITextComponent, ITextComponent> validator = null;
+    private Component value;
+    protected Function<Component, Component> validator = null;
 
-    public ManagedTextComponent(String name, @Nullable ITextComponent defaultValue, DataFlags... flags) {
+    public ManagedTextComponent(String name, @Nullable Component defaultValue, DataFlags... flags) {
         super(name, flags);
         this.value = defaultValue;
     }
@@ -30,10 +29,10 @@ public class ManagedTextComponent extends AbstractManagedData<ITextComponent> {
         this(name, null, flags);
     }
 
-    public ITextComponent set(@Nullable ITextComponent value) {
+    public Component set(@Nullable Component value) {
         if (!Objects.equals(this.value, value)) {
             boolean set = true;
-            ITextComponent prev = this.value;
+            Component prev = this.value;
             this.value = value;
 
             if (dataManager.isClientSide() && flags.allowClientControl) {
@@ -54,7 +53,7 @@ public class ManagedTextComponent extends AbstractManagedData<ITextComponent> {
     }
 
     @Nullable
-    public ITextComponent get() {
+    public Component get() {
         return value;
     }
 
@@ -64,7 +63,7 @@ public class ManagedTextComponent extends AbstractManagedData<ITextComponent> {
      * @param validator a validator function that takes an input, applies restrictions if needed then returns the updated value.
      * @return
      */
-    public ManagedTextComponent setValidator(Function<ITextComponent, ITextComponent> validator) {
+    public ManagedTextComponent setValidator(Function<Component, Component> validator) {
         this.validator = validator;
         return this;
     }
@@ -95,16 +94,16 @@ public class ManagedTextComponent extends AbstractManagedData<ITextComponent> {
     }
 
     @Override
-    public void toNBT(CompoundNBT compound) {
+    public void toNBT(CompoundTag compound) {
         if (value != null) {
-            compound.putString(name, ITextComponent.Serializer.toJson(value));
+            compound.putString(name, Component.Serializer.toJson(value));
         }
     }
 
     @Override
-    public void fromNBT(CompoundNBT compound) {
+    public void fromNBT(CompoundTag compound) {
         if (compound.contains(name)) {
-            value = ITextComponent.Serializer.fromJson(compound.getString(name));
+            value = Component.Serializer.fromJson(compound.getString(name));
         } else {
             value = null;
         }

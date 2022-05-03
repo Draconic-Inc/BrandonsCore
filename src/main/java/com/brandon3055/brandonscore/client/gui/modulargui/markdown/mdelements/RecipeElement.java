@@ -3,12 +3,10 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.integration.IRecipeRenderer;
 import com.brandon3055.brandonscore.integration.JeiHelper;
-import com.brandon3055.brandonscore.integration.PIHelper;
 import com.brandon3055.brandonscore.lib.StringyStacks;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.item.ItemStack;
 
 import java.awt.*;
 import java.util.List;
@@ -24,6 +22,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
     public int spacing = 1;
 
     public RecipeElement(String stackString) {
+        if (true) throw new RuntimeException("Fix Me!!!");
         this.hasSubParts = true;
         this.boundless = true;
         this.colour = 0xc6c6c6;
@@ -43,8 +42,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
         renderers = JeiHelper.getRecipeRenderers(stack);
         if (renderers == null) {
             error("[Broken recipe. No recipe's were found for " + stackString + "]");
-        }
-        else if (renderers.isEmpty() && false) {
+        } else if (renderers.isEmpty() && false) {
             error(I18n.get("pi.md.no_recipe_for_item.txt") + " (This message will only show in edit mode)");
         }
     }
@@ -64,8 +62,7 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 layout.newLine(0, subParts.isEmpty() ? 0 : 0);
                 MarkerElement marker = new MarkerElement(NEW_LINE);
                 subParts.add(marker);
-            }
-            else if (lineElement.isEmpty() || !(lineElement.get(lineElement.size() - 1) instanceof RecipeElement)) {
+            } else if (lineElement.isEmpty() || !(lineElement.get(lineElement.size() - 1) instanceof RecipeElement)) {
                 MarkerElement spacer = new MarkerElement(spacing, 0);
                 spacer.layoutElement(layout, lineElement);
                 subParts.add(spacer);
@@ -102,14 +99,13 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
             boolean mouseOver = isMouseOver(mouseX, mouseY);
             if (parent.hasColourBorder) {
                 drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | parent.getColourBorder(mouseOver));
-            }
-            else if (parent.hasColourBorderHover && mouseOver) {
+            } else if (parent.hasColourBorderHover && mouseOver) {
                 drawColouredRect(xPos(), yPos(), xSize(), ySize(), 0xFF000000 | parent.colourBorderHover);
             }
 
-            RenderSystem.translated(0, 0, getRenderZLevel());
-            renderer.render(minecraft, xPos() + parent.leftPad + 4, yPos() + parent.topPad + 4, mouseX, mouseY);
-            RenderSystem.translated(0, 0, -getRenderZLevel());
+//            RenderSystem.translated(0, 0, getRenderZLevel());
+//            renderer.render(minecraft, xPos() + parent.leftPad + 4, yPos() + parent.topPad + 4, mouseX, mouseY);
+//            RenderSystem.translated(0, 0, -getRenderZLevel());
             super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         }
 
@@ -146,19 +142,18 @@ public class RecipeElement extends MDElementBase<RecipeElement> {
                 if (keyCode == JeiHelper.getRecipeKey(false)) {
                     renderer.handleRecipeClick(mc, mouseX, mouseY, false);
                     return true;
-                }
-                else if (keyCode == JeiHelper.getRecipeKey(true)) {
+                } else if (keyCode == JeiHelper.getRecipeKey(true)) {
                     renderer.handleRecipeClick(mc, mouseX, mouseY, true);
                     return true;
                 }
                 //TODO Test this
-                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && PIHelper.getETGuiKey().matches(keyCode, scanCode)) {
-                    List<String> pages = PIHelper.getRelatedPages((ItemStack) o);
-                    if (!pages.isEmpty()) {
-                        PIHelper.openGui(modularGui.getScreen(), pages);
-                        return true;
-                    }
-                }
+//                else if (o instanceof ItemStack && !((ItemStack) o).isEmpty() && PIHelper.isInstalled() && PIHelper.getETGuiKey().matches(keyCode, scanCode)) {
+//                    List<String> pages = PIHelper.getRelatedPages((ItemStack) o);
+//                    if (!pages.isEmpty()) {
+//                        PIHelper.openGui(modularGui.getScreen(), pages);
+//                        return true;
+//                    }
+//                }
             }
 
             return super.keyPressed(keyCode, scanCode, modifiers);

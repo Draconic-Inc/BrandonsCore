@@ -2,8 +2,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -94,14 +94,14 @@ public class ManagedResource extends AbstractManagedData<ResourceLocation> {
     }
 
     @Override
-    public void toNBT(CompoundNBT compound) {
+    public void toNBT(CompoundTag compound) {
         if (value != null) {
             compound.putString(name, value.toString());
         }
     }
 
     @Override
-    public void fromNBT(CompoundNBT compound) {
+    public void fromNBT(CompoundTag compound) {
         if (compound.contains(name)) {
             value = new ResourceLocation(compound.getString(name));
         } else {

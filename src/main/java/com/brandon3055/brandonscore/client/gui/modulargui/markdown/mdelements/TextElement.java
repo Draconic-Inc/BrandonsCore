@@ -2,17 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MarkdownTextRenderer;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TextProcessing;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -123,12 +113,12 @@ public class TextElement extends MDElementBase<TextElement> {
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
 //            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.2, 0, 0xFF00FF00);
             if (scale > 1) {
-                RenderSystem.pushMatrix();
-                RenderSystem.translated(xPos(), yPos(), 0);
-                RenderSystem.scaled(scale, scale, 1);
-//                fontRenderer.drawString(text, 0, 0, colour.get(), shadow);
-                drawString(fontRenderer, text, 0, 0, colour.get(), shadow);
-                RenderSystem.popMatrix();
+//                RenderSystem.pushMatrix();
+//                RenderSystem.translated(xPos(), yPos(), 0);
+//                RenderSystem.scaled(scale, scale, 1);
+////                fontRenderer.drawString(text, 0, 0, colour.get(), shadow);
+//                drawString(fontRenderer, text, 0, 0, colour.get(), shadow);
+//                RenderSystem.popMatrix();
             }
             else {
 //                fontRenderer.drawString(text, xPos(), yPos(), colour.get(), shadow);

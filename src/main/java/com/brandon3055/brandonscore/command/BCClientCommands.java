@@ -1,10 +1,53 @@
 package com.brandon3055.brandonscore.command;
 
-///**
-// * Created by brandon3055 on 23/06/2017.
-// */
-//public class BCClientCommands extends CommandBase {
-//
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiToolkitTest;
+import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
+import com.brandon3055.brandonscore.lib.DelayedTask;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
+
+/**
+ * Created by brandon3055 on 23/06/2017.
+ */
+public class BCClientCommands {
+
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(
+                Commands.literal("bcore_client")
+                        .then(testGui())
+//                        .then(registerStackString())
+//                        .then(registerRegenChunk())
+//                        .then(registerNoClip())
+//                        .then(registerUUID())
+//                        .then(registerPlayerAccess())
+//                        .then(registerDumpEvents())
+//                        .then(registerEggify())
+        );
+    }
+
+
+    private static ArgumentBuilder<CommandSourceStack, ?> testGui() {
+        return Commands.literal("testui")
+                .requires(cs -> cs.hasPermission(0))
+                .then(Commands.literal("mgui")
+                        .executes(context -> {
+                            DelayedTask.run(10, () -> Minecraft.getInstance().setScreen(new ModularGuiTest(new TextComponent("Test"))));
+                            return 0;
+                        }))
+                .then(Commands.literal("toolkit")
+                        .executes(context -> {
+                            DelayedTask.run(10, () -> Minecraft.getInstance().setScreen(new GuiToolkitTest(new TextComponent("Test"))));
+                            return 0;
+                        }));
+    }
+
+
+
 //    private static Map<String, PairKV<Integer, Integer>> RESOLUTIONS = new HashMap<>();
 //
 //    static {
@@ -55,10 +98,10 @@ package com.brandon3055.brandonscore.command;
 //                functionNBT(server, sender, args);
 //            }
 //            else if (function.equals("testui")) {
-//                DelayedTask.run(10, () -> Minecraft.getInstance().displayGuiScreen(new ModularGuiTest()));
+//
 //            }
 //            else if (function.equals("testui2")) {
-//                DelayedTask.run(10, () -> Minecraft.getInstance().displayGuiScreen(new GuiToolkitTest()));
+//
 //            }
 //            else if (function.equals("profiler")) {
 //                BCProfiler.enableProfiler = !BCProfiler.enableProfiler;
@@ -191,4 +234,4 @@ package com.brandon3055.brandonscore.command;
 //            throw new CommandException(e.getMessage());
 //        }
 //    }
-//}
+}

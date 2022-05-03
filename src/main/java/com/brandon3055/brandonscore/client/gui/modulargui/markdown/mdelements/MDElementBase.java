@@ -1,14 +1,17 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.BCFontRenderer;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.HAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VAlign;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -62,10 +65,9 @@ public abstract class MDElementBase<E extends GuiElement<E>> extends GuiElement<
         if (!errors.contains(errorMessage)) {
             errors.add(errorMessage);
         }
-        if (elementError.isEmpty()){
+        if (elementError.isEmpty()) {
             this.elementError = errorMessage;
-        }
-        else {
+        } else {
             this.elementError += " and " + errorMessage;
         }
     }
@@ -113,15 +115,17 @@ public abstract class MDElementBase<E extends GuiElement<E>> extends GuiElement<
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (!invalidProps.isEmpty() && yPos() > 0 && yPos() < screenHeight) {
-            List<String> list = new ArrayList<>();
-            invalidProps.forEach(s -> list.add(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c"));
-            errors.forEach(s -> list.add(S + "c" + s + S + "c"));
-            zOffset += 100;
+            List<Component> list = new ArrayList<>();
+            invalidProps.forEach(s -> list.add(new TextComponent(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c")));
+            errors.forEach(s -> list.add(new TextComponent(S + "c" + s + S + "c")));
+//            zOffset += 100;
 //            BCFontRenderer.setStileToggleMode(true);
-            drawHoveringText(list, xPos() - 8, yPos() + 15, fontRenderer, screenWidth, screenHeight);
+            PoseStack poseStack = new PoseStack();
+            poseStack.translate(0, 0, getRenderZLevel() + 100);
+            renderTooltip(poseStack, list, xPos() - 8, yPos() + 15);
 //            BCFontRenderer.setStileToggleMode(false);
 //            fontRenderer.resetStyles();//TODO Font Renderer
-            zOffset -= 100;
+//            zOffset -= 100;
         }
 
         return super.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);

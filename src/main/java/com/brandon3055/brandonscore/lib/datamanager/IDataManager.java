@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Created by brandon3055 on 12/06/2017.
@@ -50,12 +50,12 @@ public interface IDataManager {
      * It is recommended to create a new tag compound to which you can save oll data,
      * Then write that compound to the given compound.
      */
-    void writeToNBT(CompoundNBT compound);
+    void writeToNBT(CompoundTag compound);
 
     /**
      * Load all data from NBT
      */
-    void readFromNBT(CompoundNBT compound);
+    void readFromNBT(CompoundTag compound);
 
     /**
      * Called by a data object when its value is updated.

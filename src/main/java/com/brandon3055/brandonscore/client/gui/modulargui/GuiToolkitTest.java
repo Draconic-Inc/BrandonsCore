@@ -7,13 +7,14 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.TBasicMachine;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.EXTRA_WIDE_EXTRA_TALL;
-import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.*;
-import static net.minecraft.util.text.TextFormatting.GOLD;
-import static net.minecraft.util.text.TextFormatting.GRAY;
+import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.BOTTOM_RIGHT;
+import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.TOP_LEFT;
+import static net.minecraft.ChatFormatting.GOLD;
+import static net.minecraft.ChatFormatting.GRAY;
 
 /**
  * Created by brandon3055 on 2/07/2017.
@@ -22,7 +23,7 @@ public class GuiToolkitTest extends ModularGuiScreen {
 
     protected GuiToolkit<GuiToolkitTest> toolkit = new GuiToolkit<>(this, EXTRA_WIDE_EXTRA_TALL);
 
-    public GuiToolkitTest(ITextComponent titleIn) {
+    public GuiToolkitTest(Component titleIn) {
         super(titleIn);
     }
 
@@ -45,10 +46,6 @@ public class GuiToolkitTest extends ModularGuiScreen {
         template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.fuel_efficiency"), 6, 11, () -> GRAY + ("--" + "%"), true);
         template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.output_power"), 6, 11, () -> GRAY + ("--" + " / " + "--" + " OP/t"), true);
         template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.current_fuel_value"), 6, 11, () -> GRAY + ("n/a"), true);
-
-
-
-
 
 //        GuiEntityFilter filterUI = new GuiEntityFilter(tile.entityFilter, () -> {});
 //
@@ -85,7 +82,9 @@ public class GuiToolkitTest extends ModularGuiScreen {
 
         GuiButton button1 = toolkit.createButton("Text", testSlotArea).setSize(50, 14);
         toolkit.placeInside(button1, testSlotArea, BOTTOM_RIGHT, -3, -3);
-        GuiButton button12 = toolkit.createVanillaButton("Text", testSlotArea).setSize(50, 14);
+        GuiButton button12 = toolkit.createVanillaButton("Vanilla!", testSlotArea)
+                .setSize(50, 14)
+                .setVanillaButtonRender(true);
         toolkit.placeInside(button12, testSlotArea, BOTTOM_RIGHT, -3, -20);
         GuiButton button13 = toolkit.createButton("Text", testSlotArea, true).setSize(50, 14);
         toolkit.placeInside(button13, testSlotArea, BOTTOM_RIGHT, -3, -37);

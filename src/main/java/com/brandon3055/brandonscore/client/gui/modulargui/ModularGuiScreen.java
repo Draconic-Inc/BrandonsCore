@@ -1,9 +1,9 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 /**
  * Created by brandon3055 on 30/08/2016.
@@ -15,11 +15,11 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     protected GuiElementManager manager = new GuiElementManager(this);
     protected int zLevel = 0;
 
-    public ModularGuiScreen(ITextComponent titleIn) {
+    public ModularGuiScreen(Component titleIn) {
         this(titleIn, 0, 0);
     }
 
-    public ModularGuiScreen(ITextComponent titleIn, int xSize, int ySize) {
+    public ModularGuiScreen(Component titleIn, int xSize, int ySize) {
         super(titleIn);
         this.xSize = xSize;
         this.ySize = ySize;
@@ -165,7 +165,7 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     //region Render
 
     @Override
-    public void render(MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack mStack, int mouseX, int mouseY, float partialTicks) {
         renderElements(mouseX, mouseY, partialTicks);
         super.render(mStack, mouseX, mouseY, partialTicks);
         renderOverlayLayer(mouseX, mouseY, partialTicks);
@@ -187,12 +187,6 @@ public abstract class ModularGuiScreen extends Screen implements IModularGui<Mod
     public void tick() {
         super.tick();
         manager.onUpdate();
-    }
-
-    @Override
-    public void init(Minecraft mc, int width, int height) {
-        super.init(mc, width, height);
-        manager.setWorldAndResolution(mc, width, height);
     }
 
     //endregion

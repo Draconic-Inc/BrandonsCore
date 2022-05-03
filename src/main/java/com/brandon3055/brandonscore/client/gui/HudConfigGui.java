@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.api.hud.AbstractHudElement;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.CursorHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -12,16 +13,15 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiManipul
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.hud.HudData;
 import com.brandon3055.brandonscore.client.hud.HudManager;
-import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.awt.*;
 
@@ -32,7 +32,7 @@ public class HudConfigGui extends ModularGuiScreen {
     protected GuiToolkit<HudConfigGui> toolkit = new GuiToolkit<>(this, 0, 0).setTranslationPrefix("gui.brandonscore.hud_config");
 
     public HudConfigGui() {
-        super(new TranslationTextComponent("gui.brandonscore.hud_config.name"));
+        super(new TranslatableComponent("gui.brandonscore.hud_config.name"));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class HudConfigGui extends ModularGuiScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        InputMappings.Input mouseKey = InputMappings.getKey(keyCode, scanCode);
+        InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         } else if (this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey)) {
@@ -112,8 +112,8 @@ public class HudConfigGui extends ModularGuiScreen {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-            MatrixStack mStack = new MatrixStack();
+            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            PoseStack mStack = new PoseStack();
             mStack.translate(0.0D, 0.0D, getRenderZLevel());
             double x = element.xPos();
             double y = element.yPos();
@@ -123,7 +123,7 @@ public class HudConfigGui extends ModularGuiScreen {
             drawBackground(getter, x, y, w, h, partialTicks, rgb);
 
             if (bgAnim > 0) {
-                ITextComponent name = new TranslationTextComponent(String.format("hud.%s.%s.name", element.getRegistryName().getNamespace(), element.getRegistryName().getPath()));
+                Component name = new TranslatableComponent(String.format("hud.%s.%s.name", element.getRegistryName().getNamespace(), element.getRegistryName().getPath()));
                 int tw = fontRenderer.width(name);
                 float bgAnim = Math.min(this.bgAnim + (partialTicks * 0.1F), 1);
                 fontRenderer.drawInBatch(name, (float) (x + (w - tw) / 2), (float) y + ((float) h - 8F) / 2F, (0x00FFFFFF | ((int) (0xFF * bgAnim) << 24)), false, mStack.last().pose(), getter, false, 0, 0xf000f0);
@@ -187,7 +187,7 @@ public class HudConfigGui extends ModularGuiScreen {
             return GuiHelper.isInRect(element.xPos(), element.yPos(), element.width(), element.height(), mouseX, mouseY);
         }
 
-        private void drawBackground(IRenderTypeBuffer getter, double x, double y, double w, double h, float partialTicks, int colour) {
+        private void drawBackground(MultiBufferSource getter, double x, double y, double w, double h, float partialTicks, int colour) {
             float borderAnim = this.borderAnim + (partialTicks * 0.1F);
             float bgAnim = Math.min(this.bgAnim + (partialTicks * 0.1F), 1);
             drawColouredRect(getter, x, y, w, h, 0x00000000 | ((int) (0x8F * bgAnim) << 24));
@@ -228,7 +228,7 @@ public class HudConfigGui extends ModularGuiScreen {
             }
         }
 
-        private void drawGradientQuad(IRenderTypeBuffer getter, double p1A, double p1B, double p2A, double p2B, double p3A, double p3B, double p4A, double p4B, int startColor, int endColor) {
+        private void drawGradientQuad(MultiBufferSource getter, double p1A, double p1B, double p2A, double p2B, double p3A, double p3B, double p4A, double p4B, int startColor, int endColor) {
             if (startColor == endColor && endColor == 0) return;
             double zLevel = getRenderZLevel();
             //@formatter:off
@@ -241,7 +241,7 @@ public class HudConfigGui extends ModularGuiScreen {
             float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
             float endBlue    = (float)(endColor         & 255) / 255.0F;
 
-            IVertexBuilder builder = getter.getBuffer(transColourType);
+            VertexConsumer builder = getter.getBuffer(transColourType);
             builder.vertex(p1A, p1B, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
             builder.vertex(p2A, p2B, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
             builder.vertex(p3A, p3B, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();

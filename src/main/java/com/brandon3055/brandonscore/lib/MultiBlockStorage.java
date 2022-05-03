@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.utils.MultiBlockHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.function.BiConsumer;
 
@@ -47,7 +47,7 @@ public class MultiBlockStorage {
      *
      * @param startPos refers to position x=0, y=0, z=0 in the storage array.
      */
-    public boolean checkStructure(World world, BlockPos startPos) {
+    public boolean checkStructure(Level world, BlockPos startPos) {
         for (int x = 0; x < blockStorage.length; x++) {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
@@ -69,7 +69,7 @@ public class MultiBlockStorage {
      * This method should only be used ether for testing or for use by a creative only method of spawning the structure.
      * If used for some sort of survival mode builder the MultiBlockHelper#setBlock method will need to be modified.
      */
-    public void placeStructure(World world, BlockPos startPos) {
+    public void placeStructure(Level world, BlockPos startPos) {
         for (int x = 0; x < blockStorage.length; x++) {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {
@@ -83,7 +83,7 @@ public class MultiBlockStorage {
     /**
      * When called MultiBlockHelper#forBlock will be called for every block in the structure.
      */
-    public void forEachInStructure(World world, BlockPos startPos, int flag) {
+    public void forEachInStructure(Level world, BlockPos startPos, int flag) {
         for (int x = 0; x < blockStorage.length; x++) {
             for (int y = 0; y < blockStorage[0].length; y++) {
                 for (int z = 0; z < blockStorage[0][0].length; z++) {

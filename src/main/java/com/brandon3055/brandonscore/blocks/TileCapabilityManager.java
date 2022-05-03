@@ -6,10 +6,10 @@ import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.lib.IMCDataSerializable;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -32,7 +32,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
     private Map<Capability<?>, Map<Direction, LazyOptional<?>>> capabilityMap = new HashMap<>();
     private Map<Object, Predicate<Direction>> capSideValidator = new HashMap<>();
 
-    private Map<INBTSerializable<CompoundNBT>, SerializationFlags<?>> serializableMap = new HashMap<>();
+    private Map<INBTSerializable<CompoundTag>, SerializationFlags<?>> serializableMap = new HashMap<>();
     private List<SerializationFlags<?>> indexedDataList = new ArrayList<>();
     private TileBCore tile;
 
@@ -74,7 +74,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
      * @return The modifiable serialization flags. By default set to 'save to tile' and 'save to item'
      * @see #set(Capability, Object, Direction...)
      */
-    public <T extends INBTSerializable<CompoundNBT>> SerializationFlags<T> setManaged(String tagName, @Nonnull Capability<?> cap, @Nonnull T capInstance, Direction... sides) {
+    public <T extends INBTSerializable<CompoundTag>> SerializationFlags<T> setManaged(String tagName, @Nonnull Capability<?> cap, @Nonnull T capInstance, Direction... sides) {
         set(cap, capInstance, sides);
         SerializationFlags<T> flags = new SerializationFlags<>(tagName, capInstance);
         serializableMap.put(capInstance, flags);
@@ -86,7 +86,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
      * The same as setManaged except the capability will not be exposes at all via getCapability. Used in cases where you need a "private" internal capability
      * @see #setManaged(String, Capability, INBTSerializable, Direction...)
      */
-    public <T extends INBTSerializable<CompoundNBT>> SerializationFlags<T> setInternalManaged(String tagName, @Nonnull Capability<?> cap, @Nonnull T capInstance) {
+    public <T extends INBTSerializable<CompoundTag>> SerializationFlags<T> setInternalManaged(String tagName, @Nonnull Capability<?> cap, @Nonnull T capInstance) {
         SerializationFlags<T> flags = new SerializationFlags<>(tagName, capInstance);
         serializableMap.put(capInstance, flags);
         indexedDataList.add(flags);
@@ -185,8 +185,8 @@ public class TileCapabilityManager implements ICapabilityProvider {
 
     //Serialization
 
-    public CompoundNBT serialize(boolean forItem) {
-        CompoundNBT compound = new CompoundNBT();
+    public CompoundTag serialize(boolean forItem) {
+        CompoundTag compound = new CompoundTag();
         for (SerializationFlags<?> helper : serializableMap.values()) {
             if ((forItem && helper.saveItem) || (!forItem && helper.saveTile)) {
                 compound.put(helper.tagName, helper.getData().serializeNBT());
@@ -196,7 +196,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
     }
 
     @SuppressWarnings("unchecked")
-    public void deserialize(CompoundNBT compound) {
+    public void deserialize(CompoundTag compound) {
         for (SerializationFlags<?> helper : serializableMap.values()) {
             if (compound.contains(helper.tagName)) {
                 helper.getData().deserializeNBT(compound.getCompound(helper.tagName));
@@ -216,12 +216,12 @@ public class TileCapabilityManager implements ICapabilityProvider {
         }
     }
 
-    public void detectAndSendChangesToListeners(List<IContainerListener> listeners) {
+    public void detectAndSendChangesToListeners(List<ContainerListener> listeners) {
         for (int i = 0; i < indexedDataList.size(); i++) {
             SerializationFlags<?> helper = indexedDataList.get(i);
             if (helper.syncContainer && helper.hasChanged(true)) {
                 PacketCustom packet = createCapPacket(helper, i);
-                DataUtils.forEachMatch(listeners, p -> p instanceof ServerPlayerEntity, p -> packet.sendToPlayer((ServerPlayerEntity) p));
+                DataUtils.forEachMatch(listeners, p -> p instanceof ServerPlayer, p -> packet.sendToPlayer((ServerPlayer) p));
             }
         }
     }
@@ -233,7 +233,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
         if (helper.getData() instanceof IMCDataSerializable) {
             ((IMCDataSerializable) helper.getData()).serializeMCD(packet);
         } else {
-            packet.writeCompoundNBT((CompoundNBT) helper.getData().serializeNBT());
+            packet.writeCompoundNBT((CompoundTag) helper.getData().serializeNBT());
         }
         return packet;
     }

@@ -1,17 +1,15 @@
 package com.brandon3055.brandonscore.api;
 
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.Rarity;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tier;
 
 import java.util.Locale;
 
-import static net.minecraft.item.Rarity.*;
-import static net.minecraft.util.text.TextFormatting.*;
+import static net.minecraft.ChatFormatting.*;
+import static net.minecraft.world.item.Rarity.*;
 
 /**
  * Created by brandon3055 on 8/02/19.
@@ -49,10 +47,10 @@ public enum TechLevel {
     //@formatter:on
 
     public final int index;
-    private final TextFormatting textColour;
+    private final ChatFormatting textColour;
     private Rarity rarity;
     private final int harvestLevel;
-    private IItemTier itemTier;
+    private Tier itemTier;
     public static final TechLevel[] VALUES = new TechLevel[4];
     public static final TechLevel[] TOOL_LEVELS = new TechLevel[3];
 
@@ -65,19 +63,19 @@ public enum TechLevel {
         }
     }
 
-    TechLevel(int index, TextFormatting colour, Rarity rarity, int harvestLevel) {
+    TechLevel(int index, ChatFormatting colour, Rarity rarity, int harvestLevel) {
         this.index = index;
         this.textColour = colour;
         this.rarity = rarity;
         this.harvestLevel = harvestLevel;
     }
 
-    public TextFormatting getTextColour() {
+    public ChatFormatting getTextColour() {
         return textColour;
     }
 
-    public TextComponent getDisplayName() {
-        return new TranslationTextComponent("tech_level.draconicevolution." + name().toLowerCase(Locale.ENGLISH));
+    public BaseComponent getDisplayName() {
+        return new TranslatableComponent("tech_level.draconicevolution." + name().toLowerCase(Locale.ENGLISH));
     }
 
     public Rarity getRarity() {

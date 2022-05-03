@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.api;
 
-import com.brandon3055.brandonscore.api.TechLevel;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Created by brandon3055 on 8/02/19.

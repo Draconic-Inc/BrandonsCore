@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.api.math;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -24,11 +24,11 @@ public class Vector2 {
         y = vec.y;
     }
 
-    public static Vector2 fromNBT(CompoundNBT tag) {
+    public static Vector2 fromNBT(CompoundTag tag) {
         return new Vector2(tag.getDouble("x"), tag.getDouble("y"));
     }
 
-    public CompoundNBT writeToNBT(CompoundNBT tag) {
+    public CompoundTag writeToNBT(CompoundTag tag) {
         tag.putDouble("x", x);
         tag.putDouble("y", y);
         return tag;

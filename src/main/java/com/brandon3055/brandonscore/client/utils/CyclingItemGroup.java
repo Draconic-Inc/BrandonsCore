@@ -1,13 +1,13 @@
 package com.brandon3055.brandonscore.client.utils;
 
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 /**
  * Created by brandon3055 on 29/2/20.
  */
-public class CyclingItemGroup extends ItemGroup {
+public class CyclingItemGroup extends CreativeModeTab {
 
     private Supplier<Object[]> iconSupplier;
     private int iconIndex = 0;

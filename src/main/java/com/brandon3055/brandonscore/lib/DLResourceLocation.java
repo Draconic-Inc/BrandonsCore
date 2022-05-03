@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Created by brandon3055 on 13/09/2016.

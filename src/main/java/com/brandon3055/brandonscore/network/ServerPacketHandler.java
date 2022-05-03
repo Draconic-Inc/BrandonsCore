@@ -4,27 +4,24 @@ import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.blocks.TileBCore;
-import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
-import com.brandon3055.brandonscore.lib.TeleportUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.IServerPlayNetHandler;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHandler {
+
     @Override
-    public void handlePacket(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
+    public void handlePacket(PacketCustom packet, ServerPlayer sender, ServerGamePacketListenerImpl handler) {
         switch (packet.getType()) {
             case BCoreNetwork.S_TILE_MESSAGE:
                 handleTileMessage(packet, sender, handler);
@@ -38,10 +35,10 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    private void handleTileMessage(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
+    private void handleTileMessage(PacketCustom packet, ServerPlayer sender, ServerGamePacketListener handler) {
         try {
             BlockPos pos = packet.readPos();
-            TileEntity tile = sender.level.getBlockEntity(pos);
+            BlockEntity tile = sender.level.getBlockEntity(pos);
             if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
                 int id = packet.readByte() & 0xFF;
                 ((TileBCore) tile).receivePacketFromClient(packet, sender, id);
@@ -53,7 +50,7 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    private void handlePlayerAccess(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
+    private void handlePlayerAccess(PacketCustom packet, ServerPlayer sender, ServerGamePacketListener handler) {
 //        int button = packet.readByte();
 //        if (!sender.getCommandSource().hasPermissionLevel(3)) {
 //            sender.sendMessage(new StringTextComponent("You do not have permission to use that command").setStyle(new Style().setColor(TextFormatting.RED)));
@@ -80,10 +77,10 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
 //        }
     }
 
-    private void handleTileDataManager(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
+    private void handleTileDataManager(PacketCustom packet, ServerPlayer sender, ServerGamePacketListener handler) {
         try {
             BlockPos pos = packet.readPos();
-            TileEntity tile = sender.level.getBlockEntity(pos);
+            BlockEntity tile = sender.level.getBlockEntity(pos);
             if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
                 ((TileBCore) tile).getDataManager().receiveDataFromClient(packet);
             }
@@ -95,10 +92,10 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     }
 
     //This is to assist things like grief prevention. If a player is not allowed to right click a block then they are not allowed to send packets to it.
-    public static boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
+    public static boolean verifyPlayerPermission(Player player, BlockPos pos) {
         if (!BCConfig.clientPermissionVerification) return true;
-        BlockRayTraceResult traceResult = new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false);
-        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, traceResult);
+        BlockHitResult traceResult = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+        PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, InteractionHand.MAIN_HAND, pos, traceResult);
         MinecraftForge.EVENT_BUS.post(event);
         return !event.isCanceled();
     }

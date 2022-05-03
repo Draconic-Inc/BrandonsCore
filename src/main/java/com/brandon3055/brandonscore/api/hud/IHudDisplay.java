@@ -1,12 +1,11 @@
 package com.brandon3055.brandonscore.api.hud;
 
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -21,28 +20,28 @@ import java.util.List;
 public interface IHudDisplay {
     
     @OnlyIn(Dist.CLIENT)
-    default double computeHudWidth(Minecraft mc, List<ITextComponent> displayList) {
+    default double computeHudWidth(Minecraft mc, List<Component> displayList) {
         double maxWidth = 0;
-        for (ITextComponent text : displayList) {
+        for (Component text : displayList) {
             maxWidth = Math.max(maxWidth, mc.font.width(text));
         }
         return maxWidth + 8;
     }
 
     @OnlyIn(Dist.CLIENT)
-    default double computeHudHeight(Minecraft mc, List<ITextComponent> displayList) {
+    default double computeHudHeight(Minecraft mc, List<Component> displayList) {
         return (displayList.size() * 10) + 6;
     }
 
     @OnlyIn(Dist.CLIENT)
-    default void renderHudBackground(IRenderTypeBuffer getter, MatrixStack mStack, double width, double height, List<ITextComponent> displayList) {
+    default void renderHudBackground(MultiBufferSource getter, PoseStack mStack, double width, double height, List<Component> displayList) {
         GuiHelper.drawHoverRect(getter, mStack, 0, 0, width, height);
     }
 
     @OnlyIn(Dist.CLIENT)
-    default void renderHudContent(FontRenderer font, MatrixStack mStack, double width, double height, List<ITextComponent> displayList) {
+    default void renderHudContent(Font font, PoseStack mStack, double width, double height, List<Component> displayList) {
         mStack.translate(4, 4, 0);
-        for (ITextComponent text : displayList) {
+        for (Component text : displayList) {
             font.drawShadow(mStack, text, 0, 0, 0xFFFFFF);
             mStack.translate(0, 10, 0);
         }

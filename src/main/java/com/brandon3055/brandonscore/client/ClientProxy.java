@@ -1,24 +1,18 @@
 package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.packet.PacketCustom;
-import codechicken.lib.util.ResourceUtils;
-import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.CommonProxy;
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
 import com.brandon3055.brandonscore.client.hud.HudManager;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.BCProfiler;
-import com.brandon3055.brandonscore.utils.ModelUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -33,26 +27,23 @@ public class ClientProxy extends CommonProxy {
     public void construct() {
         super.construct();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(BCSprites::initialize);
-        MinecraftForge.EVENT_BUS.addListener(this::registerShaderReloads);
+//        MinecraftForge.EVENT_BUS.addListener(this::registerShaderReloads);
         HudManager.init();
 
 
-
-
-
     }
 
-    private void registerShaderReloads(ParticleFactoryRegisterEvent event) {
-        if (Minecraft.getInstance() != null && BCConfig.useShaders) {
-            ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderH);
-            ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderV);
-        }
-    }
+//    private void registerShaderReloads(ParticleFactoryRegisterEvent event) {
+//        if (Minecraft.getInstance() != null && BCConfig.useShaders) {
+//            ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderH);
+//            ResourceUtils.registerReloadListener(GuiEnergyBar.barShaderV);
+//        }
+//    }
 
     @Override
     public void commonSetup(FMLCommonSetupEvent event) {
         super.commonSetup(event);
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new ModelUtils());
+//        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new ModelUtils());
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
         DLRSCache.initialize();
         ProcessHandlerClient.init();
@@ -71,7 +62,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public World getClientWorld() {
+    public Level getClientWorld() {
         return Minecraft.getInstance().level;
     }
 
@@ -96,7 +87,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public PlayerEntity getClientPlayer() {
+    public Player getClientPlayer() {
         return Minecraft.getInstance().player;
     }
 
@@ -116,7 +107,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void sendIndexedMessage(PlayerEntity player, ITextComponent message, int index) {
+    public void sendIndexedMessage(Player player, Component message, int index) {
         if (message == null) {
             Minecraft.getInstance().gui.getChat().removeById(index);
         } else {

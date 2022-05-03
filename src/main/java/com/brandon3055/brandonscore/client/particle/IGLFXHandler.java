@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.client.particle;
 
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.entity.Entity;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Created by brandon3055 on 30/11/2016.
@@ -20,5 +20,5 @@ public interface IGLFXHandler {
      * Run any post render gl code here.
      * This is where you would draw if you started drawing in preDraw
      */
-    void postDraw(int layer, BufferBuilder buffer, Tessellator tessellator);
+    void postDraw(int layer, BufferBuilder buffer, Tesselator tessellator);
 }

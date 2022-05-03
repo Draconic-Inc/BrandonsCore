@@ -1,25 +1,26 @@
 package com.brandon3055.brandonscore.command;
 
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SPlayerPositionLookPacket;
-import net.minecraft.util.math.*;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.server.TicketType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -31,7 +32,7 @@ import java.util.*;
  * Created by brandon3055 on 23/12/2017.
  */
 public class CommandTPX {
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("tpx")
                         .requires((p_198816_0_) -> p_198816_0_.hasPermission(2))
@@ -70,22 +71,22 @@ public class CommandTPX {
         );
     }
 
-    private static int teleportToEntity(CommandSource source, Collection<? extends Entity> targets, Entity destination) {
+    private static int teleportToEntity(CommandSourceStack source, Collection<? extends Entity> targets, Entity destination) {
         for (Entity entity : targets) {
-            teleport(source, entity, (ServerWorld) destination.level, destination.getX(), destination.getY(), destination.getZ(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class), destination.yRot, destination.xRot);
+            teleport(source, entity, (ServerLevel) destination.level, destination.getX(), destination.getY(), destination.getZ(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class), destination.getYRot(), destination.getXRot());
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
+            source.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
         } else {
-            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
+            source.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
         }
 
         return targets.size();
     }
 
     private static Random rand = new Random();
-    private static int teleportToPos(CommandSource source, Collection<? extends Entity> targets, ServerWorld targetWorld, @Nullable ILocationArgument position, @Nullable ILocationArgument rotationIn) throws CommandSyntaxException {
+    private static int teleportToPos(CommandSourceStack source, Collection<? extends Entity> targets, ServerLevel targetWorld, @Nullable Coordinates position, @Nullable Coordinates rotationIn) throws CommandSyntaxException {
         if (position == null) {
             BlockPos pos = new BlockPos(0, 127, 0);
             rand.setSeed(0);
@@ -96,7 +97,7 @@ public class CommandTPX {
                     pos = new BlockPos(-250 + rand.nextInt(500), 256, -250 + rand.nextInt(500));
                 }
                 if (targetWorld.isEmptyBlock(pos)) {
-                    while (targetWorld.isEmptyBlock(pos.below()) && World.isInWorldBounds(pos.below())) {
+                    while (targetWorld.isEmptyBlock(pos.below()) && targetWorld.isInWorldBounds(pos.below())) {
                         pos = pos.below();
                     }
                     BlockState state = targetWorld.getBlockState(pos.below());
@@ -111,71 +112,71 @@ public class CommandTPX {
             position = new BlockLocation(pos);
         }
 
-        Vector3d vec3d = position.getPosition(source);
-        Vector2f vec2f = rotationIn == null ? null : rotationIn.getRotation(source);
-        Set<SPlayerPositionLookPacket.Flags> set = EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class);
+        Vec3 vec3d = position.getPosition(source);
+        Vec2 vec2f = rotationIn == null ? null : rotationIn.getRotation(source);
+        Set<ClientboundPlayerPositionPacket.RelativeArgument> set = EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class);
         if (position.isXRelative()) {
-            set.add(SPlayerPositionLookPacket.Flags.X);
+            set.add(ClientboundPlayerPositionPacket.RelativeArgument.X);
         }
 
         if (position.isYRelative()) {
-            set.add(SPlayerPositionLookPacket.Flags.Y);
+            set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y);
         }
 
         if (position.isZRelative()) {
-            set.add(SPlayerPositionLookPacket.Flags.Z);
+            set.add(ClientboundPlayerPositionPacket.RelativeArgument.Z);
         }
 
         if (rotationIn == null) {
-            set.add(SPlayerPositionLookPacket.Flags.X_ROT);
-            set.add(SPlayerPositionLookPacket.Flags.Y_ROT);
+            set.add(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT);
+            set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT);
         } else {
             if (rotationIn.isXRelative()) {
-                set.add(SPlayerPositionLookPacket.Flags.X_ROT);
+                set.add(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT);
             }
 
             if (rotationIn.isYRelative()) {
-                set.add(SPlayerPositionLookPacket.Flags.Y_ROT);
+                set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT);
             }
         }
 
         for (Entity entity : targets) {
             if (rotationIn == null) {
-                teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, entity.yRot, entity.xRot);
+                teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, entity.getYRot(), entity.getXRot());
             } else {
                 teleport(source, entity, targetWorld, vec3d.x, vec3d.y, vec3d.z, set, vec2f.y, vec2f.x);
             }
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(new TranslatableComponent("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
         } else {
-            source.sendSuccess(new TranslationTextComponent("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(new TranslatableComponent("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
         }
 
         return targets.size();
     }
 
-    private static void teleport(CommandSource source, Entity entityIn, ServerWorld worldIn, double x, double y, double z, Set<SPlayerPositionLookPacket.Flags> relativeList, float yaw, float pitch) {
-        if (entityIn instanceof ServerPlayerEntity) {
+    private static void teleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z, Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeList, float yaw, float pitch) {
+        if (entityIn instanceof ServerPlayer) {
             ChunkPos chunkpos = new ChunkPos(new BlockPos(x, y, z));
             worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
             entityIn.stopRiding();
-            if (((ServerPlayerEntity) entityIn).isSleeping()) {
-                ((ServerPlayerEntity) entityIn).stopSleeping();
+            if (((ServerPlayer) entityIn).isSleeping()) {
+                ((ServerPlayer) entityIn).stopSleeping();
             }
 
             if (worldIn == entityIn.level) {
-                ((ServerPlayerEntity) entityIn).connection.teleport(x, y, z, yaw, pitch, relativeList);
+                ((ServerPlayer) entityIn).connection.teleport(x, y, z, yaw, pitch, relativeList);
             } else {
-                ((ServerPlayerEntity) entityIn).teleportTo(worldIn, x, y, z, yaw, pitch);
+                ((ServerPlayer) entityIn).teleportTo(worldIn, x, y, z, yaw, pitch);
             }
 
             entityIn.setYHeadRot(yaw);
         } else {
-            float f1 = MathHelper.wrapDegrees(yaw);
-            float f = MathHelper.wrapDegrees(pitch);
-            f = MathHelper.clamp(f, -90.0F, 90.0F);
+            float f1 = Mth.wrapDegrees(yaw);
+            float f = Mth.wrapDegrees(pitch);
+            f = Mth.clamp(f, -90.0F, 90.0F);
             if (worldIn == entityIn.level) {
                 entityIn.moveTo(x, y, z, f1, f);
                 entityIn.setYHeadRot(f1);
@@ -191,7 +192,7 @@ public class CommandTPX {
                 entityIn.restoreFrom(entity);
                 entityIn.moveTo(x, y, z, f1, f);
                 entityIn.setYHeadRot(f1);
-                worldIn.addFromAnotherDimension(entityIn);
+                worldIn.addDuringTeleport(entityIn);
             }
         }
 
@@ -211,7 +212,7 @@ public class CommandTPX {
     // /tpx <x> <y> <z>                                               3
     // /tpx <x> <y> <z> [dimension]                                   4
 
-    private static class EntityLocation implements ILocationArgument {
+    private static class EntityLocation implements Coordinates {
         private Entity entity;
 
         public EntityLocation(Entity entity) {
@@ -219,12 +220,12 @@ public class CommandTPX {
         }
 
         @Override
-        public Vector3d getPosition(CommandSource source) {
+        public Vec3 getPosition(CommandSourceStack source) {
             return entity.position();
         }
 
         @Override
-        public Vector2f getRotation(CommandSource source) {
+        public Vec2 getRotation(CommandSourceStack source) {
             return source.getRotation();
         }
 
@@ -244,7 +245,7 @@ public class CommandTPX {
         }
     }
 
-    private static class BlockLocation implements ILocationArgument {
+    private static class BlockLocation implements Coordinates {
         private BlockPos pos;
 
         public BlockLocation(BlockPos pos) {
@@ -252,12 +253,12 @@ public class CommandTPX {
         }
 
         @Override
-        public Vector3d getPosition(CommandSource source) {
-            return Vector3d.atCenterOf(pos);
+        public Vec3 getPosition(CommandSourceStack source) {
+            return Vec3.atCenterOf(pos);
         }
 
         @Override
-        public Vector2f getRotation(CommandSource source) {
+        public Vec2 getRotation(CommandSourceStack source) {
             return source.getRotation();
         }
 

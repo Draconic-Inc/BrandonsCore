@@ -2,10 +2,9 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.Entity;
-
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -43,9 +42,9 @@ public class FilterAdults extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        boolean isAgeable = entity instanceof AgeableEntity;
+        boolean isAgeable = entity instanceof AgeableMob;
         if (isAgeable) {
-            AgeableEntity ageable = (AgeableEntity) entity;
+            AgeableMob ageable = (AgeableMob) entity;
             return whitelistAdults == !ageable.isBaby();
         }
         return includeNonAgeable;
@@ -57,15 +56,15 @@ public class FilterAdults extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("include", whitelistAdults);
         compound.putBoolean("tamable", includeNonAgeable);
         return compound;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         whitelistAdults = nbt.getBoolean("include");
         includeNonAgeable = nbt.getBoolean("tamable");

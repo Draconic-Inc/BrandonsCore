@@ -5,16 +5,17 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -284,7 +285,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         return this;
     }
 
-    public GuiButton setTextColour(TextFormatting colour, TextFormatting colourHover) {
+    public GuiButton setTextColour(ChatFormatting colour, ChatFormatting colourHover) {
         return setTextColour(colour.getColor(), colourHover.getColor());
     }
 
@@ -298,7 +299,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         return this;
     }
 
-    public GuiButton setTextColour(TextFormatting colour) {
+    public GuiButton setTextColour(ChatFormatting colour) {
         return setTextColour(colour.getColor());
     }
 
@@ -514,12 +515,12 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     public void playClickEvent(boolean released) {
         if (toggleMode) {
             if (released) {
-                mc.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, getToggleState() ? 1F : 0.9F));
+                mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, getToggleState() ? 1F : 0.9F));
             } else {
-                mc.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 0.85F));
+                mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 0.85F));
             }
         } else if (!released) {
-            mc.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
     }
 
@@ -530,7 +531,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
     @OnlyIn(Dist.CLIENT) //Because this is referenced in
     public static void playGenericClick() {
-        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     /**
@@ -605,6 +606,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
         String displayString = getDisplayString();
         if (!displayString.isEmpty()) {
+            Component textComponent = new TextComponent(displayString);
             int colour = getTextColour(mouseOver, isDisabled());
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 
@@ -622,25 +624,23 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
             float yPos = (int) (textYOffset + ((getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2))) + (is3dText && !actualPressedState() ? -yp : 0);
             switch (rotation) {
                 case NORMAL:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, textComponent, xPos, yPos, widthLimit, colour, getAlignment(), wrap, trim, dropShadow);
                     break;
                 case ROT_CC:
                     xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2F)) - (ySize / 2F));
                     yPos = textYOffset + getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, textComponent, xPos, yPos, widthLimit, colour, getAlignment(), wrap, trim, dropShadow);
                     break;
                 case ROT_C:
                     xPos = textXOffset + ((getInsetRect().x + (getInsetRect().width / 2F)) - (ySize / 2F));
                     yPos = textYOffset + getInsetRect().y;
-                    drawCustomString(fontRenderer, displayString, xPos + ySize, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, textComponent, xPos + ySize, yPos, widthLimit, colour, getAlignment(), wrap, trim, dropShadow);
                     break;
                 case ROT_180:
-                    drawCustomString(fontRenderer, displayString, xPos, yPos, widthLimit, colour, getAlignment(), getRotation(), wrap, trim, dropShadow);
+                    drawCustomString(fontRenderer, textComponent, xPos, yPos, widthLimit, colour, getAlignment(), wrap, trim, dropShadow);
                     break;
             }
-            RenderSystem.color4f(1, 1, 1, 1);
         }
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 1, 0, 0xFF00FF00);
     }
 
     @Override
@@ -649,10 +649,10 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     }
 
     protected void renderVanillaButton(Minecraft minecraft, int mouseX, int mouseY) {
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
-        RenderMaterial mat = BCSprites.getButton(getRenderState(hovered));
-        IVertexBuilder builder = getter.getBuffer(mat.renderType(location -> BCSprites.GUI_TYPE));//mat.buffer(getter, location -> BCSprites.GUI_TYPE);
+        Material mat = BCSprites.getButton(getRenderState(hovered));
+        VertexConsumer builder = getter.getBuffer(mat.renderType(location -> BCSprites.GUI_TYPE));//mat.buffer(getter, location -> BCSprites.GUI_TYPE);
         drawDynamicSprite(builder, mat.sprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
         getter.endBatch();
     }

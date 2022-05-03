@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.api.power;
 
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 /**
  * Created by brandon3055 on 16/10/19.

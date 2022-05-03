@@ -1,12 +1,12 @@
 package com.brandon3055.brandonscore.integration;
 
-import com.brandon3055.projectintelligence.api.PiAPI;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,13 +18,13 @@ public class PIHelper {
         return ModList.get().isLoaded("projectintelligence");
     }
 
-    public static KeyBinding getETGuiKey() {
+    public static KeyMapping getETGuiKey() {
         assert isInstalled();
         return _getETGuiKey();
     }
 
-    private static KeyBinding _getETGuiKey() {
-        return PiAPI.getETGuiKey();
+    private static KeyMapping _getETGuiKey() {
+        return null;//PiAPI.getETGuiKey();
     }
 
     public static List<String> getRelatedPages(ItemStack stack) {
@@ -33,7 +33,7 @@ public class PIHelper {
     }
 
     private static List<String> _getRelatedPages(ItemStack stack) {
-        return PiAPI.getRelatedPages(stack);
+        return Collections.emptyList();//PiAPI.getRelatedPages(stack);
     }
 
     public static void openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
@@ -41,16 +41,16 @@ public class PIHelper {
         _openGui(parentScreen, pageURIs);
     }
 
-    public static void openMod(@Nullable Screen parentScreen, String modid)  {
+    public static void openMod(@Nullable Screen parentScreen, String modid) {
         assert isInstalled();
         _openMod(parentScreen, modid);
     }
 
     private static void _openGui(@Nullable Screen parentScreen, List<String> pageURIs) {
-        PiAPI.openGui(parentScreen, pageURIs);
+//        PiAPI.openGui(parentScreen, pageURIs);
     }
 
     private static void _openMod(@Nullable Screen parentScreen, String modid) {
-        PiAPI.openModPage(parentScreen, modid);
+//        PiAPI.openModPage(parentScreen, modid);
     }
 }

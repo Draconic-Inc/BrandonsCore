@@ -16,34 +16,28 @@ import com.brandon3055.brandonscore.lib.datamanager.*;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.network.ServerPacketHandler;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.INameable;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
@@ -59,25 +53,25 @@ import static com.brandon3055.brandonscore.lib.datamanager.DataFlags.*;
  * Created by brandon3055 on 26/3/2016.
  * Base tile entity class for all tile entities
  */
-public class TileBCore extends TileEntity implements IDataManagerProvider, IDataRetainingTile, INameable {
+public class TileBCore extends BlockEntity implements IDataManagerProvider, IDataRetainingTile, Nameable {
 
     protected boolean playerAccessTracking = false;
     protected TileCapabilityManager capManager = new TileCapabilityManager(this);
     protected TileDataManager<TileBCore> dataManager = new TileDataManager<>(this);
-    private Map<Integer, BiConsumer<MCDataInput, ServerPlayerEntity>> serverPacketHandlers = new HashMap<>();
-    protected Map<String, INBTSerializable<CompoundNBT>> savedItemDataObjects = new HashMap<>();
-    protected Map<String, INBTSerializable<CompoundNBT>> savedDataObjects = new HashMap<>();
+    private Map<Integer, BiConsumer<MCDataInput, ServerPlayer>> serverPacketHandlers = new HashMap<>();
+    protected Map<String, INBTSerializable<CompoundTag>> savedItemDataObjects = new HashMap<>();
+    protected Map<String, INBTSerializable<CompoundTag>> savedDataObjects = new HashMap<>();
     private Map<Integer, Consumer<MCDataInput>> clientPacketHandlers = new HashMap<>();
 
     private List<Runnable> tickables = new ArrayList<>();
     private ManagedEnum<RSMode> rsControlMode = this instanceof IRSSwitchable ? register(new ManagedEnum<>("rs_mode", RSMode.ALWAYS_ACTIVE, SAVE_BOTH_SYNC_TILE, CLIENT_CONTROL)) : null;
     private ManagedBool rsPowered = this instanceof IRSSwitchable ? register(new ManagedBool("rs_powered", false, SAVE_NBT_SYNC_TILE, TRIGGER_UPDATE)) : null;
     private String customName = "";
-    private Set<PlayerEntity> accessingPlayers = new HashSet<>();
+    private Set<Player> accessingPlayers = new HashSet<>();
     private int tick = 0;
 
-    public TileBCore(TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    public TileBCore(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     //region Data Manager
@@ -114,7 +108,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         }
     }
 
-    public void detectAndSendChangesToListeners(List<IContainerListener> listeners) {
+    public void detectAndSendChangesToListeners(List<ContainerListener> listeners) {
         if (level != null && !level.isClientSide) {
             dataManager.detectAndSendChangesToListeners(listeners);
             capManager.detectAndSendChangesToListeners(listeners);
@@ -130,30 +124,20 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     //region Packets
     @Nullable
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        CompoundNBT compound = new CompoundNBT();
-        dataManager.writeSyncNBT(compound);
-        writeExtraNBT(compound);
-        return new SUpdateTileEntityPacket(this.worldPosition, 0, compound);
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    //Used when initially sending chunks to the client... I think
     @Override
-    public CompoundNBT getUpdateTag() {
-        CompoundNBT compound = super.getUpdateTag();
+    public CompoundTag getUpdateTag() {
+        CompoundTag compound = super.getUpdateTag();
         dataManager.writeSyncNBT(compound);
         writeExtraNBT(compound);
         return compound;
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-        dataManager.readSyncNBT(tag);
-        readExtraNBT(tag);
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         dataManager.readSyncNBT(pkt.getTag());
         readExtraNBT(pkt.getTag());
     }
@@ -177,7 +161,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     /**
      * Override this method to receive data from the server via sendPacketToServer
      */
-    public void receivePacketFromClient(MCDataInput data, ServerPlayerEntity client, int id) {
+    public void receivePacketFromClient(MCDataInput data, ServerPlayer client, int id) {
         if (serverPacketHandlers.containsKey(id)) {
             serverPacketHandlers.get(id).accept(data, client);
         }
@@ -199,18 +183,18 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         return packet;
     }
 
-    public void sendPacketToClient(ServerPlayerEntity player, Consumer<MCDataOutput> writer, int id) {
+    public void sendPacketToClient(ServerPlayer player, Consumer<MCDataOutput> writer, int id) {
         sendPacketToClient(writer, id).sendToPlayer(player);
     }
 
-    public void sendPacketToClients(Collection<PlayerEntity> players, Consumer<MCDataOutput> writer, int id) {
+    public void sendPacketToClients(Collection<Player> players, Consumer<MCDataOutput> writer, int id) {
         PacketCustom packet = createClientBoundPacket(id);
         writer.accept(packet);
         sendPacketToClients(players, packet);
     }
 
-    public void sendPacketToClients(Collection<PlayerEntity> players, PacketCustom packet) {
-        players.stream().filter(e -> e instanceof ServerPlayerEntity).map(e -> (ServerPlayerEntity) e).forEach(packet::sendToPlayer);
+    public void sendPacketToClients(Collection<Player> players, PacketCustom packet) {
+        players.stream().filter(e -> e instanceof ServerPlayer).map(e -> (ServerPlayer) e).forEach(packet::sendToPlayer);
     }
 
     public void sendPacketToChunk(Consumer<MCDataOutput> writer, int id) {
@@ -246,7 +230,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * @param packetId packet id
      * @param handler  the handler for this packet
      */
-    public void setServerSidePacketHandler(int packetId, BiConsumer<MCDataInput, ServerPlayerEntity> handler) {
+    public void setServerSidePacketHandler(int packetId, BiConsumer<MCDataInput, ServerPlayer> handler) {
         this.serverPacketHandlers.put(packetId, handler);
     }
 
@@ -260,37 +244,9 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     public void dirtyBlock() {
-        Chunk chunk = level.getChunkAt(getBlockPos());
+        LevelChunk chunk = level.getChunkAt(getBlockPos());
         chunk.setUnsaved(true);
     }
-
-//    /**
-//     * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
-//     * Note that this should NOT be used in cases where the block has a different tile depending on its state.
-//     */
-//    public void setShouldRefreshOnBlockChange() {
-//        shouldRefreshOnState = false;
-//    }
-
-//    @Deprecated //I want to store everything on the tile in 1.13. I'm done dealing with these bullshit blockstate crashes.
-//    public BlockState getState(Block expectedBlock) {
-//        if (world == null) {
-//            return expectedBlock.getDefaultState();//Because apparently this is a thing........
-//        }
-//        BlockState state = world.getBlockState(pos);
-//        return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
-//    }
-//
-//    /**
-//     * Is minecraft seriously so screwed up that i have to resort to things like this?
-//     */
-//    public Block getBlockTypeSafe(Block defaultBlock) {
-//        if (getBlockState().isAir(world, pos)) {
-//            return getBlockType();
-//        } else {
-//            return defaultBlock;
-//        }
-//    }
 
     /**
      * checks that the player is allowed to interact with this tile bu firing the RightClickBlock.
@@ -298,13 +254,13 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * <br/>
      * Note: Packets from client to server do not need to be verified because that is already handled by the packet handler.
      */
-    public boolean verifyPlayerPermission(PlayerEntity player) {
+    public boolean verifyPlayerPermission(Player player) {
         return ServerPacketHandler.verifyPlayerPermission(player, getBlockPos());
     }
 
     /**
      * Adds an item to the 'tickables' list. Every item in this list will be called every tick via the tiles update method.
-     * Note: in order for this to work the tile must implement ITickable and call super in {@link ITickableTileEntity#tick()} ()}
+     * Note: in order for this to work the tile must be ticking and call super in {@link #tick()}
      *
      * @param runnable The runnable to add
      */
@@ -328,25 +284,25 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * Write your data to said tag and finally return said tag.
      */
     @Override
-    public void writeToItemStack(CompoundNBT compound, boolean willHarvest) {
-        dataManager.writeToStackNBT(compound);
-        savedItemDataObjects.forEach((tagName, serializable) -> compound.put(tagName, serializable.serializeNBT()));
-        CompoundNBT capTags = capManager.serialize(true);
+    public void writeToItemStack(CompoundTag nbt, boolean willHarvest) {
+        dataManager.writeToStackNBT(nbt);
+        savedItemDataObjects.forEach((tagName, serializable) -> nbt.put(tagName, serializable.serializeNBT()));
+        CompoundTag capTags = capManager.serialize(true);
         if (!capTags.isEmpty()) {
-            compound.put("bc_caps", capTags);
+            nbt.put("bc_caps", capTags);
         }
-        writeExtraTileAndStack(compound);
+        writeExtraTileAndStack(nbt);
     }
 
 
     @Override
-    public void readFromItemStack(CompoundNBT compound) {
-        dataManager.readFromStackNBT(compound);
-        savedItemDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(compound.getCompound(tagName)));
-        if (compound.contains("bc_caps")) {
-            capManager.deserialize(compound.getCompound("bc_caps"));
+    public void readFromItemStack(CompoundTag nbt) {
+        dataManager.readFromStackNBT(nbt);
+        savedItemDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(nbt.getCompound(tagName)));
+        if (nbt.contains("bc_caps")) {
+            capManager.deserialize(nbt.getCompound("bc_caps"));
         }
-        readExtraTileAndStack(compound);
+        readExtraTileAndStack(nbt);
     }
 
     /**
@@ -355,71 +311,61 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * Note: This will not save data to the item when the block is harvested.<br>
      * For that you need to override read and writeToStack just be sure to pay attention to the doc for those.
      */
-    public void writeExtraNBT(CompoundNBT compound) {
-        CompoundNBT capTags = capManager.serialize(false);
+    public void writeExtraNBT(CompoundTag nbt) {
+        CompoundTag capTags = capManager.serialize(false);
         if (!capTags.isEmpty()) {
-            compound.put("bc_caps", capTags);
+            nbt.put("bc_caps", capTags);
         }
 
         if (!customName.isEmpty()) {
-            compound.putString("custom_name", customName);
+            nbt.putString("custom_name", customName);
         }
 
-        savedDataObjects.forEach((tagName, serializable) -> compound.put(tagName, serializable.serializeNBT()));
-        writeExtraTileAndStack(compound);
+        savedDataObjects.forEach((tagName, serializable) -> nbt.put(tagName, serializable.serializeNBT()));
+        writeExtraTileAndStack(nbt);
     }
 
-    public void readExtraNBT(CompoundNBT compound) {
-        if (compound.contains("bc_caps")) {
-            capManager.deserialize(compound.getCompound("bc_caps"));
+    public void readExtraNBT(CompoundTag nbt) {
+        if (nbt.contains("bc_caps")) {
+            capManager.deserialize(nbt.getCompound("bc_caps"));
         }
 
-        if (compound.contains("custom_name", 8)) {
-            customName = compound.getString("custom_name");
+        if (nbt.contains("custom_name", 8)) {
+            customName = nbt.getString("custom_name");
         }
 
-        savedDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(compound.getCompound(tagName)));
-        readExtraTileAndStack(compound);
+        savedDataObjects.forEach((tagName, serializable) -> serializable.deserializeNBT(nbt.getCompound(tagName)));
+        readExtraTileAndStack(nbt);
     }
 
     /**
      * Convenience method that is called by both
-     * {@link #writeExtraNBT(CompoundNBT)} and
-     * {@link #writeToItemStack(CompoundNBT, boolean)}
+     * {@link #writeExtraNBT(CompoundTag)} and
+     * {@link #writeToItemStack(CompoundTag, boolean)}
      */
-    public void writeExtraTileAndStack(CompoundNBT compound) {}
+    public void writeExtraTileAndStack(CompoundTag nbt) {}
 
     /**
      * Convenience method that is called by both
-     * {@link #readExtraNBT(CompoundNBT)} and
-     * {@link #readFromItemStack(CompoundNBT)}
+     * {@link #readExtraNBT(CompoundTag)} and
+     * {@link #readFromItemStack(CompoundTag)}
      */
-    public void readExtraTileAndStack(CompoundNBT compound) {}
-
+    public void readExtraTileAndStack(CompoundTag nbt) {}
+    
     @Override
-    public final CompoundNBT save(CompoundNBT compound) {
-        super.save(compound);
-
-        dataManager.writeToNBT(compound);
-        writeExtraNBT(compound);
-
-        return compound;
+    protected final void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
+        dataManager.writeToNBT(nbt);
+        writeExtraNBT(nbt);
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        super.load(state, nbt);
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
         dataManager.readFromNBT(nbt);
         readExtraNBT(nbt);
-
         onTileLoaded();
     }
-
-
-//    @Override
-//    public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate) {
-//        return shouldRefreshOnState ? oldState != newSate : (oldState.getBlock() != newSate.getBlock());
-//    }
 
     /**
      * Called immediately after all NBT is loaded. World may be null at this point
@@ -434,11 +380,11 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * @param tagName    the name to use when saving this object to the tile's NBT
      * @param dataObject the serializable data object.
      */
-    public void setSavedDataObject(String tagName, INBTSerializable<CompoundNBT> dataObject) {
+    public void setSavedDataObject(String tagName, INBTSerializable<CompoundTag> dataObject) {
         this.savedDataObjects.put(tagName, dataObject);
     }
 
-    public void setItemSavedDataObject(String tagName, INBTSerializable<CompoundNBT> dataObject) {
+    public void setItemSavedDataObject(String tagName, INBTSerializable<CompoundTag> dataObject) {
         this.savedItemDataObjects.put(tagName, dataObject);
     }
 
@@ -450,9 +396,9 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         LazyOptional<T> ret = capManager.getCapability(capability, side);
         return ret.isPresent() ? ret : super.getCapability(capability, side);
     }
-
+    
     @Override
-    protected void invalidateCaps() {
+    public void invalidateCaps() {
         super.invalidateCaps();
         capManager.invalidate();
     }
@@ -472,26 +418,26 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
             return 0;
         }
 
-        TileEntity tile = level.getBlockEntity(worldPosition.relative(side));
+        BlockEntity tile = level.getBlockEntity(worldPosition.relative(side));
         if (tile != null) {
             return EnergyUtils.insertEnergy(tile, maxSend, side.getOpposite(), false);
         }
         return 0;
     }
 
-    public static long sendEnergyTo(IWorldReader world, BlockPos pos, long maxSend, Direction side) {
+    public static long sendEnergyTo(LevelReader world, BlockPos pos, long maxSend, Direction side) {
         if (maxSend == 0) {
             return 0;
         }
 
-        TileEntity tile = world.getBlockEntity(pos.relative(side));
+        BlockEntity tile = world.getBlockEntity(pos.relative(side));
         if (tile != null) {
             return EnergyUtils.insertEnergy(tile, maxSend, side.getOpposite(), false);
         }
         return 0;
     }
 
-    public static long sendEnergyToAll(IWorldReader world, BlockPos pos, long maxPerTarget, long maxAvailable) {
+    public static long sendEnergyToAll(LevelReader world, BlockPos pos, long maxPerTarget, long maxAvailable) {
         long i = 0;
         for (Direction direction : Direction.values()) {
             i += sendEnergyTo(world, pos, Math.min(maxPerTarget, maxAvailable - i), direction);
@@ -501,7 +447,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     /**
      * Adds an io tracker to the specified storage and ensures the tracker is updated every tick.
-     * Note: for updating to work this tile must implement {@link ITickableTileEntity} and call super in {@link ITickableTileEntity#tick()} ()}
+     * Note: for updating to work this tile must be ticking and call super in {@link #tick()}
      *
      * @param storage The storage to add an IO tracker to.
      */
@@ -565,7 +511,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     //Other
 
     /**
-     * Only works on {@link ITickableTileEntity} tiles that call super.update()
+     * Only works on ticking tiles that call super.update()
      *
      * @return an internal tick timer specific to this tile
      */
@@ -574,7 +520,7 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     /**
-     * Only works on {@link ITickableTileEntity} tiles that call super.update()
+     * Only works on ticking tiles that call super.update()
      *
      * @return true once every 'tickInterval' based on the tiles internal timer.
      */
@@ -638,12 +584,12 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
 
     @Override
-    public ITextComponent getName() {
+    public Component getName() {
         if (hasCustomName()) {
-            return new StringTextComponent(customName);
+            return new TextComponent(customName);
         }
 
-        return new TranslationTextComponent(getBlockState().getBlock().getDescriptionId());
+        return new TranslatableComponent(getBlockState().getBlock().getDescriptionId());
     }
 
     @Override
@@ -653,11 +599,11 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
 
     @Nullable
     @Override
-    public ITextComponent getCustomName() {
+    public Component getCustomName() {
         return customName.isEmpty() ? null : getName();
     }
 
-    public ITextComponent getDisplayName() {
+    public Component getDisplayName() {
         return getName();
     }
 
@@ -678,18 +624,22 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
      * @return a list of players currently accessing this tile's container.
      * playerAccessTracking must be enabled in this tile's constructor in order for this to work.
      */
-    public Set<PlayerEntity> getAccessingPlayers() {
+    public Set<Player> getAccessingPlayers() {
         accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCore) || ((ContainerBCTile) e.containerMenu).tile != this); //Clean up set
         return accessingPlayers;
     }
 
-    public void onPlayerOpenContainer(PlayerEntity player) {
+    public void onPlayerOpenContainer(Player player) {
         accessingPlayers.add(player);
     }
 
-    public void onPlayerCloseContainer(PlayerEntity player) {
+    public void onPlayerCloseContainer(Player player) {
         accessingPlayers.remove(player);
         accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCore) || ((ContainerBCTile) e.containerMenu).tile != this); //Clean up set
+    }
+
+    public int posSeed() {
+        return (int) worldPosition.asLong();
     }
 
 }

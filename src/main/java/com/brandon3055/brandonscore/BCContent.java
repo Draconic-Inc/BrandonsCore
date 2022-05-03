@@ -1,11 +1,11 @@
 package com.brandon3055.brandonscore;
 
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
-import net.minecraft.block.Block;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -23,7 +23,7 @@ public class BCContent {
 
     //region Container Types.
     @ObjectHolder ("player_access")
-    public static ContainerType<ContainerPlayerAccess> containerPlayerAccess;
+    public static MenuType<ContainerPlayerAccess> containerPlayerAccess;
     //endregion
 
     @SubscribeEvent
@@ -37,19 +37,19 @@ public class BCContent {
     }
 
     @SubscribeEvent
-    public static void onRegisterTiles(RegistryEvent.Register<TileEntityType<?>> event) {
-        IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
+    public static void onRegisterTiles(RegistryEvent.Register<BlockEntityType<?>> event) {
+        IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
     }
 
     @SubscribeEvent
-    public static void onRegisterContainers(RegistryEvent.Register<ContainerType<?>> event) {
-        IForgeRegistry<ContainerType<?>> registry = event.getRegistry();
-        registry.register(new ContainerType<>(ContainerPlayerAccess::new).setRegistryName("player_access"));
+    public static void onRegisterContainers(RegistryEvent.Register<MenuType<?>> event) {
+        IForgeRegistry<MenuType<?>> registry = event.getRegistry();
+        registry.register(new MenuType<>(ContainerPlayerAccess::new).setRegistryName("player_access"));
     }
 
     @SubscribeEvent
-    public static void onRegisterRecipeSerializers(RegistryEvent.Register<IRecipeSerializer<?>> event) {
-        IForgeRegistry<IRecipeSerializer<?>> registry = event.getRegistry();
+    public static void onRegisterRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> event) {
+        IForgeRegistry<RecipeSerializer<?>> registry = event.getRegistry();
     }
 
 }

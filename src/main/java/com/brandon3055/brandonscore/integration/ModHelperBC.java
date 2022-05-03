@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.integration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.util.*;
 
@@ -28,7 +28,7 @@ public class ModHelperBC {
         modNameMap = Collections.synchronizedMap(new HashMap<String, String>());
         modVersionMap = Collections.synchronizedMap(new HashMap<String, String>());
 
-        for (ModInfo mod : ModList.get().getMods()) {
+        for (IModInfo mod : ModList.get().getMods()) {
             loadedMods.add(mod.getModId());
             modNameMap.put(mod.getModId(), mod.getDisplayName());
             String version = mod.getVersion().toString();

@@ -2,13 +2,13 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -22,7 +22,7 @@ public class FilterItem extends FilterBase {
     protected String itemName = "";
     protected int count = 0;
     protected int damage = -1;
-    protected CompoundNBT nbt = null;
+    protected CompoundTag nbt = null;
     protected boolean filterBlocks = false;
     protected boolean filterItems = false;
     public boolean dataChanged = false;
@@ -69,7 +69,7 @@ public class FilterItem extends FilterBase {
         return damage;
     }
 
-    public void setNbt(CompoundNBT nbt) {
+    public void setNbt(CompoundTag nbt) {
         this.nbt = nbt;
         if (nbt != null && nbt.isEmpty()) {
             this.nbt = null;
@@ -77,7 +77,7 @@ public class FilterItem extends FilterBase {
         getFilter().nodeModified(this);
     }
 
-    public CompoundNBT getNbt() {
+    public CompoundTag getNbt() {
         return nbt;
     }
 
@@ -118,16 +118,16 @@ public class FilterItem extends FilterBase {
                     match = name.equals(itemName);
                 }
                 else {
-                    //TODO Test This
-                    Collection<ResourceLocation> tags = ItemTags.getAllTags().getMatchingTags(stack.getItem());
-//                    int[] ids = OreDictionary.getOreIDs(stack);
-                    match = false;
-                    for (ResourceLocation tag : tags) {
-                        if (tag.toString().equals(itemName)) {
-                            match = true;
-                            break;
-                        }
-                    }
+//                    //TODO Support Tags
+//                    Collection<ResourceLocation> tags = ItemTags.getAllTags().getMatchingTags(stack.getItem());
+////                    int[] ids = OreDictionary.getOreIDs(stack);
+//                    match = false;
+//                    for (ResourceLocation tag : tags) {
+//                        if (tag.toString().equals(itemName)) {
+//                            match = true;
+//                            break;
+//                        }
+//                    }
                 }
             }
             if (match && count > 0) {
@@ -160,8 +160,8 @@ public class FilterItem extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("include", whitelistItem);
         compound.putString("name", itemName);
         compound.putShort("count", (short) count);
@@ -175,7 +175,7 @@ public class FilterItem extends FilterBase {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT compound) {
+    public void deserializeNBT(CompoundTag compound) {
         super.deserializeNBT(compound);
         whitelistItem = compound.getBoolean("include");
         itemName = compound.getString("name");

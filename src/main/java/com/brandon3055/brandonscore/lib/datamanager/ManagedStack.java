@@ -2,8 +2,8 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -101,12 +101,12 @@ public class ManagedStack extends AbstractManagedData<ItemStack> {
     }
 
     @Override
-    public void toNBT(CompoundNBT compound) {
-        compound.put(name, value.save(new CompoundNBT()));
+    public void toNBT(CompoundTag compound) {
+        compound.put(name, value.save(new CompoundTag()));
     }
 
     @Override
-    public void fromNBT(CompoundNBT compound) {
+    public void fromNBT(CompoundTag compound) {
         value = ItemStack.of(compound.getCompound(name));
         notifyListeners(value);
     }

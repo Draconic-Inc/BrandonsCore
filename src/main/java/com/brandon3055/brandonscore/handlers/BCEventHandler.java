@@ -4,9 +4,9 @@ import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.inventory.BlockToStackHelper;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -16,7 +16,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +50,8 @@ public class BCEventHandler {
 
     @SubscribeEvent
     public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getPlayer() instanceof ServerPlayerEntity && event.getPlayer().getServer() != null && event.getPlayer().getServer().isDedicatedServer()) {
-            BCoreNetwork.sendConfigToClient((ServerPlayerEntity) event.getPlayer());
+        if (event.getPlayer() instanceof ServerPlayer && event.getPlayer().getServer() != null && event.getPlayer().getServer().isDedicatedServer()) {
+            BCoreNetwork.sendConfigToClient((ServerPlayer) event.getPlayer());
         }
     }
 
@@ -63,9 +62,9 @@ public class BCEventHandler {
 
     @SubscribeEvent
     public static void livingUpdate(LivingEvent.LivingUpdateEvent event) {
-        if (event.getEntity() instanceof PlayerEntity && noClipPlayers.contains(event.getEntity().getUUID())) {
+        if (event.getEntity() instanceof Player && noClipPlayers.contains(event.getEntity().getUUID())) {
             event.getEntity().noPhysics = true;
-            ((PlayerEntity) event.getEntity()).abilities.flying = true;
+            ((Player) event.getEntity()).getAbilities().flying = true;
         }
     }
 }

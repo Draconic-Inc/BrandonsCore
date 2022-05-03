@@ -4,13 +4,14 @@ package com.brandon3055.brandonscore.utils;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.capability.OPWrappers;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -20,8 +21,6 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import java.util.List;
 
-import static net.minecraft.util.text.TextFormatting.GRAY;
-
 /**
  * Created by brandon3055 on 15/11/2016.
  */
@@ -29,7 +28,7 @@ public class EnergyUtils {
 
     // ================= Get Storage =================
 
-    public static IOPStorage getStorage(TileEntity tile, Direction side) {
+    public static IOPStorage getStorage(BlockEntity tile, Direction side) {
         if (tile.getLevel().isClientSide) {
             LogHelperBC.bigDev("Attempt to do energy operation client side!");
             return null;
@@ -64,7 +63,7 @@ public class EnergyUtils {
 
     // ================= Receive =================
 
-    public static long insertEnergy(TileEntity tile, long energy, Direction side, boolean simulate) {
+    public static long insertEnergy(BlockEntity tile, long energy, Direction side, boolean simulate) {
         IOPStorage storage = getStorage(tile, side);
         if (storage != null && storage.canReceive()) {
             return storage.receiveOP(energy, simulate);
@@ -94,7 +93,7 @@ public class EnergyUtils {
 
     // ================= Extract =================
 
-    public static long extractEnergy(TileEntity tile, long energy, Direction side, boolean simulate) {
+    public static long extractEnergy(BlockEntity tile, long energy, Direction side, boolean simulate) {
         IOPStorage storage = getStorage(tile, side);
         if (storage != null && storage.canExtract()) {
             return storage.extractOP(energy, simulate);
@@ -128,12 +127,12 @@ public class EnergyUtils {
         return target.receiveOP(source.extractOP(target.receiveOP(target.getMaxOPStored(), true), false), false);
     }
 
-    public static long transferEnergy(TileEntity source, Direction sourceSide, IOPStorage target) {
+    public static long transferEnergy(BlockEntity source, Direction sourceSide, IOPStorage target) {
         IOPStorage storage = getStorage(source, sourceSide);
         return storage == null ? 0 : transferEnergy(storage, target);
     }
 
-    public static long transferEnergy(IOPStorage source, TileEntity target, Direction targetSide) {
+    public static long transferEnergy(IOPStorage source, BlockEntity target, Direction targetSide) {
         IOPStorage storage = getStorage(target, targetSide);
         return storage == null ? 0 : transferEnergy(source, storage);
     }
@@ -148,17 +147,17 @@ public class EnergyUtils {
         return storage == null ? 0 : transferEnergy(source, storage);
     }
 
-    public static long transferEnergy(ItemStack source, TileEntity target, Direction targetSide) {
+    public static long transferEnergy(ItemStack source, BlockEntity target, Direction targetSide) {
         IOPStorage storage = getStorage(source);
         return storage == null ? 0 : transferEnergy(storage, target, targetSide);
     }
 
-    public static long transferEnergy(TileEntity source, Direction sourceSide, ItemStack target) {
+    public static long transferEnergy(BlockEntity source, Direction sourceSide, ItemStack target) {
         IOPStorage storage = getStorage(target);
         return storage == null ? 0 : transferEnergy(source, sourceSide, storage);
     }
 
-    public static long transferEnergy(TileEntity source, Direction sourceSide, TileEntity target, Direction targetSide) {
+    public static long transferEnergy(BlockEntity source, Direction sourceSide, BlockEntity target, Direction targetSide) {
         IOPStorage sourceStorage = getStorage(source, sourceSide);
         if (sourceStorage == null) {
             return 0;
@@ -179,22 +178,22 @@ public class EnergyUtils {
         return storage != null && storage.canReceive();
     }
 
-    public static boolean canExtractEnergy(TileEntity tile, Direction side) {
+    public static boolean canExtractEnergy(BlockEntity tile, Direction side) {
         IOPStorage storage = getStorage(tile, side);
         return storage != null && storage.canExtract();
     }
 
-    public static boolean canReceiveEnergy(TileEntity tile, Direction side) {
+    public static boolean canReceiveEnergy(BlockEntity tile, Direction side) {
         IOPStorage storage = getStorage(tile, side);
         return storage != null && storage.canReceive();
     }
 
-    public static long getEnergyStored(TileEntity tile, Direction side) {
+    public static long getEnergyStored(BlockEntity tile, Direction side) {
         IOPStorage storage = getStorage(tile, side);
         return storage == null ? 0 : storage.getOPStored();
     }
 
-    public static long getMaxEnergyStored(TileEntity tile, Direction side) {
+    public static long getMaxEnergyStored(BlockEntity tile, Direction side) {
         IOPStorage storage = getStorage(tile, side);
         return storage == null ? 0 : storage.getMaxOPStored();
     }
@@ -234,13 +233,13 @@ public class EnergyUtils {
     // ================= Utils =================
 
     @OnlyIn(Dist.CLIENT)
-    public static void addEnergyInfo(ItemStack stack, List<ITextComponent> list) {
+    public static void addEnergyInfo(ItemStack stack, List<Component> list) {
         IOPStorage storage = getStorage(stack);
         if (storage != null) {
             String energy = Utils.formatNumber(storage.getOPStored());
             String maxEnergy = Utils.formatNumber(storage.getMaxOPStored());
             String postFix = Screen.hasShiftDown() ? "(" + I18n.get("op.brandonscore.operational_potential") + ")" : I18n.get("op.brandonscore.op");
-            list.add(new StringTextComponent(I18n.get("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).withStyle(GRAY));
+            list.add(new TextComponent(I18n.get("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).withStyle(ChatFormatting.GRAY));
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.lib;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Created by brandon3055 on 23/11/2016.
@@ -9,5 +9,5 @@ import net.minecraft.item.BlockItemUseContext;
  */
 public interface ITilePlaceListener {
 
-    void onTilePlaced(BlockItemUseContext context, BlockState state);
+    void onTilePlaced(BlockPlaceContext context, BlockState state);
 }

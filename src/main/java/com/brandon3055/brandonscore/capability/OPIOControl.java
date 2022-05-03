@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.capability;
 
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.api.power.OPStorage;
 
 /**
  * Created by brandon3055 on 20/3/20.

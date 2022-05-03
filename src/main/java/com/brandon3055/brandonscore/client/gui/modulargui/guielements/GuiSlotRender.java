@@ -3,15 +3,16 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.model.Material;
 
 /**
  * Created by brandon3055 on 3/09/2016.
  * Renders a simple inventory slot background
  */
+@Deprecated //GO AWAY!
 public class GuiSlotRender extends GuiElement<GuiSlotRender> {
 
     public GuiSlotRender() {
@@ -29,12 +30,11 @@ public class GuiSlotRender extends GuiElement<GuiSlotRender> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.color4f(1F, 1F, 1F, 1F);
-        RenderMaterial mat = BCSprites.getThemed("slot");
-        bindTexture(mat.atlasLocation());
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), getInsetRect().x, getInsetRect().y, 18, 18, mat.sprite());
-        getter.endBatch();
-        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
+//        Material mat = BCSprites.getThemed("slot");
+//        bindTexture(mat.atlasLocation());
+//        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+//        drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), getInsetRect().x, getInsetRect().y, 18, 18, mat.sprite());
+//        getter.endBatch();
+//        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 }

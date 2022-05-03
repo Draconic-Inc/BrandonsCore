@@ -1,17 +1,14 @@
 package com.brandon3055.brandonscore.utils;
 
-import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
 
-import static net.minecraft.util.text.TextFormatting.*;
+import static net.minecraft.ChatFormatting.*;
 
 /**
  * Created by brandon3055 on 7/9/2018.
@@ -40,7 +37,7 @@ public class BCProfiler {
     }
 
     @SubscribeEvent
-    public void renderWorldLast(RenderWorldLastEvent event) {
+    public void renderWorldLast(RenderLevelLastEvent event) {
         if (!enableProfiler) return;
         renderDebug.clear();
         RENDER.dumpDebug(renderDebug);
@@ -49,29 +46,29 @@ public class BCProfiler {
 
     @SubscribeEvent
     public void render(RenderGameOverlayEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (!enableProfiler || event.getType() != RenderGameOverlayEvent.ElementType.ALL || mc.options.renderDebug) {
-            return;
-        }
-
-//        ScaledResolution res = event.getResolution();
-        GlStateManager._pushMatrix();
-        GlStateManager._scaled(1D / mc.getWindow().getGuiScale(), 1D / mc.getWindow().getGuiScale(), 1);
-        GlStateManager._scaled(2, 2, 1);
-
-        int y = 0;
-        List<String> debug = new ArrayList<>();
-        debug.add(String.format("BCore Profiler: %smin time%s, %smax time%s, %saverage time%s - (Over " + timingTicks / 20 + " seconds)", GREEN, RESET, RED, RESET, YELLOW, RESET));
-        debug.add("");
-        debug.addAll(tickDebug);
-        debug.addAll(renderDebug);
-        for (String s: debug) {
-            GuiHelperOld.drawColouredRect(0, y, mc.font.width(s) + 5, 10, 0x90000000);
-            mc.font.draw(event.getMatrixStack(), s, 2, y + 1, 0xFFFFFF);
-            y += 10;
-        }
-
-        GlStateManager._popMatrix();
+//        Minecraft mc = Minecraft.getInstance();
+//        if (!enableProfiler || event.getType() != RenderGameOverlayEvent.ElementType.ALL || mc.options.renderDebug) {
+//            return;
+//        }
+//
+////        ScaledResolution res = event.getResolution();
+//        GlStateManager._pushMatrix();
+//        GlStateManager._scaled(1D / mc.getWindow().getGuiScale(), 1D / mc.getWindow().getGuiScale(), 1);
+//        GlStateManager._scaled(2, 2, 1);
+//
+//        int y = 0;
+//        List<String> debug = new ArrayList<>();
+//        debug.add(String.format("BCore Profiler: %smin time%s, %smax time%s, %saverage time%s - (Over " + timingTicks / 20 + " seconds)", GREEN, RESET, RED, RESET, YELLOW, RESET));
+//        debug.add("");
+//        debug.addAll(tickDebug);
+//        debug.addAll(renderDebug);
+//        for (String s: debug) {
+//            GuiHelperOld.drawColouredRect(0, y, mc.font.width(s) + 5, 10, 0x90000000);
+//            mc.font.draw(event.getMatrixStack(), s, 2, y + 1, 0xFFFFFF);
+//            y += 10;
+//        }
+//
+//        GlStateManager._popMatrix();
     }
 
 

@@ -1,8 +1,8 @@
 package com.brandon3055.brandonscore.inventory;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -19,7 +19,7 @@ public class SlotCheckValid extends SlotItemHandler {
     }
 
     public static class IInv extends Slot {
-        public IInv(IInventory itemHandler, int id, int x, int y) {
+        public IInv(Container itemHandler, int id, int x, int y) {
             super(itemHandler, id, x, y);
         }
 

@@ -1,22 +1,21 @@
 package com.brandon3055.brandonscore.client;
 
-import codechicken.lib.render.buffer.TransformingVertexBuilder;
-import codechicken.lib.util.SneakyUtils;
+import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout;
 import com.brandon3055.brandonscore.client.render.GuiSpriteUploader;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderState;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ColorHandlerEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -33,14 +32,15 @@ public class BCSprites {
 
     private static GuiSpriteUploader guiSpriteUploader;
     private static final Set<ResourceLocation> registeredSprites = new HashSet<>();
-    private static final Map<String, RenderMaterial> matCache = new HashMap<>();
+    private static final Map<String, Material> matCache = new HashMap<>();
 
-    public static final RenderType GUI_TYPE = RenderType.create("gui_tex", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
-            .setTextureState(new RenderState.TextureState(LOCATION_GUI_ATLAS, false, false))
-            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .setCullState(RenderState.NO_CULL)
-            .setAlphaState(RenderState.DEFAULT_ALPHA)
-            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+    public static final RenderType GUI_TYPE = RenderType.create("gui_tex", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, 256, RenderType.CompositeState.builder()
+            .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorTexShader))
+            .setTextureState(new RenderStateShard.TextureStateShard(LOCATION_GUI_ATLAS, false, false))
+            .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+            .setCullState(RenderStateShard.NO_CULL)
+//            .setAlphaState(RenderStateShard.DEFAULT_ALPHA)
+//            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
             .createCompositeState(false)
     );
 
@@ -149,19 +149,19 @@ public class BCSprites {
     }
 
     //endregion
-    public static RenderMaterial getThemed(String modid, String location) {
+    public static Material getThemed(String modid, String location) {
         return get(modid, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static RenderMaterial getThemed(String location) {
+    public static Material getThemed(String location) {
         return get(MODID, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static RenderMaterial get(String modid, String location) {
+    public static Material get(String modid, String location) {
         return matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
     }
 
-    public static RenderMaterial get(String location) {
+    public static Material get(String location) {
         return get(MODID, location);
     }
 
@@ -169,45 +169,46 @@ public class BCSprites {
         return get(location).sprite();
     }
 
-    public static Supplier<RenderMaterial> themedGetter(String modid, String location) {
+    public static Supplier<Material> themedGetter(String modid, String location) {
         return () -> get(modid, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static Supplier<RenderMaterial> themedGetter(String location) {
+    public static Supplier<Material> themedGetter(String location) {
         return () -> get(MODID, (BCConfig.darkMode ? "dark/" : "light/") + location);
     }
 
-    public static Supplier<RenderMaterial> getter(String modid, String location) {
+    public static Supplier<Material> getter(String modid, String location) {
         return () -> matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
     }
 
-    public static Supplier<RenderMaterial> getter(String location) {
+    public static Supplier<Material> getter(String location) {
         return () -> get(MODID, location);
     }
 
-    public static RenderMaterial getButton(int state) {
+    public static Material getButton(int state) {
         return getThemed(state == 1 ? "button" : state == 2 ? "button_highlight" : "button_disabled");
     }
 
     private static String[] ARMOR_ORDER = new String[] {"slots/armor_boots", "slots/armor_leggings", "slots/armor_chestplate", "slots/armor_helmet"};
-    public static RenderMaterial getArmorSlot(int slot) {
+    public static Material getArmorSlot(int slot) {
         return get(ARMOR_ORDER[slot]);
     }
 
     public static RenderType makeType(ResourceLocation location) {
-        return RenderType.create("sprite_type", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.builder()
-                .setTextureState(new RenderState.TextureState(location, false, false))
-                .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-                .setCullState(RenderState.NO_CULL)
-                .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+        return RenderType.create("sprite_type", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, 256, RenderType.CompositeState.builder()
+                .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader))
+                .setTextureState(new RenderStateShard.TextureStateShard(location, false, false))
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(RenderStateShard.NO_CULL)
+//                .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
                 .createCompositeState(false));
     }
 
-    public static IVertexBuilder builder(IRenderTypeBuffer getter, MatrixStack mStack) {
-        return new TransformingVertexBuilder(getter.getBuffer(BCSprites.GUI_TYPE), mStack);
+    public static VertexConsumer builder(MultiBufferSource getter, PoseStack mStack) {
+        return new TransformingVertexConsumer(getter.getBuffer(BCSprites.GUI_TYPE), mStack);
     }
 
-    public static IVertexBuilder builder(IRenderTypeBuffer getter) {
+    public static VertexConsumer builder(MultiBufferSource getter) {
         return getter.getBuffer(BCSprites.GUI_TYPE);
     }
 
@@ -225,7 +226,7 @@ public class BCSprites {
 //        return BCConfig.darkMode ? WIDGETS_DARK : WIDGETS_LIGHT;
 //    }
 
-    private static class CustomMat extends RenderMaterial {
+    private static class CustomMat extends Material {
 
         public CustomMat(ResourceLocation atlasLocationIn, ResourceLocation textureLocationIn) {
             super(atlasLocationIn, textureLocationIn);

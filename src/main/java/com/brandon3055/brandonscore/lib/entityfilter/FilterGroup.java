@@ -5,11 +5,11 @@ import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 import java.util.Map;
 
@@ -84,13 +84,13 @@ public class FilterGroup extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("and_group", andGroup);
         if (!subNodeMap.isEmpty()) {
-            ListNBT subs = new ListNBT();
+            ListTag subs = new ListTag();
             subNodeMap.values().forEach(node -> {
-                CompoundNBT tag = node.serializeNBT();
+                CompoundTag tag = node.serializeNBT();
                 tag.putByte("filter_type", (byte) node.getType().index);
                 subs.add(tag);
             });
@@ -100,17 +100,17 @@ public class FilterGroup extends FilterBase {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         andGroup = nbt.getBoolean("and_group");
         subNodeMap.clear();
         if (nbt.contains("sub_nodes")) {
-            ListNBT tagList = nbt.getList("sub_nodes", 10);
-            for (INBT tag : tagList) {
-                FilterType type = FilterType.filterTypeMap[((CompoundNBT) tag).getByte("filter_type")];
+            ListTag tagList = nbt.getList("sub_nodes", 10);
+            for (Tag tag : tagList) {
+                FilterType type = FilterType.filterTypeMap[((CompoundTag) tag).getByte("filter_type")];
                 FilterBase node = type.createNode(getFilter());
                 node.onLoaded(this);
-                node.deserializeNBT((CompoundNBT) tag);
+                node.deserializeNBT((CompoundTag) tag);
                 if (node.nodeID == 0 && !(node instanceof EntityFilter)) {
                     LogHelperBC.warn("EntityFilter: Skipping broken filter node");
                     continue; //Something broke and this node lost its id so it has to go!

@@ -1,11 +1,11 @@
 package com.brandon3055.brandonscore.utils;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /**
@@ -16,18 +16,18 @@ public class MultiBlockHelper {
     public BlockPos invalidBlock = null;
     public String expectedBlock = null;
 
-    public boolean checkBlock(String name, World world, BlockPos pos) {
+    public boolean checkBlock(String name, Level world, BlockPos pos) {
         BlockState state = world.getBlockState(pos);
         if (name.equals("")) {
             return true;
         } else if (name.equals("air")) {
-            return state.getBlock().isAir(state, world, pos);
+            return state.isAir();
         } else {
             return ForgeRegistries.BLOCKS.getKey(state.getBlock()).toString().equals(name);
         }
     }
 
-    public void setBlock(String name, World world, BlockPos pos) {
+    public void setBlock(String name, Level world, BlockPos pos) {
         Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name));
         if (block != null) {
             world.setBlockAndUpdate(pos, block.defaultBlockState());
@@ -44,7 +44,7 @@ public class MultiBlockHelper {
      * @param startPos is position 0, 0, 0 in the storage array
      * @param flag     is passed through from forEachInStructure and can be used for whatever you want.
      */
-    public void forBlock(String name, World world, BlockPos pos, BlockPos startPos, int flag) {
+    public void forBlock(String name, Level world, BlockPos pos, BlockPos startPos, int flag) {
         //You can override this method and do some custom stuff with this block
     }
 }

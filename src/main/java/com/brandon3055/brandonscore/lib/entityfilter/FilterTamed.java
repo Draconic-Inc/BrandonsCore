@@ -2,9 +2,9 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.TamableAnimal;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -42,9 +42,9 @@ public class FilterTamed extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        boolean isTamable = entity instanceof TameableEntity;
+        boolean isTamable = entity instanceof TamableAnimal;
         if (isTamable) {
-            TameableEntity ownable = (TameableEntity) entity;
+            TamableAnimal ownable = (TamableAnimal) entity;
             if (ownable.getOwnerUUID() != null) {
                 return whitelistTamed;
             }
@@ -59,15 +59,15 @@ public class FilterTamed extends FilterBase {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT compound = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag compound = super.serializeNBT();
         compound.putBoolean("include", whitelistTamed);
         compound.putBoolean("tamable", includeTamable);
         return compound;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         whitelistTamed = nbt.getBoolean("include");
         includeTamable = nbt.getBoolean("tamable");

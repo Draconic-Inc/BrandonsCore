@@ -1,15 +1,15 @@
 package com.brandon3055.brandonscore.client.particle;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.particle.IParticleRenderType;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 /**
  * Created by brandon3055 on 2/5/2016.
@@ -22,11 +22,11 @@ public class BCParticle extends Particle {
     protected float airResistance = 0;
     protected float baseScale = 1;
 
-    public BCParticle(ClientWorld worldIn, Vec3D pos) {
+    public BCParticle(ClientLevel worldIn, Vec3D pos) {
         super(worldIn, pos.x, pos.y, pos.z);
     }
 
-    public BCParticle(ClientWorld worldIn, Vec3D pos, Vec3D speed) {
+    public BCParticle(ClientLevel worldIn, Vec3D pos, Vec3D speed) {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 
@@ -93,7 +93,7 @@ public class BCParticle extends Particle {
         return new Vec3D(x, y, z);
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return level;
     }
 
@@ -112,12 +112,12 @@ public class BCParticle extends Particle {
 
 
     @Override
-    public void render(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
+    public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks) {
 
     }
 
     @Override
-    public IParticleRenderType getRenderType() {
+    public ParticleRenderType getRenderType() {
         return null;
     }
 
@@ -128,7 +128,7 @@ public class BCParticle extends Particle {
         }
 
         @Override
-        public void postDraw(int layer, BufferBuilder vertexbuffer, Tessellator tessellator) {
+        public void postDraw(int layer, BufferBuilder vertexbuffer, Tesselator tessellator) {
 
         }
     };

@@ -1,39 +1,33 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import codechicken.lib.math.MathHelper;
-import codechicken.lib.vec.Cuboid6;
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.MDElementContainer;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
-import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.lib.DLResourceLocation;
-import com.brandon3055.brandonscore.lib.ScissorHelper;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeBuffers;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 
 /**
@@ -103,7 +97,6 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.color4f(1, 1, 1, 1);
         if (downloading || resourceLocation.dlFailed) {
             renderDownloading(partialTicks);
         } else {
@@ -119,7 +112,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
                 int w = xSize() - rightPad - leftPad;
                 int h = ySize() - bottomPad - topPad;
-                IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
+                MultiBufferSource getter = RenderUtils.getTypeBuffer();
                 GuiHelper.drawTexture(getter.getBuffer(imageType), xPos() + leftPad, yPos() + topPad, w, h);
 //                container.drawModalRectWithCustomSizedTexture(xPos() + leftPad, yPos() + topPad, 0, 0, w, h, w, h);
                 RenderUtils.endBatch(getter);
@@ -130,10 +123,10 @@ public class ImageElement extends MDElementBase<ImageElement> {
     }
 
     private void renderDownloading(float partialTicks) {
-        IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
+        MultiBufferSource getter = RenderUtils.getTypeBuffer();
 
         boolean failed = resourceLocation.dlFailed;
-        RenderMaterial mat = failed ? BCSprites.get("download_failed") : BCSprites.get("downloading");
+        Material mat = failed ? BCSprites.get("download_failed") : BCSprites.get("downloading");
         float failTicks = failed ? 0 : partialTicks;
         float anim = MathHelper.clip((loadingTime + failTicks) / (float) maxLoadTime, 0, 1);
 
@@ -211,9 +204,9 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
             List<String> tooltip = new ArrayList<>();
             if (resourceLocation.dlFailed) {
-                tooltip.add(TextFormatting.RED + I18n.get("gui.bc.downloading_image_failed.info"));
+                tooltip.add(ChatFormatting.RED + I18n.get("gui.bc.downloading_image_failed.info"));
             } else if (!resourceLocation.dlFinished) {
-                tooltip.add(TextFormatting.GREEN + I18n.get("gui.bc.downloading_image.info"));
+                tooltip.add(ChatFormatting.GREEN + I18n.get("gui.bc.downloading_image.info"));
             }
 
             if (enableTooltip && !this.tooltip.isEmpty()) {
@@ -221,7 +214,9 @@ public class ImageElement extends MDElementBase<ImageElement> {
             }
 
             if (!tooltip.isEmpty()) {
-                drawHoveringText(tooltip, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
+                PoseStack poseStack = new PoseStack();
+                poseStack.translate(0, 0, getRenderZLevel());
+                renderTooltip(poseStack, tooltip.stream().map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
                 return true;
             }
         }

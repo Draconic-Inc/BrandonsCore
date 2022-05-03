@@ -2,18 +2,10 @@ package com.brandon3055.brandonscore;
 
 import codechicken.lib.config.ConfigTag;
 import codechicken.lib.config.StandardConfigFile;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**

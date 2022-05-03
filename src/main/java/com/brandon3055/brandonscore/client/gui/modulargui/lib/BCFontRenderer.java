@@ -1,15 +1,14 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import com.brandon3055.brandonscore.utils.Utils;
+import com.mojang.math.Matrix4f;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.fonts.Font;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.IReorderingProcessor;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.font.FontSet;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,20 +20,20 @@ import java.util.function.Function;
  * Created by brandon3055 on 10/07/2017.
  */
 @Deprecated //TODO Investigate changes to the vanilla font renderer and ether remove or update this
-public class BCFontRenderer extends FontRenderer {
+public class BCFontRenderer extends Font {
     private static boolean styleToggleMode = false;
     private static boolean colourSet = false;
     private static int prevFormat = -1;
     private static boolean colourFormatSet = false;
-    private static Map<FontRenderer, BCFontRenderer> cashedRenderers = new HashMap<>();
+    private static Map<Font, BCFontRenderer> cashedRenderers = new HashMap<>();
 
-    public BCFontRenderer(Function<ResourceLocation, Font> font) {
+    public BCFontRenderer(Function<ResourceLocation, FontSet> font) {
         super(font);
     }
 
 
     @Override
-    protected int drawInternal(String text, float x, float y, int colour, boolean shadow, Matrix4f mat4f, IRenderTypeBuffer getter, boolean boolFalse, int int0, int int1, boolean biDirection) {
+    protected int drawInternal(String text, float x, float y, int colour, boolean shadow, Matrix4f mat4f, MultiBufferSource getter, boolean boolFalse, int int0, int int1, boolean biDirection) {
         if (biDirection) {
             text = this.bidirectionalShaping(text);
         }
@@ -51,7 +50,7 @@ public class BCFontRenderer extends FontRenderer {
     }
 
     @Override
-    protected int drawInternal(IReorderingProcessor p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, IRenderTypeBuffer buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
+    protected int drawInternal(FormattedCharSequence p_238424_1_, float x, float y, int color, boolean p_238424_5_, Matrix4f matrix, MultiBufferSource buffer, boolean p_238424_8_, int p_238424_9_, int p_238424_10_) {
         color = adjustColor(color);
         Matrix4f matrix4f = matrix.copy();
         if (p_238424_5_) {
@@ -115,8 +114,8 @@ public class BCFontRenderer extends FontRenderer {
                 case '\u00a7':
                     if (k < j - 1) {
                         ++k;
-                        TextFormatting textformatting = TextFormatting.getByCode(str.charAt(k));
-                        if (textformatting == TextFormatting.BOLD) {
+                        ChatFormatting textformatting = ChatFormatting.getByCode(str.charAt(k));
+                        if (textformatting == ChatFormatting.BOLD) {
                             flag = true;
                         } else if (textformatting != null && !textformatting.isFormat()) {
                             flag = false;
@@ -317,7 +316,7 @@ public class BCFontRenderer extends FontRenderer {
 //        }
 //    }
 
-    public static BCFontRenderer convert(FontRenderer fontRenderer) {
+    public static BCFontRenderer convert(Font fontRenderer) {
         if (!cashedRenderers.containsKey(fontRenderer)) {
             BCFontRenderer fr = new BCFontRenderer(fontRenderer.fonts);
 //                        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(fr);

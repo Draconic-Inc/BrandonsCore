@@ -1,33 +1,18 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.ScreenOpenEvent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
-import org.lwjgl.stb.STBImage;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,8 +67,8 @@ public class CursorHelper {
         return result;
     }
 
-    public static void closeGui(GuiOpenEvent event) {
-        if (event.getGui() == null) {
+    public static void closeGui(ScreenOpenEvent event) {
+        if (event.getScreen() == null) {
             resetCursor();
         }
     }

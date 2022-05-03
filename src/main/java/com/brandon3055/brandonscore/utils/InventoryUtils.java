@@ -3,12 +3,12 @@ package com.brandon3055.brandonscore.utils;
 
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.lib.functions.TriPredicate;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
@@ -18,7 +18,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 
 public class InventoryUtils {
 
-    public static boolean hasStack(ItemStack stack, IInventory inventory) {
+    public static boolean hasStack(ItemStack stack, Container inventory) {
         if (stack.isEmpty()) {
             return false;
         }
@@ -35,7 +35,7 @@ public class InventoryUtils {
         return false;
     }
 
-    public static boolean consumeStack(ItemStack stack, IInventory inventory) {
+    public static boolean consumeStack(ItemStack stack, Container inventory) {
         if (stack.isEmpty()) {
             return false;
         }
@@ -66,20 +66,20 @@ public class InventoryUtils {
      * When inserting will first try to insert the item in the main hand and if that fails it will try the off hand.
      * Will not transfer partial stacks.
      */
-    public static void handleHeldStackTransfer(int slot, IInventory inventory, PlayerEntity player) {
+    public static void handleHeldStackTransfer(int slot, Container inventory, Player player) {
         if (player.level.isClientSide) {
             return;
         }
 
         if (!inventory.getItem(slot).isEmpty()) {
             if (player.getMainHandItem().isEmpty()) {
-                player.setItemInHand(Hand.MAIN_HAND, inventory.getItem(slot));
+                player.setItemInHand(InteractionHand.MAIN_HAND, inventory.getItem(slot));
             } else {
                 givePlayerStack(player, inventory.getItem(slot));
             }
             inventory.setItem(slot, ItemStack.EMPTY);
         } else {
-            DataUtils.forEach(Hand.values(), enumHand -> {
+            DataUtils.forEach(InteractionHand.values(), enumHand -> {
                 ItemStack stack = player.getItemInHand(enumHand);
                 if (!stack.isEmpty() && inventory.canPlaceItem(slot, stack) && inventory.getItem(slot).isEmpty()) {
                     inventory.setItem(slot, stack);
@@ -89,20 +89,20 @@ public class InventoryUtils {
         }
     }
 
-    public static void handleHeldStackTransfer(int slot, IItemHandlerModifiable inventory, PlayerEntity player) {
+    public static void handleHeldStackTransfer(int slot, IItemHandlerModifiable inventory, Player player) {
         if (player.level.isClientSide) {
             return;
         }
 
         if (!inventory.getStackInSlot(slot).isEmpty()) {
             if (player.getMainHandItem().isEmpty()) {
-                player.setItemInHand(Hand.MAIN_HAND, inventory.getStackInSlot(slot));
+                player.setItemInHand(InteractionHand.MAIN_HAND, inventory.getStackInSlot(slot));
             } else {
                 givePlayerStack(player, inventory.getStackInSlot(slot));
             }
             inventory.setStackInSlot(slot, ItemStack.EMPTY);
         } else {
-            for (Hand hand : Hand.values()) {
+            for (InteractionHand hand : InteractionHand.values()) {
                 ItemStack stack = player.getItemInHand(hand);
                 if (!stack.isEmpty() && inventory.isItemValid(slot, stack)) {
                     inventory.setStackInSlot(slot, stack);
@@ -113,7 +113,7 @@ public class InventoryUtils {
         }
     }
 
-    public static void consumeHeldItem(PlayerEntity player, ItemStack stack, Hand hand) {
+    public static void consumeHeldItem(Player player, ItemStack stack, InteractionHand hand) {
         stack.shrink(1);
         player.setItemInHand(hand, stack.getCount() > 0 ? stack.copy() : ItemStack.EMPTY);
     }
@@ -123,13 +123,13 @@ public class InventoryUtils {
      * if their inventory has no room.
      * Will prioritize putting it in their hand if their hand is empty.
      * */
-    public static void givePlayerStack(PlayerEntity player, ItemStack stack) {
+    public static void givePlayerStack(Player player, ItemStack stack) {
         if (player.level.isClientSide) {
             return;
         }
 
-        if (player.getItemInHand(Hand.MAIN_HAND).isEmpty()) {
-            player.setItemInHand(Hand.MAIN_HAND, stack);
+        if (player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
+            player.setItemInHand(InteractionHand.MAIN_HAND, stack);
             return;
         }
 
@@ -139,7 +139,7 @@ public class InventoryUtils {
         }
     }
 
-    public static void dropItemNoDelay(ItemStack stack, World world, Vector3 dropLocation) {
+    public static void dropItemNoDelay(ItemStack stack, Level world, Vector3 dropLocation) {
         ItemEntity item = new ItemEntity(world, dropLocation.x, dropLocation.y, dropLocation.z, stack);
         item.setDeltaMovement(world.random.nextGaussian() * 0.05, world.random.nextGaussian() * 0.05 + 0.2F, world.random.nextGaussian() * 0.05);
         world.addFreshEntity(item);

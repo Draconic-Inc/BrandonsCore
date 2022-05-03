@@ -2,16 +2,16 @@ package com.brandon3055.brandonscore.inventory;
 
 import codechicken.lib.inventory.InventoryUtils;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
@@ -27,26 +27,26 @@ public class BlockToStackHelper {
     public static FakePlayer harvester = null;
     public static List<ItemStack> itemCollection = null;
 
-    public static List<ItemStack> breakAndCollect(World world, BlockPos pos, int xp) {
+    public static List<ItemStack> breakAndCollect(Level world, BlockPos pos, int xp) {
         return breakAndCollectWithPlayer(world, pos, null, xp);
     }
 
-    public static List<ItemStack> breakAndCollectWithPlayer(World world, BlockPos pos, PlayerEntity player, int xp) {
+    public static List<ItemStack> breakAndCollectWithPlayer(Level world, BlockPos pos, Player player, int xp) {
         List<ItemStack> stacks = new ArrayList<ItemStack>();
 
-        if (!(world instanceof ServerWorld)) {
+        if (!(world instanceof ServerLevel)) {
             return stacks;
         }
 
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
         if (player == null) {
-            player = getHarvester((ServerWorld) world);
+            player = getHarvester((ServerLevel) world);
         }
         itemCollection = new ArrayList<>();
 
-        TileEntity tile = world.getBlockEntity(pos);
-        if (state.removedByPlayer(world, pos, player, true, world.getFluidState(pos))){
+        BlockEntity tile = world.getBlockEntity(pos);
+        if (state.onDestroyedByPlayer(world, pos, player, true, world.getFluidState(pos))){
             state.getBlock().destroy(world, pos, state);
             block.playerDestroy(world, player, pos, state, tile, player.getMainHandItem());
         }
@@ -56,11 +56,11 @@ public class BlockToStackHelper {
         return stacks;
     }
 
-    public static void breakAndCollect(World world, BlockPos pos, InventoryDynamic inventoryDynamic, int xp) {
+    public static void breakAndCollect(Level world, BlockPos pos, InventoryDynamic inventoryDynamic, int xp) {
         breakAndCollectWithPlayer(world, pos, inventoryDynamic, null, xp);
     }
 
-    public static void breakAndCollectWithPlayer(World world, BlockPos pos, InventoryDynamic inventoryDynamic, PlayerEntity player, int xp) {
+    public static void breakAndCollectWithPlayer(Level world, BlockPos pos, InventoryDynamic inventoryDynamic, Player player, int xp) {
         List<ItemStack> stacks = breakAndCollectWithPlayer(world, pos, player, xp);
         for (ItemStack stack : stacks) {
             if (stack != null && !stack.isEmpty()){
@@ -70,10 +70,10 @@ public class BlockToStackHelper {
         inventoryDynamic.xp += xp;
     }
 
-    public static FakePlayer getHarvester(ServerWorld world) {
+    public static FakePlayer getHarvester(ServerLevel world) {
         if (harvester == null) {
             harvester = FakePlayerFactory.get(world, new GameProfile(UUID.fromString("060e69c4-6aed-11e6-8b77-86f30ca893d3"), "[Brandons-Core]"));
-            harvester.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
+            harvester.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
         }
 
         return harvester;

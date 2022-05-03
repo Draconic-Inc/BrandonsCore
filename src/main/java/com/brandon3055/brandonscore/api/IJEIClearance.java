@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.api;
 
-import net.minecraft.client.renderer.Rectangle2d;
+import net.minecraft.client.renderer.Rect2i;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ public interface IJEIClearance {
      * This returns a list of rectangles where JEI should not render items.
      * x/y is the location of the top left of the rectangle.
      */
-    List<Rectangle2d> getGuiExtraAreas();
+    List<Rect2i> getGuiExtraAreas();
 }

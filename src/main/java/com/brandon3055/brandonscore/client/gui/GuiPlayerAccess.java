@@ -13,10 +13,10 @@ import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.player.Inventory;
 
 /**
  * Created by brandon3055 on 6/23/2018.
@@ -27,8 +27,8 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
     public BlockPos pos = new BlockPos(0, 0, 0);
     public int dimension = 0;
 
-    public GuiPlayerAccess(ContainerPlayerAccess container,  PlayerInventory player) {
-        super(container, player, new StringTextComponent("Player Access"));
+    public GuiPlayerAccess(ContainerPlayerAccess container,  Inventory player) {
+        super(container, player, new TextComponent("Player Access"));
         imageWidth = 220;
         imageHeight = 250;
     }
@@ -49,7 +49,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         accessSlots.setPos(bg.xPos() + (bg.xSize() / 2) - (accessSlots.xSize() / 2), label.maxYPos() + 2);
         LogHelperBC.dev((accessSlots.xPos() - leftPos)+" "+(accessSlots.yPos() - topPos));
 
-        GuiLabel posLabel = new GuiLabel().setDisplaySupplier(() -> String.format("Pos: " + TextFormatting.BLUE + "X: %s, Y: %s, Z: %s, Dim: %s", pos.getX(), pos.getY(), pos.getZ(), dimension));
+        GuiLabel posLabel = new GuiLabel().setDisplaySupplier(() -> String.format("Pos: " + ChatFormatting.BLUE + "X: %s, Y: %s, Z: %s, Dim: %s", pos.getX(), pos.getY(), pos.getZ(), dimension));
         posLabel.setShadow(false).setTextColour(0);
         posLabel.setAlignment(GuiAlign.LEFT);
         posLabel.setSize(accessSlots.xSize(), 12);
@@ -76,7 +76,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         clearInventory.setSize(18, 18);
         clearInventory.setPos(accessSlots.maxXPos() - 18, accessSlots.yPos());
         clearInventory.onPressed(() -> {
-            GuiPopupDialogs.createDialog(clearInventory, GuiPopupDialogs.DialogType.OK_CANCEL_OPTION, TextFormatting.RED + "Are you sure you want to clear " + name + "'s Inventory?\nThis cannot be undone!") //
+            GuiPopupDialogs.createDialog(clearInventory, GuiPopupDialogs.DialogType.OK_CANCEL_OPTION, ChatFormatting.RED + "Are you sure you want to clear " + name + "'s Inventory?\nThis cannot be undone!") //
             .setOkListener(() -> BCoreNetwork.sendPlayerAccessButton(2)) //
             .showCenter();
         });

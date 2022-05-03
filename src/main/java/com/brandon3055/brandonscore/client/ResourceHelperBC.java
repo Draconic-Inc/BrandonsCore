@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -12,6 +12,7 @@ import java.util.Map;
  * Created by brandon3055 on 29/3/2016.
  * Helper function to bind and cache resource locations.
  */
+@Deprecated
 public class ResourceHelperBC {
 
     private static ResourceLocation vanillaParticles;
@@ -19,7 +20,7 @@ public class ResourceHelperBC {
     public static final String RESOURCE_PREFIX = BrandonsCore.MODID.toLowerCase(Locale.ENGLISH) + ":";
 
     public static void bindTexture(ResourceLocation texture) {
-        Minecraft.getInstance().textureManager.bind(texture);
+        Minecraft.getInstance().textureManager.bindForSetup(texture);
     }
 
     public static ResourceLocation getResource(String rs) {

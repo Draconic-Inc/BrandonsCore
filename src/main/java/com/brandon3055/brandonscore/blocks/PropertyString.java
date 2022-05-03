@@ -4,7 +4,7 @@ import codechicken.lib.math.MathHelper;
 import codechicken.lib.util.ArrayUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import net.minecraft.state.Property;
+import net.minecraft.world.level.block.state.properties.Property;
 
 import javax.annotation.Nonnull;
 import java.util.*;

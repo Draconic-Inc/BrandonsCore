@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
@@ -10,8 +10,8 @@ public final class ItemNBTHelper {
 
 
     // SETTERS ///////////////////////////////////////////////////////////////////
-    public static CompoundNBT getCompound(ItemStack stack) {
-        if (stack.getTag() == null) stack.setTag(new CompoundNBT());
+    public static CompoundTag getCompound(ItemStack stack) {
+        if (stack.getTag() == null) stack.setTag(new CompoundTag());
         return stack.getTag();
     }
 
@@ -63,7 +63,7 @@ public final class ItemNBTHelper {
     // GETTERS ///////////////////////////////////////////////////////////////////
 
     public static boolean verifyExistance(ItemStack stack, String tag) {
-        CompoundNBT compound = stack.getTag();
+        CompoundTag compound = stack.getTag();
         if (compound == null) return false;
         else return stack.getTag().contains(tag);
     }

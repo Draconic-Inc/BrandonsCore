@@ -1,16 +1,14 @@
 package com.brandon3055.brandonscore.inventory;
 
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
@@ -22,29 +20,29 @@ import java.util.List;
  * Created by brandon3055 on 28/3/2016.
  * Base class for all containers. Handles syncing on syncable objects inside an attached TileBCBase.
  */
-public class ContainerBCore<D> extends Container {
+public class ContainerBCore<D> extends AbstractContainerMenu {
 
-    protected PlayerEntity player;
+    protected Player player;
     protected LayoutFactory<D> factory;
     protected ContainerSlotLayout slotLayout;
 
-    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory playerInv, PacketBuffer extraData) {
+    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory playerInv, FriendlyByteBuf extraData) {
         super(type, windowId);
         this.player = playerInv.player;
     }
 
-    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, PacketBuffer extraData, LayoutFactory<D> factory) {
+    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<D> factory) {
         this(type, windowId, player, extraData);
         this.factory = factory;
         this.buildSlotLayout();
     }
 
-    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory player) {
+    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player) {
         super(type, windowId);
         this.player = player.player;
     }
 
-    public ContainerBCore(@Nullable ContainerType<?> type, int windowId, PlayerInventory player, LayoutFactory<D> factory) {
+    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player, LayoutFactory<D> factory) {
         this(type, windowId, player);
         this.player = player.player;
         this.factory = factory;
@@ -73,19 +71,19 @@ public class ContainerBCore<D> extends Container {
     }
 
     @Override
-    public void addSlotListener(IContainerListener listener) {
+    public void addSlotListener(ContainerListener listener) {
         super.addSlotListener(listener);
     }
 
     @Override
-    public boolean stillValid(PlayerEntity playerIn) {
+    public boolean stillValid(Player playerIn) {
         return true;
     }
 
     //Note to self: This is called from a loop. As long as this does not return an empty stack the loop will continue.
     //Returning an empty stack essentially indicates that no more items can be transferred.
     @Override
-    public ItemStack quickMoveStack(PlayerEntity player, int i) {
+    public ItemStack quickMoveStack(Player player, int i) {
         int playerSlots = 36;
         if (slotLayout != null) {
             playerSlots = slotLayout.getPlayerSlotCount();
@@ -104,8 +102,7 @@ public class ContainerBCore<D> extends Container {
                     if (!moveItemStackTo(stack, 0, playerSlots, false)) {
                         return ItemStack.EMPTY; //Return if failed to merge
                     }
-                }
-                else {
+                } else {
                     //Transferring from player to tile
                     if (!moveItemStackTo(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
                         return ItemStack.EMPTY;  //Return if failed to merge
@@ -114,8 +111,7 @@ public class ContainerBCore<D> extends Container {
 
                 if (stack.getCount() == 0) {
                     slot.set(ItemStack.EMPTY);
-                }
-                else {
+                } else {
                     slot.setChanged();
                 }
 
@@ -129,12 +125,14 @@ public class ContainerBCore<D> extends Container {
 
     //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
 
+
     @Override
-    public void setItem(int slotID, ItemStack stack) {
+    public void setItem(int slotID, int stateId, ItemStack stack) {
         Slot slot = this.getSlot(slotID);
         if (slot != null) {
             slot.set(stack);
         }
+        this.stateId = stateId;
     }
 
     @Override
@@ -146,14 +144,16 @@ public class ContainerBCore<D> extends Container {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void setAll(List<ItemStack> stacks) {
+    public void initializeContents(int stateId, List<ItemStack> stacks, ItemStack carried) {
         for (int i = 0; i < stacks.size(); ++i) {
             Slot slot = getSlot(i);
             if (slot != null) {
                 slot.set(stacks.get(i));
             }
         }
+
+        this.carried = carried;
+        this.stateId = stateId;
     }
 
     /**

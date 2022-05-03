@@ -1,24 +1,23 @@
 package com.brandon3055.brandonscore.worldentity;
 
-import codechicken.lib.util.SneakyUtils;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.RegistryEvent;
+import net.covers1624.quack.util.SneakyUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
@@ -28,26 +27,26 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
  */
 @Mod.EventBusSubscriber(modid = BrandonsCore.MODID, bus = FORGE)
 public class WorldEntityHandler {
-    public static ForgeRegistry<WorldEntityType<?>> REGISTRY;
+    public static IForgeRegistry<WorldEntityType<?>> REGISTRY;
     private static final Map<UUID, WorldEntity> ID_ENTITY_MAP = new HashMap<>();
-    private static final Map<RegistryKey<World>, List<WorldEntity>> WORLD_ENTITY_MAP = new HashMap<>();
-    private static final Map<RegistryKey<World>, List<ITickableWorldEntity>> TICKING_ENTITY_MAP = new HashMap<>();
-    private static final Map<RegistryKey<World>, List<WorldEntity>> ADDED_WORLD_ENTITIES = new HashMap<>();
+    private static final Map<ResourceKey<Level>, List<WorldEntity>> WORLD_ENTITY_MAP = new HashMap<>();
+    private static final Map<ResourceKey<Level>, List<ITickableWorldEntity>> TICKING_ENTITY_MAP = new HashMap<>();
+    private static final Map<ResourceKey<Level>, List<WorldEntity>> ADDED_WORLD_ENTITIES = new HashMap<>();
 
-    public static void createRegistry(RegistryEvent.NewRegistry event) {
-        REGISTRY = (ForgeRegistry<WorldEntityType<?>>) new RegistryBuilder<>()
-                .setName(new ResourceLocation(BrandonsCore.MODID, "world_entity"))
-                .setType(SneakyUtils.unsafeCast(WorldEntityType.class))
-                .disableSaving()
-                .disableSync()
-                .create();
+    public static void createRegistry(NewRegistryEvent event) {
+        event.create(new RegistryBuilder<WorldEntityType<?>>()
+                        .setName(new ResourceLocation(BrandonsCore.MODID, "world_entity"))
+                        .setType(SneakyUtils.unsafeCast(WorldEntityType.class))
+                        .disableSaving()
+                        .disableSync(),
+                ts -> REGISTRY = ts);
     }
 
     @SubscribeEvent
     public static void worldLoad(WorldEvent.Load event) {
-        if (!(event.getWorld() instanceof ServerWorld)) return;
-        ServerWorld world = (ServerWorld) event.getWorld();
-        RegistryKey<World> key = world.dimension();
+        if (!(event.getWorld() instanceof ServerLevel)) return;
+        ServerLevel world = (ServerLevel) event.getWorld();
+        ResourceKey<Level> key = world.dimension();
 
         //If the world was unloaded properly then this should always be null. But better safe
         List<WorldEntity> oldEntities = WORLD_ENTITY_MAP.remove(key);
@@ -58,23 +57,23 @@ public class WorldEntityHandler {
             WORLD_ENTITY_MAP.remove(key);
         }
 
-        WorldEntitySaveData data = world.getDataStorage().computeIfAbsent(WorldEntitySaveData::new, WorldEntitySaveData.ID);
+        WorldEntitySaveData data = world.getDataStorage().computeIfAbsent(WorldEntitySaveData::load,WorldEntitySaveData::new, WorldEntitySaveData.FILE_ID);
         data.setSaveCallback(() -> handleSave(data, key));
         for (WorldEntity entity : data.getEntities()) {
             addWorldEntity(world, entity);
         }
     }
 
-    private static void handleSave(WorldEntitySaveData data, RegistryKey<World> key) {
+    private static void handleSave(WorldEntitySaveData data, ResourceKey<Level> key) {
         List<WorldEntity> worldEntities = WORLD_ENTITY_MAP.get(key);
         data.updateEntities(worldEntities);
     }
 
     @SubscribeEvent
     public static void worldUnload(WorldEvent.Unload event) {
-        if (!(event.getWorld() instanceof ServerWorld)) return;
-        ServerWorld world = (ServerWorld) event.getWorld();
-        RegistryKey<World> key = world.dimension();
+        if (!(event.getWorld() instanceof ServerLevel)) return;
+        ServerLevel world = (ServerLevel) event.getWorld();
+        ResourceKey<Level> key = world.dimension();
         TICKING_ENTITY_MAP.remove(key);
         List<WorldEntity> removed = WORLD_ENTITY_MAP.get(key);
         if (removed != null) {
@@ -90,15 +89,15 @@ public class WorldEntityHandler {
 
     @SubscribeEvent
     public static void worldTick(TickEvent.WorldTickEvent event) {
-        if (!(event.world instanceof ServerWorld)) return;
-        World world = event.world;
-        RegistryKey<World> key = world.dimension();
+        if (!(event.world instanceof ServerLevel)) return;
+        Level world = event.world;
+        ResourceKey<Level> key = world.dimension();
 
         //Clear dead entities
         ID_ENTITY_MAP.entrySet().removeIf(entry -> {
             WorldEntity entity = entry.getValue();
             if (entity.isRemoved()) {
-                RegistryKey<World> removeKey = entity.world.dimension();
+                ResourceKey<Level> removeKey = entity.world.dimension();
                 if (WORLD_ENTITY_MAP.containsKey(removeKey)) {
                     WORLD_ENTITY_MAP.get(removeKey).remove(entity);
                 }
@@ -150,15 +149,15 @@ public class WorldEntityHandler {
         }
     }
 
-    public static void addWorldEntity(World world, WorldEntity entity) {
-        if (!(world instanceof ServerWorld)) return;
-        RegistryKey<World> key = world.dimension();
+    public static void addWorldEntity(Level world, WorldEntity entity) {
+        if (!(world instanceof ServerLevel)) return;
+        ResourceKey<Level> key = world.dimension();
         ADDED_WORLD_ENTITIES.computeIfAbsent(key, e -> new ArrayList<>()).add(entity);
         entity.setWorld(world);
     }
 
     @Nullable
-    public static WorldEntity getWorldEntity(World world, UUID id) {
+    public static WorldEntity getWorldEntity(Level world, UUID id) {
         WorldEntity entity = ID_ENTITY_MAP.get(id);
         if (entity == null && ADDED_WORLD_ENTITIES.containsKey(world.dimension())) {
             entity = ADDED_WORLD_ENTITIES.get(world.dimension()).stream().filter(e -> e.getUniqueID().equals(id)).findAny().orElse(null);
@@ -177,7 +176,7 @@ public class WorldEntityHandler {
     }
 
     protected static void onEntityRemove(WorldEntity entity) {
-        RegistryKey<World> key = entity.getWorld().dimension();
+        ResourceKey<Level> key = entity.getWorld().dimension();
         if (ADDED_WORLD_ENTITIES.containsKey(key)) {
             ADDED_WORLD_ENTITIES.get(key).remove(entity);
         }

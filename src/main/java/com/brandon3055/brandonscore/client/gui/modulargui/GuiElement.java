@@ -2,39 +2,32 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import codechicken.lib.colour.Colour;
 import codechicken.lib.colour.ColourARGB;
-import codechicken.lib.util.SneakyUtils;
 import codechicken.lib.vec.Vector3;
-import codechicken.lib.vec.uv.UVRotation;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.*;
-import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
+import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.*;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -74,20 +67,7 @@ import java.util.stream.Collectors;
 public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiParentElement<E> {
     private static final String INTERNAL_TRANSLATION_PREFIX = "mod_gui.brandonscore.";
 
-    protected static final ResourceLocation WIDGETS_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
-    public static final RenderType transColourType = RenderType.create("trans_colour", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.builder()
-            .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .setCullState(RenderState.NO_CULL)
-            .setShadeModelState(RenderState.SMOOTH_SHADE)
-            .setTexturingState(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-            .createCompositeState(false)
-    );
-//    protected static final RenderType widgetsType = RenderType.makeType("widgets", DefaultVertexFormats.POSITION_TEX_COLOR, GL11.GL_QUADS, 256, RenderType.State.getBuilder()
-//            .texture(new RenderState.TextureState(WIDGETS_TEXTURES, false, false))
-//            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-//            .texturing(new RenderState.TexturingState("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
-//            .build(false)
-//    );
+    public static final RenderType transColourType = GuiHelper.transColourType;
 
     /*
      * Idea for new position system when i get around to re writing modular gui. On the front end everything would still use absolute positioning
@@ -145,7 +125,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     protected boolean drawHoverText = false;
     protected boolean capturesClicks = false;
-    protected boolean frameAnimation = false;
     /**
      * When true child elements will be disabled when they are removed.
      * This is useful for edge cases where the 1 tick delay in removing an element can cause issues.
@@ -778,35 +757,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return false;
     }
 
-//    /**
-//     * Called whenever a mouse event is fired.
-//     *
-//     * @return Return true to prevent any further processing for this mouse action.
-//     */
-//    public boolean handleMouseInput() {
-//        int mouseX = Mouse.getEventX() * screenWidth / mc.displayWidth;
-//        int mouseY = screenHeight - Mouse.getEventY() * screenHeight / mc.displayHeight - 1;
-//        int scrollDirection = Mouse.getEventDWheel();
-//
-//        if (scrollDirection != 0) {
-//            if (handleMouseScroll(mouseX, mouseY, scrollDirection)) {
-//                return true;
-//            }
-//            for (GuiElement element : childElements) {
-//                if (element.isEnabled() && element.handleMouseScroll(mouseX, mouseY, scrollDirection)) {
-//                    return true;
-//                }
-//            }
-//        }
-//
-//        for (GuiElement element : childElements) {
-//            if (element.isEnabled() && element.handleMouseInput()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
     /**
      * Called whenever the scroll wheel is active.
      *
@@ -891,18 +841,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Return true to cancel the remainder of this update call. Used primarily to avoid concurrent modification exceptions.
      */
     public boolean onUpdate() {
-        if (frameAnimation && animFrameX == 0 && animFrameY == 0) {
-            frameAnimation = false;
-        }
         lastTickXPos = xPos;
         lastTickYPos = yPos;
-        if (frameAnimation) {
-            frameAnimation = false;
-            translate(animFrameX, animFrameY);
-            animFrameX = animFrameY = 0;
-            frameAnimation = true;
-        }
-
 
         if (!toRemove.isEmpty()) {
             childElements.removeAll(toRemove);
@@ -919,11 +859,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
 
         if (animatedTranslating) {
-            int x = MathHelper.clamp(animTranslateX, -animSpeed, animSpeed);
-            int y = MathHelper.clamp(animTranslateY, -animSpeed, animSpeed);
+            int x = Mth.clamp(animTranslateX, -animSpeed, animSpeed);
+            int y = Mth.clamp(animTranslateY, -animSpeed, animSpeed);
             animTranslateX -= x;
             animTranslateY -= y;
-            animateMoveFrames();
             translate(x, y);
             if (animTranslateX == 0 && animTranslateY == 0) {
                 animatedTranslating = false;
@@ -953,15 +892,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        if (frameAnimation) {
-            RenderSystem.pushMatrix();
-            double x = ((double) lastTickXPos - xPos) * partialTicks;
-            double y = ((double) lastTickYPos - yPos) * partialTicks;
-            RenderSystem.translated(x, y, 0);
-        }
-
-//        if (y != 0) LogHelperBC.dev(y);
-
         for (GuiElement element : childElements) {
             if (element.isEnabled()) {
                 element.preDraw(minecraft, mouseX, mouseY, partialTicks);
@@ -969,11 +899,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
                 element.postDraw(minecraft, mouseX, mouseY, partialTicks);
             }
         }
-
-        if (frameAnimation) {
-            RenderSystem.popMatrix();
-        }
-//        drawBorderedRect(xPos(), yPos(), xSize(), ySize(), 0.5, 0, 0xFF00FF00);
     }
 
     /**
@@ -996,9 +921,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
 
         if (isHoverTextEnabled() && isMouseOver(mouseX, mouseY) && hoverTime >= hoverTextDelay) {
-            List<String> hoverText = getHoverText();
+            List<Component> hoverText = getHoverText();
             if (!hoverText.isEmpty()) {
-                drawHoveringText(hoverText, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
+                PoseStack poseStack = new PoseStack();
+                poseStack.translate(0, 0, getRenderZLevel());
+                renderTooltip(poseStack, hoverText, mouseX, mouseY);
                 return true;
             }
         }
@@ -1060,11 +987,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      */
     @SuppressWarnings("unchecked")
     public E translate(int xAmount, int yAmount) {
-        if (frameAnimation) {
-            animFrameX += xAmount;
-            animFrameY += yAmount;
-            return (E) this;
-        }
         xPos += xAmount;
         yPos += yAmount;
         for (GuiElement element : childElements) {
@@ -1081,12 +1003,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         animTranslateY += yAmount;
         animSpeed = speed;
         animatedTranslating = true;
-        return (E) this;
-    }
-
-    @Deprecated //This is experimental code that has some issues.
-    public E animateMoveFrames() {
-        frameAnimation = true;
         return (E) this;
     }
 
@@ -1602,7 +1518,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Computes a rectangle that encloses all child elements of this element then updates the raw position
      * and dimensions to match that rectangle.
-     * */
+     */
     public void setBoundsToChildren(int topMargin, int leftMargin, int bottomMargin, int rightMargin) {
         Rectangle rect = getEnclosingRect();
         setRawPos(rect.x - leftMargin, rect.y - topMargin);
@@ -1613,10 +1529,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         setBoundsToChildren(0, 0, 0, 0);
     }
 
-        /**
-         * Expands the bounds of the given rectangle (if needed) so that they enclose this element.
-         * And all of its child elements recursively.
-         */
+    /**
+     * Expands the bounds of the given rectangle (if needed) so that they enclose this element.
+     * And all of its child elements recursively.
+     */
     public Rectangle addBoundsToRect(Rectangle enclosingRect) {
         if (!boundless) {
             int enRectMaxX = (int) enclosingRect.getMaxX();
@@ -1696,17 +1612,6 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     public Screen getScreen() {
         return modularGui.getScreen();
-    }
-
-    /**
-     * I was going to cache this to avoid rebinding the same texture multiple times but it turns out vanilla already does this.
-     *
-     * @param texture The texture to bind.
-     */
-    public void bindTexture(ResourceLocation texture) {
-        if (mc != null) {
-            mc.getTextureManager().bind(texture);
-        }
     }
 
     public void applyGeneralElementData(IModularGui modularGui, Minecraft mc, int width, int height, BCFontRenderer fontRenderer) {
@@ -1870,18 +1775,18 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Deprecated
     public List<String> getTooltipFromItemString(ItemStack stack) {
-        List<ITextComponent> list = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+        List<Component> list = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
         List<String> list1 = Lists.newArrayList();
 
-        for (ITextComponent itextcomponent : list) {
+        for (Component itextcomponent : list) {
             list1.add(itextcomponent.getString());
         }
 
         return list1;
     }
 
-    public List<ITextComponent> getTooltipFromItem(ItemStack stack) {
-        return stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+    public List<Component> getTooltipFromItem(ItemStack stack) {
+        return stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
     }
 
     //endregion
@@ -1894,139 +1799,139 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return (float) (modularGui.getZLevel() + zOffset);// + (parentElement == null ? 0 : parentElement.getRenderZLevel());
     }
 
-    @Deprecated
-    public void drawRect(double left, double top, double right, double bottom, int color) {
-        double zLevel = getRenderZLevel();
-        if (left < right) {
-            double i = left;
-            left = right;
-            right = i;
-        }
-
-        if (top < bottom) {
-            double j = top;
-            top = bottom;
-            bottom = j;
-        }
-
-        float f3 = (float) (color >> 24 & 255) / 255.0F;
-        float f = (float) (color >> 16 & 255) / 255.0F;
-        float f1 = (float) (color >> 8 & 255) / 255.0F;
-        float f2 = (float) (color & 255) / 255.0F;
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.color4f(f, f1, f2, f3);
-        buffer.begin(7, DefaultVertexFormats.POSITION);
-        buffer.vertex(left, bottom, zLevel).endVertex();
-        buffer.vertex(right, bottom, zLevel).endVertex();
-        buffer.vertex(right, top, zLevel).endVertex();
-        buffer.vertex(left, top, zLevel).endVertex();
-        tessellator.end();
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
-    }
-
-    @Deprecated
-    public void drawTexturedModalRect(int x, int y, int textureX, int textureY, int width, int height) {
-        double zLevel = getRenderZLevel();
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultBlendFunc();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(x, y + height, zLevel).uv(textureX * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
-        buffer.vertex(x + width, y + height, zLevel).uv((textureX + width) * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
-        buffer.vertex(x + width, y, zLevel).uv((textureX + width) * 0.00390625F, textureY * 0.00390625F).endVertex();
-        buffer.vertex(x, y, zLevel).uv(textureX * 0.00390625F, textureY * 0.00390625F).endVertex();
-        tessellator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-    }
-
-    @Deprecated
-    public void drawTexturedModalRect(double xCoord, double yCoord, int minU, int minV, int maxU, int maxV) {
-        double zLevel = getRenderZLevel();
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultBlendFunc();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(xCoord + 0.0F, yCoord + (float) maxV, zLevel).uv((float) minU * 0.00390625F, (float) (minV + maxV) * 0.00390625F).endVertex();
-        buffer.vertex(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).uv((float) (minU + maxU) * 0.00390625F, (float) (minV + maxV) * 0.00390625F).endVertex();
-        buffer.vertex(xCoord + (float) maxU, yCoord + 0.0F, zLevel).uv((float) (minU + maxU) * 0.00390625F, (float) minV * 0.00390625F).endVertex();
-        buffer.vertex(xCoord + 0.0F, yCoord + 0.0F, zLevel).uv((float) minU * 0.00390625F, (float) minV * 0.00390625F).endVertex();
-        tessellator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-    }
-
-    @Deprecated
-    public void drawTexturedModalRect(int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn) {
-        double zLevel = getRenderZLevel();
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultBlendFunc();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(xCoord, yCoord + heightIn, zLevel).uv(textureSprite.getU0(), textureSprite.getV1()).endVertex();
-        buffer.vertex(xCoord + widthIn, yCoord + heightIn, zLevel).uv(textureSprite.getU1(), textureSprite.getV1()).endVertex();
-        buffer.vertex(xCoord + widthIn, yCoord, zLevel).uv(textureSprite.getU1(), textureSprite.getV0()).endVertex();
-        buffer.vertex(xCoord, yCoord, zLevel).uv(textureSprite.getU0(), textureSprite.getV0()).endVertex();
-        tessellator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-    }
-
-    @Deprecated
-    public void drawModalRectWithCustomSizedTexture(float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
-        float zLevel = getRenderZLevel();
-        float f = 1.0F / textureWidth;
-        float f1 = 1.0F / textureHeight;
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultBlendFunc();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(x, y + height, zLevel).uv(u * f, (v + height) * f1).endVertex();
-        buffer.vertex(x + width, y + height, zLevel).uv((u + width) * f, (v + height) * f1).endVertex();
-        buffer.vertex(x + width, y, zLevel).uv((u + width) * f, v * f1).endVertex();
-        buffer.vertex(x, y, zLevel).uv(u * f, v * f1).endVertex();
-        tessellator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-    }
-
-    @Deprecated
-    public void drawScaledCustomSizeModalRect(float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight) {
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultBlendFunc();
-        float zLevel = getRenderZLevel();
-        float f = 1.0F / textureSheetWidth;
-        float f1 = 1.0F / testureSheetHeight;
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(xPos, yPos + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
-        buffer.vertex(xPos + width, yPos + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
-        buffer.vertex(xPos + width, yPos, zLevel).uv((u + uWidth) * f, v * f1).endVertex();
-        buffer.vertex(xPos, yPos, zLevel).uv(u * f, v * f1).endVertex();
-        tessellator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
-    }
+//    @Deprecated
+//    public void drawRect(double left, double top, double right, double bottom, int color) {
+//        double zLevel = getRenderZLevel();
+//        if (left < right) {
+//            double i = left;
+//            left = right;
+//            right = i;
+//        }
+//
+//        if (top < bottom) {
+//            double j = top;
+//            top = bottom;
+//            bottom = j;
+//        }
+//
+//        float f3 = (float) (color >> 24 & 255) / 255.0F;
+//        float f = (float) (color >> 16 & 255) / 255.0F;
+//        float f1 = (float) (color >> 8 & 255) / 255.0F;
+//        float f2 = (float) (color & 255) / 255.0F;
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableTexture();
+//        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        RenderSystem.color4f(f, f1, f2, f3);
+//        buffer.begin(7, DefaultVertexFormat.POSITION);
+//        buffer.vertex(left, bottom, zLevel).endVertex();
+//        buffer.vertex(right, bottom, zLevel).endVertex();
+//        buffer.vertex(right, top, zLevel).endVertex();
+//        buffer.vertex(left, top, zLevel).endVertex();
+//        tessellator.end();
+//        RenderSystem.enableTexture();
+//        RenderSystem.disableBlend();
+//    }
+//
+//    @Deprecated
+//    public void drawTexturedModalRect(int x, int y, int textureX, int textureY, int width, int height) {
+//        double zLevel = getRenderZLevel();
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableAlphaTest();
+//        RenderSystem.defaultBlendFunc();
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        buffer.begin(7, DefaultVertexFormat.POSITION_TEX);
+//        buffer.vertex(x, y + height, zLevel).uv(textureX * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
+//        buffer.vertex(x + width, y + height, zLevel).uv((textureX + width) * 0.00390625F, (textureY + height) * 0.00390625F).endVertex();
+//        buffer.vertex(x + width, y, zLevel).uv((textureX + width) * 0.00390625F, textureY * 0.00390625F).endVertex();
+//        buffer.vertex(x, y, zLevel).uv(textureX * 0.00390625F, textureY * 0.00390625F).endVertex();
+//        tessellator.end();
+//        RenderSystem.disableBlend();
+//        RenderSystem.enableAlphaTest();
+//    }
+//
+//    @Deprecated
+//    public void drawTexturedModalRect(double xCoord, double yCoord, int minU, int minV, int maxU, int maxV) {
+//        double zLevel = getRenderZLevel();
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableAlphaTest();
+//        RenderSystem.defaultBlendFunc();
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        buffer.begin(7, DefaultVertexFormat.POSITION_TEX);
+//        buffer.vertex(xCoord + 0.0F, yCoord + (float) maxV, zLevel).uv((float) minU * 0.00390625F, (float) (minV + maxV) * 0.00390625F).endVertex();
+//        buffer.vertex(xCoord + (float) maxU, yCoord + (float) maxV, zLevel).uv((float) (minU + maxU) * 0.00390625F, (float) (minV + maxV) * 0.00390625F).endVertex();
+//        buffer.vertex(xCoord + (float) maxU, yCoord + 0.0F, zLevel).uv((float) (minU + maxU) * 0.00390625F, (float) minV * 0.00390625F).endVertex();
+//        buffer.vertex(xCoord + 0.0F, yCoord + 0.0F, zLevel).uv((float) minU * 0.00390625F, (float) minV * 0.00390625F).endVertex();
+//        tessellator.end();
+//        RenderSystem.disableBlend();
+//        RenderSystem.enableAlphaTest();
+//    }
+//
+//    @Deprecated
+//    public void drawTexturedModalRect(int xCoord, int yCoord, TextureAtlasSprite textureSprite, int widthIn, int heightIn) {
+//        double zLevel = getRenderZLevel();
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableAlphaTest();
+//        RenderSystem.defaultBlendFunc();
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        buffer.begin(7, DefaultVertexFormat.POSITION_TEX);
+//        buffer.vertex(xCoord, yCoord + heightIn, zLevel).uv(textureSprite.getU0(), textureSprite.getV1()).endVertex();
+//        buffer.vertex(xCoord + widthIn, yCoord + heightIn, zLevel).uv(textureSprite.getU1(), textureSprite.getV1()).endVertex();
+//        buffer.vertex(xCoord + widthIn, yCoord, zLevel).uv(textureSprite.getU1(), textureSprite.getV0()).endVertex();
+//        buffer.vertex(xCoord, yCoord, zLevel).uv(textureSprite.getU0(), textureSprite.getV0()).endVertex();
+//        tessellator.end();
+//        RenderSystem.disableBlend();
+//        RenderSystem.enableAlphaTest();
+//    }
+//
+//    @Deprecated
+//    public void drawModalRectWithCustomSizedTexture(float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
+//        float zLevel = getRenderZLevel();
+//        float f = 1.0F / textureWidth;
+//        float f1 = 1.0F / textureHeight;
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableAlphaTest();
+//        RenderSystem.defaultBlendFunc();
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        buffer.begin(7, DefaultVertexFormat.POSITION_TEX);
+//        buffer.vertex(x, y + height, zLevel).uv(u * f, (v + height) * f1).endVertex();
+//        buffer.vertex(x + width, y + height, zLevel).uv((u + width) * f, (v + height) * f1).endVertex();
+//        buffer.vertex(x + width, y, zLevel).uv((u + width) * f, v * f1).endVertex();
+//        buffer.vertex(x, y, zLevel).uv(u * f, v * f1).endVertex();
+//        tessellator.end();
+//        RenderSystem.disableBlend();
+//        RenderSystem.enableAlphaTest();
+//    }
+//
+//    @Deprecated
+//    public void drawScaledCustomSizeModalRect(float xPos, float yPos, float u, float v, float uWidth, float vHeight, float width, float height, float textureSheetWidth, float testureSheetHeight) {
+//        RenderSystem.enableBlend();
+//        RenderSystem.disableAlphaTest();
+//        RenderSystem.defaultBlendFunc();
+//        float zLevel = getRenderZLevel();
+//        float f = 1.0F / textureSheetWidth;
+//        float f1 = 1.0F / testureSheetHeight;
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        buffer.begin(7, DefaultVertexFormat.POSITION_TEX);
+//        buffer.vertex(xPos, yPos + height, zLevel).uv(u * f, (v + vHeight) * f1).endVertex();
+//        buffer.vertex(xPos + width, yPos + height, zLevel).uv((u + uWidth) * f, (v + vHeight) * f1).endVertex();
+//        buffer.vertex(xPos + width, yPos, zLevel).uv((u + uWidth) * f, v * f1).endVertex();
+//        buffer.vertex(xPos, yPos, zLevel).uv(u * f, v * f1).endVertex();
+//        tessellator.end();
+//        RenderSystem.disableBlend();
+//        RenderSystem.enableAlphaTest();
+//    }
 
     @Deprecated
     public void drawGradientRect(double left, double top, double right, double bottom, int startColor, int endColor) {
-        IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
-        MatrixStack mStack = new MatrixStack();
+        MultiBufferSource getter = RenderUtils.getTypeBuffer();
+        PoseStack mStack = new PoseStack();
         mStack.translate(0, 0, getRenderZLevel());
         GuiHelper.drawGradientRect(getter, mStack, left, top, right, bottom, startColor, endColor);
         RenderUtils.endBatch(getter);
@@ -2034,8 +1939,8 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Deprecated
     public void drawMultiPassGradientRect(double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
-        IRenderTypeBuffer getter = RenderUtils.getTypeBuffer();
-        MatrixStack mStack = new MatrixStack();
+        MultiBufferSource getter = RenderUtils.getTypeBuffer();
+        PoseStack mStack = new PoseStack();
         mStack.translate(0, 0, getRenderZLevel());
         GuiHelper.drawMultiPassGradientRect(getter, mStack, left, top, right, bottom, colour1, colour2, layers);
         RenderUtils.endBatch(getter);
@@ -2073,41 +1978,41 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         drawColouredRect(x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
     }
 
-    @Deprecated
-    public void renderVanillaButtonTexture(int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
-        ResourceHelperBC.bindTexture(WIDGETS_TEXTURES);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-        int k = 1;
-        if (disabled) {
-            k = 0;
-        } else if (hovered) {
-            k = 2;
-        }
-
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-        int texHeight = Math.min(20, ySize);
-        int texPos = 46 + k * 20;
-
-        drawTexturedModalRect(xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight);
-        drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight);
-
-        if (ySize < 20) {
-            drawTexturedModalRect(xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
-            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3);
-        } else if (ySize > 20) {
-            for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
-                drawTexturedModalRect(xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15);
-                drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15);
-            }
-
-            drawTexturedModalRect(xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15);
-            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15);
-        }
-    }
+//    @Deprecated
+//    public void renderVanillaButtonTexture(int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
+//        ResourceHelperBC.bindTexture(WIDGETS_TEXTURES);
+//        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+//
+//        int k = 1;
+//        if (disabled) {
+//            k = 0;
+//        } else if (hovered) {
+//            k = 2;
+//        }
+//
+//        RenderSystem.enableBlend();
+//        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+//        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+//
+//        int texHeight = Math.min(20, ySize);
+//        int texPos = 46 + k * 20;
+//
+//        drawTexturedModalRect(xPos, yPos, 0, texPos, xSize % 2 + xSize / 2, texHeight);
+//        drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos, 200 - xSize / 2, texPos, xSize / 2, texHeight);
+//
+//        if (ySize < 20) {
+//            drawTexturedModalRect(xPos, yPos + 3, 0, texPos + 20 - ySize + 3, xSize % 2 + xSize / 2, ySize - 3);
+//            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + 3, 200 - xSize / 2, texPos + 20 - ySize + 3, xSize / 2, ySize - 3);
+//        } else if (ySize > 20) {
+//            for (int y = yPos + 17; y + 15 < yPos + ySize; y += 15) {
+//                drawTexturedModalRect(xPos, y, 0, texPos + 2, xSize % 2 + xSize / 2, 15);
+//                drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, y, 200 - xSize / 2, texPos + 2, xSize / 2, 15);
+//            }
+//
+//            drawTexturedModalRect(xPos, yPos + ySize - 15, 0, texPos + 5, xSize % 2 + xSize / 2, 15);
+//            drawTexturedModalRect(xSize % 2 + xPos + xSize / 2, yPos + ySize - 15, 200 - xSize / 2, texPos + 5, xSize / 2, 15);
+//        }
+//    }
 
     @Deprecated
     public void drawTiledTextureRectWithTrim(int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight) {
@@ -2116,9 +2021,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
         if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
 
-        Tessellator tessellator = Tessellator.getInstance();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         for (int x = 0; x < xSize; ) {
             int rWidth = Math.min(xSize - x, trimWidth);
@@ -2160,7 +2065,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     //New render system
-    public void drawRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int color) {
+    public void drawRect(MultiBufferSource getter, double left, double top, double right, double bottom, int color) {
         double zLevel = getRenderZLevel();
         if (left < right) {
             double i = left;
@@ -2184,7 +2089,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //        RenderSystem.disableTexture();
 //        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 //        RenderSystem.color4f(f, f1, f2, f3);
-        IVertexBuilder builder = getter.getBuffer(transColourType);
+        VertexConsumer builder = getter.getBuffer(transColourType);
         builder.vertex(left, bottom, zLevel).color(r, g, b, a).endVertex();
         builder.vertex(right, bottom, zLevel).color(r, g, b, a).endVertex();
         builder.vertex(right, top, zLevel).color(r, g, b, a).endVertex();
@@ -2211,7 +2116,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //        builder.pos(x, y, zLevel).tex(0, 0).color(colours[1], colours[2], colours[3], colours[0]).endVertex();
 //    }
 
-    public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite) {
+    public void drawSprite(VertexConsumer builder, float x, float y, float width, float height, TextureAtlasSprite sprite) {
         double zLevel = getRenderZLevel();
         //@formatter:off
         builder.vertex(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
@@ -2221,7 +2126,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, int rotation, TextureAtlasSprite sprite) {
+    public void drawSprite(VertexConsumer builder, float x, float y, float width, float height, int rotation, TextureAtlasSprite sprite) {
         double zLevel = getRenderZLevel();
         float[] u = {sprite.getU0(), sprite.getU1(), sprite.getU1(), sprite.getU0()};
         float[] v = {sprite.getV1(), sprite.getV1(), sprite.getV0(), sprite.getV0()};
@@ -2233,7 +2138,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawSprite(IVertexBuilder builder, float x, float y, float width, float height, TextureAtlasSprite sprite, int colour) {
+    public void drawSprite(VertexConsumer builder, float x, float y, float width, float height, TextureAtlasSprite sprite, int colour) {
         double zLevel = getRenderZLevel();
         int[] colours = Colour.unpack(colour);
         //@formatter:off
@@ -2244,11 +2149,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawSprite(IVertexBuilder builder, float x, float y, TextureAtlasSprite sprite) {
+    public void drawSprite(VertexConsumer builder, float x, float y, TextureAtlasSprite sprite) {
         drawSprite(builder, x, y, sprite, 0xFFFFFFFF);
     }
 
-    public void drawSprite(IVertexBuilder builder, float x, float y, TextureAtlasSprite sprite, int colour) {
+    public void drawSprite(VertexConsumer builder, float x, float y, TextureAtlasSprite sprite, int colour) {
         double zLevel = getRenderZLevel();
         int[] colours = Colour.unpack(colour);
         float width = sprite.getWidth();
@@ -2261,7 +2166,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawQuarterDynamicSprite(IVertexBuilder buffer, int xPos, int yPos, int xSize, int ySize, TextureAtlasSprite sprite) {
+    public void drawQuarterDynamicSprite(VertexConsumer buffer, int xPos, int yPos, int xSize, int ySize, TextureAtlasSprite sprite) {
         float texU = sprite.getU0();
         float texV = sprite.getV0();
         int texWidth = sprite.getWidth();
@@ -2277,12 +2182,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     //TODO look at adapting forge's version of this because its mutch cleaner than mine
-    public void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim) {
+    public void drawDynamicSprite(VertexConsumer builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim) {
         drawDynamicSprite(builder, tex, xPos, yPos, xSize, ySize, topTrim, leftTrim, bottomTrim, rightTrim, 0xFFFFFFFF);
     }
 
 
-    public void drawDynamicSprite(IVertexBuilder builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour) {
+    public void drawDynamicSprite(VertexConsumer builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour) {
         int texWidth = tex.getWidth();
         int texHeight = tex.getHeight();
         int trimWidth = texWidth - leftTrim - rightTrim;
@@ -2332,7 +2237,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
-    private void bufferTexturedModalRect(IVertexBuilder builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour) {
+    private void bufferTexturedModalRect(VertexConsumer builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour) {
         double zLevel = getRenderZLevel();
         int w = tex.getWidth();
         int h = tex.getHeight();
@@ -2397,7 +2302,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //    }
 //
     @Deprecated
-    private void bufferRect(IVertexBuilder buffer, float x, float y, float width, float height, float minU, float minV, float tWidth, float tHeight) {
+    private void bufferRect(VertexConsumer buffer, float x, float y, float width, float height, float minU, float minV, float tWidth, float tHeight) {
         double zLevel = getRenderZLevel();
         //@formatter:off
         buffer.vertex(x,           y + height, zLevel).color(1F, 1F, 1F, 1F).uv(minU, minV + tHeight).endVertex();
@@ -2467,11 +2372,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //        //@formatter:on
 //    }
 
-    public void drawGradient(IRenderTypeBuffer getter, double xPos, double yPos, double xSize, double ySize, int startColor, int endColor) {
+    public void drawGradient(MultiBufferSource getter, double xPos, double yPos, double xSize, double ySize, int startColor, int endColor) {
         drawGradientRect(getter, xPos, yPos, xPos + xSize, yPos + ySize, startColor, endColor);
     }
 
-    public void drawGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int startColor, int endColor) {
+    public void drawGradientRect(MultiBufferSource getter, double left, double top, double right, double bottom, int startColor, int endColor) {
         if (startColor == endColor && endColor == 0) return;
         double zLevel = getRenderZLevel();
         //@formatter:off
@@ -2484,7 +2389,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(endColor         & 255) / 255.0F;
 
-        IVertexBuilder builder = getter.getBuffer(transColourType);
+        VertexConsumer builder = getter.getBuffer(transColourType);
         builder.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
         builder.vertex( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
         builder.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
@@ -2492,11 +2397,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawSideGradient(IRenderTypeBuffer getter, double xPos, double yPos, double xSize, double ySize, int leftColor, int rightColor) {
+    public void drawSideGradient(MultiBufferSource getter, double xPos, double yPos, double xSize, double ySize, int leftColor, int rightColor) {
         drawSideGradientRect(getter, xPos, yPos, xPos + xSize, yPos + ySize, leftColor, rightColor);
     }
 
-    public void drawSideGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int leftColor, int rightColor) {
+    public void drawSideGradientRect(MultiBufferSource getter, double left, double top, double right, double bottom, int leftColor, int rightColor) {
         if (leftColor == rightColor && rightColor == 0) return;
         double zLevel = getRenderZLevel();
         //@formatter:off
@@ -2509,7 +2414,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         float endGreen   = (float)(leftColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(leftColor         & 255) / 255.0F;
 
-        IVertexBuilder builder = getter.getBuffer(transColourType);
+        VertexConsumer builder = getter.getBuffer(transColourType);
         builder.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
         builder.vertex( left,    top, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
         builder.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
@@ -2517,7 +2422,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawMultiPassGradientRect(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
+    public void drawMultiPassGradientRect(MultiBufferSource getter, double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
         if (colour1 == colour2 && colour2 == 0) return;
         double zLevel = getRenderZLevel();
         float alpha1 = (colour1 >> 24 & 255) / 255.0F;
@@ -2528,7 +2433,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         float red2 = (float) (colour2 >> 16 & 255) / 255.0F;
         float green2 = (float) (colour2 >> 8 & 255) / 255.0F;
         float blue2 = (float) (colour2 & 255) / 255.0F;
-        IVertexBuilder builder = getter.getBuffer(transColourType);
+        VertexConsumer builder = getter.getBuffer(transColourType);
         for (int i = 0; i < layers; i++) {
             builder.vertex(right, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
             builder.vertex(left, top, zLevel).color(red1, green1, blue1, alpha1).endVertex();
@@ -2537,11 +2442,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
-    public void drawColouredRect(IRenderTypeBuffer getter, double posX, double posY, double xSize, double ySize, int colour) {
+    public void drawColouredRect(MultiBufferSource getter, double posX, double posY, double xSize, double ySize, int colour) {
         drawColouredRectABS(getter, posX, posY, posX + xSize, posY + ySize, colour);
     }
 
-    public void drawColouredRectABS(IRenderTypeBuffer getter, double left, double top, double right, double bottom, int colour) {
+    public void drawColouredRectABS(MultiBufferSource getter, double left, double top, double right, double bottom, int colour) {
         double zLevel = getRenderZLevel();
         //@formatter:off
         float alpha = (float)(colour >> 24 & 255) / 255.0F;
@@ -2549,7 +2454,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         float green = (float)(colour >>  8 & 255) / 255.0F;
         float blue  = (float)(colour       & 255) / 255.0F;
 
-        IVertexBuilder builder = getter.getBuffer(transColourType);
+        VertexConsumer builder = getter.getBuffer(transColourType);
         builder.vertex(right,    top, zLevel).color(red, green, blue, alpha).endVertex();
         builder.vertex( left,    top, zLevel).color(red, green, blue, alpha).endVertex();
         builder.vertex( left, bottom, zLevel).color(red, green, blue, alpha).endVertex();
@@ -2557,7 +2462,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         //@formatter:on
     }
 
-    public void drawBorderedRect(IRenderTypeBuffer getter, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour) {
+    public void drawBorderedRect(MultiBufferSource getter, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour) {
         drawColouredRect(getter, posX, posY, xSize, borderWidth, borderColour);
         drawColouredRect(getter, posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour);
         drawColouredRect(getter, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour);
@@ -2565,7 +2470,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         drawColouredRect(getter, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour);
     }
 
-    public void drawShadedRect(IRenderTypeBuffer getter, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
+    public void drawShadedRect(MultiBufferSource getter, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
         //Fill
         drawColouredRect(getter, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill);
         //Top
@@ -2582,7 +2487,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         drawColouredRect(getter, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
     }
 
-    public void renderVanillaButtonTexture(IRenderTypeBuffer getter, int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
+    public void renderVanillaButtonTexture(MultiBufferSource getter, int xPos, int yPos, int xSize, int ySize, boolean hovered, boolean disabled) {
         int k = 1;
         if (disabled) {
             k = 0;
@@ -2611,15 +2516,15 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
-    public void drawTiledTextureRectWithTrim(IRenderTypeBuffer getter, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight) {
+    public void drawTiledTextureRectWithTrim(MultiBufferSource getter, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight) {
         int trimWidth = texWidth - leftTrim - rightTrim;
         int trimHeight = texHeight - topTrim - bottomTrim;
         if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
         if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
 
-        Tessellator tessellator = Tessellator.getInstance();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(0x07, DefaultVertexFormats.POSITION_TEX);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         for (int x = 0; x < xSize; ) {
             int rWidth = Math.min(xSize - x, trimWidth);
@@ -2660,7 +2565,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         tessellator.end();
     }
 
-    private void bufferTexturedModalRect(IVertexBuilder buffer, int x, int y, float textureX, float textureY, int width, int height) {
+    private void bufferTexturedModalRect(VertexConsumer buffer, int x, int y, float textureX, float textureY, int width, int height) {
         double zLevel = getRenderZLevel();
         buffer.vertex(x, y + height, zLevel).uv((textureX * 0.00390625F), ((textureY + height) * 0.00390625F)).endVertex();
         buffer.vertex(x + width, y + height, zLevel).uv(((textureX + width) * 0.00390625F), ((textureY + height) * 0.00390625F)).endVertex();
@@ -2683,9 +2588,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Draws a string with the given colour and optional shadow.
      */
-    public int drawString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        MatrixStack textStack = new MatrixStack();
+    public int drawString(Font fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
         int i = fontRenderer.drawInBatch(text, x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
@@ -2697,19 +2602,19 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Simply draws a string with the given colour and no shadow.
      */
-    public float drawString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int colour) {
+    public float drawString(Font fontRenderer, FormattedText text, float x, float y, int colour) {
         return drawString(fontRenderer, text, x, y, colour, false);
     }
 
     /**
      * Draws a string with the given colour and optional shadow.
      */
-    public float drawString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int colour, boolean dropShadow) {
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        MatrixStack textStack = new MatrixStack();
+    public float drawString(Font fontRenderer, FormattedText text, float x, float y, int colour, boolean dropShadow) {
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
-        float i = fontRenderer.drawInBatch(LanguageMap.getInstance().getVisualOrder(text), x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
+        float i = fontRenderer.drawInBatch(Language.getInstance().getVisualOrder(text), x, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
         getter.endBatch();
         return i;
     }
@@ -2717,9 +2622,9 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Draws a centered string
      */
-    public void drawCenteredString(FontRenderer fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        IRenderTypeBuffer.Impl getter = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-        MatrixStack textStack = new MatrixStack();
+    public void drawCenteredString(Font fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
+        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
         fontRenderer.drawInBatch(text, x - fontRenderer.width(text) / 2F, y, colour, dropShadow, textLocation, getter, false, 0, 15728880);
@@ -2729,7 +2634,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Draws a split string (multi line string)
      */
-    public void drawSplitString(FontRenderer fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
+    public void drawSplitString(Font fontRenderer, String text, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
         for (String s : BCFontRenderer.listFormattedStringToWidth(text, wrapWidth)) {
             drawString(fontRenderer, s, x, y, colour, dropShadow);
             y += fontRenderer.lineHeight;
@@ -2739,107 +2644,119 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Draws a centered split string
      */
-    public void drawCenteredSplitString(FontRenderer fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
+    public void drawCenteredSplitString(Font fontRenderer, String str, float x, float y, int wrapWidth, int colour, boolean dropShadow) {
         for (String s : BCFontRenderer.listFormattedStringToWidth(str, wrapWidth)) {
             drawCenteredString(fontRenderer, s, x, y, colour, dropShadow);
             y += fontRenderer.lineHeight;
         }
     }
 
-    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
-        drawCustomString(fr, text, x, y, width, colour, alignment, rotation, wrap, trim, false, dropShadow);
+//    public void drawCustomString(Font fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean dropShadow) {
+//        drawCustomString(fr, text, x, y, width, colour, alignment, rotation, wrap, trim, false, dropShadow);
+//    }
+
+//    /**
+//     * This is an advanced draw string method with all sorts of built in fancy stuff.
+//     *
+//     * @param width     This xSize is used for alignment, Wrapping and trimming. (or technically ySize if at a 90 degree rotation)
+//     * @param alignment Allows you to align the text ether to the left, in the middle or to the right ("right" is defined by x + xSize)
+//     * @param rotation  Allows you to rotate the text
+//     * @param wrap      if true the text will wrap (milty line text) if the text is longer than xSize. (Not compatible with trim)
+//     * @param trim      if true the text will be trimmed to xSize if it is too long. When trimmed "..." will be appended to the end of the string.
+//     */
+//    public void drawCustomString(Font fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean midTrim, boolean dropShadow) {
+//        if (width <= 0) return;
+//        Component textComponent = new TextComponent(text);
+//        if (trim && fr.width(text) > width) {
+//            int dotW = fr.width("..");
+//            if (midTrim) {
+//                text = fr.plainSubstrByWidth(text, (width / 2) - (dotW / 2)) + ".." + fr.plainSubstrByWidth(text, (width / 2) - (dotW / 2), true);
+//            } else {
+//                text = fr.plainSubstrByWidth(text, width - dotW) + "..";
+//            }
+//        }
+//
+//        if (rotation == TextRotation.NORMAL) {
+//            if (wrap) {
+//                drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
+//            } else {
+//                if (text.contains("\n")) {
+//                    int offset = 0;
+//                    String prefix = "";
+//                    if (text.startsWith("\u00A7") && text.length() > 1) prefix = text.substring(0, 2);
+//                    for (String str : text.split("\n")) {
+//                        if (!str.isEmpty()) {
+//                            drawAlignedString(fr, str.startsWith("\u00A7") ? str : prefix + str, x, y + offset, width, alignment, colour, dropShadow, trim);
+//                            offset += fontRenderer.lineHeight;
+//                        }
+//                    }
+//                } else
+//                    drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
+//            }
+//        } else {
+//            RenderSystem.pushMatrix();
+//            if (rotation == TextRotation.ROT_C) {
+//                RenderSystem.translated(x, y, 0);
+//                RenderSystem.rotatef(90, 0, 0, 1);
+//            } else if (rotation == TextRotation.ROT_CC) {
+//                RenderSystem.translated(x, y + width, 0);
+//                RenderSystem.rotatef(-90, 0, 0, 1);
+//            } else if (rotation == TextRotation.ROT_180) {
+//                RenderSystem.translated(x + width, y + fr.wordWrapHeight(text, width), 0);
+//                RenderSystem.rotatef(180, 0, 0, 1);
+//            }
+//
+//            if (wrap) {
+//                drawAlignedSplitString(fr, text, 0, 0, width, alignment, colour, dropShadow);
+//            } else {
+//                drawAlignedString(fr, text, 0, 0, width, alignment, colour, dropShadow, trim);
+//            }
+//
+//            RenderSystem.popMatrix();
+//        }
+//    }
+
+    public void drawCustomString(Font font, FormattedText text, float x, float y, int width, int colour, GuiAlign alignment, boolean wrap, boolean trim, boolean dropShadow) {
+        drawCustomString(font, text, x, y, width, colour, alignment, wrap, trim, false, dropShadow);
     }
 
-    /**
-     * This is an advanced draw string method with all sorts of built in fancy stuff.
-     *
-     * @param width     This xSize is used for alignment, Wrapping and trimming. (or technically ySize if at a 90 degree rotation)
-     * @param alignment Allows you to align the text ether to the left, in the middle or to the right ("right" is defined by x + xSize)
-     * @param rotation  Allows you to rotate the text
-     * @param wrap      if true the text will wrap (milty line text) if the text is longer than xSize. (Not compatible with trim)
-     * @param trim      if true the text will be trimmed to xSize if it is too long. When trimmed "..." will be appended to the end of the string.
-     */
-    public void drawCustomString(FontRenderer fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean midTrim, boolean dropShadow) {
+    @Deprecated // Not sure about midTrim
+    public void drawCustomString(Font font, FormattedText text, float x, float y, int width, int colour, GuiAlign alignment, boolean wrap, boolean trim, boolean midTrim, boolean dropShadow) {
         if (width <= 0) return;
-        ITextComponent textComponent = new StringTextComponent(text);
-        if (trim && fr.width(text) > width) {
-            int dotW = fr.width("..");
-            if (midTrim) {
-                text = fr.plainSubstrByWidth(text, (width / 2) - (dotW / 2)) + ".." + fr.plainSubstrByWidth(text, (width / 2) - (dotW / 2), true);
-            } else {
-                text = fr.plainSubstrByWidth(text, width - dotW) + "..";
-            }
-        }
-
-        if (rotation == TextRotation.NORMAL) {
-            if (wrap) {
-                drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
-            } else {
-                if (text.contains("\n")) {
-                    int offset = 0;
-                    String prefix = "";
-                    if (text.startsWith("\u00A7") && text.length() > 1) prefix = text.substring(0, 2);
-                    for (String str : text.split("\n")) {
-                        if (!str.isEmpty()) {
-                            drawAlignedString(fr, str.startsWith("\u00A7") ? str : prefix + str, x, y + offset, width, alignment, colour, dropShadow, trim);
-                            offset += fontRenderer.lineHeight;
-                        }
-                    }
-                } else
-                    drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
-            }
-        } else {
-            RenderSystem.pushMatrix();
-            if (rotation == TextRotation.ROT_C) {
-                RenderSystem.translated(x, y, 0);
-                RenderSystem.rotatef(90, 0, 0, 1);
-            } else if (rotation == TextRotation.ROT_CC) {
-                RenderSystem.translated(x, y + width, 0);
-                RenderSystem.rotatef(-90, 0, 0, 1);
-            } else if (rotation == TextRotation.ROT_180) {
-                RenderSystem.translated(x + width, y + fr.wordWrapHeight(text, width), 0);
-                RenderSystem.rotatef(180, 0, 0, 1);
-            }
-
-            if (wrap) {
-                drawAlignedSplitString(fr, text, 0, 0, width, alignment, colour, dropShadow);
-            } else {
-                drawAlignedString(fr, text, 0, 0, width, alignment, colour, dropShadow, trim);
-            }
-
-            RenderSystem.popMatrix();
-        }
-    }
-
-    public void drawCustomString(FontRenderer fr, ITextProperties text, float x, float y, int width, int colour, GuiAlign alignment, boolean wrap, boolean trim, boolean dropShadow) {
-        if (width <= 0) return;
-        boolean willTrim = trim && fr.width(text) > width;
+        boolean willTrim = trim && font.width(text) > width;
         if (willTrim) {
-            int dotW = fr.width("..");
-            Style style = text instanceof ITextComponent ? ((ITextComponent) text).getStyle() : Style.EMPTY;
-            text = fr.getSplitter().headByWidth(text, width - dotW, Style.EMPTY)/* + ".."*/;
-            text = ITextProperties.composite(text, new StringTextComponent("..").withStyle(style));
+            int dotW = font.width("..");
+            Style style = text instanceof Component ? ((Component) text).getStyle() : Style.EMPTY;
+
+            if (midTrim) {
+                String head = font.getSplitter().plainHeadByWidth(text.getString(), (width / 2) - (dotW / 2), Style.EMPTY);
+                String tail = font.getSplitter().plainTailByWidth(text.getString(), (width / 2) - (dotW / 2), Style.EMPTY);
+                text = new TextComponent(head + ".." + tail);
+            } else {
+                text = font.getSplitter().headByWidth(text, width - dotW, Style.EMPTY);
+                text = FormattedText.composite(text, new TextComponent("..").withStyle(style));
+            }
         }
 
         if (wrap) {
-            drawAlignedSplitString(fr, text, x, y, width, alignment, colour, dropShadow);
+            drawAlignedSplitString(font, text, x, y, width, alignment, colour, dropShadow);
         } else {
-            float end = drawAlignedString(fr, text, x, y, width, alignment, colour, dropShadow, trim);
+            drawAlignedString(font, text, x, y, width, alignment, colour, dropShadow, trim);
         }
     }
 
     /**
      * Allows you to draw a split string aligned to the left, middle or right of the specified area.
      */
-    public void drawAlignedSplitString(FontRenderer fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
+    public void drawAlignedSplitString(Font fontRenderer, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
         for (String s : BCFontRenderer.listFormattedStringToWidth(text, width)) {
             drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
             y += fontRenderer.lineHeight;
         }
     }
 
-    public void drawAlignedSplitString(FontRenderer fontRenderer, ITextProperties text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
-        for (ITextProperties s : fontRenderer.getSplitter().splitLines(text, width, Style.EMPTY)) {
+    public void drawAlignedSplitString(Font fontRenderer, FormattedText text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow) {
+        for (FormattedText s : fontRenderer.getSplitter().splitLines(text, width, Style.EMPTY)) {
             drawAlignedString(fontRenderer, s, x, y, width, alignment, colour, dropShadow, false);
             y += fontRenderer.lineHeight;
         }
@@ -2848,7 +2765,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     /**
      * Allows you to draw a string aligned to the left, middle or right of the specified area.
      */
-    public void drawAlignedString(FontRenderer fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
+    public void drawAlignedString(Font fr, String text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
         if (trim && fr.width(text) > width) {
             text = fr.plainSubstrByWidth(text, width - 8) + "..";
         }
@@ -2868,13 +2785,13 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //        drawString(fontRenderer, s, x, y, colour, dropShadow);
     }
 
-    public float drawAlignedString(FontRenderer fr, ITextProperties text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
+    public float drawAlignedString(Font fr, FormattedText text, float x, float y, int width, GuiAlign alignment, int colour, boolean dropShadow, boolean trim) {
         boolean willTrim = trim && fr.width(text) > width;
         if (willTrim) {
             int dotW = fr.width("..");
-            Style style = text instanceof ITextComponent ? ((ITextComponent) text).getStyle() : Style.EMPTY;
+            Style style = text instanceof Component ? ((Component) text).getStyle() : Style.EMPTY;
             text = fr.getSplitter().headByWidth(text, width - dotW, Style.EMPTY)/* + ".."*/;
-            text = ITextProperties.composite(text, new StringTextComponent("..").withStyle(style));
+            text = FormattedText.composite(text, new TextComponent("..").withStyle(style));
         }
 
         float end = 0;
@@ -2896,288 +2813,304 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return end;
     }
 
-    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight) {
-        drawHoveringTextString(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
+    public void renderTooltip(PoseStack poseStack, List<Component> components, int mouseX, int mouseY) {
+        Screen screen = modularGui.getScreen();
+        screen.renderTooltip(poseStack, components, Optional.empty(), mouseX, mouseY);
     }
 
-    @Deprecated
-    public void drawHoveringTextString(List<String> textLines, int mouseX, int mouseY, FontRenderer font) {
-        drawHoveringTextString(textLines, mouseX, mouseY, font, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX));
+    public void renderTooltip(PoseStack poseStack, Component components, int mouseX, int mouseY) {
+        Screen screen = modularGui.getScreen();
+        screen.renderTooltip(poseStack, components, mouseX, mouseY);
     }
 
-    /**
-     * This is almost an exact copy of forges code except it respects zLevel.
-     */
-    @Deprecated
-    public void drawHoveringTextString(List<String> textLines, int mouseX, int mouseY, FontRenderer font, int screenWidth, int screenHeight, int maxTextWidth) {
-        font = mc.font;
-        if (!textLines.isEmpty()) {
-            RenderSystem.disableRescaleNormal();
-//            RenderHelper.disableStandardItemLighting();
-//            RenderSystem.disableLighting();
-            RenderSystem.disableDepthTest();
-            int tooltipTextWidth = 0;
-
-            for (String textLine : textLines) {
-                int textLineWidth = font.width(textLine);
-
-                if (textLineWidth > tooltipTextWidth) {
-                    tooltipTextWidth = textLineWidth;
-                }
-            }
-
-            boolean needsWrap = false;
-
-            int titleLinesCount = 1;
-            int tooltipX = mouseX + 12;
-            if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
-                tooltipX = mouseX - 16 - tooltipTextWidth;
-                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
-                {
-                    if (mouseX > screenWidth / 2) {
-                        tooltipTextWidth = mouseX - 12 - 8;
-                    } else {
-                        tooltipTextWidth = screenWidth - 16 - mouseX;
-                    }
-                    needsWrap = true;
-                }
-            }
-
-            if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
-                tooltipTextWidth = maxTextWidth;
-                needsWrap = true;
-            }
-
-            if (needsWrap) {
-                int wrappedTooltipWidth = 0;
-                List<String> wrappedTextLines = new ArrayList<>();
-                for (int i = 0; i < textLines.size(); i++) {
-                    String textLine = textLines.get(i);
-                    List<String> wrappedLine = BCFontRenderer.listFormattedStringToWidth(textLine, tooltipTextWidth);
-                    if (i == 0) {
-                        titleLinesCount = wrappedLine.size();
-                    }
-
-                    for (String line : wrappedLine) {
-                        int lineWidth = font.width(line);
-                        if (lineWidth > wrappedTooltipWidth) {
-                            wrappedTooltipWidth = lineWidth;
-                        }
-                        wrappedTextLines.add(line);
-                    }
-                }
-                tooltipTextWidth = wrappedTooltipWidth;
-                textLines = wrappedTextLines;
-
-                if (mouseX > screenWidth / 2) {
-                    tooltipX = mouseX - 16 - tooltipTextWidth;
-                } else {
-                    tooltipX = mouseX + 12;
-                }
-            }
-
-            int tooltipY = mouseY - 12;
-
-            int tooltipHeight = 8;
-
-            if (textLines.size() > 1) {
-                tooltipHeight += (textLines.size() - 1) * 10;
-                if (textLines.size() > titleLinesCount) {
-                    tooltipHeight += 2; // gap between title lines and next lines
-                }
-            }
-
-            if (tooltipY + tooltipHeight + 6 > screenHeight) {
-                tooltipY = screenHeight - tooltipHeight - 6;
-            }
-
-            if (tooltipY < 4) {
-                tooltipY = 4;
-            }
-
-            double renderOffset = 800 - getRenderZLevel();
-            zOffset += renderOffset;
-            final int backgroundColor = 0xF0100010;
-            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            final int borderColorStart = 0x505000FF;
-            final int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
-            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
-
-            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
-                String line = textLines.get(lineNumber);
-                drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
-
-                if (lineNumber + 1 == titleLinesCount) {
-                    tooltipY += 2;
-                }
-
-                tooltipY += 10;
-            }
-            zOffset -= renderOffset;
-
-//            RenderSystem.enableLighting();
-            RenderSystem.enableDepthTest();
-//            RenderHelper.enableStandardItemLighting();
-            RenderSystem.enableRescaleNormal();
-        }
-    }
-
-    public void drawHoveringText(List<? extends ITextProperties> textLines, int mouseX, int mouseY, FontRenderer font) {
-        drawHoveringText(ItemStack.EMPTY, textLines, mouseX, mouseY, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX), font);
+    @Deprecated //Use componente!... as much as possible
+    public void renderToolTipStrings(PoseStack poseStack, List<String> components, int mouseX, int mouseY) {
+        renderTooltip(poseStack, components.stream().map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
     }
 
 
-    /**
-     * Forges drawHoveringText for drawing item tool tips. Modified to work with the modular GUI system.
-     * My only concern with implementing forge events in the modular gui system is that other mods may try to replace this call with their own renderer
-     * which in the context of a modular gui would probably break.
-     */
-    public void drawHoveringText(@Nonnull final ItemStack stack, List<? extends ITextProperties> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, FontRenderer font) {
-        if (!textLines.isEmpty()) {
-            MatrixStack mStack = new MatrixStack();
-            mStack.translate(0, 0, getRenderZLevel());
-            RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, mStack, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
-            if (MinecraftForge.EVENT_BUS.post(event)) {
-                return;
-            }
-            mouseX = event.getX();
-            mouseY = event.getY();
-            screenWidth = event.getScreenWidth();
-            screenHeight = event.getScreenHeight();
-            maxTextWidth = event.getMaxWidth();
-            font = event.getFontRenderer() == font ? font : BCFontRenderer.convert(event.getFontRenderer());
+//    public void drawHoveringText(List<String> textLines, int mouseX, int mouseY, BCFontRenderer font, int screenWidth, int screenHeight) {
+//        drawHoveringTextString(textLines, mouseX, mouseY, font, screenWidth, screenHeight, -1);
+//    }
+//
+//    @Deprecated
+//    public void drawHoveringTextString(List<String> textLines, int mouseX, int mouseY, Font font) {
+//        drawHoveringTextString(textLines, mouseX, mouseY, font, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX));
+//    }
 
-            RenderSystem.disableRescaleNormal();
-//            RenderHelper.disableStandardItemLighting();
-//            RenderSystem.disableLighting();
-            RenderSystem.disableDepthTest();
-            int tooltipTextWidth = 0;
+//    /**
+//     * This is almost an exact copy of forges code except it respects zLevel.
+//     */
+//    @Deprecated
+//    public void drawHoveringTextString(List<String> textLines, int mouseX, int mouseY, Font font, int screenWidth, int screenHeight, int maxTextWidth) {
+//        font = mc.font;
+//        if (!textLines.isEmpty()) {
+//            RenderSystem.disableRescaleNormal();
+////            RenderHelper.disableStandardItemLighting();
+////            RenderSystem.disableLighting();
+//            RenderSystem.disableDepthTest();
+//            int tooltipTextWidth = 0;
+//
+//            for (String textLine : textLines) {
+//                int textLineWidth = font.width(textLine);
+//
+//                if (textLineWidth > tooltipTextWidth) {
+//                    tooltipTextWidth = textLineWidth;
+//                }
+//            }
+//
+//            boolean needsWrap = false;
+//
+//            int titleLinesCount = 1;
+//            int tooltipX = mouseX + 12;
+//            if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+//                tooltipX = mouseX - 16 - tooltipTextWidth;
+//                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+//                {
+//                    if (mouseX > screenWidth / 2) {
+//                        tooltipTextWidth = mouseX - 12 - 8;
+//                    } else {
+//                        tooltipTextWidth = screenWidth - 16 - mouseX;
+//                    }
+//                    needsWrap = true;
+//                }
+//            }
+//
+//            if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
+//                tooltipTextWidth = maxTextWidth;
+//                needsWrap = true;
+//            }
+//
+//            if (needsWrap) {
+//                int wrappedTooltipWidth = 0;
+//                List<String> wrappedTextLines = new ArrayList<>();
+//                for (int i = 0; i < textLines.size(); i++) {
+//                    String textLine = textLines.get(i);
+//                    List<String> wrappedLine = BCFontRenderer.listFormattedStringToWidth(textLine, tooltipTextWidth);
+//                    if (i == 0) {
+//                        titleLinesCount = wrappedLine.size();
+//                    }
+//
+//                    for (String line : wrappedLine) {
+//                        int lineWidth = font.width(line);
+//                        if (lineWidth > wrappedTooltipWidth) {
+//                            wrappedTooltipWidth = lineWidth;
+//                        }
+//                        wrappedTextLines.add(line);
+//                    }
+//                }
+//                tooltipTextWidth = wrappedTooltipWidth;
+//                textLines = wrappedTextLines;
+//
+//                if (mouseX > screenWidth / 2) {
+//                    tooltipX = mouseX - 16 - tooltipTextWidth;
+//                } else {
+//                    tooltipX = mouseX + 12;
+//                }
+//            }
+//
+//            int tooltipY = mouseY - 12;
+//
+//            int tooltipHeight = 8;
+//
+//            if (textLines.size() > 1) {
+//                tooltipHeight += (textLines.size() - 1) * 10;
+//                if (textLines.size() > titleLinesCount) {
+//                    tooltipHeight += 2; // gap between title lines and next lines
+//                }
+//            }
+//
+//            if (tooltipY + tooltipHeight + 6 > screenHeight) {
+//                tooltipY = screenHeight - tooltipHeight - 6;
+//            }
+//
+//            if (tooltipY < 4) {
+//                tooltipY = 4;
+//            }
+//
+//            double renderOffset = 800 - getRenderZLevel();
+//            zOffset += renderOffset;
+//            final int backgroundColor = 0xF0100010;
+//            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+//            final int borderColorStart = 0x505000FF;
+//            final int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
+//            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+//            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+//            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
+//            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
+//
+//            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
+//                String line = textLines.get(lineNumber);
+//                drawString(font, line, (float) tooltipX, (float) tooltipY, -1, true);
+//
+//                if (lineNumber + 1 == titleLinesCount) {
+//                    tooltipY += 2;
+//                }
+//
+//                tooltipY += 10;
+//            }
+//            zOffset -= renderOffset;
+//
+////            RenderSystem.enableLighting();
+//            RenderSystem.enableDepthTest();
+////            RenderHelper.enableStandardItemLighting();
+//            RenderSystem.enableRescaleNormal();
+//        }
+//    }
 
-            for (ITextProperties textLine : textLines) {
-                int textLineWidth = font.width(textLine);
+//    public void drawHoveringText(List<? extends FormattedText> textLines, int mouseX, int mouseY, Font font) {
+//        drawHoveringText(ItemStack.EMPTY, textLines, mouseX, mouseY, screenWidth, screenHeight, Math.max(mouseX, screenWidth - mouseX), font);
+//    }
 
-                if (textLineWidth > tooltipTextWidth) {
-                    tooltipTextWidth = textLineWidth;
-                }
-            }
 
-            boolean needsWrap = false;
-
-            int titleLinesCount = 1;
-            int tooltipX = mouseX + 12;
-            if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
-                tooltipX = mouseX - 16 - tooltipTextWidth;
-                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
-                {
-                    if (mouseX > screenWidth / 2) {
-                        tooltipTextWidth = mouseX - 12 - 8;
-                    } else {
-                        tooltipTextWidth = screenWidth - 16 - mouseX;
-                    }
-                    needsWrap = true;
-                }
-            }
-
-            if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
-                tooltipTextWidth = maxTextWidth;
-                needsWrap = true;
-            }
-
-            if (needsWrap) {
-                int wrappedTooltipWidth = 0;
-                List<ITextProperties> wrappedTextLines = new ArrayList<>();
-                for (int i = 0; i < textLines.size(); i++) {
-                    ITextProperties textLine = textLines.get(i);
-                    List<ITextProperties> wrappedLine = font.getSplitter().splitLines(textLine, tooltipTextWidth, Style.EMPTY);
-                    if (i == 0) {
-                        titleLinesCount = wrappedLine.size();
-                    }
-
-                    for (ITextProperties line : wrappedLine) {
-                        int lineWidth = font.width(line);
-                        if (lineWidth > wrappedTooltipWidth) {
-                            wrappedTooltipWidth = lineWidth;
-                        }
-                        wrappedTextLines.add(line);
-                    }
-                }
-                tooltipTextWidth = wrappedTooltipWidth;
-                textLines = wrappedTextLines;
-
-                if (mouseX > screenWidth / 2) {
-                    tooltipX = mouseX - 16 - tooltipTextWidth;
-                } else {
-                    tooltipX = mouseX + 12;
-                }
-            }
-
-            int tooltipY = mouseY - 12;
-            int tooltipHeight = 8;
-
-            if (textLines.size() > 1) {
-                tooltipHeight += (textLines.size() - 1) * 10;
-                if (textLines.size() > titleLinesCount) {
-                    tooltipHeight += 2; // gap between title lines and next lines
-                }
-            }
-
-            if (tooltipY + tooltipHeight + 6 > screenHeight) {
-                tooltipY = screenHeight - tooltipHeight - 6;
-            }
-
-            double renderOffset = 800 - getRenderZLevel();
-            zOffset += renderOffset;
-            final int backgroundColor = 0xF0100010;
-            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
-            final int borderColorStart = 0x505000FF;
-            final int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
-            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
-            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
-            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
-
-            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, mStack, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
-            int tooltipTop = tooltipY;
-
-            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
-                ITextProperties line = textLines.get(lineNumber);
-                if (line != null) {
-                    IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-                    MatrixStack textStack = new MatrixStack();
-                    textStack.translate(0.0D, 0.0D, getRenderZLevel());
-                    Matrix4f mat = textStack.last().pose();
-                    font.drawInBatch(LanguageMap.getInstance().getVisualOrder(line), (float) tooltipX, (float) tooltipY, -1, true, mat, renderType, false, 0, 15728880);
-                    renderType.endBatch();
-                }
-
-                if (lineNumber + 1 == titleLinesCount) {
-                    tooltipY += 2;
-                }
-
-                tooltipY += 10;
-            }
-
-            zOffset -= renderOffset;
-
-            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, mStack, tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
-
-//            RenderSystem.enableLighting();
-            RenderSystem.enableDepthTest();
-//            RenderHelper.enableStandardItemLighting();
-            RenderSystem.enableRescaleNormal();
-        }
-    }
+//    /**
+//     * Forges drawHoveringText for drawing item tool tips. Modified to work with the modular GUI system.
+//     * My only concern with implementing forge events in the modular gui system is that other mods may try to replace this call with their own renderer
+//     * which in the context of a modular gui would probably break.
+//     */
+//    public void drawHoveringText(@Nonnull final ItemStack stack, List<? extends FormattedText> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, Font font) {
+//        if (!textLines.isEmpty()) {
+//            PoseStack mStack = new PoseStack();
+//            mStack.translate(0, 0, getRenderZLevel());
+//            RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, textLines, mStack, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
+//            if (MinecraftForge.EVENT_BUS.post(event)) {
+//                return;
+//            }
+//            mouseX = event.getX();
+//            mouseY = event.getY();
+//            screenWidth = event.getScreenWidth();
+//            screenHeight = event.getScreenHeight();
+//            maxTextWidth = event.getMaxWidth();
+//            font = event.getFontRenderer() == font ? font : BCFontRenderer.convert(event.getFontRenderer());
+//
+//            RenderSystem.disableRescaleNormal();
+////            RenderHelper.disableStandardItemLighting();
+////            RenderSystem.disableLighting();
+//            RenderSystem.disableDepthTest();
+//            int tooltipTextWidth = 0;
+//
+//            for (FormattedText textLine : textLines) {
+//                int textLineWidth = font.width(textLine);
+//
+//                if (textLineWidth > tooltipTextWidth) {
+//                    tooltipTextWidth = textLineWidth;
+//                }
+//            }
+//
+//            boolean needsWrap = false;
+//
+//            int titleLinesCount = 1;
+//            int tooltipX = mouseX + 12;
+//            if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+//                tooltipX = mouseX - 16 - tooltipTextWidth;
+//                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+//                {
+//                    if (mouseX > screenWidth / 2) {
+//                        tooltipTextWidth = mouseX - 12 - 8;
+//                    } else {
+//                        tooltipTextWidth = screenWidth - 16 - mouseX;
+//                    }
+//                    needsWrap = true;
+//                }
+//            }
+//
+//            if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
+//                tooltipTextWidth = maxTextWidth;
+//                needsWrap = true;
+//            }
+//
+//            if (needsWrap) {
+//                int wrappedTooltipWidth = 0;
+//                List<FormattedText> wrappedTextLines = new ArrayList<>();
+//                for (int i = 0; i < textLines.size(); i++) {
+//                    FormattedText textLine = textLines.get(i);
+//                    List<FormattedText> wrappedLine = font.getSplitter().splitLines(textLine, tooltipTextWidth, Style.EMPTY);
+//                    if (i == 0) {
+//                        titleLinesCount = wrappedLine.size();
+//                    }
+//
+//                    for (FormattedText line : wrappedLine) {
+//                        int lineWidth = font.width(line);
+//                        if (lineWidth > wrappedTooltipWidth) {
+//                            wrappedTooltipWidth = lineWidth;
+//                        }
+//                        wrappedTextLines.add(line);
+//                    }
+//                }
+//                tooltipTextWidth = wrappedTooltipWidth;
+//                textLines = wrappedTextLines;
+//
+//                if (mouseX > screenWidth / 2) {
+//                    tooltipX = mouseX - 16 - tooltipTextWidth;
+//                } else {
+//                    tooltipX = mouseX + 12;
+//                }
+//            }
+//
+//            int tooltipY = mouseY - 12;
+//            int tooltipHeight = 8;
+//
+//            if (textLines.size() > 1) {
+//                tooltipHeight += (textLines.size() - 1) * 10;
+//                if (textLines.size() > titleLinesCount) {
+//                    tooltipHeight += 2; // gap between title lines and next lines
+//                }
+//            }
+//
+//            if (tooltipY + tooltipHeight + 6 > screenHeight) {
+//                tooltipY = screenHeight - tooltipHeight - 6;
+//            }
+//
+//            double renderOffset = 800 - getRenderZLevel();
+//            zOffset += renderOffset;
+//            final int backgroundColor = 0xF0100010;
+//            drawGradientRect(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+//            drawGradientRect(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
+//            final int borderColorStart = 0x505000FF;
+//            final int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
+//            drawGradientRect(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+//            drawGradientRect(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+//            drawGradientRect(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
+//            drawGradientRect(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
+//
+//            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, mStack, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
+//            int tooltipTop = tooltipY;
+//
+//            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
+//                FormattedText line = textLines.get(lineNumber);
+//                if (line != null) {
+//                    MultiBufferSource.BufferSource renderType = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+//                    PoseStack textStack = new PoseStack();
+//                    textStack.translate(0.0D, 0.0D, getRenderZLevel());
+//                    Matrix4f mat = textStack.last().pose();
+//                    font.drawInBatch(Language.getInstance().getVisualOrder(line), (float) tooltipX, (float) tooltipY, -1, true, mat, renderType, false, 0, 15728880);
+//                    renderType.endBatch();
+//                }
+//
+//                if (lineNumber + 1 == titleLinesCount) {
+//                    tooltipY += 2;
+//                }
+//
+//                tooltipY += 10;
+//            }
+//
+//            zOffset -= renderOffset;
+//
+//            MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, mStack, tooltipX, tooltipTop, font, tooltipTextWidth, tooltipHeight));
+//
+////            RenderSystem.enableLighting();
+//            RenderSystem.enableDepthTest();
+////            RenderHelper.enableStandardItemLighting();
+//            RenderSystem.enableRescaleNormal();
+//        }
+//    }
 
     public static int mixColours(int colour1, int colour2) {
         return mixColours(colour1, colour2, false);
@@ -3193,10 +3126,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         int blue1 = colour1 & 255;
         int blue2 = colour2 & 255;
 
-        int alpha = MathHelper.clamp(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
-        int red = MathHelper.clamp(red1 + (subtract ? -red2 : red2), 0, 255);
-        int green = MathHelper.clamp(green1 + (subtract ? -green2 : green2), 0, 255);
-        int blue = MathHelper.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
+        int alpha = Mth.clamp(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
+        int red = Mth.clamp(red1 + (subtract ? -red2 : red2), 0, 255);
+        int green = Mth.clamp(green1 + (subtract ? -green2 : green2), 0, 255);
+        int blue = Mth.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
 
         return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | blue & 0xFF;
     }
@@ -3314,13 +3247,13 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     //TODO I can probably expend on this. Maybe re write things to use text components or some custom system that supports text components.
-    public E setComponentHoverText(List<ITextComponent> textLines) {
-        setHoverText(element -> textLines.stream().map(ITextComponent::getString).collect(Collectors.toList()));
+    public E setComponentHoverText(List<Component> textLines) {
+        setHoverText(element -> textLines.stream().map(Component::getString).collect(Collectors.toList()));
         return (E) this;
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> getHoverText() {
+    public List<Component> getHoverText() {
         return hoverText == null || !drawHoverText ? Collections.emptyList() : hoverText.getHoverText((E) this);
     }
 
@@ -3339,7 +3272,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         void call(Minecraft minecraft, int mouseX, int mouseY, float partialTicks, boolean mouseOver);
 
         static void resetColour(Minecraft minecraft, int mouseX, int mouseY, float partialTicks, boolean mouseOver) {
-            RenderSystem.color4f(1F, 1F, 1F, 1F);
+//            RenderSystem.color4f(1F, 1F, 1F, 1F);
         }
     }
 

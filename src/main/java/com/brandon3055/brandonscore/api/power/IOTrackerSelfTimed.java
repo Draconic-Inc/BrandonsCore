@@ -1,11 +1,11 @@
 package com.brandon3055.brandonscore.api.power;
 
 import com.brandon3055.brandonscore.api.TimeKeeper;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 /**
  * Created by brandon3055 on 16/10/19.
- *
+ * <p>
  * This io tracker does not need to be updated every tick in order to function.
  * However it does have increased overhead as a result.
  */
@@ -51,8 +51,7 @@ public class IOTrackerSelfTimed extends IOTracker {
     public void energyModified(long amount) {
         if (amount > 0) {
             energyInserted(amount);
-        }
-        else {
+        } else {
             energyExtracted(amount * -1);
         }
     }
@@ -69,8 +68,7 @@ public class IOTrackerSelfTimed extends IOTracker {
     public long currentInput() {
         if (EffectiveSide.get().isClient()) {
             return inputPerTick;
-        }
-        else {
+        } else {
             int tick = TimeKeeper.getServerTick();
             if (tick != lastInputCheck) {
                 zeroSkippedTicks(inputArray, lastInputTick, tick);
@@ -85,8 +83,7 @@ public class IOTrackerSelfTimed extends IOTracker {
     public long currentOutput() {
         if (EffectiveSide.get().isClient()) {
             return outputPerTick;
-        }
-        else {
+        } else {
             int tick = TimeKeeper.getServerTick();
             if (tick != lastOutputCheck) {
                 zeroSkippedTicks(outputArray, lastOutputTick, tick);
