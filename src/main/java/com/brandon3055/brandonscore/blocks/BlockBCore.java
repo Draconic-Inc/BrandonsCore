@@ -40,6 +40,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Created by brandon3055 on 18/3/2016.
@@ -53,7 +54,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
     protected boolean hasSubItemTypes = false;
     protected boolean isMobResistant = false;
     private boolean blockSpawns = false;
-    private BlockEntityType<? extends TileBCore> blockEntityType = null;
+    private Supplier<BlockEntityType<? extends TileBCore>> blockEntityType = null;
     private boolean enableTicking;
 
     public BlockBCore(Block.Properties properties) {
@@ -65,7 +66,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
         return this;
     }
 
-    public BlockBCore setBlockEntity(BlockEntityType<? extends TileBCore> blockEntityType, boolean enableTicking) {
+    public BlockBCore setBlockEntity(Supplier<BlockEntityType<? extends TileBCore>> blockEntityType, boolean enableTicking) {
         if (!(this instanceof EntityBlock)) {
             throw new RuntimeException("Attempted to set block entity on block that does not implement EntityBlock! " + this.getClass().getName());
         }
@@ -76,12 +77,12 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Nullable
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return blockEntityType.create(blockPos, blockState);
+        return blockEntityType.get().create(blockPos, blockState);
     }
 
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> entityType) {
-        if (enableTicking && blockEntityType == entityType) {
+        if (enableTicking && blockEntityType.get() == entityType) {
             return (e, e2, e3, tile) -> ((TileBCore) tile).tick();
         }
         return null;
