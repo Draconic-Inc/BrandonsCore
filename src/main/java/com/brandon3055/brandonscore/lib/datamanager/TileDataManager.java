@@ -8,10 +8,12 @@ import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,13 +67,12 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
      *
      * @param listeners The list of container listeners.
      */
-    public void detectAndSendChangesToListeners(List<ContainerListener> listeners) {
+    public void detectAndSendChangesToListeners(Collection<Player> listeners) {
         for (IManagedData data : managedDataList) {
             if (data.flags().syncContainer && data.isDirty(true)) {
                 PacketCustom syncPacket = createSyncPacket();
                 syncPacket.writeByte((byte) data.getIndex());
                 data.toBytes(syncPacket);
-//                syncPacket.sendToChunk(tile);
                 DataUtils.forEachMatch(listeners, p -> p instanceof ServerPlayer, p -> syncPacket.sendToPlayer((ServerPlayer) p));
             }
         }

@@ -27,7 +27,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -97,21 +96,19 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
      */
     public void tick() {
         tickables.forEach(Runnable::run);
-        detectAndSendChanges();
+        detectAndSendChanges(false);
         tick++;
     }
 
-    public void detectAndSendChanges() {
+    public void detectAndSendChanges(boolean containerListeners) {
         if (level != null && !level.isClientSide) {
-            dataManager.detectAndSendChanges();
-            capManager.detectAndSendChanges();
-        }
-    }
-
-    public void detectAndSendChangesToListeners(List<ContainerListener> listeners) {
-        if (level != null && !level.isClientSide) {
-            dataManager.detectAndSendChangesToListeners(listeners);
-            capManager.detectAndSendChangesToListeners(listeners);
+            if (containerListeners) {
+                dataManager.detectAndSendChangesToListeners(getAccessingPlayers());
+                capManager.detectAndSendChangesToListeners(getAccessingPlayers());
+            } else {
+                dataManager.detectAndSendChanges();
+                capManager.detectAndSendChanges();
+            }
         }
     }
 
@@ -351,7 +348,7 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
      * {@link #readFromItemStack(CompoundTag)}
      */
     public void readExtraTileAndStack(CompoundTag nbt) {}
-    
+
     @Override
     protected final void saveAdditional(CompoundTag nbt) {
         super.saveAdditional(nbt);
@@ -396,7 +393,7 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
         LazyOptional<T> ret = capManager.getCapability(capability, side);
         return ret.isPresent() ? ret : super.getCapability(capability, side);
     }
-    
+
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();

@@ -157,7 +157,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     /**
      * Add an element to be used as the background for this stack.<br>
-     * Recommend {@link GuiSlotRender} or {@link GuiBorderedRect}<br>
+     * Recommend {@link GuiTexture#newSlot()} or {@link GuiBorderedRect}<br>
      * But really you can use any element base including buttons which will make the element function as a button.<br>
      * When you add a background element its size and position will automatically be adjusted to match the stack icon.
      *
@@ -234,7 +234,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     public GuiStackIcon addSlotBackground() {
         setBackground(null);
-        addChild(background = new GuiSlotRender().setPos(this).setSizeModifiers((guiSlotRender, integer) -> GuiStackIcon.this.xSize(), (guiSlotRender, integer) -> GuiStackIcon.this.ySize()));
+        addChild(background = GuiTexture.newSlot().setPos(this).setSizeModifiers((guiSlotRender, integer) -> GuiStackIcon.this.xSize(), (guiSlotRender, integer) -> GuiStackIcon.this.ySize()));
         return this;
     }
 

@@ -4,19 +4,22 @@ import codechicken.lib.math.MathHelper;
 import codechicken.lib.render.shader.ShaderProgram;
 import com.brandon3055.brandonscore.api.power.IOInfo;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
+import com.brandon3055.brandonscore.client.BCShaders;
 import com.brandon3055.brandonscore.client.BCSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-import com.brandon3055.brandonscore.client.render.BCShaders;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
 import com.brandon3055.brandonscore.utils.MathUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.Material;
@@ -66,6 +69,23 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 //            )
 //            .whenUsed(cache -> cache.glUniform1f("time", BCClientEventHandler.elapsedTicks / 10F))
 //            .build();
+
+//    public static final RenderType SHADER_TYPE = RenderType.create("sh_energy_bar", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, 256, RenderType.CompositeState.builder()
+//                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorTexShader))
+//                    .setTextureState(new RenderStateShard.TextureStateShard(LOCATION_GUI_ATLAS, false, false))
+//                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+//                    .setCullState(RenderStateShard.NO_CULL)
+////            .setAlphaState(RenderStateShard.DEFAULT_ALPHA)
+////            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
+//                    .createCompositeState(false)
+//    );
+
+    private static final RenderType SHADER_TYPE = RenderType.create("starfield", DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS, 256, false, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(() -> BCShaders.energyBarShader))
+                    .setTextureState(new RenderStateShard.TextureStateShard(TheEndPortalRenderer.END_PORTAL_LOCATION, false, false))
+                    .createCompositeState(false)
+    );
 
     private IOPStorage energyHandler = null;
     private Supplier<Long> capacitySupplier = null;
@@ -212,6 +232,12 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             getter.endBatch();
         }
         else {
+            VertexConsumer shaderConsumer = getter.getBuffer(SHADER_TYPE);
+            testRect(shaderConsumer, posX + 1, posY + 1, barWidth - 2, barLength - 2);
+            testRect(shaderConsumer, posX + 1, posY + barLength - draw - 1, barWidth - 2, draw);
+            getter.endBatch();
+
+
 //            bindShader(horizontal ? barShaderH : barShaderV);
 //            drawColouredRect(posX + 1, posY + 1, barWidth - 2, barLength - 2, 0xFF000000);
 //            drawColouredRect(posX + 1, posY + barLength - draw - 1, barWidth - 2, draw, 0xFFFF0000);
@@ -222,6 +248,17 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 //            RenderSystem.popMatrix();
         }
     }
+
+    private void testRect(VertexConsumer buffer, float x, float y, float width, float height) {
+        double zLevel = getRenderZLevel();
+        //@formatter:off
+        buffer.vertex(x,           y + height, zLevel).endVertex();
+        buffer.vertex(x + width,   y + height, zLevel).endVertex();
+        buffer.vertex(x + width,   y,          zLevel).endVertex();
+        buffer.vertex(x,           y,          zLevel).endVertex();
+        //@formatter:on
+    }
+
     public void sliceSprite(VertexConsumer buffer, int xPos, int yPos, int xSize, int ySize, TextureAtlasSprite sprite) {
         float texU = sprite.getU0();
         float texV = sprite.getV0();
@@ -320,12 +357,12 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
     }
 
     public void releaseShader(ShaderProgram program) {
-        if (useShaders()) {
-            program.release();
-        }
+//        if (useShaders()) {
+//            program.release();
+//        }
     }
 
-    public boolean useShaders() {
-        return !rfMode && shaderEnabled.get() && BCShaders.useShaders();
-    }
+//    public boolean useShaders() {
+//        return !rfMode && shaderEnabled.get() && BCShaders.useShaders();
+//    }
 }

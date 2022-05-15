@@ -138,44 +138,6 @@ public class TeleportUtils {
 
 
         return entity;
-
-//
-//        DimensionType sourceType =DimensionType.getById(sourceDim);
-//        DimensionType targetType =DimensionType.getById(targetDim);
-//        if (sourceType == null || targetType == null) {
-//            return null;
-//        }
-//
-//        ServerWorld sourceWorld = server.getWorld(sourceType);
-//        ServerWorld targetWorld = server.getWorld(targetType);
-//
-//        if (entity.isAlive() && entity instanceof ContainerMinecartEntity) {
-//            ((ContainerMinecartEntity) entity).dropContentsWhenDead(false);
-//        }
-//
-//        entity.dimension = targetType;
-//
-//        sourceWorld.removeEntity(entity);
-//        entity.revive();
-//        entity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-//        sourceWorld.updateEntity(entity);
-//
-//        Entity newEntity = EntityList.newEntity(entity.getClass(), targetWorld);
-//        if (newEntity != null) {
-//            newEntity.copyDataFromOld(entity);
-//            newEntity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
-//            boolean flag = newEntity.forceSpawn;
-//            newEntity.forceSpawn = true;
-//            targetWorld.spawnEntity(newEntity);
-//            newEntity.forceSpawn = flag;
-//            targetWorld.updateEntityWithOptionalForce(newEntity, false);
-//        }
-//
-//        entity.isDead = true;
-//        sourceWorld.resetUpdateEntityTick();
-//        targetWorld.resetUpdateEntityTick();
-//
-//        return newEntity;
     }
 
     /**
@@ -187,42 +149,14 @@ public class TeleportUtils {
         if (!player.isAlive() || targetWorld == null) {
             return player;
         }
-//        if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(player, targetWorld.dimension())) return player;
         player.isChangingDimension = true;
-
-//        IWorldInfo worldInfo = targetWorld.getLevelData();
-//        player.connection.send(new SRespawnPacket(targetWorld.dimensionType(), targetWorld.dimension(), BiomeManager.obfuscateSeed(targetWorld.getSeed()), player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), true));
-//        player.connection.send(new SServerDifficultyPacket(worldInfo.getDifficulty(), worldInfo.isDifficultyLocked()));
-//        PlayerList playerlist = player.server.getPlayerList();
-//        playerlist.sendPlayerPermissionLevel(player);
-//        originWorld.removeEntity(player, true); //Forge: the player entity is moved to the new world, NOT cloned. So keep the data alive with no matching invalidate call.
-//        player.revive();
-//
-//        player.setLevel(targetWorld);
-//        targetWorld.addDuringPortalTeleport(player);
-//        player.absMoveTo(xCoord, yCoord, zCoord, yaw, pitch);
-//        player.setYHeadRot(yaw);
-//        player.connection.resetPosition();
-//
-//        player.gameMode.setLevel(targetWorld);
-//        player.connection.send(new SPlayerAbilitiesPacket(player.abilities));
-//        playerlist.sendLevelInfo(player, targetWorld);
-//        playerlist.sendAllPlayerInfo(player);
-//
-//        for (EffectInstance effectinstance : player.getActiveEffects()) {
-//            player.connection.send(new SPlayEntityEffectPacket(player.getId(), effectinstance));
-//        }
-
         player.teleportTo(targetWorld, xCoord, yCoord, zCoord, yaw, pitch);
 
         player.lastSentExp = -1;
         player.lastSentHealth = -1.0F;
         player.lastSentFood = -1;
 
-        //Fixes issue where creative flight is reset client side after teleport
         player.onUpdateAbilities();
-//        net.minecraftforge.fml.hooks.BasicEventHooks.firePlayerChangedDimensionEvent(player, originWorld.dimension(), targetWorld.dimension());
-
         return player;
     }
 
@@ -288,7 +222,7 @@ public class TeleportUtils {
                 entity.moveTo(entity.getX() + offsetX, entity.getY() + offsetY, entity.getZ() + offsetZ, entity.getYRot(), entity.getXRot());
             }
             for (PassengerHelper passenger : passengers) {
-                passenger.entity.startRiding(entity, true);
+                DelayedTask.run(1, () -> passenger.entity.startRiding(entity, true));
                 passenger.remountRiders();
             }
         }

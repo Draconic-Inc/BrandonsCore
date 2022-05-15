@@ -73,7 +73,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
-        tile.detectAndSendChangesToListeners(containerListeners);
+        tile.detectAndSendChanges(true);
     }
 
     @Override

@@ -9,7 +9,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSlotRender;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.SlotMover;
@@ -40,7 +39,7 @@ public class TGuiBase implements IGuiTemplate {
     public GuiButton themeButton;
     public GuiElement<?> playerSlots;
     public GuiEnergyBar energyBar;
-    public GuiSlotRender powerSlot;
+    public GuiElement<?> powerSlot;
     public InfoPanel infoPanel;
 
     protected Screen gui;
@@ -114,7 +113,7 @@ public class TGuiBase implements IGuiTemplate {
             throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
         }
 
-        background.addChild(powerSlot = new GuiSlotRender());
+        background.addChild(powerSlot = GuiTexture.newSlot());
         GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slot_energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 
@@ -174,7 +173,7 @@ public class TGuiBase implements IGuiTemplate {
             throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
         }
 
-        background.addChild(powerSlot = new GuiSlotRender());
+        background.addChild(powerSlot = GuiTexture.newSlot());
         GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slots/energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 

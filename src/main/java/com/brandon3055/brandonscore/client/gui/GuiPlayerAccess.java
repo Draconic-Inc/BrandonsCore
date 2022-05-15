@@ -7,7 +7,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiPopupDialogs;
-import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSlotRender;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
@@ -99,20 +98,20 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
         bg.addChild(slotsElement);
 
         for (int i = 0; i < 4; i++) {
-            slotsElement.addChild(new GuiSlotRender().setRelPos(0, i * 19));
+            slotsElement.addChild(GuiTexture.newSlot().setRelPos(0, i * 19));
         }
 
         for (int x = 0; x < 9; x++) {
-            slotsElement.addChild(new GuiSlotRender().setRelPos(21 + 18 * x, 54 + 3));
+            slotsElement.addChild(GuiTexture.newSlot().setRelPos(21 + 18 * x, 54 + 3));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                slotsElement.addChild(new GuiSlotRender().setRelPos(21 + 18 * x, y * 18));
+                slotsElement.addChild(GuiTexture.newSlot().setRelPos(21 + 18 * x, y * 18));
             }
         }
 
-        slotsElement.addChild(new GuiSlotRender().setRelPos(186, 54 + 3));
+        slotsElement.addChild(GuiTexture.newSlot().setRelPos(186, 54 + 3));
 
         slotsElement.setSize(slotsElement.getEnclosingRect());
         return slotsElement;

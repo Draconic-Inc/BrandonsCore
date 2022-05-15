@@ -9,6 +9,7 @@ import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -18,10 +19,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -216,7 +214,7 @@ public class TileCapabilityManager implements ICapabilityProvider {
         }
     }
 
-    public void detectAndSendChangesToListeners(List<ContainerListener> listeners) {
+    public void detectAndSendChangesToListeners(Collection<Player> listeners) {
         for (int i = 0; i < indexedDataList.size(); i++) {
             SerializationFlags<?> helper = indexedDataList.get(i);
             if (helper.syncContainer && helper.hasChanged(true)) {

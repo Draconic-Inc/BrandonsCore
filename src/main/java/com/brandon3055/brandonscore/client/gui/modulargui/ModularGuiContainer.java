@@ -1,14 +1,21 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Created by brandon3055 on 30/08/2016.
@@ -196,8 +203,6 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
 
     //endregion
 
-    //region Render
-
     @Override
     protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY) {
         renderBackgroundLayer(mouseX, mouseY, partialTicks);
@@ -217,8 +222,7 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
             renderBackground(matrixStack);
         }
 
-        //TODO
-//        renderSuperScreen(matrixStack, mouseX, mouseY, partialTicks);
+        renderSuperScreen(matrixStack, mouseX, mouseY, partialTicks);
         renderOverlayLayer(mouseX, mouseY, partialTicks);
 
         if (itemTooltipsEnabled) {
@@ -228,7 +232,6 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
         }
     }
 
-
     public void renderBackgroundLayer(int mouseX, int mouseY, float partialTicks) {
         manager.renderElements(minecraft, mouseX, mouseY, partialTicks);
     }
@@ -236,9 +239,6 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
     public void renderOverlayLayer(int mouseX, int mouseY, float partialTicks) {
         manager.renderOverlayLayer(minecraft, mouseX, mouseY, partialTicks);
     }
-    //endregion
-
-    //region Update
 
     @Override
     protected void containerTick() {
@@ -246,159 +246,93 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
         manager.onUpdate();
     }
 
-    //endregion
+    private void renderSuperScreen(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+        int left = this.leftPos;
+        int top = this.topPos;
+        this.renderBg(poseStack, partialTicks, mouseX, mouseY);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.DrawBackground(this, poseStack, mouseX, mouseY));
+        RenderSystem.disableDepthTest();
 
-    //region Overriding vanilla stuff and things
+        for (Widget widget : this.renderables) {
+            widget.render(poseStack, mouseX, mouseY, partialTicks);
+        }
 
-//    public void renderSuperScreen(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-//        int left = this.leftPos;
-//        int top = this.topPos;
-//        this.renderBg(matrixStack, partialTicks, mouseX, mouseY);
-//        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawBackground(this, matrixStack, mouseX, mouseY));
-//        RenderSystem.disableRescaleNormal();
-//        RenderSystem.disableDepthTest();
-//
-//        for (int i = 0; i < this.buttons.size(); ++i) {
-//            this.buttons.get(i).render(matrixStack, mouseX, mouseY, partialTicks);
-//        }
-//
-//        RenderSystem.pushMatrix();
-//        RenderSystem.translatef((float) left, (float) top, 0.0F);
-//        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//        RenderSystem.enableRescaleNormal();
-//        this.hoveredSlot = null;
-//        int k = 240;
-//        int l = 240;
-//        RenderSystem.glMultiTexCoord2f(33986, 240.0F, 240.0F);
-//        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//
-//        for (int i1 = 0; i1 < this.container.slots.size(); ++i1) {
-//            Slot slot = this.container.slots.get(i1);
-//            if (slot.isActive()) {
-//                this.drawSlot(matrixStack, slot);
-//            }
-//
-//            boolean occluded = manager.isAreaUnderElement(slot.x + guiLeft(), slot.y + guiTop(), 16, 16, 100);
-//            if (!occluded || experimentalSlotOcclusion) {
-//                if (!occluded && this.isHovering(slot, mouseX, mouseY) && slot.isActive()) {
-//                    this.hoveredSlot = slot;
-//                    RenderSystem.disableDepthTest();
-//                    int j1 = slot.x;
-//                    int k1 = slot.y;
-//                    RenderSystem.colorMask(true, true, true, false);
-//                    int slotColor = this.getSlotColor(i1);
-//                    this.fillGradient(matrixStack, j1, k1, j1 + 16, k1 + 16, slotColor, slotColor);
-//                    RenderSystem.colorMask(true, true, true, true);
-//                    RenderSystem.enableDepthTest();
-//                }
-//                drawSlotOverlay(slot, occluded);
-//            }
-//        }
-//
-//        this.renderLabels(matrixStack, mouseX, mouseY);
-//        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.GuiContainerEvent.DrawForeground(this, matrixStack, mouseX, mouseY));
-//        Inventory playerinventory = this.minecraft.player.inventory;
-//        ItemStack itemstack = this.draggingItem.isEmpty() ? playerinventory.getCarried() : this.draggingItem;
-//        if (!itemstack.isEmpty()) {
-//            int j2 = 8;
-//            int k2 = this.draggingItem.isEmpty() ? 8 : 16;
-//            String s = null;
-//            if (!this.draggingItem.isEmpty() && this.isSplittingStack) {
-//                itemstack = itemstack.copy();
-//                itemstack.setCount(Mth.ceil((float) itemstack.getCount() / 2.0F));
-//            } else if (this.isQuickCrafting && this.quickCraftSlots.size() > 1) {
-//                itemstack = itemstack.copy();
-//                itemstack.setCount(this.quickCraftingRemainder);
-//                if (itemstack.isEmpty()) {
-//                    s = "" + ChatFormatting.YELLOW + "0";
-//                }
-//            }
-//
-//            this.renderFloatingItem(itemstack, mouseX - left - 8, mouseY - top - k2, s);
-//        }
-//
-//        if (!this.snapbackItem.isEmpty()) {
-//            float f = (float) (Util.getMillis() - this.snapbackTime) / 100.0F;
-//            if (f >= 1.0F) {
-//                f = 1.0F;
-//                this.snapbackItem = ItemStack.EMPTY;
-//            }
-//
-//            int l2 = this.snapbackEnd.x - this.snapbackStartX;
-//            int i3 = this.snapbackEnd.y - this.snapbackStartY;
-//            int l1 = this.snapbackStartX + (int) ((float) l2 * f);
-//            int i2 = this.snapbackStartY + (int) ((float) i3 * f);
-//            this.renderFloatingItem(this.snapbackItem, l1, i2, null);
-//        }
-//
-//        RenderSystem.popMatrix();
-//        RenderSystem.enableDepthTest();
-//    }
-//
-//    private void drawSlot(PoseStack matrixStack, Slot slotIn) {
-//        int yPos = slotIn.y;
-//        int xPos = slotIn.x;
-//
-//        boolean occluded = manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100);
-//        if (occluded && !experimentalSlotOcclusion) {
-//            return;
-//        }
-//
-//        ItemStack itemstack = slotIn.getItem();
-//        boolean flag = false;
-//        boolean flag1 = slotIn == this.clickedSlot && !this.draggingItem.isEmpty() && !this.isSplittingStack;
-//        ItemStack itemstack1 = this.minecraft.player.inventory.getCarried();
-//        String s = null;
-//        if (slotIn == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !itemstack.isEmpty()) {
-//            itemstack = itemstack.copy();
-//            itemstack.setCount(itemstack.getCount() / 2);
-//        } else if (this.isQuickCrafting && this.quickCraftSlots.contains(slotIn) && !itemstack1.isEmpty()) {
-//            if (this.quickCraftSlots.size() == 1) {
-//                return;
-//            }
-//
-//            if (AbstractContainerMenu.canItemQuickReplace(slotIn, itemstack1, true) && this.container.canDragTo(slotIn)) {
-//                itemstack = itemstack1.copy();
-//                flag = true;
-//                AbstractContainerMenu.getQuickCraftSlotCount(this.quickCraftSlots, this.quickCraftingType, itemstack, slotIn.getItem().isEmpty() ? 0 : slotIn.getItem().getCount());
-//                int k = Math.min(itemstack.getMaxStackSize(), slotIn.getMaxStackSize(itemstack));
-//                if (itemstack.getCount() > k) {
-//                    s = ChatFormatting.YELLOW.toString() + k;
-//                    itemstack.setCount(k);
-//                }
-//            } else {
-//                this.quickCraftSlots.remove(slotIn);
-//                this.recalculateQuickCraftRemaining();
-//            }
-//        }
-//
-//        this.setBlitOffset(100);
-//        this.itemRenderer.blitOffset = 100.0F;
-//        if (itemstack.isEmpty() && slotIn.isActive()) {
-//            Pair<ResourceLocation, ResourceLocation> pair = slotIn.getNoItemIcon();
-//            if (pair != null) {
-//                TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
-//                this.minecraft.getTextureManager().bind(textureatlassprite.atlas().location());
-//                blit(matrixStack, xPos, yPos, this.getBlitOffset(), 16, 16, textureatlassprite);
-//                flag1 = true;
-//            }
-//        }
-//
-//        if (!flag1) {
-//            if (flag) {
-//                fill(matrixStack, xPos, yPos, xPos + 16, yPos + 16, -2130706433);
-//            }
-//
-//            RenderSystem.enableDepthTest();
-//            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemstack, xPos, yPos);
-//            if (!occluded) {
-//                this.itemRenderer.renderGuiItemDecorations(this.font, itemstack, xPos, yPos, s);
-//            }
-//        }
-//
-//        this.itemRenderer.blitOffset = 0.0F;
-//        this.setBlitOffset(0);
-//    }
+        PoseStack posestack = RenderSystem.getModelViewStack();
+        posestack.pushPose();
+        posestack.translate(left, top, 0.0D);
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.hoveredSlot = null;
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        for (int k = 0; k < this.menu.slots.size(); ++k) {
+            Slot slot = this.menu.slots.get(k);
+            if (slot.isActive()) {
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                this.renderSlot(poseStack, slot);
+            }
+
+            boolean occluded = manager.isAreaUnderElement(slot.x + guiLeft(), slot.y + guiTop(), 16, 16, 100);
+            if (!occluded || experimentalSlotOcclusion) {
+                if (!occluded && this.isHovering(slot, mouseX, mouseY) && slot.isActive()) {
+                    this.hoveredSlot = slot;
+                    int l = slot.x;
+                    int i1 = slot.y;
+                    renderSlotHighlight(poseStack, l, i1, this.getBlitOffset(), this.getSlotColor(k));
+                }
+                drawSlotOverlay(slot, occluded);
+            }
+        }
+
+        this.renderLabels(poseStack, mouseX, mouseY);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.DrawForeground(this, poseStack, mouseX, mouseY));
+        ItemStack itemstack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
+        if (!itemstack.isEmpty()) {
+            int l1 = 8;
+            int i2 = this.draggingItem.isEmpty() ? 8 : 16;
+            String s = null;
+            if (!this.draggingItem.isEmpty() && this.isSplittingStack) {
+                itemstack = itemstack.copy();
+                itemstack.setCount(Mth.ceil((float) itemstack.getCount() / 2.0F));
+            } else if (this.isQuickCrafting && this.quickCraftSlots.size() > 1) {
+                itemstack = itemstack.copy();
+                itemstack.setCount(this.quickCraftingRemainder);
+                if (itemstack.isEmpty()) {
+                    s = ChatFormatting.YELLOW + "0";
+                }
+            }
+
+            this.renderFloatingItem(itemstack, mouseX - left - 8, mouseY - top - i2, s);
+        }
+
+        if (!this.snapbackItem.isEmpty()) {
+            float f = (float) (Util.getMillis() - this.snapbackTime) / 100.0F;
+            if (f >= 1.0F) {
+                f = 1.0F;
+                this.snapbackItem = ItemStack.EMPTY;
+            }
+
+            int j2 = this.snapbackEnd.x - this.snapbackStartX;
+            int k2 = this.snapbackEnd.y - this.snapbackStartY;
+            int j1 = this.snapbackStartX + (int) ((float) j2 * f);
+            int k1 = this.snapbackStartY + (int) ((float) k2 * f);
+            this.renderFloatingItem(this.snapbackItem, j1, k1, null);
+        }
+
+        posestack.popPose();
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.enableDepthTest();
+    }
+
+    @Override
+    public void renderSlot(PoseStack poseStack, Slot slot) {
+        int xPos = slot.x;
+        int yPos = slot.y;
+        boolean occluded = manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100);
+        if (!occluded || experimentalSlotOcclusion) {
+            super.renderSlot(poseStack, slot);
+        }
+    }
 
     protected void drawSlotOverlay(Slot slot, boolean occluded) {}
 
@@ -407,14 +341,14 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
     }
 
     @Override
-    public int getGuiLeft() { return guiLeft(); }
+    public int getGuiLeft() {return guiLeft();}
 
     @Override
-    public int getGuiTop() { return guiTop(); }
+    public int getGuiTop() {return guiTop();}
 
     @Override
-    public int getXSize() { return xSize(); }
+    public int getXSize() {return xSize();}
 
     @Override
-    public int getYSize() { return ySize(); }
+    public int getYSize() {return ySize();}
 }

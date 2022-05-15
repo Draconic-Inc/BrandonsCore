@@ -180,6 +180,13 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return texYGetter == null ? texV : texYGetter.get();
     }
 
+    /**
+     * @return a new themed slot texture
+     */
+    public static GuiTexture newSlot() {
+        return new GuiTexture(18, 18, BCSprites.themedGetter("slot"));
+    }
+
     public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<Material> materialSupplier) {
         return newDynamicTexture(materialSupplier).setSize(xSize, ySize);
     }
