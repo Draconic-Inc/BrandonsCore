@@ -3,7 +3,7 @@ package com.brandon3055.brandonscore.client;
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout;
-import com.brandon3055.brandonscore.client.render.GuiSpriteUploader;
+import com.brandon3055.brandonscore.client.render.CustomSpriteUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -26,27 +27,24 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 /**
  * Created by brandon3055 on 3/09/2016.
  */
-public class BCSprites {
-    public static final ResourceLocation LOCATION_GUI_ATLAS = new ResourceLocation(MODID, "textures/atlas/gui.png");
-    public static final String RESOURCE_PREFIX = MODID.toLowerCase(Locale.ENGLISH) + ":";
+public class BCGuiSprites {
+    public static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(MODID, "textures/atlas/gui.png");
 
-    private static GuiSpriteUploader guiSpriteUploader;
-    private static final Set<ResourceLocation> registeredSprites = new HashSet<>();
+    private static CustomSpriteUploader customSpriteUploader;
+    private static final Map<ResourceLocation, Consumer<TextureAtlasSprite>> registeredSprites = new HashMap<>();
     private static final Map<String, Material> matCache = new HashMap<>();
 
     public static final RenderType GUI_TYPE = RenderType.create("gui_tex", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, 256, RenderType.CompositeState.builder()
             .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorTexShader))
-            .setTextureState(new RenderStateShard.TextureStateShard(LOCATION_GUI_ATLAS, false, false))
+            .setTextureState(new RenderStateShard.TextureStateShard(ATLAS_LOCATION, false, false))
             .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
             .setCullState(RenderStateShard.NO_CULL)
-//            .setAlphaState(RenderStateShard.DEFAULT_ALPHA)
-//            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
             .createCompositeState(false)
     );
 
 
     public static void initialize(ColorHandlerEvent.Block event) {
-        guiSpriteUploader = new GuiSpriteUploader(registeredSprites);
+        customSpriteUploader = new CustomSpriteUploader(registeredSprites, BCGuiSprites.ATLAS_LOCATION, "gui");
 
         //Gui Backgrounds
         Stream.of(GuiLayout.values()).filter(e -> e.xSize != -1).forEach(layout -> registerThemed(MODID, layout.textureName()));
@@ -141,12 +139,21 @@ public class BCSprites {
         register(modid, "dark/" + location);
     }
     public static void register(String modid, String location) {
-        register(new ResourceLocation(modid, location));
+        register(new ResourceLocation(modid, location), equipmentManager -> {});
     }
 
     public static void register(ResourceLocation location) {
-        registeredSprites.add(location);
+        register(location, null);
     }
+
+    public static void register(String modid, String location, Consumer<TextureAtlasSprite> onLoad) {
+        register(new ResourceLocation(modid, location), onLoad);
+    }
+
+    public static void register(ResourceLocation location, Consumer<TextureAtlasSprite> onLoad) {
+        registeredSprites.put(location, onLoad);
+    }
+
 
     //endregion
     public static Material getThemed(String modid, String location) {
@@ -158,7 +165,7 @@ public class BCSprites {
     }
 
     public static Material get(String modid, String location) {
-        return matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
+        return matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(ATLAS_LOCATION, new ResourceLocation(modid, location)));
     }
 
     public static Material get(String location) {
@@ -178,7 +185,7 @@ public class BCSprites {
     }
 
     public static Supplier<Material> getter(String modid, String location) {
-        return () -> matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(LOCATION_GUI_ATLAS, new ResourceLocation(modid, location)));
+        return () -> matCache.computeIfAbsent(modid + ":" + location, s -> new CustomMat(ATLAS_LOCATION, new ResourceLocation(modid, location)));
     }
 
     public static Supplier<Material> getter(String location) {
@@ -200,31 +207,16 @@ public class BCSprites {
                 .setTextureState(new RenderStateShard.TextureStateShard(location, false, false))
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                 .setCullState(RenderStateShard.NO_CULL)
-//                .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
                 .createCompositeState(false));
     }
 
     public static VertexConsumer builder(MultiBufferSource getter, PoseStack mStack) {
-        return new TransformingVertexConsumer(getter.getBuffer(BCSprites.GUI_TYPE), mStack);
+        return new TransformingVertexConsumer(getter.getBuffer(BCGuiSprites.GUI_TYPE), mStack);
     }
 
     public static VertexConsumer builder(MultiBufferSource getter) {
-        return getter.getBuffer(BCSprites.GUI_TYPE);
+        return getter.getBuffer(BCGuiSprites.GUI_TYPE);
     }
-
-    @Deprecated //TODO remove this
-    public static final ResourceLocation MODULAR_GUI = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/modular_gui.png");
-//
-//    private static final ResourceLocation WIDGETS_LIGHT = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/light/widgets.png");
-//    private static final ResourceLocation WIDGETS_DARK = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/dark/widgets.png");
-//
-//    //TODO Switch to an atlas sprite based system
-//    @Deprecated
-//    public static final ResourceLocation WIDGETS_GENERIC = new ResourceLocation(RESOURCE_PREFIX + "textures/gui/generic/widgets_generic.png");
-//
-//    public static ResourceLocation widgets() {
-//        return BCConfig.darkMode ? WIDGETS_DARK : WIDGETS_LIGHT;
-//    }
 
     private static class CustomMat extends Material {
 
@@ -234,7 +226,7 @@ public class BCSprites {
 
         @Override
         public TextureAtlasSprite sprite() {
-            return guiSpriteUploader.getSprite(texture());
+            return customSpriteUploader.getSprite(texture());
         }
     }
 }

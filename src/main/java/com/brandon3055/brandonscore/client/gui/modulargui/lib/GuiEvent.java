@@ -10,7 +10,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTextFie
 /**
  * Created by brandon3055 on 1/07/2017.
  */
-//TODO Add new events as needed
+//~~TODO Add new events as needed~~ DELETE THIS!!!!
 @Deprecated
 public class GuiEvent<E extends GuiElement, EVENT extends GuiEvent> {
     private E element;

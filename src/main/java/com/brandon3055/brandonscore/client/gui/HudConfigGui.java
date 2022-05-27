@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.api.hud.AbstractHudElement;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.CursorHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
@@ -82,7 +82,7 @@ public class HudConfigGui extends ModularGuiScreen {
 
         @Override
         public void addChildElements() {
-            settings = toolkit.createIconButton(this, 10, BCSprites.getter("dark/gear"));
+            settings = toolkit.createIconButton(this, 10, BCGuiSprites.getter("dark/gear"));
             settings.setPosModifiers(() -> (int) (element.xPos() + element.width() - settings.xSize()) - 2, () -> (int) element.yPos() + 2);
             settings.setHoverText(toolkit.i18n("settings"));
             settings.setResetHoverOnClick(true);
@@ -102,7 +102,7 @@ public class HudConfigGui extends ModularGuiScreen {
             String infoKey = String.format("hud.%s.%s.info", element.getRegistryName().getNamespace(), element.getRegistryName().getPath());
             String translatedInfo = I18n.get(infoKey);
             if (!infoKey.equals(translatedInfo)) {
-                GuiButton infoButton = toolkit.createIconButton(this, 10, BCSprites.getter("dark/info_icon"));
+                GuiButton infoButton = toolkit.createIconButton(this, 10, BCGuiSprites.getter("dark/info_icon"));
                 infoButton.setPosModifiers(() -> (int) (element.xPos() + 2), () -> (int) element.yPos() + 2);
                 infoButton.setHoverText(translatedInfo);
                 infoButton.setHoverTextDelay(0);

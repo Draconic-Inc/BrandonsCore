@@ -74,13 +74,12 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         int xSize = xSize();
         int ySize = ySize();
 
-        addChild(hexField = new GuiTextField(xPos + 4, yPos + 4, xSize - 8, 12).setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb())));
-        hexField.setChangeListener(this::onTextFieldChanged);
-        hexField.setBorderColour(hovering -> 0xFF505050);
-        hexField.setFillColour(hovering -> 0xFF000000);
+        addChild(hexField = new GuiTextField().setPosAndSize(xPos + 4, yPos + 4, xSize - 8, 12).setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb())));
+        hexField.onValueChanged(this::onTextFieldChanged);
+        hexField.addBackground(0xFF000000, 0xFF505050);
 
-        hexField.setMaxStringLength(includeAlpha ? 8 : 6);
-        hexField.setValidator(input -> {
+        hexField.setMaxLength(includeAlpha ? 8 : 6);
+        hexField.setFilter(input -> {
             try {
                 Utils.parseHex(input);
                 return true;
@@ -92,26 +91,26 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
 
         addChild(redSlider = new GuiSlideControl(xPos + 4, hexField.yPos() + 14, xSize - 8, 9));
         redSlider.setReverseScrollDir(true);
-        redSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFFFF0000, 0xFF000000).setBorderWidth(0.5));
+        redSlider.setSliderElement(new GuiBorderedRect().setColours(0xFFFF0000, 0xFF000000).setBorderWidth(0.5));
         redSlider.updatePos((colour.r & 0xFF) / 255D, false);
         redSlider.setBarStyleBackground(0xFF505050).setSliderSize(3);
 
         addChild(greenSlider = new GuiSlideControl(xPos + 4, redSlider.yPos() + 10, xSize - 8, 9));
         greenSlider.setReverseScrollDir(true);
-        greenSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFF00FF00, 0xFF000000).setBorderWidth(0.5));
+        greenSlider.setSliderElement(new GuiBorderedRect().setColours(0xFF00FF00, 0xFF000000).setBorderWidth(0.5));
         greenSlider.updatePos((colour.g & 0xFF) / 255D, false);
         greenSlider.setBarStyleBackground(0xFF505050).setSliderSize(3);
 
         addChild(blueSlider = new GuiSlideControl(xPos + 4, greenSlider.yPos() + 10, xSize - 8, 9));
         blueSlider.setReverseScrollDir(true);
-        blueSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFF0000FF, 0xFF000000).setBorderWidth(0.5));
+        blueSlider.setSliderElement(new GuiBorderedRect().setColours(0xFF0000FF, 0xFF000000).setBorderWidth(0.5));
         blueSlider.updatePos((colour.b & 0xFF) / 255D, false);
         blueSlider.setBarStyleBackground(0xFF505050).setSliderSize(3);
 
         if (includeAlpha) {
             addChild(alphaSlider = new GuiSlideControl(xPos + 4,blueSlider.yPos() + 10, xSize - 8, 9));
             alphaSlider.setReverseScrollDir(true);
-            alphaSlider.setSliderElement(new GuiBorderedRect().setShadeColours(0xFFFFFFFF, 0xFF000000).setBorderWidth(0.5));
+            alphaSlider.setSliderElement(new GuiBorderedRect().setColours(0xFFFFFFFF, 0xFF000000).setBorderWidth(0.5));
             alphaSlider.updatePos((colour.a & 0xFF) / 255D, false);
             alphaSlider.setBarStyleBackground(0xFF505050).setSliderSize(3);
         }
@@ -166,22 +165,22 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         boolean colourChanged = false;
         if (eventElement == redSlider) {
             colour.r = (byte) (redSlider.getPosition() * 255D);
-            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == greenSlider) {
             colour.g = (byte) (greenSlider.getPosition() * 255D);
-            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == blueSlider) {
             colour.b = (byte) (blueSlider.getPosition() * 255D);
-            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == alphaSlider) {
             colour.a = (byte) (alphaSlider.getPosition() * 255D);
-            hexField.setTextAndNotify(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+            hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
             colourChanged = true;
         }
         else if (eventElement == hexField) {
@@ -193,10 +192,10 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         }
     }
 
-    private void onTextFieldChanged() {
+    private void onTextFieldChanged(String newValue) {
         try {
             int pos = hexField.getCursorPosition();
-            colour.set(Utils.parseHex(hexField.getText()));
+            colour.set(Utils.parseHex(hexField.getValue()));
             redSlider.updateRawPos((colour.r & 0xFF) / 255D);
             greenSlider.updateRawPos((colour.g & 0xFF) / 255D);
             blueSlider.updateRawPos((colour.b & 0xFF) / 255D);

@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.baseelements;
 
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
@@ -524,11 +524,6 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         }
     }
 
-    @Deprecated
-    public static void playGenericClick(Minecraft mc) {
-        playGenericClick();
-    }
-
     @OnlyIn(Dist.CLIENT) //Because this is referenced in
     public static void playGenericClick() {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -564,6 +559,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
      */
     public GuiButton setToggleStateSupplier(Supplier<Boolean> toggleStateSupplier) {
         this.toggleStateSupplier = toggleStateSupplier;
+        setToggleMode(toggleStateSupplier != null);
         return this;
     }
 
@@ -651,8 +647,8 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     protected void renderVanillaButton(Minecraft minecraft, int mouseX, int mouseY) {
         MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
-        Material mat = BCSprites.getButton(getRenderState(hovered));
-        VertexConsumer builder = getter.getBuffer(mat.renderType(location -> BCSprites.GUI_TYPE));//mat.buffer(getter, location -> BCSprites.GUI_TYPE);
+        Material mat = BCGuiSprites.getButton(getRenderState(hovered));
+        VertexConsumer builder = getter.getBuffer(mat.renderType(location -> BCGuiSprites.GUI_TYPE));//mat.buffer(getter, location -> BCSprites.GUI_TYPE);
         drawDynamicSprite(builder, mat.sprite(), xPos(), yPos(), xSize(), ySize(), 2, 2, 2, 2);
         getter.endBatch();
     }

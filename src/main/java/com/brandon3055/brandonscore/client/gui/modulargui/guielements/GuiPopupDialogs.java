@@ -1,11 +1,10 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 
@@ -100,27 +99,27 @@ public class GuiPopupDialogs extends GuiPopUpDialogBase<GuiPopupDialogs> {
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
-        return createDialog(parent, type, message, title, xSize, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
+        return createDialog(parent, type, message, title, xSize, GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int xSize) {
-        return createDialog(parent, type, message, title, xSize, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, title, xSize, GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, int xSize) {
-        return createDialog(parent, type, message, "", xSize, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, "", xSize, GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title, int buttonFill, int buttonFillHover, int buttonBorder, int buttonBorderHover) {
-        return createDialog(parent, type, message, title, 200, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
+        return createDialog(parent, type, message, title, 200, GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")), false, buttonFill, buttonFillHover, buttonBorder, buttonBorderHover);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message, String title) {
-        return createDialog(parent, type, message, title, 200, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, title, 200, GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createDialog(GuiElement parent, DialogType type, String message) {
-        return createDialog(parent, type, message, "", 200, GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
+        return createDialog(parent, type, message, "", 200, GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")), true, 0, 0, 0, 0);
     }
 
     public static GuiPopupDialogs createPopOut(GuiElement parent, GuiElement popOutElement) {

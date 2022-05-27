@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
@@ -79,7 +79,7 @@ public class GuiProgressIcon extends GuiElement<GuiProgressIcon> {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
         MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         Material base = baseTextureSupplier == null ? baseTexture : baseTextureSupplier.get();
-        drawSprite(getter.getBuffer(base.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), base.sprite());
+        drawSprite(getter.getBuffer(base.renderType(BCGuiSprites::makeType)), xPos(), yPos(), xSize(), ySize(), base.sprite());
         direction.draw(this, getter);
         getter.endBatch();
     }
@@ -88,19 +88,19 @@ public class GuiProgressIcon extends GuiElement<GuiProgressIcon> {
         /**
          * Progress bar animated from bottom to top
          */
-        UP((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCSprites::makeType)), icon.xPos(), icon.yPos() + (icon.ySize() * (1D - icon.getRenderState())), icon.xSize(), icon.ySize() * icon.getRenderState(), icon.getOverlay().sprite(), 0, 1D - icon.getRenderState(), 1, 1)),
+        UP((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCGuiSprites::makeType)), icon.xPos(), icon.yPos() + (icon.ySize() * (1D - icon.getRenderState())), icon.xSize(), icon.ySize() * icon.getRenderState(), icon.getOverlay().sprite(), 0, 1D - icon.getRenderState(), 1, 1)),
         /**
          * Progress bar animated from top to bottom
          */
-        DOWN((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCSprites::makeType)), icon.xPos(), icon.yPos(), icon.xSize(), icon.ySize() * icon.getRenderState(), icon.getOverlay().sprite(), 0, 0, 1, icon.getRenderState())),
+        DOWN((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCGuiSprites::makeType)), icon.xPos(), icon.yPos(), icon.xSize(), icon.ySize() * icon.getRenderState(), icon.getOverlay().sprite(), 0, 0, 1, icon.getRenderState())),
         /**
          * Progress bar animated from right to left
          */
-        LEFT((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCSprites::makeType)), icon.xPos() + (icon.xSize() * (1D - icon.getRenderState())), icon.yPos(), icon.xSize() * icon.getRenderState(), icon.ySize(), icon.getOverlay().sprite(), 1D - icon.getRenderState(), 0, 1, 1)),
+        LEFT((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCGuiSprites::makeType)), icon.xPos() + (icon.xSize() * (1D - icon.getRenderState())), icon.yPos(), icon.xSize() * icon.getRenderState(), icon.ySize(), icon.getOverlay().sprite(), 1D - icon.getRenderState(), 0, 1, 1)),
         /**
          * Progress bar animated from left to right
          */
-        RIGHT((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCSprites::makeType)), icon.xPos(), icon.yPos(), icon.xSize() * icon.getRenderState(), icon.ySize(), icon.getOverlay().sprite(), 0, 0, icon.getRenderState(), 1));
+        RIGHT((icon, getter) -> GuiHelper.drawPartialSprite(getter.getBuffer(icon.getOverlay().renderType(BCGuiSprites::makeType)), icon.xPos(), icon.yPos(), icon.xSize() * icon.getRenderState(), icon.ySize(), icon.getOverlay().sprite(), 0, 0, icon.getRenderState(), 1));
 
         private BiConsumer<GuiProgressIcon, MultiBufferSource.BufferSource> drawFunc;
 

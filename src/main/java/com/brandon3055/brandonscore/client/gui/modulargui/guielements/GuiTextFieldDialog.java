@@ -51,22 +51,22 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
     @Override
     public void addChildElements() {
         addChild(textField = new GuiTextField().setPosAndSize(getInsetRect()).setXSize(getInsetRect().width - 20));
-        textField.setChangeListener(text -> {if (changeCallBack != null) changeCallBack.accept(text);});
-        textField.setReturnListener(text -> {
+        textField.onValueChanged(text -> {if (changeCallBack != null) changeCallBack.accept(text);});
+        textField.onReturnPressed(text -> {
             if (confirmCallBack != null) confirmCallBack.accept(text);
             close();
         });
-        textField.setMaxStringLength(maxLength);
-        textField.setTextAndNotify(defaultText);
+        textField.setMaxLength(maxLength);
+        textField.setValue(defaultText);
 
         if (validator != null) {
-            textField.setValidator(validator);
+            textField.setFilter(validator);
         }
 
         addChild(okButton = new GuiButton(textField.maxXPos(), textField.yPos(), 20, textField.ySize(), I18n.get("mod_gui.brandonscore.button.ok")).setTrim(false).setFillColour(0xFF000000).setBorderColours(0xFF555555, 0xFF777777));
         okButton.onPressed(() -> {
             if (confirmCallBack != null) {
-                confirmCallBack.accept(textField.getText());
+                confirmCallBack.accept(textField.getValue());
             }
             close();
         });
@@ -79,7 +79,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
     public GuiTextFieldDialog setValidator(Predicate<String> validator) {
         this.validator = validator;
         if (textField != null) {
-            textField.setValidator(validator);
+            textField.setFilter(validator);
         }
         return this;
     }
@@ -87,7 +87,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
     public GuiTextFieldDialog setText(String text) {
         this.defaultText = text;
         if (textField != null) {
-            textField.setTextAndNotify(text);
+            textField.setValue(text);
         }
         return this;
     }
@@ -111,7 +111,7 @@ public class GuiTextFieldDialog extends GuiPopUpDialogBase<GuiTextFieldDialog> {
     public GuiTextFieldDialog setMaxLength(int maxLength) {
         this.maxLength = maxLength;
         if (textField != null) {
-            textField.setMaxStringLength(maxLength);
+            textField.setMaxLength(maxLength);
         }
         return this;
     }

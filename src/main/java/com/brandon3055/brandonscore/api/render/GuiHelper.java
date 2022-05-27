@@ -133,6 +133,23 @@ public class GuiHelper {
         //@formatter:on
     }
 
+    public static void drawShadedRect(MultiBufferSource getter, PoseStack poseStack, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
+        //Fill
+        drawRect(getter, poseStack, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill);
+        //Top
+        drawRect(getter, poseStack, x, y, width - borderWidth, borderWidth, topLeftColour);
+        //Left
+        drawRect(getter, poseStack, x, y + borderWidth, borderWidth, height - borderWidth * 2, topLeftColour);
+        //Bottom
+        drawRect(getter, poseStack, x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour);
+        //Right
+        drawRect(getter, poseStack, x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, bottomRightColour);
+        //Top Right Corner
+        drawRect(getter, poseStack, x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour);
+        //Bottom Left Corner
+        drawRect(getter, poseStack, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
+    }
+
     //#######################################################################
     //# Sprites
     //#######################################################################

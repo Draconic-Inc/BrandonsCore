@@ -36,7 +36,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         background.addChild(scrollElement);
 
         //Add a white backing for the scroll element
-        scrollElement.applyBackgroundElement(new GuiBorderedRect().setShadeColours(0xFFc0c0c0, 0xFFFFFFFF));
+        scrollElement.applyBackgroundElement(new GuiBorderedRect().setColours(0xFFc0c0c0, 0xFFFFFFFF));
 
 
         GuiTreeElement tree = (GuiTreeElement) new GuiTreeElement().setRelPos(10, 10).setSize(150, 200);

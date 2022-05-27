@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.utils;
 
 import codechicken.lib.colour.ColourARGB;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.gui.Font;
@@ -272,7 +272,7 @@ public class GuiHelperOld {
     @Deprecated
     public static void drawPlayerSlots(GuiComponent gui, int posX, int posY, boolean center) {
 //        RenderSystem.color4f(1F, 1F, 1F, 1F);
-        Material mat = BCSprites.getThemed("slot");
+        Material mat = BCGuiSprites.getThemed("slot");
         ResourceHelperBC.bindTexture(mat.atlasLocation());
         MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
@@ -282,12 +282,12 @@ public class GuiHelperOld {
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
+                drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
             }
         }
 
         for (int x = 0; x < 9; x++) {
-            drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
+            drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
         }
         getter.endBatch();
     }

@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore;
 import codechicken.lib.internal.command.CCLCommands;
 import codechicken.lib.internal.command.client.HighlightCommand;
 import com.brandon3055.brandonscore.capability.CapabilityOP;
+import com.brandon3055.brandonscore.client.BCShaders;
 import com.brandon3055.brandonscore.client.ClientProxy;
 import com.brandon3055.brandonscore.command.BCClientCommands;
 import com.brandon3055.brandonscore.command.BCUtilCommands;

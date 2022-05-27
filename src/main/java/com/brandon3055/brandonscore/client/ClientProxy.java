@@ -26,11 +26,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void construct() {
         super.construct();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(BCSprites::initialize);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(BCGuiSprites::initialize);
 //        MinecraftForge.EVENT_BUS.addListener(this::registerShaderReloads);
         HudManager.init();
 
-
+        BCShaders.init();
     }
 
 //    private void registerShaderReloads(ParticleFactoryRegisterEvent event) {

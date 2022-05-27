@@ -1,18 +1,19 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.api.power.OPStorage;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.TBasicMachine;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
 import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.EXTRA_WIDE_EXTRA_TALL;
-import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.BOTTOM_RIGHT;
-import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.TOP_LEFT;
+import static com.brandon3055.brandonscore.client.gui.GuiToolkit.LayoutPos.*;
 import static net.minecraft.ChatFormatting.GOLD;
 import static net.minecraft.ChatFormatting.GRAY;
 
@@ -22,6 +23,7 @@ import static net.minecraft.ChatFormatting.GRAY;
 public class GuiToolkitTest extends ModularGuiScreen {
 
     protected GuiToolkit<GuiToolkitTest> toolkit = new GuiToolkit<>(this, EXTRA_WIDE_EXTRA_TALL);
+    private static OPStorage opStorage = new OPStorage(500);
 
     public GuiToolkitTest(Component titleIn) {
         super(titleIn);
@@ -36,7 +38,8 @@ public class GuiToolkitTest extends ModularGuiScreen {
         GuiElement bg = template.background;
 
         //Power
-        template.addEnergyBar(new OPStorage(100000));
+        template.addEnergyBar(opStorage);
+        template.energyBar.setEnergySupplier(() -> (long)(TimeKeeper.getClientTick() % 500));
         template.addEnergyItemSlot(false, true);
         template.powerSlot.setMaxYPos(template.playerSlots.maxYPos(), false).setXPos(template.background.maxXPos() - (7 + 18));
         template.energyBar.setYPos(template.playerSlots.yPos() + 10).setMaxYPos(template.powerSlot.yPos() - 12, true).setXPos(template.powerSlot.xPos() + 2);
@@ -46,6 +49,14 @@ public class GuiToolkitTest extends ModularGuiScreen {
         template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.fuel_efficiency"), 6, 11, () -> GRAY + ("--" + "%"), true);
         template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.output_power"), 6, 11, () -> GRAY + ("--" + " / " + "--" + " OP/t"), true);
         template.infoPanel.addLabeledValue(GOLD + I18n.get("gui.de.generator.current_fuel_value"), 6, 11, () -> GRAY + ("n/a"), true);
+
+        GuiEnergyBar hBar = new GuiEnergyBar()
+                .setEnergyStorage(opStorage)
+                .setEnergySupplier(() -> (long)(TimeKeeper.getClientTick() % 500))
+                .setSize(150, 14);
+        template.background.addChild(hBar);
+        toolkit.placeOutside(hBar, template.playerSlots, TOP_CENTER, 0, -5);
+
 
 //        GuiEntityFilter filterUI = new GuiEntityFilter(tile.entityFilter, () -> {});
 //
@@ -80,27 +91,27 @@ public class GuiToolkitTest extends ModularGuiScreen {
         bg.addChild(subItem4);
 
 
-        GuiButton button1 = toolkit.createButton("Text", testSlotArea).setSize(50, 14);
+        GuiButton button1 = toolkit.createButton_old("Text", testSlotArea).setSize(50, 14);
         toolkit.placeInside(button1, testSlotArea, BOTTOM_RIGHT, -3, -3);
         GuiButton button12 = toolkit.createVanillaButton("Vanilla!", testSlotArea)
                 .setSize(50, 14)
                 .setVanillaButtonRender(true);
         toolkit.placeInside(button12, testSlotArea, BOTTOM_RIGHT, -3, -20);
-        GuiButton button13 = toolkit.createButton("Text", testSlotArea, true).setSize(50, 14);
+        GuiButton button13 = toolkit.createButton_old("Text", testSlotArea, true).setSize(50, 14);
         toolkit.placeInside(button13, testSlotArea, BOTTOM_RIGHT, -3, -37);
 
-        GuiButton button2 = toolkit.createButton("Text", testSlotArea).setSize(50, 14);
+        GuiButton button2 = toolkit.createButton_old("Text", testSlotArea).setSize(50, 14);
         toolkit.placeOutside(button2, testSlotArea, BOTTOM_RIGHT, -36, 3);
         GuiButton button22 = toolkit.createVanillaButton("Text", testSlotArea).setSize(50, 14);
         toolkit.placeOutside(button22, testSlotArea, BOTTOM_RIGHT, -36, 20);
-        GuiButton button23 = toolkit.createButton("Text", testSlotArea, true).setSize(50, 14);
+        GuiButton button23 = toolkit.createButton_old("Text", testSlotArea, true).setSize(50, 14);
         toolkit.placeOutside(button23, testSlotArea, BOTTOM_RIGHT, -36, 37);
 
-        GuiButton button3 = toolkit.createButton("Text", subItem2).setSize(50, 14);
+        GuiButton button3 = toolkit.createButton_old("Text", subItem2).setSize(50, 14);
         toolkit.placeInside(button3, subItem2, TOP_LEFT, 3, 3);
         GuiButton button32 = toolkit.createVanillaButton("Text", subItem2).setSize(50, 14);
         toolkit.placeInside(button32, subItem2, TOP_LEFT, 3, 20);
-        GuiButton button33 = toolkit.createButton("Text", subItem2, true).setSize(50, 14);
+        GuiButton button33 = toolkit.createButton_old("Text", subItem2, true).setSize(50, 14);
         toolkit.placeInside(button33, subItem2, TOP_LEFT, 3, 37);
 
     }

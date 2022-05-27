@@ -489,7 +489,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      */
     public GuiSlideControl setDefaultBackground(int fillColour, int borderColour) {
         lockBackgroundWidthPos(true);
-        setBackgroundElement(new GuiBorderedRect().setShadeColours(fillColour, borderColour));
+        setBackgroundElement(new GuiBorderedRect().setColours(fillColour, borderColour));
         return this;
     }
 
@@ -509,7 +509,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      */
     public GuiSlideControl setDefaultSlider(int fillColour, int hoverFillColour, int borderColour, int hoverBorderColour) {
         lockSliderWidthPos(true);
-        setSliderElement(new GuiBorderedRect().setShadeColours(fillColour, hoverFillColour, borderColour, hoverBorderColour));
+        setSliderElement(new GuiBorderedRect().setColours(fillColour, hoverFillColour, borderColour, hoverBorderColour));
         return this;
     }
 
@@ -529,7 +529,7 @@ public class GuiSlideControl extends GuiElement<GuiSlideControl> implements IGui
      */
     public GuiSlideControl setDefaultSlider(int fillColour, int borderColour) {
         lockSliderWidthPos(true);
-        setSliderElement(new GuiBorderedRect().setShadeColours(fillColour, borderColour));
+        setSliderElement(new GuiBorderedRect().setColours(fillColour, borderColour));
         return this;
     }
 

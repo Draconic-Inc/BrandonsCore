@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.templates;
 
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.InfoPanel;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -114,7 +114,7 @@ public class TGuiBase implements IGuiTemplate {
         }
 
         background.addChild(powerSlot = GuiTexture.newSlot());
-        GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slot_energy")).setPos(1, 1);
+        GuiTexture bgTexture = new GuiTexture(16, 16, BCGuiSprites.get("slot_energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 
         if (slotMover != null) {
@@ -127,7 +127,7 @@ public class TGuiBase implements IGuiTemplate {
         }
         powerToggle.setSize(14, 14);
         powerToggle.setHoverText(element -> I18n.get("gui.bc." + (chargeItem.get() ? "charging" : "discharging") + "_item.txt"));
-        GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get(bellowBar ? "vertical_discharge" : "right_discharge"));
+        GuiTexture toggleTex = new GuiTexture(14, 14, BCGuiSprites.get(bellowBar ? "vertical_discharge" : "right_discharge"));
         toggleTex.setPos(powerToggle);
 
         if (bellowBar) {
@@ -140,7 +140,7 @@ public class TGuiBase implements IGuiTemplate {
         }
 
         if (chargeItem != null) {
-            toggleTex.setMaterialSupplier(() -> BCSprites.get(!chargeItem.get() ? bellowBar ? "btn_vertical_discharge" : "btn_right_discharge" : bellowBar ? "btn_vertical_charge" : "btn_right_charge"));
+            toggleTex.setMaterialSupplier(() -> BCGuiSprites.get(!chargeItem.get() ? bellowBar ? "btn_vertical_discharge" : "btn_right_discharge" : bellowBar ? "btn_vertical_charge" : "btn_right_charge"));
             powerToggle.addChild(toggleTex);
 
             if (bellowBar) {
@@ -174,14 +174,14 @@ public class TGuiBase implements IGuiTemplate {
         }
 
         background.addChild(powerSlot = GuiTexture.newSlot());
-        GuiTexture bgTexture = new GuiTexture(16, 16, BCSprites.get("slots/energy")).setPos(1, 1);
+        GuiTexture bgTexture = new GuiTexture(16, 16, BCGuiSprites.get("slots/energy")).setPos(1, 1);
         powerSlot.addChild(bgTexture);
 
         if (slotMover != null) {
             bgTexture.setEnabledCallback(() -> !slotMover.slot.hasItem());
             powerSlot.addPosChangeListener((x, y) -> slotMover.setPos(x + 1 - toolkit.guiLeft(), y + 1 - toolkit.guiTop()));
         }
-        GuiTexture toggleTex = new GuiTexture(14, 14, BCSprites.get("item_charge/" + ((bellowBar ? "vertical" : "right") + "_" + (chargeItem ? "charge" : "discharge"))));
+        GuiTexture toggleTex = new GuiTexture(14, 14, BCGuiSprites.get("item_charge/" + ((bellowBar ? "vertical" : "right") + "_" + (chargeItem ? "charge" : "discharge"))));
 
         if (bellowBar) {
             energyBar.translate(2, 0);

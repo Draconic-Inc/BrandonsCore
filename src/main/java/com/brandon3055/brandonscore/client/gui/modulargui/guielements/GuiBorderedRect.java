@@ -55,7 +55,7 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
 
     //region Colour setters and getters
 
-    public GuiBorderedRect setShadeColours(int fill, int fillHover, int border, int borderHover) {
+    public GuiBorderedRect setColours(int fill, int fillHover, int border, int borderHover) {
         setFillColours(fill, fillHover);
         setBorderColours(border, borderHover);
         return this;
@@ -67,14 +67,7 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
         return this;
     }
 
-    @Deprecated //Seems this got renamed by accident
-    public GuiBorderedRect setShadeColours(int fill, int border) {
-        setFillColour(fill);
-        setBorderColour(border);
-        return this;
-    }
-
-    public GuiBorderedRect setShadeColours(int fill, int topLeft, int bottomRight) {
+    public GuiBorderedRect setColours(int fill, int topLeft, int bottomRight) {
         setFillColour(fill);
         set3dTopLeftColour(topLeft);
         set3dBottomRightColour(bottomRight);

@@ -1,12 +1,22 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.lib.StringyStacks;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
@@ -41,25 +51,25 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         this(ItemStack.EMPTY);
     }
 
-    @Deprecated //Do i really need StackReference (now stackString)
     public GuiStackIcon(String stackString) {
         this.stackString = stackString;
         setSize(18, 18);
+        setInsets(1, 1, 1, 1);
     }
 
     public GuiStackIcon(ItemStack stack) {
         this.stack = stack;
         setSize(18, 18);
+        setInsets(1, 1, 1, 1);
     }
 
-    @Deprecated
     public GuiStackIcon(int xPos, int yPos, String stackString) {
         super(xPos, yPos);
         this.stackString = stackString;
         setSize(18, 18);
+        setInsets(1, 1, 1, 1);
     }
 
-    @Deprecated
     public GuiStackIcon(int xPos, int yPos, int xSize, int ySize, String stackString) {
         super(xPos, yPos, xSize, ySize);
         this.stackString = stackString;
@@ -72,10 +82,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         if (drawHoverHighlight && isMouseOver(mouseX, mouseY)) {
             drawColouredRect(xPos(), yPos(), xSize(), ySize(), -2130706433);
         }
-
-//        RenderSystem.pushMatrix();
-//        renderStack(minecraft);
-//        RenderSystem.popMatrix();
+        renderStack(minecraft);
     }
 
     public GuiStackIcon setDrawCount(boolean drawCount) {
@@ -83,40 +90,77 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         return this;
     }
 
-//    private void renderStack(Minecraft minecraft) {
-////        RenderHelper.enableGUIStandardItemLighting();
-//        if (getStack().isEmpty()) return;
-//
-//        double scaledWidth = xSize() / 18D;
-//        double scaledHeight = ySize() / 18D;
-//
-//        RenderSystem.translated(xPos() + scaledWidth + getInsets().left, yPos() + scaledHeight + getInsets().top, getRenderZLevel() - 80);
-//        RenderSystem.scaled(scaledWidth, scaledHeight, 1);
-//        minecraft.getItemRenderer().renderGuiItem(getStack(), 0, 0);
-//
-//        if (getStack().getItem().showDurabilityBar(getStack())) {
-//            double health = getStack().getItem().getDurabilityForDisplay(getStack());
-//            int rgbfordisplay = getStack().getItem().getRGBDurabilityForDisplay(getStack());
-//            int i = Math.round(13.0F - (float) health * 13.0F);
-//
-//            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
-//            zOffset += 45;
-//            drawColouredRect(2, 13, 13, 2, 0xFF000000);
-//            drawColouredRect(2, 13, i, 1, rgbfordisplay | 0xFF000000);
-//            zOffset -= 45;
-//            RenderSystem.translated(0, 0, (getRenderZLevel() - 80));
-//        }
-//
-//        if (drawCount && getStack().getCount() > 1) {
-//            String s = getStack().getCount() + "";
-//            RenderSystem.translated(0, 0, -(getRenderZLevel() - 80));
-//            zOffset += 45;
-//            drawString(fontRenderer, s, (float) (xSize() / scaledWidth) - (fontRenderer.width(s)) - 1, fontRenderer.lineHeight, 0xFFFFFF, true);
-//            zOffset -= 45;
-//        }
-//
-//        Lighting.turnOff();
-//    }
+    private void renderStack(Minecraft minecraft) {
+        if (getStack().isEmpty()) return;
+        float xScale = xSize() / 18F;
+        float yScale = ySize() / 18F;
+        double itemX = xPos() + (xScale * getInsets().left);
+        double itemY = yPos() + (yScale * getInsets().top);
+        renderGuiItem(minecraft, getStack(), itemX, itemY, getRenderZLevel(), xScale, yScale);
+        renderItemOverlay(getStack(), itemX, itemY, getRenderZLevel(), xScale, yScale);
+    }
+
+    protected void renderGuiItem(Minecraft minecraft, ItemStack stack, double x, double y, double z, float xScale, float yScale) {
+        ItemRenderer itemRenderer = minecraft.getItemRenderer();
+        BakedModel model = itemRenderer.getModel(stack, null, null, 0);
+
+        minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        PoseStack posestack = RenderSystem.getModelViewStack();
+        posestack.pushPose();
+        posestack.translate(x, y, z + 100);
+        posestack.translate(8.0D * xScale, 8.0D * yScale, 0.0D);
+        posestack.scale(1.0F, -1.0F, 1.0F);
+        posestack.scale(16.0F, 16.0F, 16.0F);
+        posestack.scale(xScale, yScale, 1F);
+        RenderSystem.applyModelViewMatrix();
+        PoseStack posestack1 = new PoseStack();
+        MultiBufferSource.BufferSource multibuffersource$buffersource = Minecraft.getInstance().renderBuffers().bufferSource();
+        boolean flag = !model.usesBlockLight();
+        if (flag) {
+            Lighting.setupForFlatItems();
+        }
+
+        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, posestack1, multibuffersource$buffersource, 15728880, OverlayTexture.NO_OVERLAY, model);
+        multibuffersource$buffersource.endBatch();
+        RenderSystem.enableDepthTest();
+        if (flag) {
+            Lighting.setupFor3DItems();
+        }
+
+        posestack.popPose();
+        RenderSystem.applyModelViewMatrix();
+    }
+
+    private void renderItemOverlay(ItemStack stack, double x, double y, double z, float xScale, float yScale) {
+        if (!stack.isEmpty()) {
+            PoseStack poseStack = new PoseStack();
+            if (stack.getCount() != 1 && drawCount) {
+                String s = String.valueOf(stack.getCount());
+                poseStack.pushPose();
+                poseStack.translate(x, y, z + 200.0F);
+                poseStack.scale(xScale, yScale, 1F);
+                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                fontRenderer.drawInBatch(s, (float) (19 - 2 - fontRenderer.width(s)), (float) (6 + 3), 16777215, true, poseStack.last().pose(), buffer, false, 0, 15728880);
+                buffer.endBatch();
+                poseStack.popPose();
+            }
+
+            if (stack.isBarVisible()) {
+                MultiBufferSource getter = RenderUtils.getTypeBuffer();
+                poseStack.translate(x, y, z + 200.0F);
+                poseStack.scale(xScale, yScale, 1F);
+                int i = stack.getBarWidth();
+                int colour = stack.getBarColor();
+                GuiHelper.drawRect(getter, poseStack, 2, 13, 13, 2, 0xFF000000);
+                GuiHelper.drawRect(getter, poseStack, 2, 13, i, 1, 0xFF000000 | colour);
+                RenderUtils.endBatch(getter);
+            }
+        }
+    }
 
     @Override
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
@@ -196,8 +240,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     public ItemStack getStack() {
         if (stackString == null) {
             return stack;
-        }
-        else if (stackString.isEmpty()) {
+        } else if (stackString.isEmpty()) {
             return ItemStack.EMPTY;
         }
 

@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
 
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -76,10 +76,10 @@ public class GuiTexture extends GuiElement<GuiTexture> {
                     mStack.mulPose(new Quaternion(0, 0, rotation, true));
                 }
                 mStack.translate(-(xSize() / 2D), -(ySize() / 2D), 0);
-                VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(mat.renderType(BCSprites::makeType)), mStack);
+                VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), mStack);
                 drawSprite(builder, 0, 0, xSize(), ySize(), mat.sprite());
             } else {
-                drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+                drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), xPos(), yPos(), xSize(), ySize(), mat.sprite());
             }
             getter.endBatch();
         }
@@ -184,7 +184,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
      * @return a new themed slot texture
      */
     public static GuiTexture newSlot() {
-        return new GuiTexture(18, 18, BCSprites.themedGetter("slot"));
+        return new GuiTexture(18, 18, BCGuiSprites.themedGetter("slot"));
     }
 
     public static GuiTexture newDynamicTexture(int xSize, int ySize, Supplier<Material> materialSupplier) {
@@ -196,7 +196,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                drawDynamicSprite(getter.getBuffer(BCSprites.GUI_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
+                drawDynamicSprite(getter.getBuffer(BCGuiSprites.GUI_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
                 getter.endBatch();
 
                 for (GuiElement element : childElements) {

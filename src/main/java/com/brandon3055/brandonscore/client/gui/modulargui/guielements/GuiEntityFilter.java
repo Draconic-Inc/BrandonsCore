@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette.Ctrl;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette.SubItem;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -157,7 +157,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             trash = new GuiButton().setSize(10, 10);
             trash.setHoverText(i18ni("delete." + (nodeID == 0 ? "all" : "node")));
-            GuiTexture icon = new GuiTexture(10, 10, () -> BCSprites.get(nodeID == 0 ? "delete_all" : "delete"));
+            GuiTexture icon = new GuiTexture(10, 10, () -> BCGuiSprites.get(nodeID == 0 ? "delete_all" : "delete"));
             trash.onPressed(() -> {
                 trashClicks++;
                 if (trashClicks == 3 && nodeID == 0) gui.entityFilter.clientClearFilter();
@@ -217,7 +217,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiButton addButton = new GuiButton().setSize(10, 10);
             addButton.setHoverText(i18ni("add_filter"));
-            GuiTexture addIcon = new GuiTexture(10, 10, BCSprites.get("add"));
+            GuiTexture addIcon = new GuiTexture(10, 10, BCGuiSprites.get("add"));
             addButton.onPressed(() -> {
                 GuiSelectDialog<FilterType> dialog = new GuiSelectDialog<>(gui);
                 dialog.setCloseOnSelection(true);
@@ -236,7 +236,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     return button;
                 });
                 dialog.setSelectionListener(e -> {
-                    GuiButton.playGenericClick(mc);
+                    GuiButton.playGenericClick();
                     gui.entityFilter.clientAddNode(e, getNode());
                 });
                 DataUtils.forEachMatch(FilterType.values(), e -> (e != FilterType.FILTER_GROUP || depth < maxDepth) && gui.entityFilter.isFilterAllowed(e), dialog::addItem);
@@ -254,7 +254,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             GuiButton matchButton = new GuiButton().setShadow(true).setYSize(10).setInsets(0, 0, 0, 0);
             matchButton.setDisplaySupplier(() -> ChatFormatting.UNDERLINE + i18ni("and_group.button." + isAndNode()));
             matchButton.setHoverText((e) -> i18ni("and_group." + isAndNode()));
-            matchButton.onPressed(() -> { if (getNode() != null) getNode().setAndGroup(!getNode().isAndGroup()); });
+            matchButton.onPressed(() -> {if (getNode() != null) getNode().setAndGroup(!getNode().isAndGroup());});
             matchButton.setYPos(yPos() + 1).setXPosMod(() -> addButton.xPos() - fontRenderer.width(matchButton.getDisplayString()) - 1);
             matchButton.setXSizeMod(() -> fontRenderer.width(matchButton.getDisplayString()));
             addChild(matchButton);
@@ -345,7 +345,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleHostile.setDisplaySupplier(() -> i18ni("hostile." + (getNode() != null && getNode().isWhitelistHostile())));
             toggleHostile.setAlignment(GuiAlign.LEFT);
             toggleHostile.getInsets().left = 2;
-            toggleHostile.onPressed(() -> { if (getNode() != null) getNode().setWhitelistHostile(!getNode().isWhitelistHostile()); });
+            toggleHostile.onPressed(() -> {if (getNode() != null) getNode().setWhitelistHostile(!getNode().isWhitelistHostile());});
             addChild(toggleHostile);
         }
     }
@@ -367,7 +367,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleTamed.setDisplaySupplier(() -> i18ni("tamed." + (getNode() != null && getNode().isWhitelistTamed())));
             toggleTamed.setAlignment(GuiAlign.LEFT);
             toggleTamed.getInsets().left = 2;
-            toggleTamed.onPressed(() -> { if (getNode() != null) getNode().setWhitelistTamed(!getNode().isWhitelistTamed()); });
+            toggleTamed.onPressed(() -> {if (getNode() != null) getNode().setWhitelistTamed(!getNode().isWhitelistTamed());});
             addChild(toggleTamed);
 
             GuiButton toggleTamable = new GuiButton();
@@ -376,7 +376,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleTamable.setHoverText((e) -> i18ni("tamable.info"));
             toggleTamable.setAlignment(GuiAlign.LEFT);
             toggleTamable.getInsets().left = 6;
-            toggleTamable.onPressed(() -> { if (getNode() != null) getNode().setIncludeTamable(!getNode().isIncludeTamable()); });
+            toggleTamable.onPressed(() -> {if (getNode() != null) getNode().setIncludeTamable(!getNode().isIncludeTamable());});
             addChild(toggleTamable);
         }
     }
@@ -398,7 +398,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleAdults.setDisplaySupplier(() -> i18ni("adults." + (getNode() != null && getNode().isWhitelistAdults())));
             toggleAdults.setAlignment(GuiAlign.LEFT);
             toggleAdults.getInsets().left = 2;
-            toggleAdults.onPressed(() -> { if (getNode() != null) getNode().setWhitelistAdults(!getNode().isWhitelistAdults()); });
+            toggleAdults.onPressed(() -> {if (getNode() != null) getNode().setWhitelistAdults(!getNode().isWhitelistAdults());});
             addChild(toggleAdults);
 
             GuiButton toggleAgeable = new GuiButton();
@@ -407,7 +407,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleAgeable.setHoverText((e) -> i18ni("non_ageable.info"));
             toggleAgeable.setAlignment(GuiAlign.LEFT);
             toggleAgeable.getInsets().left = 6;
-            toggleAgeable.onPressed(() -> { if (getNode() != null) getNode().setIncludeNonAgeable(!getNode().isIncludeNonAgeable()); });
+            toggleAgeable.onPressed(() -> {if (getNode() != null) getNode().setIncludeNonAgeable(!getNode().isIncludeNonAgeable());});
             addChild(toggleAgeable);
         }
     }
@@ -429,7 +429,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleIncludePlayers.setDisplaySupplier(() -> i18ni("player." + (getNode() != null && getNode().isWhitelistPlayers())));
             toggleIncludePlayers.setAlignment(GuiAlign.LEFT);
             toggleIncludePlayers.getInsets().left = 2;
-            toggleIncludePlayers.onPressed(() -> { if (getNode() != null) getNode().setWhitelistPlayers(!getNode().isWhitelistPlayers()); });
+            toggleIncludePlayers.onPressed(() -> {if (getNode() != null) getNode().setWhitelistPlayers(!getNode().isWhitelistPlayers());});
             toggleIncludePlayers.setHoverText(i18ni("player.info"));
             addChild(toggleIncludePlayers);
 
@@ -439,11 +439,10 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             GuiTextField nameField = new GuiTextField();
 //            nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getPlayerName());
-            nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getPlayerName(), s -> { if (getNode() != null) getNode().setPlayerName(s); }); //TODO Test
+            nameField.linkExternalValue(() -> getNode() == null ? "" : getNode().getPlayerName(), s -> {if (getNode() != null) getNode().setPlayerName(s);}); //TODO Test
 //            nameField.setChangeListener(s -> { if (getNode() != null) getNode().setPlayerName(s); });
-            nameField.setValidator(s -> FilterPlayer.namePattern.matcher(s).find());
-            nameField.setMaxStringLength(16);
-            nameField.setEnableBackgroundDrawing(false);
+            nameField.setFilter(s -> FilterPlayer.namePattern.matcher(s).find());
+            nameField.setMaxLength(16);
             nameField.setPos(nameLabel.maxXPos() + 1, yPos() + 12).setYSize(10).setXSizeMod(() -> xSize() - (nameLabel.xSize() + 15));
             addChild(nameField);
         }
@@ -466,7 +465,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleIncludeEntity.setDisplaySupplier(() -> i18ni("entity_type." + (getNode() != null && getNode().isWhitelistEntity())));
             toggleIncludeEntity.setAlignment(GuiAlign.LEFT);
             toggleIncludeEntity.getInsets().left = 2;
-            toggleIncludeEntity.onPressed(() -> { if (getNode() != null) getNode().setWhitelistEntity(!getNode().isWhitelistEntity()); });
+            toggleIncludeEntity.onPressed(() -> {if (getNode() != null) getNode().setWhitelistEntity(!getNode().isWhitelistEntity());});
             addChild(toggleIncludeEntity);
 
             GuiLabel nameLabel = new GuiLabel(i18ni("entity_type.name")).setShadow(false).setTextColour(gui.nodeTitleColour.getColour());
@@ -474,9 +473,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             addChild(nameLabel);
 
             GuiTextField nameField = new GuiTextField();
-            nameField.setValidator(ResourceLocation::isValidResourceLocation);
+            nameField.setFilter(ResourceLocation::isValidResourceLocation);
 //            nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getEntityName());
-            nameField.setLinkedValue(() -> getNode() == null ? "" : getNode().getEntityName(), s -> {
+            nameField.linkExternalValue(() -> getNode() == null ? "" : getNode().getEntityName(), s -> {
                 if (getNode() != null) {
                     getNode().setEntityName(s);
                     ResourceLocation rs = new ResourceLocation(s);
@@ -499,8 +498,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 //            nameField.setChangeListener(s -> {
 //
 //            });
-            nameField.setMaxStringLength(512);
-            nameField.setEnableBackgroundDrawing(false);
+            nameField.setMaxLength(512);
             nameField.setPos(nameLabel.maxXPos() + 1, yPos() + 12).setYSize(10).setXSizeMod(() -> xSize() - (nameLabel.xSize() + 15));
             addChild(nameField);
 
@@ -525,7 +523,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     GuiLabel label = new GuiLabel(I18n.get(I18n.get(name)));
                     label.setPos(renderer.maxXPos() + 6, container.yPos() + 2).setWrap(true).setYSize(container.ySize() - 4).setXSizeMod(() -> container.xSize() - (16 + 6 + 2 + 2));
                     container.addChild(label);
-                    label.zOffset+=5;
+                    label.zOffset += 5;
                     GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(0).setXPos(container.xPos()).setYSizeMod(container::ySize).bindSize(container, false);
                     buttonBG.setFillColourL((h) -> SubItem.fill());
                     buttonBG.setBorderColourL((h) -> SubItem.border3d());
@@ -535,9 +533,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     return container;
                 });
                 dialog.setSelectionListener(rs -> {
-                    GuiButton.playGenericClick(mc);
+                    GuiButton.playGenericClick();
                     if (getNode() != null) {
-                        nameField.setTextAndNotify(rs.toString());
+                        nameField.setValueQuietly(rs.toString());
                     }
                 });
 
@@ -547,9 +545,9 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 dialog.setSize(150, 190);
                 dialog.addBackGroundChild(new GuiBorderedRect().set3DGetters(SubItem::fill, SubItem::accentLight, SubItem::accentDark).setDoubleBorder(1).setBorderColourL(e -> SubItem.border3d()).setPosAndSize(dialog));
                 GuiTextField filter = new GuiTextField();
-                filter.textZOffset+=5;
+                filter.zOffset += 5;
                 filter.setSize(dialog.xSize() - 6, 12).setPos(dialog.xPos() + 3, dialog.maxYPos() - 15);
-                filter.setChangeListener((s) -> {
+                filter.onValueChanged((s) -> {
                     dialog.clearItems();
                     DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
                         EntityType<?> type = e.getValue();
@@ -565,7 +563,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 searchLabel.setPosAndSize(filter).translate(0, 1);
                 searchLabel.setAlignment(GuiAlign.LEFT);
                 searchLabel.getInsets().left = 3;
-                searchLabel.setEnabledCallback(() -> filter.getText().isEmpty() && !filter.isFocused());
+                searchLabel.setEnabledCallback(() -> filter.getValue().isEmpty() && !filter.isFocused());
                 filter.addChild(searchLabel);
                 dialog.addChild(filter);
                 filter.zOffset++;
@@ -598,7 +596,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             toggleWhiteList.setDisplaySupplier(() -> i18ni("item_filter." + (getNode() != null && getNode().isWhitelistItem())));
             toggleWhiteList.setAlignment(GuiAlign.LEFT);
             toggleWhiteList.getInsets().left = 2;
-            toggleWhiteList.onPressed(() -> { if (getNode() != null) getNode().setWhitelistItem(!getNode().isWhitelistItem()); });
+            toggleWhiteList.onPressed(() -> {if (getNode() != null) getNode().setWhitelistItem(!getNode().isWhitelistItem());});
             addChild(toggleWhiteList);
 
 
@@ -610,8 +608,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             stackIcon.setClickListener(() -> {
                 if (getNode() != null) {
                     Player player = Minecraft.getInstance().player;
-                    if (!player.inventoryMenu.getCarried().isEmpty()) {
-                        ItemStack stack = player.inventoryMenu.getCarried().copy();
+                    if (!player.containerMenu.getCarried().isEmpty()) {
+                        ItemStack stack = player.containerMenu.getCarried().copy();
                         stack.setCount(1);
                         getNode().setItemName(stack.getItem().getRegistryName().toString());
                         getNode().setDamage(stack.isDamageableItem() ? stack.getDamageValue() : -1);
@@ -648,7 +646,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             countField = new GuiTextField();
             countField.setHoverText(i18ni("item.count.info"));
 //            countField.setLinkedValue(() -> getNode() == null ? "" : getNode().getCount() == 0 ? "" : "" + getNode().getCount());
-            countField.setLinkedValue(() -> getNode() == null ? "" : getNode().getCount() == 0 ? "" : "" + getNode().getCount(), s -> {
+            countField.linkExternalValue(() -> getNode() == null ? "" : getNode().getCount() == 0 ? "" : "" + getNode().getCount(), s -> {
                 if (getNode() != null) {
                     if (s.isEmpty()) getNode().setCount(0);
                     else getNode().setCount(Utils.parseInt(s));
@@ -661,16 +659,15 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 //                    else getNode().setCount(Utils.parseInt(s));
 //                }
 //            });
-            countField.setValidator(s -> s.isEmpty() || (Utils.validInteger(s) && Utils.parseInt(s) > 0 && Utils.parseInt(s) <= 64));
-            countField.setMaxStringLength(2);
-            countField.setEnableBackgroundDrawing(false);
+            countField.setFilter(s -> s.isEmpty() || (Utils.validInteger(s) && Utils.parseInt(s) > 0 && Utils.parseInt(s) <= 64));
+            countField.setMaxLength(2);
             countField.setPos(Math.max(countLabel.maxXPos(), metaLabel.maxXPos()) + 1, yPos() + 12).setYSize(10).setXSize(20);
             addChild(countField);
 
             metaField = new GuiTextField();
             metaField.setHoverText(i18ni("item.damage.info"));
 //            metaField.setLinkedValue(() -> getNode() == null ? "" : getNode().getDamage() == -1 ? "" : "" + getNode().getDamage());
-            countField.setLinkedValue(() -> getNode() == null ? "" : getNode().getDamage() == 0 ? "" : "" + getNode().getDamage(), s -> {
+            countField.linkExternalValue(() -> getNode() == null ? "" : getNode().getDamage() == 0 ? "" : "" + getNode().getDamage(), s -> {
                 if (getNode() != null) {
                     if (s.isEmpty()) getNode().setDamage(-1);
                     else getNode().setDamage(Utils.parseInt(s));
@@ -683,9 +680,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 //                    else getNode().setDamage(Utils.parseInt(s));
 //                }
 //            });
-            metaField.setValidator(s -> s.isEmpty() || (Utils.validInteger(s) && Utils.parseInt(s) >= 0 && Utils.parseInt(s) <= Short.MAX_VALUE));
-            metaField.setMaxStringLength(5);
-            metaField.setEnableBackgroundDrawing(false);
+            metaField.setFilter(s -> s.isEmpty() || (Utils.validInteger(s) && Utils.parseInt(s) >= 0 && Utils.parseInt(s) <= Short.MAX_VALUE));
+            metaField.setMaxLength(5);
             metaField.setPos(Math.max(countLabel.maxXPos(), metaLabel.maxXPos()) + 1, yPos() + 20).setYSize(10).setXSize(30);
             addChild(metaField);
 
@@ -724,8 +720,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
 
             nbtField = new GuiTextField();
             nbtField.setHoverText(i18ni("item.nbt.info"));
-            nbtField.setTextAndNotify(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
-            nbtField.setChangeListener(s -> {
+            nbtField.setValue(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
+            nbtField.onValueChanged(s -> {
                 if (getNode() != null) {
                     if (s.isEmpty()) {
                         getNode().setNbt(null);
@@ -737,8 +733,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                             getNode().setNbt(compound);
                             nbtField.setTextColor(0xFFFFFF);
                             nbtField.setHoverText(i18ni("item.nbt.info"));
-                        }
-                        catch (CommandSyntaxException e) {
+                        } catch (CommandSyntaxException e) {
                             getNode().setNbt(null);
                             nbtField.setTextColor(0xFF0000);
                             nbtField.setHoverText(i18ni("item.nbt.bad"));
@@ -746,20 +741,19 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     }
                 }
             });
-            nbtField.setMaxStringLength(1024);
-            nbtField.setEnableBackgroundDrawing(false);
+            nbtField.setMaxLength(1024);
             nbtField.setPos(nbtLabel.maxXPos() + 1, yPos() + 31).setYSize(10).setXSizeMod(() -> xSize() - (nbtLabel.xSize() + 3));
             addChild(nbtField);
-//            Will have a chost item box (look into jei ghost item support?)
+//            Will have a ghost item box (look into jei ghost item support?)
 //            and a text box with item string
 //            Also i guess maybe an option to set count... and damage... ore handling? also the block stiff...
         }
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-            countField.setFocused(false);
-            metaField.setFocused(false);
-            nbtField.setFocused(false);
+            countField.setFocus(false);
+            metaField.setFocus(false);
+            nbtField.setFocus(false);
             return super.mouseClicked(mouseX, mouseY, mouseButton);
         }
 
@@ -782,7 +776,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
         @Override
         public boolean onUpdate() {
             if (getNode() != null && getNode().dataChanged) {
-                nbtField.setTextAndNotify(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
+                nbtField.setValue(getNode() == null || getNode().getNbt() == null ? "" : getNode().getNbt().toString());
                 updateStackIcon();
                 getNode().dataChanged = false;
             }

@@ -1,6 +1,6 @@
 package com.brandon3055.brandonscore.client.gui;
 
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElementManager;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
@@ -34,7 +34,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
 
     @Override
     public void addElements(GuiElementManager manager) {
-        GuiTexture bg = GuiTexture.newDynamicTexture(BCSprites.getter("light/background_dynamic")).setSize(imageWidth, imageHeight);
+        GuiTexture bg = GuiTexture.newDynamicTexture(BCGuiSprites.getter("light/background_dynamic")).setSize(imageWidth, imageHeight);
         bg.setPos(guiLeft(), guiTop());
         manager.addChild(bg);
 

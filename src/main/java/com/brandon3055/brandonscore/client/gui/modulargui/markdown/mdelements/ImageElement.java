@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.markdown.mdelements;
 
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.markdown.LayoutHelper;
@@ -126,16 +126,16 @@ public class ImageElement extends MDElementBase<ImageElement> {
         MultiBufferSource getter = RenderUtils.getTypeBuffer();
 
         boolean failed = resourceLocation.dlFailed;
-        Material mat = failed ? BCSprites.get("download_failed") : BCSprites.get("downloading");
+        Material mat = failed ? BCGuiSprites.get("download_failed") : BCGuiSprites.get("downloading");
         float failTicks = failed ? 0 : partialTicks;
         float anim = MathHelper.clip((loadingTime + failTicks) / (float) maxLoadTime, 0, 1);
 
         drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, 0, failed ? 0xFFFF0000 : 0xFF00FF00);
 
         if (failed) {
-            GuiHelper.drawSprite(BCSprites.builder(getter), xPos(), yPos(), xSize(), ySize(), mat.sprite());
+            GuiHelper.drawSprite(BCGuiSprites.builder(getter), xPos(), yPos(), xSize(), ySize(), mat.sprite());
         } else {
-            GuiHelper.drawPartialSprite(BCSprites.builder(getter), xPos(), yPos(), xSize(), ySize() * anim, mat.sprite(), 0, 0, 1, anim);
+            GuiHelper.drawPartialSprite(BCGuiSprites.builder(getter), xPos(), yPos(), xSize(), ySize() * anim, mat.sprite(), 0, 0, 1, anim);
         }
 
 //        GuiHelper.drawSprite(BCSprites.builder(getter), xPos(), yPos(), xSize(), ySize(), mat.sprite());

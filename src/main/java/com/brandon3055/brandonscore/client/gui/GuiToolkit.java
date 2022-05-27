@@ -2,7 +2,7 @@ package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.client.BCSprites;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
@@ -84,11 +84,15 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return this;
     }
 
-    public String i18n(String translationKey) {
+    public String i18n(String translationKey, Object... args) {
         if (translationKey.startsWith(".")) {
             translationKey = translationKey.substring(1);
         }
-        return I18n.get(translationPrefix + translationKey);
+        return I18n.get(translationPrefix + translationKey, args);
+    }
+
+    public Supplier<String> i18n(Supplier<String> translationKey) {
+        return () -> I18n.get(translationPrefix + translationKey.get());
     }
 
     /**
@@ -99,10 +103,6 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             translationKey = translationKey.substring(1);
         }
         return I18n.get(INTERNAL_TRANSLATION_PREFIX + translationKey);
-    }
-
-    public Supplier<String> i18n(Supplier<String> translationKey) {
-        return () -> I18n.get(translationPrefix + translationKey.get());
     }
 
     public GuiLayout getLayout() {
@@ -118,7 +118,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         addHoverHighlight(button);
         button.setHoverTextDelay(10);
         button.setSize(12, 12);
-        GuiTexture icon = new GuiTexture(12, 12, () -> BCSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
+        GuiTexture icon = new GuiTexture(12, 12, () -> BCGuiSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
         button.addChild(icon);
         icon.setYPosMod(button::yPos);
         button.setHoverText(element -> i18ni("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
@@ -139,7 +139,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         }
 
         //TODO move to a function in BCTextures?
-        GuiTexture texture = new GuiTexture(() -> BCSprites.getThemed(layout.textureName()));
+        GuiTexture texture = new GuiTexture(() -> BCGuiSprites.getThemed(layout.textureName()));
         texture.setSize(layout.xSize, layout.ySize);
         if (addToManager) {
             gui.getManager().addChild(texture);
@@ -191,9 +191,9 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                Material slot = BCSprites.getThemed("slot");
+                Material slot = BCGuiSprites.getThemed("slot");
                 MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                VertexConsumer buffer = getter.getBuffer(BCSprites.GUI_TYPE);
+                VertexConsumer buffer = getter.getBuffer(BCGuiSprites.GUI_TYPE);
 
                 for (int x = 0; x < columns; x++) {
                     for (int y = 0; y < rows; y++) {
@@ -268,9 +268,9 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-                Material slot = BCSprites.getThemed(largeSlot ? "slot_large" : "slot");
+                Material slot = BCGuiSprites.getThemed(largeSlot ? "slot_large" : "slot");
                 MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                VertexConsumer buffer = getter.getBuffer(BCSprites.GUI_TYPE);
+                VertexConsumer buffer = getter.getBuffer(BCGuiSprites.GUI_TYPE);
                 drawSprite(buffer, xPos(), yPos(), size, size, slot.sprite());
                 if (background != null && (slotMover == null || !slotMover.slot.hasItem())) {
                     int offset = largeSlot ? 5 : 1;
@@ -322,14 +322,14 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         if (addArmor) {
             for (int i = 0; i < 4; i++) {
                 int finalI = 3 - i;
-                GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_ARMOR, finalI), BCSprites.getArmorSlot(finalI));
+                GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_ARMOR, finalI), BCGuiSprites.getArmorSlot(finalI));
                 element.setMaxXPos(main.xPos() - 3, false);
                 element.setYPos(main.yPos() + (i * 19));
             }
         }
 
         if (addOffHand) {
-            GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_OFF_HAND, 4), BCSprites.get("slots/armor_shield"));
+            GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_OFF_HAND, 4), BCGuiSprites.get("slots/armor_shield"));
             element.setXPos(main.maxXPos() + 3);
             element.setMaxYPos(bar.maxYPos(), false);
         }
@@ -372,7 +372,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         GuiElement fallback = new GuiElement();
         if (equipmentManager != null) {
             LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
-            GuiElement container = GuiTexture.newDynamicTexture(() -> BCSprites.getThemed("bg_dynamic_small"));
+            GuiElement container = GuiTexture.newDynamicTexture(() -> BCGuiSprites.getThemed("bg_dynamic_small"));
             container.setXSize(26);
             optional.ifPresent(handler -> {
                 if (jeiExclude) {
@@ -429,7 +429,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
         button.set3dText(true);
-        GuiTexture texture = GuiTexture.newDynamicTexture(() -> BCSprites.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
+        GuiTexture texture = GuiTexture.newDynamicTexture(() -> BCGuiSprites.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
         button.addChild(texture);
         addHoverHighlight(button, 0, 0, true);
         texture.bindSize(button, false);
@@ -439,11 +439,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return button;
     }
 
-    public GuiButton createButton(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d) {
-        return createButton(unlocalizedText, parent, inset3d, 1);
-    }
-
-    public GuiButton createButton(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
+    @Deprecated
+    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
         GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
@@ -456,7 +453,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             buttonBG.setBorderColourL(Palette.Ctrl::border3D);
             buttonBG.set3dTopLeftColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentDark(true) : Palette.Ctrl.accentLight(hovering));
             buttonBG.set3dBottomRightColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentLight(true) : Palette.Ctrl.accentDark(hovering));
-            GuiTexture disabledBG = GuiTexture.newDynamicTexture(BCSprites.themedGetter("button_disabled"));
+            GuiTexture disabledBG = GuiTexture.newDynamicTexture(BCGuiSprites.themedGetter("button_disabled"));
             disabledBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
             disabledBG.setEnabledCallback(button::isDisabled);
             buttonBG.addChild(disabledBG);
@@ -474,17 +471,65 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return button;
     }
 
-    public GuiButton createButton(String unlocalizedText, @Nullable GuiElement parent) {
-        return createButton(unlocalizedText, parent, true);
+    @Deprecated
+    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d) {
+        return createButton_old(unlocalizedText, parent, inset3d, 1);
     }
 
-    public GuiButton createButton(String unlocalizedText, boolean shadeEdges) {
-        return createButton(unlocalizedText, null, shadeEdges);
+    @Deprecated
+    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement parent) {
+        return createButton_old(unlocalizedText, parent, true);
     }
 
-    public GuiButton createButton(String unlocalizedText) {
-        return createButton(unlocalizedText, null, true);
+    @Deprecated
+    public GuiButton createButton_old(String unlocalizedText, boolean shadeEdges) {
+        return createButton_old(unlocalizedText, null, shadeEdges);
     }
+
+    @Deprecated
+    public GuiButton createButton_old(String unlocalizedText) {
+        return createButton_old(unlocalizedText, null, true);
+    }
+
+    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
+        GuiButton button = new GuiButton().setDisplaySupplier(i18n(toolkitI18nText));
+        button.setInsets(5, 2, 5, 2);
+        button.setHoverTextDelay(10);
+        if (inset3d) {
+            button.set3dText(true);
+            GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(doubleBoarder);
+            //I use modifiers here to account for the possibility that this button may have modifiers. Something i need to account for when i re write modular gui
+            buttonBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
+            buttonBG.setFillColourL(hovering -> Palette.Ctrl.fill(hovering || button.isPressed()));
+            buttonBG.setBorderColourL(Palette.Ctrl::border3D);
+            buttonBG.set3dTopLeftColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentDark(true) : Palette.Ctrl.accentLight(hovering));
+            buttonBG.set3dBottomRightColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentLight(true) : Palette.Ctrl.accentDark(hovering));
+            GuiTexture disabledBG = GuiTexture.newDynamicTexture(BCGuiSprites.themedGetter("button_disabled"));
+            disabledBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
+            disabledBG.setEnabledCallback(button::isDisabled);
+            buttonBG.addChild(disabledBG);
+
+            button.addChild(buttonBG);
+        } else {
+            button.setRectFillColourGetter((hovering, disabled) -> Palette.Ctrl.fill(hovering));
+            button.setRectBorderColourGetter((hovering, disabled) -> Palette.Ctrl.border(hovering));
+        }
+        button.setTextColGetter((hovering, disabled) -> Palette.Ctrl.textH(hovering));
+
+        if (parent != null) {
+            parent.addChild(button);
+        }
+        return button;
+    }
+
+    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement parent) {
+        return createButton(toolkitI18nText, parent, true, 1);
+    }
+
+    public GuiButton createButton(String toolkitI18nText, @Nullable GuiElement parent) {
+        return createButton(() -> toolkitI18nText, parent, true, 1);
+    }
+
 
     public GuiButton createThemeButton(GuiElement<?> parent) {
         GuiButton button = createThemedIconButton(parent, "theme");
@@ -530,7 +575,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createThemedIconButton(GuiElement<?> parent, int size, String iconString) {
-        return createIconButton(parent, size, BCSprites.themedGetter(iconString));
+        return createIconButton(parent, size, BCGuiSprites.themedGetter(iconString));
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<Material> iconSupplier) {
@@ -538,7 +583,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, String iconString) {
-        return createIconButton(parent, buttonSize, iconSize, BCSprites.getter(iconString));
+        return createIconButton(parent, buttonSize, iconSize, BCGuiSprites.getter(iconString));
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
@@ -556,7 +601,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
-        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCSprites.getter(iconString));
+        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCGuiSprites.getter(iconString));
     }
 
     public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {
@@ -673,10 +718,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         textField.setTextColor(Palette.Ctrl::text);
         textField.setShadow(false);
 
-        textField.setEnableBackgroundDrawing(background);
         if (background) {
-            textField.setFillColour(Palette.Ctrl::fill);
-            textField.setBorderColour(hovering -> Palette.Ctrl.accentLight(false));
+            textField.addBackground(Palette.Ctrl::fill, hovering -> Palette.Ctrl.accentLight(false));
         }
 
         if (parent != null) {
@@ -688,8 +731,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     //Create Scroll Bars
     public GuiSlideControl createVanillaScrollBar(GuiSlideControl.SliderRotation rotation, boolean forceEnabled) {
         GuiSlideControl scrollBar = new GuiSlideControl(rotation);
-        scrollBar.setBackgroundElement(GuiTexture.newDynamicTexture(BCSprites.themedGetter("button_disabled")));
-        scrollBar.setSliderElement(GuiTexture.newDynamicTexture(BCSprites.themedGetter("button_borderless")));
+        scrollBar.setBackgroundElement(GuiTexture.newDynamicTexture(BCGuiSprites.themedGetter("button_disabled")));
+        scrollBar.setSliderElement(GuiTexture.newDynamicTexture(BCGuiSprites.themedGetter("button_borderless")));
         if (forceEnabled) {
             scrollBar.setEnabledCallback(() -> true);
         }
@@ -953,7 +996,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
             addHoverHighlight(toggleButton);
 
-            GuiTexture icon = new GuiTexture(12, 12, BCSprites.getter("info_panel"))
+            GuiTexture icon = new GuiTexture(12, 12, BCGuiSprites.getter("info_panel"))
                     .setPosModifiers(() -> getOrigin().x, () -> getOrigin().y);
 
             toggleButton.addChild(icon);

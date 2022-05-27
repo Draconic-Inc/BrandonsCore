@@ -2442,6 +2442,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         }
     }
 
+    @Deprecated
     public void drawColouredRect(MultiBufferSource getter, double posX, double posY, double xSize, double ySize, int colour) {
         drawColouredRectABS(getter, posX, posY, posX + xSize, posY + ySize, colour);
     }
@@ -2470,6 +2471,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         drawColouredRect(getter, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour);
     }
 
+    @Deprecated
     public void drawShadedRect(MultiBufferSource getter, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour) {
         //Fill
         drawColouredRect(getter, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill);
