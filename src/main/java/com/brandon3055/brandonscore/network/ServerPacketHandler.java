@@ -4,8 +4,7 @@ import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.blocks.TileBCore;
-import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
-import com.brandon3055.brandonscore.lib.TeleportUtils;
+import com.brandon3055.brandonscore.inventory.ContainerBCTile;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -16,18 +15,16 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 
 public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHandler {
     @Override
     public void handlePacket(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         switch (packet.getType()) {
-            case BCoreNetwork.S_TILE_MESSAGE:
-                handleTileMessage(packet, sender, handler);
+            case BCoreNetwork.S_CONTAINER_MESSAGE:
+                handleContainerMessage(packet, sender, handler);
                 break;
             case BCoreNetwork.S_PLAYER_ACCESS_BUTTON:
                 handlePlayerAccess(packet, sender, handler);
@@ -38,13 +35,10 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
         }
     }
 
-    private void handleTileMessage(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
+    private void handleContainerMessage(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         try {
-            BlockPos pos = packet.readPos();
-            TileEntity tile = sender.level.getBlockEntity(pos);
-            if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
-                int id = packet.readByte() & 0xFF;
-                ((TileBCore) tile).receivePacketFromClient(packet, sender, id);
+            if (sender.containerMenu instanceof ContainerBCTile) {
+                ((ContainerBCTile<?>) sender.containerMenu).handleContainerMessage(packet, sender);
             }
         }
         catch (Throwable e) {
@@ -82,10 +76,8 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
 
     private void handleTileDataManager(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         try {
-            BlockPos pos = packet.readPos();
-            TileEntity tile = sender.level.getBlockEntity(pos);
-            if (tile instanceof TileBCore && verifyPlayerPermission(sender, pos)) {
-                ((TileBCore) tile).getDataManager().receiveDataFromClient(packet);
+            if (sender.containerMenu instanceof ContainerBCTile) {
+                ((ContainerBCTile<?>) sender.containerMenu).handleTileDataPacket(packet, sender);
             }
         }
         catch (Throwable e) {
@@ -95,11 +87,12 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
     }
 
     //This is to assist things like grief prevention. If a player is not allowed to right click a block then they are not allowed to send packets to it.
+    @Deprecated //Anything requiring player permission should go through the open container
     public static boolean verifyPlayerPermission(PlayerEntity player, BlockPos pos) {
         if (!BCConfig.clientPermissionVerification) return true;
         BlockRayTraceResult traceResult = new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false);
         PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, Hand.MAIN_HAND, pos, traceResult);
         MinecraftForge.EVENT_BUS.post(event);
-        return !event.isCanceled();
+        return event.getResult() != Event.Result.DENY;
     }
 }

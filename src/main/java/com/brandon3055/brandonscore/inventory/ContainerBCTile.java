@@ -1,7 +1,11 @@
 package com.brandon3055.brandonscore.inventory;
 
+import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -13,6 +17,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
@@ -22,6 +27,7 @@ import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by brandon3055 on 28/3/2016.
@@ -177,5 +183,24 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
 
     protected static <T extends TileEntity> T getClientTile(PacketBuffer extraData) {
         return (T) Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());
+    }
+
+    public PacketCustom createServerBoundPacket(int packetType) {
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, packetType);
+        packet.writeInt(containerId);
+        return packet;
+    }
+
+    public void handleContainerMessage(PacketCustom packet, ServerPlayerEntity player) {
+        int containerId = packet.readInt();
+        if (containerId != this.containerId) return;
+        int packetID = packet.readByte();
+        tile.receivePacketFromClient(packet, player, packetID);
+    }
+
+    public void handleTileDataPacket(PacketCustom packet, ServerPlayerEntity player) {
+        int containerId = packet.readInt();
+        if (containerId != this.containerId) return;
+        tile.getDataManager().receiveDataFromClient(packet);
     }
 }

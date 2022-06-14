@@ -20,8 +20,6 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.event.EventNetworkChannel;
 
@@ -48,9 +46,11 @@ public class BCoreNetwork {
     public static final int C_ENTITY_VELOCITY = 12;
     public static final int C_OPEN_HUD_CONFIG = 13;
     //Client to server
-    public static final int S_TILE_MESSAGE = 1;
+    public static final int S_CONTAINER_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
     public static final int S_TILE_DATA_MANAGER = 3;
+
+    public static final int S_DUMMY_PACKET = 99;
 
 
     public static void sendConfigToClient(ServerPlayerEntity player) {

@@ -2,13 +2,17 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.blocks.TileBCBase;
+import com.brandon3055.brandonscore.inventory.ContainerBCTile;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
@@ -199,11 +203,16 @@ public class TileDataManager<T extends TileEntity & IDataManagerProvider> implem
     @Override
     public void sendToServer(IManagedData data) {
         if (tile.getLevel().isClientSide && data.flags().allowClientControl) {
-            PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_DATA_MANAGER);
-            packet.writePos(tile.getBlockPos());
-            packet.writeByte((byte) data.getIndex());
-            data.toBytes(packet);
-            packet.sendToServer();
+            PlayerEntity player = BrandonsCore.proxy.getClientPlayer();
+            if (player != null) {
+                Container container = player.containerMenu;
+                if (container instanceof ContainerBCTile && ((ContainerBCTile<?>) container).tile == tile) {
+                    PacketCustom packet = ((ContainerBCTile<?>) container).createServerBoundPacket(BCoreNetwork.S_TILE_DATA_MANAGER);
+                    packet.writeByte((byte) data.getIndex());
+                    data.toBytes(packet);
+                    packet.sendToServer();
+                }
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.blocks;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
@@ -19,6 +20,7 @@ import com.brandon3055.brandonscore.utils.EnergyUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -159,14 +161,22 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     }
 
     public PacketCustom createServerBoundPacket(int id) {
-        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_MESSAGE);
-        packet.writePos(worldPosition);
-        packet.writeByte((byte) id);
-        return packet;
+        PlayerEntity player = BrandonsCore.proxy.getClientPlayer();
+        if (player != null) {
+            Container container = player.containerMenu;
+            if (container instanceof ContainerBCTile && ((ContainerBCTile<?>) container).tile == this) {
+                PacketCustom packet = ((ContainerBCTile<?>) container).createServerBoundPacket(BCoreNetwork.S_CONTAINER_MESSAGE);
+                packet.writeByte((byte) id);
+                return packet;
+            }
+        }
+        return new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_DUMMY_PACKET);
     }
 
     /**
      * Send a data packet to the server, Supply a consumer to write the data you want to send
+     * Note: This packet now goes through the container for this block for security.
+     * Meaning this tile must have an associated container, and that container must be open for this to work
      */
     public void sendPacketToServer(Consumer<MCDataOutput> writer, int id) {
         PacketCustom packet = createServerBoundPacket(id);
@@ -217,10 +227,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
         sendPacketToClient(writer, id).sendToChunk(this);
     }
 
-//    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer, int id) {
-//        sendPacketToClient(writer, id).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
-//    }
-
     /**
      * Override this method to receive data from the client via sendPacketToClient
      */
@@ -262,44 +268,6 @@ public class TileBCore extends TileEntity implements IDataManagerProvider, IData
     public void dirtyBlock() {
         Chunk chunk = level.getChunkAt(getBlockPos());
         chunk.setUnsaved(true);
-    }
-
-//    /**
-//     * Calling this in the constructor will force the tile to only refresh when the block changes rather then when the state changes.
-//     * Note that this should NOT be used in cases where the block has a different tile depending on its state.
-//     */
-//    public void setShouldRefreshOnBlockChange() {
-//        shouldRefreshOnState = false;
-//    }
-
-//    @Deprecated //I want to store everything on the tile in 1.13. I'm done dealing with these bullshit blockstate crashes.
-//    public BlockState getState(Block expectedBlock) {
-//        if (world == null) {
-//            return expectedBlock.getDefaultState();//Because apparently this is a thing........
-//        }
-//        BlockState state = world.getBlockState(pos);
-//        return state.getBlock() == expectedBlock ? state : expectedBlock.getDefaultState();
-//    }
-//
-//    /**
-//     * Is minecraft seriously so screwed up that i have to resort to things like this?
-//     */
-//    public Block getBlockTypeSafe(Block defaultBlock) {
-//        if (getBlockState().isAir(world, pos)) {
-//            return getBlockType();
-//        } else {
-//            return defaultBlock;
-//        }
-//    }
-
-    /**
-     * checks that the player is allowed to interact with this tile bu firing the RightClickBlock.
-     * If the event is canceled bu another mod such as a permissions mod this will return false.
-     * <br/>
-     * Note: Packets from client to server do not need to be verified because that is already handled by the packet handler.
-     */
-    public boolean verifyPlayerPermission(PlayerEntity player) {
-        return ServerPacketHandler.verifyPlayerPermission(player, getBlockPos());
     }
 
     /**
