@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore;
 
-import codechicken.lib.config.ConfigTag;
-import codechicken.lib.config.StandardConfigFile;
+import codechicken.lib.config.*;
 import net.minecraftforge.fml.ModList;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -14,15 +13,17 @@ import java.util.function.Consumer;
 //@Mod.EventBusSubscriber(modid = BrandonsCore.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BCConfig {
 
-    private static ConfigTag config;
-    private static ConfigTag clientTag;
-    private static ConfigTag serverTag;
+    private static ConfigCategory config;
+    private static ConfigCategory clientTag;
+    private static ConfigCategory serverTag;
 
     public static void load() {
-        config = new StandardConfigFile(Paths.get("./config/brandon3055/BrandonsCore.cfg")).load();
+        config = new ConfigFile(BrandonsCore.MODID)
+                .path(Paths.get("./config/brandon3055/BrandonsCore.cfg"))
+                .load();
         loadServer();
         loadClient();
-        config.runSync();
+        config.runSync(ConfigCallback.Reason.MANUAL);
         config.save();
     }
 
@@ -30,19 +31,19 @@ public class BCConfig {
     public static boolean clientPermissionVerification;
 
     private static void loadServer() {
-        serverTag = config.getTag("Server");
-        serverTag.getTag("enable_tpx")
+        serverTag = config.getCategory("Server");
+        serverTag.getValue("enable_tpx")
                 .setComment("Allows you to disable the tpx command.")
                 .setDefaultBoolean(!ModList.get().isLoaded("mystcraft"))
-                .setSyncCallback((tag, type) -> enable_tpx = tag.getBoolean());
+                .onSync((tag, type) -> enable_tpx = tag.getBoolean());
 
-        serverTag.getTag("clientPermissionVerification")
+        serverTag.getValue("clientPermissionVerification")
                 .setComment("Uses the right click block event to verify that players have permission to interact with BC / DE blocks.",
                         "This ensures there is no possible way a player can interact with a BC block if a protection system is blocking the interaction",
                         "In theory not even a modified client sending raw packets will be able to bypass this.",
                         "I have added the ability to disable this feature because it seems in rare cases it blocks players who should have access and i have no idea why.")
                 .setDefaultBoolean(true)
-                .setSyncCallback((tag, type) -> clientPermissionVerification = tag.getBoolean());
+                .onSync((tag, type) -> clientPermissionVerification = tag.getBoolean());
     }
 
 
@@ -52,37 +53,37 @@ public class BCConfig {
     public static boolean useShaders;
 
     private static void loadClient() {
-        clientTag = config.getTag("Client");
-        clientTag.getTag("darkMode")
+        clientTag = config.getCategory("Client");
+        clientTag.getValue("darkMode")
                 .setComment("Enable / Disable dark mode in my GUI's. (This can also be toggled in game from any gui that supports dark mode)")
                 .setDefaultBoolean(true)
-                .setSyncCallback((tag, type) -> darkMode = tag.getBoolean());
-        clientTag.getTag("useShaders")
+                .onSync((tag, type) -> darkMode = tag.getBoolean());
+        clientTag.getValue("useShaders")
                 .setComment("Set this to false if your system can not handle the awesomeness that is shaders! (Warning: Will make cool things look much less cool!)")
                 .setDefaultBoolean(true)
-                .setSyncCallback((tag, type) -> useShaders = tag.getBoolean());
+                .onSync((tag, type) -> useShaders = tag.getBoolean());
     }
 
-    private static void modifyProperty(String name, Consumer<ConfigTag> modifyCallback, String... groupPath) {
-        ConfigTag parent = config;
+    private static void modifyProperty(String name, Consumer<ConfigValue> modifyCallback, String... groupPath) {
+        ConfigCategory parent = config;
         for (String group : groupPath) {
-            parent = parent.getTag(group);
+            parent = parent.getCategory(group);
         }
-        ConfigTag tag = parent.getTag(name);
+        ConfigValue tag = parent.getValue(name);
         modifyCallback.accept(tag);
-        tag.runSync();
+        tag.runSync(ConfigCallback.Reason.MANUAL);
         tag.save();
     }
 
-    public static void modifyClientProperty(String name, Consumer<ConfigTag> modifyCallback, String... groupPath) {
+    public static void modifyClientProperty(String name, Consumer<ConfigValue> modifyCallback, String... groupPath) {
         modifyProperty(name, modifyCallback, ArrayUtils.addAll(new String[]{"Client"}, groupPath));
     }
 
-    public static void modifyServerProperty(String name, Consumer<ConfigTag> modifyCallback, String... groupPath) {
+    public static void modifyServerProperty(String name, Consumer<ConfigValue> modifyCallback, String... groupPath) {
         modifyProperty(name, modifyCallback, ArrayUtils.addAll(new String[]{"Server"}, groupPath));
     }
 
-    public static void modifyCommonProperty(String name, Consumer<ConfigTag> modifyCallback, String... groupPath) {
+    public static void modifyCommonProperty(String name, Consumer<ConfigValue> modifyCallback, String... groupPath) {
         modifyProperty(name, modifyCallback, ArrayUtils.addAll(new String[]{"Common"}, groupPath));
     }
 

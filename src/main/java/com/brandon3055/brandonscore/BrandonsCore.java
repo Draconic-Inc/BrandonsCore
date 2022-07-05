@@ -67,7 +67,7 @@ public class BrandonsCore {
             LogHelperBC.info("Oh well.. At least we dont have to worry about getting blown up now...");
         }
 
-        proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
+        proxy = DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
         proxy.construct();
         FMLJavaModLoadingContext.get().getModEventBus().register(this);
 
