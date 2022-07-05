@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.Pair;
 import com.brandon3055.brandonscore.lib.StringyStacks;
+import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.InventoryUtils;
@@ -26,9 +27,15 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -45,6 +52,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.EventBus;
 import net.minecraftforge.eventbus.api.Event;
@@ -70,7 +78,7 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
  * Created by brandon3055 on 23/06/2017.
  */
 //TODO Test all these commands!
- public class BCUtilCommands {
+public class BCUtilCommands {
 
     private static Random rand = new Random();
 
@@ -85,7 +93,23 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
 //                        .then(registerPlayerAccess())
                         .then(registerDumpEvents())
                         .then(registerEggify())
+                        .then(registerPlaceMultiBlock())
         );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> registerPlaceMultiBlock() {
+        return Commands.literal("place_multiblock")
+                .requires(cs -> cs.hasPermission(3))
+                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .then(Commands.argument("multiblock", ResourceLocationArgument.id())
+                                .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(MultiBlockManager.getRegisteredIds(), builder))
+                                .executes(context -> MultiBlockManager.placeCommand(context.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(context, "pos"), ResourceLocationArgument.getId(context, "multiblock"), Vec3.ZERO))
+                                .then(Commands.argument("rotation", Vec3Argument.vec3(false))
+                                        .executes(context -> MultiBlockManager.placeCommand(context.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(context, "pos"), ResourceLocationArgument.getId(context, "multiblock"), Vec3Argument.getVec3(context, "rotation")))
+                                )
+                        )
+                );
+
     }
 
 
@@ -226,7 +250,7 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
         boolean flag = player.getInventory().add(stack);
         if (flag && stack.isEmpty()) {
             stack.setCount(1);
-            player.level.playSound((Player)null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.level.playSound((Player) null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
             player.inventoryMenu.broadcastChanges();
         } else {
             ItemEntity itementity = player.drop(stack, false);
@@ -376,8 +400,7 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
                     }
                 }
             }
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             throw new CommandRuntimeException(new TextComponent(e.getMessage()));
         }
@@ -543,8 +566,7 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
         } else {
             try {
                 profile = cache.get(UUID.fromString(target)).orElse(null);
-            }
-            catch (IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException ignored) {
             }
 
             if (profile == null) {
@@ -590,12 +612,10 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
             CompoundTag compound = NbtIo.read(is);
             IOUtils.closeQuietly(is);
             return compound;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new CommandRuntimeException(new TextComponent(e.toString()));
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(is);
         }
     }
@@ -606,12 +626,10 @@ import static net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT;
             os = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(playerFile)));
             NbtIo.write(playerCompound, os);
             IOUtils.closeQuietly(os);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new IOException(e);
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(os);
         }
     }

@@ -1,9 +1,11 @@
 package com.brandon3055.brandonscore;
 
 import codechicken.lib.packet.PacketCustom;
+import codechicken.lib.util.ResourceUtils;
 import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.network.chat.Component;
@@ -12,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
@@ -25,6 +28,8 @@ public class CommonProxy {
     public void construct() {
         BCoreNetwork.init();
         BCConfig.load();
+
+        MultiBlockManager.init();
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {

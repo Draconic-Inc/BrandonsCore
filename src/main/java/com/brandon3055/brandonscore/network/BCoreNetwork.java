@@ -4,7 +4,11 @@ import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.packet.PacketCustomChannelBuilder;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.handlers.FileHandler;
+import com.brandon3055.brandonscore.multiblock.MultiBlockDefinition;
+import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.google.gson.JsonParser;
 import com.mojang.math.Vector3f;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -22,6 +26,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.event.EventNetworkChannel;
+
+import java.util.Map;
 
 /**
  * Created by brandon3055 on 17/12/19.
@@ -45,6 +51,7 @@ public class BCoreNetwork {
     public static final int C_SPAWN_PARTICLE = 11;
     public static final int C_ENTITY_VELOCITY = 12;
     public static final int C_OPEN_HUD_CONFIG = 13;
+    public static final int C_MULTI_BLOCK_DEFINITIONS = 14;
     //Client to server
     public static final int S_TILE_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
@@ -164,6 +171,16 @@ public class BCoreNetwork {
 
     public static void sendOpenHudConfig(ServerPlayer player) {
         new PacketCustom(CHANNEL, C_OPEN_HUD_CONFIG).sendToPlayer(player);
+    }
+
+    public static void sendMultiBlockDefinitions(ServerPlayer player, Map<ResourceLocation, MultiBlockDefinition> multiBlockMap) {
+        PacketCustom packet = new PacketCustom(CHANNEL, C_MULTI_BLOCK_DEFINITIONS);
+        packet.writeVarInt(multiBlockMap.size());
+        multiBlockMap.forEach((key, value) -> {
+            packet.writeResourceLocation(key);
+            packet.writeString(MultiBlockManager.GSON.toJson(value.getJson()));
+        });
+        packet.sendToPlayer(player);
     }
 
     public static void init() {

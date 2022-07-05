@@ -9,6 +9,7 @@ import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
 import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
+import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.mojang.math.Vector3f;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.Minecraft;
@@ -98,6 +99,9 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 break;
             case BCoreNetwork.C_OPEN_HUD_CONFIG:
                 mc.setScreen(new HudConfigGui());
+                break;
+            case BCoreNetwork.C_MULTI_BLOCK_DEFINITIONS:
+                MultiBlockManager.receiveDefinitionsFromServer(packet);
                 break;
         }
     }
