@@ -11,13 +11,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by brandon3055 on 26/06/2022
@@ -115,7 +112,7 @@ public class MultiBlockDefinition {
                     String key = String.valueOf(rowString.charAt(i));
                     BlockPos pos = new BlockPos(i, layer, row).subtract(origin);
                     if (blockMap.containsKey(pos)) {
-                        throw new IllegalStateException("What?");
+                        throw new IllegalStateException("Duplicate Position Detected"); //<- Should be impossible but just in case.
                     }
                     if (!key.equals(" ")){
                         if (!keyMap.containsKey(key)) {
@@ -127,64 +124,6 @@ public class MultiBlockDefinition {
                 row++;
             }
             layer++;
-        }
-    }
-
-    private static class BlockPart implements MultiBlockPart {
-        private final Block block;
-
-        public BlockPart(ResourceLocation id) {
-            if (!ForgeRegistries.BLOCKS.containsKey(id)) {
-                throw new IllegalStateException("Specified block could not be found: " + id);
-            }
-            this.block = ForgeRegistries.BLOCKS.getValue(id);
-        }
-
-        @Override
-        public boolean isMatch(Level level, BlockPos pos) {
-            return level.getBlockState(pos).is(block);
-        }
-
-        @Override
-        public Collection<Block> validBlocks() {
-            return Collections.singleton(block);
-        }
-    }
-
-    private static class TagPart implements MultiBlockPart {
-        private TagKey<Block> tag;
-        private List<Block> blockCache;
-
-        public TagPart(TagKey<Block> tag) {
-            this.tag = tag;
-        }
-
-        @Override
-        public boolean isMatch(Level level, BlockPos pos) {
-            return level.getBlockState(pos).is(tag);
-        }
-
-        @Override
-        public Collection<Block> validBlocks() {
-            if (blockCache == null) {
-                blockCache = ForgeRegistries.BLOCKS.getValues()
-                        .stream()
-                        .filter(block -> block.defaultBlockState().is(tag))
-                        .collect(Collectors.toList());
-            }
-            return blockCache;
-        }
-    }
-
-    private static class EmptyPart implements MultiBlockPart {
-        @Override
-        public boolean isMatch(Level level, BlockPos pos) {
-            return level.isEmptyBlock(pos);
-        }
-
-        @Override
-        public Collection<Block> validBlocks() {
-            return Collections.singleton(Blocks.AIR);
         }
     }
 }
