@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -28,7 +29,7 @@ public class MultiBlockDefinition {
      * The structure origin offset.
      * This shouldn't be needed outside this class because this offset is already applied when the structure is loaded.
      * Meaning the block at 0, 0, 0 within the structure is the origin.
-     * */
+     */
     private BlockPos origin = BlockPos.ZERO;
     //Position the position of each block relative to origin
     private Map<BlockPos, MultiBlockPart> blockMap = new HashMap<>();
@@ -47,8 +48,25 @@ public class MultiBlockDefinition {
         return json;
     }
 
+    // Structure map getters
+
+    /**
+     * @return The block map for this structure.
+     */
     public Map<BlockPos, MultiBlockPart> getBlocks() {
         return ImmutableMap.copyOf(blockMap);
+    }
+
+    /**
+     * Returns the structures block map translated so that the structure's origin is at the given position.
+     *
+     * @param worldOrigin A position in the world.
+     * @return The block map.
+     */
+    public Map<BlockPos, MultiBlockPart> getBlocksAt(BlockPos worldOrigin) {
+        Map<BlockPos, MultiBlockPart> translated = new HashMap<>();
+        blockMap.forEach((pos, part) -> translated.put(worldOrigin.offset(pos), part));
+        return ImmutableMap.copyOf(translated);
     }
 
     /**
@@ -56,9 +74,9 @@ public class MultiBlockDefinition {
      * For obvious reasons the rotation angle must be a multiple of 90 degrees.
      *
      * @param rotation Rotation to apply to the structure.
-     * @return The structure blocks with the applied rotation.
+     * @return The block map with the applied rotation.
      */
-    public Map<BlockPos, MultiBlockPart> getBlocksWithRotation(Rotation rotation) {
+    public Map<BlockPos, MultiBlockPart> getBlocks(Rotation rotation) {
         Map<BlockPos, MultiBlockPart> transformed = new HashMap<>();
         Transformation transform = rotation.at(Vector3.CENTER).inverse();
         blockMap.forEach((pos, part) -> {
@@ -68,6 +86,58 @@ public class MultiBlockDefinition {
         });
         return ImmutableMap.copyOf(transformed);
     }
+
+    /**
+     * Combination of {@link #getBlocksAt(BlockPos)} and {@link #getBlocks(Rotation)}
+     *
+     * @see #getBlocksAt(BlockPos)
+     * @see #getBlocks(Rotation)
+     */
+    public Map<BlockPos, MultiBlockPart> getBlocksAt(BlockPos worldOrigin, Rotation rotation) {
+        Map<BlockPos, MultiBlockPart> transformed = new HashMap<>();
+        Transformation transform = rotation.at(Vector3.CENTER).inverse();
+        blockMap.forEach((pos, part) -> {
+            Vector3 vec = Vector3.fromBlockPosCenter(pos);
+            vec.apply(transform);
+            transformed.put(vec.add(worldOrigin).pos(), part);
+        });
+        return ImmutableMap.copyOf(transformed);
+    }
+
+    // Structure validation
+
+    /**
+     * Test if this structure matches a structure at the given position.
+     *
+     * @param level The world
+     * @param originPos The in world position that corresponds to the structure's origin.
+     * @return A list containing any blocks that do not match this structure. Empty list means the structure is valid.
+     */
+    public List<InvalidPart> test(Level level, BlockPos originPos) {
+        List<InvalidPart> result = new ArrayList<>();
+        getBlocksAt(origin).forEach((pos, part) -> {
+            if (!part.isMatch(level, originPos)) result.add(new InvalidPart(pos, part));
+        });
+        return result;
+    }
+
+    /**
+     * Test if this structure matches a structure at the given position.
+     *
+     * @param level The world
+     * @param originPos The in world position that corresponds to the structure's origin.
+     * @param rotation Rotation to apply to the structure.
+     * @return A list containing any blocks that do not match this structure. Empty list means the structure is valid.
+     * @see #getBlocks(Rotation)
+     */
+    public List<InvalidPart> test(Level level, BlockPos originPos, Rotation rotation) {
+        List<InvalidPart> result = new ArrayList<>();
+        getBlocksAt(origin, rotation).forEach((pos, part) -> {
+            if (!part.isMatch(level, originPos)) result.add(new InvalidPart(pos, part));
+        });
+        return result;
+    }
+
 
     private void loadFromJson() {
         JsonObject obj = json.getAsJsonObject();
@@ -114,7 +184,7 @@ public class MultiBlockDefinition {
                     if (blockMap.containsKey(pos)) {
                         throw new IllegalStateException("Duplicate Position Detected"); //<- Should be impossible but just in case.
                     }
-                    if (!key.equals(" ")){
+                    if (!key.equals(" ")) {
                         if (!keyMap.containsKey(key)) {
                             throw new IllegalArgumentException("Undefined key in multiblock definition: " + id + ", Key: " + key);
                         }

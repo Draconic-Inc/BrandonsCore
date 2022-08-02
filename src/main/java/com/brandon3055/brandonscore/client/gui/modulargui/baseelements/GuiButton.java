@@ -28,7 +28,6 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispatcher*/ {
-    protected static ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
     protected ResourceLocation textureOverride;
     protected Supplier<ResourceLocation> textureSupplier;
 
@@ -182,7 +181,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     }
 
     protected boolean actualPressedState() {
-        return isPressed;
+        return isPressed && !isDisabled();
     }
 
     //region Button Identification
@@ -591,7 +590,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
         boolean mouseOver = isMouseOver(mouseX, mouseY);
 
         if (drawBorderedRectBackground) {
-            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && getToggleState()), isDisabled()), getBorderColour(mouseOver || (toggleMode && getToggleState()), disabled));
+            drawBorderedRect(xPos(), yPos(), xSize(), ySize(), backgroundBorderWidth, getFillColour(mouseOver || (toggleMode && getToggleState()), isDisabled()), getBorderColour(mouseOver || (toggleMode && getToggleState()), isDisabled()));
         }
 
         if (vanillaButtonRender) {

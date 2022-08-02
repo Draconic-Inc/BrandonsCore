@@ -1,22 +1,26 @@
-//package com.brandon3055.brandonscore.utils;
-//
-//import net.minecraft.client.renderer.block.model.BakedQuad;
-//import net.minecraft.client.resources.model.BakedModel;
-//import net.minecraft.resources.ResourceLocation;
-//import net.minecraft.server.packs.resources.ResourceManager;
-//import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-//import net.minecraft.world.level.block.state.BlockState;
-//
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.Random;
-//
-///**
-// * Created by brandon3055 on 9/4/2016.
-// * Used for general rendering stuff
-// */
-//public class ModelUtils implements ResourceManagerReloadListener {
+package com.brandon3055.brandonscore.utils;
+
+/**
+ * Created by brandon3055 on 9/4/2016.
+ */
+public class ModelUtils /*implements ResourceManagerReloadListener*/ {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //    public static Map<BlockState, List<BakedQuad>> quadCache = new HashMap<BlockState, List<BakedQuad>>();
 //    public static Map<ResourceLocation, BakedModel> bakedModelCache = new HashMap<ResourceLocation, BakedModel>();
 //    public static Random rand = new Random();
@@ -119,6 +123,6 @@
 //        quadCache.clear();
 //        bakedModelCache.clear();
 //    }
-//}
-//
-//
+}
+
+

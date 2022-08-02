@@ -122,7 +122,7 @@ public class MultiBlockManager extends SimpleJsonResourceReloadListener {
         MultiBlockDefinition definition = getDefinition(id);
 
         if (definition != null) {
-            for (Map.Entry<BlockPos, MultiBlockPart> entry : definition.getBlocksWithRotation(new Rotation(new Quat(new Quaternion((float) rotation.x, (float) rotation.y, (float) rotation.z, true)))).entrySet()) {
+            for (Map.Entry<BlockPos, MultiBlockPart> entry : definition.getBlocks(new Rotation(new Quat(new Quaternion((float) rotation.x, (float) rotation.y, (float) rotation.z, true)))).entrySet()) {
 //            for (Map.Entry<BlockPos, MultiBlockPart> entry : definition.getBlocksWithRotation(new Rotation(1, new Vector3(rotation))).entrySet()) {
                 BlockPos offset = entry.getKey();
                 List<Block> blocks = Lists.newArrayList(entry.getValue().validBlocks());

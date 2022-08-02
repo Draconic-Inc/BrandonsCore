@@ -514,7 +514,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             button.setRectFillColourGetter((hovering, disabled) -> Palette.Ctrl.fill(hovering));
             button.setRectBorderColourGetter((hovering, disabled) -> Palette.Ctrl.border(hovering));
         }
-        button.setTextColGetter((hovering, disabled) -> Palette.Ctrl.textH(hovering));
+        button.setTextColGetter((hovering, disabled) -> disabled ? 0xa0a0a0 : Palette.Ctrl.textH(hovering));
 
         if (parent != null) {
             parent.addChild(button);
