@@ -1,7 +1,11 @@
 package com.brandon3055.brandonscore.inventory;
 
+import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +25,7 @@ import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by brandon3055 on 28/3/2016.
@@ -157,5 +162,24 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
 
     protected static <T extends BlockEntity> T getClientTile(FriendlyByteBuf extraData) {
         return (T) Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());
+    }
+
+    public PacketCustom createServerBoundPacket(int packetType) {
+        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, packetType);
+        packet.writeInt(containerId);
+        return packet;
+    }
+
+    public void handleContainerMessage(PacketCustom packet, ServerPlayer player) {
+        int containerId = packet.readInt();
+        if (containerId != this.containerId) return;
+        int packetID = packet.readByte();
+        tile.receivePacketFromClient(packet, player, packetID);
+    }
+
+    public void handleTileDataPacket(PacketCustom packet, ServerPlayer player) {
+        int containerId = packet.readInt();
+        if (containerId != this.containerId) return;
+        tile.getDataManager().receiveDataFromClient(packet);
     }
 }

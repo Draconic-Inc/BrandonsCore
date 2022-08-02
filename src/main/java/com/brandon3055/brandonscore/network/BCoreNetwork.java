@@ -53,10 +53,11 @@ public class BCoreNetwork {
     public static final int C_OPEN_HUD_CONFIG = 13;
     public static final int C_MULTI_BLOCK_DEFINITIONS = 14;
     //Client to server
-    public static final int S_TILE_MESSAGE = 1;
+    public static final int S_CONTAINER_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
     public static final int S_TILE_DATA_MANAGER = 3;
 
+    public static final int S_DUMMY_PACKET = 99;
 
     public static void sendConfigToClient(ServerPlayer player) {
         PacketCustom packet = new PacketCustom(CHANNEL, C_SERVER_CONFIG_SYNC);

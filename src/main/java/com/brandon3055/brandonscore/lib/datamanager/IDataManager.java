@@ -75,6 +75,8 @@ public interface IDataManager {
      * Upon receival of the data the server must first confirm that client control is enabled for this data
      * then validate the received value before applying it.
      *
+     * Note: Depending on use case you my need to consider security. Do you need to verify that the player has permission to send this packet?
+     * {@link TileDataManager} does this by ensuring the player has the tile's container open.
      * @param data The data to be send to the server.
      */
     void sendToServer(IManagedData data);

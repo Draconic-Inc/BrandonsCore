@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.blocks;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
@@ -27,6 +28,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -140,14 +142,22 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
     }
 
     public PacketCustom createServerBoundPacket(int id) {
-        PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_MESSAGE);
-        packet.writePos(worldPosition);
-        packet.writeByte((byte) id);
-        return packet;
+        Player player = BrandonsCore.proxy.getClientPlayer();
+        if (player != null) {
+            AbstractContainerMenu container = player.containerMenu;
+            if (container instanceof ContainerBCTile && ((ContainerBCTile<?>) container).tile == this) {
+                PacketCustom packet = ((ContainerBCTile<?>) container).createServerBoundPacket(BCoreNetwork.S_CONTAINER_MESSAGE);
+                packet.writeByte((byte) id);
+                return packet;
+            }
+        }
+        return new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_DUMMY_PACKET);
     }
 
     /**
      * Send a data packet to the server, Supply a consumer to write the data you want to send
+     * Note: This packet now goes through the container for this block for security.
+     * Meaning this tile must have an associated container, and that container must be open for this to work
      */
     public void sendPacketToServer(Consumer<MCDataOutput> writer, int id) {
         PacketCustom packet = createServerBoundPacket(id);
@@ -198,10 +208,6 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
         sendPacketToClient(writer, id).sendToChunk(this);
     }
 
-//    public void sendPacketToClient(NetworkRegistry.TargetPoint tp, Consumer<MCDataOutput> writer, int id) {
-//        sendPacketToClient(writer, id).sendPacketToAllAround(tp.x, tp.y, tp.z, tp.range, tp.dimension);
-//    }
-
     /**
      * Override this method to receive data from the client via sendPacketToClient
      */
@@ -243,16 +249,6 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
     public void dirtyBlock() {
         LevelChunk chunk = level.getChunkAt(getBlockPos());
         chunk.setUnsaved(true);
-    }
-
-    /**
-     * checks that the player is allowed to interact with this tile bu firing the RightClickBlock.
-     * If the event is canceled bu another mod such as a permissions mod this will return false.
-     * <br/>
-     * Note: Packets from client to server do not need to be verified because that is already handled by the packet handler.
-     */
-    public boolean verifyPlayerPermission(Player player) {
-        return ServerPacketHandler.verifyPlayerPermission(player, getBlockPos());
     }
 
     /**

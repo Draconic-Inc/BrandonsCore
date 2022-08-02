@@ -2,13 +2,16 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
+import com.brandon3055.brandonscore.inventory.ContainerBCTile;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +22,7 @@ import java.util.List;
 
 /**
  * Created by brandon3055 on 12/06/2017.
- * My implementation if IDataManager for tile {@link TileBCBase}
+ * My implementation if IDataManager for tile {@link com.brandon3055.brandonscore.blocks.TileBCore}
  */
 @SuppressWarnings("DuplicatedCode")
 public class TileDataManager<T extends BlockEntity & IDataManagerProvider> implements IDataManager {
@@ -199,11 +202,16 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     @Override
     public void sendToServer(IManagedData data) {
         if (tile.getLevel().isClientSide && data.flags().allowClientControl) {
-            PacketCustom packet = new PacketCustom(BCoreNetwork.CHANNEL, BCoreNetwork.S_TILE_DATA_MANAGER);
-            packet.writePos(tile.getBlockPos());
-            packet.writeByte((byte) data.getIndex());
-            data.toBytes(packet);
-            packet.sendToServer();
+            Player player = BrandonsCore.proxy.getClientPlayer();
+            if (player != null) {
+                AbstractContainerMenu container = player.containerMenu;
+                if (container instanceof ContainerBCTile<?> && ((ContainerBCTile<?>) container).tile == tile) {
+                    PacketCustom packet = ((ContainerBCTile<?>) container).createServerBoundPacket(BCoreNetwork.S_TILE_DATA_MANAGER);
+                    packet.writeByte((byte) data.getIndex());
+                    data.toBytes(packet);
+                    packet.sendToServer();
+                }
+            }
         }
     }
 

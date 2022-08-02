@@ -55,6 +55,8 @@ public class DataFlags {
      * once validated it should be re synced to the client vie your chosen synchronization method. This is to ensure the client side value always matches the server side value.
      * If you do not want this behavior then call setCCSCS on the data. This will cause the client side value to be set immediately but the value should still be synced
      * from the server if nothing breaks.
+     *
+     * For Security reasons this will only work on tiles that have an associated container, and that container must be open by the player.
      */
     @Beta //Potentially dangerous! Read documentation
     public static DataFlags CLIENT_CONTROL = new DataFlags(false, false, false, false, false, false, true);
