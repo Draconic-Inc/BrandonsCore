@@ -125,6 +125,12 @@ public class LangGenerator extends LanguageProvider {
 
         add("hud.brandonscore.block_item_hud.name",         "Combined Block & Item HUD");
         add("hud.brandonscore.block_item_hud.info",         "Combines item info hud and block info hud into one for convenience.");
+
+        //Structure Builder
+        helper.setPrefix("struct_build.brandonscore");
+        helper.add("found_invalid",                         "Build Error: Found invalid block \"%s\" at %s.");
+        helper.add("missing_required",                      "Build Error: Unable to complete structure! Missing required block(s) \"%s\".");
+//        add("ecore.de.assemble_error_expected_air.txt",                         "ERROR: Expected air block at %s");
     }
 
     private void addGui(PrefixHelper helper) {

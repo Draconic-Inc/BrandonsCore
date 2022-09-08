@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Created by brandon3055 on 07/07/2022
  */
-class TagPart implements MultiBlockPart {
+public class TagPart implements MultiBlockPart {
     private TagKey<Block> tag;
     private List<Block> blockCache;
 
@@ -23,7 +24,11 @@ class TagPart implements MultiBlockPart {
 
     @Override
     public boolean isMatch(Level level, BlockPos pos) {
-        return level.getBlockState(pos).is(tag);
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof StructurePart) {
+            return ((StructurePart) state.getBlock()).is(level, pos, tag);
+        }
+        return state.is(tag);
     }
 
     @Override

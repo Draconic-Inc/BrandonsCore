@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
@@ -12,7 +13,7 @@ import java.util.Collections;
 /**
  * Created by brandon3055 on 07/07/2022
  */
-class BlockPart implements MultiBlockPart {
+public class BlockPart implements MultiBlockPart {
     private final Block block;
 
     public BlockPart(ResourceLocation id) {
@@ -24,7 +25,11 @@ class BlockPart implements MultiBlockPart {
 
     @Override
     public boolean isMatch(Level level, BlockPos pos) {
-        return level.getBlockState(pos).is(block);
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof StructurePart) {
+            return ((StructurePart) state.getBlock()).is(level, pos, block);
+        }
+        return state.is(block);
     }
 
     @Override

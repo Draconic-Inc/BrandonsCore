@@ -88,5 +88,7 @@
   "op.brandonscore.op_capacity": "OP Capacity",
   "op.brandonscore.op_stored": "OP Stored",
   "op.brandonscore.op_transfer": "OP Transfer",
-  "op.brandonscore.operational_potential": "Operational Potential"
+  "op.brandonscore.operational_potential": "Operational Potential",
+  "struct_build.brandonscore.found_invalid": "Build Error: Found invalid block \"%s\" at %s.",
+  "struct_build.brandonscore.missing_required": "Build Error: Unable to complete structure! Missing required block(s) \"%s\"."
 }

@@ -56,9 +56,15 @@ public class BlockBCore extends Block implements IBCoreBlock {
     private boolean blockSpawns = false;
     private Supplier<BlockEntityType<? extends TileBCore>> blockEntityType = null;
     private boolean enableTicking;
+    private boolean isLightTransparent = false;
 
     public BlockBCore(Block.Properties properties) {
         super(properties);
+    }
+
+    public BlockBCore setLightTransparent() {
+        isLightTransparent = true;
+        return this;
     }
 
     public BlockBCore setMobResistant() {
@@ -96,6 +102,11 @@ public class BlockBCore extends Block implements IBCoreBlock {
     @Override
     public boolean isValidSpawn(BlockState state, BlockGetter level, BlockPos pos, SpawnPlacements.Type type, EntityType<?> entityType) {
         return !blockSpawns && super.isValidSpawn(state, level, pos, type, entityType);
+    }
+
+    @Override
+    public float getShadeBrightness(BlockState p_60472_, BlockGetter p_60473_, BlockPos p_60474_) {
+        return isLightTransparent ? 1F : super.getShadeBrightness(p_60472_, p_60473_, p_60474_);
     }
 
     /**

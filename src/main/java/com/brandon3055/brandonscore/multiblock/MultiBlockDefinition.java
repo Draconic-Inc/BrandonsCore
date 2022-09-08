@@ -115,8 +115,8 @@ public class MultiBlockDefinition {
      */
     public List<InvalidPart> test(Level level, BlockPos originPos) {
         List<InvalidPart> result = new ArrayList<>();
-        getBlocksAt(origin).forEach((pos, part) -> {
-            if (!part.isMatch(level, originPos)) result.add(new InvalidPart(pos, part));
+        getBlocksAt(originPos).forEach((pos, part) -> {
+            if (!part.isMatch(level, pos)) result.add(new InvalidPart(pos, part));
         });
         return result;
     }
@@ -132,8 +132,8 @@ public class MultiBlockDefinition {
      */
     public List<InvalidPart> test(Level level, BlockPos originPos, Rotation rotation) {
         List<InvalidPart> result = new ArrayList<>();
-        getBlocksAt(origin, rotation).forEach((pos, part) -> {
-            if (!part.isMatch(level, originPos)) result.add(new InvalidPart(pos, part));
+        getBlocksAt(originPos, rotation).forEach((pos, part) -> {
+            if (!part.isMatch(level, pos)) result.add(new InvalidPart(pos, part));
         });
         return result;
     }

@@ -1,24 +1,18 @@
 package com.brandon3055.brandonscore.utils;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
+
 /**
  * Created by brandon3055 on 9/4/2016.
  */
 public class ModelUtils /*implements ResourceManagerReloadListener*/ {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public static ModelPart getEntityModel(ModelLayerLocation location) {
+        return Minecraft.getInstance().getEntityRenderDispatcher().entityModels.bakeLayer(location);
+    }
 
 
 //    public static Map<BlockState, List<BakedQuad>> quadCache = new HashMap<BlockState, List<BakedQuad>>();
