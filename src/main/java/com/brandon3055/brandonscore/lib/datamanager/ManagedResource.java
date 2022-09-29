@@ -114,4 +114,12 @@ public class ManagedResource extends AbstractManagedData<ResourceLocation> {
     public String toString() {
         return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
     }
+
+    public boolean isNull() {
+        return value == null;
+    }
+
+    public boolean notNull() {
+        return value != null;
+    }
 }

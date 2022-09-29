@@ -123,4 +123,12 @@ public class ManagedPos extends AbstractManagedData<BlockPos> {
     public String toString() {
         return getClass().getSimpleName() + ":[" + getName() + "=" + value + "]";
     }
+
+    public boolean isNull() {
+        return value == null;
+    }
+
+    public boolean notNull() {
+        return value != null;
+    }
 }

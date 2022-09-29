@@ -37,6 +37,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.DrawSelectionEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -347,6 +348,11 @@ public class BlockBCore extends Block implements IBCoreBlock {
         if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
             tooltip.add(new TranslatableComponent("info.brandonscore.block_has_saved_data"));
         }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public boolean renderSelectionBox(DrawSelectionEvent.HighlightBlock event, Level level) {
+        return true;
     }
 }
 

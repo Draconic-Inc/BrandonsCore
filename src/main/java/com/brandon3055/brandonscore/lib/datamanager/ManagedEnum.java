@@ -4,6 +4,8 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.math.MathHelper;
 import net.minecraft.nbt.CompoundTag;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,15 +16,22 @@ import java.util.function.Function;
  * Created by brandon3055 on 12/06/2017.
  */
 public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
+
     private T value;
+    private Class<T> enumClass;
     public Map<Integer, T> indexToValue = new HashMap<>();
     public Map<T, Integer> valueToIndex = new HashMap<>();
     protected Function<T, T> validator = null;
 
-    public ManagedEnum(String name, T defaultValue, DataFlags... flags) {
+    public ManagedEnum(String name, @NotNull T defaultValue, DataFlags... flags) {
+        this(name, defaultValue.getDeclaringClass(), defaultValue, flags);
+    }
+
+    public ManagedEnum(String name, Class<T> enumClass, @Nullable T defaultValue, DataFlags... flags) {
         super(name, flags);
         this.value = defaultValue;
-        T[] v = value.getDeclaringClass().getEnumConstants();
+        this.enumClass = enumClass;
+        T[] v = enumClass.getEnumConstants();
         if (v.length > 255) {
             throw new RuntimeException("Max enum size supported by SyncableEnum is 255");
         }
@@ -46,8 +55,7 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
             if (set) {
                 markDirty();
                 notifyListeners(value);
-            }
-            else {
+            } else {
                 this.value = prev;
             }
         }
@@ -79,28 +87,54 @@ public class ManagedEnum<T extends Enum<T>> extends AbstractManagedData<T> {
 
     @Override
     public void toBytes(MCDataOutput output) {
-        output.writeByte(valueToIndex.get(value).byteValue());
+        output.writeBoolean(value == null);
+        if (value != null) {
+            output.writeEnum(value);
+        }
     }
 
     @Override
     public void fromBytes(MCDataInput input) {
-        value = indexToValue.get(MathHelper.clip(input.readByte() & 0xFF, 0, indexToValue.size() - 1));
+        if (!input.readBoolean()) {
+            value = input.readEnum(enumClass);
+        }
         notifyListeners(value);
     }
 
     @Override
     public void toNBT(CompoundTag compound) {
-        compound.putByte(name, valueToIndex.get(value).byteValue());
+        CompoundTag nbt = new CompoundTag();
+        if (value == null) {
+            nbt.putBoolean("null", true);
+        } else {
+            nbt.putByte("value", valueToIndex.get(value).byteValue());
+        }
+        compound.put(name, nbt);
     }
 
     @Override
     public void fromNBT(CompoundTag compound) {
-        value = indexToValue.get(MathHelper.clip(compound.getByte(name) & 0xFF, 0, indexToValue.size() - 1));
+        if (compound.contains(name, 10)) {
+            CompoundTag nbt = compound.getCompound(name);
+            if (nbt.contains("null")) {
+                value = null;
+            } else {
+                value = indexToValue.get(MathHelper.clip(nbt.getByte("value") & 0xFF, 0, indexToValue.size() - 1));
+            }
+        }
         notifyListeners(value);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
+        return getClass().getSimpleName() + ":[" + getName() + "=" + value + "]";
+    }
+
+    public boolean isNull() {
+        return value == null;
+    }
+
+    public boolean notNull() {
+        return value != null;
     }
 }

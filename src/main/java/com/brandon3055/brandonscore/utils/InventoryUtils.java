@@ -133,7 +133,7 @@ public class InventoryUtils {
             return;
         }
 
-        player.inventory.add(stack);
+        player.getInventory().add(stack);
         if (stack.getCount() > 0) {
             dropItemNoDelay(stack, player.level, Vector3.fromEntity(player));
         }

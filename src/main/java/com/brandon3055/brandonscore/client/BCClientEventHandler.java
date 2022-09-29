@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
+import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
@@ -10,6 +11,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.FOVModifierEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
@@ -81,6 +86,18 @@ public class BCClientEventHandler {
     }
 
     @SubscribeEvent
+    public void drawSelectionEvent(DrawSelectionEvent.HighlightBlock event) {
+        Level level = Minecraft.getInstance().level;
+        if (event.getTarget().getType() == HitResult.Type.MISS || level == null) return;
+        BlockState state = level.getBlockState(event.getTarget().getBlockPos());
+        if (state.getBlock() instanceof BlockBCore block) {
+            if (!block.renderSelectionBox(event, level)) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public void joinWorld(EntityJoinWorldEvent event) {
 //        if (event.getEntity() instanceof ServerPlayerEntity) {
 //TODO            BrandonsCore.network.sendToServer(new PacketUpdateMount(0));
@@ -124,7 +141,7 @@ public class BCClientEventHandler {
         float newFOV = originalFOV;
 
         int slotIndex = 2;
-        for (ItemStack stack : player.inventory.armor) {
+        for (ItemStack stack : player.getInventory().armor) {
             if (!stack.isEmpty() && stack.getItem() instanceof IFOVModifierItem) {
                 newFOV = ((IFOVModifierItem) stack.getItem()).getNewFOV(player, stack, newFOV, originalFOV, EquipmentSlot.values()[slotIndex]);
             }

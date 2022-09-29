@@ -46,7 +46,7 @@ public class ContainerPlayerAccess extends AbstractContainerMenu {
         super(BCContent.containerPlayerAccess, id);
         this.player = playerInv.player;
         this.playerAccess = playerAccess;
-        targetInventory = playerAccess.inventory;
+        targetInventory = playerAccess.getInventory();
         this.server = server;
         layoutSlots();
     }
@@ -99,20 +99,20 @@ public class ContainerPlayerAccess extends AbstractContainerMenu {
         xPos = 9;
         yPos = 168;
         for (int x = 0; x < 9; x++) {
-            addSlot(new Slot(player.inventory, x, xPos + 21 + 18 * x, yPos + 54 + 3));
+            addSlot(new Slot(player.getInventory(), x, xPos + 21 + 18 * x, yPos + 54 + 3));
         }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
-                addSlot(new Slot(player.inventory, x + y * 9 + 9, xPos + 21 + 18 * x, yPos + y * 18));
+                addSlot(new Slot(player.getInventory(), x + y * 9 + 9, xPos + 21 + 18 * x, yPos + y * 18));
             }
         }
 
         for (int i = 0; i < 4; i++) {
-            this.addSlot(new ArmorSlot(player.inventory, 36 + (3 - i), xPos, yPos + i * 19, VALID_EQUIPMENT_SLOTS[i], player));
+            this.addSlot(new ArmorSlot(player.getInventory(), 36 + (3 - i), xPos, yPos + i * 19, VALID_EQUIPMENT_SLOTS[i], player));
         }
 
-        this.addSlot(new OffhandSlot(player.inventory, 40, xPos + 186, yPos + 54 + 3));
+        this.addSlot(new OffhandSlot(player.getInventory(), 40, xPos + 186, yPos + 54 + 3));
     }
 
     @Override

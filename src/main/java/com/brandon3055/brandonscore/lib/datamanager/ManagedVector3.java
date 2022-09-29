@@ -126,4 +126,12 @@ public class ManagedVector3 extends AbstractManagedData<Vector3> {
     public String toString() {
         return getClass().getSimpleName() + ":[" + getName() + "="+ value + "]";
     }
+
+    public boolean isNull() {
+        return value == null;
+    }
+
+    public boolean notNull() {
+        return value != null;
+    }
 }
