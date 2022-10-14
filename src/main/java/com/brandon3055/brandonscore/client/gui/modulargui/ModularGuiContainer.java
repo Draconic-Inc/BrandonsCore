@@ -48,8 +48,14 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
     @Override
     public final void init() {
         super.init();
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         manager.onGuiInit(minecraft, width, height);
         reloadGui();
+    }
+
+    @Override
+    public void removed() {
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     public void reloadGui() {

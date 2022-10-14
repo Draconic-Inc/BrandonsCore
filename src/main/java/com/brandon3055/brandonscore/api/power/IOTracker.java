@@ -39,18 +39,29 @@ public class IOTracker implements IOInfo, Runnable {
     }
 
     public void energyInserted(long amount) {
-        inputArray[tick % inputArray.length] += amount;
+        int i = tick % inputArray.length;
+        if (inputArray[i] == 0) {
+            inputArray[i] += amount;
+        } else {
+            long space = Long.MAX_VALUE - inputArray[i];
+            inputArray[i] += Math.min(space, amount);
+        }
     }
 
     public void energyExtracted(long amount) {
-        outputArray[tick % outputArray.length] += amount;
+        int i = tick % inputArray.length;
+        if (outputArray[i] == 0) {
+            outputArray[i] += amount;
+        } else {
+            long space = Long.MAX_VALUE - outputArray[i];
+            outputArray[i] += Math.min(space, amount);
+        }
     }
 
     public void energyModified(long amount) {
         if (amount > 0) {
             energyInserted(amount);
-        }
-        else {
+        } else {
             energyExtracted(amount * -1);
         }
     }
@@ -64,8 +75,7 @@ public class IOTracker implements IOInfo, Runnable {
     public long currentInput() {
         if (EffectiveSide.get().isClient()) {
             return inputPerTick;
-        }
-        else {
+        } else {
             if (tick != lastInputCheck) {
                 lastInputCheck = tick;
                 inputPerTick = averageLongArray(inputArray, tick % inputArray.length);
@@ -78,9 +88,7 @@ public class IOTracker implements IOInfo, Runnable {
     public long currentOutput() {
         if (EffectiveSide.get().isClient()) {
             return outputPerTick;
-        }
-        else {
-            int tick = TimeKeeper.getServerTick();
+        } else {
             if (tick != lastOutputCheck) {
                 lastOutputCheck = tick;
                 outputPerTick = averageLongArray(outputArray, tick % inputArray.length);

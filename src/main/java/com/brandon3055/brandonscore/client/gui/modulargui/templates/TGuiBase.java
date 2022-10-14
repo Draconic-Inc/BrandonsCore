@@ -9,6 +9,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
+import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiManipulable;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.SlotMover;
@@ -41,10 +42,12 @@ public class TGuiBase implements IGuiTemplate {
     public GuiEnergyBar energyBar;
     public GuiElement<?> powerSlot;
     public InfoPanel infoPanel;
+    public boolean makeDraggable = true;
 
     protected Screen gui;
     protected GuiToolkit<?> toolkit;
     protected ContainerSlotLayout slotLayout;
+    protected GuiManipulable draggable;
 
     public TGuiBase(Screen gui) {this.gui = gui;}
 
@@ -55,15 +58,31 @@ public class TGuiBase implements IGuiTemplate {
     @Override
     public void addElements(IGuiParentElement<?> parent, GuiToolkit<?> toolkit) {
         this.toolkit = toolkit;
+
         //Background
         if (background == null) {
-            parent.addChild(background = toolkit.createBackground(true));
-        } else if (!parent.hasChild(background)) {
+            background = toolkit.createBackground(true);
+        }
+
+        if (parent.hasChild(background)) {
+            parent.removeChild(background);
+        }
+
+        if (makeDraggable) {
+            draggable = new GuiManipulable();
+            parent.addChild(draggable);
+            draggable.addChild(background);
+            draggable.bindPosition(background);
+            draggable.setSizeModifiers(() -> background.xSize(), () -> background.ySize());
+            draggable.setDragBarHeight(20);
+            toolkit.jeiExclude(draggable);
+        } else {
             parent.addChild(background);
         }
 
         //Title
         title = toolkit.createHeading(getTitle(), background, true);//setEnabled(false);
+
 
         //Theme Button
         themeButton = toolkit.createThemeButton(background);

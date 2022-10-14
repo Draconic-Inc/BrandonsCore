@@ -240,7 +240,7 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         }
     }
 
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         mousePressed = false;
         for (GuiElement element : actionList) {
             if (element.isEnabled() && element.mouseReleased(mouseX, mouseY, button)) {
@@ -476,10 +476,13 @@ public class GuiElementManager implements IGuiParentElement<GuiElementManager> {
         if (jeiExclusions == null) {
             return Collections.emptyList();
         }
-        return jeiExclusions.get().stream().map(elementBase -> {
-            Rectangle rect = elementBase.getRect();
-            return new Rect2i(rect.x, rect.y, rect.width, rect.height);
-        }).collect(Collectors.toList());
+        return jeiExclusions.get().stream()
+                .filter(GuiElement::isEnabled)
+                .map(elementBase -> {
+                    Rectangle rect = elementBase.getRect();
+                    return new Rect2i(rect.x, rect.y, rect.width, rect.height);
+                })
+                .collect(Collectors.toList());
     }
 
     public List<JEITargetAdapter> getJeiGhostTargets() {

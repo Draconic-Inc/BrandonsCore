@@ -635,7 +635,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         rect.setBorderColourL(hovering -> Palette.Ctrl.fill(hovering) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF));
         rect.setPosModifiers(() -> button.xPos() - leftOversize, () -> button.yPos() - topOversize);
         rect.setSizeModifiers(() -> button.xSize() + leftOversize + rightOversize, () -> button.ySize() + topOversize + bottomOversize);
-        rect.setEnabledCallback(() -> button.getHoverTime() > 0);
+        rect.setEnabledCallback(() -> button.getHoverTime() > 0 || (button instanceof GuiButton b && b.getToggleState()));
         if (transparent) {
             button.addChild(rect);
         } else {

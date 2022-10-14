@@ -69,6 +69,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
     //## Setup ##
 
+    @Deprecated //This is a bit crashy when combined with client controlled managed values. I need to find a fix.
     public GuiTextField linkExternalValue(Supplier<String> getValue, Consumer<String> setValue) {
         this.setValue = setValue;
         this.getValue = getValue;
@@ -224,9 +225,10 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public void insertText(String text) {
+        String value = getValue();
         int selectStart = Math.min(cursorPos, highlightPos);
         int selectEnd = Math.max(cursorPos, highlightPos);
-        int freeSpace = maxLength - getValue().length() - (selectStart - selectEnd);
+        int freeSpace = maxLength - value.length() - (selectStart - selectEnd);
         String toInsert = SharedConstants.filterText(text);
         int insertLen = toInsert.length();
         if (freeSpace < insertLen) {
@@ -234,12 +236,12 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             insertLen = freeSpace;
         }
 
-        String newValue = (new StringBuilder(getValue())).replace(selectStart, selectEnd, toInsert).toString();
+        String newValue = (new StringBuilder(value)).replace(selectStart, selectEnd, toInsert).toString();
         if (filter.test(newValue)) {
             _setValue(newValue);
             setCursorPosition(selectStart + insertLen);
             setHighlightPos(cursorPos);
-            onValueChange(getValue());
+            onValueChange(newValue);
         }
     }
 
@@ -268,7 +270,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public void deleteChars(int i1) {
-        if (!getValue().isEmpty()) {
+        String value = getValue();
+        if (!value.isEmpty()) {
             if (highlightPos != cursorPos) {
                 insertText("");
             } else {
@@ -276,7 +279,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
                 int j = Math.min(i, cursorPos);
                 int k = Math.max(i, cursorPos);
                 if (j != k) {
-                    String s = (new StringBuilder(getValue())).delete(j, k).toString();
+                    String s = (new StringBuilder(value)).delete(j, k).toString();
                     if (filter.test(s)) {
                         _setValue(s);
                         moveCursorTo(j);
@@ -295,27 +298,28 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     private int getWordPosition(int i1, int i2, boolean b) {
+        String value = getValue();
         int i = i2;
         boolean flag = i1 < 0;
         int j = Math.abs(i1);
 
         for (int k = 0; k < j; ++k) {
             if (!flag) {
-                int l = getValue().length();
-                i = getValue().indexOf(32, i);
+                int l = value.length();
+                i = value.indexOf(32, i);
                 if (i == -1) {
                     i = l;
                 } else {
-                    while (b && i < l && getValue().charAt(i) == ' ') {
+                    while (b && i < l && value.charAt(i) == ' ') {
                         ++i;
                     }
                 }
             } else {
-                while (b && i > 0 && getValue().charAt(i - 1) == ' ') {
+                while (b && i > 0 && value.charAt(i - 1) == ' ') {
                     --i;
                 }
 
-                while (i > 0 && getValue().charAt(i - 1) != ' ') {
+                while (i > 0 && value.charAt(i - 1) != ' ') {
                     --i;
                 }
             }
@@ -384,10 +388,11 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public GuiTextField setMaxLength(int newWidth) {
+        String value = getValue();
         maxLength = newWidth;
-        if (getValue().length() > newWidth) {
-            _setValue(getValue().substring(0, newWidth));
-            onValueChange(getValue());
+        if (value.length() > newWidth) {
+            _setValue(value.substring(0, newWidth));
+            onValueChange(value);
         }
         return this;
     }
@@ -405,7 +410,8 @@ public class GuiTextField extends GuiElement<GuiTextField> {
     }
 
     public void setHighlightPos(int p_94209_) {
-        int i = getValue().length();
+        String value = getValue();
+        int i = value.length();
         highlightPos = Mth.clamp(p_94209_, 0, i);
         if (fontRenderer != null) {
             if (displayPos > i) {
@@ -413,10 +419,10 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             }
 
             int j = getInnerWidth();
-            String s = fontRenderer.plainSubstrByWidth(getValue().substring(displayPos), j);
+            String s = fontRenderer.plainSubstrByWidth(value.substring(displayPos), j);
             int k = s.length() + displayPos;
             if (highlightPos == displayPos) {
-                displayPos -= fontRenderer.plainSubstrByWidth(getValue(), j, true).length();
+                displayPos -= fontRenderer.plainSubstrByWidth(value, j, true).length();
             }
 
             if (highlightPos > k) {
@@ -625,7 +631,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
             }
         }
 
-        if (!flag2 && suggestion != null) {
+        if (suggestion != null && value.isEmpty()) {
             if (shadow.get()) {
                 fontRenderer.drawShadow(poseStack, suggestion.get(), (float) (k1 - 1), (float) i1, -8355712);
             } else {

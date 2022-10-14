@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.utils;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.sun.jna.platform.win32.LMAccess;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -39,22 +40,25 @@ public class Utils {
     public static final String SELECT = "\u00A7";
     private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
 
+    @Deprecated
     public static String formatNumber(double value) {
-        if (value < 1000D) return String.valueOf(value);
-        else if (value < 1000000D) return addCommas((int) value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
-        else if (value < 1000000000D) return String.valueOf(Math.round(value / 1000D) / 1000D) + "M";
-        else if (value < 1000000000000D) return String.valueOf(Math.round(value / 1000000D) / 1000D) + "B";
+        if (Math.abs(value) < 1000D) return String.valueOf(value);
+        else if (Math.abs(value) < 1000000D) return addCommas((int) value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
+        else if (Math.abs(value) < 1000000000D) return String.valueOf(Math.round(value / 1000D) / 1000D) + "M";
+        else if (Math.abs(value) < 1000000000000D) return String.valueOf(Math.round(value / 1000000D) / 1000D) + "B";
         else return String.valueOf(Math.round(value / 1000000000D) / 1000D) + "T";
     }
 
+    @Deprecated //TODO Switch to localizations used by DE
     public static String formatNumber(long value) {
-        if (value < 1000L) return String.valueOf(value);
-        else if (value < 1000000L) return Utils.addCommas(value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
-        else if (value < 1000000000L) return String.valueOf(Math.round(value / 100000L) / 10D) + "M";
-        else if (value < 1000000000000L) return String.valueOf(Math.round(value / 100000000L) / 10D) + "G";
-        else if (value < 1000000000000000L) return String.valueOf(Math.round(value / 1000000000L) / 1000D) + "T";
-        else if (value < 1000000000000000000L) return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "P";
-        else if (value <= Long.MAX_VALUE) return String.valueOf(Math.round(value / 1000000000000000L) / 1000D) + "E";
+        if (value == Long.MIN_VALUE) value = Long.MAX_VALUE;
+        if (Math.abs(value) < 1000L) return String.valueOf(value);
+        else if (Math.abs(value) < 1000000L) return Utils.addCommas(value); //I mean whats the ploint of displaying 1.235K instead of 1,235?
+        else if (Math.abs(value) < 1000000000L) return String.valueOf(Math.round(value / 100000L) / 10D) + "M";
+        else if (Math.abs(value) < 1000000000000L) return String.valueOf(Math.round(value / 100000000L) / 10D) + "G";
+        else if (Math.abs(value) < 1000000000000000L) return String.valueOf(Math.round(value / 1000000000L) / 1000D) + "T";
+        else if (Math.abs(value) < 1000000000000000000L) return String.valueOf(Math.round(value / 1000000000000L) / 1000D) + "P";
+        else if (Math.abs(value) <= Long.MAX_VALUE) return String.valueOf(Math.round(value / 1000000000000000L) / 1000D) + "E";
         else return "Something is very broken!!!!";
     }
 

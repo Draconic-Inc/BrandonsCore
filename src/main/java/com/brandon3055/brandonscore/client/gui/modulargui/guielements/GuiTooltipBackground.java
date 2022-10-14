@@ -8,13 +8,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraftforge.client.gui.GuiUtils;
 
+import java.util.function.Supplier;
+
 /**
  * Created by brandon3055 on 29/04/2022
  */
 public class GuiTooltipBackground extends GuiElement<GuiTooltipBackground> {
 
-    private int backgroundColor = GuiUtils.DEFAULT_BACKGROUND_COLOR;
-    private int borderColor = GuiUtils.DEFAULT_BORDER_COLOR_START;
+    private Supplier<Integer> backgroundColor = () -> GuiUtils.DEFAULT_BACKGROUND_COLOR;
+    private Supplier<Integer> borderColor = () -> GuiUtils.DEFAULT_BORDER_COLOR_START;
+    private Supplier<Integer> borderEndColor = () -> (borderColor.get() & 0xFEFEFE) >> 1 | borderColor.get() & 0xFF000000;
+    private boolean empty = false;
 
     public GuiTooltipBackground() {
     }
@@ -30,18 +34,43 @@ public class GuiTooltipBackground extends GuiElement<GuiTooltipBackground> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         MultiBufferSource.BufferSource getter = RenderUtils.getTypeBuffer();
-        GuiHelper.drawHoverRect(getter, new PoseStack(), xPos(), yPos(), xSize(), ySize(), backgroundColor, borderColor);
+        GuiHelper.drawHoverRect(getter, new PoseStack(), xPos(), yPos(), xSize(), ySize(), backgroundColor.get(), borderColor.get(), borderEndColor.get(), empty);
         getter.endBatch();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
 
     public GuiTooltipBackground setBackgroundColor(int backgroundColor) {
-        this.backgroundColor = backgroundColor;
+        this.backgroundColor = () -> backgroundColor;
         return this;
     }
 
     public GuiTooltipBackground setBorderColor(int borderColor) {
+        this.borderColor = () -> borderColor;
+        return this;
+    }
+
+    public GuiTooltipBackground setBorderEndColor(int borderEndColor) {
+        this.borderEndColor = () -> borderEndColor;
+        return this;
+    }
+
+    public GuiTooltipBackground setBackgroundColor(Supplier<Integer> backgroundColor) {
+        this.backgroundColor = backgroundColor;
+        return this;
+    }
+
+    public GuiTooltipBackground setBorderColor(Supplier<Integer> borderColor) {
         this.borderColor = borderColor;
+        return this;
+    }
+
+    public GuiTooltipBackground setBorderEndColor(Supplier<Integer> borderEndColor) {
+        this.borderEndColor = borderEndColor;
+        return this;
+    }
+
+    public GuiTooltipBackground setEmpty(boolean empty) {
+        this.empty = empty;
         return this;
     }
 }

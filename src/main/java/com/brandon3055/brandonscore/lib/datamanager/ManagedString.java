@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;

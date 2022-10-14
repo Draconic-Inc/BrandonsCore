@@ -192,6 +192,26 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
         }
     }
 
+    public void updateColour(int newColour) {
+        colour.set(newColour);
+
+        redSlider.updatePos((colour.r & 0xFF) / 255D, false);
+        hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+
+        greenSlider.updatePos((colour.g & 0xFF) / 255D, false);
+        hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+
+        blueSlider.updatePos((colour.b & 0xFF) / 255D, false);
+        hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+
+        if (includeAlpha) {
+            alphaSlider.updatePos((colour.a & 0xFF) / 255D, false);
+            hexField.setValue(Integer.toHexString(includeAlpha ? colour.argb() : colour.rgb()));
+        }
+
+        onColourChangeInternal();
+    }
+
     private void onTextFieldChanged(String newValue) {
         try {
             int pos = hexField.getCursorPosition();

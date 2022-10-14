@@ -22,10 +22,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.brandon3055.brandonscore.BCConfig.darkMode;
 import static net.minecraft.ChatFormatting.*;
@@ -271,7 +274,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
             PoseStack poseStack = new PoseStack();
             poseStack.translate(0, 0, getRenderZLevel());
-            renderToolTipStrings(poseStack, Lists.newArrayList(builder.toString().split("\n")), mouseX, mouseY);
+            renderTooltip(poseStack, Arrays.stream(builder.toString().split("\n")).map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
             return true;
         }
 

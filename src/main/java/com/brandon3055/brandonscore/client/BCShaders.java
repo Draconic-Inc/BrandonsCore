@@ -23,6 +23,8 @@ public class BCShaders {
     public static CCUniform energyBarESize; //Size on screen in "real" screen pixels
     public static CCUniform energyBarScreenSize; //The resolution of the actual minecraft window
 
+    public static CCShaderInstance posColourTexAlpha0;
+
     public static void init() {
         LOCK.lock();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(BCShaders::onRegisterShaders);
@@ -37,6 +39,10 @@ public class BCShaders {
             energyBarESize = energyBarShader.getUniform("eSize");
             energyBarScreenSize = energyBarShader.getUniform("screenSize");
             energyBarShader.onApply(() -> energyBarTime.glUniform1f(BCClientEventHandler.elapsedTicks / 10F));
+        });
+
+        event.registerShader(CCShaderInstance.create(event.getResourceManager(), new ResourceLocation(BrandonsCore.MODID, "position_color_tex_alpha0"), DefaultVertexFormat.POSITION_COLOR_TEX), e -> {
+            posColourTexAlpha0 = (CCShaderInstance) e;
         });
     }
 

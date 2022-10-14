@@ -85,6 +85,7 @@ public class BCGuiSprites {
         registerThemed(MODID, "prog_arrow_up_over");
         registerThemed(MODID, "prog_arrow_up_tall");
         registerThemed(MODID, "prog_arrow_up_tall_over");
+        registerThemed(MODID, "pwr_btn");
 
         register(MODID, "add");
         register(MODID, "delete");
@@ -92,6 +93,10 @@ public class BCGuiSprites {
         register(MODID, "info_panel");
         register(MODID, "reposition_gray");
         register(MODID, "new_group");
+
+        register(MODID, "color_picker");
+        register(MODID, "legacy");
+        register(MODID, "rgb_checker");
 
         register(MODID, "redstone/always_active");
         register(MODID, "redstone/active_high");
