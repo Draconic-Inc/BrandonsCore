@@ -112,7 +112,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
 
                 int w = xSize() - rightPad - leftPad;
                 int h = ySize() - bottomPad - topPad;
-                MultiBufferSource getter = RenderUtils.getTypeBuffer();
+                MultiBufferSource getter = RenderUtils.getGuiBuffers();
                 GuiHelper.drawTexture(getter.getBuffer(imageType), xPos() + leftPad, yPos() + topPad, w, h);
 //                container.drawModalRectWithCustomSizedTexture(xPos() + leftPad, yPos() + topPad, 0, 0, w, h, w, h);
                 RenderUtils.endBatch(getter);
@@ -123,7 +123,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
     }
 
     private void renderDownloading(float partialTicks) {
-        MultiBufferSource getter = RenderUtils.getTypeBuffer();
+        MultiBufferSource getter = RenderUtils.getGuiBuffers();
 
         boolean failed = resourceLocation.dlFailed;
         Material mat = failed ? BCGuiSprites.get("download_failed") : BCGuiSprites.get("downloading");

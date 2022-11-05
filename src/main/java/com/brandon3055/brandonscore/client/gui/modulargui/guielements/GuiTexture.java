@@ -64,7 +64,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         Material mat = getMaterial();
         if (mat != null) {
-            MultiBufferSource.BufferSource getter = RenderUtils.getTypeBuffer();
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             if (rotation != 0 || flipX || flipY) {
                 PoseStack mStack = new PoseStack();
                 mStack.translate(xPos(), yPos(), 0);

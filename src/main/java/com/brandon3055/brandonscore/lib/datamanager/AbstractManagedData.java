@@ -31,6 +31,9 @@ public abstract class AbstractManagedData<T> implements IManagedData {
 
     @Override
     public void init(IDataManager dataManager, int index) {
+        if (dataManager.getDataByName(getName()) != null) {
+            throw new IllegalStateException("Attempted to register managed data object with duplicate name!");
+        }
         this.dataManager = dataManager;
         this.index = index;
     }

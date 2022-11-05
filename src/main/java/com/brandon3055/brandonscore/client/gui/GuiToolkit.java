@@ -47,7 +47,7 @@ import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotTyp
 /**
  * Created by brandon3055 on 5/7/19.
  */
-public class GuiToolkit<T extends Screen & IModularGui> {
+public class GuiToolkit<T extends Screen & IModularGui<?>> {
     private static final String INTERNAL_TRANSLATION_PREFIX = "gui_tkt.brandonscore.";
 
     private static Map<String, ResourceLocation> resourceCache = new HashMap<>();
@@ -126,7 +126,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return button;
     }
 
-    public GuiButton createRSSwitch(GuiElement parent, IRSSwitchable switchable) {
+    public GuiButton createRSSwitch(GuiElement<?> parent, IRSSwitchable switchable) {
         GuiButton button = createRSSwitch(switchable);
         parent.addChild(button);
         return button;
@@ -159,7 +159,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     //UI Heading
-    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent, boolean layout) {
+    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement<?> parent, boolean layout) {
         GuiLabel heading = new GuiLabel(I18n.get(unlocalizedHeading));
         heading.setTextColGetter(Palette.BG::text);
         heading.setShadowStateSupplier(() -> darkMode);
@@ -172,7 +172,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return heading;
     }
 
-    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement parent) {
+    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement<?> parent) {
         return createHeading(unlocalizedHeading, parent, false);
     }
 
@@ -186,8 +186,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
      *
      * @param slotMapper (column, row, slotData)
      */
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotMover> slotMapper, Material background) {
-        GuiElement element = new GuiElement() {
+    public GuiElement<?> createSlots(GuiElement<?> parent, int columns, int rows, int spacing, BiFunction<Integer, Integer, SlotMover> slotMapper, Material background) {
+        GuiElement<?> element = new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
@@ -219,8 +219,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             }
 
             @Override
-            public GuiElement translate(int xAmount, int yAmount) {
-                GuiElement ret = super.translate(xAmount, yAmount);
+            public GuiElement<?> translate(int xAmount, int yAmount) {
+                GuiElement<?> ret = super.translate(xAmount, yAmount);
                 if (slotMapper != null) {
                     for (int x = 0; x < columns; x++) {
                         for (int y = 0; y < rows; y++) {
@@ -242,29 +242,29 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return element;
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing) {
+    public GuiElement<?> createSlots(GuiElement<?> parent, int columns, int rows, int spacing) {
         return createSlots(parent, columns, rows, spacing, null, null);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows) {
+    public GuiElement<?> createSlots(GuiElement<?> parent, int columns, int rows) {
         return createSlots(parent, columns, rows, 0);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, int spacing, Material slotTexture) {
+    public GuiElement<?> createSlots(GuiElement<?> parent, int columns, int rows, int spacing, Material slotTexture) {
         return createSlots(parent, columns, rows, spacing, null, slotTexture);
     }
 
-    public GuiElement createSlots(GuiElement parent, int columns, int rows, Material slotTexture) {
+    public GuiElement<?> createSlots(GuiElement<?> parent, int columns, int rows, Material slotTexture) {
         return createSlots(parent, columns, rows, 0, null, slotTexture);
     }
 
-    public GuiElement createSlots(int columns, int rows) {
+    public GuiElement<?> createSlots(int columns, int rows) {
         return createSlots(null, columns, rows, 0);
     }
 
-    public GuiElement createSlot(GuiElement parent, SlotMover slotMover, Supplier<Material> background, boolean largeSlot) {
+    public GuiElement<?> createSlot(GuiElement<?> parent, SlotMover slotMover, Supplier<Material> background, boolean largeSlot) {
         int size = largeSlot ? 26 : 18;
-        GuiElement element = new GuiElement() {
+        GuiElement<?> element = new GuiElement() {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
@@ -280,8 +280,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             }
 
             @Override
-            public GuiElement translate(int xAmount, int yAmount) {
-                GuiElement ret = super.translate(xAmount, yAmount);
+            public GuiElement<?> translate(int xAmount, int yAmount) {
+                GuiElement<?> ret = super.translate(xAmount, yAmount);
                 if (slotMover != null) {
                     slotMover.setPos(xPos() - gui.guiLeft() + (largeSlot ? 5 : 1), yPos() - gui.guiTop() + (largeSlot ? 5 : 1));
                 }
@@ -299,14 +299,14 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     /**
      * Creates the standard player inventory slot layout.
      */
-    public GuiElement createPlayerSlots(GuiElement parent, boolean title) {
+    public GuiElement<?> createPlayerSlots(GuiElement<?> parent, boolean title) {
         return createPlayerSlots(parent, title, false, false);
     }
 
-    public GuiElement createPlayerSlots(GuiElement parent, boolean title, boolean addArmor, boolean addOffHand) {
-        GuiElement container = new GuiElement();
-        GuiElement main = createSlots(container, 9, 3, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column + row * 9 + 9), null);
-        GuiElement bar = createSlots(container, 9, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column), null);
+    public GuiElement<?> createPlayerSlots(GuiElement<?> parent, boolean title, boolean addArmor, boolean addOffHand) {
+        GuiElement<?> container = new GuiElement<>();
+        GuiElement<?> main = createSlots(container, 9, 3, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column + row * 9 + 9), null);
+        GuiElement<?> bar = createSlots(container, 9, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_INV, column), null);
         bar.setYPos(main.maxYPos() + 3);
 
         if (title) {
@@ -322,14 +322,14 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         if (addArmor) {
             for (int i = 0; i < 4; i++) {
                 int finalI = 3 - i;
-                GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_ARMOR, finalI), BCGuiSprites.getArmorSlot(finalI));
+                GuiElement<?> element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_ARMOR, finalI), BCGuiSprites.getArmorSlot(finalI));
                 element.setMaxXPos(main.xPos() - 3, false);
                 element.setYPos(main.yPos() + (i * 19));
             }
         }
 
         if (addOffHand) {
-            GuiElement element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_OFF_HAND, 4), BCGuiSprites.get("slots/armor_shield"));
+            GuiElement<?> element = createSlots(container, 1, 1, 0, slotLayout == null ? null : (column, row) -> slotLayout.getSlotData(PLAYER_OFF_HAND, 4), BCGuiSprites.get("slots/armor_shield"));
             element.setXPos(main.maxXPos() + 3);
             element.setMaxYPos(bar.maxYPos(), false);
         }
@@ -343,10 +343,10 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return container;
     }
 
-    public GuiElement createPlayerSlotsManualMovers(GuiElement parent, boolean title, Function<Integer, SlotMover> slotGetter) {
-        GuiElement container = new GuiElement();
-        GuiElement main = createSlots(container, 9, 3, 0, (column, row) -> slotGetter.apply(column + row * 9 + 9), null);
-        GuiElement bar = createSlots(container, 9, 1, 0, (column, row) -> slotGetter.apply(column), null);
+    public GuiElement<?> createPlayerSlotsManualMovers(GuiElement<?> parent, boolean title, Function<Integer, SlotMover> slotGetter) {
+        GuiElement<?> container = new GuiElement<>();
+        GuiElement<?> main = createSlots(container, 9, 3, 0, (column, row) -> slotGetter.apply(column + row * 9 + 9), null);
+        GuiElement<?> bar = createSlots(container, 9, 1, 0, (column, row) -> slotGetter.apply(column), null);
         bar.setYPos(main.maxYPos() + 3);
 
         if (title) {
@@ -368,11 +368,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return container;
     }
 
-    public GuiElement createEquipModSlots(GuiElement parent, Player player, boolean jeiExclude, Predicate<ItemStack> showFilter) {
-        GuiElement fallback = new GuiElement();
+    public GuiElement<?> createEquipModSlots(GuiElement<?> parent, Player player, boolean jeiExclude, Predicate<ItemStack> showFilter) {
+        GuiElement<?> fallback = new GuiElement<>();
         if (equipmentManager != null) {
             LazyOptional<IItemHandlerModifiable> optional = equipmentManager.getInventory(player);
-            GuiElement container = GuiTexture.newDynamicTexture(() -> BCGuiSprites.getThemed("bg_dynamic_small"));
+            GuiElement<?> container = GuiTexture.newDynamicTexture(() -> BCGuiSprites.getThemed("bg_dynamic_small"));
             container.setXSize(26);
             optional.ifPresent(handler -> {
                 if (jeiExclude) {
@@ -387,7 +387,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
                         data.setPos(-9999, -9999);
                         continue;
                     }
-                    GuiElement element = createSlots(container, 1, 1, 0, (column, row) -> data, null);
+                    GuiElement<?> element = createSlots(container, 1, 1, 0, (column, row) -> data, null);
                     element.setXPos(container.xPos() + 4, false);
                     element.setYPos(container.yPos() + (c * 19) + 4);
                     container.setMaxYPos(element.maxYPos() + 4, true);
@@ -399,14 +399,14 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return fallback;
     }
 
-    public GuiElement createPlayerSlots() {
+    public GuiElement<?> createPlayerSlots() {
         return createPlayerSlots(null, true);
     }
 
     //region  Buttons
     //####################################################################################################
 
-    public GuiButton createVanillaButton(String unlocalizedText, @Nullable GuiElement parent) {
+    public GuiButton createVanillaButton(String unlocalizedText, @Nullable GuiElement<?> parent) {
         GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setHoverTextDelay(10);
         button.enableVanillaRender();
@@ -424,7 +424,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createBorderlessButton(null, unlocalizedText);
     }
 
-    public GuiButton createBorderlessButton(@Nullable GuiElement parent, String unlocalizedText) {
+    public GuiButton createBorderlessButton(@Nullable GuiElement<?> parent, String unlocalizedText) {
         GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
@@ -440,7 +440,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     @Deprecated
-    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
+    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement<?> parent, boolean inset3d, double doubleBoarder) {
         GuiButton button = new GuiButton(I18n.get(unlocalizedText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
@@ -472,12 +472,12 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     @Deprecated
-    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement parent, boolean inset3d) {
+    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement<?> parent, boolean inset3d) {
         return createButton_old(unlocalizedText, parent, inset3d, 1);
     }
 
     @Deprecated
-    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement parent) {
+    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement<?> parent) {
         return createButton_old(unlocalizedText, parent, true);
     }
 
@@ -491,7 +491,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createButton_old(unlocalizedText, null, true);
     }
 
-    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement parent, boolean inset3d, double doubleBoarder) {
+    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement<?> parent, boolean inset3d, double doubleBoarder) {
         GuiButton button = new GuiButton().setDisplaySupplier(i18n(toolkitI18nText));
         button.setInsets(5, 2, 5, 2);
         button.setHoverTextDelay(10);
@@ -522,11 +522,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return button;
     }
 
-    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement parent) {
+    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement<?> parent) {
         return createButton(toolkitI18nText, parent, true, 1);
     }
 
-    public GuiButton createButton(String toolkitI18nText, @Nullable GuiElement parent) {
+    public GuiButton createButton(String toolkitI18nText, @Nullable GuiElement<?> parent) {
         return createButton(() -> toolkitI18nText, parent, true, 1);
     }
 
@@ -557,8 +557,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createGearButton(GuiElement<?> parent) {
-        GuiButton button = createThemedIconButton(parent, "gear");
-        return button;
+        return createThemedIconButton(parent, "gear");
     }
 
     public GuiButton createAdvancedButton() {
@@ -566,8 +565,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     public GuiButton createAdvancedButton(GuiElement<?> parent) {
-        GuiButton button = createThemedIconButton(parent, "advanced");
-        return button;
+        return createThemedIconButton(parent, "advanced");
     }
 
     public GuiButton createThemedIconButton(GuiElement<?> parent, String iconString) {
@@ -618,19 +616,19 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return button;
     }
 
-    public static GuiBorderedRect addHoverHighlight(GuiElement button) {
+    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button) {
         return addHoverHighlight(button, 0, 0);
     }
 
-    public static GuiBorderedRect addHoverHighlight(GuiElement button, int xOversize, int yOversize) {
+    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button, int xOversize, int yOversize) {
         return addHoverHighlight(button, xOversize / 2, yOversize / 2, false);
     }
 
-    public static GuiBorderedRect addHoverHighlight(GuiElement button, int xOversize, int yOversize, boolean transparent) {
+    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button, int xOversize, int yOversize, boolean transparent) {
         return addHoverHighlight(button, xOversize, xOversize, yOversize, yOversize, transparent);
     }
 
-    public static GuiBorderedRect addHoverHighlight(GuiElement button, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
+    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
         GuiBorderedRect rect = new GuiBorderedRect();
         rect.setBorderColourL(hovering -> Palette.Ctrl.fill(hovering) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF));
         rect.setPosModifiers(() -> button.xPos() - leftOversize, () -> button.yPos() - topOversize);
@@ -644,7 +642,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return rect;
     }
 
-    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier) {
+    public GuiElement<?> createHighlightIcon(GuiElement<?> parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier) {
         GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
         GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
         addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> base.getHoverTime() > 0);
@@ -653,7 +651,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return base;
     }
 
-    public GuiElement createHighlightIcon(GuiElement parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier, Function<GuiElement, Boolean> highlight) {
+    public GuiElement<?> createHighlightIcon(GuiElement<?> parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier, Function<GuiElement<?>, Boolean> highlight) {
         GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
         GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
         addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> highlight.apply(base));
@@ -667,7 +665,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     //Create Progress Bar..
 
     //Create Power Bar
-    public GuiEnergyBar createEnergyBar(GuiElement parent) {
+    public GuiEnergyBar createEnergyBar(GuiElement<?> parent) {
         GuiEnergyBar energyBar = new GuiEnergyBar();
         //TODO add ability to bind to
         //TODO Theme? Maybe? Maybe not needed?
@@ -678,7 +676,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return energyBar;
     }
 
-    public GuiEnergyBar createEnergyBar(GuiElement parent, IOPStorage storage) {
+    public GuiEnergyBar createEnergyBar(GuiElement<?> parent, IOPStorage storage) {
         GuiEnergyBar energyBar = new GuiEnergyBar();
         energyBar.setEnergyStorage(storage);
 
@@ -697,7 +695,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     }
 
     //Info Panel
-    public InfoPanel createInfoPanel(GuiElement parent, boolean leftSide) {
+    public InfoPanel createInfoPanel(GuiElement<?> parent, boolean leftSide) {
         InfoPanel panel = new InfoPanel(parent, leftSide);
         parent.addChild(panel);
         jeiExclude(panel);
@@ -709,11 +707,11 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         return createTextField(null);
     }
 
-    public GuiTextField createTextField(GuiElement parent) {
+    public GuiTextField createTextField(GuiElement<?> parent) {
         return createTextField(parent, true);
     }
 
-    public GuiTextField createTextField(GuiElement parent, boolean background) {
+    public GuiTextField createTextField(GuiElement<?> parent, boolean background) {
         GuiTextField textField = new GuiTextField();
         textField.setTextColor(Palette.Ctrl::text);
         textField.setShadow(false);
@@ -750,21 +748,21 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
 
     //LayoutUtils
-    public void center(GuiElement element, GuiElement centerOn, int xOffset, int yOffset) {
+    public void center(GuiElement<?> element, GuiElement<?> centerOn, int xOffset, int yOffset) {
         element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2) + xOffset);
         element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2) + yOffset);
     }
 
-    public void center(GuiElement element, int xPos, int yPos) {
+    public void center(GuiElement<?> element, int xPos, int yPos) {
         element.setXPos(xPos - (element.xSize() / 2));
         element.setYPos(yPos - (element.ySize() / 2));
     }
 
-    public void centerX(GuiElement element, GuiElement centerOn, int xOffset) {
+    public void centerX(GuiElement<?> element, GuiElement<?> centerOn, int xOffset) {
         element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2) + xOffset);
     }
 
-    public void centerY(GuiElement element, GuiElement centerOn, int yOffset) {
+    public void centerY(GuiElement<?> element, GuiElement<?> centerOn, int yOffset) {
         element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2) + yOffset);
     }
 
@@ -777,7 +775,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     /**
      * Place inside the target element https://ss.brandon3055.com/e89a6
      */
-    public void placeInside(GuiElement element, GuiElement placeInside, LayoutPos position, int xOffset, int yOffset) {
+    public void placeInside(GuiElement<?> element, GuiElement<?> placeInside, LayoutPos position, int xOffset, int yOffset) {
         //@formatter:off
         switch (position) {
             case TOP_LEFT:      element.setRelPos(placeInside, xOffset, yOffset); break;
@@ -795,7 +793,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
     /**
      * Place outside the target element https://ss.brandon3055.com/baa7c
      */
-    public void placeOutside(GuiElement element, GuiElement placeOutside, LayoutPos position, int xOffset, int yOffset) {
+    public void placeOutside(GuiElement<?> element, GuiElement<?> placeOutside, LayoutPos position, int xOffset, int yOffset) {
         //@formatter:off
         switch (position) {
             case TOP_LEFT:      element.setRelPos(placeOutside, -element.xSize() + xOffset, -element.ySize() + yOffset); break;
@@ -810,7 +808,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         //@formatter:on
     }
 
-    public void jeiExclude(GuiElement element) {
+    public void jeiExclude(GuiElement<?> element) {
         jeiExclusions.add(element);
     }
 
@@ -937,8 +935,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
 
     public static class InfoPanel extends GuiElement<InfoPanel> {
         private static AtomicBoolean globalExpanded = new AtomicBoolean(false);
-        private Map<GuiElement, Dimension> elementsDimMap = new LinkedHashMap<>();
-        private final GuiElement parent;
+        private Map<GuiElement<?>, Dimension> elementsDimMap = new LinkedHashMap<>();
+        private final GuiElement<?> parent;
         private boolean leftSide = false;
         private boolean hasPI = true;
         private AtomicBoolean expanded;
@@ -947,7 +945,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
         private GuiButton toggleButton;
         public String hoverText = GuiToolkit.i18ni("info_panel");
 
-        public InfoPanel(GuiElement parent, boolean leftSide, AtomicBoolean expandedHolder) {
+        public InfoPanel(GuiElement<?> parent, boolean leftSide, AtomicBoolean expandedHolder) {
             this.parent = parent;
             this.leftSide = leftSide;
             this.expanded = expandedHolder;
@@ -961,7 +959,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             setHoverTextDelay(10);
         }
 
-        public InfoPanel(GuiElement parent, boolean leftSide) {
+        public InfoPanel(GuiElement<?> parent, boolean leftSide) {
             this(parent, leftSide, globalExpanded);
         }
 
@@ -1024,7 +1022,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             return origin.get();
         }
 
-        public InfoPanel addElement(GuiElement element, Dimension preferredSize) {
+        public InfoPanel addElement(GuiElement<?> element, Dimension preferredSize) {
             if (elementsDimMap.isEmpty()) {
                 setEnabled(true);
             }
@@ -1034,7 +1032,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             return this;
         }
 
-        public InfoPanel addElement(GuiElement element) {
+        public InfoPanel addElement(GuiElement<?> element) {
             return addElement(element, new Dimension(element.xSize(), element.ySize()));
         }
 
@@ -1070,8 +1068,8 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             return label;
         }
 
-        public GuiElement addLabeledValue(String labelText, int valueOffset, int lineHeight, Supplier<String> valueSupplier, boolean multiLine) {
-            GuiElement container = new GuiElement();
+        public GuiElement<?> addLabeledValue(String labelText, int valueOffset, int lineHeight, Supplier<String> valueSupplier, boolean multiLine) {
+            GuiElement<?> container = new GuiElement<>();
             GuiLabel label = new GuiLabel(labelText).setAlignment(GuiAlign.LEFT);
             label.setSize(multiLine ? fontRenderer.width(labelText) : valueOffset, lineHeight);
             label.setWrap(true);
@@ -1168,7 +1166,7 @@ public class GuiToolkit<T extends Screen & IModularGui> {
             setPosAndSize(sx, sy, sw, sh);
 
             int y = yPos + 3;
-            for (GuiElement element : elementsDimMap.keySet()) {
+            for (GuiElement<?> element : elementsDimMap.keySet()) {
                 if (animState >= 1) {
                     element.setEnabled(true);
                     element.setPos(xPos() + 4, y);

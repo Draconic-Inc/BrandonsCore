@@ -49,7 +49,7 @@ public class BrandonsCore {
 
     public BrandonsCore() {
         FileHandler.init();
-        inDev = ModHelperBC.getModVersion(MODID).equals("version");
+        inDev = ModHelperBC.getModVersion(MODID).equals("0.0NONE");
 
         //Knock Knock...
         Logger deLog = LogManager.getLogger("draconicevolution");

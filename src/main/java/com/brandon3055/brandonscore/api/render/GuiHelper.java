@@ -32,8 +32,6 @@ public class GuiHelper {
                     .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setCullState(RenderStateShard.NO_CULL)
-//            .setShadeModelState(RenderStateShard.SMOOTH_SHADE)
-//            .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
                     .createCompositeState(false)
     );
 

@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.render;
 
 import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 /**
@@ -8,8 +9,12 @@ import net.minecraft.client.renderer.MultiBufferSource;
  */
 public class RenderUtils {
 
-    public static MultiBufferSource.BufferSource getTypeBuffer() {
+    public static MultiBufferSource.BufferSource getGuiBuffers() {
         return MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+    }
+
+    public static MultiBufferSource.BufferSource getBuffers() {
+        return Minecraft.getInstance().renderBuffers().bufferSource();
     }
 
     public static void endBatch(MultiBufferSource getter) {

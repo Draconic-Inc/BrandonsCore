@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.command;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
@@ -18,6 +19,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
@@ -83,18 +85,22 @@ public class BCUtilCommands {
     private static Random rand = new Random();
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-                Commands.literal("bcore_util")
-                        .then(registerNBT())
-                        .then(registerStackString())
+        LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("bcore_util")
+                .then(registerNBT())
+                .then(registerStackString())
 //                        .then(registerRegenChunk())
-                        .then(registerNoClip())
-                        .then(registerUUID())
+                .then(registerNoClip())
+                .then(registerUUID())
 //                        .then(registerPlayerAccess())
-                        .then(registerDumpEvents())
-                        .then(registerEggify())
-                        .then(registerPlaceMultiBlock())
-        );
+                .then(registerDumpEvents())
+                .then(registerEggify())
+                .then(registerPlaceMultiBlock());
+        if (BrandonsCore.inDev) {
+            builder.then(registerDev1());
+            builder.then(registerDev2());
+        }
+
+        dispatcher.register(builder);
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> registerPlaceMultiBlock() {
@@ -109,7 +115,6 @@ public class BCUtilCommands {
                                 )
                         )
                 );
-
     }
 
 
@@ -716,4 +721,31 @@ public class BCUtilCommands {
 //    }
 
     //endregion
+
+
+    private static ArgumentBuilder<CommandSourceStack, ?> registerDev1() {
+        return Commands.literal("dev1")
+                .requires(cs -> cs.hasPermission(3))
+                .executes(ctx -> {
+                    ServerLevel level = ctx.getSource().getLevel();
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+
+//                    level
+
+                    return 0;
+                });
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> registerDev2() {
+        return Commands.literal("dev2")
+                .requires(cs -> cs.hasPermission(3))
+                .executes(ctx -> {
+                    ServerLevel level = ctx.getSource().getLevel();
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+
+//                    level
+
+                    return 0;
+                });
+    }
 }

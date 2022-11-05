@@ -1930,7 +1930,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Deprecated
     public void drawGradientRect(double left, double top, double right, double bottom, int startColor, int endColor) {
-        MultiBufferSource getter = RenderUtils.getTypeBuffer();
+        MultiBufferSource getter = RenderUtils.getGuiBuffers();
         PoseStack mStack = new PoseStack();
         mStack.translate(0, 0, getRenderZLevel());
         GuiHelper.drawGradientRect(getter, mStack, left, top, right, bottom, startColor, endColor);
@@ -1939,7 +1939,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Deprecated
     public void drawMultiPassGradientRect(double left, double top, double right, double bottom, int colour1, int colour2, int layers) {
-        MultiBufferSource getter = RenderUtils.getTypeBuffer();
+        MultiBufferSource getter = RenderUtils.getGuiBuffers();
         PoseStack mStack = new PoseStack();
         mStack.translate(0, 0, getRenderZLevel());
         GuiHelper.drawMultiPassGradientRect(getter, mStack, left, top, right, bottom, colour1, colour2, layers);

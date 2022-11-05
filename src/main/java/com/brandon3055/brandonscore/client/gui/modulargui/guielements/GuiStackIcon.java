@@ -10,7 +10,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -150,7 +149,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             }
 
             if (stack.isBarVisible()) {
-                MultiBufferSource getter = RenderUtils.getTypeBuffer();
+                MultiBufferSource getter = RenderUtils.getGuiBuffers();
                 poseStack.translate(x, y, z + 200.0F);
                 poseStack.scale(xScale, yScale, 1F);
                 int i = stack.getBarWidth();
