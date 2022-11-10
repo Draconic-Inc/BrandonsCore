@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.api.hud.AbstractHudElement;
 import com.brandon3055.brandonscore.api.math.Vector2;
 import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.Minecraft;
@@ -44,6 +45,7 @@ public class HudManager {
         if (event.isCanceled()) return;
         PoseStack stack = event.getMatrixStack();
         boolean configuring = Minecraft.getInstance().screen instanceof HudConfigGui;
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F); //Fixes broken hud when underwater
         for (AbstractHudElement element : hudElements.values()) {
             if (element.shouldRender(event.getType(), true)) {
                 stack.pushPose();

@@ -79,9 +79,7 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
     public abstract void render(PoseStack mStack, float partialTicks, boolean configuring);
 
     public boolean shouldRender(ElementType type, boolean preRenderEvent) {
-        //TODO maybe refine this a bit
-        Minecraft mc = Minecraft.getInstance();
-        return preRenderEvent && type == ElementType.ALL/* && !mc.options.renderDebug && !(mc.screen instanceof ChatScreen)*/;
+        return preRenderEvent && type == ElementType.ALL;
     }
 
     public void addConfigElements(List<GuiElement<?>> list, GuiElement<?> parent) {
