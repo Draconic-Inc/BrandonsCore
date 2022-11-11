@@ -61,16 +61,16 @@ public class MarkdownTextRenderer {
                     } else {
                         switch (textformatting) {
                             case OBFUSCATED:
-                                activeStyle = activeStyle.setObfuscated(!activeStyle.isObfuscated());
+                                activeStyle = activeStyle.withObfuscated(!activeStyle.isObfuscated());
                                 break;
                             case BOLD:
                                 activeStyle = activeStyle.withBold(!activeStyle.isBold());
                                 break;
                             case STRIKETHROUGH:
-                                activeStyle = activeStyle.setStrikethrough(!activeStyle.isStrikethrough());
+                                activeStyle = activeStyle.withStrikethrough(!activeStyle.isStrikethrough());
                                 break;
                             case UNDERLINE:
-                                activeStyle = activeStyle.setUnderlined(!activeStyle.isUnderlined());
+                                activeStyle = activeStyle.withUnderlined(!activeStyle.isUnderlined());
                                 break;
                             case ITALIC:
                                 activeStyle = activeStyle.withItalic(!activeStyle.isItalic());

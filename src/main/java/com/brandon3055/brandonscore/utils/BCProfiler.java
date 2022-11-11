@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.utils;
 
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,8 +38,8 @@ public class BCProfiler {
     }
 
     @SubscribeEvent
-    public void renderWorldLast(RenderLevelLastEvent event) {
-        if (!enableProfiler) return;
+    public void renderWorldLast(RenderLevelStageEvent event) {
+        if (!enableProfiler || event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         renderDebug.clear();
         RENDER.dumpDebug(renderDebug);
         RENDER.update();
