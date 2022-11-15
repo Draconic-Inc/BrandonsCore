@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client;
 
+import codechicken.lib.CodeChickenLib;
 import codechicken.lib.colour.EnumColour;
 import codechicken.lib.render.RenderUtils;
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
@@ -42,6 +43,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
 
@@ -52,6 +54,7 @@ import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_
 /**
  * Created by brandon3055 on 17/07/2016.
  */
+@Mod.EventBusSubscriber (value = Dist.CLIENT, modid = CodeChickenLib.MOD_ID)
 public class BCClientEventHandler {
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
