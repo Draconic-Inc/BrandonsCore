@@ -22,6 +22,7 @@ public class ClientInit {
 
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(BCGuiSprites::initialize);
+        modBus.addListener(ClientInit::clientSetupEvent);
 
         MinecraftForge.EVENT_BUS.addListener(CursorHelper::closeGui);
         ProcessHandlerClient.init();
@@ -29,5 +30,9 @@ public class ClientInit {
         BCShaders.init();
         BCProfiler.init();
         DLRSCache.init();
+    }
+
+    private static void clientSetupEvent(FMLClientSetupEvent event) {
+        BCClientEventHandler.init();
     }
 }

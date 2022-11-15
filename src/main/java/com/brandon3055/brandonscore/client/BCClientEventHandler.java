@@ -6,6 +6,7 @@ import codechicken.lib.render.RenderUtils;
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.client.render.BlockEntityRendererTransparent;
@@ -54,7 +55,6 @@ import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_
 /**
  * Created by brandon3055 on 17/07/2016.
  */
-@Mod.EventBusSubscriber (value = Dist.CLIENT, modid = CodeChickenLib.MOD_ID)
 public class BCClientEventHandler {
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
@@ -89,7 +89,6 @@ public class BCClientEventHandler {
         MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
     }
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void disconnectEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         Minecraft mc = Minecraft.getInstance();
