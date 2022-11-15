@@ -61,7 +61,7 @@ public class EntityFilter extends FilterGroup {
      * @param player Send full synchronization data package to the specified client.
      */
     public void syncClient(ServerPlayer player) {
-        PacketCustom output = (PacketCustom) serverPacketProvider.get();
+        PacketCustom output = serverPacketProvider.get();
         output.writeByte(0);
         serializeMCD(output);
         output.sendToPlayer(player);
@@ -99,7 +99,7 @@ public class EntityFilter extends FilterGroup {
             PacketCustom output = serverPacketProvider.get();
             output.writeByte(0);
             serializeMCD(output);
-            serverPacketSender.accept((PacketCustom) output);
+            serverPacketSender.accept(output);
         }
     }
 
@@ -109,7 +109,7 @@ public class EntityFilter extends FilterGroup {
             output.writeByte(1);
             output.writeVarInt(node.nodeID);
             node.serializeMCD(output);
-            serverPacketSender.accept((PacketCustom) output);
+            serverPacketSender.accept(output);
         }
     }
 
