@@ -64,7 +64,7 @@ public class BrandonsCore {
         BCEventHandler.init();
         BCCommands.init();
 
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
     }
 }
 
