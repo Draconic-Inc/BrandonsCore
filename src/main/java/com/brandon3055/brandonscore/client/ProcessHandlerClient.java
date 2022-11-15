@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client;
 
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.utils.BCProfiler;
+import net.covers1624.quack.util.CrashLock;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -22,6 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 
 public class ProcessHandlerClient {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
     private static List<IProcess> processes = new ArrayList<IProcess>();
     private static List<IProcess> newProcesses = new ArrayList<IProcess>();
@@ -30,6 +32,7 @@ public class ProcessHandlerClient {
     private static List<IProcess> newPersistentProcesses = new ArrayList<IProcess>();
 
     public static void init() {
+        LOCK.lock();
         MinecraftForge.EVENT_BUS.register(new ProcessHandlerClient());
     }
 

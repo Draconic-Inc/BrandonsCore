@@ -10,6 +10,7 @@ import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.gson.JsonParser;
 import com.mojang.math.Vector3f;
+import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
@@ -24,6 +25,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.event.EventNetworkChannel;
 
@@ -33,6 +36,7 @@ import java.util.Map;
  * Created by brandon3055 on 17/12/19.
  */
 public class BCoreNetwork {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
     public static final ResourceLocation CHANNEL = new ResourceLocation(BrandonsCore.MODID + ":network");
     public static EventNetworkChannel netChannel;
@@ -40,7 +44,6 @@ public class BCoreNetwork {
     //Server to client
     public static final int C_TILE_DATA_MANAGER = 1;
     public static final int C_TILE_MESSAGE = 2;
-    public static final int C_SERVER_CONFIG_SYNC = 3;
     public static final int C_NO_CLIP = 4;
     public static final int C_PLAYER_ACCESS = 5;
     public static final int C_PLAYER_ACCESS_UPDATE = 6;
@@ -59,15 +62,8 @@ public class BCoreNetwork {
 
     public static final int S_DUMMY_PACKET = 99;
 
-    public static void sendConfigToClient(ServerPlayer player) {
-        PacketCustom packet = new PacketCustom(CHANNEL, C_SERVER_CONFIG_SYNC);
-//        ModConfigParser.writeConfigForSync(packet);
-        packet.sendToPlayer(player);
-        LogHelperBC.dev("Sending Config To Client: " + player);
-    }
-
     public static void sendNoClip(ServerPlayer player, boolean enabled) {
-        PacketCustom packet = new PacketCustom(CHANNEL, C_SERVER_CONFIG_SYNC);
+        PacketCustom packet = new PacketCustom(CHANNEL, C_NO_CLIP);
         packet.writeBoolean(enabled);
         packet.sendToPlayer(player);
         LogHelperBC.dev("Sending NoClip update to player: " + player + " Enabled: " + enabled);
@@ -185,6 +181,8 @@ public class BCoreNetwork {
     }
 
     public static void init() {
+        LOCK.lock();
+
         netChannel = PacketCustomChannelBuilder.named(CHANNEL)
                 .networkProtocolVersion(() -> "1")
                 .clientAcceptedVersions(e -> true)

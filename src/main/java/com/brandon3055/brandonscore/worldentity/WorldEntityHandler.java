@@ -1,17 +1,23 @@
 package com.brandon3055.brandonscore.worldentity;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.ImmutableList;
+import net.covers1624.quack.util.CrashLock;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -25,8 +31,9 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 /**
  * Created by brandon3055 on 15/12/20
  */
-@Mod.EventBusSubscriber(modid = BrandonsCore.MODID, bus = FORGE)
 public class WorldEntityHandler {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized.");
+
     public static IForgeRegistry<WorldEntityType<?>> REGISTRY;
     private static final Map<UUID, WorldEntity> ID_ENTITY_MAP = new HashMap<>();
     private static final Map<ResourceKey<Level>, List<WorldEntity>> WORLD_ENTITY_MAP = new HashMap<>();
@@ -42,7 +49,17 @@ public class WorldEntityHandler {
                 ts -> REGISTRY = ts);
     }
 
-    @SubscribeEvent
+    public static void init() {
+        LOCK.lock();
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modBus.addListener(WorldEntityHandler::createRegistry);
+
+        MinecraftForge.EVENT_BUS.addListener(WorldEntityHandler::worldLoad);
+        MinecraftForge.EVENT_BUS.addListener(WorldEntityHandler::worldUnload);
+        MinecraftForge.EVENT_BUS.addListener(WorldEntityHandler::onServerStop);
+        MinecraftForge.EVENT_BUS.addListener(WorldEntityHandler::worldTick);
+    }
+
     public static void worldLoad(WorldEvent.Load event) {
         if (!(event.getWorld() instanceof ServerLevel)) return;
         ServerLevel world = (ServerLevel) event.getWorld();
@@ -69,7 +86,6 @@ public class WorldEntityHandler {
         data.updateEntities(worldEntities);
     }
 
-    @SubscribeEvent
     public static void worldUnload(WorldEvent.Unload event) {
         if (!(event.getWorld() instanceof ServerLevel)) return;
         ServerLevel world = (ServerLevel) event.getWorld();
@@ -81,13 +97,12 @@ public class WorldEntityHandler {
         }
     }
 
-    public static void serverStopped() {
+    public static void onServerStop(ServerStoppedEvent event) {
         WORLD_ENTITY_MAP.clear();
         TICKING_ENTITY_MAP.clear();
         ID_ENTITY_MAP.clear();
     }
 
-    @SubscribeEvent
     public static void worldTick(TickEvent.WorldTickEvent event) {
         if (!(event.world instanceof ServerLevel)) return;
         Level world = event.world;

@@ -49,9 +49,6 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 }
                 break;
             }
-            case BCoreNetwork.C_SERVER_CONFIG_SYNC:
-//                ModConfigParser.readConfigForSync(packet);
-                break;
             case BCoreNetwork.C_NO_CLIP:
                 boolean enable = packet.readBoolean();
                 if (enable) {

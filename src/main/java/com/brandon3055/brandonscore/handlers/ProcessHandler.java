@@ -1,7 +1,9 @@
 package com.brandon3055.brandonscore.handlers;
 
+import net.covers1624.quack.util.CrashLock;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,12 +18,19 @@ import java.util.List;
  */
 
 public class ProcessHandler {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
     private static List<IProcess> processes = new ArrayList<IProcess>();
     private static List<IProcess> newProcesses = new ArrayList<IProcess>();
 
-    @SubscribeEvent
-    public void onServerTick(TickEvent.ServerTickEvent event) {
+    public static void init() {
+        LOCK.lock();
+
+        MinecraftForge.EVENT_BUS.addListener(ProcessHandler::onServerTick);
+        MinecraftForge.EVENT_BUS.addListener(ProcessHandler::onServerStop);
+    }
+
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             Iterator<IProcess> i = processes.iterator();
 
@@ -51,4 +60,7 @@ public class ProcessHandler {
         newProcesses.add(process);
     }
 
+    public static void onServerStop(ServerStoppedEvent event) {
+        clearHandler();
+    }
 }

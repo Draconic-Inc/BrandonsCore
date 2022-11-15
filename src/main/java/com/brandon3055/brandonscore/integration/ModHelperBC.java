@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.integration;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.covers1624.quack.util.CrashLock;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 
@@ -11,9 +12,8 @@ import java.util.*;
  * Created by brandon3055 on 29/9/2015.
  */
 public class ModHelperBC {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
-
-    private static boolean initialized = false;
     private static List<String> loadedMods = null;
     private static Map<String, String> modNameMap = null;
     private static Map<String, String> modVersionMap = null;
@@ -22,11 +22,11 @@ public class ModHelperBC {
     public static boolean isPIInstalled;
 
     public static void init() {
-        if (initialized) return;
+        LOCK.lock();
 
         loadedMods = Collections.synchronizedList(new ArrayList<>());
-        modNameMap = Collections.synchronizedMap(new HashMap<String, String>());
-        modVersionMap = Collections.synchronizedMap(new HashMap<String, String>());
+        modNameMap = Collections.synchronizedMap(new HashMap<>());
+        modVersionMap = Collections.synchronizedMap(new HashMap<>());
 
         for (IModInfo mod : ModList.get().getMods()) {
             loadedMods.add(mod.getModId());
@@ -40,8 +40,6 @@ public class ModHelperBC {
 
         isJEIInstalled = ModList.get().isLoaded("jei");
         isPIInstalled = ModList.get().isLoaded("projectintelligence");
-
-        initialized = true;
     }
 
 
@@ -49,7 +47,6 @@ public class ModHelperBC {
      * @return a list of all loaded mod id's
      */
     public static List<String> getLoadedMods() {
-        init();
         return ImmutableList.copyOf(loadedMods);
     }
 
@@ -57,7 +54,6 @@ public class ModHelperBC {
      * @return a map of all loaded mod id's to mod names
      */
     public static Map<String, String> getModNameMap() {
-        init();
         return ImmutableMap.copyOf(modNameMap);
     }
 
@@ -65,7 +61,6 @@ public class ModHelperBC {
      * @return a map of all loaded mod id's to mod versions
      */
     public static Map<String, String> getModVersionMap() {
-        init();
         return ImmutableMap.copyOf(modVersionMap);
     }
 

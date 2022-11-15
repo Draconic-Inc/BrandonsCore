@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.utils;
 
+import net.covers1624.quack.util.CrashLock;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -14,7 +15,9 @@ import static net.minecraft.ChatFormatting.*;
 /**
  * Created by brandon3055 on 7/9/2018.
  */
+@Deprecated
 public class BCProfiler {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized.");
     public static ProfilerInstance RENDER = new ProfilerInstance("Render");
     public static ProfilerInstance TICK = new ProfilerInstance("Tick");
 
@@ -23,6 +26,8 @@ public class BCProfiler {
     public static List<String> tickDebug = new ArrayList<>();
 
     public static void init() {
+        LOCK.lock();
+
         MinecraftForge.EVENT_BUS.register(new BCProfiler());
     }
 

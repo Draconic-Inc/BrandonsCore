@@ -30,10 +30,9 @@ public class EntityFilter extends FilterGroup {
     public Int2ObjectMap<FilterBase> nodeMap = new Int2ObjectOpenHashMap<>();
     private Predicate<FilterType> typePredicate;
     private int nextNodeID = 1;
-    private Supplier<? extends MCDataOutput> serverPacketProvider;
+    private Supplier<PacketCustom> serverPacketProvider;
     private Consumer<PacketCustom> serverPacketSender;
-    private Supplier<? extends MCDataOutput> clientPacketProvider;
-    private Consumer<PacketCustom> clientPacketSender;
+    private Supplier<PacketCustom> clientPacketProvider;
     private Runnable dirtyHandler;
     private com.google.common.base.Predicate<Entity> filterPredicate = this::test;
     public boolean fixedAndLogic = false;
@@ -74,7 +73,7 @@ public class EntityFilter extends FilterGroup {
      * @param serverPacketProvider must provide a packet to write the sync data to.
      * @param serverPacketSender   must sent the previously provided packet to all players accessing this filter.
      */
-    public <T extends MCDataOutput> void setupServerPacketHandling(Supplier<T> serverPacketProvider, Consumer<PacketCustom> serverPacketSender) {
+    public void setupServerPacketHandling(Supplier<PacketCustom> serverPacketProvider, Consumer<PacketCustom> serverPacketSender) {
         this.serverPacketProvider = serverPacketProvider;
         this.serverPacketSender = serverPacketSender;
     }
@@ -97,7 +96,7 @@ public class EntityFilter extends FilterGroup {
 
     protected void filterChanged() {
         if (serverPacketProvider != null && EffectiveSide.get().isServer()) {
-            MCDataOutput output = serverPacketProvider.get();
+            PacketCustom output = serverPacketProvider.get();
             output.writeByte(0);
             serializeMCD(output);
             serverPacketSender.accept((PacketCustom) output);
@@ -106,7 +105,7 @@ public class EntityFilter extends FilterGroup {
 
     private void serverModifiedNode(FilterBase node) {
         if (serverPacketProvider != null && EffectiveSide.get().isServer()) {
-            MCDataOutput output = serverPacketProvider.get();
+            PacketCustom output = serverPacketProvider.get();
             output.writeByte(1);
             output.writeVarInt(node.nodeID);
             node.serializeMCD(output);
@@ -120,15 +119,13 @@ public class EntityFilter extends FilterGroup {
      * Sets up packet handling that allows this entity filter to send packets from a client to the server.
      *
      * @param clientPacketProvider must provide a packet to write the sync data to.
-     * @param clientPacketSender   must sent the previously provided packet to the server.
      */
-    public <T extends MCDataOutput> void setupClientPacketHandling(Supplier<T> clientPacketProvider, Consumer<PacketCustom> clientPacketSender) {
+    public void setupClientPacketHandling(Supplier<PacketCustom> clientPacketProvider) {
         this.clientPacketProvider = clientPacketProvider;
-        this.clientPacketSender = clientPacketSender;
     }
 
     /**
-     * This is where packets sent by {@link #setupClientPacketHandling(Supplier, Consumer)} must end up. (Server side)
+     * This is where packets sent by {@link #setupClientPacketHandling(Supplier)} must end up. (Server side)
      */
     public void receivePacketFromClient(MCDataInput input) {
         int id = input.readByte();
@@ -166,36 +163,36 @@ public class EntityFilter extends FilterGroup {
      */
     public void clientAddNode(FilterType type, FilterGroup parentGroup) {
         if (parentGroup == null) return;
-        MCDataOutput output = clientPacketProvider.get();
+        PacketCustom output = clientPacketProvider.get();
         output.writeByte(0);
         output.writeEnum(type);
         output.writeVarInt(parentGroup.nodeID);
-        clientPacketSender.accept((PacketCustom) output);
+        output.sendToServer();
     }
 
     /**
      * Called by the client to remove the specified node
      */
     public void clientRemoveNode(int nodeID) {
-        MCDataOutput output = clientPacketProvider.get();
+        PacketCustom output = clientPacketProvider.get();
         output.writeByte(1);
         output.writeVarInt(nodeID);
-        clientPacketSender.accept((PacketCustom) output);
+        output.sendToServer();
     }
 
     public void clientClearFilter() {
-        MCDataOutput output = clientPacketProvider.get();
+        PacketCustom output = clientPacketProvider.get();
         output.writeByte(3);
-        clientPacketSender.accept((PacketCustom) output);
+        output.sendToServer();
     }
 
     private void clientModifiedNode(FilterBase node) {
         if (clientPacketProvider != null) {
-            MCDataOutput output = clientPacketProvider.get();
+            PacketCustom output = clientPacketProvider.get();
             output.writeByte(2);
             output.writeVarInt(node.nodeID);
             node.serializeMCD(output);
-            clientPacketSender.accept((PacketCustom) output);
+            output.sendToServer();
         }
     }
 

@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.lib;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.FileHandler;
+import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
  * Downloadable Resource Cache
  */
 public class DLRSCache {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
     public static final DLResourceLocation DOWNLOADING_TEXTURE = new DLResourceLocation(BrandonsCore.MODID.toLowerCase(Locale.ENGLISH), "textures/loading_texture.png");
     static {
@@ -27,7 +29,9 @@ public class DLRSCache {
     private static File cacheFolder;
     private static Pattern urlStripper = Pattern.compile("([^a-zA-Z0-9]*)");
 
-    public static void initialize() {
+    public static void init() {
+        LOCK.lock();
+
         cacheFolder = new File(FileHandler.brandon3055Folder, "ResourceCache");
         cacheFolder.mkdirs();
     }

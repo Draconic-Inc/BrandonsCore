@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.covers1624.quack.util.CrashLock;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -28,11 +29,14 @@ import java.util.Map;
  * Created by brandon3055 on 30/7/21
  */
 public class HudManager {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
     private static IForgeRegistry<AbstractHudElement> HUD_REGISTRY;
     protected static Map<ResourceLocation, AbstractHudElement> hudElements = new HashMap<>();
 
     public static void init() {
+        LOCK.lock();
+
         MinecraftForge.EVENT_BUS.addListener(HudManager::onDrawOverlayPre);
         MinecraftForge.EVENT_BUS.addListener(HudManager::onDrawOverlayPost);
         MinecraftForge.EVENT_BUS.addListener(HudManager::onClientTick);

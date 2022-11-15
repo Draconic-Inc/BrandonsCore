@@ -8,51 +8,52 @@ import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.api.IFOVModifierItem;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.client.render.BlockEntityRendererTransparent;
-import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.BlockDestructionProgress;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.DrawSelectionEvent;
 import net.minecraftforge.client.event.FOVModifierEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
 
 import static net.minecraft.client.renderer.RenderStateShard.*;
-import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
+import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_PARTICLES;
+import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS;
 
 /**
  * Created by brandon3055 on 17/07/2016.
  */
 public class BCClientEventHandler {
+    private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
     private static int remountTicksRemaining = 0;
     private static int remountEntityID = 0;
@@ -79,6 +80,20 @@ public class BCClientEventHandler {
         return Long.compare(totalCompare, totalValue);
     };
 
+    public static void init() {
+        LOCK.lock();
+
+        MinecraftForge.EVENT_BUS.register(new BCClientEventHandler());
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void disconnectEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            BCEventHandler.noClipPlayers.remove(mc.player.getUUID());
+        }
+    }
 
     @SubscribeEvent
     public void tickEnd(TickEvent.ClientTickEvent event) {
