@@ -36,13 +36,16 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
     }
 
     public OPStorage(long capacity, long maxTransfer) {
-        this(capacity, maxTransfer, maxTransfer, 0);
+        this(capacity, maxTransfer, maxTransfer);
     }
 
     public OPStorage(long capacity, long maxReceive, long maxExtract) {
-        this(capacity, maxReceive, maxExtract, 0);
+        this.capacity = capacity;
+        this.maxReceive = maxReceive;
+        this.maxExtract = maxExtract;
     }
 
+    @Deprecated
     public OPStorage(long capacity, long maxReceive, long maxExtract, long energy) {
         this.capacity = capacity;
         this.maxReceive = maxReceive;
@@ -77,7 +80,7 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
             return 0;
         }
 
-        long energyReceived = Math.min(capacity - energy, Math.min(this.maxReceive, maxReceive));
+        long energyReceived = Math.min(getMaxOPStored() - energy, Math.min(this.maxReceive(), maxReceive));
         if (!simulate) {
             energy += energyReceived;
             if (ioTracker != null) {
@@ -93,7 +96,7 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
             return 0;
         }
 
-        long energyExtracted = Math.min(energy, Math.min(this.maxExtract, maxExtract));
+        long energyExtracted = Math.min(energy, Math.min(this.maxExtract(), maxExtract));
         if (!simulate) {
             energy -= energyExtracted;
             if (ioTracker != null) {
@@ -115,18 +118,18 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
 
     @Override
     public boolean canExtract() {
-        return allowExtract && maxExtract > 0;
+        return allowExtract && maxExtract() > 0;
     }
 
     @Override
     public boolean canReceive() {
-        return allowReceive && maxReceive > 0;
+        return allowReceive && maxReceive() > 0;
     }
 
     @Override
     public long modifyEnergyStored(long amount) {
-        if (amount > capacity - energy) {
-            amount = capacity - energy;
+        if (amount > getMaxOPStored() - energy) {
+            amount = getMaxOPStored() - energy;
         } else if (amount < -energy) {
             amount = -energy;
         }
@@ -140,12 +143,12 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
 
     @Override
     public long maxExtract() {
-        return maxExtract > 0 ? maxExtract : maxReceive;
+        return maxExtract;
     }
 
     @Override
     public long maxReceive() {
-        return maxReceive > 0 ? maxReceive : maxExtract;
+        return maxReceive;
     }
 
     /**
@@ -171,13 +174,6 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
     }
 
     /**
-     * This is mostly for internal use. For things like saving and loading data.
-     */
-    public long getMaxExtract() {
-        return maxExtract;
-    }
-
-    /**
      * This is a raw unchecked setter for the maxInsert value.
      * This is for internal use only. For things like saving and loading data.
      *
@@ -186,13 +182,6 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
     public OPStorage setMaxReceive(long maxReceive) {
         this.maxReceive = maxReceive;
         return this;
-    }
-
-    /**
-     * This is mostly for internal use. For things like saving and loading data.
-     */
-    public long getMaxReceive() {
-        return maxReceive;
     }
 
     public OPStorage setMaxTransfer(long maxTransfer) {
@@ -204,18 +193,12 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
     public CompoundTag serializeNBT() {
         CompoundTag compound = new CompoundTag();
         smartWrite("energy", energy, compound);
-//        smartWrite("capacity", capacity, compound);  On second thought i think its better if the tile has full control over this.
-//        smartWrite("max_receive", maxReceive, compound);
-//        smartWrite("max_extract", maxExtract, compound);
         return compound;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         energy = smartRead("energy", nbt);
-//        capacity = smartRead("capacity", nbt);
-//        maxReceive = smartRead("max_receive", nbt);
-//        maxExtract = smartRead("max_extract", nbt);
     }
 
     private void smartWrite(String name, long value, CompoundTag compound) {

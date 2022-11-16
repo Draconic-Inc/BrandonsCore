@@ -47,6 +47,16 @@ public class OPIOControl implements IOPStorage {
     }
 
     @Override
+    public long maxExtract() {
+        return wrapped.maxExtract();
+    }
+
+    @Override
+    public long maxReceive() {
+        return wrapped.maxReceive();
+    }
+
+    @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
         return wrapped.receiveEnergy(maxReceive, simulate);
     }

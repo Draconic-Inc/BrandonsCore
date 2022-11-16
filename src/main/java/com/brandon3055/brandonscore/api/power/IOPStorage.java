@@ -66,6 +66,24 @@ public interface IOPStorage extends IEnergyStorage {
      */
     boolean canReceive();
 
+    /**
+     * This is the maximum energy that can be extracted from this storage per tick. (Or rather per {@link #extractOP(long, boolean)} call)
+     *
+     * @return The maximum energy extraction rate.
+     */
+    default long maxExtract() {
+        return Long.MAX_VALUE;
+    }
+
+    /**
+     * This is the maximum energy that can be inserted into this storage per tick. (Or rather per {@link #receiveOP(long, boolean)} call)
+     *
+     * @return The maximum energy insertion rate.
+     */
+    default long maxReceive() {
+        return Long.MAX_VALUE;
+    }
+
     @Nullable
     default IOInfo getIOInfo() {
         return null;
