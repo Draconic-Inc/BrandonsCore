@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui;
 
 import com.brandon3055.brandonscore.BCConfig;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
@@ -16,6 +17,7 @@ import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.SlotMover;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import com.brandon3055.brandonscore.utils.MathUtils;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -1186,16 +1188,11 @@ public class GuiToolkit<T extends Screen & IModularGui<?>> {
             double fadeAlpha = Math.min(1, ((animState + 0.5) * 2));
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
-            int col3 = 0x00408f | (int) (0x80 * fadeAlpha) << 24;
             MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-
-            drawColouredRect(getter, xPos(), yPos() + 1, xSize(), ySize() - 2, col1);
-            drawColouredRect(getter, xPos() + 1, yPos(), xSize() - 2, ySize(), col1);
-
-            drawGradientRect(getter, xPos() + 1, yPos() + 1, xPos() + xSize() - 1, yPos() + ySize() - 1, col2, col3);
-            drawColouredRect(getter, xPos() + 2, yPos() + 2, xSize() - 4, ySize() - 4, col1);
-
+            PoseStack poseStack = new PoseStack();
+            GuiHelper.drawHoverRect(getter, poseStack, xPos(), yPos(), xSize(), ySize(), col1, col2, false);
             getter.endBatch();
+
 
             for (GuiElement<?> element : childElements) {
                 if (element.isEnabled() && element != toggleButton) {

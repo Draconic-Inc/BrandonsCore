@@ -20,6 +20,9 @@ import net.minecraft.client.resources.language.I18n;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by brandon3055 on 9/7/19.
@@ -37,17 +40,22 @@ public class TGuiBase implements IGuiTemplate {
     private boolean isInitialized = false;
     public GuiElement<?> background;
     public GuiLabel title;
-    public GuiButton themeButton;
     public GuiElement<?> playerSlots;
     public GuiEnergyBar energyBar;
     public GuiElement<?> powerSlot;
-    public InfoPanel infoPanel;
     public boolean makeDraggable = true;
 
     protected Screen gui;
     protected GuiToolkit<?> toolkit;
     protected ContainerSlotLayout slotLayout;
     protected GuiManipulable draggable;
+
+    //Dynamic Buttons
+    public List<GuiElement<?>> dynamicButtons = new ArrayList<>();
+    public Consumer<List<GuiElement<?>>> buttonPlacer = this::positionDynamicButtons;
+    public GuiButton themeButton;
+    public InfoPanel infoPanel;
+
 
     public TGuiBase(Screen gui) {this.gui = gui;}
 
@@ -83,21 +91,51 @@ public class TGuiBase implements IGuiTemplate {
         //Title
         title = toolkit.createHeading(getTitle(), background, true);//setEnabled(false);
 
-
-        //Theme Button
-        themeButton = toolkit.createThemeButton(background);
-        themeButton.setRelPosRight(background, -15, 3);
-
-//        //Player Slots
-//        playerSlots = toolkit.createPlayerSlots(background, 4, true);
-//        toolkit.placeInside(playerSlots, background, GuiToolkit.LayoutPos.BOTTOM_CENTER, 0, -7);
-
-        //Info Panel
-        infoPanel = toolkit.createInfoPanel(background, false);
-        infoPanel.setOrigin(() -> new Point(themeButton.xPos(), themeButton.maxYPos()));
-        infoPanel.setEnabled(false);
+        addDynamicButtons(dynamicButtons);
+        if (buttonPlacer != null) buttonPlacer.accept(dynamicButtons);
 
         isInitialized = true;
+    }
+
+    public void addDynamicButtons(List<GuiElement<?>> dynamicButtons) {
+        //Theme Button
+        themeButton = toolkit.createThemeButton(background);
+//        themeButton.setRelPosRight(background, -15, 3);
+        dynamicButtons.add(themeButton);
+
+        //Info Panel
+        GuiElement<?> panelPosition = new GuiElement<>().setSize(12, 12);
+        background.addChild(panelPosition);
+        infoPanel = toolkit.createInfoPanel(background, false);
+        background.removeChild(infoPanel);
+        panelPosition.addChild(infoPanel);
+        infoPanel.setOrigin(() -> new Point(panelPosition.xPos(), panelPosition.yPos()));
+        infoPanel.setEnabled(false);
+        panelPosition.setEnabledCallback(() -> infoPanel.isEnabled());
+        dynamicButtons.add(panelPosition);
+    }
+
+    public void positionDynamicButtons(List<GuiElement<?>> dynamicButtons) {
+        for (int i = 0; i < dynamicButtons.size(); i++) {
+            GuiElement<?> button = dynamicButtons.get(i);
+            button.setXPos(background.maxXPos() - 15);
+
+            int finalI = i;
+            button.setYPosMod(() -> {
+               int index = finalI - 1;
+               while (index >= 0) {
+                   if (dynamicButtons.get(index).isEnabled()) {
+                       break;
+                   }
+                   index--;
+               }
+               return index < 0 ? background.yPos() + 3 : dynamicButtons.get(index).maxYPos() + 1;
+            });
+        }
+    }
+
+    public void setButtonPlacer(Consumer<List<GuiElement<?>>> buttonPlacer) {
+        this.buttonPlacer = buttonPlacer;
     }
 
     public void addPlayerSlots() {

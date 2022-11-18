@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.IDataRetainingTile;
+import com.brandon3055.brandonscore.api.event.TileBCoreInitEvent;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
 import com.brandon3055.brandonscore.api.power.OPStorage;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
@@ -71,8 +73,9 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
     private Set<Player> accessingPlayers = new HashSet<>();
     private int tick = 0;
 
-    public TileBCore(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
-        super(tileEntityTypeIn, pos, state);
+    public TileBCore(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        MinecraftForge.EVENT_BUS.post(new TileBCoreInitEvent(this));
     }
 
     //region Data Manager

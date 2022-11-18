@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 public abstract class ModularGuiContainer<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements IModularGui<ModularGuiContainer> {
 
     protected GuiElementManager manager = new GuiElementManager(this);
+    public final Inventory playerInv;
     protected int zLevel = 0;
     protected T container;
     protected boolean itemTooltipsEnabled = true;
@@ -30,10 +32,12 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
     private boolean experimentalSlotOcclusion = false;
     @Deprecated
     protected boolean dumbGui = false;
+    private FloatingItemRenderOverride floatingItemOverride = null;
 
-    public ModularGuiContainer(T container, Inventory inv, Component titleIn) {
-        super(container, inv, titleIn);
+    public ModularGuiContainer(T container, Inventory playerInv, Component titleIn) {
+        super(container, playerInv, titleIn);
         this.container = container;
+        this.playerInv = playerInv;
         this.minecraft = Minecraft.getInstance();
         this.itemRenderer = minecraft.getItemRenderer();
         this.font = minecraft.font;
@@ -250,6 +254,9 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
     protected void containerTick() {
         super.containerTick();
         manager.onUpdate();
+        if (container instanceof ContainerBCore c) {
+            c.clientTick();
+        }
     }
 
     private void renderSuperScreen(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
@@ -357,4 +364,29 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
 
     @Override
     public int getYSize() {return ySize();}
+
+    @Override
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int button) {
+        return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop, button) && manager.getElementsAtPosition(mouseX, mouseY).stream().noneMatch(GuiElement::isEnabled);
+    }
+
+    public T getContainer() {
+        return container;
+    }
+
+    @Override
+    public void renderFloatingItem(ItemStack stack, int x, int y, String altText) {
+        if (floatingItemOverride != null && floatingItemOverride.renderFloatingItem(stack, x, y, altText)) {
+            return;
+        }
+        super.renderFloatingItem(stack, x, y, altText);
+    }
+
+    public void setFloatingItemOverride(FloatingItemRenderOverride floatingItemOverride) {
+        this.floatingItemOverride = floatingItemOverride;
+    }
+
+    public interface FloatingItemRenderOverride {
+        boolean renderFloatingItem(ItemStack stack, int x, int y, String altText);
+    }
 }

@@ -9,6 +9,8 @@ import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
@@ -166,4 +168,7 @@ public class ContainerBCore<D> extends AbstractContainerMenu {
     public ContainerSlotLayout getSlotLayout() {
         return slotLayout;
     }
+
+    @OnlyIn(Dist.CLIENT)
+    public void clientTick() {}
 }

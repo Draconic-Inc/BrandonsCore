@@ -2,11 +2,14 @@ package com.brandon3055.brandonscore.client.gui.modulargui.templates;
 
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit;
+import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import net.minecraft.client.gui.screens.Screen;
+
+import java.util.List;
 
 /**
  * Created by brandon3055 on 9/7/19.
@@ -45,11 +48,14 @@ public class TBasicMachine extends TGuiBase {
         if (addPlayerSlots) {
             addPlayerSlots();
         }
+    }
 
+    @Override
+    public void addDynamicButtons(List<GuiElement<?>> dynamicButtons) {
+        super.addDynamicButtons(dynamicButtons);
         if (tile instanceof IRSSwitchable) {
             rsButton = toolkit.createRSSwitch(background, (IRSSwitchable) tile);
-            rsButton.setXPos(themeButton.xPos());
-            rsButton.setYPosMod(() -> infoPanel.isEnabled() ? infoPanel.getOrigin().y + 12 : themeButton.maxYPos());
+            dynamicButtons.add(rsButton);
         }
     }
 
