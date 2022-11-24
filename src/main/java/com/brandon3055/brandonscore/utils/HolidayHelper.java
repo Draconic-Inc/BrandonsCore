@@ -25,11 +25,11 @@ public class HolidayHelper {
         return isAprilFools || true;
     }
 
-    static void setDate(Calendar cal, int month, int date, boolean endOfDay) {
+    static void setDate(Calendar cal, int month, int day, boolean endOfDay) {
         cal.clear();
         cal.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));
         cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DATE, date);
+        cal.set(Calendar.DATE, day);
 
         if (endOfDay) {
             cal.set(Calendar.HOUR_OF_DAY, 23);

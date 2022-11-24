@@ -79,7 +79,7 @@ public class GuiToolkit<T extends Screen & IModularGui<?>> {
     }
 
     public GuiToolkit<T> setTranslationPrefix(String translationPrefix) {
-        if (!translationPrefix.endsWith(".")) {
+        if (!translationPrefix.endsWith(".") && !translationPrefix.isEmpty()) {
             translationPrefix = translationPrefix + ".";
         }
         this.translationPrefix = translationPrefix;

@@ -2,10 +2,12 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url "https://maven.minecraftforge.net/" }
+        maven { url = "https://maven.minecraftforge.net/" }
+        maven { url = "https://repo.spongepowered.org/maven" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
@@ -16,7 +18,7 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+apply plugin: "org.spongepowered.mixin"
 
 group = "com.brandon3055.brandonscore"
 archivesBaseName = "BrandonsCore"
@@ -75,6 +77,10 @@ minecraft {
     }
 }
 
+mixin {
+    add(sourceSets.main, "mixins.brandonscore.refmap.json")
+}
+
 repositories {
     mavenLocal()
     maven { url = "https://maven.covers1624.net/" }
@@ -129,6 +135,7 @@ jar {
         attributes 'Implementation-Vendor': 'brandon3055'
         attributes 'Implementation-Version': version
         attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        attributes 'MixinConfigs': 'mixins.brandonscore.json'
     }
     from file("LICENSE")
 }

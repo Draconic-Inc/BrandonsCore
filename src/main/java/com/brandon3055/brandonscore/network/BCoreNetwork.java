@@ -2,9 +2,12 @@ package com.brandon3055.brandonscore.network;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.packet.PacketCustomChannelBuilder;
+import codechicken.lib.util.ServerUtils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.FileHandler;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.multiblock.MultiBlockDefinition;
 import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
@@ -29,6 +32,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.event.EventNetworkChannel;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -55,10 +59,12 @@ public class BCoreNetwork {
     public static final int C_ENTITY_VELOCITY = 12;
     public static final int C_OPEN_HUD_CONFIG = 13;
     public static final int C_MULTI_BLOCK_DEFINITIONS = 14;
+    public static final int C_CONTRIBUTOR_CONFIG = 15;
     //Client to server
     public static final int S_CONTAINER_MESSAGE = 1;
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
     public static final int S_TILE_DATA_MANAGER = 3;
+    public static final int S_CONTRIBUTOR_CONFIG = 4;
 
     public static final int S_DUMMY_PACKET = 99;
 
@@ -178,6 +184,29 @@ public class BCoreNetwork {
             packet.writeString(MultiBlockManager.GSON.toJson(value.getJson()));
         });
         packet.sendToPlayer(player);
+    }
+
+    public static void sendContributorConfigToServer(ContributorProperties props) {
+        PacketCustom packet = new PacketCustom(CHANNEL, S_CONTRIBUTOR_CONFIG);
+        if (props.isContributor()) {
+            props.getConfig().serialize(packet);
+            packet.sendToServer();
+        }
+    }
+
+    public static PacketCustom contributorConfigToClient(ContributorProperties props) {
+        PacketCustom packet = new PacketCustom(CHANNEL, C_CONTRIBUTOR_CONFIG);
+        packet.writeUUID(props.getUserID());
+        props.getConfig().serialize(packet);
+        return packet;
+    }
+
+    public static void sentToAllExcept(PacketCustom packet, Player exclude) {
+        for (ServerPlayer player : ServerUtils.getPlayers()) {
+            if (!player.getUUID().equals(exclude.getUUID())) {
+                packet.sendToPlayer(player);
+            }
+        }
     }
 
     public static void init() {

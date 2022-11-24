@@ -513,7 +513,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     }
 
     @Nullable
-    public GuiElement getParent() {
+    public GuiElement<?> getParent() {
         return parentElement;
     }
 

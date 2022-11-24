@@ -1,13 +1,18 @@
-package com.brandon3055.brandonscore.client;
+package com.brandon3055.brandonscore.client.shader;
 
+import codechicken.lib.math.MathHelper;
 import codechicken.lib.render.shader.CCShaderInstance;
 import codechicken.lib.render.shader.CCUniform;
+import codechicken.lib.util.ClientUtils;
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.client.BCClientEventHandler;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.covers1624.quack.util.CrashLock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
@@ -15,6 +20,22 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
  */
 public class BCShaders {
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
+
+    public static final ChaosEntityShader CHAOS_ENTITY_SHADER = new ChaosEntityShader("chaos_entity", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> {
+                Player player = Minecraft.getInstance().player;
+                e.getTimeUniform().glUniform1f((float) ClientUtils.getRenderTime());
+                e.getYawUniform().glUniform1f((float) (player.getYRot() * MathHelper.torad));
+                e.getPitchUniform().glUniform1f((float) -(player.getXRot() * MathHelper.torad));
+            });
+
+    public static final ContribShader CONTRIB_BASE_SHADER = new ContribShader("contributor/wings_base", DefaultVertexFormat.NEW_ENTITY);
+    public static final ContribShader WINGS_WEB_SHADER = new ContribShader("contributor/wings_web", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
+    public static final ContribShader WINGS_BONE_SHADER = new ContribShader("contributor/wings_bone", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
+    public static final ContribShader BADGE_SHADER = new ContribShader("contributor/badge", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
 
     public static CCShaderInstance energyBarShader;
     public static CCUniform energyBarTime;
@@ -27,6 +48,13 @@ public class BCShaders {
 
     public static void init() {
         LOCK.lock();
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        CONTRIB_BASE_SHADER.register(bus);
+        WINGS_WEB_SHADER.register(bus);
+        WINGS_BONE_SHADER.register(bus);
+        BADGE_SHADER.register(bus);
+        CHAOS_ENTITY_SHADER.register(bus);
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(BCShaders::onRegisterShaders);
     }
 

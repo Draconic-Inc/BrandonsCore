@@ -83,6 +83,7 @@ public class GuiPopUpDialogBase<E extends GuiElement<E>> extends GuiElement<E> {
             dragging = true;
             dragXOffset = (int)mouseX - xPos();
             dragYOffset = (int)mouseY - yPos();
+            captured = true;
         }
 
         return captured || blockOutsideClicks;

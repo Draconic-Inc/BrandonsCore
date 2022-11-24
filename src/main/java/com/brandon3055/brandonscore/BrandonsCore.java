@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.command.BCCommands;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.init.ClientInit;
 import com.brandon3055.brandonscore.integration.ModHelperBC;
 import com.brandon3055.brandonscore.inventory.BlockToStackHelper;
@@ -24,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(BrandonsCore.MODID)
 public class BrandonsCore {
-    public static final Logger LOGGER = LogManager.getLogger("BrandonsCore"); //TODO going to slowly transition everything to this.
+    public static final Logger LOGGER = LogManager.getLogger("BrandonsCore");
     public static final String MODNAME = "Brandon's Core";
     public static final String MODID = "brandonscore";
     public static final String VERSION = "${mod_version}";
@@ -59,8 +60,9 @@ public class BrandonsCore {
         BCConfig.load();
         ProcessHandler.init();
         MultiBlockManager.init();
-        WorldEntityHandler.init();
         BlockToStackHelper.init();
+        WorldEntityHandler.init();
+        ContributorHandler.init();
         BCEventHandler.init();
         BCCommands.init();
 

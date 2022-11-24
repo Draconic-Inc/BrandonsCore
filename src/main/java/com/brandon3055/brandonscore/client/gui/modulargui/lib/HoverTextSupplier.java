@@ -28,7 +28,9 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
             return Collections.singletonList(new TextComponent(text));
         }
         else if (hoverText instanceof String[]) {
-            return splitNewLines(Arrays.asList((String[]) hoverText)).stream().map(TextComponent::new).collect(Collectors.toList());
+            List<String> lines = splitNewLines(Arrays.asList((String[]) hoverText));
+            if (lines.isEmpty() || (lines.size() == 1 && lines.get(0).isEmpty())) return Collections.emptyList();
+            return lines.stream().map(TextComponent::new).collect(Collectors.toList());
         }
         else if (hoverText instanceof List) {
             return splitNewLines((List<String>) hoverText).stream().map(TextComponent::new).collect(Collectors.toList());

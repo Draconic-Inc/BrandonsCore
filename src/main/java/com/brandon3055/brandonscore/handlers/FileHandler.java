@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.handlers;
 
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -113,13 +114,19 @@ public class FileHandler {
         return true;
     };
 
-    public static JsonObject readObj(File file) throws IOException {
+    public static JsonElement readJson(File file) throws IOException {
         try (JsonReader reader = new JsonReader(new FileReader(file))) {
-            JsonParser parser = new JsonParser();
             reader.setLenient(true);
-            JsonElement element = parser.parse(reader);
-            return element.getAsJsonObject();
+            return JsonParser.parseReader(reader);
         }
+    }
+
+    public static JsonObject readObj(File file) throws IOException {
+        return readJson(file).getAsJsonObject();
+    }
+
+    public static JsonArray readArray(File file) throws IOException {
+        return readJson(file).getAsJsonArray();
     }
 
     public static void writeJson(JsonObject obj, File file) throws IOException {

@@ -33,36 +33,44 @@ public class GuiManipulable extends GuiElement<GuiManipulable> {
     protected Runnable onResizedCallback = null;
     protected PositionRestraint positionRestraint = GuiElement::normalizePosition;
 
-    public void setCanDrag(Supplier<Boolean> canDrag) {
+    public GuiManipulable setCanDrag(Supplier<Boolean> canDrag) {
         this.canDrag = canDrag;
+        return this;
     }
 
-    public void setCanResizeH(Supplier<Boolean> canResizeH) {
+    public GuiManipulable setCanResizeH(Supplier<Boolean> canResizeH) {
         this.canResizeH = canResizeH;
+        return this;
     }
 
-    public void setCanResizeV(Supplier<Boolean> canResizeV) {
+    public GuiManipulable setCanResizeV(Supplier<Boolean> canResizeV) {
         this.canResizeV = canResizeV;
+        return this;
     }
 
-    public void setDragBarHeight(int dragBarHeight) {
+    public GuiManipulable setDragBarHeight(int dragBarHeight) {
         dragZone = (x, y) -> GuiHelperOld.isInRect(xPos(), yPos(), xSize(), dragBarHeight, x, y);
+        return this;
     }
 
-    public void setDragZone(PositionValidator dragZone) {
+    public GuiManipulable setDragZone(PositionValidator dragZone) {
         this.dragZone = dragZone;
+        return this;
     }
 
-    public void setOnMovedCallback(Runnable onMovedCallback) {
+    public GuiManipulable setOnMovedCallback(Runnable onMovedCallback) {
         this.onMovedCallback = onMovedCallback;
+        return this;
     }
 
-    public void setOnResizedCallback(Runnable onResizedCallback) {
+    public GuiManipulable setOnResizedCallback(Runnable onResizedCallback) {
         this.onResizedCallback = onResizedCallback;
+        return this;
     }
 
-    public void setPositionRestraint(PositionRestraint positionRestraint) {
+    public GuiManipulable setPositionRestraint(PositionRestraint positionRestraint) {
         this.positionRestraint = positionRestraint;
+        return this;
     }
 
     public GuiManipulable setEnableCursors(boolean enableCursors) {

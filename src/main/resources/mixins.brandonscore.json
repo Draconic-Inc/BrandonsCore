@@ -1,0 +1,13 @@
+{
+    "required":           true,
+    "minVersion":         "0.8",
+    "package":            "com.brandon3055.brandonscore.mixin",
+    "refmap":             "mixins.brandonscore.refmap.json",
+    "target":             "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_17",
+    "mixins":             [
+    ],
+    "client":             [
+        "ElytraLayerMixin"
+    ]
+}

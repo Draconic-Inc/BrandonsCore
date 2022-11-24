@@ -3,6 +3,9 @@ package com.brandon3055.brandonscore.init;
 import com.brandon3055.brandonscore.client.*;
 import com.brandon3055.brandonscore.client.hud.HudManager;
 import com.brandon3055.brandonscore.client.model.EquippedItemModelLayer;
+import com.brandon3055.brandonscore.client.shader.BCShaders;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.BCProfiler;
 import net.covers1624.quack.util.CrashLock;
@@ -10,9 +13,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -31,6 +39,7 @@ public class ClientInit {
         modBus.addListener(ClientInit::onAddRenderLayers);
 
         MinecraftForge.EVENT_BUS.addListener(CursorHelper::closeGui);
+        MinecraftForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggedInEvent event) -> ContributorHandler.onClientLogin(event.getPlayer()));
         ProcessHandlerClient.init();
         HudManager.init();
         BCShaders.init();
@@ -55,5 +64,15 @@ public class ClientInit {
                 renderer.addLayer(new EquippedItemModelLayer(renderer, false));
             }
         }
+    }
+
+    //Use with DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientInit::getClientPlayer); to safely get the client player
+    public static Player getClientPlayer() {
+        return Minecraft.getInstance().player;
+    }
+
+    //Use with DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientInit::getClientWorld); to safely get the client level
+    public static Level getClientWorld() {
+        return Minecraft.getInstance().level;
     }
 }

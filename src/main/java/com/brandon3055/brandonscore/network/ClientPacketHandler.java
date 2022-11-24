@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
 import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
 import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.mojang.math.Vector3f;
@@ -32,74 +33,49 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
     @Override
     public void handlePacket(PacketCustom packet, Minecraft mc, ClientPacketListener handler) {
         switch (packet.getType()) {
-            case BCoreNetwork.C_TILE_DATA_MANAGER: {
+            case BCoreNetwork.C_TILE_DATA_MANAGER -> {
                 BlockPos pos = packet.readPos();
-                BlockEntity tile = mc.level.getBlockEntity(pos);
-                if (tile instanceof IDataManagerProvider) {
-                    ((IDataManagerProvider) tile).getDataManager().receiveSyncData(packet);
+                if (mc.level.getBlockEntity(pos) instanceof IDataManagerProvider tile) {
+                    tile.getDataManager().receiveSyncData(packet);
                 }
-                break;
             }
-            case BCoreNetwork.C_TILE_MESSAGE: {
+            case BCoreNetwork.C_TILE_MESSAGE -> {
                 BlockPos pos = packet.readPos();
-                BlockEntity tile = mc.level.getBlockEntity(pos);
-                if (tile instanceof TileBCore) {
+                if (mc.level.getBlockEntity(pos) instanceof TileBCore tile) {
                     int id = packet.readByte() & 0xFF;
-                    ((TileBCore) tile).receivePacketFromServer(packet, id);
+                    tile.receivePacketFromServer(packet, id);
                 }
-                break;
             }
-            case BCoreNetwork.C_NO_CLIP:
+            case BCoreNetwork.C_NO_CLIP -> {
                 boolean enable = packet.readBoolean();
                 if (enable) {
                     BCEventHandler.noClipPlayers.add(mc.player.getUUID());
                 } else {
                     BCEventHandler.noClipPlayers.add(mc.player.getUUID());
                 }
-                break;
-            case BCoreNetwork.C_PLAYER_ACCESS:
-                //I dont think i need this any more?
-//                int windowID = packet.readInt();
-//                GuiPlayerAccess guiPlayerAccess = new GuiPlayerAccess(mc.player);
-//                mc.displayGuiScreen(guiPlayerAccess);
-//                mc.player.openContainer.windowId = windowID;
-                break;
-            case BCoreNetwork.C_PLAYER_ACCESS_UPDATE:
+            }
+            case BCoreNetwork.C_PLAYER_ACCESS_UPDATE -> {
                 GuiPlayerAccess gui = mc.screen instanceof GuiPlayerAccess ? (GuiPlayerAccess) mc.screen : null;
                 if (gui != null) {
                     gui.name = packet.readString();
                     gui.pos = packet.readPos();
                     gui.dimension = packet.readInt();
                 }
-                break;
-            case BCoreNetwork.C_INDEXED_MESSAGE:
-                BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), packet.readInt());
-                break;
-            case BCoreNetwork.C_TILE_CAP_DATA:
+            }
+            case BCoreNetwork.C_INDEXED_MESSAGE -> BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), packet.readInt());
+            case BCoreNetwork.C_TILE_CAP_DATA -> {
                 BlockPos pos = packet.readPos();
-                BlockEntity tile = Minecraft.getInstance().level.getBlockEntity(pos);
-                if (tile instanceof TileBCore) {
-                    ((TileBCore) tile).getCapManager().receiveCapSyncData(packet);
+                if (mc.level.getBlockEntity(pos) instanceof TileBCore tile) {
+                    tile.getCapManager().receiveCapSyncData(packet);
                 }
-                break;
-            case BCoreNetwork.C_PLAY_SOUND:
-                handlePlaySound(packet, mc);
-                break;
-            case BCoreNetwork.C_SPAWN_ENTITY:
-                handleEntitySpawn(packet, mc);
-                break;
-            case BCoreNetwork.C_SPAWN_PARTICLE:
-                handleParticleSpawn(packet, mc);
-                break;
-            case BCoreNetwork.C_ENTITY_VELOCITY:
-                handleEntityVelocity(packet, mc);
-                break;
-            case BCoreNetwork.C_OPEN_HUD_CONFIG:
-                mc.setScreen(new HudConfigGui());
-                break;
-            case BCoreNetwork.C_MULTI_BLOCK_DEFINITIONS:
-                MultiBlockManager.receiveDefinitionsFromServer(packet);
-                break;
+            }
+            case BCoreNetwork.C_PLAY_SOUND -> handlePlaySound(packet, mc);
+            case BCoreNetwork.C_SPAWN_ENTITY -> handleEntitySpawn(packet, mc);
+            case BCoreNetwork.C_SPAWN_PARTICLE -> handleParticleSpawn(packet, mc);
+            case BCoreNetwork.C_ENTITY_VELOCITY -> handleEntityVelocity(packet, mc);
+            case BCoreNetwork.C_OPEN_HUD_CONFIG -> mc.setScreen(new HudConfigGui());
+            case BCoreNetwork.C_MULTI_BLOCK_DEFINITIONS -> MultiBlockManager.receiveDefinitionsFromServer(packet);
+            case BCoreNetwork.C_CONTRIBUTOR_CONFIG -> ContributorHandler.handleSettingsFromServer(packet);
         }
     }
 
