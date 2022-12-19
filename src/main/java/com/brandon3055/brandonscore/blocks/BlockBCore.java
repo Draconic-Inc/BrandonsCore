@@ -52,11 +52,8 @@ public class BlockBCore extends Block implements IBCoreBlock {
     public static final String BC_MANAGED_DATA_FLAG = "bc_managed_data"; //Seemed like as good a place as any to put this.
 
     protected boolean canProvidePower = false;
-    protected boolean hasSubItemTypes = false;
     protected boolean isMobResistant = false;
     private boolean blockSpawns = false;
-    private Supplier<BlockEntityType<? extends TileBCore>> blockEntityType = null;
-    private boolean enableTicking;
     private boolean isLightTransparent = false;
 
     public BlockBCore(Block.Properties properties) {
@@ -73,31 +70,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
         return this;
     }
 
-    public BlockBCore setBlockEntity(Supplier<BlockEntityType<? extends TileBCore>> blockEntityType, boolean enableTicking) {
-        if (!(this instanceof EntityBlock)) {
-            throw new RuntimeException("Attempted to set block entity on block that does not implement EntityBlock! " + this.getClass().getName());
-        }
-        this.blockEntityType = blockEntityType;
-        this.enableTicking = enableTicking;
-        return this;
-    }
-
-    @Nullable
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return blockEntityType.get().create(blockPos, blockState);
-    }
-
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> entityType) {
-        if (enableTicking && blockEntityType.get() == entityType) {
-            return (e, e2, e3, tile) -> ((TileBCore) tile).tick();
-        }
-        return null;
-    }
-
-    @Deprecated
+    @Deprecated //TODO move block entity specific code to EntityBlockBCore
     protected boolean hasBlockEntity() {
-        return blockEntityType != null;
+        return this instanceof EntityBlockBCore;
     }
 
     @Override
