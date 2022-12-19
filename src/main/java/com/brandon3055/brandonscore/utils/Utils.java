@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.utils;
 import com.brandon3055.brandonscore.lib.Vec3D;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;

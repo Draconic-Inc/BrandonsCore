@@ -206,16 +206,18 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
         quaternion.mul(quaternion1);
         posestack1.mulPose(quaternion);
         posestack1.mulPose(Vector3f.YP.rotationDegrees((float) rotation));
+
         float f2 = entity.yBodyRot;
-        float f3 = entity.yRot;
-        float f4 = entity.xRot;
+        float f3 = entity.getYRot();
+        float f4 = entity.getXRot();
         float f5 = entity.yHeadRotO;
         float f6 = entity.yHeadRot;
         entity.yBodyRot = 180.0F + lookX * 20.0F;
-        entity.yRot = 180.0F + lookX * 40.0F;
-        entity.xRot = -lookY * 20.0F;
-        entity.yHeadRot = entity.yRot;
-        entity.yHeadRotO = entity.yRot;
+        entity.setYRot(180.0F + lookX * 40.0F);
+        entity.setXRot(-lookY * 20.0F);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
+
         Lighting.setupForEntityInInventory();
         EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         quaternion1.conj();
