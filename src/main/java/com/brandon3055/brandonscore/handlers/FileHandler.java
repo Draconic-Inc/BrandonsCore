@@ -48,6 +48,7 @@ public class FileHandler {
      * @param output    Target File
      * @throws IOException
      */
+    @Deprecated // use CCL JavaDownloadAction with etags
     public static void downloadFile(String sourceUrl, File output) throws IOException {
         if (!output.exists() && !output.createNewFile()) {
             throw new IOException("Could not create file, Reason unknown refresh ");

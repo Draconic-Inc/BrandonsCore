@@ -42,17 +42,17 @@ public class BrandonsCore {
         //Knock Knock...
         Logger deLog = LogManager.getLogger("draconicevolution");
         if (ModList.get().isLoaded("draconicevolution")) {
-            LogHelperBC.info("Knock Knock...");
+            LOGGER.info("Knock Knock...");
             deLog.log(Level.WARN, "Reactor detonation initiated.");
-            LogHelperBC.info("Wait... NO! What?");
-            LogHelperBC.info("Stop That! That's not how this works!");
+            LOGGER.info("Wait... NO! What?");
+            LOGGER.info("Stop That! That's not how this works!");
             deLog.log(Level.WARN, "Calculating explosion ETA");
-            LogHelperBC.info("Ahh... NO... NONONO! DONT DO THAT!!! STOP THIS NOW!");
+            LOGGER.info("Ahh... NO... NONONO! DONT DO THAT!!! STOP THIS NOW!");
             deLog.log(Level.WARN, "**Explosion Imminent!!!**");
-            LogHelperBC.info("Well...... fork...");
+            LOGGER.info("Well...... fork...");
         } else {
-            LogHelperBC.info("Hey! Where's DE?");
-            LogHelperBC.info("Oh well.. At least we dont have to worry about getting blown up now...");
+            LOGGER.info("Hey! Where's DE?");
+            LOGGER.info("Oh well.. At least we dont have to worry about getting blown up now...");
         }
 
         CapabilityOP.init();

@@ -24,7 +24,8 @@ public class ElytraLayerMixin {
     @Inject(
             method = "shouldRender(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Z",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     public void shouldRender(ItemStack stack, LivingEntity entity, CallbackInfoReturnable<Boolean> cir) {
         if (ContributorHandler.shouldCancelElytra(entity)) {

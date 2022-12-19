@@ -65,6 +65,7 @@ public class BCoreNetwork {
     public static final int S_PLAYER_ACCESS_BUTTON = 2;
     public static final int S_TILE_DATA_MANAGER = 3;
     public static final int S_CONTRIBUTOR_CONFIG = 4;
+    public static final int S_CONTRIBUTOR_LINK = 5;
 
     public static final int S_DUMMY_PACKET = 99;
 
@@ -192,6 +193,7 @@ public class BCoreNetwork {
             props.getConfig().serialize(packet);
             packet.sendToServer();
         }
+//        BrandonsCore.LOGGER.info("sendContributorConfigToServer");
     }
 
     public static PacketCustom contributorConfigToClient(ContributorProperties props) {
@@ -199,6 +201,10 @@ public class BCoreNetwork {
         packet.writeUUID(props.getUserID());
         props.getConfig().serialize(packet);
         return packet;
+    }
+
+    public static void sendContribLinkToServer() {
+        new PacketCustom(CHANNEL, S_CONTRIBUTOR_LINK).sendToServer();
     }
 
     public static void sentToAllExcept(PacketCustom packet, Player exclude) {

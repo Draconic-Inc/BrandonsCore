@@ -65,14 +65,4 @@ public class ClientInit {
             }
         }
     }
-
-    //Use with DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientInit::getClientPlayer); to safely get the client player
-    public static Player getClientPlayer() {
-        return Minecraft.getInstance().player;
-    }
-
-    //Use with DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientInit::getClientWorld); to safely get the client level
-    public static Level getClientWorld() {
-        return Minecraft.getInstance().level;
-    }
 }

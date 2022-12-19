@@ -81,6 +81,10 @@ mixin {
     add(sourceSets.main, "mixins.brandonscore.refmap.json")
 }
 
+configurations {
+    annotationProcessor.extendsFrom minecraft
+}
+
 repositories {
     mavenLocal()
     maven { url = "https://maven.covers1624.net/" }
