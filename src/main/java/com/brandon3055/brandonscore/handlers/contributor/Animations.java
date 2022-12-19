@@ -2,14 +2,14 @@ package com.brandon3055.brandonscore.handlers.contributor;
 
 import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.client.ClientOnly;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig.WingBehavior;
-import com.brandon3055.brandonscore.init.ClientInit;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 
 /**
@@ -36,9 +36,13 @@ public class Animations {
     private float foldAprSpeed = 0;
 
     private float wingFlap = 0;
+    private float wingFlap2 = 0;
     private float lastWingFlap = 0;
+    private float lastWingFlap2 = 0;
     private float targetWingFlap = 0;
+    private float targetWingFlap2 = 0;
     private float flapAprSpeed = 0;
+    private float flap2AprSpeed = 0;
     private float flapDir = 0; //1 up, -1 down, 0 neutral
     private float lastVelocity = 0;
     private float flapSpeed = 0;
@@ -52,12 +56,22 @@ public class Animations {
     private boolean hideWings = true;
     private float hideAnim = 2;
 
+    private int playerExpiry = 0;
+    private Player player = null;
+
     public Animations(ContributorProperties props) {
         this.props = props;
     }
 
+    public void setPlayer(Player player) {
+        this.player = player;
+        playerExpiry = 0;
+    }
+
+    @OnlyIn(Dist.CLIENT)
     public void tick() {
-        Player player = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientInit::getClientPlayer);
+        Boolean paused = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientOnly::isClientPaused);
+        if (paused != null && paused) return;
         ContributorConfig config = props.getConfig();
         if (config.getWingRGBBoneColour()) {
             float s = ContributorConfig.unpack(config.getWingsOverrideBoneColour())[0];
@@ -82,15 +96,20 @@ public class Animations {
             tickWings(player, config);
         }
 
+        if (player != null && playerExpiry++ > 20*60) {
+            player = null;
+        }
     }
 
     private void tickWings(Player player, ContributorConfig config) {
         lastWingExt = wingExt;
         lastWingFold = wingFold;
         lastWingFlap = wingFlap;
+        lastWingFlap2 = wingFlap2;
         lastWingPitch = wingPitch;
         extAprSpeed = foldAprSpeed = pitchAprSpeed = 0.1F;
         flapAprSpeed = 0.05F;
+        flap2AprSpeed = 0.1F;
         targetWingExt = targetWingFold = 0;
         hideWings = false;
         float hideSpeed = 0.1F;
@@ -101,6 +120,9 @@ public class Animations {
         }
 
         if (config.getWingsTier() == null || (hasElytra && config.getWingsElytra() == ContributorConfig.WingElytraCompat.HIDE_WINGS)) {
+            hideWings = true;
+        }
+        else if (!hasElytra && config.getWingsElytra() == ContributorConfig.WingElytraCompat.REPLACE) {
             hideWings = true;
         }
         //Elytra flight overrides all other wing behavior logic.
@@ -139,22 +161,30 @@ public class Animations {
         wingExt = MathHelper.approachLinear(wingExt, targetWingExt, extAprSpeed);
         wingFold = MathHelper.approachLinear(wingFold, targetWingFold, foldAprSpeed);
         wingFlap = MathHelper.approachLinear(wingFlap, targetWingFlap, flapAprSpeed);
+        wingFlap2 = MathHelper.approachLinear(wingFlap2, targetWingFlap2, flap2AprSpeed);
         wingPitch = MathHelper.approachLinear(wingPitch, targetWingPitch, pitchAprSpeed);
         hideAnim = MathHelper.approachLinear(hideAnim, hideWings ? 2 : 0, hideSpeed);
         if (hideAnim > 0) {
             wingExt = MathHelper.clip(Math.min(wingExt, 1 - hideAnim), 0, 1);
             wingFold = MathHelper.clip(Math.min(wingFold, 1 - hideAnim), 0, 1);
+            wingFlap = MathHelper.clip(Math.min(wingFlap, 1 - hideAnim), 0, 1);
+            wingFlap2 = MathHelper.clip(Math.min(wingFlap2, 1 - hideAnim), 0, 1);
+            wingPitch = MathHelper.clip(Math.min(wingPitch, 1 - hideAnim), 0, 1);
         }
     }
 
     private void doWingBehavior(WingBehavior behavior) {
         switch (behavior){
             case HIDE -> hideWings = true;
-            case RETRACT -> targetWingExt = targetWingFold = 0;
-            case EXTEND -> targetWingFold = targetWingExt = 1;
+            case RETRACT -> targetWingExt = targetWingFold = targetWingFlap = targetWingFlap2 = 0;
+            case EXTEND -> {
+                targetWingFold = targetWingExt = 1;
+                targetWingFlap = 0;
+                targetWingFlap2 = 1F;
+            }
             case EXTEND_AND_FLAP -> {
                 targetWingFold = targetWingExt = 1;
-                doFlapAnimation(0.08F, 2.5F, 2, 0, 0, 0);
+                doFlapAnimation(0.08F, 2.5F, 2, 0.25F, -0.5F, 2.5F);
             }
         }
     }
@@ -162,15 +192,17 @@ public class Animations {
     private void doFlapAnimation(float flapSpeed, float upSpeed, float downSpeed, float upPitch, float downPitch, float pitchMod) {
         if (flapSpeed > 0) {
             float minSpeed = Math.max(flapSpeed, 0.01F);
-            flapAprSpeed = minSpeed * 20;
+            flapAprSpeed = flap2AprSpeed = minSpeed * 20;
             if (flapDir == 0) flapDir = 1;
             if (flapDir > 0) { //Up
                 targetWingFlap = MathHelper.approachLinear(targetWingFlap, 10, minSpeed * upSpeed);
                 targetWingPitch = upPitch;
+                if (targetWingFlap > 0.5) targetWingFlap2 = 1 - ((targetWingFlap - 0.5F) * 2F * 1.1F);
                 if (targetWingFlap >= 1) flapDir = -1;
             } else { //Down
                 targetWingFlap = MathHelper.approachLinear(targetWingFlap, -10, minSpeed * downSpeed);
                 targetWingPitch = downPitch;
+                if (targetWingFlap < 0.5) targetWingFlap2 = 1 - (targetWingFlap * 2F * 1.1F);
                 if (targetWingFlap <= -0.25) flapDir = 1;
             }
             pitchAprSpeed = minSpeed * pitchMod;
@@ -178,45 +210,45 @@ public class Animations {
             flapDir = 0;
             targetWingPitch = 0;
             targetWingFlap = 0;
+            targetWingFlap2 = 0.5F;
         }
     }
 
-    public float getWingBoneCol() {
-        return wingBoneCol + (wingBoneColSpeed * getPartialTicks());
+    public float getWingBoneCol(float partialTick) {
+        return wingBoneCol + (wingBoneColSpeed * partialTick);
     }
 
-    public float getWingWebCol() {
-        return wingWebCol + (wingWebColSpeed * getPartialTicks());
+    public float getWingWebCol(float partialTick) {
+        return wingWebCol + (wingWebColSpeed * partialTick);
     }
 
-    public float getShieldCol() {
-        return shieldCol + (shieldColSpeed * getPartialTicks());
+    public float getShieldCol(float partialTick) {
+        return shieldCol + (shieldColSpeed * partialTick);
     }
 
-    public float getWingExt() {
-        return MathHelper.interpolate(lastWingExt, wingExt, getPartialTicks());
+    public float getWingExt(float partialTick) {
+        return MathHelper.interpolate(lastWingExt, wingExt, partialTick);
     }
 
     //1 is glide pos, 0 is 'stowed' angle
-    public float getWingFold() {
-        return MathHelper.interpolate(lastWingFold, wingFold, getPartialTicks());
+    public float getWingFold(float partialTick) {
+        return MathHelper.interpolate(lastWingFold, wingFold, partialTick);
     }
 
     //0 is neutral/glide pos
-    public float getWingFlap() {
-        return MathHelper.interpolate(lastWingFlap, wingFlap, getPartialTicks());
+    public float getWingFlap(float partialTick) {
+        return MathHelper.interpolate(lastWingFlap, wingFlap, partialTick);
     }
 
-    public float getWingPitch() {
-        return MathHelper.interpolate(lastWingPitch, wingPitch, getPartialTicks());
+    public float getWingFlap2(float partialTick) {
+        return MathHelper.interpolate(lastWingFlap2, wingFlap2, partialTick);
+    }
+
+    public float getWingPitch(float partialTick) {
+        return MathHelper.interpolate(lastWingPitch, wingPitch, partialTick);
     }
 
     public float hideDecay() {
         return Math.max(hideAnim - 1, 0);
-    }
-
-    private float getPartialTicks() {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.isPaused() ? 0 : mc.getFrameTime();
     }
 }

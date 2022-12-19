@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.command;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.client.ClientOnly;
 import com.brandon3055.brandonscore.client.gui.ContributorConfigGui;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiToolkitTest;
 import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
@@ -9,21 +10,15 @@ import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.init.ClientInit;
 import com.brandon3055.brandonscore.lib.DelayedTask;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.*;
 import net.minecraft.world.entity.player.Player;
-
-import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.ChatFormatting.*;
 
@@ -32,6 +27,8 @@ import static net.minecraft.ChatFormatting.*;
  */
 public class BCClientCommands {
 
+    private static long lastReload = 0;
+    private static long lastLink = 0;
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         var builder = Commands.literal("bcore_client");
@@ -64,7 +61,7 @@ public class BCClientCommands {
         return Commands.literal("contributor")
                 .requires(cs -> cs.hasPermission(0))
                 .executes(context -> {
-                    Player player = ClientInit.getClientPlayer();
+                    Player player = ClientOnly.getClientPlayer();
                     ContributorProperties props = ContributorHandler.getProps(player);
                     if (!props.isLoadComplete()) {
                         player.sendMessage(new TextComponent("Your contributor status has not yet been determined. Please wait a few seconds and try again."), Util.NIL_UUID);
@@ -91,7 +88,7 @@ public class BCClientCommands {
                 })
                 .then(Commands.literal("help")
                         .executes(context -> {
-                            Player player = ClientInit.getClientPlayer();
+                            Player player = ClientOnly.getClientPlayer();
                             player.sendMessage(new TextComponent("If you are already a contributor but you you cant access your perks there are several possible causes.").withStyle(YELLOW), Util.NIL_UUID);
                             player.sendMessage(new TextComponent("Your contributor status might not have have been linked to your Minecraft user id. " +
                                     "If you are a patron then you should have received a message with instructions when you signed up. " +
@@ -103,8 +100,40 @@ public class BCClientCommands {
                             player.sendMessage(new TextComponent("If you need help you can request assistance via the ").withStyle(GREEN).append(link.withStyle(BLUE, UNDERLINE)), Util.NIL_UUID);
                             return 0;
                         })
+                ).then(Commands.literal("reload")
+                        .executes(context -> {
+                            if (System.currentTimeMillis() - lastReload < 30000 && !BrandonsCore.inDev) {
+                                Player player = ClientOnly.getClientPlayer();
+                                player.sendMessage(new TextComponent("Please wait at least 30 seconds before running this command again").withStyle(RED), Util.NIL_UUID);
+                            } else {
+                                ContributorHandler.reload();
+                                lastReload = System.currentTimeMillis();
+                            }
+                            return 0;
+                        })
+                ).then(Commands.literal("link")
+                        .then(Commands.argument("link_code", StringArgumentType.string())
+                                .executes(context -> {
+                                    Player player = ClientOnly.getClientPlayer();
+                                    if (System.currentTimeMillis() - lastLink < 30000 && !BrandonsCore.inDev) {
+                                        player.sendMessage(new TextComponent("Please wait at least 30 seconds before running this command again").withStyle(RED), Util.NIL_UUID);
+                                    } else {
+                                        String linkCode = StringArgumentType.getString(context, "link_code");
+                                        ContributorHandler.linkUser(player, linkCode, error -> {
+                                            if (error == -1) {
+                                                player.sendMessage(new TextComponent("Link Successful!").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+                                            } else {
+                                                player.sendMessage(new TextComponent("An error occurred.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                                                player.sendMessage(new TextComponent(error == 404 ? "Invalid Link Code" : ("Unknown error code: " + error)).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                                            }
+                                        });
+                                        lastLink = System.currentTimeMillis();
+                                    }
+                                    return 0;
+                                }))
                 );
     }
+
 
 //    public static LiteralHiddenArgumentBuilder<CommandSourceStack> literalHidden(String literal) {
 //        return LiteralHiddenArgumentBuilder.literal(literal);

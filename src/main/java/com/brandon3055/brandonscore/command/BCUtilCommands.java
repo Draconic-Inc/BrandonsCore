@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.command;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.inventory.ContainerPlayerAccess;
 import com.brandon3055.brandonscore.lib.ChatHelper;
 import com.brandon3055.brandonscore.lib.Pair;
@@ -94,13 +95,24 @@ public class BCUtilCommands {
 //                        .then(registerPlayerAccess())
                 .then(registerDumpEvents())
                 .then(registerEggify())
-                .then(registerPlaceMultiBlock());
+                .then(registerPlaceMultiBlock())
+                .then(reloadContributors());
         if (BrandonsCore.inDev) {
             builder.then(registerDev1());
             builder.then(registerDev2());
         }
 
         dispatcher.register(builder);
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> reloadContributors() {
+        return Commands.literal("reset_contrib_handler")
+                .requires(cs -> cs.hasPermission(3))
+                .executes(context -> {
+                    ContributorHandler.reload();
+                    context.getSource().sendSuccess(new TextComponent("Reset complete"), false);
+                    return 0;
+                });
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> registerPlaceMultiBlock() {

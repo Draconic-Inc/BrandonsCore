@@ -1,11 +1,12 @@
 package com.brandon3055.brandonscore.handlers.contributor;
 
+import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.api.TechLevel;
 import com.brandon3055.brandonscore.api.TimeKeeper;
+import com.brandon3055.brandonscore.client.ClientOnly;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig.Badge;
 import com.brandon3055.brandonscore.init.ClientInit;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -57,9 +58,9 @@ public class ContributorProperties {
         loadComplete = true;
     }
 
-    public ContributorProperties(Player player) {
-        ContributorFetcher.getContributorStatus(player, this::fetchComplete);
-        this.userID = player.getUUID();
+    public ContributorProperties(UUID userID, @Nullable String username) {
+        ContributorHandler.getContributorStatus(userID, username, this::fetchComplete);
+        this.userID = userID;
     }
 
     /**
@@ -132,7 +133,7 @@ public class ContributorProperties {
             badges.clear();
         }
 
-        Player client = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientInit::getClientPlayer);
+        Player client = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientOnly::getClientPlayer);
         if (client != null && client.getUUID().equals(userID)) {
             config = ContributorConfig.load();
             config.props = this;
@@ -165,8 +166,9 @@ public class ContributorProperties {
     }
 
     public void clientTick() {
-        if (!isContributor() || Minecraft.getInstance().isPaused()) return;
+        if (!isContributor()) return;
         if (TimeKeeper.getClientTick() % 20 == 0 && getConfig().getResetSyncRequired()) {
+//            BrandonsCore.LOGGER.info("Contrib Props: clientTick: Send config");
             BCoreNetwork.sendContributorConfigToServer(this);
         }
         getAnim().tick();

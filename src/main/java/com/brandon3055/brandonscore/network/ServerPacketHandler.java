@@ -29,6 +29,7 @@ public class ServerPacketHandler implements ICustomPacketHandler.IServerPacketHa
             case BCoreNetwork.S_CONTAINER_MESSAGE -> handleContainerMessage(packet, sender, handler);
             case BCoreNetwork.S_TILE_DATA_MANAGER -> handleTileDataManager(packet, sender, handler);
             case BCoreNetwork.S_CONTRIBUTOR_CONFIG -> ContributorHandler.handleSettingsFromClient(sender, packet);
+            case BCoreNetwork.S_CONTRIBUTOR_LINK -> ContributorHandler.handleClientLink(sender);
         }
     }
 

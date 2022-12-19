@@ -6,6 +6,7 @@ import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.api.TechLevel;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.google.gson.Gson;
+import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -38,12 +39,10 @@ public class ContributorConfig {
     private WingBehavior wingsCreative = WingBehavior.RETRACT;
     private WingElytraCompat wingsElytra = WingElytraCompat.HIDE_ELYTRA;
 
-    //TODO wing behavior options.
-    // Also "use shader" options for webs and bones
-
     private boolean showWelcome = true;
 
     private transient boolean requiresSync = false;
+    private transient TechLevel lastWingsTier = null;
     protected transient ContributorProperties props;
 
     public ContributorConfig() {}
@@ -51,7 +50,6 @@ public class ContributorConfig {
     public ContributorConfig(ContributorProperties props) {
         this.props = props;
     }
-
 
     //@formatter:off
     // ## Shield ##
@@ -81,7 +79,15 @@ public class ContributorConfig {
         return wingsTier == null || tiers.isEmpty() ? null : tiers.contains(wingsTier) ? wingsTier : tiers.get(tiers.size() - 1);
     }
 
+    public TechLevel getWingRenderTier() {
+        TechLevel tier = getWingsTier();
+        return tier == null ? lastWingsTier : tier;
+    }
+
     public void setWingsTier(@Nullable TechLevel wingsTier) {
+        if (wingsTier == null) {
+            lastWingsTier = this.wingsTier;
+        }
         this.wingsTier = wingsTier;
         markDirty();
     }
@@ -212,6 +218,7 @@ public class ContributorConfig {
             }
         }
         ContributorConfig config = new ContributorConfig();
+        config.requiresSync = true;
         config.save();
         return config;
     }
@@ -267,12 +274,12 @@ public class ContributorConfig {
         boolean enabled = input.readBoolean();                            // output.writeBoolean(wingsTier != null);
         if (enabled) {                                                    // if (wingsTier != null) {
             config.wingsTier = input.readEnum(TechLevel.class);           //     output.writeEnum(wingsTier);
-            config.overrideBoneColour = input.readBoolean();                  //     output.writeBoolean(overrideWingsA);
-            config.boneColourOverride = input.readInt();                      //     output.writeInt(wingsOverrideA);
-            config.wingBoneShader = input.readBoolean();                     //     output.writeBoolean(wingShaderA);
-            config.overrideWebColour = input.readBoolean();                  //     output.writeBoolean(overrideWingsB);
-            config.webColourOverride = input.readInt();                      //     output.writeInt(wingsOverrideB);
-            config.wingWebShader = input.readBoolean();                     //     output.writeBoolean(wingShaderB);
+            config.overrideBoneColour = input.readBoolean();              //     output.writeBoolean(overrideBoneColour);
+            config.boneColourOverride = input.readInt();                  //     output.writeInt(boneColourOverride);
+            config.wingBoneShader = input.readBoolean();                  //     output.writeBoolean(wingBoneShader);
+            config.overrideWebColour = input.readBoolean();               //     output.writeBoolean(overrideWebColour);
+            config.webColourOverride = input.readInt();                   //     output.writeInt(webColourOverride);
+            config.wingWebShader = input.readBoolean();                   //     output.writeBoolean(wingWebShader);
             //Wing Behavior                                               //     //Wing Behavior
             config.wingsGround = input.readEnum(WingBehavior.class);      //     output.writeEnum(wingsGround);
             config.wingsCreative = input.readEnum(WingBehavior.class);    //     output.writeEnum(wingsCreative);
@@ -301,27 +308,24 @@ public class ContributorConfig {
     };
 
     public int getBaseColourI(TechLevel techLevel) {
-        float[][] TIER_COLOURS = {
-                {0.0F, 0.5F, 0.8F, 1F},
-                {0.55F, 0.0F, 0.65F, 1F},
-                {0.8F, 0.5F, 0.1F, 1F},
-                {0.75F, 0.05F, 0.05F, 1F}
-        };
-
         if (techLevel == null) techLevel = TechLevel.DRACONIUM;
         return Colour.packARGB(TIER_COLOURS[techLevel.index]);
     }
 
-    public float[] getWingBoneColour() {
-        return getColour(getWingsTier(), overrideWingBoneColour(), getWingsOverrideBoneColour(), getWingRGBBoneColour(), props.getAnim().getWingBoneCol());
+    public float[] getWingBoneColour(float partialTick) {
+        return getColour(getWingRenderTier(), overrideWingBoneColour(), getWingsOverrideBoneColour(), getWingRGBBoneColour(), props.getAnim().getWingBoneCol(partialTick));
     }
 
-    public float[] getWingWebColour() {
-        return getColour(getWingsTier(), overrideWingWebColour(), getWingsOverrideWebColour(), getWingRGBWebColour(), props.getAnim().getWingWebCol());
+    public float[] getWingWebColour(float partialTick) {
+        return getColour(getWingRenderTier(), overrideWingWebColour(), getWingsOverrideWebColour(), getWingRGBWebColour(), props.getAnim().getWingWebCol(partialTick));
     }
 
-    public float[] getShieldColour() {
-        return getColour(null, true, getShieldOverride(), getShieldRGB(), props.getAnim().getShieldCol());
+    public int getShieldColour(float partialTick) {
+        if (getShieldRGB()) {
+            float[] colours = unpack(getShieldOverride());
+            return Color.HSBtoRGB(props.getAnim().getShieldCol(partialTick), colours[1], colours[2]);
+        }
+        return getShieldOverride();
     }
 
     private static float[] getColour(TechLevel level, boolean useOverride, int override, boolean rgbEffect, float anim) {
@@ -347,6 +351,7 @@ public class ContributorConfig {
 
         private final String name;
         private final String[] hover;
+
         WingBehavior(String name, String... hover) {
             this.name = name;
             this.hover = hover;
@@ -367,10 +372,11 @@ public class ContributorConfig {
         HIDE_WINGS("Hide wings", "Wings will be hidden while wearing Elytra."),
         HIDE_ELYTRA("Hide Elytra", "The Elytra model will be disabled in favour of the wings."),
         SHOW_BOTH("Show Both", "Both the wings and Elytra will render on top of each other.", "Not sure why you would want this but its an option."),
-        REPLACE("Elytra Only", "The wings will replace the Elytra model and they will only be visible while wearing Elytra.");
+        REPLACE("Elytra Only", "The wings will replace the Elytra model.", "And " + ChatFormatting.RED + "they will only be visible while wearing Elytra.");
 
         private final String name;
         private final String[] hover;
+
         WingElytraCompat(String name, String... hover) {
             this.name = name;
             this.hover = hover;
@@ -401,6 +407,7 @@ public class ContributorConfig {
 
         private final String name;
         private final String[] hover;
+
         Badge(String name, String... hover) {
             this.name = name;
             this.hover = hover;

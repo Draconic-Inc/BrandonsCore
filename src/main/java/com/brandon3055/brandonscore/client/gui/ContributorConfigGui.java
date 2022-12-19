@@ -1,7 +1,6 @@
 package com.brandon3055.brandonscore.client.gui;
 
 import codechicken.lib.math.MathHelper;
-import com.brandon3055.brandonscore.api.TechLevel;
 import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -60,7 +59,6 @@ public class ContributorConfigGui extends ModularGuiScreen {
                 .setPosAndSize(titleElement)
                 .translate(0, -1);
         toolkit.createHeading("Contributor Configuration", bg).setPosAndSize(titleElement).setAlignment(GuiAlign.CENTER);
-
 
         container = manager.addChild(new GuiManipulable())
                 .setSize(100, 100)
@@ -128,7 +126,6 @@ public class ContributorConfigGui extends ModularGuiScreen {
                 .addChild(colourPickerButton(shieldColour, () -> 3, () -> 3).setEnabledCallback(() -> cfg.overrideShield()).setXPos(width + 1).setSize(height, height))
                 .addChild(colourRGBButton(() -> cfg.getShieldRGB(), e -> cfg.setShieldRGB(e)).setEnabledCallback(() -> cfg.overrideShield()).setXPos(width + 16).setSize(height, height)).getParent().getParent());
 
-
         rightControls.add(createEnableButton("Welcome Message: ", () -> cfg.showWelcome(), e -> cfg.setShowWelcome(e))
                 .setSize(width, height));
 
@@ -152,8 +149,7 @@ public class ContributorConfigGui extends ModularGuiScreen {
                 .setHoverText("When using creative style flight"));
 
         rightControls.add(createEnumButton("Elytra: ", WingElytraCompat.class, () -> cfg.getWingsElytra(), e -> cfg.setWingsElytra(e)).setEnabledCallback(() -> props.hasWings())
-                .setSize(width, height)
-                .setHoverText("When happens when you are also wearing Elytra"));
+                .setSize(width, height));
     }
 
     private GuiElement<?> arrangeControls(GuiElement<?> container, List<GuiElement<?>> controls) {
@@ -295,7 +291,8 @@ public class ContributorConfigGui extends ModularGuiScreen {
 
     private <E extends Enum<E>> GuiButton createEnumButton(String text, Class<E> clazz, Supplier<E> getter, Consumer<E> setter) {
         return new GuiButton()
-                .setDisplaySupplier(() -> text + getter.get().name())
+                .setDisplaySupplier(() -> text + getter.get().toString())
+                .setHoverText(e -> getter.get() instanceof ContributorConfig.HoverText hover ? hover.getHoverText() : null)
                 .setFillColours(0x90000000, 0x90116011)
                 .setTextColour(Palette.Ctrl.textH(false), Palette.Ctrl.textH(true))
                 .setBorderColours(0xFF606060, 0xFF9090FF)

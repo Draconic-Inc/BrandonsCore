@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.handlers.contributor;
 
 import codechicken.lib.packet.PacketCustom;
+import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig.WingElytraCompat;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.Util;
@@ -34,10 +35,12 @@ import static net.minecraft.ChatFormatting.BLUE;
 public class ContributorHandler {
     private static final CrashLock LOCK = new CrashLock("Already Initialized.");
     private static final Map<UUID, ContributorProperties> CONTRIBUTOR_MAP = new HashMap<>();
+    private static final ContributorFetcher FETCHER = new ContributorFetcher();
+    private static final String PROJECT_KEY = "3055";
 
     public static void init() {
         LOCK.lock();
-        ContributorFetcher.init();
+        FETCHER.init();
         MinecraftForge.EVENT_BUS.addListener(ContributorHandler::onClientTick);
         MinecraftForge.EVENT_BUS.addListener(ContributorHandler::onPlayerLogin);
     }
@@ -65,6 +68,10 @@ public class ContributorHandler {
         CONTRIBUTOR_MAP.values().forEach(ContributorProperties::clientTick);
     }
 
+    public static void getContributorStatus(UUID playerId, String username, Consumer<Map<String, String>> flagsCallback) {
+        FETCHER.fetchContributorFlags(playerId, username, PROJECT_KEY, flagsCallback);
+    }
+
     /**
      * Retrieve the players ContributorProperties creating them if they do not already exist.
      * An API query is cued automatically when ContributorProperties is created.
@@ -72,8 +79,15 @@ public class ContributorHandler {
      * Note: when using this method there is no guarantee that the player's contributor status
      * has finished being verified.
      */
+    public static ContributorProperties getProps(UUID playerId, String username) {
+        return CONTRIBUTOR_MAP.computeIfAbsent(playerId, uuid -> new ContributorProperties(uuid, username));
+    }
+
+    /**
+     * @see #getProps(UUID, String)
+     */
     public static ContributorProperties getProps(Player player) {
-        return CONTRIBUTOR_MAP.computeIfAbsent(player.getUUID(), uuid -> new ContributorProperties(player));
+        return getProps(player.getUUID(), player.getGameProfile().getName());
     }
 
     /**
@@ -88,35 +102,73 @@ public class ContributorHandler {
     }
 
     /**
-     * Retrieves the contributor properties for the specified player if they exist.
-     * The given callback is then attached via {@link ContributorProperties#onContributorLoaded(Consumer)}
-     * where it will be called if and when the player is confirmed to be a contributor.
+     * Retrieve the players ContributorProperties creating them if they do not already exist.
+     * An API query is cued automatically when ContributorProperties is created.
      * <p>
-     * This method is not able to initialize a contributor if they do not already been initialized.
+     * The properties are then returned via a callback when the API query finishes and the player
+     * is confirmed to be a contributor.
+     * <p>
+     * {@link #getPropsCallback(Player, Consumer)} is the preferred method as it takes online status into account.
      */
     public static void getPropsCallback(UUID playerID, Consumer<ContributorProperties> callBack) {
-        if (CONTRIBUTOR_MAP.containsKey(playerID)) {
-            CONTRIBUTOR_MAP.get(playerID).onContributorLoaded(callBack);
-        }
+        getProps(playerID, null).onContributorLoaded(callBack);
     }
 
     public static void handleSettingsFromClient(ServerPlayer sender, PacketCustom packet) {
+//        BrandonsCore.LOGGER.info("handleSettingsFromClient: Received Client Settings: " + sender);
         ContributorConfig newConfig = ContributorConfig.deSerialize(packet);
         getPropsCallback(sender, props -> {
             //Fixes some bugyness in the config gui when playing in single-player
             if (sender.server.isDedicatedServer() || !sender.server.isSingleplayerOwner(sender.getGameProfile())) {
                 props.setConfig(newConfig);
+//                BrandonsCore.LOGGER.info("handleSettingsFromClient: Accepted Client Settings: " + sender);
             }
             BCoreNetwork.sentToAllExcept(BCoreNetwork.contributorConfigToClient(props), sender);
         });
     }
 
     public static void handleSettingsFromServer(PacketCustom packet) {
+        UUID uuid = packet.readUUID();
         ContributorConfig newConfig = ContributorConfig.deSerialize(packet);
-        ContributorHandler.getPropsCallback(packet.readUUID(), e -> e.setConfig(newConfig));
+//        BrandonsCore.LOGGER.info("handleSettingsFromServer: Received config from server");
+        if (!FETCHER.hasUser(uuid)) {
+//            BrandonsCore.LOGGER.info("handleSettingsFromServer: Not in fetcher, Reload");
+            reload();
+        }
+        getPropsCallback(uuid, e -> {
+//            BrandonsCore.LOGGER.info("handleSettingsFromServer: Apply config from server");
+            e.setConfig(newConfig);
+        });
     }
 
-    public static void reset() {
+    public static void linkUser(Player player, String linkCode, Consumer<Integer> callback) {
+        FETCHER.linkUser(player, linkCode, errorCode -> {
+            if (errorCode == -1) linkSuccessful(player);
+            callback.accept(errorCode);
+        });
+    }
+
+    //Client side
+    public static void linkSuccessful(Player player) {
+        BCoreNetwork.sendContribLinkToServer();
+        reload();
+//        BrandonsCore.LOGGER.info("linkSuccessful: Link Successful");
+        getPropsCallback(player, props -> sendWelcomeMessage(player, props));
+    }
+
+    private static long lastClientReload = 0;
+
+    public static void handleClientLink(ServerPlayer sender) {
+//        BrandonsCore.LOGGER.info("handleClientLink: Client Link Received");
+        if (sender.server.isDedicatedServer() && !FETCHER.hasUser(sender.getUUID()) && System.currentTimeMillis() - lastClientReload > 60000) {
+            reload();
+            lastClientReload = System.currentTimeMillis();
+//            BrandonsCore.LOGGER.info("handleClientLink: Client Link Accepted!");
+        }
+    }
+
+    public static void reload() {
+        FETCHER.reload();
         CONTRIBUTOR_MAP.clear();
     }
 
@@ -144,7 +196,10 @@ public class ContributorHandler {
     public static boolean shouldCancelElytra(LivingEntity entity) {
         if (entity instanceof Player player) {
             ContributorProperties props = ContributorHandler.getProps(player);
-            return props.hasWings() && props.getConfig().getWingsElytra() == ContributorConfig.WingElytraCompat.HIDE_ELYTRA;
+            if (!props.hasWings()) return false;
+            ContributorConfig config = props.getConfig();
+            if (config.getWingsTier() == null && props.getAnim().hideDecay() == 1) return false;
+            return (props.getConfig().getWingsElytra() == WingElytraCompat.HIDE_ELYTRA || props.getConfig().getWingsElytra() == WingElytraCompat.REPLACE);
         }
         return false;
     }
