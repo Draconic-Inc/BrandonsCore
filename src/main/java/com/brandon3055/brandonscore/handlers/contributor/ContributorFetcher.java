@@ -45,9 +45,9 @@ import java.util.function.Consumer;
  * Created by brandon3055 on 21/11/2022
  */
 public class ContributorFetcher {
-    private static final String CONTRIBUTOR_URL = "https://brandon3055.com/api/contributor";
-    private static final String HASHES_URL = "https://brandon3055.com/api/hashes";
-    private static final String LINK_URL = "https://brandon3055.com/api/link";
+    private static final String CONTRIBUTOR_URL = "http://localhost:8080/api/contributor";
+    private static final String HASHES_URL = "http://localhost:8080/api/hashes";
+    private static final String LINK_URL = "http://localhost:8080/api/link";
     private static final Map<UUID, String> HASH_CACHE = new HashMap<>();
     private static final HashFunction SHA = Hashing.sha256();
     private static final Gson GSON = new GsonBuilder().create();

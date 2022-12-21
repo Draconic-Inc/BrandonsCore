@@ -146,7 +146,6 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
             ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e -> isChestpiece(e.getItem()), entity);
             hasChestpiece = !stack.isEmpty();
         }
-        hasChestpiece = true;
 
         drawBadge(ccrs, mat.copy(), buffers, config.getChestBadge(), config, false, armor, hasChestpiece, partialTicks);
         drawBadge(ccrs, mat.copy(), buffers, config.getBackBadge(), config, true, armor, hasChestpiece, partialTicks);
@@ -176,7 +175,7 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
 
     private void drawBadge(CCRenderState ccrs, Matrix4 mat, MultiBufferSource buffers, BCShader<?> shader, RenderType type, boolean onBack, boolean onArmor, boolean hasChestpiece, double zOffset, boolean glint, float rotation) {
         float p = 1 / 16F;
-        float scale = onBack ? p * 6 : p * 4;
+        float scale = onBack ? p * 6 : p * 3F;
         if (onBack) mat.rotate(180 * torad, Vector3.Y_NEG);
         mat.translate(onBack ? 0 : p * 2, onBack ? p * 4 : p * 2, (p * (onArmor ? -3.1 : -2.275)) - zOffset);
         if (hasChestpiece) {
@@ -205,7 +204,7 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
 
     private void drawBadgeBasic(CCRenderState ccrs, Matrix4 mat, MultiBufferSource buffers, RenderType type, boolean onBack, boolean onArmor, boolean hasChestpiece, double zOffset, boolean glint, float rotation) {
         float p = 1 / 16F;
-        float scale = onBack ? p * 6 : p * 4;
+        float scale = onBack ? p * 6 : p * 3F;
         if (onBack) mat.rotate(180 * torad, Vector3.Y_NEG);
         mat.translate(onBack ? 0 : p * 2, onBack ? p * 4 : p * 2, (p * (onArmor ? -3.1 : -2.275)) - zOffset);
         if (hasChestpiece) {

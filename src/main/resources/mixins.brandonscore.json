@@ -5,9 +5,8 @@
     "refmap":             "mixins.brandonscore.refmap.json",
     "target":             "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_17",
-    "mixins":             [
-    ],
+    "mixins":             ["EntityAccessor", "LivingEntityMixin", "PlayerMixin"],
     "client":             [
-        "ElytraLayerMixin"
+        "ElytraLayerMixin", "LocalPlayerMixin"
     ]
 }
