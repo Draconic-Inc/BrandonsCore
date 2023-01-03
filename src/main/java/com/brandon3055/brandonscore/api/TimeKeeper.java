@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.api;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 /**
  * Created by brandon3055 on 12/10/19.
@@ -36,6 +37,11 @@ public class TimeKeeper {
 
     public static int getClientTick() {
         return clientTick;
+    }
+
+    public static int interval(int intervalTicks, int rollover) {
+        int tick = EffectiveSide.get().isClient() ? getClientTick() : getServerTick();
+        return (tick / intervalTicks) % rollover;
     }
 
 }

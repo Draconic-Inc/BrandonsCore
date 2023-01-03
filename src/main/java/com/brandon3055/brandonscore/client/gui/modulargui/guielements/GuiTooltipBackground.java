@@ -34,7 +34,9 @@ public class GuiTooltipBackground extends GuiElement<GuiTooltipBackground> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
-        GuiHelper.drawHoverRect(getter, new PoseStack(), xPos(), yPos(), xSize(), ySize(), backgroundColor.get(), borderColor.get(), borderEndColor.get(), empty);
+        PoseStack poseStack = new PoseStack();
+        poseStack.translate(0, 0, getRenderZLevel());
+        GuiHelper.drawHoverRect(getter, poseStack, xPos(), yPos(), xSize(), ySize(), backgroundColor.get(), borderColor.get(), borderEndColor.get(), empty);
         getter.endBatch();
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
     }
