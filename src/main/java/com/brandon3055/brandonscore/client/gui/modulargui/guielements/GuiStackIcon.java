@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +46,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     private ItemStack stack = ItemStack.EMPTY;
     private Runnable clickListener = null;
     private Consumer<Object> ingredientDropListener = null;
+    private Supplier<ItemStack> stackSupplier = null;
 
     public GuiStackIcon() {
         this(ItemStack.EMPTY);
@@ -198,6 +200,16 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
         return this;
     }
 
+    public GuiStackIcon setStackSupplier(Supplier<ItemStack> stackSupplier) {
+        this.stackSupplier = stackSupplier;
+        return this;
+    }
+
+    public GuiStackIcon setDrawToolTip(boolean drawToolTip) {
+        this.drawToolTip = drawToolTip;
+        return this;
+    }
+
     /**
      * Add an element to be used as the background for this stack.<br>
      * Recommend {@link GuiTexture#newSlot()} or {@link GuiBorderedRect}<br>
@@ -237,6 +249,9 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
     }
 
     public ItemStack getStack() {
+        if (stackSupplier != null) {
+            return stackSupplier.get();
+        }
         if (stackString == null) {
             return stack;
         } else if (stackString.isEmpty()) {

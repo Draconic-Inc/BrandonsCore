@@ -1371,8 +1371,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     public E bindSize(GuiElement element, boolean insetSize) {
         if (insetSize) {
             element.boundInsetSizeElements.add(this);
+            setSize(element.getInsetRect());
         } else {
             element.boundSizeElements.add(this);
+            setSize(element);
         }
         return (E) this;
     }
@@ -1387,8 +1389,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
     public E imposeSize(GuiElement element, boolean insetSize) {
         if (insetSize) {
             boundInsetSizeElements.add(element);
+            element.setSize(this.getInsetRect());
         } else {
             boundSizeElements.add(element);
+            element.setSize(this);
         }
         return (E) this;
     }
@@ -2740,7 +2744,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             }
         }
 
-        if (wrap) {
+        if (wrap || text.getString().contains("\n")) {
             drawAlignedSplitString(font, text, x, y, width, alignment, colour, dropShadow);
         } else {
             drawAlignedString(font, text, x, y, width, alignment, colour, dropShadow, trim);
