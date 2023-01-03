@@ -11,8 +11,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -31,6 +33,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
     private int textColour = 0xFFFFFFFF;
     private String labelText = "";
     private Supplier<String> displayStringSupplier;
+    private Supplier<Component> displaySupplier;
     private Supplier<Boolean> shadowStateSupplier;
     private HoverColour<Integer> texColGetter;
 
@@ -46,6 +49,10 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
     public GuiLabel(String labelText) {
         this.labelText = labelText;
+    }
+
+    public GuiLabel(Component label) {
+        displaySupplier = () -> label;
     }
 
     public GuiLabel(Supplier<String> displayStringSupplier) {
@@ -74,6 +81,11 @@ public class GuiLabel extends GuiElement<GuiLabel> {
      */
     public GuiLabel setDisplaySupplier(Supplier<String> displayStringSupplier) {
         this.displayStringSupplier = displayStringSupplier;
+        return this;
+    }
+
+    public GuiLabel setComponentSupplier(Supplier<Component> displaySupplier) {
+        this.displaySupplier = displaySupplier;
         return this;
     }
 
@@ -199,18 +211,18 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
         super.renderElement(mc, mouseX, mouseY, partialTicks);
 
-        String displayString = getLabelText();
-        if (!displayString.isEmpty()) {
-            Component component = new TextComponent(displayString);
+        Component component = displaySupplier == null ? new TextComponent(getLabelText()) : displaySupplier.get();
+        if (!component.getString().isEmpty()) {
+
             int colour = getTextColour(mouseOver);
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 
             int ySize = fontRenderer.lineHeight;
             if (wrap && !trim) {
-                ySize = fontRenderer.wordWrapHeight(displayString, widthLimit);
+                ySize = fontRenderer.getSplitter().splitLines(component, widthLimit, component.getStyle()).size() * fontRenderer.lineHeight;
             }
 
-            boolean wrap = this.wrap && fontRenderer.width(displayString) > widthLimit;
+//            boolean wrap = this.wrap && fontRenderer.width(displayString) > widthLimit;
 
             int yPos = (getInsetRect().y + (getInsetRect().height / 2)) - (ySize / 2);
             int xPos = getInsetRect().x;
