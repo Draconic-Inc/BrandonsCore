@@ -21,6 +21,7 @@ import net.minecraft.client.resources.language.I18n;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -44,6 +45,7 @@ public class TGuiBase implements IGuiTemplate {
     public GuiEnergyBar energyBar;
     public GuiElement<?> powerSlot;
     public boolean makeDraggable = true;
+    public int dragZoneHeight = 20;
 
     protected Screen gui;
     protected GuiToolkit<?> toolkit;
@@ -51,10 +53,11 @@ public class TGuiBase implements IGuiTemplate {
     protected GuiManipulable draggable;
 
     //Dynamic Buttons
-    public List<GuiElement<?>> dynamicButtons = new ArrayList<>();
+    public LinkedList<GuiElement<?>> dynamicButtons = new LinkedList<>();
     public Consumer<List<GuiElement<?>>> buttonPlacer = this::positionDynamicButtons;
     public GuiButton themeButton;
     public InfoPanel infoPanel;
+    private Consumer<LinkedList<GuiElement<?>>> buttonListListener;
 
 
     public TGuiBase(Screen gui) {this.gui = gui;}
@@ -82,7 +85,7 @@ public class TGuiBase implements IGuiTemplate {
             draggable.addChild(background);
             draggable.bindPosition(background);
             draggable.setSizeModifiers(() -> background.xSize(), () -> background.ySize());
-            draggable.setDragBarHeight(20);
+            draggable.setDragBarHeight(dragZoneHeight);
             toolkit.jeiExclude(draggable);
         } else {
             parent.addChild(background);
@@ -92,7 +95,12 @@ public class TGuiBase implements IGuiTemplate {
         title = toolkit.createHeading(getTitle(), background, true);//setEnabled(false);
 
         addDynamicButtons(dynamicButtons);
-        if (buttonPlacer != null) buttonPlacer.accept(dynamicButtons);
+        if (buttonListListener != null) {
+            buttonListListener.accept(dynamicButtons);
+        }
+        if (buttonPlacer != null) {
+            buttonPlacer.accept(dynamicButtons);
+        }
 
         isInitialized = true;
     }
@@ -100,7 +108,6 @@ public class TGuiBase implements IGuiTemplate {
     public void addDynamicButtons(List<GuiElement<?>> dynamicButtons) {
         //Theme Button
         themeButton = toolkit.createThemeButton(background);
-//        themeButton.setRelPosRight(background, -15, 3);
         dynamicButtons.add(themeButton);
 
         //Info Panel
@@ -113,6 +120,11 @@ public class TGuiBase implements IGuiTemplate {
         infoPanel.setEnabled(false);
         panelPosition.setEnabledCallback(() -> infoPanel.isEnabled());
         dynamicButtons.add(panelPosition);
+    }
+
+    public void dynamicButtonPrePosition(Consumer<LinkedList<GuiElement<?>>> buttonListListener) {
+        if (isInitialized) throw new IllegalStateException("dynamicButtonPrePosition must be called before template is loaded with toolkit.loadTemplate");
+        this.buttonListListener = buttonListListener;
     }
 
     public void positionDynamicButtons(List<GuiElement<?>> dynamicButtons) {
