@@ -38,16 +38,7 @@ void main() {
     float tval = xMid - invY; //triangle brightness value applied to base brightness
 
     float xAnim = (coord.x - 0.5) * 2;
-
-//    coord.x *= 0.5;//3.5;//X Compression factor
-//    coord.y *= 0.5;////8;//Y Compression factor
-
-//    float brightness = max(-0.5 + min(tval * 5, 2), 0);//0.5;// * coord.x;
     float brightness = -1.5 + min(tval * 10, 1.5) + (coord.y * coord.y * coord.y * 1.5);
-//    coord.y += coord.x * 0.5;
-
-//    coord.x += (time * 0.1);
-//    coord = vec3(tval / 2, xMid / 2, .5);
 
     //Bottom Curve
     float curveDepth = 11F/64F;
@@ -56,25 +47,17 @@ void main() {
     cDist = max(0, cDist + 0.1) / 0.3;
     cDist = pow(cDist, 4);
     brightness += cDist * 50;
-//    if (cDist > 0) {
-//        brightness += cDist * 40;
-//    } else {
-//        brightness += 0.5 - min(cDist, 0.5);
-//    }
-
 
     float density = 8;
     for (int i = 1; i <= 5; i++) {
         float power = pow(2, float(i));
         brightness += (2 / power) * max(snoise(coord + vec3(Time * 0.0 * ils, Time * 0.03 * ils, Time * 0.02), power * density), -1);
-//        brightness += (2 / power) * max(snoise(coord + vec3(time * 0.01 * ils, time * 0.015 * ils, time * 0.02), power * density), -1);
 
         vec3 oc = vec3(coord.xyz);
         for (float l = 1; l <= 2; l++) {
             float od = 8 + (l * 3);
             oc.xy *= 1.5;
             brightness += (1 / power) * max(snoise(oc + vec3(Time * 0.0 * (l + 1) * ols, Time * -0.02 * (l + 1) * ols, Time * -0.0), power * od), -1);
-//            brightness += (1 / power) * max(snoise(oc + vec3(time * 0.01 * (l + 1) * ols, time * -0.01 * (l + 1) * ols, time * -0.0), power * od), -1);
         }
     }
 

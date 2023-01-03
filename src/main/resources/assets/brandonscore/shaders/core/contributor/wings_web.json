@@ -4,7 +4,7 @@
         "srcrgb": "srcalpha",
         "dstrgb": "1-srcalpha"
     },
-    "vertex": "brandonscore:contributor/wings_base",
+    "vertex": "brandonscore:contributor/contrib_base",
     "fragment": "brandonscore:contributor/wings_web",
     "attributes": [
         "Position",

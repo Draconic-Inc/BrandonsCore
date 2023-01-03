@@ -19,7 +19,6 @@ import com.brandon3055.brandonscore.client.shader.ContribShader;
 import com.brandon3055.brandonscore.handlers.contributor.Animations;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
-import com.brandon3055.brandonscore.items.EquippedModelItem;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -29,6 +28,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -54,21 +54,25 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> implements EquippedItemModel {
     public ContributorProperties props = new ContributorProperties();
 
+    //Wing Types
     private static final RenderType BONE_TYPE = createBoneType("bone", BCShaders.CONTRIB_BASE_SHADER);
     private static final RenderType BONE_CHAOS_TYPE = createChaosType("bone_chaos", BCShaders.CHAOS_ENTITY_SHADER);
     private static final RenderType BONE_SHADER_TYPE = createBoneType("bone_shader", BCShaders.WINGS_BONE_SHADER);
     private static final RenderType WEB_TYPE = createWebType("web", BCShaders.CONTRIB_BASE_SHADER);
     private static final RenderType WEB_SHADER_TYPE = createWebType("web_shader", BCShaders.WINGS_WEB_SHADER);
 
+    //Basic badge types
     private static final RenderType LOLNET_TYPE = createBasicBadgeType(new ResourceLocation(MODID, "textures/contributor/badges/lolnet.png"), false);
     private static final RenderType CR_TYPE = createBasicBadgeType(new ResourceLocation(MODID, "textures/contributor/badges/cr.png"), false);
     private static final RenderType OG_TYPE = createBasicBadgeType(new ResourceLocation(MODID, "textures/contributor/badges/og_patreon.png"), false);
 
-    private static final RenderType BADGE_BASE_TYPE = createBadgeType("badge", BCShaders.BADGE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/patreon_base.png"), true);
-    private static final RenderType BADGE_DE_TYPE = createBadgeType("badge_over", BCShaders.BADGE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/patreon_de.png"), true);
+    //Fancy badge types
+    private static final RenderType PATREON_LOGO_TYPE = createBadgeType("badge", BCShaders.BADGE_FOIL_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/patreon_base.png"), true);
+    private static final RenderType PATREON_LOGO_OUTLINE_TYPE = createBadgeType("badge", BCShaders.BADGE_OUTLINE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/patreon_base.png"), true);
+    private static final RenderType PATREON_CORE_TYPE = createBadgeType("badge", BCShaders.BADGE_CORE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/patreon_core.png"), true);
 
-    private static final RenderType BADGE_VET_TYPE = createBadgeType("vet", BCShaders.BADGE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/veteran.png"), false);
-    private static final RenderType BADGE_VET_CORE_TYPE = createBadgeType("vet_over", BCShaders.BADGE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/veteran_overlay.png"), false);
+    private static final RenderType BADGE_VET_TYPE = createBadgeType("vet", BCShaders.VET_BADGE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/veteran.png"), false);
+    private static final RenderType BADGE_VET_CORE_TYPE = createBadgeType("vet_over", BCShaders.VET_BADGE_SHADER, new ResourceLocation(MODID, "textures/contributor/badges/veteran_overlay.png"), false);
 
     private final WingBoneRenderer humBone;
     private final WingBoneRenderer radBone;
@@ -161,12 +165,12 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
             case PATREON_CHAOTIC -> drawDEBadge(ccrs, mat, buffers, TechLevel.CHAOTIC, config, onBack, onArmor, hasChestpiece);
             case OG_VETERAN -> {
                 float[] colour = ContributorConfig.unpack(config.getBaseColourI(TechLevel.DRACONIC));
-                BCShaders.BADGE_SHADER.getBaseColorUniform().glUniform4f(colour[0], colour[1], colour[2], 1);
-                BCShaders.BADGE_SHADER.getDecayUniform().glUniform1f(0.01F);
-                drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_SHADER, BADGE_VET_TYPE, onBack, onArmor, hasChestpiece, 0, false, ((TimeKeeper.getClientTick() + partialTicks) / 2F) % 360);
-                BCShaders.BADGE_SHADER.getDecayUniform().glUniform1f(0.1F);
-                BCShaders.BADGE_SHADER.getBaseColorUniform().glUniform4f(0.75F, 0.75F, 0.75F, 0F);
-                drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_SHADER, BADGE_VET_CORE_TYPE, onBack, onArmor, hasChestpiece, 0.001, false, 0);
+                BCShaders.VET_BADGE_SHADER.getBaseColorUniform().glUniform4f(colour[0], colour[1], colour[2], 1);
+                BCShaders.VET_BADGE_SHADER.getDecayUniform().glUniform1f(0.01F);
+                drawBadge(ccrs, mat.copy(), buffers, BCShaders.VET_BADGE_SHADER, BADGE_VET_TYPE, onBack, onArmor, hasChestpiece, 0, false, ((TimeKeeper.getClientTick() + partialTicks) / 2F) % 360);
+                BCShaders.VET_BADGE_SHADER.getDecayUniform().glUniform1f(0.1F);
+                BCShaders.VET_BADGE_SHADER.getBaseColorUniform().glUniform4f(0.75F, 0.75F, 0.75F, 0F);
+                drawBadge(ccrs, mat.copy(), buffers, BCShaders.VET_BADGE_SHADER, BADGE_VET_CORE_TYPE, onBack, onArmor, hasChestpiece, 0.001, false, 0);
             }
             case LOLNET -> drawBadgeBasic(ccrs, mat.copy(), buffers, LOLNET_TYPE, onBack, onArmor, hasChestpiece, 0, true, 0);
             case CR -> drawBadgeBasic(ccrs, mat.copy(), buffers, CR_TYPE, onBack, onArmor, hasChestpiece, 0, true, 0);
@@ -220,12 +224,12 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
         if (rotation != 0) mat.rotate(rotation * torad, Vector3.Z_NEG);
         mat.translate(-0.5, -0.5, 0);
         VertexConsumer consumer = new TransformingVertexConsumer(buffers.getBuffer(type), mat);
-        ccrs.bind(consumer, DefaultVertexFormat.NEW_ENTITY);
-        ccrs.startDrawing(VertexFormat.Mode.QUADS, DefaultVertexFormat.NEW_ENTITY);
-        addVertex(consumer, 0, 0, 0, 0, 0);
-        addVertex(consumer, 0, 1, 0, 0, 1);
-        addVertex(consumer, 1, 1, 0, 1, 1);
-        addVertex(consumer, 1, 0, 0, 1, 0);
+        ccrs.bind(consumer, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+        ccrs.startDrawing(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+        addBasicVertex(consumer, 0, 0, 0, 0, 0);
+        addBasicVertex(consumer, 0, 1, 0, 0, 1);
+        addBasicVertex(consumer, 1, 1, 0, 1, 1);
+        addBasicVertex(consumer, 1, 0, 0, 1, 0);
         ccrs.draw();
         if (glint) {
             consumer = new TransformingVertexConsumer(buffers.getBuffer(RenderType.armorGlint()), mat);
@@ -242,12 +246,14 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
 
     private void drawDEBadge(CCRenderState ccrs, Matrix4 mat, MultiBufferSource buffers, TechLevel tier, ContributorConfig config, boolean onBack, boolean onArmor, boolean hasChestpiece) {
         float[] colour = ContributorConfig.unpack(config.getBaseColourI(tier));
-        BCShaders.BADGE_SHADER.getDecayUniform().glUniform1f(0.1F);
-        BCShaders.BADGE_SHADER.getBaseColorUniform().glUniform4f(0.5F, 0.5F, 0.5F, 0F);
-        drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_SHADER, BADGE_BASE_TYPE, onBack, onArmor, hasChestpiece, 0, false, 0);
-        BCShaders.BADGE_SHADER.getBaseColorUniform().glUniform4f(colour[0], colour[1], colour[2], colour[3]);
-        BCShaders.BADGE_SHADER.getDecayUniform().glUniform1f(0);
-        drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_SHADER, BADGE_DE_TYPE, onBack, onArmor, hasChestpiece, 0, false, 0);
+        //Patreon Logo
+        BCShaders.BADGE_FOIL_SHADER.getBaseColorUniform().glUniform4f(1F, 0.259F, 0.302F, 1F); //<= Patreon logo colour
+        drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_FOIL_SHADER, PATREON_LOGO_TYPE, onBack, onArmor, hasChestpiece, 0, false, 0);
+        //Patreon Logo Outline
+        drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_OUTLINE_SHADER, PATREON_LOGO_OUTLINE_TYPE, onBack, onArmor, hasChestpiece, 0, false, 0);
+        //Core
+        BCShaders.BADGE_CORE_SHADER.getBaseColorUniform().glUniform4f(colour[0], colour[1], colour[2], colour[3]);
+        drawBadge(ccrs, mat.copy(), buffers, BCShaders.BADGE_CORE_SHADER, PATREON_CORE_TYPE, onBack, onArmor, hasChestpiece, 0, false, 0);
     }
 
     private void renderWings(ContributorConfig config, LivingEntity entity, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) {
@@ -365,11 +371,15 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
     }
 
     private void addVertex(VertexConsumer consumer, Vector3 vert, float u, float v) {
-        consumer.vertex(vert.x, vert.y, vert.z).color(0xFFFFFFFF).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).normal(0, 1, 0).endVertex();
+        consumer.vertex(vert.x, vert.y, vert.z).color(0xFFFFFFFF).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).normal(0.5F, 0.5F, 0.5F).endVertex();
     }
 
     private void addVertex(VertexConsumer consumer, double x, double y, double z, float u, float v) {
         consumer.vertex(x, y, z).color(0xFFFFFFFF).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).normal(0, 1, 0).endVertex();
+    }
+
+    private void addBasicVertex(VertexConsumer consumer, double x, double y, double z, float u, float v) {
+        consumer.vertex(x, y, z).color(0xFFFFFFFF).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).endVertex();
     }
 
     private boolean isChestpiece(Item item) {
@@ -474,17 +484,30 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
         return RenderType.create(MODID + ":badge" + name, DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, false, RenderType.CompositeState.builder()
                 .setShaderState(new RenderStateShard.ShaderStateShard(shader::getShaderInstance))
                 .setTextureState(new RenderStateShard.TextureStateShard(texture, blur, false))
+                .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
                 .setLightmapState(RenderStateShard.LIGHTMAP)
                 .setOverlayState(RenderStateShard.OVERLAY)
                 .createCompositeState(false)
         );
     }
 
+    //    private static RenderType createBasicBadgeType(ResourceLocation texture, boolean blur) {
+//        return RenderType.create(MODID + ":basic_badge", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, RenderType.CompositeState.builder()
+//                .setShaderState(RenderType.RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
+//                .setTextureState(new RenderStateShard.TextureStateShard(texture, blur, false))
+//                .setTransparencyState(RenderType.NO_TRANSPARENCY)
+//                .setCullState(RenderType.NO_CULL)
+//                .setLightmapState(RenderType.LIGHTMAP)
+//                .setOverlayState(RenderType.OVERLAY)
+//                .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
+//                .createCompositeState(true));
+//    }
+
     private static RenderType createBasicBadgeType(ResourceLocation texture, boolean blur) {
-        return RenderType.create(MODID + ":basic_badge", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, RenderType.CompositeState.builder()
-                .setShaderState(RenderType.RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
+        return RenderType.create(MODID + ":basic_badge", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, VertexFormat.Mode.QUADS, 256, true, false, RenderType.CompositeState.builder()
+                .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorTexLightmapShader))
                 .setTextureState(new RenderStateShard.TextureStateShard(texture, blur, false))
-                .setTransparencyState(RenderType.NO_TRANSPARENCY)
+                .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
                 .setCullState(RenderType.NO_CULL)
                 .setLightmapState(RenderType.LIGHTMAP)
                 .setOverlayState(RenderType.OVERLAY)

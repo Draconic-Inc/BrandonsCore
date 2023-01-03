@@ -16,6 +16,8 @@ public class ContribShader extends BCShader<ContribShader> {
     private CCUniform uv2OverrideUniform;
 
     private CCUniform baseColorUniform;
+    private CCUniform transitionUniform;
+    private CCUniform hueUniform;
 
     public ContribShader(String path, VertexFormat format) {
         super(new ResourceLocation(BrandonsCore.MODID, path), format);
@@ -32,6 +34,10 @@ public class ContribShader extends BCShader<ContribShader> {
     public final boolean hasUv2OverrideUniform() { return uv2OverrideUniform != null; }
     public final CCUniform getBaseColorUniform() { return Objects.requireNonNull(baseColorUniform, missingUniformMessage("BaseColor")); }
     public final boolean hasBaseColorUniform() { return baseColorUniform != null; }
+    public final CCUniform getTransitionUniform() { return Objects.requireNonNull(transitionUniform, missingUniformMessage("Transition")); }
+    public final boolean hasTransitionUniform() { return transitionUniform != null; }
+    public final CCUniform getHueUniform() { return Objects.requireNonNull(transitionUniform, missingUniformMessage("Hue")); }
+    public final boolean hasHueUniform() { return transitionUniform != null; }
     // @formatter:on
 
     @Override
@@ -41,5 +47,7 @@ public class ContribShader extends BCShader<ContribShader> {
         uv2OverrideUniform = shaderInstance.getUniform("UV2Override");
 
         baseColorUniform = shaderInstance.getUniform("BaseColor");
+        transitionUniform = shaderInstance.getUniform("Transition");
+        hueUniform = shaderInstance.getUniform("Hue");
     }
 }

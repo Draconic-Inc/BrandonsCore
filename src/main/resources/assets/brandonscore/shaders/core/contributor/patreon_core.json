@@ -4,8 +4,8 @@
         "srcrgb": "srcalpha",
         "dstrgb": "1-srcalpha"
     },
-    "vertex": "brandonscore:contributor/wings_base",
-    "fragment": "brandonscore:contributor/badge",
+    "vertex": "brandonscore:contributor/contrib_base",
+    "fragment": "brandonscore:contributor/patreon_core",
     "attributes": [
         "Position",
         "Color",
@@ -38,6 +38,6 @@
         { "name": "BaseColor", "type": "vec4", "count": 4, "values": [ 1.0, 1.0, 1.0, 1.0 ] },
         { "name": "UV1Override", "type": "i_vec2", "count": 2, "values": [ -1, -1 ] },
         { "name": "UV2Override", "type": "i_vec2", "count": 2, "values": [ -1, -1 ] },
-        { "name": "Decay", "type": "float", "count": 1, "values": [ 0.0 ] }
+        { "name": "Transition", "type": "float", "count": 1, "values": [ 0.6 ] }
     ]
 }

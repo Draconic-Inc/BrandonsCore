@@ -4,8 +4,8 @@
         "srcrgb": "srcalpha",
         "dstrgb": "1-srcalpha"
     },
-    "vertex": "brandonscore:contributor/wings_base",
-    "fragment": "brandonscore:contributor/wings_base",
+    "vertex": "brandonscore:contributor/contrib_base",
+    "fragment": "brandonscore:contributor/badge_foil",
     "attributes": [
         "Position",
         "Color",
@@ -26,16 +26,18 @@
         { "name": "IViewRotMat", "type": "matrix3x3", "count": 9, "values": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
         { "name": "ColorModulator", "type": "vec4", "count": 4, "values": [ 1.0, 1.0, 1.0, 1.0 ] },
         { "name": "SimpleLight", "type": "int", "count": 1, "values": [0] },
-        { "name": "DisableLight", "type": "int", "count": 1, "values": [0] },
+        { "name": "DisableLight", "type": "int", "count": 1, "values": [1] },
         { "name": "Light0_Direction", "type": "vec3", "count": 3, "values": [0.0, 0.0, 0.0] },
         { "name": "Light1_Direction", "type": "vec3", "count": 3, "values": [0.0, 0.0, 0.0] },
-        { "name": "DisableOverlay", "type": "int", "count": 1, "values": [0] },
+        { "name": "DisableOverlay", "type": "int", "count": 1, "values": [1] },
         { "name": "FogStart", "type": "float", "count": 1, "values": [ 0.0 ] },
         { "name": "FogEnd", "type": "float", "count": 1, "values": [ 1.0 ] },
         { "name": "FogColor", "type": "vec4", "count": 4, "values": [ 0.0, 0.0, 0.0, 0.0 ] },
         { "name": "FogShape", "type": "int", "count": 1, "values": [ 0 ] },
-        { "name": "UV1Override", "type": "i_vec2", "count": 2, "values": [ 0, 0 ] },
-        { "name": "UV2Override", "type": "i_vec2", "count": 2, "values": [ 0, 0 ] },
-        { "name": "Decay", "type": "float", "count": 1, "values": [ 0.0 ] }
+        { "name": "Time", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "BaseColor", "type": "vec4", "count": 4, "values": [ 1.0, 1.0, 1.0, 1.0 ] },
+        { "name": "UV1Override", "type": "i_vec2", "count": 2, "values": [ -1, -1 ] },
+        { "name": "UV2Override", "type": "i_vec2", "count": 2, "values": [ -1, -1 ] },
+        { "name": "Transition", "type": "float", "count": 1, "values": [ 0.6 ] }
     ]
 }

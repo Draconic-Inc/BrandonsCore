@@ -29,13 +29,21 @@ public class BCShaders {
                 e.getPitchUniform().glUniform1f((float) -(player.getXRot() * MathHelper.torad));
             });
 
-    public static final ContribShader CONTRIB_BASE_SHADER = new ContribShader("contributor/wings_base", DefaultVertexFormat.NEW_ENTITY);
+    public static final ContribShader CONTRIB_BASE_SHADER = new ContribShader("contributor/contrib_base", DefaultVertexFormat.NEW_ENTITY);
     public static final ContribShader WINGS_WEB_SHADER = new ContribShader("contributor/wings_web", DefaultVertexFormat.NEW_ENTITY)
             .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
     public static final ContribShader WINGS_BONE_SHADER = new ContribShader("contributor/wings_bone", DefaultVertexFormat.NEW_ENTITY)
             .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
-    public static final ContribShader BADGE_SHADER = new ContribShader("contributor/badge", DefaultVertexFormat.NEW_ENTITY)
+
+    public static final ContribShader VET_BADGE_SHADER = new ContribShader("contributor/vet_badge", DefaultVertexFormat.NEW_ENTITY)
             .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
+
+    public static final ContribShader BADGE_OUTLINE_SHADER = new ContribShader("contributor/badge_outline", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
+    public static final ContribShader BADGE_CORE_SHADER = new ContribShader("contributor/patreon_core", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 20)));
+    public static final ContribShader BADGE_FOIL_SHADER = new ContribShader("contributor/badge_foil", DefaultVertexFormat.NEW_ENTITY)
+            .onShaderApplied(e -> e.getTimeUniform().glUniform1f((float) (ClientUtils.getRenderTime() / 40)));
 
     public static CCShaderInstance energyBarShader;
     public static CCUniform energyBarTime;
@@ -52,8 +60,11 @@ public class BCShaders {
         CONTRIB_BASE_SHADER.register(bus);
         WINGS_WEB_SHADER.register(bus);
         WINGS_BONE_SHADER.register(bus);
-        BADGE_SHADER.register(bus);
+        VET_BADGE_SHADER.register(bus);
         CHAOS_ENTITY_SHADER.register(bus);
+        BADGE_OUTLINE_SHADER.register(bus);
+        BADGE_CORE_SHADER.register(bus);
+        BADGE_FOIL_SHADER.register(bus);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(BCShaders::onRegisterShaders);
     }

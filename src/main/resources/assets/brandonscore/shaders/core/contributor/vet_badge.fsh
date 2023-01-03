@@ -29,7 +29,7 @@ void main() {
     vec4 baseColour = BaseColor;
     float brightness = BaseColor.w;
     vec4 texCol = texture(Sampler0, texCoord0) * ColorModulator;
-    bool useAlt = false;
+    bool useAlt = false;//Alt is foil
 
     if (texCol.a < 0.1) {
         discard;
