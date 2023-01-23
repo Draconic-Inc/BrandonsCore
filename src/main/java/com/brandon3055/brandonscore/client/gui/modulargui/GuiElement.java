@@ -3119,25 +3119,11 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //    }
 
     public static int mixColours(int colour1, int colour2) {
-        return mixColours(colour1, colour2, false);
+        return GuiHelper.mixColours(colour1, colour2);
     }
 
     public static int mixColours(int colour1, int colour2, boolean subtract) {
-        int alpha1 = colour1 >> 24 & 255;
-        int alpha2 = colour2 >> 24 & 255;
-        int red1 = colour1 >> 16 & 255;
-        int red2 = colour2 >> 16 & 255;
-        int green1 = colour1 >> 8 & 255;
-        int green2 = colour2 >> 8 & 255;
-        int blue1 = colour1 & 255;
-        int blue2 = colour2 & 255;
-
-        int alpha = Mth.clamp(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
-        int red = Mth.clamp(red1 + (subtract ? -red2 : red2), 0, 255);
-        int green = Mth.clamp(green1 + (subtract ? -green2 : green2), 0, 255);
-        int blue = Mth.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
-
-        return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | blue & 0xFF;
+        return GuiHelper.mixColours(colour1, colour2, subtract);
     }
 
     public static int midColour(int colour1, int colour2) {

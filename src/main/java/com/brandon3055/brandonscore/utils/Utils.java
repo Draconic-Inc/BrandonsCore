@@ -86,15 +86,25 @@ public class Utils {
      * @param z2 point B z
      * @return The distance between point A and point B
      */
-    public static double getDistanceAtoB(double x1, double y1, double z1, double x2, double y2, double z2) {
+    public static double getDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
         double dx = x1 - x2;
         double dy = y1 - y2;
         double dz = z1 - z2;
         return Math.sqrt((dx * dx + dy * dy + dz * dz));
     }
 
+    @Deprecated
+    public static double getDistanceAtoB(double x1, double y1, double z1, double x2, double y2, double z2) {
+        return getDistance(x1, y1, z1, x2, y2, z2);
+    }
+
+    @Deprecated
     public static double getDistanceAtoB(Vec3D pos1, Vec3D pos2) {
-        return getDistanceAtoB(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
+        return getDistance(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
+    }
+
+    public static double getDistance(Vec3D pos1, Vec3D pos2) {
+        return getDistance(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z);
     }
 
     public static int getCardinalDistance(BlockPos pos1, BlockPos pos2) {
@@ -111,6 +121,14 @@ public class Utils {
             return getDistanceSq(posA.getX(), posA.getY(), posA.getZ(), posB.getX(), posB.getY(), posB.getZ()) <= range * range;
     }
 
+
+    @Deprecated
+    public static double getDistanceAtoB(double x1, double z1, double x2, double z2) {
+        double dx = x1 - x2;
+        double dz = z1 - z2;
+        return Math.sqrt((dx * dx + dz * dz));
+    }
+
     /**
      * Calculates the exact distance between two points in 2D space
      *
@@ -120,7 +138,7 @@ public class Utils {
      * @param z2 point B z
      * @return The distance between point A and point B
      */
-    public static double getDistanceAtoB(double x1, double z1, double x2, double z2) {
+    public static double getDistance(double x1, double z1, double x2, double z2) {
         double dx = x1 - x2;
         double dz = z1 - z2;
         return Math.sqrt((dx * dx + dz * dz));

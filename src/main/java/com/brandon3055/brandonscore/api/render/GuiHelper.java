@@ -2,18 +2,29 @@ package com.brandon3055.brandonscore.api.render;
 
 import codechicken.lib.math.MathHelper;
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.client.utils.GuiHelperOld;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.brandon3055.brandonscore.utils.Utils;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import io.netty.util.internal.UnstableApi;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.gui.GuiUtils;
 
 /**
@@ -34,7 +45,6 @@ public class GuiHelper {
                     .setCullState(RenderStateShard.NO_CULL)
                     .createCompositeState(false)
     );
-
 
     //#######################################################################
     //# Backgrounds
@@ -148,6 +158,19 @@ public class GuiHelper {
         drawRect(getter, poseStack, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour);
     }
 
+    public static void drawBorderedRect(MultiBufferSource getter, PoseStack poseStack, double x, double y, double width, double height, double borderWidth, int fillColour, int borderColour) {
+        //Fill
+        drawRect(getter, poseStack, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fillColour);
+        //Top (Full Width)
+        drawRect(getter, poseStack, x, y, width, borderWidth, borderColour);
+        //Left
+        drawRect(getter, poseStack, x, y + borderWidth, borderWidth, height - borderWidth * 2, borderColour);
+        //Bottom (Full Width)
+        drawRect(getter, poseStack, x, y + height - borderWidth, width, borderWidth, borderColour);
+        //Right
+        drawRect(getter, poseStack, x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, borderColour);
+    }
+
     //#######################################################################
     //# Sprites
     //#######################################################################
@@ -239,40 +262,6 @@ public class GuiHelper {
         //@formatter:on
     }
 
-//    public static void drawTexture(IVertexBuilder builder, double x, double y, double width, double height, double uMin, double vMin, double uMax, double vMax, int texWidth, int texHeight) {
-//        double uInc = 1D / texWidth;
-//        double vInc = 1D / texHeight;
-//        uMin *= uInc;
-//        vMin *= vInc;
-//        uMax *= uInc;
-//        vMax *= vInc;
-//        //@formatter:off
-//        builder.vertex(x,          y + height, 0).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
-//        builder.vertex(x + width,  y + height, 0).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();
-//        builder.vertex(x + width,  y,          0).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV0()).endVertex();
-//        builder.vertex(x,          y,          0).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV0()).endVertex();
-//        //@formatter:on
-//    }
-
-//    public static void drawTexture(float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
-//        float zLevel = getRenderZLevel();
-//        float f = 1.0F / textureWidth;
-//        float f1 = 1.0F / textureHeight;
-//        RenderSystem.enableBlend();
-//        RenderSystem.disableAlphaTest();
-//        RenderSystem.defaultBlendFunc();
-//        Tessellator tessellator = Tessellator.getInstance();
-//        BufferBuilder buffer = tessellator.getBuilder();
-//        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-//        buffer.vertex(x, y + height, zLevel).uv(u * f, (v + height) * f1).endVertex();
-//        buffer.vertex(x + width, y + height, zLevel).uv((u + width) * f, (v + height) * f1).endVertex();
-//        buffer.vertex(x + width, y, zLevel).uv((u + width) * f, v * f1).endVertex();
-//        buffer.vertex(x, y, zLevel).uv(u * f, v * f1).endVertex();
-//        tessellator.end();
-//        RenderSystem.disableBlend();
-//        RenderSystem.enableAlphaTest();
-//    }
-
     //#######################################################################
     //# Progress Rendering
     //#######################################################################
@@ -296,6 +285,90 @@ public class GuiHelper {
     }
 
     //#######################################################################
+    //# Stack Rendering
+    //#######################################################################
+
+    /**
+     * Recommended standard z offset is +100
+     */
+    public static void renderGuiStack(ItemStack stack/*, PoseStack poseStack*/, double x, double y, double z, double width, double height) {
+        Minecraft minecraft = Minecraft.getInstance();
+        ItemRenderer itemRenderer = minecraft.getItemRenderer();
+        BakedModel model = itemRenderer.getModel(stack, null, null, 0);
+        float xScale = (float) width / 16F;
+        float yScale = (float) height / 16F;
+
+        minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        PoseStack viewStack = RenderSystem.getModelViewStack();
+        viewStack.pushPose();
+        viewStack.translate(x + (8.0D * xScale), y + (8.0D * yScale), z);
+        viewStack.scale(16.0F, -16.0F, 16.0F);
+        viewStack.scale(xScale, yScale, 1F);
+        RenderSystem.applyModelViewMatrix(); //Just apply default model view
+
+        PoseStack poseStack = new PoseStack();
+//        poseStack.pushPose();
+//        poseStack.translate(x + (8.0D * xScale), y + (8.0D * yScale), 100);
+//        poseStack.scale(16.0F, -16.0F, 16.0F);
+//        poseStack.scale(xScale, yScale, 1F);
+
+        MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
+        boolean noBlockLight = !model.usesBlockLight();
+        if (noBlockLight) {
+            Lighting.setupForFlatItems();
+        }
+
+        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, poseStack, buffers, 0xf000f0, OverlayTexture.NO_OVERLAY, model);
+        buffers.endBatch();
+        RenderSystem.enableDepthTest();
+        if (noBlockLight) {
+            Lighting.setupFor3DItems();
+        }
+
+//        poseStack.popPose();
+
+        viewStack.popPose();
+        RenderSystem.applyModelViewMatrix();
+    }
+
+    /**
+     * Recommended standard z offset is +200
+     */
+    public static void renderStackOverlay(ItemStack stack, Font font, double x, double y, double z, double width, double height, boolean drawCount) {
+        float xScale = (float) width / 16F;
+        float yScale = (float) height / 16F;
+        if (!stack.isEmpty()) {
+            PoseStack poseStack = new PoseStack();
+            if (stack.getCount() != 1 && drawCount) {
+                String s = String.valueOf(stack.getCount());
+                poseStack.pushPose();
+                poseStack.translate(x, y, z);
+                poseStack.scale(xScale, yScale, 1F);
+                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                font.drawInBatch(s, (float) (19 - 2 - font.width(s)), (float) (6 + 3), 16777215, true, poseStack.last().pose(), buffer, false, 0, 15728880);
+                buffer.endBatch();
+                poseStack.popPose();
+            }
+
+            if (stack.isBarVisible()) {
+                MultiBufferSource getter = RenderUtils.getGuiBuffers();
+                poseStack.translate(x, y, z);
+                poseStack.scale(xScale, yScale, 1F);
+                int i = stack.getBarWidth();
+                int colour = stack.getBarColor();
+                GuiHelper.drawRect(getter, poseStack, 2, 13, 13, 2, 0xFF000000);
+                GuiHelper.drawRect(getter, poseStack, 2, 13, i, 1, 0xFF000000 | colour);
+                RenderUtils.endBatch(getter);
+            }
+        }
+    }
+
+    //#######################################################################
     //# Utils
     //#######################################################################
 
@@ -305,6 +378,47 @@ public class GuiHelper {
 
     public static boolean isInRect(double x, double y, double xSize, double ySize, double mouseX, double mouseY) {
         return ((mouseX >= x && mouseX < x + xSize) && (mouseY >= y && mouseY < y + ySize));
+    }
+
+//    /**
+//     * @param x Rect xPos (Inclusive)
+//     * @param y Rect yPos (Inclusive)
+//     * @param xSize Rect Width (Exclusive)
+//     * @param ySize Rect Height (Exclusive)
+//     * @param mouseX Check x pos
+//     * @param mouseY Check y pos
+//     * @return distance.
+//     */
+    public static double distToRect(double x, double y, double xSize, double ySize, double mouseX, double mouseY) {
+        if (isInRect(x, y, xSize, ySize, mouseX, mouseY)) {
+            return 0;
+        }
+//        /*
+//        * This is to deal with a quirk of rendering where...
+//        * Say you render the rect x=0,y=0,width=10,height=10
+//        * That renders from x=0,y=0 (Inclusive) to x=10,y=10 (Exclusive)
+//        * But if you were to give that same rect to this method it would be treated as
+//        * x=0,y=0 (Inclusive) to x=10,y=10 (Inclusive)
+//        * Effectively adding a 1 pixel offset to the right and the bottom.
+//        * To resolve this width and height are decremented by 1.
+//        * */
+////        xSize--;
+////        ySize--;
+
+        //Inside Height (Simply distance from Left or Right)
+        if (mouseY >= y && mouseY < y + ySize) {
+            return mouseX >= x + xSize ? mouseX - (x + xSize) : x - mouseX;
+        }
+
+        //Inside Width (Simply distance from Top or Bottom)
+        if (mouseX >= x && mouseX < x + xSize) {
+            return mouseY < y ? y - mouseY : mouseY - (y + ySize);
+        }
+
+        //Distance from corner
+        double cx = mouseX < x ? x : x + xSize;
+        double cy = mouseY < y ? y : y + ySize;
+        return Utils.getDistance(cx, cy, mouseX, mouseY);
     }
 
     public static RenderType guiTextureType(ResourceLocation resource) {
@@ -318,5 +432,37 @@ public class GuiHelper {
 //                .setTexturingState(new RenderStateShard.TexturingStateShard("lighting", RenderSystem::disableLighting, SneakyUtils.none()))
                         .createCompositeState(false)
         );
+    }
+
+    public static int mixColours(int colour1, int colour2) {
+        return mixColours(colour1, colour2, false);
+    }
+
+    public static int mixColours(int colour1, int colour2, boolean subtract) {
+        int alpha1 = colour1 >> 24 & 255;
+        int alpha2 = colour2 >> 24 & 255;
+        int red1 = colour1 >> 16 & 255;
+        int red2 = colour2 >> 16 & 255;
+        int green1 = colour1 >> 8 & 255;
+        int green2 = colour2 >> 8 & 255;
+        int blue1 = colour1 & 255;
+        int blue2 = colour2 & 255;
+
+        int alpha = Mth.clamp(alpha1 + (subtract ? -alpha2 : alpha2), 0, 255);
+        int red = Mth.clamp(red1 + (subtract ? -red2 : red2), 0, 255);
+        int green = Mth.clamp(green1 + (subtract ? -green2 : green2), 0, 255);
+        int blue = Mth.clamp(blue1 + (subtract ? -blue2 : blue2), 0, 255);
+
+        return (alpha & 0xFF) << 24 | (red & 0xFF) << 16 | (green & 0xFF) << 8 | blue & 0xFF;
+    }
+
+    public static double getMouseX() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.mouseHandler.xpos() * (double) mc.getWindow().getGuiScaledWidth() / (double) mc.getWindow().getScreenWidth();
+    }
+
+    public static double getMouseY() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.mouseHandler.ypos() * (double) mc.getWindow().getGuiScaledHeight() / (double) mc.getWindow().getScreenHeight();
     }
 }

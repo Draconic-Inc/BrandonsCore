@@ -1,12 +1,20 @@
 package com.brandon3055.brandonscore.client.gui.modulargui;
 
+import codechicken.lib.render.buffer.TransformingVertexConsumer;
+import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiScrollElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiBorderedRect;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTreeElement.TreeNode;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+
+import java.awt.*;
 
 import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LEFT;
 
@@ -15,7 +23,7 @@ import static com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.LE
  */
 public class ModularGuiTest extends ModularGuiScreen {
     public ModularGuiTest(Component titleIn) {
-        super(titleIn, 400, 200);
+        super(titleIn, 200, 200);
     }
 
 
@@ -31,7 +39,7 @@ public class ModularGuiTest extends ModularGuiScreen {
         //Alternatively you could store a reference to the element and update its size and pos in the reloadGui method.
 
         GuiBorderedRect background;
-        manager.addChild(background = new GuiBorderedRect().setFillColour(0xFF303030).addReloadCallback(guiRect -> guiRect.setPos(guiLeft(), guiTop()).setSize(xSize, ySize)));
+        manager.addChild(background = new GuiBorderedRect().setFillColour(0xFF303030).addReloadCallback(guiRect -> guiRect.setPos(guiLeft() + 200, guiTop()).setSize(xSize, ySize)));
         GuiScrollElement scrollElement = new GuiScrollElement().setRelPos(5, 5).setSize(xSize - 10, ySize - 10).setStandardScrollBehavior();
         background.addChild(scrollElement);
 
@@ -335,5 +343,55 @@ public class ModularGuiTest extends ModularGuiScreen {
         super.reloadGui();
     }
 
+    @Override
+    public void render(PoseStack mStack, int mouseX, int mouseY, float partialTicks) {
+        super.render(mStack, mouseX, mouseY, partialTicks);
 
+        Rectangle rect = new Rectangle(100, 100, 30, 30);
+
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
+        int w = 100;
+
+        GuiHelper.drawBorderedRect(getter, mStack, rect.x, rect.y, rect.width, rect.height, 1, 0xFFFFFFFF, 0xFFFF0000);
+
+        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(GuiHelper.transColourType), mStack);
+
+        for (int x = rect.x - w; x < rect.x + rect.width + w; x++) {
+            for (int y = rect.y - w; y < rect.y + rect.height + w; y++) {
+//                if (GuiHelper.isInRect(rect.x, rect.y, rect.width, rect.height, x, y)) continue;
+                double dist = GuiHelper.distToRect(rect.x, rect.y, rect.width, rect.height, x, y);
+                if (dist == 0) continue;
+                int c = (int)((dist / 50) * 255);
+                if (c > 255) c = 255;
+//                drawRect(builder, x, y, 1, 1, 0xFF000000 + c);
+                drawRect(builder, x+0.1, y+0.1, 0.8, 0.8, 0xFF000000 + c);
+            }
+        }
+
+
+        getter.endBatch();
+    }
+
+    public static void drawRect(VertexConsumer builder, double x, double y, double width, double height, int colour) {
+        drawGradientRect(builder, x, y, x + width, y + height, colour, colour);
+    }
+
+    public static void drawGradientRect(VertexConsumer builder, double left, double top, double right, double bottom, int startColor, int endColor) {
+        if (startColor == endColor && endColor == 0) return;
+        //@formatter:off
+        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
+        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
+        float startBlue  = (float)(startColor       & 255) / 255.0F;
+        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
+        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
+        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
+        float endBlue    = (float)(endColor         & 255) / 255.0F;
+
+        builder.vertex(right,    top, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.vertex( left,    top, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+        builder.vertex( left, bottom, 0).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        builder.vertex(right, bottom, 0).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+        //@formatter:on
+    }
 }

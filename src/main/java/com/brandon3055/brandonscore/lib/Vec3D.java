@@ -191,7 +191,7 @@ public class Vec3D {
      * apply motion so hat is moves towards pos2
      */
     public static Vec3D getDirectionVec(Vec3D vecFrom, Vec3D vecTo) {
-        double distance = Utils.getDistanceAtoB(vecFrom, vecTo);
+        double distance = Utils.getDistance(vecFrom, vecTo);
         if (distance == 0) {
             distance = 0.1;
         }
@@ -206,7 +206,7 @@ public class Vec3D {
      * apply motion so hat is moves towards pos2
      */
     public static Vector3 getDirectionVec(Vector3 vecFrom, Vector3 vecTo) {
-        double distance = Utils.getDistanceAtoB(vecFrom.x, vecFrom.y, vecFrom.z, vecTo.x, vecTo.y, vecTo.z);
+        double distance = Utils.getDistance(vecFrom.x, vecFrom.y, vecFrom.z, vecTo.x, vecTo.y, vecTo.z);
         if (distance == 0) {
             distance = 0.1;
         }
@@ -224,15 +224,15 @@ public class Vec3D {
     }
 
     public double distXZ(Vec3D vec3D) {
-        return Utils.getDistanceAtoB(x, z, vec3D.x, vec3D.z);
+        return Utils.getDistance(x, z, vec3D.x, vec3D.z);
     }
 
     public double distance(Vec3D vec3D) {
-        return Utils.getDistanceAtoB(this, vec3D);
+        return Utils.getDistance(this, vec3D);
     }
 
     public double distance(Entity entity) {
-        return Utils.getDistanceAtoB(this, new Vec3D(entity));
+        return Utils.getDistance(this, new Vec3D(entity));
     }
 
     public double distanceSq(Vec3D v) {
