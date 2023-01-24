@@ -3238,9 +3238,14 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
         return (E) this;
     }
 
-    //TODO I can probably expend on this. Maybe re write things to use text components or some custom system that supports text components.
+    //TODO I cant wait to do the GUI re write if only to finally standardise on components!
     public E setComponentHoverText(List<Component> textLines) {
         setHoverText(element -> textLines.stream().map(Component::getString).collect(Collectors.toList()));
+        return (E) this;
+    }
+
+    public E setComponentHoverText(Supplier<List<Component>> textLines) {
+        setHoverText(element -> textLines.get().stream().map(Component::getString).collect(Collectors.toList()));
         return (E) this;
     }
 

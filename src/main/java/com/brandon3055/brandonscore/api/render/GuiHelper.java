@@ -291,7 +291,7 @@ public class GuiHelper {
     /**
      * Recommended standard z offset is +100
      */
-    public static void renderGuiStack(ItemStack stack/*, PoseStack poseStack*/, double x, double y, double z, double width, double height) {
+    public static void renderGuiStack(ItemStack stack, PoseStack poseStack, double x, double y, double width, double height) {
         Minecraft minecraft = Minecraft.getInstance();
         ItemRenderer itemRenderer = minecraft.getItemRenderer();
         BakedModel model = itemRenderer.getModel(stack, null, null, 0);
@@ -304,18 +304,12 @@ public class GuiHelper {
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        PoseStack viewStack = RenderSystem.getModelViewStack();
-        viewStack.pushPose();
-        viewStack.translate(x + (8.0D * xScale), y + (8.0D * yScale), z);
-        viewStack.scale(16.0F, -16.0F, 16.0F);
-        viewStack.scale(xScale, yScale, 1F);
-        RenderSystem.applyModelViewMatrix(); //Just apply default model view
-
-        PoseStack poseStack = new PoseStack();
-//        poseStack.pushPose();
-//        poseStack.translate(x + (8.0D * xScale), y + (8.0D * yScale), 100);
-//        poseStack.scale(16.0F, -16.0F, 16.0F);
-//        poseStack.scale(xScale, yScale, 1F);
+        poseStack.pushPose();
+        poseStack.translate(x + (8.0D * xScale), y + (8.0D * yScale), 0);
+        poseStack.scale(16.0F, -16.0F, 16.0F);
+        poseStack.scale(xScale, yScale, 1F);
+        pushModelViewPoseStack(poseStack);
+        poseStack.popPose();
 
         MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
         boolean noBlockLight = !model.usesBlockLight();
@@ -323,41 +317,36 @@ public class GuiHelper {
             Lighting.setupForFlatItems();
         }
 
-        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, poseStack, buffers, 0xf000f0, OverlayTexture.NO_OVERLAY, model);
+        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, new PoseStack(), buffers, 0xf000f0, OverlayTexture.NO_OVERLAY, model);
         buffers.endBatch();
         RenderSystem.enableDepthTest();
         if (noBlockLight) {
             Lighting.setupFor3DItems();
         }
 
-//        poseStack.popPose();
-
-        viewStack.popPose();
-        RenderSystem.applyModelViewMatrix();
+        popModelViewPoseStack(poseStack);
     }
 
     /**
      * Recommended standard z offset is +200
      */
-    public static void renderStackOverlay(ItemStack stack, Font font, double x, double y, double z, double width, double height, boolean drawCount) {
+    public static void renderStackOverlay(ItemStack stack, PoseStack poseStack, Font font, double x, double y, double width, double height, boolean drawCount) {
         float xScale = (float) width / 16F;
         float yScale = (float) height / 16F;
         if (!stack.isEmpty()) {
-            PoseStack poseStack = new PoseStack();
+            poseStack.pushPose();
             if (stack.getCount() != 1 && drawCount) {
                 String s = String.valueOf(stack.getCount());
-                poseStack.pushPose();
-                poseStack.translate(x, y, z);
+                poseStack.translate(x, y, 0);
                 poseStack.scale(xScale, yScale, 1F);
                 MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                 font.drawInBatch(s, (float) (19 - 2 - font.width(s)), (float) (6 + 3), 16777215, true, poseStack.last().pose(), buffer, false, 0, 15728880);
                 buffer.endBatch();
-                poseStack.popPose();
             }
 
             if (stack.isBarVisible()) {
                 MultiBufferSource getter = RenderUtils.getGuiBuffers();
-                poseStack.translate(x, y, z);
+                poseStack.translate(x, y, 0);
                 poseStack.scale(xScale, yScale, 1F);
                 int i = stack.getBarWidth();
                 int colour = stack.getBarColor();
@@ -365,6 +354,7 @@ public class GuiHelper {
                 GuiHelper.drawRect(getter, poseStack, 2, 13, i, 1, 0xFF000000 | colour);
                 RenderUtils.endBatch(getter);
             }
+            poseStack.popPose();
         }
     }
 
@@ -380,7 +370,7 @@ public class GuiHelper {
         return ((mouseX >= x && mouseX < x + xSize) && (mouseY >= y && mouseY < y + ySize));
     }
 
-//    /**
+    //    /**
 //     * @param x Rect xPos (Inclusive)
 //     * @param y Rect yPos (Inclusive)
 //     * @param xSize Rect Width (Exclusive)
@@ -464,5 +454,28 @@ public class GuiHelper {
     public static double getMouseY() {
         Minecraft mc = Minecraft.getInstance();
         return mc.mouseHandler.ypos() * (double) mc.getWindow().getGuiScaledHeight() / (double) mc.getWindow().getScreenHeight();
+    }
+
+    /**
+     * For cases where you need to apply your own PoseStack to the modelViewStack.
+     * At time of writing this is really only needed for {@link #renderGuiStack(ItemStack, PoseStack, double, double, double, double)}
+     * But it may be useful in other places.
+     */
+    public static void pushModelViewPoseStack(PoseStack poseStack) {
+        PoseStack viewStack = RenderSystem.getModelViewStack();
+        if (viewStack == poseStack) return;
+
+        viewStack.pushPose();
+        viewStack.last().pose().multiply(poseStack.last().pose());
+        viewStack.last().normal().mul(poseStack.last().normal());
+        RenderSystem.applyModelViewMatrix();
+    }
+
+    public static void popModelViewPoseStack(PoseStack poseStack) {
+        PoseStack viewStack = RenderSystem.getModelViewStack();
+        if (viewStack == poseStack) return;
+
+        viewStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 }
