@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.command.BCCommands;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
+import com.brandon3055.brandonscore.handlers.SighEditHandler;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.init.ClientInit;
 import com.brandon3055.brandonscore.integration.ModHelperBC;
@@ -65,6 +66,7 @@ public class BrandonsCore {
         ContributorHandler.init();
         BCEventHandler.init();
         BCCommands.init();
+        SighEditHandler.init();
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
     }
