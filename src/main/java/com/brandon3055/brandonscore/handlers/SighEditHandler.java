@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 /**
  * Created by brandon3055 on 24/01/2023
@@ -20,17 +21,17 @@ public class SighEditHandler {
 
     public static void init() {
         LOCK.lock();
-        MinecraftForge.EVENT_BUS.addListener(SighEditHandler::onBlockInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, SighEditHandler::onBlockInteract);
     }
 
     public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
         Level level = event.getWorld();
-        if (level.isClientSide()) {
+        if (level.isClientSide() || event.isCanceled()) {
             return;
         }
 
         Player player = event.getPlayer();
-        if (!player.isShiftKeyDown() || !level.getGameRules().getBoolean(ALLOW_SIGN_EDIT) || !player.getItemInHand(event.getHand()).isEmpty()) {
+        if (!player.isShiftKeyDown() || !player.getAbilities().mayBuild || !level.getGameRules().getBoolean(ALLOW_SIGN_EDIT) || !player.getItemInHand(event.getHand()).isEmpty()) {
             return;
         }
 
