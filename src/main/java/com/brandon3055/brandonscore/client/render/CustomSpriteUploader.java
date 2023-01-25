@@ -59,6 +59,7 @@ public class CustomSpriteUploader extends TextureAtlasHolder {
         registeredSprites.entrySet()
                 .stream()
                 .filter(Objects::nonNull)
+                .filter(e -> e.getValue() != null)
                 .forEach(e -> e.getValue().accept(getSprite(e.getKey())));
 
         if (reloadListener != null) {
