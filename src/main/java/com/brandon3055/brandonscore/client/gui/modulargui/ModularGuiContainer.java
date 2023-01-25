@@ -4,13 +4,16 @@ import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -236,9 +239,9 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
         renderOverlayLayer(mouseX, mouseY, partialTicks);
 
         if (itemTooltipsEnabled) {
-            matrixStack.translate(0, 0, 400);
+            matrixStack.translate(0, 0, 510); //10 above element hover text.
             renderTooltip(matrixStack, mouseX, mouseY);
-            matrixStack.translate(0, 0, -400);
+            matrixStack.translate(0, 0, -510);
         }
     }
 
@@ -342,9 +345,64 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
         int xPos = slot.x;
         int yPos = slot.y;
         boolean occluded = manager.isAreaUnderElement(xPos + guiLeft(), yPos + guiTop(), 16, 16, 100);
-        if (!occluded || experimentalSlotOcclusion) {
-            super.renderSlot(poseStack, slot);
+        if (occluded && !experimentalSlotOcclusion) {
+            return;
         }
+
+        ItemStack itemstack = slot.getItem();
+        boolean flag = false;
+        boolean flag1 = slot == this.clickedSlot && !this.draggingItem.isEmpty() && !this.isSplittingStack;
+        ItemStack carried = this.menu.getCarried();
+        String countText = null;
+        if (slot == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !itemstack.isEmpty()) {
+            itemstack = itemstack.copy();
+            itemstack.setCount(itemstack.getCount() / 2);
+        } else if (this.isQuickCrafting && this.quickCraftSlots.contains(slot) && !carried.isEmpty()) {
+            if (this.quickCraftSlots.size() == 1) {
+                return;
+            }
+
+            if (AbstractContainerMenu.canItemQuickReplace(slot, carried, true) && this.menu.canDragTo(slot)) {
+                itemstack = carried.copy();
+                flag = true;
+                AbstractContainerMenu.getQuickCraftSlotCount(this.quickCraftSlots, this.quickCraftingType, itemstack, slot.getItem().isEmpty() ? 0 : slot.getItem().getCount());
+                int k = Math.min(itemstack.getMaxStackSize(), slot.getMaxStackSize(itemstack));
+                if (itemstack.getCount() > k) {
+                    countText = ChatFormatting.YELLOW.toString() + k;
+                    itemstack.setCount(k);
+                }
+            } else {
+                this.quickCraftSlots.remove(slot);
+                this.recalculateQuickCraftRemaining();
+            }
+        }
+
+        this.setBlitOffset(100);
+        this.itemRenderer.blitOffset = 100.0F;
+        if (itemstack.isEmpty() && slot.isActive()) {
+            Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
+            if (pair != null) {
+                TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+                RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
+                blit(poseStack, xPos, yPos, this.getBlitOffset(), 16, 16, textureatlassprite);
+                flag1 = true;
+            }
+        }
+
+        if (!flag1) {
+            if (flag) {
+                fill(poseStack, xPos, yPos, xPos + 16, yPos + 16, -2130706433);
+            }
+
+            RenderSystem.enableDepthTest();
+            this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemstack, xPos, yPos, slot.x + slot.y * this.imageWidth);
+            if (!occluded){
+                this.itemRenderer.renderGuiItemDecorations(this.font, itemstack, xPos, yPos, countText);
+            }
+        }
+
+        this.itemRenderer.blitOffset = 0.0F;
+        this.setBlitOffset(0);
     }
 
     protected void drawSlotOverlay(Slot slot, boolean occluded) {}

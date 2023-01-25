@@ -5,7 +5,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideC
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiSelectDialog;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
-import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
