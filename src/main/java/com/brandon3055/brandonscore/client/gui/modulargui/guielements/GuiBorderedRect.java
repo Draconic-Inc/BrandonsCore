@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui.guielements;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverColour;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -36,7 +37,7 @@ public class GuiBorderedRect extends GuiElement<GuiBorderedRect> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         boolean hovering = isMouseOver(mouseX, mouseY);
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         if (is3dEffect) {
             int fill = getFillColour(hovering);
             int topLeft = getBorderTopLeft(hovering);

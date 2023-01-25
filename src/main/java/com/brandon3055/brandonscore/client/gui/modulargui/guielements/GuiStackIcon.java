@@ -144,7 +144,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
                 poseStack.pushPose();
                 poseStack.translate(x, y, z + 200.0F);
                 poseStack.scale(xScale, yScale, 1F);
-                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                MultiBufferSource.BufferSource buffer = RenderUtils.getGuiBuffers();
                 fontRenderer.drawInBatch(s, (float) (19 - 2 - fontRenderer.width(s)), (float) (6 + 3), 16777215, true, poseStack.last().pose(), buffer, false, 0, 15728880);
                 buffer.endBatch();
                 poseStack.popPose();

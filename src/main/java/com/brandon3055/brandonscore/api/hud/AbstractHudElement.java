@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase.PopoutDialog;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
@@ -108,7 +109,7 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
     public GuiElement<?> createConfigDialog(GuiElement<?> parentElement) {
         PopoutDialog dialog = new PopoutDialog(parentElement).setCloseOnOutsideClick(false);
         dialog.setPreDrawCallback((minecraft, mouseX, mouseY, partialTicks, mouseOver) -> {
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             GuiHelper.drawHoverRect(getter, new PoseStack(), dialog.xPos(), dialog.yPos(), dialog.xSize(), dialog.ySize(), 0xFF100010, 0x500000FF, false);
             getter.endBatch();
         });

@@ -12,6 +12,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideC
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
 import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
 import com.brandon3055.brandonscore.inventory.SlotMover;
@@ -194,7 +195,7 @@ public class GuiToolkit<T extends Screen & IModularGui<?>> {
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 Material slot = BCGuiSprites.getThemed("slot");
-                MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
                 VertexConsumer buffer = getter.getBuffer(BCGuiSprites.GUI_TYPE);
 
                 for (int x = 0; x < columns; x++) {
@@ -271,7 +272,7 @@ public class GuiToolkit<T extends Screen & IModularGui<?>> {
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
                 super.renderElement(minecraft, mouseX, mouseY, partialTicks);
                 Material slot = BCGuiSprites.getThemed(largeSlot ? "slot_large" : "slot");
-                MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
                 VertexConsumer buffer = getter.getBuffer(BCGuiSprites.GUI_TYPE);
                 drawSprite(buffer, xPos(), yPos(), size, size, slot.sprite());
                 if (background != null && (slotMover == null || !slotMover.slot.hasItem())) {
@@ -1188,7 +1189,7 @@ public class GuiToolkit<T extends Screen & IModularGui<?>> {
             double fadeAlpha = Math.min(1, ((animState + 0.5) * 2));
             int col1 = 0x100010 | (int) (0xf0 * fadeAlpha) << 24;
             int col2 = 0x0080ff | (int) (0xB0 * fadeAlpha) << 24;
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             PoseStack poseStack = new PoseStack();
             GuiHelper.drawHoverRect(getter, poseStack, xPos(), yPos(), xSize(), ySize(), col1, col2, false);
             getter.endBatch();

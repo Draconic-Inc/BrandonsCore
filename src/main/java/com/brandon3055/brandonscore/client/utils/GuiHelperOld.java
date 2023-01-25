@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.client.utils;
 import codechicken.lib.colour.ColourARGB;
 import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.ResourceHelperBC;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -274,7 +275,7 @@ public class GuiHelperOld {
 //        RenderSystem.color4f(1F, 1F, 1F, 1F);
         Material mat = BCGuiSprites.getThemed("slot");
         ResourceHelperBC.bindTexture(mat.atlasLocation());
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
 
         if (center) {
             posX -= 81;
@@ -382,7 +383,7 @@ public class GuiHelperOld {
 //
 //    public static void renderCuboid(Cuboid6 cuboid, float r, float g, float b, float a) {
 //        PoseStack stack = new PoseStack();
-//        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+//        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
 //        Matrix4 mat = new Matrix4(stack);
 //        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(RenderType.lines()), mat);
 //        RenderUtils.bufferCuboidOutline(builder, cuboid.copy().expand(0.0020000000949949026D), r, g, b, a);

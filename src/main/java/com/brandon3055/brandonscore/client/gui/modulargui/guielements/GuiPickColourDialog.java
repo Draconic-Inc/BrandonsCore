@@ -9,6 +9,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpD
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiEvent;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.IGuiEventListener;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -142,7 +143,7 @@ public class GuiPickColourDialog extends GuiPopUpDialogBase<GuiPickColourDialog>
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         zOffset -= 1;
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
 //        drawBorderedRect(getter, xPos(), yPos(), xSize(), ySize(), 1, 0xFFFFFFFF, 0xFF000000);
         GuiHelper.drawHoverRect(getter, new PoseStack(), xPos(), yPos(), xSize(), ySize());
 

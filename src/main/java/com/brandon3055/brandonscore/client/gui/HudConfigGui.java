@@ -13,6 +13,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiManipul
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.hud.HudData;
 import com.brandon3055.brandonscore.client.hud.HudManager;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -112,7 +113,7 @@ public class HudConfigGui extends ModularGuiScreen {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             PoseStack mStack = new PoseStack();
             mStack.translate(0.0D, 0.0D, getRenderZLevel());
             double x = element.xPos();

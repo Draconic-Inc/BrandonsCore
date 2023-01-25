@@ -71,7 +71,7 @@ public class StackElement extends MDElementBase<StackElement> {
 //            Material mat = BCSprites.get("light/slot");
 //            bindTexture(mat.atlasLocation());
 //            RenderSystem.color4f(1F, 1F, 1F, 1F);
-//            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+//            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
 //            drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), xPos(), yPos(), xSize(), ySize(), mat.sprite());
 //            getter.endBatch();
 //        }

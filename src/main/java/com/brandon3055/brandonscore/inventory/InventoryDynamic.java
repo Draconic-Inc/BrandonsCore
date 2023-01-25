@@ -145,4 +145,12 @@ public class InventoryDynamic implements Container {
     public void removeIf(Predicate<ItemStack> filter) {
         stacks.removeIf(filter);
     }
+
+    public LinkedList<ItemStack> getStacks() {
+        return stacks;
+    }
+
+    public void setStacks(LinkedList<ItemStack> stacks) {
+        this.stacks = stacks;
+    }
 }

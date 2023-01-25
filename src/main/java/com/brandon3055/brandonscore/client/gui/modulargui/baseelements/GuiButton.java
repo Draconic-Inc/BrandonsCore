@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign.TextRotation;
 import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiColourProvider.HoverDisableColour;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
@@ -644,7 +645,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
     }
 
     protected void renderVanillaButton(Minecraft minecraft, int mouseX, int mouseY) {
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         boolean hovered = isMouseOver(mouseX, mouseY) || (toggleMode && getToggleState());
         Material mat = BCGuiSprites.getButton(getRenderState(hovered));
         VertexConsumer builder = getter.getBuffer(mat.renderType(location -> BCGuiSprites.GUI_TYPE));//mat.buffer(getter, location -> BCSprites.GUI_TYPE);

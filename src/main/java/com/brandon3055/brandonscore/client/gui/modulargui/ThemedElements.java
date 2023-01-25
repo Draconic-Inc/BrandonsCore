@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.client.gui.modulargui;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
 import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiPickColourDialog;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -68,7 +69,7 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             boolean inset = this.inset.get();
             int light = inset ? getBgLight() : getBgDark();
             int dark = inset ? getBgDark() : getBgLight();
@@ -102,7 +103,7 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             boolean inset = this.inset.get();
             int light = inset ? getBgDark() : getBgLight();
             int dark = inset ? getBgLight() : getBgDark();
@@ -133,7 +134,7 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             if (background) {
                 boolean highlight = isMouseOver(mouseX, mouseY) || dragging.get();
                 drawColouredRect(getter, xPos(), yPos(), xSize(), ySize(), GuiElement.mixColours(ThemedElements.getBgFill(), 0x00303030 + (highlight ? 0x00151515 : 0), !darkMode));
@@ -267,7 +268,7 @@ public class ThemedElements {
 
         @Override
         public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-            MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
             setPos(screenWidth / 2 + 10, screenHeight / 2).setSize(150, 50);
 
 

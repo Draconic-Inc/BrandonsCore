@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.api.hud.IHudDisplay;
 import com.brandon3055.brandonscore.api.hud.IHudItem;
 import com.brandon3055.brandonscore.api.math.Vector2;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
@@ -101,7 +102,7 @@ public class HudDataElement extends AbstractHudElement {
     @Override
     public void render(PoseStack mStack, float partialTicks, boolean configuring) {
         if (!enabled || (activeHud == null && !configuring)) return;
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         mStack.translate(xPos(), yPos(), 0);
         if (activeHud == null) {
             GuiHelper.drawHoverRect(getter, mStack, 0, 0, width(), height());

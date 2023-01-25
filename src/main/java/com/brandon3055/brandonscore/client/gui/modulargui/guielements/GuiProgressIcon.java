@@ -4,6 +4,7 @@ import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -77,7 +78,7 @@ public class GuiProgressIcon extends GuiElement<GuiProgressIcon> {
     @Override
     public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         super.renderElement(minecraft, mouseX, mouseY, partialTicks);
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         Material base = baseTextureSupplier == null ? baseTexture : baseTextureSupplier.get();
         drawSprite(getter.getBuffer(base.renderType(BCGuiSprites::makeType)), xPos(), yPos(), xSize(), ySize(), base.sprite());
         direction.draw(this, getter);

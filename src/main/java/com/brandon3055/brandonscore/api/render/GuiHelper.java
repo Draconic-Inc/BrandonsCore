@@ -339,7 +339,7 @@ public class GuiHelper {
                 String s = String.valueOf(stack.getCount());
                 poseStack.translate(x, y, 0);
                 poseStack.scale(xScale, yScale, 1F);
-                MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                MultiBufferSource.BufferSource buffer = RenderUtils.getGuiBuffers();
                 font.drawInBatch(s, (float) (19 - 2 - font.width(s)), (float) (6 + 3), 16777215, true, poseStack.last().pose(), buffer, false, 0, 15728880);
                 buffer.endBatch();
             }

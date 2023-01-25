@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.client.gui.modulargui.markdown;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -39,7 +40,7 @@ public class MarkdownTextRenderer {
     }
 
     public int drawFormattedString(String text, float x, float y, int colour, boolean dropShadow) {
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, guiElement.getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();

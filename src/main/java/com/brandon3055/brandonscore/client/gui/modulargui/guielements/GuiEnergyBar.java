@@ -5,6 +5,7 @@ import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import com.brandon3055.brandonscore.api.power.IOInfo;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.render.GuiHelper;
+import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.client.shader.BCShaders;
 import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
@@ -169,7 +170,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
             poseStack.mulPose(new Quaternion(0, 0, 90, true));
         }
 
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         int light = 0xFFFFFFFF;
         int dark = darkMode ? 0xFF808080 : 0xFF505050;
         GuiHelper.drawShadedRect(getter, poseStack, posX, posY, barWidth, barLength, 1, 0, dark, light, midColour(light, dark));

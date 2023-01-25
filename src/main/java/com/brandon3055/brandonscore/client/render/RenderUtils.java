@@ -9,6 +9,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
  */
 public class RenderUtils {
 
+    /**
+     * * @return The buffer source used for GUI rendering. You must ALWAYS call endBatch on this when you are done with it.
+     */
     public static MultiBufferSource.BufferSource getGuiBuffers() {
         return MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
     }
@@ -22,5 +25,4 @@ public class RenderUtils {
             ((MultiBufferSource.BufferSource) getter).endBatch();
         }
     }
-
 }

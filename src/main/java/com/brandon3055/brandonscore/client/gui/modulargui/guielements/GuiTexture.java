@@ -195,7 +195,7 @@ public class GuiTexture extends GuiElement<GuiTexture> {
         return new GuiTexture(null) {
             @Override
             public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-                MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
                 drawDynamicSprite(getter.getBuffer(BCGuiSprites.GUI_TYPE), getMaterial().sprite(), xPos(), yPos(), xSize(), ySize(), getInsets().top, getInsets().left, getInsets().bottom, getInsets().right);
                 getter.endBatch();
 

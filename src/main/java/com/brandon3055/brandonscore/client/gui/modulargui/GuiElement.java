@@ -2595,7 +2595,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a string with the given colour and optional shadow.
      */
     public int drawString(Font fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
@@ -2616,7 +2616,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a string with the given colour and optional shadow.
      */
     public float drawString(Font fontRenderer, FormattedText text, float x, float y, int colour, boolean dropShadow) {
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
@@ -2629,7 +2629,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
      * Draws a centered string
      */
     public void drawCenteredString(Font fontRenderer, String text, float x, float y, int colour, boolean dropShadow) {
-        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
         PoseStack textStack = new PoseStack();
         textStack.translate(0.0D, 0.0D, getRenderZLevel());
         Matrix4f textLocation = textStack.last().pose();
@@ -3092,7 +3092,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
 //                FormattedText line = textLines.get(lineNumber);
 //                if (line != null) {
-//                    MultiBufferSource.BufferSource renderType = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+//                    MultiBufferSource.BufferSource renderType = RenderUtils.getGuiBuffers();
 //                    PoseStack textStack = new PoseStack();
 //                    textStack.translate(0.0D, 0.0D, getRenderZLevel());
 //                    Matrix4f mat = textStack.last().pose();

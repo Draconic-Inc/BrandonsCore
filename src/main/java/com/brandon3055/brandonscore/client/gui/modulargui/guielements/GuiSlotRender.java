@@ -32,7 +32,7 @@
 //    public void renderElement(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
 ////        Material mat = BCSprites.getThemed("slot");
 ////        bindTexture(mat.atlasLocation());
-////        MultiBufferSource.BufferSource getter = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+////        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
 ////        drawSprite(getter.getBuffer(mat.renderType(BCSprites::makeType)), getInsetRect().x, getInsetRect().y, 18, 18, mat.sprite());
 ////        getter.endBatch();
 ////        super.renderElement(minecraft, mouseX, mouseY, partialTicks);
