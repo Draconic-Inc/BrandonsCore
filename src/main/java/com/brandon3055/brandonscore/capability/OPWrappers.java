@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.capability;
 
+import codechicken.lib.math.MathHelper;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
@@ -10,7 +11,7 @@ public class OPWrappers {
 
     public static class FE implements IOPStorage {
 
-        private IEnergyStorage storage;
+        private final IEnergyStorage storage;
 
         public FE(IEnergyStorage storage) {
             this.storage = storage;
@@ -34,6 +35,16 @@ public class OPWrappers {
         @Override
         public int getMaxEnergyStored() {
             return storage.getMaxEnergyStored();
+        }
+
+        @Override
+        public long modifyEnergyStored(long amount) {
+            amount = Math.min(Math.max(amount, Integer.MIN_VALUE), Integer.MAX_VALUE);
+            if (amount > 0) {
+                return receiveEnergy((int)amount, false);
+            } else {
+                return extractEnergy((int)-amount, false);
+            }
         }
 
         @Override

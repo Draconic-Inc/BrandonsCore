@@ -77,6 +77,11 @@ public class OPIOControl implements IOPStorage {
     }
 
     @Override
+    public long modifyEnergyStored(long amount) {
+        return wrapped.modifyEnergyStored(amount);
+    }
+
+    @Override
     public long receiveOP(long maxReceive, boolean simulate) {
         return wrapped.receiveOP(maxReceive, simulate);
     }

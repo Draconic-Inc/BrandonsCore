@@ -108,4 +108,20 @@ public interface IOPStorage extends IEnergyStorage {
     default int getMaxEnergyStored() {
         return (int) Math.min(getMaxOPStored(), Integer.MAX_VALUE);
     }
+
+    /**
+     * This method bypasses the usual can insert, can extract and transfer rate checks and modifies
+     * the energy storage directly. This is primarily for internal use and is the method by which an
+     * energy item / machine should modify its own energy value.
+     * <p>
+     * <strong>Only use this if you know what your doing!</strong>
+     * <p>
+     * Note: in cases where {@link IOPStorage} is wrapping {@link IEnergyStorage} this is still limited
+     * by the receive/extract methods. So unless your sure your dealing with an actual {@link IOPStorage}
+     * do not just assume this will work.
+     *
+     * @param amount the amount (positive or negative)
+     * @return The amount of energy that was actually added / removed (always positive or zero)
+     */
+    long modifyEnergyStored(long amount);
 }
