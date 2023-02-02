@@ -6,9 +6,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by brandon3055 on 26/08/2016.
@@ -16,7 +14,7 @@ import java.util.UUID;
 public class BCEventHandler {
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
-    public static List<UUID> noClipPlayers = new ArrayList<>();
+    public static Set<UUID> noClipPlayers = new HashSet<>();
 
     public static void init() {
         LOCK.lock();

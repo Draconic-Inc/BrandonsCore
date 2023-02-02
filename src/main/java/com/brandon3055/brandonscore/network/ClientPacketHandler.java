@@ -51,7 +51,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 if (enable) {
                     BCEventHandler.noClipPlayers.add(mc.player.getUUID());
                 } else {
-                    BCEventHandler.noClipPlayers.add(mc.player.getUUID());
+                    BCEventHandler.noClipPlayers.remove(mc.player.getUUID());
                 }
             }
             case BCoreNetwork.C_PLAYER_ACCESS_UPDATE -> {
