@@ -13,7 +13,6 @@ import java.util.function.Predicate;
  * Created by brandon3055 on 26/08/2016.
  * This is a dynamic inventory that will automatically expand its size to told any number of item stacks.
  */
-@Deprecated //Old IInventory stuff i probably dont need. Though i may need a dynamic IItemHandler at some point?
 public class InventoryDynamic implements Container {
 
     private LinkedList<ItemStack> stacks = new LinkedList<ItemStack>();

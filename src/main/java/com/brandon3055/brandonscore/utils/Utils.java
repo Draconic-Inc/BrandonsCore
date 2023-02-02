@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
 import com.brandon3055.brandonscore.lib.Vec3D;
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.ChatFormatting;
@@ -29,6 +30,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
 import java.text.DecimalFormat;
+import java.util.function.Consumer;
 
 /**
  * Created by Brandon on 25/07/2014.
@@ -198,8 +200,7 @@ public class Utils {
 
         try {
             return Integer.parseInt(s);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (catchException) {
                 return 0;
             }
@@ -214,8 +215,7 @@ public class Utils {
 
         try {
             return Double.parseDouble(s);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (catchException) {
                 return 0;
             }
@@ -239,8 +239,7 @@ public class Utils {
         if (catchException) {
             try {
                 return (int) Long.parseLong(s, 16);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return 0;
             }
         } else {
@@ -251,8 +250,7 @@ public class Utils {
     public static boolean validInteger(String value) {
         try {
             Long.parseLong(value);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
         return true;
@@ -261,8 +259,7 @@ public class Utils {
     public static boolean validDouble(String value) {
         try {
             Double.parseDouble(value);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
         return true;
@@ -327,8 +324,7 @@ public class Utils {
             if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                 return (String) transferable.getTransferData(DataFlavor.stringFlavor);
             }
-        }
-        catch (Exception var1) {}
+        } catch (Exception var1) {}
 
         return "";
     }
@@ -338,8 +334,7 @@ public class Utils {
             try {
                 StringSelection stringselection = new StringSelection(copyText);
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringselection, null);
-            }
-            catch (Exception var2) {
+            } catch (Exception var2) {
                 var2.printStackTrace();
             }
         }
@@ -386,16 +381,13 @@ public class Utils {
     }
 
     private static BiMap<Block, Fluid> fluidBlocks = null;
-    public static Fluid lookupFluidForBlock(Block block)
-    {
-        if (fluidBlocks == null)
-        {
+
+    public static Fluid lookupFluidForBlock(Block block) {
+        if (fluidBlocks == null) {
             BiMap<Block, Fluid> tmp = HashBiMap.create();
-            for (Fluid fluid : ForgeRegistries.FLUIDS.getValues())
-            {
+            for (Fluid fluid : ForgeRegistries.FLUIDS.getValues()) {
                 Block fluidBlock = fluid.defaultFluidState().createLegacyBlock().getBlock();
-                if (fluidBlock != Blocks.AIR)
-                {
+                if (fluidBlock != Blocks.AIR) {
                     tmp.put(fluidBlock, fluid);
                 }
             }
@@ -409,7 +401,7 @@ public class Utils {
         int i = -1;
         int j = stringIn.length();
 
-        while((i = stringIn.indexOf(167, i + 1)) != -1) {
+        while ((i = stringIn.indexOf(167, i + 1)) != -1) {
             if (i < j - 1) {
                 ChatFormatting textformatting = ChatFormatting.getByCode(stringIn.charAt(i + 1));
                 if (textformatting != null) {
@@ -418,7 +410,7 @@ public class Utils {
                     }
 
                     if (textformatting != ChatFormatting.RESET) {
-                        stringbuilder.append((Object)textformatting);
+                        stringbuilder.append((Object) textformatting);
                     }
                 }
             }
@@ -463,6 +455,60 @@ public class Utils {
         for (long v : values)
             sum += v;
         return sum / values.length;
+    }
+
+    public static void hollowCube(BlockPos min, BlockPos max, Consumer<BlockPos> callback) {
+        hollowCube(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ(), callback);
+    }
+
+    public static void hollowCube(int xmin, int ymin, int zmin, int xmax, int ymax, int zmax, Consumer<BlockPos> callback) {
+        if (xmax - xmin < 2 || ymax - ymin < 2 || zmax - zmin < 2) {
+            betweenClosed(xmin, ymin, zmin, xmax, ymax, zmax, callback);
+        }
+
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int x = xmin; x <= xmax; x++) {
+            for (int y = ymin + 1; y <= ymax - 1; y++) {
+                for (int z = zmin; z <= zmax; z += zmax - zmin) {
+                    callback.accept(cursor.set(x, y, z));
+                }
+            }
+
+            for (int z = zmin; z <= zmax; z++) {
+                for (int y = ymin; y <= ymax; y += ymax - ymin) {
+                    callback.accept(cursor.set(x, y, z));
+                }
+            }
+        }
+
+
+        for (int z = zmin + 1; z <= zmax - 1; z++) {
+            for (int y = ymin + 1; y <= ymax - 1; y++) {
+                for (int x = xmin; x <= xmax; x += xmax - xmin) {
+                    callback.accept(cursor.set(x, y, z));
+                }
+            }
+        }
+    }
+
+    public static void betweenClosed(BlockPos min, BlockPos max, Consumer<BlockPos> callback) {
+        betweenClosed(Math.min(min.getX(), max.getX()), Math.min(min.getY(), max.getY()), Math.min(min.getZ(), max.getZ()), Math.max(min.getX(), max.getX()), Math.max(min.getY(), max.getY()), Math.max(min.getZ(), max.getZ()), callback);
+    }
+
+    public static void betweenClosed(int xmin, int ymin, int zmin, int xmax, int ymax, int zmax, Consumer<BlockPos> callback) {
+        int width = xmax - xmin + 1;
+        int height = ymax - ymin + 1;
+        int depth = zmax - zmin + 1;
+        int total = width * height * depth;
+
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int index = 0; index < total; index++) {
+            int x = index % width;
+            int j1 = index / width;
+            int y = j1 % height;
+            int z = j1 / height;
+            callback.accept(cursor.set(xmin + x, ymin + y, zmin + z));
+        }
     }
 }
 

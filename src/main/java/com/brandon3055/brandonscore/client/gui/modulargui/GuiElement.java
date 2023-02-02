@@ -2740,12 +2740,12 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     public void renderTooltip(PoseStack poseStack, List<Component> components, int mouseX, int mouseY) {
         Screen screen = modularGui.getScreen();
-        screen.renderTooltip(poseStack, components, Optional.empty(), mouseX, mouseY);
+        screen.renderComponentTooltip(poseStack, components, mouseX, mouseY);
     }
 
-    public void renderTooltip(PoseStack poseStack, Component components, int mouseX, int mouseY) {
+    public void renderTooltip(PoseStack poseStack, Component component, int mouseX, int mouseY) {
         Screen screen = modularGui.getScreen();
-        screen.renderTooltip(poseStack, components, mouseX, mouseY);
+        screen.renderComponentTooltip(poseStack, Collections.singletonList(component), mouseX, mouseY);
     }
 
     @Deprecated //Use componente!... as much as possible

@@ -13,6 +13,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.awt.*;
 
@@ -347,29 +349,43 @@ public class ModularGuiTest extends ModularGuiScreen {
     public void render(PoseStack mStack, int mouseX, int mouseY, float partialTicks) {
         super.render(mStack, mouseX, mouseY, partialTicks);
 
-        Rectangle rect = new Rectangle(100, 100, 30, 30);
-
-        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
-        int w = 100;
-
-        GuiHelper.drawBorderedRect(getter, mStack, rect.x, rect.y, rect.width, rect.height, 1, 0xFFFFFFFF, 0xFFFF0000);
-
-        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(GuiHelper.transColourType), mStack);
-
-        for (int x = rect.x - w; x < rect.x + rect.width + w; x++) {
-            for (int y = rect.y - w; y < rect.y + rect.height + w; y++) {
-//                if (GuiHelper.isInRect(rect.x, rect.y, rect.width, rect.height, x, y)) continue;
-                double dist = GuiHelper.distToRect(rect.x, rect.y, rect.width, rect.height, x, y);
-                if (dist == 0) continue;
-                int c = (int)((dist / 50) * 255);
-                if (c > 255) c = 255;
-//                drawRect(builder, x, y, 1, 1, 0xFF000000 + c);
-                drawRect(builder, x+0.1, y+0.1, 0.8, 0.8, 0xFF000000 + c);
-            }
-        }
+//        Rectangle rect = new Rectangle(100, 100, 30, 30);
+//
+//        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
+//        int w = 100;
+//
+//        GuiHelper.drawHoverRect(getter, mStack, 100, 100, 80, 26);
+//
+//        ItemStack stack = new ItemStack(Items.CAT_SPAWN_EGG);
+//
+//        GuiHelper.renderGuiStack(stack, mStack, 104, 105, 16, 16);
+//
+//        getter.endBatch();
+//
+//        drawString(mStack, font, "test", 123, 105, 0xFFFFFFFF);
+//        drawString(mStack, font, "test", 123, 105+9, 0xFFFFFFFF);
 
 
-        getter.endBatch();
+//        GuiHelper.drawBorderedRect(getter, mStack, rect.x, rect.y, rect.width, rect.height, 1, 0xFFFFFFFF, 0xFFFF0000);
+
+
+
+//        VertexConsumer builder = new TransformingVertexConsumer(getter.getBuffer(GuiHelper.transColourType), mStack);
+//
+//        for (int x = rect.x - w; x < rect.x + rect.width + w; x++) {
+//            for (int y = rect.y - w; y < rect.y + rect.height + w; y++) {
+////                if (GuiHelper.isInRect(rect.x, rect.y, rect.width, rect.height, x, y)) continue;
+//                double dist = GuiHelper.distToRect(rect.x, rect.y, rect.width, rect.height, x, y);
+//                if (dist == 0) continue;
+//                int c = (int)((dist / 50) * 255);
+//                if (c > 255) c = 255;
+////                drawRect(builder, x, y, 1, 1, 0xFF000000 + c);
+//                drawRect(builder, x+0.1, y+0.1, 0.8, 0.8, 0xFF000000 + c);
+//            }
+//        }
+//
+//
+
     }
 
     public static void drawRect(VertexConsumer builder, double x, double y, double width, double height, int colour) {

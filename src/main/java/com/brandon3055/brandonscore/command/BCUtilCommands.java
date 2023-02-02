@@ -13,6 +13,7 @@ import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import com.brandon3055.brandonscore.utils.InventoryUtils;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
@@ -35,6 +36,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.*;
@@ -46,6 +48,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -54,6 +57,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
@@ -742,7 +746,16 @@ public class BCUtilCommands {
                     ServerLevel level = ctx.getSource().getLevel();
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-//                    level
+                    int radius = 90;
+                    BlockPos origin = player.blockPosition().offset(0, 88 - player.blockPosition().getY(), 0);
+
+                    BlockPos.betweenClosed(origin.offset(-radius, -20, -radius), origin.offset(radius, 20, radius)).forEach(blockPos -> {
+                        if (Utils.getDistance(blockPos.getX(), blockPos.getZ(), origin.getX(), origin.getZ()) > radius) return;
+                        BlockState state = level.getBlockState(blockPos);
+                        if (state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES)) {
+                            level.removeBlock(blockPos, false);
+                        }
+                    });
 
                     return 0;
                 });
