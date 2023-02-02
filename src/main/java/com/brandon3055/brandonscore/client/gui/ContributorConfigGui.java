@@ -177,6 +177,10 @@ public class ContributorConfigGui extends ModularGuiScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 1 && playerRender.isMouseOver(mouseX, mouseY)) {
+            dragging = true;
+            return true;
+        }
         boolean ret = super.mouseClicked(mouseX, mouseY, button);
         dragging = !ret;
         return ret;
@@ -199,7 +203,7 @@ public class ContributorConfigGui extends ModularGuiScreen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollAmount) {
         int size = playerRender.xSize();
-        size = (int) MathHelper.clip(size + (scrollAmount * 10), 10, 500);
+        size = (int) MathHelper.clip(size + (scrollAmount * Math.max(size / 10, 1)), 10, 500);
         playerRender.setSize(size, size);
         playerRender.reloadElement();
         return super.mouseScrolled(mouseX, mouseY, scrollAmount);
@@ -296,6 +300,6 @@ public class ContributorConfigGui extends ModularGuiScreen {
                 .setFillColours(0x90000000, 0x90116011)
                 .setTextColour(Palette.Ctrl.textH(false), Palette.Ctrl.textH(true))
                 .setBorderColours(0xFF606060, 0xFF9090FF)
-                .onPressed(() -> setter.accept(clazz.getEnumConstants()[(getter.get().ordinal() + 1) % clazz.getEnumConstants().length]));
+                .onButtonPressed((button) -> setter.accept(clazz.getEnumConstants()[(getter.get().ordinal() + (button == 0 ? 1 : -1)) % clazz.getEnumConstants().length]));
     }
 }

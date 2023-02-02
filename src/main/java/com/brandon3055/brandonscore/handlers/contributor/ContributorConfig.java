@@ -246,6 +246,10 @@ public class ContributorConfig {
             output.writeBoolean(overrideWebColour);
             output.writeInt(webColourOverride);
             output.writeBoolean(wingWebShader);
+
+            output.writeBoolean(wingBoneRGB);
+            output.writeBoolean(wingWebRGB);
+            output.writeBoolean(shieldRGB);
             //Wing Behavior
             output.writeEnum(wingsGround);
             output.writeEnum(wingsCreative);
@@ -280,6 +284,10 @@ public class ContributorConfig {
             config.overrideWebColour = input.readBoolean();               //     output.writeBoolean(overrideWebColour);
             config.webColourOverride = input.readInt();                   //     output.writeInt(webColourOverride);
             config.wingWebShader = input.readBoolean();                   //     output.writeBoolean(wingWebShader);
+
+            config.wingBoneRGB = input.readBoolean();
+            config.wingWebRGB = input.readBoolean();
+            config.shieldRGB = input.readBoolean();
             //Wing Behavior                                               //     //Wing Behavior
             config.wingsGround = input.readEnum(WingBehavior.class);      //     output.writeEnum(wingsGround);
             config.wingsCreative = input.readEnum(WingBehavior.class);    //     output.writeEnum(wingsCreative);
