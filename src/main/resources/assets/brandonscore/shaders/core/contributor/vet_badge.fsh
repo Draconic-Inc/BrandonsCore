@@ -52,7 +52,7 @@ void main() {
 
     vec4 color;
     if (useAlt) {
-        baseColour = vec4(1.5F, 0.259F, 0.302F, 1F);
+        baseColour = vec4(1.5, 0.259, 0.302, 1);
         float rad = (distance(coord.xy, vec2(81.5/128, 49.5/128)) * 5);
         float density = 24;
         float noise = 0;

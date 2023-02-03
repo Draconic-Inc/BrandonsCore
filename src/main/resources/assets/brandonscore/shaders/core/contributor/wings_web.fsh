@@ -41,7 +41,7 @@ void main() {
     float brightness = -1.5 + min(tval * 10, 1.5) + (coord.y * coord.y * coord.y * 1.5);
 
     //Bottom Curve
-    float curveDepth = 11F/64F;
+    float curveDepth = 11.0/64.0;
     float cSin = 1 - (sin(coord.x * M_PI) * curveDepth);
     float cDist = (coord.y + 0.04) - cSin; //neg until cSin then pos, 0.04 offset helps reduce edge clipping at bottom left and right, Compensated for in renderer
     cDist = max(0, cDist + 0.1) / 0.3;

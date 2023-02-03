@@ -45,9 +45,9 @@ vec4 chaos(sampler2D sampler0, float time, float yaw, float pitch, float alpha, 
 
         // get semi-random stuff
         int j = i + 7;
-        float rand1 = (j * j * 4321 + j * 8) * 2.0F;
+        float rand1 = (j * j * 4321 + j * 8) * 2.0;
         int k = j + 1;
-        float rand2 = (k * k * k * 239 + k * 37) * 3.6F;
+        float rand2 = (k * k * k * 239 + k * 37) * 3.6;
         float rand3 = rand1 * 347.4 + rand2 * 63.4;
 
         // random rotation matrix by random rotation around random axis

@@ -35,10 +35,6 @@ void main() {
     float value = BaseColor.w;
     float rad = distance(coord.xy, vec2(81.5/128, 49.5/128)) * 5;
 
-    //    vec3 rgb = hsv2rgb(vec3(rad, 1, 1));
-
-    //    baseColour = vec4(rgb, 1F);
-    //    baseColour = vec4(1.5F, 0.259F, 0.302F, 1F);
 
 
     float density = 24;
@@ -99,11 +95,7 @@ void main() {
 //    float rad = distance(coord.xy, vec2(81.5/128, 49.5/128)) * 5;
 //
 //    vec3 rgb = hsv2rgb(vec3(rad, 1, 1));
-//
-//    baseColour = vec4(rgb, 1F);
-//    //    baseColour = vec4(1.5F, 0.259F, 0.302F, 1F);
-//
-//
+
 //    float density = 24;
 //    float noise = 0;
 //    for (int i = 1; i <= 5; i++) {
