@@ -50,7 +50,7 @@ public class BCConfig {
     @Deprecated
     public static boolean devLog;
     public static boolean darkMode;
-    public static boolean useShaders;
+//    public static boolean useShaders;
 
     private static void loadClient() {
         clientTag = config.getCategory("Client");
@@ -58,10 +58,10 @@ public class BCConfig {
                 .setComment("Enable / Disable dark mode in my GUI's. (This can also be toggled in game from any gui that supports dark mode)")
                 .setDefaultBoolean(true)
                 .onSync((tag, type) -> darkMode = tag.getBoolean());
-        clientTag.getValue("useShaders")
-                .setComment("Set this to false if your system can not handle the awesomeness that is shaders! (Warning: Will make cool things look much less cool!)")
-                .setDefaultBoolean(true)
-                .onSync((tag, type) -> useShaders = tag.getBoolean());
+//        clientTag.getValue("useShaders")
+//                .setComment("Set this to false if your system can not handle the awesomeness that is shaders! (Warning: Will make cool things look much less cool!)")
+//                .setDefaultBoolean(true)
+//                .onSync((tag, type) -> useShaders = tag.getBoolean());
     }
 
     private static void modifyProperty(String name, Consumer<ConfigValue> modifyCallback, String... groupPath) {
