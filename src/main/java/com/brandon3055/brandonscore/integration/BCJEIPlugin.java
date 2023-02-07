@@ -11,7 +11,6 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 
@@ -40,21 +39,19 @@ public class BCJEIPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler() { //TODO figure out why this wont compile when done proeprly
+        registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler<>() {
             @Override
-            public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen containerScreen) {
-                return ((ModularGuiContainer)containerScreen).getManager().getJeiExclusions();
+            public List<Rect2i> getGuiExtraAreas(ModularGuiContainer containerScreen) {
+                return containerScreen.getManager().getJeiExclusions();
             }
         });
-//        registration.addGuiScreenHandler(ModularGuiScreen.class, new IScreenHandler<ModularGuiScreen>() {
-//            @Nullable
-//            @Override
-//            public IGuiProperties apply(ModularGuiScreen guiScreen) {
-//                return guiScreen.getManager().getJeiExclusions();
-//            }
-//        });
 
-        registration.addGhostIngredientHandler(ModularGuiContainer.class, new IGhostIngredientHandler<ModularGuiContainer>() {
+        registration.addGuiScreenHandler(ModularGuiScreen.class, ModularGuiProperties::create);
+        registration.addGuiScreenHandler(ModularGuiContainer.class, ModularGuiProperties::create);
+
+
+
+        registration.addGhostIngredientHandler(ModularGuiContainer.class, new IGhostIngredientHandler<>() {
             @Override
             public <I> java.util.List<Target<I>> getTargets(ModularGuiContainer gui, I ingredient, boolean doStart) {
                 //noinspection unchecked
@@ -77,7 +74,7 @@ public class BCJEIPlugin implements IModPlugin {
             }
         });
 
-        registration.addGhostIngredientHandler(ModularGuiScreen.class, new IGhostIngredientHandler<ModularGuiScreen>() {
+        registration.addGhostIngredientHandler(ModularGuiScreen.class, new IGhostIngredientHandler<>() {
             @Override
             public <I> java.util.List<Target<I>> getTargets(ModularGuiScreen gui, I ingredient, boolean doStart) {
                 return gui.getJEIDropTargets().stream().filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {

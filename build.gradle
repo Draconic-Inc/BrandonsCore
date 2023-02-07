@@ -96,7 +96,9 @@ dependencies {
 
 //     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
     implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
-    implementation fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
+
 }
 
 signing {

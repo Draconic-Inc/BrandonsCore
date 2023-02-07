@@ -2,25 +2,18 @@ package com.brandon3055.brandonscore.integration;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.ingredients.IIngredientHelper;
-import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
-import mezz.jei.api.recipe.IFocusFactory;
 import mezz.jei.api.recipe.IRecipeManager;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import mezz.jei.config.KeyBindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
@@ -88,20 +81,20 @@ public class JeiHelper {
     }
 
     public static int getRecipeKey(boolean usage) {
-        if (jeiAvailable()) {
-            return getRecipeKeyInternal(usage);
-        }
+//        if (jeiAvailable()) {
+//            return getRecipeKeyInternal(usage);
+//        }
         return -1;
     }
 
-    private static int getRecipeKeyInternal(boolean usage) {
-        try {
-            return usage ? KeyBindings.showUses.get(0).getKey().getValue() : KeyBindings.showRecipe.get(0).getKey().getValue();
-        } catch (Throwable e) {
-            e.printStackTrace();
-            return 01;
-        }
-    }
+//    private static int getRecipeKeyInternal(boolean usage) {
+//        try {
+//            return usage ? KeyBindings.showUses.get(0).getKey().getValue() : KeyBindings.showRecipe.get(0).getKey().getValue();
+//        } catch (Throwable e) {
+//            e.printStackTrace();
+//            return 01;
+//        }
+//    }
 
     @Nullable //Because reasons!
     public static ItemStack getPanelItemUnderMouse() {
