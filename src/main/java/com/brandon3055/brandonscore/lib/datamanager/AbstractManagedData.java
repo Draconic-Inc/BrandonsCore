@@ -56,7 +56,9 @@ public abstract class AbstractManagedData<T> implements IManagedData {
     public void markDirty() {
         validate();
         isDirty = true;
-        dataManager.markDirty();
+        if (flags.saveNBT && !flags.dontMark){
+            dataManager.markDirty();
+        }
     }
 
     @Override

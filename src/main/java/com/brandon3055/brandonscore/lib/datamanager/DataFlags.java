@@ -10,22 +10,22 @@ import com.google.common.annotations.Beta;
  */
 public class DataFlags {
 
-    public static DataFlags NONE = new DataFlags(false, false, false, false, false, false, false);
+    public static DataFlags NONE = new DataFlags(false, false, false, false, false, false, false, false);
     /**
      * Save this data to the tile's NBT.
      */
-    public static DataFlags SAVE_NBT = new DataFlags(true, false, false, false, false, false, false);
+    public static DataFlags SAVE_NBT = new DataFlags(true, false, false, false, false, false, false, false);
 
     /**
      * Save this data to dropped item when tile is harvested.
      */
-    public static DataFlags SAVE_ITEM = new DataFlags(false, true, false, false, false, false, false);
+    public static DataFlags SAVE_ITEM = new DataFlags(false, true, false, false, false, false, false, false);
 
     /**
      * Sync this data via the tile (usually via onUpdate).
      * This should be used for data that needs to always be synced to the client.
      */
-    public static DataFlags SYNC_TILE = new DataFlags(false, false, true, false, false, false, false);
+    public static DataFlags SYNC_TILE = new DataFlags(false, false, true, false, false, false, false, false);
 
     /**
      * Sync this data via container.
@@ -33,18 +33,18 @@ public class DataFlags {
      * Useful if data is only needed inside a GUI.
      * TODO I think this will have issues if multiple players have a container open. I need to look into this if its still an issue in 1.14+
      */
-    public static DataFlags SYNC_CONTAINER = new DataFlags(false, false, false, true, false, false, false);
+    public static DataFlags SYNC_CONTAINER = new DataFlags(false, false, false, true, false, false, false, false);
 
     /**
      * If set a client side block update will be triggered when this data is modified.
      */
-    public static DataFlags TRIGGER_UPDATE = new DataFlags(false, false, false, false, true, false, false);
+    public static DataFlags TRIGGER_UPDATE = new DataFlags(false, false, false, false, true, false, false, false);
 
     /**
      * If this flag is set then a client sync will be triggered when the data value is set.
      * In most situations this would not be needed but there may be some edge cases where this could be useful.
      */
-    public static DataFlags SYNC_ON_SET = new DataFlags(false, false, false, false, false, true, false);
+    public static DataFlags SYNC_ON_SET = new DataFlags(false, false, false, false, false, true, false, false);
 
     /**
      * If set this flag will allow changes to be pushed from the client to the server. This is useful for things like gui controls <strong>BUT<strong/>
@@ -59,13 +59,20 @@ public class DataFlags {
      * For Security reasons this will only work on tiles that have an associated container, and that container must be open by the player.
      */
     @Beta //Potentially dangerous! Read documentation
-    public static DataFlags CLIENT_CONTROL = new DataFlags(false, false, false, false, false, false, true);
+    public static DataFlags CLIENT_CONTROL = new DataFlags(false, false, false, false, false, false, true, false);
     //The following are combinations of the above flags.
     public static DataFlags SAVE_BOTH = new DataFlags(SAVE_NBT, SAVE_ITEM);
     public static DataFlags SAVE_NBT_SYNC_TILE = new DataFlags(SAVE_NBT, SYNC_TILE);
     public static DataFlags SAVE_NBT_SYNC_CONTAINER = new DataFlags(SAVE_NBT, SYNC_CONTAINER);
     public static DataFlags SAVE_BOTH_SYNC_TILE = new DataFlags(SAVE_BOTH, SYNC_TILE);
     public static DataFlags SAVE_BOTH_SYNC_CONTAINER = new DataFlags(SAVE_BOTH, SYNC_CONTAINER);
+
+    /**
+     * If this flag is specified the host will not be marked dirty when the data value is changed.
+     */
+    @Deprecated //Meh changed my mind but this may still be useful
+    public static DataFlags DONT_DIRTY = new DataFlags(false, false, false, false, false, false, false, true);
+
 
     public final boolean saveNBT;
     public final boolean saveItem;
@@ -74,8 +81,9 @@ public class DataFlags {
     public final boolean triggerUpdate;
     public final boolean syncOnSet;
     public final boolean allowClientControl;
+    public final boolean dontMark;
 
-    DataFlags(boolean saveNBT, boolean saveItem, boolean syncTile, boolean syncContainer, boolean triggerUpdate, boolean syncOnSet, boolean allowClientControl) {
+    DataFlags(boolean saveNBT, boolean saveItem, boolean syncTile, boolean syncContainer, boolean triggerUpdate, boolean syncOnSet, boolean allowClientControl, boolean dontMark) {
         this.saveNBT = saveNBT;
         this.saveItem = saveItem;
         this.syncTile = syncTile;
@@ -83,6 +91,7 @@ public class DataFlags {
         this.triggerUpdate = triggerUpdate;
         this.syncOnSet = syncOnSet;
         this.allowClientControl = allowClientControl;
+        this.dontMark = dontMark;
     }
 
     DataFlags(DataFlags[] combine) {
@@ -97,6 +106,7 @@ public class DataFlags {
         boolean triggerUpdate = base.triggerUpdate;
         boolean syncOnSet = base.syncOnSet;
         boolean allowClientControl = base.allowClientControl;
+        boolean dontMark = base.dontMark;
         for (DataFlags flag : combine) {
             saveNBT |= flag.saveNBT;
             saveItem |= flag.saveItem;
@@ -105,6 +115,7 @@ public class DataFlags {
             triggerUpdate |= flag.triggerUpdate;
             syncOnSet |= flag.syncOnSet;
             allowClientControl |= flag.allowClientControl;
+            dontMark |= flag.allowClientControl;
         }
         this.saveNBT = saveNBT;
         this.saveItem = saveItem;
@@ -113,5 +124,6 @@ public class DataFlags {
         this.triggerUpdate = triggerUpdate;
         this.syncOnSet = syncOnSet;
         this.allowClientControl = allowClientControl;
+        this.dontMark = dontMark;
     }
 }

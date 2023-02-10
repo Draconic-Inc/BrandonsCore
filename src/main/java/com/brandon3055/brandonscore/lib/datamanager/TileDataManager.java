@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.lib.datamanager;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.inventory.ContainerBCTile;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
@@ -29,9 +30,15 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
 
     protected LinkedList<IManagedData> managedDataList = new LinkedList<>();
     public final T tile;
+    private int lastDirty = -9999;
+    private int maxSaveInterval = 10;
 
     public TileDataManager(T tile) {
         this.tile = tile;
+    }
+
+    public void setMaxSaveInterval(int maxSaveInterval) {
+        this.maxSaveInterval = maxSaveInterval;
     }
 
     /**
@@ -182,7 +189,14 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     @Override
     public void markDirty() {
         if (tile.getLevel() != null && !tile.getLevel().isClientSide) {
-            tile.setChanged();
+            maxSaveInterval = 10;
+            if (maxSaveInterval == 0){
+                tile.setChanged();
+            } else if (TimeKeeper.getServerTick() > lastDirty + maxSaveInterval) {
+                lastDirty = TimeKeeper.getServerTick();
+                tile.setChanged();
+            }
+
             for (IManagedData data : managedDataList) {
                 if (data.flags().syncOnSet && data.isDirty(true)) {
                     PacketCustom syncPacket = createSyncPacket();
