@@ -18,6 +18,7 @@ import com.brandon3055.brandonscore.lib.datamanager.*;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.network.ServerPacketHandler;
 import com.brandon3055.brandonscore.utils.EnergyUtils;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -42,6 +43,8 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.items.IItemHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,6 +60,7 @@ import static com.brandon3055.brandonscore.lib.datamanager.DataFlags.*;
  * Base tile entity class for all tile entities
  */
 public class TileBCore extends BlockEntity implements IDataManagerProvider, IDataRetainingTile, Nameable {
+    public static final Logger LOGGER = LogManager.getLogger();
 
     protected boolean playerAccessTracking = false;
     protected TileCapabilityManager capManager = new TileCapabilityManager(this);
@@ -65,6 +69,9 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
     protected Map<String, INBTSerializable<CompoundTag>> savedItemDataObjects = new HashMap<>();
     protected Map<String, INBTSerializable<CompoundTag>> savedDataObjects = new HashMap<>();
     private Map<Integer, Consumer<MCDataInput>> clientPacketHandlers = new HashMap<>();
+
+    private boolean debugOutputEnabled = false;
+    private ManagedBool debugEnabled = null;
 
     private List<Runnable> tickables = new ArrayList<>();
     private ManagedEnum<RSMode> rsControlMode = this instanceof IRSSwitchable ? register(new ManagedEnum<>("rs_mode", RSMode.ALWAYS_ACTIVE, SAVE_BOTH_SYNC_TILE, CLIENT_CONTROL)) : null;
@@ -638,4 +645,28 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
         return (int) worldPosition.asLong();
     }
 
+    //Debug
+
+    /**
+     * Call from tile constructor to enable debug-ability
+     */
+    protected void enableTileDebug() {
+        register(debugEnabled = new ManagedBool("tile.debugging.enabled", false, SYNC_TILE));
+    }
+
+    public boolean toggleDebugOutput(Player player) {
+        if (debugEnabled == null) {
+            return false;
+        } else {
+            debugEnabled.invert();
+            player.sendMessage(new TextComponent("Debug is now " + (debugEnabled.get() ? "Enabled (Check Server/Client console)" : "Disabled")), Util.NIL_UUID);
+        }
+        return true;
+    }
+
+    public void debug(Object text) {
+        if (debugEnabled.get()) {
+            LOGGER.info("TileDebug:" + getBlockPos() + ", " + getLevel().dimension().location() + ": " + text);
+        }
+    }
 }

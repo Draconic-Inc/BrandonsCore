@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.command;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.HandHelper;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
@@ -57,6 +58,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.phys.Vec3;
@@ -100,13 +102,36 @@ public class BCUtilCommands {
                 .then(registerDumpEvents())
                 .then(registerEggify())
                 .then(registerPlaceMultiBlock())
-                .then(reloadContributors());
+                .then(reloadContributors())
+                .then(registerTileDebug());
         if (BrandonsCore.inDev) {
             builder.then(registerDev1());
             builder.then(registerDev2());
         }
 
         dispatcher.register(builder);
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> registerTileDebug() {
+        return Commands.literal("debug_tile")
+                .requires(cs -> cs.hasPermission(3))
+                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .executes(context -> {
+                            BlockPos pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            if (!(player.level.getBlockEntity(pos) instanceof TileBCore tile) || !tile.toggleDebugOutput(player)) {
+                                player.sendMessage(new TextComponent("This tile does not support Brandon's Core Debugging"), Util.NIL_UUID);
+                            }
+                            return 0;
+                        })
+                        .then(Commands.argument("multiblock", ResourceLocationArgument.id())
+                                .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(MultiBlockManager.getRegisteredIds(), builder))
+                                .executes(context -> MultiBlockManager.placeCommand(context.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(context, "pos"), ResourceLocationArgument.getId(context, "multiblock"), Vec3.ZERO))
+                                .then(Commands.argument("rotation", Vec3Argument.vec3(false))
+                                        .executes(context -> MultiBlockManager.placeCommand(context.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(context, "pos"), ResourceLocationArgument.getId(context, "multiblock"), Vec3Argument.getVec3(context, "rotation")))
+                                )
+                        )
+                );
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> reloadContributors() {
