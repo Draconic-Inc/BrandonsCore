@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ElytraLayer.class)
 public class ElytraLayerMixin {
 
-    public PlayerModel<?> getThis() {
-        return SneakyUtils.unsafeCast(this);
+    private PlayerModel getThis() {
+        return (PlayerModel) (Object) this;
     }
 
     @Inject(

@@ -21,8 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(LocalPlayer.class)
 public class LocalPlayerMixin {
 
-    public LocalPlayer getThis() {
-        return SneakyUtils.unsafeCast(this);
+    private LocalPlayer getThis() {
+        return (LocalPlayer) (Object) this;
     }
 
     @Inject(

@@ -20,10 +20,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(Player.class)
 public class PlayerMixin {
 
-    public Player getThis() {
-        return SneakyUtils.unsafeCast(this);
+    private Player getThis() {
+        return (Player) (Object) this;
     }
-
 
     @SuppressWarnings("InvalidInjectorMethodSignature")
     @Inject(

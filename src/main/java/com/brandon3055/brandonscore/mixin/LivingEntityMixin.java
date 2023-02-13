@@ -31,8 +31,8 @@ public abstract class LivingEntityMixin implements EntityAccessor{
 
     @Shadow protected int fallFlyTicks;
 
-    public LivingEntity getThis() {
-        return SneakyUtils.unsafeCast(this);
+    private LivingEntity getThis() {
+        return (LivingEntity) (Object) this;
     }
 
     @SuppressWarnings("InvalidInjectorMethodSignature")
