@@ -115,7 +115,7 @@ public class DataFlags {
             triggerUpdate |= flag.triggerUpdate;
             syncOnSet |= flag.syncOnSet;
             allowClientControl |= flag.allowClientControl;
-            dontMark |= flag.allowClientControl;
+            dontMark |= flag.dontMark;
         }
         this.saveNBT = saveNBT;
         this.saveItem = saveItem;
@@ -125,5 +125,9 @@ public class DataFlags {
         this.syncOnSet = syncOnSet;
         this.allowClientControl = allowClientControl;
         this.dontMark = dontMark;
+    }
+
+    public boolean syncViaPacket() {
+        return syncTile || syncContainer;
     }
 }

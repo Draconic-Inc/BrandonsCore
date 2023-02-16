@@ -31,7 +31,7 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     protected LinkedList<IManagedData> managedDataList = new LinkedList<>();
     public final T tile;
     private int lastDirty = -9999;
-    private int maxSaveInterval = 10;
+    private int maxSaveInterval = 0;
 
     public TileDataManager(T tile) {
         this.tile = tile;
@@ -174,7 +174,7 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     @Override
     public void writeToNBT(CompoundTag compound) {
         CompoundTag dataTag = new CompoundTag();
-        DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.toNBT(dataTag));
+        DataUtils.forEachMatch(managedDataList, data -> data.flags().syncViaPacket(), data -> data.toNBT(dataTag));
         compound.put(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
@@ -182,7 +182,7 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     public void readFromNBT(CompoundTag compound) {
         if (compound.contains(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
             CompoundTag dataTag = compound.getCompound(BlockBCore.BC_MANAGED_DATA_FLAG);
-            DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.fromNBT(dataTag));
+            DataUtils.forEachMatch(managedDataList, data -> data.flags().syncViaPacket(), data -> data.fromNBT(dataTag));
         }
     }
 
@@ -244,14 +244,14 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
      */
     public void writeSyncNBT(CompoundTag compound) {
         CompoundTag dataTag = new CompoundTag();
-        DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.toNBT(dataTag));
+        DataUtils.forEachMatch(managedDataList, data -> data.flags().syncViaPacket(), data -> data.toNBT(dataTag));
         compound.put(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
     public void readSyncNBT(CompoundTag compound) {
         if (compound.contains(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
             CompoundTag dataTag = compound.getCompound(BlockBCore.BC_MANAGED_DATA_FLAG);
-            DataUtils.forEachMatch(managedDataList, data -> data.flags().syncTile, data -> data.fromNBT(dataTag));
+            DataUtils.forEachMatch(managedDataList, data -> data.flags().syncViaPacket(), data -> data.fromNBT(dataTag));
         }
     }
 
