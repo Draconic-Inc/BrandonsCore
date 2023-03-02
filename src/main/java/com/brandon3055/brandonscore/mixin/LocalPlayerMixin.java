@@ -39,8 +39,8 @@ public class LocalPlayerMixin {
             getThis().connection.send(new ServerboundPlayerCommandPacket(getThis(), ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         if (BrandonsCore.equipmentManager != null) {
-            ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e-> e.getItem() instanceof ElytraEnabledItem, getThis());
-            if (stack.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(stack, getThis()) && getThis().tryToStartFallFlying()) {
+            ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e-> e.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(e, getThis()), getThis());
+            if (!stack.isEmpty() && getThis().tryToStartFallFlying()) {
                 getThis().connection.send(new ServerboundPlayerCommandPacket(getThis(), ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             }
         }

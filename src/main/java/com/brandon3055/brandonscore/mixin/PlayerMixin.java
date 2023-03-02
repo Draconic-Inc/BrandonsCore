@@ -41,8 +41,8 @@ public class PlayerMixin {
             cir.setReturnValue(true);
         }
         if (BrandonsCore.equipmentManager != null) {
-            ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e-> e.getItem() instanceof ElytraEnabledItem, getThis());
-            if (stack.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(stack, getThis())) {
+            ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e-> e.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(e, getThis()), getThis());
+            if (!stack.isEmpty()) {
                 getThis().startFallFlying();
                 cir.setReturnValue(true);
             }

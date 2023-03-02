@@ -52,8 +52,8 @@ public abstract class LivingEntityMixin implements EntityAccessor{
         }
 
         if (BrandonsCore.equipmentManager != null) {
-            ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e-> e.getItem() instanceof ElytraEnabledItem, getThis());
-            if (stack.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(stack, getThis()) && item.elytraFlightTickBC(stack, getThis(), fallFlyTicks)) {
+            ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e -> e.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(e, getThis()), getThis());
+            if (stack.getItem() instanceof ElytraEnabledItem item && item.elytraFlightTickBC(stack, getThis(), fallFlyTicks)) {
                 ci.cancel();
             }
         }
