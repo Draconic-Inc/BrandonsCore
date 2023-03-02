@@ -13,7 +13,7 @@ public class ScissorHelper {
 
     public static void pushGuiScissor(Minecraft mc, double x, double y, double width, double height, int screenWidth, int screenHeight) {
         double yResScale = (double) mc.getWindow().getScreenHeight() / (screenHeight);
-        double xResScale = (double) mc.getWindow().getGuiScaledWidth() / (screenWidth);
+        double xResScale = (double) mc.getWindow().getScreenWidth() / (screenWidth);
         double scaledWidth = (double) width * xResScale;
         double scaledHeight = (double) height * yResScale;
         int screenX = (int) (x * xResScale);
