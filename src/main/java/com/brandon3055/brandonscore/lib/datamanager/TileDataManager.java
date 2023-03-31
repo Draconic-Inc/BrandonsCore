@@ -174,7 +174,7 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     @Override
     public void writeToNBT(CompoundTag compound) {
         CompoundTag dataTag = new CompoundTag();
-        DataUtils.forEachMatch(managedDataList, data -> data.flags().syncViaPacket(), data -> data.toNBT(dataTag));
+        DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.toNBT(dataTag));
         compound.put(BlockBCore.BC_MANAGED_DATA_FLAG, dataTag);
     }
 
@@ -182,14 +182,13 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
     public void readFromNBT(CompoundTag compound) {
         if (compound.contains(BlockBCore.BC_MANAGED_DATA_FLAG, 10)) {
             CompoundTag dataTag = compound.getCompound(BlockBCore.BC_MANAGED_DATA_FLAG);
-            DataUtils.forEachMatch(managedDataList, data -> data.flags().syncViaPacket(), data -> data.fromNBT(dataTag));
+            DataUtils.forEachMatch(managedDataList, data -> data.flags().saveNBT, data -> data.fromNBT(dataTag));
         }
     }
 
     @Override
     public void markDirty() {
         if (tile.getLevel() != null && !tile.getLevel().isClientSide) {
-            maxSaveInterval = 10;
             if (maxSaveInterval == 0){
                 tile.setChanged();
             } else if (TimeKeeper.getServerTick() > lastDirty + maxSaveInterval) {
