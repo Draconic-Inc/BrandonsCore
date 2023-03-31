@@ -30,45 +30,45 @@ out vec4 fragColor;
 #define T_ANIM_OFF 2.0
 
 void main() {
-    vec2 center = vec2(81.5/128, 49.5/128);
+    vec2 center = vec2(81.5/128.0, 49.5/128.0);
     vec3 origin = vec3(texCoord0 - center, 0.0);
     vec4 texCol = texture(Sampler0, texCoord0);
     float anim = mod(Time, T_OFF + T_ON + T_ANIM_ON + T_ANIM_OFF);
-    float diamater = 42 / 128.0;
+    float diamater = 42.0 / 128.0;
 
-    if (texCol.a <= 0 || anim < T_OFF) {
+    if (texCol.a <= 0.0 || anim < T_OFF) {
         discard;
     }
 
     anim -= T_OFF;
     //0->1 controlling effect activation
-    float turnOnAnim = anim < T_ANIM_ON ? anim / T_ANIM_ON : 1;
+    float turnOnAnim = anim < T_ANIM_ON ? anim / T_ANIM_ON : 1.0;
     anim -= T_ANIM_ON + T_ON;
     //0->1 controlling effect deactivation
-    float turnOffAnim = anim < 0 ? 0 : anim / T_ANIM_OFF;
+    float turnOffAnim = anim < 0.0 ? 0.0 : anim / T_ANIM_OFF;
 
-    vec3 coord = vec3(atan(origin.x, origin.y) / 6.28318 + 0.5, length(origin) * 0.4, 0);
+    vec3 coord = vec3(atan(origin.x, origin.y) / 6.28318 + 0.5, length(origin) * 0.4, 0.0);
 
     float len = length(origin);
     float dist = len / (diamater * 1.25 * turnOnAnim);
-    if (dist > 1) {
+    if (dist > 1.0) {
         discard;
     }
 
-    float value = 3 - (3 * dist);
-    value *= min(1, (1.0 - (len / (diamater * 1.025))) * 100);
+    float value = 3.0 - (3.0 * dist);
+    value *= min(1.0, (1.0 - (len / (diamater * 1.025))) * 100);
 
     vec3 coreColour = BaseColor.rgb;
-    coreColour *= (1 - (texCol.a - 0.5));
+    coreColour *= (1.0 - (texCol.a - 0.5));
 
     for(int i = 1; i <= 4; i++) {
         float power = pow(2.0, float(i));
         value += (1.5 / power) * snoise(coord + vec3(0.0,-Time * 0.05, Time * 0.01), power * 16.0);
     }
 
-    value *= 1 - turnOffAnim;
+    value *= 1.0 - turnOffAnim;
 
-    vec4 colour = vec4(pow(value * coreColour.r, 3 * (1.0 - coreColour.r)), pow(value * coreColour.g, 3 * (1.0 - coreColour.g)), pow(value * coreColour.b, 3 * (1.0 - coreColour.b)), min(value, 1));
+    vec4 colour = vec4(pow(value * coreColour.r, 3.0 * (1.0 - coreColour.r)), pow(value * coreColour.g, 3.0 * (1.0 - coreColour.g)), pow(value * coreColour.b, 3.0 * (1.0 - coreColour.b)), min(value, 1.0));
     colour *= vertexColor * ColorModulator;
     colour.rgb = mix(overlayColor.rgb, colour.rgb, overlayColor.a);
     colour *= lightMapColor;
