@@ -8,7 +8,7 @@ import java.util.LinkedList;
 
 public class ScissorHelper {
 
-    private static LinkedList<ScissorState> prevStates = new LinkedList<>();
+    private static LinkedList<ScissorState> stack = new LinkedList<>();
     private static ScissorState currentState = null;
 
     public static void pushGuiScissor(Minecraft mc, double x, double y, double width, double height, int screenWidth, int screenHeight) {
@@ -29,16 +29,16 @@ public class ScissorHelper {
         int xMax = x + width;
         int yMax = y + height;
         if (currentState == null) {
-            prevStates.add(currentState = new ScissorState(false, 0, 0, mc.getWindow().getScreenWidth(), mc.getWindow().getScreenHeight()));
+            stack.add(currentState = new ScissorState(false, 0, 0, mc.getWindow().getScreenWidth(), mc.getWindow().getScreenHeight()));
         }
         else {
-            prevStates.add(currentState);
+            stack.add(currentState);
         }
         currentState = new ScissorState(true, x, y, xMax, yMax, currentState).apply();
     }
 
     public static void popScissor() {
-        ScissorState lastState = prevStates.size() > 0 ? prevStates.removeLast() : null;
+        ScissorState lastState = stack.size() > 0 ? stack.removeLast() : null;
         if (lastState != null) {
             currentState = lastState.apply();
             if (!currentState.enabled) {

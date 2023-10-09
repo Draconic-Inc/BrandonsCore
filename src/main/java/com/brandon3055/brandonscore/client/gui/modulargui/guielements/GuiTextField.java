@@ -633,7 +633,7 @@ public class GuiTextField extends GuiElement<GuiTextField> {
 
         if (suggestion != null && value.isEmpty()) {
             if (shadow.get()) {
-                fontRenderer.drawShadow(poseStack, suggestion.get(), (float) (k1 - 1), (float) i1, -8355712);
+                fontRenderer.drawShadow(poseStack, suggestion.get(), (float) (k1 - 1), (float) i1, 0xff808080);
             } else {
                 fontRenderer.draw(poseStack, suggestion.get(), (float) (k1 - 1), (float) i1, -8355712);
             }
