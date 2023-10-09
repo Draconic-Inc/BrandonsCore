@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
@@ -160,10 +161,10 @@ public class JeiHelper {
 
         @Override
         public boolean handleRecipeClick(Minecraft minecraft, double mouseX, double mouseY, boolean usage) {
-            ItemStack clicked = recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY, VanillaTypes.ITEM_STACK);
+            Optional<ItemStack> clicked = recipeLayout.getIngredientUnderMouse((int) mouseX, (int) mouseY, VanillaTypes.ITEM_STACK);
 
             if (clicked != null) {
-                IFocus<ItemStack> focus = BCJEIPlugin.jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(usage ? INPUT : OUTPUT, VanillaTypes.ITEM_STACK, clicked);
+                IFocus<ItemStack> focus = BCJEIPlugin.jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(usage ? INPUT : OUTPUT, VanillaTypes.ITEM_STACK, clicked.get());
                 BCJEIPlugin.jeiRuntime.getRecipesGui().show(focus);
             }
 

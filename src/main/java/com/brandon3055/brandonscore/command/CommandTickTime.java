@@ -40,7 +40,7 @@
 //            if (!listeners.get(name).isDead()){
 //                listeners.get(name).setDead();
 //                listeners.remove(name);
-//                sender.sendMessage(new StringTextComponent("Stopped sending tick time to client. (Display will go away after a few seconds)"));
+//                sender.sendSystemMessage(new StringTextComponent("Stopped sending tick time to client. (Display will go away after a few seconds)"));
 //                return;
 //            }
 //            else {
@@ -53,7 +53,7 @@
 //        TickSenderProcess process = new TickSenderProcess(sender.getName(), list);
 //        listeners.put(sender.getName(), process);
 //        ProcessHandler.addProcess(process);
-//        sender.sendMessage(new StringTextComponent("Started sending tick time to client."));
+//        sender.sendSystemMessage(new StringTextComponent("Started sending tick time to client."));
 //    }
 //
 //    @Override

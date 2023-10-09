@@ -24,8 +24,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Nameable;
@@ -589,10 +587,10 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
     @Override
     public Component getName() {
         if (hasCustomName()) {
-            return new TextComponent(customName);
+            return Component.literal(customName);
         }
 
-        return new TranslatableComponent(getBlockState().getBlock().getDescriptionId());
+        return Component.translatable(getBlockState().getBlock().getDescriptionId());
     }
 
     @Override
@@ -659,7 +657,7 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
             return false;
         } else {
             debugEnabled.invert();
-            player.sendMessage(new TextComponent("Debug is now " + (debugEnabled.get() ? "Enabled (Check Server/Client console)" : "Disabled")), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("Debug is now " + (debugEnabled.get() ? "Enabled (Check Server/Client console)" : "Disabled")));
         }
         return true;
     }

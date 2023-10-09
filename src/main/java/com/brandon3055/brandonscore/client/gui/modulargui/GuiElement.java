@@ -24,7 +24,6 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -2591,7 +2590,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 //     */
 //    public void drawCustomString(Font fr, String text, float x, float y, int width, int colour, GuiAlign alignment, TextRotation rotation, boolean wrap, boolean trim, boolean midTrim, boolean dropShadow) {
 //        if (width <= 0) return;
-//        Component textComponent = new TextComponent(text);
+//        Component textComponent = Component.literal(text);
 //        if (trim && fr.width(text) > width) {
 //            int dotW = fr.width("..");
 //            if (midTrim) {
@@ -2656,10 +2655,10 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             if (midTrim) {
                 String head = font.getSplitter().plainHeadByWidth(text.getString(), (width / 2) - (dotW / 2), Style.EMPTY);
                 String tail = font.getSplitter().plainTailByWidth(text.getString(), (width / 2) - (dotW / 2), Style.EMPTY);
-                text = new TextComponent(head + ".." + tail);
+                text = Component.literal(head + ".." + tail);
             } else {
                 text = font.getSplitter().headByWidth(text, width - dotW, Style.EMPTY);
-                text = FormattedText.composite(text, new TextComponent("..").withStyle(style));
+                text = FormattedText.composite(text, Component.literal("..").withStyle(style));
             }
         }
 
@@ -2716,7 +2715,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
             int dotW = fr.width("..");
             Style style = text instanceof Component ? ((Component) text).getStyle() : Style.EMPTY;
             text = fr.getSplitter().headByWidth(text, width - dotW, Style.EMPTY)/* + ".."*/;
-            text = FormattedText.composite(text, new TextComponent("..").withStyle(style));
+            text = FormattedText.composite(text, Component.literal("..").withStyle(style));
         }
 
         float end = 0;

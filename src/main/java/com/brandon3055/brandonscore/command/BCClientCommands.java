@@ -47,12 +47,12 @@ public class BCClientCommands {
                 .requires(cs -> cs.hasPermission(0))
                 .then(Commands.literal("mgui")
                         .executes(context -> {
-                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ModularGuiTest(new TextComponent("Test"))));
+                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ModularGuiTest(Component.literal("Test"))));
                             return 0;
                         }))
                 .then(Commands.literal("toolkit")
                         .executes(context -> {
-                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new GuiToolkitTest(new TextComponent("Test"))));
+                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new GuiToolkitTest(Component.literal("Test"))));
                             return 0;
                         }));
     }
@@ -64,22 +64,22 @@ public class BCClientCommands {
                     Player player = ClientOnly.getClientPlayer();
                     ContributorProperties props = ContributorHandler.getProps(player);
                     if (!props.isLoadComplete()) {
-                        player.sendMessage(new TextComponent("Your contributor status has not yet been determined. Please wait a few seconds and try again."), Util.NIL_UUID);
+                        player.sendSystemMessage(Component.literal("Your contributor status has not yet been determined. Please wait a few seconds and try again."));
                         return 0;
                     }
                     if (!props.isContributor()) {
-                        player.sendMessage(new TextComponent("This command allows Draconic Evolution contributors to configure their contributor perks.").withStyle(GREEN), Util.NIL_UUID);
-                        player.sendMessage(new TextComponent("Contributor perks are purely aesthetic features offered to those who support Draconic Evolution.").withStyle(GREEN), Util.NIL_UUID);
-                        player.sendMessage(new TextComponent("You can find more information on my patreon page: ").withStyle(GREEN), Util.NIL_UUID);
-                        MutableComponent link = new TextComponent("www.patreon.com/brandon3055").setStyle(Style.EMPTY
+                        player.sendSystemMessage(Component.literal("This command allows Draconic Evolution contributors to configure their contributor perks.").withStyle(GREEN));
+                        player.sendSystemMessage(Component.literal("Contributor perks are purely aesthetic features offered to those who support Draconic Evolution.").withStyle(GREEN));
+                        player.sendSystemMessage(Component.literal("You can find more information on my patreon page: ").withStyle(GREEN));
+                        MutableComponent link = Component.literal("www.patreon.com/brandon3055").setStyle(Style.EMPTY
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.patreon.com/brandon3055"))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to open or copy link"))));
-                        player.sendMessage(link.withStyle(BLUE, UNDERLINE), Util.NIL_UUID);
-                        player.sendMessage(new TextComponent(""), Util.NIL_UUID);
-                        MutableComponent notLinked = new TextComponent("Please Click Here").setStyle(Style.EMPTY
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open or copy link"))));
+                        player.sendSystemMessage(link.withStyle(BLUE, UNDERLINE));
+                        player.sendSystemMessage(Component.literal(""));
+                        MutableComponent notLinked = Component.literal("Please Click Here").setStyle(Style.EMPTY
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bcore_client contributor help"))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click for help"))));
-                        player.sendMessage(new TextComponent("Already a contributor? ").withStyle(LIGHT_PURPLE).append(notLinked.withStyle(BLUE)), Util.NIL_UUID);
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click for help"))));
+                        player.sendSystemMessage(Component.literal("Already a contributor? ").withStyle(LIGHT_PURPLE).append(notLinked.withStyle(BLUE)));
                         return 0;
                     }
 
@@ -89,22 +89,22 @@ public class BCClientCommands {
                 .then(Commands.literal("help")
                         .executes(context -> {
                             Player player = ClientOnly.getClientPlayer();
-                            player.sendMessage(new TextComponent("If you are already a contributor but you you cant access your perks there are several possible causes.").withStyle(YELLOW), Util.NIL_UUID);
-                            player.sendMessage(new TextComponent("Your contributor status might not have have been linked to your Minecraft user id. " +
+                            player.sendSystemMessage(Component.literal("If you are already a contributor but you you cant access your perks there are several possible causes.").withStyle(YELLOW));
+                            player.sendSystemMessage(Component.literal("Your contributor status might not have have been linked to your Minecraft user id. " +
                                     "If you are a patron then you should have received a message with instructions when you signed up. " +
                                     "If you are playing in offline mode your contributor status can not be verified. " +
-                                    "Or your client might not be able to contact the contributor API for some reason.").withStyle(GRAY), Util.NIL_UUID);
-                            MutableComponent link = new TextComponent("DE Discord").setStyle(Style.EMPTY
+                                    "Or your client might not be able to contact the contributor API for some reason.").withStyle(GRAY));
+                            MutableComponent link = Component.literal("DE Discord").setStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/e2HBEtF"))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to open or copy link"))));
-                            player.sendMessage(new TextComponent("If you need help you can request assistance via the ").withStyle(GREEN).append(link.withStyle(BLUE, UNDERLINE)), Util.NIL_UUID);
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open or copy link"))));
+                            player.sendSystemMessage(Component.literal("If you need help you can request assistance via the ").withStyle(GREEN).append(link.withStyle(BLUE, UNDERLINE)));
                             return 0;
                         })
                 ).then(Commands.literal("reload")
                         .executes(context -> {
                             if (System.currentTimeMillis() - lastReload < 30000 && !BrandonsCore.inDev) {
                                 Player player = ClientOnly.getClientPlayer();
-                                player.sendMessage(new TextComponent("Please wait at least 30 seconds before running this command again").withStyle(RED), Util.NIL_UUID);
+                                player.sendSystemMessage(Component.literal("Please wait at least 30 seconds before running this command again").withStyle(RED));
                             } else {
                                 ContributorHandler.reload();
                                 lastReload = System.currentTimeMillis();
@@ -116,15 +116,15 @@ public class BCClientCommands {
                                 .executes(context -> {
                                     Player player = ClientOnly.getClientPlayer();
                                     if (System.currentTimeMillis() - lastLink < 30000 && !BrandonsCore.inDev) {
-                                        player.sendMessage(new TextComponent("Please wait at least 30 seconds before running this command again").withStyle(RED), Util.NIL_UUID);
+                                        player.sendSystemMessage(Component.literal("Please wait at least 30 seconds before running this command again").withStyle(RED));
                                     } else {
                                         String linkCode = StringArgumentType.getString(context, "link_code");
                                         ContributorHandler.linkUser(player, linkCode, error -> {
                                             if (error == -1) {
-                                                player.sendMessage(new TextComponent("Link Successful!").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+                                                player.sendSystemMessage(Component.literal("Link Successful!").withStyle(ChatFormatting.GREEN));
                                             } else {
-                                                player.sendMessage(new TextComponent("An error occurred.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
-                                                player.sendMessage(new TextComponent(error == 404 ? "Invalid Link Code" : ("Unknown error code: " + error)).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                                                player.sendSystemMessage(Component.literal("An error occurred.").withStyle(ChatFormatting.RED));
+                                                player.sendSystemMessage(Component.literal(error == 404 ? "Invalid Link Code" : ("Unknown error code: " + error)).withStyle(ChatFormatting.RED));
                                             }
                                         });
                                         lastLink = System.currentTimeMillis();
@@ -133,57 +133,4 @@ public class BCClientCommands {
                                 }))
                 );
     }
-
-
-//    public static LiteralHiddenArgumentBuilder<CommandSourceStack> literalHidden(String literal) {
-//        return LiteralHiddenArgumentBuilder.literal(literal);
-//    }
-//
-//    public static class LiteralHiddenArgumentBuilder<S> extends ArgumentBuilder<S, LiteralHiddenArgumentBuilder<S>> {
-//        private final String literal;
-//
-//        protected LiteralHiddenArgumentBuilder(final String literal) {
-//            this.literal = literal;
-//        }
-//
-//        public static <S> LiteralHiddenArgumentBuilder<S> literal(final String name) {
-//            return new LiteralHiddenArgumentBuilder<>(name);
-//        }
-//
-//        @Override
-//        protected LiteralHiddenArgumentBuilder<S> getThis() {
-//            return this;
-//        }
-//
-//        public String getLiteral() {
-//            return literal;
-//        }
-//
-//        @Override
-//        public LiteralCommandNode<S> build() {
-//            final LiteralCommandNode<S> result = new LiteralCommandNode<>(getLiteral(), getCommand(), getRequirement(), getRedirect(), getRedirectModifier(), isFork()){
-//                @Override
-//                public CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-//                    return Suggestions.empty();
-//                }
-//
-//                @Override
-//                public LiteralHiddenArgumentBuilder<S> createBuilder() {
-//                    final LiteralHiddenArgumentBuilder<S> builder = LiteralHiddenArgumentBuilder.literal(literal);
-//                    builder.requires(getRequirement());
-//                    builder.forward(getRedirect(), getRedirectModifier(), isFork());
-//                    if (getCommand() != null) {
-//                        builder.executes(getCommand());
-//                    }
-//                    return builder;
-//                }
-//            };
-//
-//            for (final CommandNode<S> argument : getArguments()) {
-//                result.addChild(argument);
-//            }
-//
-//            return result;
-//        }
-//    }
 }

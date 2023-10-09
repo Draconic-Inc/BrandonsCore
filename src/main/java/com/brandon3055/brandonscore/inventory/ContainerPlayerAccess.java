@@ -57,14 +57,14 @@ public class ContainerPlayerAccess extends AbstractContainerMenu {
 //        if (playerAccess != null && !(playerAccess instanceof OfflinePlayer)) {
 //            if (!playerAccess.isAlive()) {
 //                player.closeScreen();
-//                player.sendMessage(new StringTextComponent("Target player died or disconnected.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
+//                player.sendSystemMessage(new StringTextComponent("Target player died or disconnected.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
 //                return;
 //            }
 //        } else if (playerAccess != null) {
 //            //noinspection ConstantConditions
 //            if (server.getPlayerList().getPlayerByUUID(playerAccess.getGameProfile().getId()) != null) {
 //                player.closeScreen();
-//                player.sendMessage(new StringTextComponent("Target player is now online.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
+//                player.sendSystemMessage(new StringTextComponent("Target player is now online.").setStyle(new Style().setColor(RED)).appendSibling(new StringTextComponent("\n(run command again to re-establish inventory connection)").setStyle(new Style().setColor(WHITE))));
 //                return;
 //            }
 //        }

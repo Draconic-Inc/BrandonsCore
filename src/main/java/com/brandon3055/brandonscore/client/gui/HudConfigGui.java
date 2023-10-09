@@ -22,7 +22,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import java.awt.*;
 
@@ -33,7 +32,7 @@ public class HudConfigGui extends ModularGuiScreen {
     protected GuiToolkit<HudConfigGui> toolkit = new GuiToolkit<>(this, 0, 0).setTranslationPrefix("gui.brandonscore.hud_config");
 
     public HudConfigGui() {
-        super(new TranslatableComponent("gui.brandonscore.hud_config.name"));
+        super(Component.translatable("gui.brandonscore.hud_config.name"));
     }
 
     @Override
@@ -124,7 +123,7 @@ public class HudConfigGui extends ModularGuiScreen {
             drawBackground(getter, x, y, w, h, partialTicks, rgb);
 
             if (bgAnim > 0) {
-                Component name = new TranslatableComponent(String.format("hud.%s.%s.name", element.getRegistryName().getNamespace(), element.getRegistryName().getPath()));
+                Component name = Component.translatable(String.format("hud.%s.%s.name", element.getRegistryName().getNamespace(), element.getRegistryName().getPath()));
                 int tw = fontRenderer.width(name);
                 float bgAnim = Math.min(this.bgAnim + (partialTicks * 0.1F), 1);
                 fontRenderer.drawInBatch(name, (float) (x + (w - tw) / 2), (float) y + ((float) h - 8F) / 2F, (0x00FFFFFF | ((int) (0xFF * bgAnim) << 24)), false, mStack.last().pose(), getter, false, 0, 0xf000f0);

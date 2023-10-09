@@ -4,6 +4,7 @@ import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -16,7 +17,7 @@ import java.util.UUID;
  */
 public abstract class WorldEntity {
     private WorldEntityType<?> worldEntityType;
-    protected final Random rand = new Random();
+    protected final RandomSource rand = RandomSource.create();
     private UUID uniqueID = Mth.createInsecureUUID(this.rand);
     protected Level world;
     protected boolean removed;

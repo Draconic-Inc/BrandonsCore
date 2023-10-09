@@ -42,7 +42,7 @@ public class FilterEntity extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        ResourceLocation res = entity.getType().getRegistryName();
+        ResourceLocation res = entity.getType().getDefaultLootTable();  //TODO [FoxMcloud5655]: Ensure this is correct.
         if (entityName.isEmpty() || res == null) {
             return !whitelistEntity;
         }

@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -77,9 +77,9 @@ public class CommandTPX {
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
+            source.sendSuccess(Component.translatable("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
         } else {
-            source.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
+            source.sendSuccess(Component.translatable("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
         }
 
         return targets.size();
@@ -149,9 +149,9 @@ public class CommandTPX {
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslatableComponent("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(Component.translatable("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
         } else {
-            source.sendSuccess(new TranslatableComponent("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(Component.translatable("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
         }
 
         return targets.size();

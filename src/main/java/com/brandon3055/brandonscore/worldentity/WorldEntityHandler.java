@@ -12,8 +12,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -43,7 +43,7 @@ public class WorldEntityHandler {
     public static void createRegistry(NewRegistryEvent event) {
         event.create(new RegistryBuilder<WorldEntityType<?>>()
                         .setName(new ResourceLocation(BrandonsCore.MODID, "world_entity"))
-                        .setType(SneakyUtils.unsafeCast(WorldEntityType.class))
+                        //.setType(SneakyUtils.unsafeCast(WorldEntityType.class)) // TODO [FoxMcloud5655]: This is surely incorrect.
                         .disableSaving()
                         .disableSync(),
                 ts -> REGISTRY = ts);
@@ -60,9 +60,9 @@ public class WorldEntityHandler {
         MinecraftForge.EVENT_BUS.addListener(WorldEntityHandler::worldTick);
     }
 
-    public static void worldLoad(WorldEvent.Load event) {
-        if (!(event.getWorld() instanceof ServerLevel)) return;
-        ServerLevel world = (ServerLevel) event.getWorld();
+    public static void worldLoad(LevelEvent.Load event) {
+        if (!(event.getLevel() instanceof ServerLevel)) return;
+        ServerLevel world = (ServerLevel) event.getLevel();
         ResourceKey<Level> key = world.dimension();
 
         //If the world was unloaded properly then this should always be null. But better safe
@@ -86,9 +86,9 @@ public class WorldEntityHandler {
         data.updateEntities(worldEntities);
     }
 
-    public static void worldUnload(WorldEvent.Unload event) {
-        if (!(event.getWorld() instanceof ServerLevel)) return;
-        ServerLevel world = (ServerLevel) event.getWorld();
+    public static void worldUnload(LevelEvent.Unload event) {
+        if (!(event.getLevel() instanceof ServerLevel)) return;
+        ServerLevel world = (ServerLevel) event.getLevel();
         ResourceKey<Level> key = world.dimension();
         TICKING_ENTITY_MAP.remove(key);
         List<WorldEntity> removed = WORLD_ENTITY_MAP.get(key);
@@ -103,9 +103,9 @@ public class WorldEntityHandler {
         ID_ENTITY_MAP.clear();
     }
 
-    public static void worldTick(TickEvent.WorldTickEvent event) {
-        if (!(event.world instanceof ServerLevel)) return;
-        Level world = event.world;
+    public static void worldTick(TickEvent.LevelTickEvent event) {
+        if (!(event.level instanceof ServerLevel)) return;
+        Level world = event.level;
         ResourceKey<Level> key = world.dimension();
 
         //Clear dead entities

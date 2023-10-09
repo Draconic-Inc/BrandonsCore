@@ -242,8 +242,8 @@
 //                ITextComponent buttonHover = new StringTextComponent("Click here to open the config conflict gui that better explains this issue and gives you options to easily resolve this issue.");
 //                button.setStyle(new Style().setColor(TextFormatting.BLUE).setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bcore_client config_sync_gui")).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, buttonHover)));
 //
-//                Minecraft.getInstance().player.sendMessage(message);
-//                Minecraft.getInstance().player.sendMessage(button);
+//                Minecraft.getInstance().player.sendSystemMessage(message);
+//                Minecraft.getInstance().player.sendSystemMessage(button);
 //            }
 //            else {
 //                Minecraft.getInstance().displayGuiScreen(new GuiIncompatibleConfig(propsRequireRestart));

@@ -13,8 +13,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nullable;
 import java.awt.*;

@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -37,7 +36,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.DrawSelectionEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -321,13 +319,12 @@ public class BlockBCore extends Block implements IBCoreBlock {
     public void appendHoverText(ItemStack stack, @Nullable BlockGetter worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
         if (stack.hasTag() && stack.getTag().contains(BC_TILE_DATA_TAG)) {
-            tooltip.add(new TranslatableComponent("info.brandonscore.block_has_saved_data"));
+            tooltip.add(Component.translatable("info.brandonscore.block_has_saved_data"));
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public boolean renderSelectionBox(DrawSelectionEvent.HighlightBlock event, Level level) {
-        return true;
-    }
+//    @OnlyIn(Dist.CLIENT)
+//    public boolean renderSelectionBox(DrawSelectionEvent.HighlightBlock event, Level level) {
+//        return true;
+//    }
 }
-

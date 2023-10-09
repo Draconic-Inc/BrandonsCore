@@ -7,7 +7,6 @@ import com.brandon3055.brandonscore.lib.StringyStacks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;

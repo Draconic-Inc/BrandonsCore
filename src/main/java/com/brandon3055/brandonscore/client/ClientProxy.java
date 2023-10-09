@@ -10,6 +10,7 @@ import com.brandon3055.brandonscore.utils.BCProfiler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -54,11 +55,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void sendIndexedMessage(Player player, Component message, int index) {
+    public void sendIndexedMessage(Player player, Component message, MessageSignature signature) {
         if (message == null) {
-            Minecraft.getInstance().gui.getChat().removeById(index);
+            Minecraft.getInstance().gui.getChat().deleteMessage(signature);
         } else {
-            Minecraft.getInstance().gui.getChat().addMessage(message, index);
+            Minecraft.getInstance().gui.getChat().addMessage(message, signature, null);
         }
     }
 

@@ -8,6 +8,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
@@ -88,7 +89,7 @@ public class CyclingItemGroup extends CreativeModeTab {
             for(Item item : Registry.ITEM) {
                 item.fillItemCategory(this, sortedItems);
             }
-            sortedItems.sort(Comparator.comparingInt(value -> sortOrder.indexOf(value.getItem().getRegistryName())));
+            sortedItems.sort(Comparator.comparingInt(value -> sortOrder.indexOf(ForgeRegistries.ITEMS.getKey(value.getItem())))); //TODO [FoxMcloud5655]: Can be null?  Need to check.
             items.addAll(sortedItems);
         }
         else {

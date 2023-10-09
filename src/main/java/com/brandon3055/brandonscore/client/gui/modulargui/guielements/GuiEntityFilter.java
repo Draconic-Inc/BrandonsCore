@@ -22,8 +22,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -766,8 +764,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     ItemStack stack = StringyStacks.legacyStackConverter(getNode().getItemName(), getNode().getCount(), getNode().getDamage(), getNode().getNbt());
                     stackIcon.setStack(stack);
                     List<Component> tooltip = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? ADVANCED : NORMAL);
-                    tooltip.add(new TextComponent(ChatFormatting.GRAY + "----------------------------"));
-                    tooltip.add(new TranslatableComponent("set_stack"));
+                    tooltip.add(Component.literal(ChatFormatting.GRAY + "----------------------------"));
+                    tooltip.add(Component.translatable("set_stack"));
                     stackIcon.setComponentHoverText(tooltip);
                 }
             }

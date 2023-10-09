@@ -9,7 +9,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -239,7 +238,7 @@ public class EnergyUtils {
             String energy = Utils.formatNumber(storage.getOPStored());
             String maxEnergy = Utils.formatNumber(storage.getMaxOPStored());
             String postFix = Screen.hasShiftDown() ? "(" + I18n.get("op.brandonscore.operational_potential") + ")" : I18n.get("op.brandonscore.op");
-            list.add(new TextComponent(I18n.get("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).withStyle(ChatFormatting.GRAY));
+            list.add(Component.literal(I18n.get("op.brandonscore.charge") + ": " + energy + " / " + maxEnergy + " " + postFix).withStyle(ChatFormatting.GRAY));
         }
     }
 }

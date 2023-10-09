@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -40,7 +40,7 @@ public class BlockToStackHelper {
         MinecraftForge.EVENT_BUS.addListener(BlockToStackHelper::entityJoinWorld);
     }
 
-    public static void entityJoinWorld(EntityJoinWorldEvent event) {
+    public static void entityJoinWorld(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof ItemEntity && BlockToStackHelper.itemCollection != null && !event.isCanceled()) {
             BlockToStackHelper.itemCollection.add(((ItemEntity) event.getEntity()).getItem());
             event.setCanceled(true);

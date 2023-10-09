@@ -25,7 +25,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.GuiUtils;
 
 /**
  * Created by brandon3055 on 12/8/21

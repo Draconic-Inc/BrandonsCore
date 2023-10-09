@@ -5,7 +5,7 @@ import com.brandon3055.brandonscore.utils.BCProfiler;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class ProcessHandlerClient {
     }
 
     @SubscribeEvent
-    public void onWorldClose(WorldEvent.Unload event) {
+    public void onWorldClose(LevelEvent.Unload event) {
         processes.clear();
         newProcesses.clear();
     }

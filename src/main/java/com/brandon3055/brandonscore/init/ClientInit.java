@@ -39,7 +39,7 @@ public class ClientInit {
         modBus.addListener(ClientInit::onAddRenderLayers);
 
         MinecraftForge.EVENT_BUS.addListener(CursorHelper::closeGui);
-        MinecraftForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggedInEvent event) -> ContributorHandler.onClientLogin(event.getPlayer()));
+        MinecraftForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> ContributorHandler.onClientLogin(event.getPlayer()));
         ProcessHandlerClient.init();
         HudManager.init();
         BCShaders.init();

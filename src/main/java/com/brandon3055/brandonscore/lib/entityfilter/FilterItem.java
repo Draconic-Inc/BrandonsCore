@@ -3,15 +3,19 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -114,8 +118,11 @@ public class FilterItem extends FilterBase {
             //Check name/oreDict
             if (!itemName.isEmpty()) {
                 if (itemName.contains(":")) {
-                    String name = Objects.requireNonNull(stack.getItem().getRegistryName()).toString();
-                    match = name.equals(itemName);
+                	Optional<ResourceKey<Item>> key = ForgeRegistries.ITEMS.getResourceKey(stack.getItem());
+                	match = key.isPresent();
+                	if (match) {
+                		match = key.get().toString().equals(itemName); //TODO [FoxMcloud5655]: Make sure this works.
+                	}
                 }
                 else {
 //                    //TODO Support Tags

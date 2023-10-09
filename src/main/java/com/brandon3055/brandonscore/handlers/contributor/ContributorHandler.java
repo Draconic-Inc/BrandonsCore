@@ -6,9 +6,9 @@ import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.Util;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -54,7 +54,7 @@ public class ContributorHandler {
     }
 
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getPlayer() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof ServerPlayer player) {
             CONTRIBUTOR_MAP.values()
                     .stream()
                     .filter(ContributorProperties::isContributor)
@@ -175,22 +175,22 @@ public class ContributorHandler {
     private static void sendWelcomeMessage(Player player, ContributorProperties props) {
         if (!props.getConfig().showWelcome()) return;
         if (props.isDev()) {
-            player.sendMessage(new TextComponent("DE Dev status confirmed.").withStyle(AQUA), Util.NIL_UUID);
-            player.sendMessage(new TextComponent("All contributor features are available.").withStyle(AQUA), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("DE Dev status confirmed.").withStyle(AQUA));
+            player.sendSystemMessage(Component.literal("All contributor features are available.").withStyle(AQUA));
         } else if (props.isPatron()) {
-            player.sendMessage(new TextComponent("Thank you for supporting Draconic Evolution!").withStyle(AQUA), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("Thank you for supporting Draconic Evolution!").withStyle(AQUA));
         } else {
-            player.sendMessage(new TextComponent("Draconic Evolution contributor features enabled!").withStyle(AQUA), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("Draconic Evolution contributor features enabled!").withStyle(AQUA));
         }
 
-        MutableComponent configCommand = new TextComponent("/bcore_client contributor").withStyle(BLUE);
+        MutableComponent configCommand = Component.literal("/bcore_client contributor").withStyle(BLUE);
         configCommand.setStyle(configCommand.getStyle()
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bcore_client contributor"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to run command"))));
-        player.sendMessage(new TextComponent("Run ")
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to run command"))));
+        player.sendSystemMessage(Component.literal("Run ")
                 .append(configCommand)
-                .append(new TextComponent(" to access contributor settings.")), Util.NIL_UUID);
-        player.sendMessage(new TextComponent("You will also find an option to disable this message."), Util.NIL_UUID);
+                .append(Component.literal(" to access contributor settings.")));
+        player.sendSystemMessage(Component.literal("You will also find an option to disable this message."));
     }
 
     public static boolean shouldCancelElytra(LivingEntity entity) {
