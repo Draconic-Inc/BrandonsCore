@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.client.gui.modulargui.lib;
 
 import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
             } else if (text.contains("\n")) {
                 return Arrays.stream(text.split("\n")).map(TextComponent::new).collect(Collectors.toList());
             }
-            return Collections.singletonList(new TextComponent(text));
+            return Collections.singletonList(Component.literal(text));
         }
         else if (hoverText instanceof String[]) {
             List<String> lines = splitNewLines(Arrays.asList((String[]) hoverText));

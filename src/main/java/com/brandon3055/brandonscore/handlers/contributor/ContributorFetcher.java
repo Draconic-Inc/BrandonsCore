@@ -15,7 +15,7 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.ChatFormatting;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.Util;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -150,7 +150,7 @@ public class ContributorFetcher {
 
     public void linkUser(Player player, String linkCode, Consumer<Integer> callback) {
         if (!isOnline(player.getUUID(), player.getGameProfile().getName())) {
-            player.sendMessage(new TextComponent("You must be playing in online mode to link your account.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("You must be playing in online mode to link your account.").withStyle(ChatFormatting.RED));
         } else {
             queTask(new LinkTask(player.getUUID(), linkCode, callback));
         }
@@ -198,7 +198,7 @@ public class ContributorFetcher {
     }
 
     private boolean isOnline(UUID playerId, @Nullable String username) {
-        return username == null || !playerId.equals(Player.createPlayerUUID(username));
+        return username == null || /*!playerId.equals(Player.getUUID(username))*/ playerId != null; //TODO [FoxMcloud5655]: This is incorrect.
     }
 
     private static class DownloadTask implements ThreadedTask {

@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
@@ -263,9 +262,9 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
             if (stack == null) {
                 stack = new ItemStack(Blocks.BARRIER);
                 toolTipOverride = new ArrayList<>();
-                toolTipOverride.add(new TextComponent("Failed to load Item Stack"));
-                toolTipOverride.add(new TextComponent("This may mean the mod the stack belongs to is not installed"));
-                toolTipOverride.add(new TextComponent("Or its just broken..."));
+                toolTipOverride.add(Component.literal("Failed to load Item Stack"));
+                toolTipOverride.add(Component.literal("This may mean the mod the stack belongs to is not installed"));
+                toolTipOverride.add(Component.literal("Or its just broken..."));
             }
             stackCache.put(stackString, stack);
         }

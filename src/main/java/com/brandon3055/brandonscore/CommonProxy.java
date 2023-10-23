@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -41,8 +42,8 @@ public class CommonProxy {
         ProcessHandler.addProcess(process);
     }
 
-    public void sendIndexedMessage(Player player, Component message, int index) {
-        BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, index);
+    public void sendIndexedMessage(Player player, Component message, MessageSignature signature) {
+        BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, signature);
     }
 
     public void setClipboardString(String text) {}

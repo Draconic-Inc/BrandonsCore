@@ -120,7 +120,7 @@ public class BCUtilCommands {
                             BlockPos pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             if (!(player.level.getBlockEntity(pos) instanceof TileBCore tile) || !tile.toggleDebugOutput(player)) {
-                                player.sendMessage(new TextComponent("This tile does not support Brandon's Core Debugging"), Util.NIL_UUID);
+                                player.sendSystemMessage(Component.literal("This tile does not support Brandon's Core Debugging"));
                             }
                             return 0;
                         })
@@ -139,7 +139,7 @@ public class BCUtilCommands {
                 .requires(cs -> cs.hasPermission(3))
                 .executes(context -> {
                     ContributorHandler.reload();
-                    context.getSource().sendSuccess(new TextComponent("Reset complete"), false);
+                    context.getSource().sendSuccess(Component.literal("Reset complete"), false);
                     return 0;
                 });
     }
@@ -256,9 +256,9 @@ public class BCUtilCommands {
         Player player = source.getPlayerOrException();
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
-            throw new CommandRuntimeException(new TextComponent("You are not holding an item!"));
+            throw new CommandRuntimeException(Component.literal("You are not holding an item!"));
         } else if (!stack.hasTag()) {
-            throw new CommandRuntimeException(new TextComponent("That stack has no NBT tag!"));
+            throw new CommandRuntimeException(Component.literal("That stack has no NBT tag!"));
         }
 
         CompoundTag compound = stack.getTag();
@@ -267,7 +267,7 @@ public class BCUtilCommands {
         StringBuilder builder = new StringBuilder();
         LogHelperBC.buildNBT(builder, compound, "", "Tag", false);
         String[] lines = builder.toString().split("\n");
-        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, new TextComponent(s).withStyle(ChatFormatting.GOLD)));
+        DataUtils.forEach(lines, s -> ChatHelper.sendMessage(player, Component.literal(s).withStyle(ChatFormatting.GOLD)));
         return 0;
     }
 
@@ -275,13 +275,13 @@ public class BCUtilCommands {
         Player player = source.getPlayerOrException();
         ItemStack stack = HandHelper.getMainFirst(player);
         if (stack.isEmpty()) {
-            throw new CommandRuntimeException(new TextComponent("You are not holding an item!"));
+            throw new CommandRuntimeException(Component.literal("You are not holding an item!"));
         }
 
         String returnString = StringyStacks.toString(stack, nbt, count, caps);
-        ChatHelper.sendMessage(player, new TextComponent("# The following is stack string for the held stack (click to copy) #").withStyle(ChatFormatting.BLUE));
-        MutableComponent textComponent = returnString.length() > 64 ? new TextComponent(returnString.substring(0, 64) + "... ").withStyle(ChatFormatting.GOLD).append(new TextComponent("(Mouseover for full)").withStyle(ChatFormatting.DARK_AQUA).withStyle(ChatFormatting.UNDERLINE)) : new TextComponent(returnString).withStyle(ChatFormatting.GOLD);
-        textComponent.setStyle(textComponent.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, new TextComponent("Click to copy to clipboard").withStyle(ChatFormatting.BLUE).append(new TextComponent("\n" + returnString).withStyle(ChatFormatting.GRAY)))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, returnString)));
+        ChatHelper.sendMessage(player, Component.literal("# The following is stack string for the held stack (click to copy) #").withStyle(ChatFormatting.BLUE));
+        MutableComponent textComponent = returnString.length() > 64 ? Component.literal(returnString.substring(0, 64) + "... ").withStyle(ChatFormatting.GOLD).append(Component.literal("(Mouseover for full)").withStyle(ChatFormatting.DARK_AQUA).withStyle(ChatFormatting.UNDERLINE)) : Component.literal(returnString).withStyle(ChatFormatting.GOLD);
+        textComponent.setStyle(textComponent.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, Component.literal("Click to copy to clipboard").withStyle(ChatFormatting.BLUE).append(Component.literal("\n" + returnString).withStyle(ChatFormatting.GRAY)))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, returnString)));
         ChatHelper.sendMessage(player, textComponent);
         StringyStacks.LOGGER.info(returnString);
         return 0;
@@ -290,7 +290,7 @@ public class BCUtilCommands {
     private static int functionFromStackString(CommandSourceStack source, ServerPlayer player, String stackString) throws CommandRuntimeException, CommandSyntaxException {
         ItemStack stack = StringyStacks.fromString(stackString, null);
         if (stack == null) {
-            throw new CommandRuntimeException(new TextComponent("Invalid item string. You may find more details in the server console."));
+            throw new CommandRuntimeException(Component.literal("Invalid item string. You may find more details in the server console."));
         }
 
         boolean flag = player.getInventory().add(stack);
@@ -370,19 +370,19 @@ public class BCUtilCommands {
         if (enabled) {
             BCEventHandler.noClipPlayers.remove(player.getUUID());
             BCoreNetwork.sendNoClip(player, false);
-            source.sendSuccess(new TextComponent("NoClip Disabled!"), true);
+            source.sendSuccess(Component.literal("NoClip Disabled!"), true);
         } else {
             BCEventHandler.noClipPlayers.add(player.getUUID());
             BCoreNetwork.sendNoClip(player, true);
-            source.sendSuccess(new TextComponent("NoClip Enabled!"), true);
+            source.sendSuccess(Component.literal("NoClip Enabled!"), true);
         }
         return 0;
     }
 
     private static int getUUID(CommandSourceStack source, ServerPlayer player) throws CommandRuntimeException {
-        TextComponent comp = new TextComponent(player.getName().getString() + "'s UUID: " + ChatFormatting.UNDERLINE + player.getUUID());
+        MutableComponent comp = Component.literal(player.getName().getString() + "'s UUID: " + ChatFormatting.UNDERLINE + player.getUUID());
         comp.setStyle(comp.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, player.getUUID().toString())));
-        comp.setStyle(comp.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, new TextComponent("Click to copy to clipboard"))));
+        comp.setStyle(comp.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, Component.literal("Click to copy to clipboard"))));
         source.sendSuccess(comp, true);
         return 0;
     }
@@ -415,7 +415,7 @@ public class BCUtilCommands {
 
         LogHelperBC.info(builder.toString());
         for (String s : builder.toString().split("\n")) {
-            source.sendSuccess(new TextComponent(s), true);
+            source.sendSuccess(Component.literal(s), true);
         }
         return 0;
     }
@@ -448,7 +448,7 @@ public class BCUtilCommands {
             }
         } catch (Throwable e) {
             e.printStackTrace();
-            throw new CommandRuntimeException(new TextComponent(e.getMessage()));
+            throw new CommandRuntimeException(Component.literal(e.getMessage()));
         }
     }
 
@@ -459,7 +459,7 @@ public class BCUtilCommands {
         Entity entity = target;
 
         if (entity == null) {
-            player.sendMessage(new TextComponent("You must be looking at an entity!"), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("You must be looking at an entity!"));
             return 1;
         }
 
@@ -572,7 +572,7 @@ public class BCUtilCommands {
 //        }
 
         if (target == null) {
-            source.sendSuccess(new TextComponent("################## All Known Players ##################"), false);
+            source.sendSuccess(Component.literal("################## All Known Players ##################"), false);
             for (UUID uuid : playerMap.keySet()) {
                 GameProfile profile = playerMap.get(uuid);
 
@@ -584,16 +584,16 @@ public class BCUtilCommands {
                     }
                 }
 
-                BaseComponent message = new TextComponent((online ? ChatFormatting.GREEN + "[Online]: " : ChatFormatting.GRAY + "[Offline]: ") + profile.getName());
+                MutableComponent message = Component.literal((online ? ChatFormatting.GREEN + "[Online]: " : ChatFormatting.GRAY + "[Offline]: ") + profile.getName());
 
                 boolean offline = UUID.nameUUIDFromBytes(("OfflinePlayer:" + profile.getName()).getBytes(Charsets.UTF_8)).equals(uuid);
                 if (offline) {
-                    message.append(new TextComponent(" (Offline Account)").withStyle(ChatFormatting.RED));
+                    message.append(Component.literal(" (Offline Account)").withStyle(ChatFormatting.RED));
                 }
 
-                Component messageHover = new TextComponent("Last Seen: " + "\n") //
-                        .append(new TextComponent(ChatFormatting.GRAY + "UUID: " + uuid + "\n")) //
-                        .append(new TextComponent(ChatFormatting.GOLD + "-Click to access player."));
+                Component messageHover = Component.literal("Last Seen: " + "\n") //
+                        .append(Component.literal(ChatFormatting.GRAY + "UUID: " + uuid + "\n")) //
+                        .append(Component.literal(ChatFormatting.GOLD + "-Click to access player."));
 
                 Style msgStyle = Style.EMPTY;
                 msgStyle.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
@@ -616,7 +616,7 @@ public class BCUtilCommands {
             }
 
             if (profile == null) {
-                throw new CommandRuntimeException(new TextComponent("Could not find the specified player name or uuid!"));
+                throw new CommandRuntimeException(Component.literal("Could not find the specified player name or uuid!"));
             }
         }
 
@@ -629,7 +629,7 @@ public class BCUtilCommands {
         }
 
         if (playerSender == targetPlayer) {
-            throw new CommandRuntimeException(new TextComponent("This command only works on other players!"));
+            throw new CommandRuntimeException(Component.literal("This command only works on other players!"));
         }
         openPlayerAccessUI(source.getServer(), playerSender, targetPlayer);
         return 0;
@@ -648,7 +648,7 @@ public class BCUtilCommands {
 //            }
 //        }
 
-        throw new CommandRuntimeException(new TextComponent("Could not find a data file for the specified player!"));
+        throw new CommandRuntimeException(Component.literal("Could not find a data file for the specified player!"));
     }
 
     public static CompoundTag readPlayerCompound(File playerData) throws CommandRuntimeException {
@@ -660,7 +660,7 @@ public class BCUtilCommands {
             return compound;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CommandRuntimeException(new TextComponent(e.toString()));
+            throw new CommandRuntimeException(Component.literal(e.toString()));
         } finally {
             IOUtils.closeQuietly(is);
         }
@@ -689,7 +689,7 @@ public class BCUtilCommands {
         player.openMenu(new MenuProvider() {
             @Override
             public Component getDisplayName() {
-                return new TextComponent("Player Access");
+                return Component.literal("Player Access");
             }
 
             @Nullable
@@ -756,7 +756,7 @@ public class BCUtilCommands {
 //            }
 //            catch (IOException e) {
 //                e.printStackTrace();
-//                accessedBy.sendMessage(new StringTextComponent("An error occurred while saving the player's inventory!\n" + e.toString() + "\nFull error is in server console."));
+//                accessedBy.sendSystemMessage(new StringTextComponent("An error occurred while saving the player's inventory!\n" + e.toString() + "\nFull error is in server console."));
 //            }
 //        }
 //    }

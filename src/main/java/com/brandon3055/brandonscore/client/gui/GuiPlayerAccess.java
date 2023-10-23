@@ -14,7 +14,7 @@ import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
@@ -27,7 +27,7 @@ public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> 
     public int dimension = 0;
 
     public GuiPlayerAccess(ContainerPlayerAccess container,  Inventory player) {
-        super(container, player, new TextComponent("Player Access"));
+        super(container, player, Component.literal("Player Access"));
         imageWidth = 220;
         imageHeight = 250;
     }

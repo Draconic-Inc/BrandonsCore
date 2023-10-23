@@ -4,7 +4,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public class InfoHelper {
 
     public static boolean holdShiftForDetails(List<Component> list, boolean inverted) {
         if (isShiftKeyDown() == inverted){
-            list.add(new TextComponent(I18n.get("item_info.brandonscore.shift_for_details", ChatFormatting.AQUA + "" + ChatFormatting.ITALIC, ChatFormatting.RESET + "" + ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
+            list.add(Component.literal(I18n.get("item_info.brandonscore.shift_for_details", ChatFormatting.AQUA + "" + ChatFormatting.ITALIC, ChatFormatting.RESET + "" + ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
         }
         return isShiftKeyDown();
     }

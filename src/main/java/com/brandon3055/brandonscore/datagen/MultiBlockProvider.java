@@ -5,12 +5,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +26,6 @@ import java.util.Map;
  * Created by brandon3055 on 26/06/2022
  */
 public abstract class MultiBlockProvider implements DataProvider {
-    private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     public static final Logger LOGGER = LogManager.getLogger(MultiBlockProvider.class);
 
     private final DataGenerator gen;
@@ -36,7 +38,7 @@ public abstract class MultiBlockProvider implements DataProvider {
     }
 
     @Override
-    public void run(HashCache cache) throws IOException {
+    public void run(CachedOutput cache) throws IOException {
         builtMultiBlocks.clear();
         buildMultiBlocks();
         for (String name : builtMultiBlocks.keySet()) {
@@ -44,12 +46,12 @@ public abstract class MultiBlockProvider implements DataProvider {
         }
     }
 
-    private void saveMultiBlock(HashCache cache, ResourceLocation id, JsonObject multiBlockJson) {
+    private void saveMultiBlock(CachedOutput cache, ResourceLocation id, JsonObject multiBlockJson) {
         Path mainOutput = gen.getOutputFolder();
         String pathSuffix = "data/" + id.getNamespace() + "/multiblocks/" + id.getPath() + ".json";
         Path outputPath = mainOutput.resolve(pathSuffix);
         try {
-            DataProvider.save(GSON, cache, multiBlockJson, outputPath);
+            DataProvider.saveStable(cache, multiBlockJson, outputPath);
         } catch (IOException e) {
             LOGGER.error("Couldn't save multiblock structure to {}", outputPath, e);
         }
@@ -101,7 +103,7 @@ public abstract class MultiBlockProvider implements DataProvider {
         }
 
         public Builder key(char key, Block block) {
-            return key(key, "block", block.getRegistryName().toString());
+            return key(key, "block", ForgeRegistries.BLOCKS.getKey(block).toString());
         }
 
         /**

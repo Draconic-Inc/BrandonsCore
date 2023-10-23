@@ -4,6 +4,7 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
 import java.util.*;
@@ -24,10 +25,10 @@ public class BCEventHandler {
     }
 
     public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        noClipPlayers.remove(event.getPlayer().getUUID());
+        noClipPlayers.remove(event.getEntity().getUUID());
     }
 
-    public static void livingUpdate(LivingEvent.LivingUpdateEvent event) {
+    public static void livingUpdate(LivingTickEvent event) {
         if (event.getEntity() instanceof Player && noClipPlayers.contains(event.getEntity().getUUID())) {
             event.getEntity().noPhysics = true;
             ((Player) event.getEntity()).getAbilities().flying = true;

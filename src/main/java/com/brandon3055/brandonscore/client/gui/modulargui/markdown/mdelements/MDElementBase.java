@@ -7,7 +7,6 @@ import com.brandon3055.brandonscore.client.gui.modulargui.markdown.reader.lib.VA
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -116,8 +115,8 @@ public abstract class MDElementBase<E extends GuiElement<E>> extends GuiElement<
     public boolean renderOverlayLayer(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
         if (!invalidProps.isEmpty() && yPos() > 0 && yPos() < screenHeight) {
             List<Component> list = new ArrayList<>();
-            invalidProps.forEach(s -> list.add(new TextComponent(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c")));
-            errors.forEach(s -> list.add(new TextComponent(S + "c" + s + S + "c")));
+            invalidProps.forEach(s -> list.add(Component.literal(S + "cProperty \"" + s + "\" is invalid or not supported by this tag!" + S + "c")));
+            errors.forEach(s -> list.add(Component.literal(S + "c" + s + S + "c")));
 //            zOffset += 100;
 //            BCFontRenderer.setStileToggleMode(true);
             PoseStack poseStack = new PoseStack();

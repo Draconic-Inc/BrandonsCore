@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         mavenLocal()
+        jcenter()
         mavenCentral()
         maven { url = "https://maven.minecraftforge.net/" }
         maven { url = "https://repo.spongepowered.org/maven" }
@@ -14,16 +15,18 @@ buildscript {
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id "net.covers1624.signing" version '1.1.4'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: "org.spongepowered.mixin"
+apply plugin: 'eclipse'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 group = "com.brandon3055.brandonscore"
 archivesBaseName = "BrandonsCore"
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 
@@ -55,7 +58,7 @@ if (System.getenv("KEY_STORE")) {
 config.mod_version = "${config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "9999")
 version = "${config.mc_version}-${config.mod_version}"
 println "Starting build of ${archivesBaseName}, Version: ${config.mod_version}"
-println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}, with Mappings: 'official'"
+println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}"
 
 minecraft {
     mappings channel: 'official', version: config.mc_version
@@ -81,40 +84,6 @@ mixin {
     add(sourceSets.main, "mixins.brandonscore.refmap.json")
 }
 
-configurations {
-    annotationProcessor.extendsFrom minecraft
-}
-
-repositories {
-    mavenLocal()
-    maven { url = "https://maven.covers1624.net/" }
-    maven { url = "https://dvs1.progwml6.com/files/maven" }
-}
-
-dependencies {
-    minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
-
-//     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
-    implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
-    implementation fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
-
-}
-
-signing {
-    if (!signProps.isEmpty()) {
-        jars {
-            sign jar
-            after 'reobfJar'
-
-            keyStore = signProps.keyStore
-            alias = signProps.alias
-            storePass = signProps.storePass
-            keyPass = signProps.keyPass
-        }
-    }
-}
-
 processResources {
     inputs.property 'mod_version', config.mod_version
     inputs.property 'mc_version', config.mc_version
@@ -130,22 +99,66 @@ processResources {
     }
 }
 
-jar {
-    finalizedBy 'reobfJar'
-    classifier = 'universal'
-    manifest {
-        attributes 'Specification-Title': archivesBaseName
-        attributes 'Specification-Vendor': 'brandon3055'
-        attributes 'Specification-Version': "1"
-        attributes 'Implementation-Title': archivesBaseName
-        attributes 'Implementation-Vendor': 'brandon3055'
-        attributes 'Implementation-Version': version
-        attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        attributes 'MixinConfigs': 'mixins.brandonscore.json'
-    }
-    from file("LICENSE")
+configurations {
+    shadow
+    implementation.extendsFrom shadow
+    annotationProcessor.extendsFrom minecraft
 }
 
+repositories {
+    mavenLocal()
+    maven { url = "https://maven.covers1624.net/" }
+    maven { url = "https://dvs1.progwml6.com/files/maven" }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
+    shadow 'net.covers1624:Quack:0.4.7.72'
+//     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
+    implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
+    implementation fg.deobf("mezz.jei:jei-${config.mc_version}-forge-api:${config.jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}-forge:${config.jei_version}")
+}
+
+reobf {
+    shadowJar {}
+    jar { enabled = false } // Disable jar.
+}
+
+signing {
+    if (!signProps.isEmpty()) {
+        jars {
+            sign shadowJar
+            after 'reobfShadowJar'
+
+            keyStore = signProps.keyStore
+            alias = signProps.alias
+            storePass = signProps.storePass
+            keyPass = signProps.keyPass
+        }
+    }
+}
+
+def commonManifest = {
+    attributes 'Specification-Title': archivesBaseName
+    attributes 'Specification-Vendor': 'brandon3055'
+    attributes 'Specification-Version': "1"
+    attributes 'Implementation-Title': archivesBaseName
+    attributes 'Implementation-Vendor': 'brandon3055'
+    attributes 'Implementation-Version': version
+    attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    attributes 'MixinConfigs': 'mixins.brandonscore.json'
+}
+
+jar.enabled = false
+shadowJar {
+    finalizedBy 'reobfShadowJar'
+    classifier = 'universal'
+    manifest commonManifest
+
+    configurations = [project.configurations.shadow]
+    from file("LICENSE")
+}
 
 task srcJar(type: Jar) {
     build.dependsOn it
@@ -153,13 +166,6 @@ task srcJar(type: Jar) {
     classifier = 'sources'
     from file("LICENSE")
 }
-
-//task deobfJar(type: Jar) {
-//    build.dependsOn it
-//    from sourceSets.main.output
-//    classifier = 'deobf'
-//    from file("LICENSE")
-//}
 
 publishing {
     repositories {
@@ -180,7 +186,6 @@ publishing {
             version project.version
             artifact jar
             artifact srcJar
-//            artifact deobfJar
 
             pom {
                 name = archivesBaseName
@@ -215,33 +220,33 @@ publishing {
     }
 }
 
+/**
+ * Polls the 'compile' configuration for a dependency with the given module name
+ * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
+ *
+ * @param module The module to search for.
+ * @param chop If the string should be chopped on the last '-' in its string.
+ * @param configuration The name of the configuration to search.
+ * @param errorMissing If an error should be thrown if it can't be found.
+ * @return The version string, '0' if 'errorMissing' is false and nothing was found.
+ */
+def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
+    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
+    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
+            .findAll { it.id.componentIdentifier.module == module }
+            .collect { it.id.componentIdentifier.version }
+    if (filtered.size() > 1) {
+        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
+    }
+    if (errorMissing && filtered.isEmpty()) {
+        throw new RuntimeException("Failed resolve dependency version for '${module}'")
+    }
+    if (filtered.isEmpty()) return "0"
+    def version = filtered.first() as String
+    if (chop) {
+        def idx = version.lastIndexOf('-')
+        return version.substring(idx + 1)
+    }
+    return version
+}
 
-///**
-// * Polls the 'compile' configuration for a dependency with the given module name
-// * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
-// *
-// * @param module The module to search for.
-// * @param chop If the string should be chopped on the last '-' in its string.
-// * @param configuration The name of the configuration to search.
-// * @param errorMissing If an error should be thrown if it can't be found.
-// * @return The version string, '0' if 'errorMissing' is false and nothing was found.
-// */
-//def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
-//    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
-//    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
-//            .findAll { it.id.componentIdentifier.module == module }
-//            .collect { it.id.componentIdentifier.version }
-//    if (filtered.size() > 1) {
-//        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
-//    }
-//    if (errorMissing && filtered.isEmpty()) {
-//        throw new RuntimeException("Failed resolve dependency version for '${module}'")
-//    }
-//    if (filtered.isEmpty()) return "0"
-//    def version = filtered.first() as String
-//    if (chop) {
-//        def idx = version.lastIndexOf('-')
-//        return version.substring(idx + 1)
-//    }
-//    return version
-//}

@@ -12,7 +12,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -211,7 +210,7 @@ public class GuiLabel extends GuiElement<GuiLabel> {
 
         super.renderElement(mc, mouseX, mouseY, partialTicks);
 
-        Component component = displaySupplier == null ? new TextComponent(getLabelText()) : displaySupplier.get();
+        Component component = displaySupplier == null ? Component.literal(getLabelText()) : displaySupplier.get();
         if (!component.getString().isEmpty()) {
 
             int colour = getTextColour(mouseOver);

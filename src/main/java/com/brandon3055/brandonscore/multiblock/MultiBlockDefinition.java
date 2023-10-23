@@ -14,6 +14,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -161,7 +162,7 @@ public class MultiBlockDefinition {
                 keyMap.put(key, new TagPart(tagkey));
             } else if (keyVal.has("block")) {
                 ResourceLocation resourcelocation = new ResourceLocation(keyVal.get("block").getAsString());
-                if (Blocks.AIR.getRegistryName().equals(resourcelocation)) {
+                if (ForgeRegistries.BLOCKS.getKey(Blocks.AIR).equals(resourcelocation)) {
                     keyMap.put(key, new EmptyPart());
                 } else {
                     keyMap.put(key, new BlockPart(resourcelocation));

@@ -19,7 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.EmptyModel;
 
 import java.util.*;
 
@@ -62,7 +62,7 @@ public class MultiBlockRenderers {
                 poseStack.pushPose();
                 poseStack.translate(pos.getX() + 0.1, pos.getY() + 0.1, pos.getZ() + 0.1);
                 poseStack.scale(0.8F, 0.8F, 0.8F);
-                Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, poseStack, getter, packedLight, OverlayTexture.pack(anim, 10), EmptyModelData.INSTANCE);
+                Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, poseStack, getter, packedLight, OverlayTexture.pack(anim, 10));
                 poseStack.popPose();
             } else if (!part.isMatch(level, worldPos)) {
                 invalidBlocks.add(pos);

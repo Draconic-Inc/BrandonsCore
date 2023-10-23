@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraftforge.api.distmarker.Dist;
@@ -602,7 +601,7 @@ public class GuiButton extends GuiElement<GuiButton>/* implements IGuiEventDispa
 
         String displayString = getDisplayString();
         if (!displayString.isEmpty()) {
-            Component textComponent = new TextComponent(displayString);
+            Component textComponent = Component.literal(displayString);
             int colour = getTextColour(mouseOver, isDisabled());
             int widthLimit = rotation == TextRotation.NORMAL || rotation == TextRotation.ROT_180 ? getInsetRect().width : getInsetRect().height;
 

@@ -260,7 +260,7 @@ public class StringyStacks {
             return "";
         }
 
-        String stackString = stack.getItem().getRegistryName().toString();
+        String stackString = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
 
         if (withNBT || withForgeCaps) {
             CompoundTag stackTag = stack.serializeNBT();

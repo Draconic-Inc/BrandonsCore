@@ -1,8 +1,7 @@
 package com.brandon3055.brandonscore.api;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tier;
 
@@ -74,8 +73,8 @@ public enum TechLevel {
         return textColour;
     }
 
-    public BaseComponent getDisplayName() {
-        return new TranslatableComponent("tech_level.draconicevolution." + name().toLowerCase(Locale.ENGLISH));
+    public Component getDisplayName() {
+        return Component.translatable("tech_level.draconicevolution." + name().toLowerCase(Locale.ENGLISH));
     }
 
     public Rarity getRarity() {

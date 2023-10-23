@@ -83,7 +83,7 @@ public class MultiBlockManager extends SimpleJsonResourceReloadListener {
         }
     }
 
-    private static void onDisconnectFromServer(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+    private static void onDisconnectFromServer(ClientPlayerNetworkEvent.LoggingOut event) {
         SERVER_DEFINITIONS.clear();
     }
 

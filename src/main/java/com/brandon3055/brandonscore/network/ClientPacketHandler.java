@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -62,7 +63,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                     gui.dimension = packet.readInt();
                 }
             }
-            case BCoreNetwork.C_INDEXED_MESSAGE -> BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), packet.readInt());
+            case BCoreNetwork.C_INDEXED_MESSAGE -> BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), new MessageSignature(packet.readBytes())); //TODO [FoxMcloud5655]: Testing required.
             case BCoreNetwork.C_TILE_CAP_DATA -> {
                 BlockPos pos = packet.readPos();
                 if (mc.level.getBlockEntity(pos) instanceof TileBCore tile) {
@@ -109,7 +110,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             return;
         }
 
-        entity.setPacketCoordinates(posX, posY, posZ);
+        entity.setPosRaw(posX, posY, posZ);
         entity.absMoveTo(posX, posY, posZ, (pitch * 360) / 256.0F, (yaw * 360) / 256.0F);
         entity.setYHeadRot((headYaw * 360) / 256.0F);
         entity.setYBodyRot((headYaw * 360) / 256.0F);

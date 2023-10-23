@@ -15,7 +15,8 @@ import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig.WingE
 import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.network.chat.TextComponent;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class ContributorConfigGui extends ModularGuiScreen {
     private boolean dragging = false;
 
     public ContributorConfigGui(Player player, ContributorProperties props) {
-        super(new TextComponent("Contributor Configuration"));
+        super(Component.literal("Contributor Configuration"));
         this.player = player;
         this.props = props;
         this.cfg = props.getConfig();

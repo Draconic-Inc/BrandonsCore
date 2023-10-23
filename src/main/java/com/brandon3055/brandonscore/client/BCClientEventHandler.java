@@ -37,8 +37,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.client.event.FOVModifierEvent;
+import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -90,7 +89,7 @@ public class BCClientEventHandler {
     }
 
     @SubscribeEvent
-    public static void disconnectEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+    public static void disconnectEvent(ClientPlayerNetworkEvent.LoggingOut event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
             BCEventHandler.noClipPlayers.remove(mc.player.getUUID());
@@ -132,9 +131,9 @@ public class BCClientEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public void fovUpdate(FOVModifierEvent event) {
-        Player player = event.getEntity();
-        float originalFOV = event.getFov();
+    public void fovUpdate(ComputeFovModifierEvent event) {
+        Player player = event.getPlayer();
+        float originalFOV = event.getFovModifier();
         float newFOV = originalFOV;
 
         int slotIndex = 2;
@@ -155,7 +154,7 @@ public class BCClientEventHandler {
         }
 
         if (newFOV != originalFOV) {
-            event.setNewfov(newFOV);
+            event.setNewFovModifier(newFOV);
         }
     }
 

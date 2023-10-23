@@ -1,7 +1,7 @@
 package com.brandon3055.brandonscore.utils;
 
 import net.covers1624.quack.util.CrashLock;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -51,7 +51,7 @@ public class BCProfiler {
     }
 
     @SubscribeEvent
-    public void render(RenderGameOverlayEvent.Post event) {
+    public void render(RenderGuiOverlayEvent.Post event) {
 //        Minecraft mc = Minecraft.getInstance();
 //        if (!enableProfiler || event.getType() != RenderGameOverlayEvent.ElementType.ALL || mc.options.renderDebug) {
 //            return;

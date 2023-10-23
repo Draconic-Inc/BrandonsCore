@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +33,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.event.EventNetworkChannel;
+import net.minecraftforge.registries.ForgeRegistries;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -96,10 +99,10 @@ public class BCoreNetwork {
         packet.sendToServer();
     }
 
-    public static void sendIndexedMessage(ServerPlayer player, Component message, int index) {
+    public static void sendIndexedMessage(ServerPlayer player, Component message, MessageSignature signature) {
         PacketCustom packet = new PacketCustom(CHANNEL, C_INDEXED_MESSAGE);
         packet.writeTextComponent(message);
-        packet.writeInt(index);
+        packet.writeBytes(signature.bytes());
         packet.sendToPlayer(player);
     }
 
@@ -115,7 +118,7 @@ public class BCoreNetwork {
         if (!world.isClientSide) {
             PacketCustom packet = new PacketCustom(CHANNEL, C_PLAY_SOUND);
             packet.writePos(pos);
-            packet.writeRegistryId(sound);
+            packet.writeRegistryId(ForgeRegistries.SOUND_EVENTS, sound);
             packet.writeVarInt(category.ordinal());
             packet.writeFloat(volume);
             packet.writeFloat(pitch);
@@ -127,7 +130,7 @@ public class BCoreNetwork {
     public static void sendParticle(Level world, ParticleOptions particleData, Vector3 pos, Vector3 motion, boolean distanceOverride) {
         if (!world.isClientSide) {
             PacketCustom packet = new PacketCustom(CHANNEL, C_SPAWN_PARTICLE);
-            packet.writeRegistryId(particleData.getType());
+            packet.writeRegistryId(ForgeRegistries.PARTICLE_TYPES, particleData.getType());
             particleData.writeToNetwork(packet.toPacketBuffer());
             packet.writeVector(pos);
             packet.writeVector(motion);

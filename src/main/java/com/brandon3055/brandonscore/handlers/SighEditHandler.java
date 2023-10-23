@@ -25,12 +25,12 @@ public class SighEditHandler {
     }
 
     public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
-        Level level = event.getWorld();
+        Level level = event.getLevel();
         if (level.isClientSide() || event.isCanceled()) {
             return;
         }
 
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (!player.isShiftKeyDown() || !player.getAbilities().mayBuild || !level.getGameRules().getBoolean(ALLOW_SIGN_EDIT) || !player.getItemInHand(event.getHand()).isEmpty()) {
             return;
         }
