@@ -453,7 +453,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
             setYSize(22);
         }
 
-        @Override
+		@Override
         public void addChildElements() {
             super.addChildElements();
             nodeLabel.setEnabled(false);
@@ -478,8 +478,8 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     getNode().setEntityName(s);
                     ResourceLocation rs = new ResourceLocation(s);
                     //TODO Test
-                    EntityType<?> type = ForgeRegistries.ENTITIES.getValue(rs);
-                    boolean exists = ForgeRegistries.ENTITIES.containsKey(rs);
+                    EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(rs);
+                    boolean exists = ForgeRegistries.ENTITY_TYPES.containsKey(rs);
                     String name = exists ? type.getDescriptionId() : "unknown";
                     nameField.setTextColor(exists ? 0x00FF00 : 0xFF0000);
                     Optional<? extends ModContainer> mod = ModList.get().getModContainerById(rs.getNamespace());
@@ -516,7 +516,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     renderer.setSize(16, 16);
                     renderer.setPos(8, 2);
                     container.addChild(renderer);
-                    EntityType type = ForgeRegistries.ENTITIES.getValue(rs);
+                    EntityType type = ForgeRegistries.ENTITY_TYPES.getValue(rs);
                     String name = type == null ? "unknown" : type.getDescription().getString();
                     GuiLabel label = new GuiLabel(I18n.get(I18n.get(name)));
                     label.setPos(renderer.maxXPos() + 6, container.yPos() + 2).setWrap(true).setYSize(container.ySize() - 4).setXSizeMod(() -> container.xSize() - (16 + 6 + 2 + 2));
@@ -537,7 +537,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     }
                 });
 
-                DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
+                DataUtils.forEachMatch(ForgeRegistries.ENTITY_TYPES.getEntries(), e -> {
                     return e.getValue().create(mc.level) instanceof LivingEntity;
                 }, e -> dialog.addItem(e.getKey().location()));
                 dialog.setSize(150, 190);
@@ -547,7 +547,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 filter.setSize(dialog.xSize() - 6, 12).setPos(dialog.xPos() + 3, dialog.maxYPos() - 15);
                 filter.onValueChanged((s) -> {
                     dialog.clearItems();
-                    DataUtils.forEachMatch(ForgeRegistries.ENTITIES.getEntries(), e -> {
+                    DataUtils.forEachMatch(ForgeRegistries.ENTITY_TYPES.getEntries(), e -> {
                         EntityType<?> type = e.getValue();
                         boolean pass = s.isEmpty() || type.toString().toLowerCase(Locale.ENGLISH).contains(s.toLowerCase(Locale.ENGLISH));
                         String name = type.getDescription().getString();
@@ -609,7 +609,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                     if (!player.containerMenu.getCarried().isEmpty()) {
                         ItemStack stack = player.containerMenu.getCarried().copy();
                         stack.setCount(1);
-                        getNode().setItemName(stack.getItem().getRegistryName().toString());
+                        getNode().setItemName(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
                         getNode().setDamage(stack.isDamageableItem() ? stack.getDamageValue() : -1);
                         getNode().setNbt(stack.getTag());
                     } else {
@@ -624,7 +624,7 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 if (e instanceof ItemStack && getNode() != null) {
                     ItemStack stack = ((ItemStack) e).copy();
                     stack.setCount(1);
-                    getNode().setItemName(stack.getItem().getRegistryName().toString());
+                    getNode().setItemName(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
                     getNode().setDamage(stack.isDamageableItem() ? stack.getDamageValue() : -1);
                     getNode().setNbt(stack.getTag());
                 }

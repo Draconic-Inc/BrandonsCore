@@ -2749,7 +2749,7 @@ public class GuiElement<E extends GuiElement<E>> implements IMouseOver, IGuiPare
 
     @Deprecated //Use componente!... as much as possible
     public void renderToolTipStrings(PoseStack poseStack, List<String> components, int mouseX, int mouseY) {
-        renderTooltip(poseStack, components.stream().map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
+        renderTooltip(poseStack, components.stream().map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList()), mouseX, mouseY);
     }
 
 

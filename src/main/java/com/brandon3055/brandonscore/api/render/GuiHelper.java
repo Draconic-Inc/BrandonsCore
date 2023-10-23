@@ -25,6 +25,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.gui.ScreenUtils;
 
 /**
  * Created by brandon3055 on 12/8/21
@@ -74,7 +75,7 @@ public class GuiHelper {
     }
 
     public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, boolean empty) {
-        drawHoverRect(getter, mStack, x, y, width, height, GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, empty);
+        drawHoverRect(getter, mStack, x, y, width, height, ScreenUtils.DEFAULT_BACKGROUND_COLOR, ScreenUtils.DEFAULT_BORDER_COLOR_START, empty);
     }
 
     public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height, int backgroundColor, int borderColor) {
@@ -83,7 +84,7 @@ public class GuiHelper {
     }
 
     public static void drawHoverRect(MultiBufferSource getter, PoseStack mStack, double x, double y, double width, double height) {
-        drawHoverRect(getter, mStack, x, y, width, height, GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, false);
+        drawHoverRect(getter, mStack, x, y, width, height, ScreenUtils.DEFAULT_BACKGROUND_COLOR, ScreenUtils.DEFAULT_BORDER_COLOR_START, false);
     }
 
     //#######################################################################

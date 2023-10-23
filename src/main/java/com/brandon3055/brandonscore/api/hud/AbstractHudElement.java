@@ -6,6 +6,7 @@ import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
 import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiPopUpDialogBase.PopoutDialog;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
@@ -27,7 +28,7 @@ import java.util.function.Supplier;
  * Your custom hud elements must be registered to the AbstractHudElement forge registry.
  * Just keep in mind this is a client side only registry.
  */
-public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudElement> {
+public abstract class AbstractHudElement {
 
     protected Vector2 rawPos;
     protected double width = 100;
@@ -77,8 +78,8 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
      */
     public abstract void render(PoseStack mStack, float partialTicks, boolean configuring);
 
-    public boolean shouldRender(ElementType type, boolean preRenderEvent) {
-        return preRenderEvent && type == ElementType.ALL;
+    public boolean shouldRender(boolean preRenderEvent) {
+        return preRenderEvent;
     }
 
     public void addConfigElements(List<GuiElement<?>> list, GuiElement<?> parent) {

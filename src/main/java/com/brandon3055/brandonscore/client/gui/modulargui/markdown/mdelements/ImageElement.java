@@ -215,7 +215,7 @@ public class ImageElement extends MDElementBase<ImageElement> {
             if (!tooltip.isEmpty()) {
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(0, 0, getRenderZLevel());
-                renderTooltip(poseStack, tooltip.stream().map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
+                renderTooltip(poseStack, tooltip.stream().map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList()), mouseX, mouseY);
                 return true;
             }
         }

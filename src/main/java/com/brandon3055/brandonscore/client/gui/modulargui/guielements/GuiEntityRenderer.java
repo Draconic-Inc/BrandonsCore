@@ -63,7 +63,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
             return this;
         }
 
-        this.entityName = entity.getType().getRegistryName();
+        this.entityName = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         invalidEntity = false;
 
         if (invalidEntities.contains(entityName)) {
@@ -76,7 +76,7 @@ public class GuiEntityRenderer extends GuiElement<GuiEntityRenderer> {
     public GuiEntityRenderer setEntity(ResourceLocation entity) {
         this.entityName = entity;
         this.entity = entityCache.computeIfAbsent(entity, resourceLocation -> {
-            EntityType type = ForgeRegistries.ENTITIES.getValue(entity);
+            EntityType type = ForgeRegistries.ENTITY_TYPES.getValue(entity);
             return type == null ? null : type.create(mc.level);
         });
         invalidEntity = false;

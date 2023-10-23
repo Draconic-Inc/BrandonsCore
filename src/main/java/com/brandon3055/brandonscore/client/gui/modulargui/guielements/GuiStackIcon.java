@@ -274,7 +274,7 @@ public class GuiStackIcon extends GuiElement<GuiStackIcon> implements IModularGu
 
     @Deprecated
     public GuiStackIcon setToolTipOverride(List<String> toolTipOverride) {
-        this.toolTipOverride = toolTipOverride == null ? null : toolTipOverride.stream().map(TextComponent::new).collect(Collectors.toList());
+        this.toolTipOverride = toolTipOverride == null ? null : toolTipOverride.stream().map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList());
         return this;
     }
 

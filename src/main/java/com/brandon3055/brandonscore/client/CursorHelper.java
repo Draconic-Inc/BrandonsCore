@@ -3,7 +3,8 @@ package com.brandon3055.brandonscore.client;
 import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ScreenOpenEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
@@ -67,7 +68,7 @@ public class CursorHelper {
         return result;
     }
 
-    public static void closeGui(ScreenOpenEvent event) {
+    public static void closeGui(ScreenEvent.Opening event) {
         if (event.getScreen() == null) {
             resetCursor();
         }

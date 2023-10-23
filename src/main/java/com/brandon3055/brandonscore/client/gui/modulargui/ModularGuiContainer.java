@@ -266,7 +266,7 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
         int left = this.leftPos;
         int top = this.topPos;
         this.renderBg(poseStack, partialTicks, mouseX, mouseY);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.DrawBackground(this, poseStack, mouseX, mouseY));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.Render.Background(this, poseStack, mouseX, mouseY));
         RenderSystem.disableDepthTest();
 
         for (Widget widget : this.renderables) {
@@ -301,7 +301,7 @@ public abstract class ModularGuiContainer<T extends AbstractContainerMenu> exten
         }
 
         this.renderLabels(poseStack, mouseX, mouseY);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.DrawForeground(this, poseStack, mouseX, mouseY));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.Render.Foreground(this, poseStack, mouseX, mouseY));
         ItemStack itemstack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
         if (!itemstack.isEmpty()) {
             int l1 = 8;

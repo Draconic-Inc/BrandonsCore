@@ -273,7 +273,7 @@ public class GuiEnergyBar extends GuiElement<GuiEnergyBar> {
 
             PoseStack poseStack = new PoseStack();
             poseStack.translate(0, 0, getRenderZLevel());
-            renderTooltip(poseStack, Arrays.stream(builder.toString().split("\n")).map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
+            renderTooltip(poseStack, Arrays.stream(builder.toString().split("\n")).map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList()), mouseX, mouseY);
             return true;
         }
 

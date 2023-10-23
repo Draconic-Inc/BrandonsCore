@@ -22,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.awt.*;
 
@@ -99,7 +100,8 @@ public class HudConfigGui extends ModularGuiScreen {
                 }
             });
 
-            String infoKey = String.format("hud.%s.%s.info", element.getRegistryName().getNamespace(), element.getRegistryName().getPath());
+            ResourceLocation loc = HudManager.HUD_REGISTRY.getKey(element);
+            String infoKey = String.format("hud.%s.%s.info", loc.getNamespace(), loc.getPath());
             String translatedInfo = I18n.get(infoKey);
             if (!infoKey.equals(translatedInfo)) {
                 GuiButton infoButton = toolkit.createIconButton(this, 10, BCGuiSprites.getter("dark/info_icon"));
@@ -123,7 +125,8 @@ public class HudConfigGui extends ModularGuiScreen {
             drawBackground(getter, x, y, w, h, partialTicks, rgb);
 
             if (bgAnim > 0) {
-                Component name = Component.translatable(String.format("hud.%s.%s.name", element.getRegistryName().getNamespace(), element.getRegistryName().getPath()));
+            	ResourceLocation loc = HudManager.HUD_REGISTRY.getKey(element);
+                Component name = Component.translatable(String.format("hud.%s.%s.name", loc.getNamespace(), loc.getPath()));
                 int tw = fontRenderer.width(name);
                 float bgAnim = Math.min(this.bgAnim + (partialTicks * 0.1F), 1);
                 fontRenderer.drawInBatch(name, (float) (x + (w - tw) / 2), (float) y + ((float) h - 8F) / 2F, (0x00FFFFFF | ((int) (0xFF * bgAnim) << 24)), false, mStack.last().pose(), getter, false, 0, 0xf000f0);

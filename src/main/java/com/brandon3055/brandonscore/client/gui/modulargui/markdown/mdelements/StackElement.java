@@ -114,9 +114,9 @@ public class StackElement extends MDElementBase<StackElement> {
 //                    }
 //                }
 //
-//                GuiUtils.preItemToolTip(stack);
+//                ScreenUtils.preItemToolTip(stack);
 //                this.drawHoveringText(stack, list, mouseX, mouseY, screenWidth, screenHeight, -1, fontRenderer);
-//                GuiUtils.postItemToolTip();
+//                ScreenUtils.postItemToolTip();
 //            } else {
 //                drawHoveringText(tooltip, mouseX, mouseY, fontRenderer, screenWidth, screenHeight);
 //            }

@@ -180,7 +180,7 @@ public class MarkdownTextRenderer {
         @Override
         public boolean accept(int p_accept_1_, Style p_accept_2_, int p_accept_3_) {
             FontSet font = getFontSet(p_accept_2_.getFont());
-            GlyphInfo iglyph = font.getGlyphInfo(p_accept_3_);
+            GlyphInfo iglyph = font.getGlyphInfo(p_accept_3_, false); //TODO [FoxMcloud5655]: More "fishy" glyphs.
             BakedGlyph texturedglyph = p_accept_2_.isObfuscated() && p_accept_3_ != 32 ? font.getRandomGlyph(iglyph) : font.getGlyph(p_accept_3_);
             boolean flag = p_accept_2_.isBold();
             float f3 = this.a;

@@ -28,7 +28,7 @@ public class BCFontRenderer extends Font {
     private static Map<Font, BCFontRenderer> cashedRenderers = new HashMap<>();
 
     public BCFontRenderer(Function<ResourceLocation, FontSet> font) {
-        super(font);
+        super(font, true); //TODO [FoxMcloud5655]: New boolean references filtering "fishy glyphs".  Needs testing.
     }
 
 

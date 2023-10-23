@@ -6,7 +6,7 @@ import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraftforge.client.gui.GuiUtils;
+import net.minecraftforge.client.gui.ScreenUtils;
 
 import java.util.function.Supplier;
 
@@ -15,8 +15,8 @@ import java.util.function.Supplier;
  */
 public class GuiTooltipBackground extends GuiElement<GuiTooltipBackground> {
 
-    private Supplier<Integer> backgroundColor = () -> GuiUtils.DEFAULT_BACKGROUND_COLOR;
-    private Supplier<Integer> borderColor = () -> GuiUtils.DEFAULT_BORDER_COLOR_START;
+    private Supplier<Integer> backgroundColor = () -> ScreenUtils.DEFAULT_BACKGROUND_COLOR;
+    private Supplier<Integer> borderColor = () -> ScreenUtils.DEFAULT_BORDER_COLOR_START;
     private Supplier<Integer> borderEndColor = () -> (borderColor.get() & 0xFEFEFE) >> 1 | borderColor.get() & 0xFF000000;
     private boolean empty = false;
 

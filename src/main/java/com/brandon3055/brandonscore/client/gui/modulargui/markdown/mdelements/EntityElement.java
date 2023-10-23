@@ -122,7 +122,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
             if (GuiHelperOld.isInRect(x, y, (int) width, (int) height, mouseX, mouseY)) {
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(0, 0, getRenderZLevel());
-                renderTooltip(poseStack, tooltip.stream().map(TextComponent::new).collect(Collectors.toList()), mouseX, mouseY);
+                renderTooltip(poseStack, tooltip.stream().map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList()), mouseX, mouseY);
                 return true;
             }
         }
@@ -192,7 +192,7 @@ public class EntityElement extends MDElementBase<EntityElement> {
         if (entityString.startsWith("player:")) {
 //            entity = createRenderPlayer(world, entityString.replaceFirst("player:", ""));
         } else {
-            EntityType type = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityString));
+            EntityType type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityString));
             if (type != null) {
                 entity = type.create(world);
             }

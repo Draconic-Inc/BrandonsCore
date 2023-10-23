@@ -22,17 +22,17 @@ public interface HoverTextSupplier<E extends GuiElement<?>> {
             if (text.isEmpty()) {
                 return Collections.emptyList();
             } else if (text.contains("\n")) {
-                return Arrays.stream(text.split("\n")).map(TextComponent::new).collect(Collectors.toList());
+                return Arrays.stream(text.split("\n")).map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList());
             }
             return Collections.singletonList(Component.literal(text));
         }
         else if (hoverText instanceof String[]) {
             List<String> lines = splitNewLines(Arrays.asList((String[]) hoverText));
             if (lines.isEmpty() || (lines.size() == 1 && lines.get(0).isEmpty())) return Collections.emptyList();
-            return lines.stream().map(TextComponent::new).collect(Collectors.toList());
+            return lines.stream().map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList());
         }
         else if (hoverText instanceof List) {
-            return splitNewLines((List<String>) hoverText).stream().map(TextComponent::new).collect(Collectors.toList());
+            return splitNewLines((List<String>) hoverText).stream().map(net.minecraft.network.chat.Component::literal).collect(Collectors.toList());
         }
         else if (hoverText instanceof Component) {
             return Collections.singletonList(((Component) hoverText));
