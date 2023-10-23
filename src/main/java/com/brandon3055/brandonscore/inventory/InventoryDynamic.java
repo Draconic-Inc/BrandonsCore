@@ -52,6 +52,7 @@ public class InventoryDynamic implements Container {
         return index >= 0 && index < stacks.size() ? stacks.get(index) : ItemStack.EMPTY;
     }
 
+    @Override
     public ItemStack removeItem(int index, int count) {
         ItemStack itemstack = getItem(index);
 

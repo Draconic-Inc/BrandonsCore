@@ -178,7 +178,7 @@ public class StringyStacks {
         }
 
         //Read Stack Size
-        if (workString.length() > 0) {
+        if (!workString.isEmpty()) {
             if (!workString.contains(splitter)) {
                 countString = workString;
                 workString = "";
@@ -188,7 +188,7 @@ public class StringyStacks {
             }
         }
         //Read Stack Meta
-        if (workString.length() > 0) {
+        if (!workString.isEmpty()) {
             if (!workString.contains(splitter)) {
                 metaString = workString;
                 workString = "";
@@ -198,7 +198,7 @@ public class StringyStacks {
             }
         }
         //Read Stack NBT
-        if (workString.length() > 0) {
+        if (!workString.isEmpty()) {
             nbt = workString;
         }
 
@@ -206,7 +206,7 @@ public class StringyStacks {
         int meta = 0;
         CompoundTag compound = null;
 
-        if (countString.length() > 0) {
+        if (!countString.isEmpty()) {
             try {
                 count = Integer.parseInt(countString);
             }
@@ -215,7 +215,7 @@ public class StringyStacks {
                 return defaultIfInputInvalid;
             }
         }
-        if (metaString.length() > 0) {
+        if (!metaString.isEmpty()) {
             try {
                 meta = Integer.parseInt(metaString);
             }
@@ -224,7 +224,7 @@ public class StringyStacks {
                 return defaultIfInputInvalid;
             }
         }
-        if (nbt.length() > 0) {
+        if (!nbt.isEmpty()) {
             try {
                 compound = TagParser.parseTag(nbt);
             }

@@ -30,6 +30,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
@@ -39,7 +41,7 @@ import java.util.function.Consumer;
 public class Utils {
 
     public static final String SELECT = "\u00A7";
-    private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###");
+    private static DecimalFormat energyValue = new DecimalFormat("###,###,###,###,###", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     @Deprecated
     public static String formatNumber(double value) {
