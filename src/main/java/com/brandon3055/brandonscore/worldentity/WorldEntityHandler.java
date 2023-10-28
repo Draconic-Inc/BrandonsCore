@@ -1,11 +1,9 @@
 package com.brandon3055.brandonscore.worldentity;
 
-import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.google.common.collect.ImmutableList;
 import net.covers1624.quack.util.CrashLock;
-import net.covers1624.quack.util.SneakyUtils;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -15,8 +13,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
@@ -26,7 +22,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 
 /**
  * Created by brandon3055 on 15/12/20
@@ -34,6 +30,7 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 public class WorldEntityHandler {
     private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
+    public static final ResourceKey<Registry<WorldEntity>> ENTITY_TYPE = ResourceKey.createRegistryKey(new ResourceLocation(MODID, "world_entity"));
     public static IForgeRegistry<WorldEntityType<?>> REGISTRY;
     private static final Map<UUID, WorldEntity> ID_ENTITY_MAP = new HashMap<>();
     private static final Map<ResourceKey<Level>, List<WorldEntity>> WORLD_ENTITY_MAP = new HashMap<>();
@@ -42,8 +39,7 @@ public class WorldEntityHandler {
 
     public static void createRegistry(NewRegistryEvent event) {
         event.create(new RegistryBuilder<WorldEntityType<?>>()
-                        .setName(new ResourceLocation(BrandonsCore.MODID, "world_entity"))
-                        //.setType(SneakyUtils.unsafeCast(WorldEntityType.class)) // TODO [FoxMcloud5655]: This is surely incorrect.
+                        .setName(ENTITY_TYPE.location())
                         .disableSaving()
                         .disableSync(),
                 ts -> REGISTRY = ts);

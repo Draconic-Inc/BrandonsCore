@@ -36,6 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderHighlightEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -323,8 +324,8 @@ public class BlockBCore extends Block implements IBCoreBlock {
         }
     }
 
-//    @OnlyIn(Dist.CLIENT)
-//    public boolean renderSelectionBox(DrawSelectionEvent.HighlightBlock event, Level level) {
-//        return true;
-//    }
+    @OnlyIn(Dist.CLIENT)
+    public boolean renderSelectionBox(RenderHighlightEvent.Block event, Level level) {
+        return true;
+    }
 }

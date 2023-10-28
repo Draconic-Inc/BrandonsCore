@@ -15,6 +15,7 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.ChatFormatting;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.Util;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -198,7 +199,7 @@ public class ContributorFetcher {
     }
 
     private boolean isOnline(UUID playerId, @Nullable String username) {
-        return username == null || /*!playerId.equals(Player.getUUID(username))*/ playerId != null; //TODO [FoxMcloud5655]: This is incorrect.
+        return username == null || !playerId.equals(UUIDUtil.createOfflinePlayerUUID(username));
     }
 
     private static class DownloadTask implements ThreadedTask {

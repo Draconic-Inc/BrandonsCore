@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -42,7 +43,7 @@ public class FilterEntity extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
-        ResourceLocation res = entity.getType().getDefaultLootTable();  //TODO [FoxMcloud5655]: Ensure this is correct.
+        ResourceLocation res = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         if (entityName.isEmpty() || res == null) {
             return !whitelistEntity;
         }

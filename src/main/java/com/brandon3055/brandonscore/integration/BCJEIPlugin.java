@@ -1,9 +1,6 @@
 package com.brandon3055.brandonscore.integration;
 
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui.JEITargetAdapter;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
@@ -13,6 +10,7 @@ import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,93 +37,62 @@ public class BCJEIPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler<>() {
-            @Override
-            public List<Rect2i> getGuiExtraAreas(ModularGuiContainer containerScreen) {
-                return containerScreen.getManager().getJeiExclusions();
-            }
-        });
-
-        registration.addGuiScreenHandler(ModularGuiScreen.class, ModularGuiProperties::create);
-        registration.addGuiScreenHandler(ModularGuiContainer.class, ModularGuiProperties::create);
-
-
-
-        registration.addGhostIngredientHandler(ModularGuiContainer.class, new IGhostIngredientHandler<>() {
-            @Override
-            public <I> java.util.List<Target<I>> getTargets(ModularGuiContainer gui, I ingredient, boolean doStart) {
-                //noinspection unchecked
-                return ((Stream<JEITargetAdapter>) gui.getJEIDropTargets().stream()).filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {
-                    @Override
-                    public Rect2i getArea() {
-                        return adaptor.getMCRect();
-                    }
-
-                    @Override
-                    public void accept(I o) {
-                        adaptor.accept(o);
-                    }
-                }).collect(Collectors.toList());
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
-
-        registration.addGhostIngredientHandler(ModularGuiScreen.class, new IGhostIngredientHandler<>() {
-            @Override
-            public <I> java.util.List<Target<I>> getTargets(ModularGuiScreen gui, I ingredient, boolean doStart) {
-                return gui.getJEIDropTargets().stream().filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {
-                    @Override
-                    public Rect2i getArea() {
-                        return adaptor.getMCRect();
-                    }
-
-                    @Override
-                    public void accept(I o) {
-                        adaptor.accept(o);
-                    }
-                }).collect(Collectors.toList());
-            }
-
-            @Override
-            public void onComplete() {}
-        });
+        //TODO JEI integration
+//        registration.addGuiContainerHandler(ModularGuiContainer.class, new IGuiContainerHandler<>() {
+//            @Override
+//            public List<Rect2i> getGuiExtraAreas(ModularGuiContainer containerScreen) {
+//                return containerScreen.getManager().getJeiExclusions();
+//            }
+//        });
+//
+//        registration.addGuiScreenHandler(ModularGuiScreen.class, ModularGuiProperties::create);
+//        registration.addGuiScreenHandler(ModularGuiContainer.class, ModularGuiProperties::create);
+//
+//
+//
+//        registration.addGhostIngredientHandler(ModularGuiContainer.class, new IGhostIngredientHandler<>() {
+//            @Override
+//            public <I> java.util.List<Target<I>> getTargets(ModularGuiContainer gui, I ingredient, boolean doStart) {
+//                //noinspection unchecked
+//                return ((Stream<JEITargetAdapter>) gui.getJEIDropTargets().stream()).filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {
+//                    @Override
+//                    public Rect2i getArea() {
+//                        return adaptor.getMCRect();
+//                    }
+//
+//                    @Override
+//                    public void accept(I o) {
+//                        adaptor.accept(o);
+//                    }
+//                }).collect(Collectors.toList());
+//            }
+//
+//            @Override
+//            public void onComplete() {
+//
+//            }
+//        });
+//
+//        registration.addGhostIngredientHandler(ModularGuiScreen.class, new IGhostIngredientHandler<>() {
+//            @Override
+//            public <I> java.util.List<Target<I>> getTargets(ModularGuiScreen gui, I ingredient, boolean doStart) {
+//                return gui.getJEIDropTargets().stream().filter(JEITargetAdapter::isEnabled).map(adaptor -> new Target<I>() {
+//                    @Override
+//                    public Rect2i getArea() {
+//                        return adaptor.getMCRect();
+//                    }
+//
+//                    @Override
+//                    public void accept(I o) {
+//                        adaptor.accept(o);
+//                    }
+//                }).collect(Collectors.toList());
+//            }
+//
+//            @Override
+//            public void onComplete() {}
+//        });
     }
-
-
-//    @Override
-//    public void register(IModRegistry registry) {
-////        ModFeatureParser.getFeaturesToHide(stack -> registry.getJeiHelpers().getIngredientBlacklist().addIngredientToBlacklist(stack));
-//        ingredientRegistry = registry.getIngredientRegistry();
-//
-//
-//
-////        ModRegistry reg = (ModRegistry) registry;
-////        reg.getGhostIngredientHandlers().put(IModularGui.class, new IGhostIngredientHandler() {
-////            @SuppressWarnings("unchecked")
-////            @Override
-////            public List<Target> getTargets(Screen gui, Object o, boolean b) {
-////                return (List<Target>)((IModularGui)gui).getJEIDropTargets().stream().map(adaptor -> new Target<Object>() {
-////                    @Override
-////                    public Rectangle getArea() {
-////                        return ((IModularGui.JEITargetAdapter)adaptor).getArea();
-////                    }
-////
-////                    @Override
-////                    public void accept(Object o) {
-////                        ((IModularGui.JEITargetAdapter)adaptor).accept(o);
-////                    }
-////                }).collect(Collectors.toList());
-////            }
-////
-////            @Override
-////            public void onComplete() {}
-////        });
-//
-//    }
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime iJeiRuntime) {

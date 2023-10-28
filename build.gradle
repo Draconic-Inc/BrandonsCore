@@ -2,7 +2,6 @@ buildscript {
     repositories {
         mavenLocal()
         jcenter()
-        mavenCentral()
         maven { url = "https://maven.minecraftforge.net/" }
         maven { url = "https://repo.spongepowered.org/maven" }
     }
@@ -21,7 +20,6 @@ plugins {
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: "org.spongepowered.mixin"
-apply plugin: 'eclipse'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -113,11 +111,15 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
+
     shadow 'net.covers1624:Quack:0.4.7.72'
 //     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
     implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
     implementation fg.deobf("mezz.jei:jei-${config.mc_version}-forge-api:${config.jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${config.mc_version}-common-api:${config.jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}-forge:${config.jei_version}")
+//    runtimeOnly fg.deobf("mezz.jei:jei-${config.mc_version}-common:${config.jei_version}")
+
 }
 
 reobf {
@@ -138,6 +140,7 @@ signing {
         }
     }
 }
+
 
 def commonManifest = {
     attributes 'Specification-Title': archivesBaseName
@@ -167,6 +170,7 @@ task srcJar(type: Jar) {
     from file("LICENSE")
 }
 
+
 publishing {
     repositories {
         if (System.getenv('MAVEN_PASS')) {
@@ -186,6 +190,7 @@ publishing {
             version project.version
             artifact jar
             artifact srcJar
+//            artifact deobfJar
 
             pom {
                 name = archivesBaseName
@@ -220,33 +225,33 @@ publishing {
     }
 }
 
-/**
- * Polls the 'compile' configuration for a dependency with the given module name
- * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
- *
- * @param module The module to search for.
- * @param chop If the string should be chopped on the last '-' in its string.
- * @param configuration The name of the configuration to search.
- * @param errorMissing If an error should be thrown if it can't be found.
- * @return The version string, '0' if 'errorMissing' is false and nothing was found.
- */
-def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
-    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
-    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
-            .findAll { it.id.componentIdentifier.module == module }
-            .collect { it.id.componentIdentifier.version }
-    if (filtered.size() > 1) {
-        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
-    }
-    if (errorMissing && filtered.isEmpty()) {
-        throw new RuntimeException("Failed resolve dependency version for '${module}'")
-    }
-    if (filtered.isEmpty()) return "0"
-    def version = filtered.first() as String
-    if (chop) {
-        def idx = version.lastIndexOf('-')
-        return version.substring(idx + 1)
-    }
-    return version
-}
 
+///**
+// * Polls the 'compile' configuration for a dependency with the given module name
+// * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
+// *
+// * @param module The module to search for.
+// * @param chop If the string should be chopped on the last '-' in its string.
+// * @param configuration The name of the configuration to search.
+// * @param errorMissing If an error should be thrown if it can't be found.
+// * @return The version string, '0' if 'errorMissing' is false and nothing was found.
+// */
+//def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
+//    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
+//    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
+//            .findAll { it.id.componentIdentifier.module == module }
+//            .collect { it.id.componentIdentifier.version }
+//    if (filtered.size() > 1) {
+//        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
+//    }
+//    if (errorMissing && filtered.isEmpty()) {
+//        throw new RuntimeException("Failed resolve dependency version for '${module}'")
+//    }
+//    if (filtered.isEmpty()) return "0"
+//    def version = filtered.first() as String
+//    if (chop) {
+//        def idx = version.lastIndexOf('-')
+//        return version.substring(idx + 1)
+//    }
+//    return version
+//}

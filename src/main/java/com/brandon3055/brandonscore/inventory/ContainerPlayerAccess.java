@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.inventory;
 import codechicken.lib.inventory.InventorySimple;
 import com.brandon3055.brandonscore.BCContent;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -34,8 +35,8 @@ public class ContainerPlayerAccess extends AbstractContainerMenu {
     private int tick = 0;
 
     //Client Side Constructor
-    public ContainerPlayerAccess(int id, Inventory playerInv) {
-        super(BCContent.containerPlayerAccess, id);
+    public ContainerPlayerAccess(int windowId, Inventory playerInv, FriendlyByteBuf extraData) {
+        super(BCContent.containerPlayerAccess, windowId);
         this.player = playerInv.player;
         playerAccess = null;
         targetInventory = new InventorySimple(41);

@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -27,7 +28,7 @@ import java.util.function.Supplier;
  * Your custom hud elements must be registered to the AbstractHudElement forge registry.
  * Just keep in mind this is a client side only registry.
  */
-public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudElement> {
+public abstract class AbstractHudElement {
 
     protected Vector2 rawPos;
     protected double width = 100;
@@ -77,8 +78,8 @@ public abstract class AbstractHudElement extends ForgeRegistryEntry<AbstractHudE
      */
     public abstract void render(PoseStack mStack, float partialTicks, boolean configuring);
 
-    public boolean shouldRender(ElementType type, boolean preRenderEvent) {
-        return preRenderEvent && type == ElementType.ALL;
+    public boolean shouldRender(boolean preRenderEvent) {
+        return preRenderEvent;
     }
 
     public void addConfigElements(List<GuiElement<?>> list, GuiElement<?> parent) {

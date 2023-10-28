@@ -3,7 +3,6 @@ package com.brandon3055.brandonscore.multiblock;
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.vec.Quat;
 import codechicken.lib.vec.Rotation;
-import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
