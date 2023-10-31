@@ -1,10 +1,14 @@
 package com.brandon3055.brandonscore.lib;
 
+import java.nio.ByteBuffer;
+
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import net.minecraft.Util;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -44,7 +48,7 @@ public class ChatHelper {
         //0xE3055000 is an arbitrary number. Combine that with the relatively limited range and chances if my indexes conflicting with
         //another mod doing something similar are pretty low. But even if there is a conflict its hardly a game breaking issue. 
         if (index < -1000 || index > 1000) LogHelperBC.bigWarn("Message index is out of bounds. Message: " + message.getString());
-        BrandonsCore.proxy.sendIndexedMessage(player, message, index + 0xE3055000);
+        BrandonsCore.proxy.sendIndexedMessage(player, message, new MessageSignature(ByteBuffer.allocate(4).putInt(index + 0xE3055000).array()));
     }
 
     /**

@@ -5,8 +5,6 @@ import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
-import com.brandon3055.brandonscore.client.gui.GuiPlayerAccess;
-import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
@@ -56,14 +54,14 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
                 }
             }
             case BCoreNetwork.C_PLAYER_ACCESS_UPDATE -> {
-                GuiPlayerAccess gui = mc.screen instanceof GuiPlayerAccess ? (GuiPlayerAccess) mc.screen : null;
-                if (gui != null) {
-                    gui.name = packet.readString();
-                    gui.pos = packet.readPos();
-                    gui.dimension = packet.readInt();
-                }
+                //GuiPlayerAccess gui = mc.screen instanceof GuiPlayerAccess ? (GuiPlayerAccess) mc.screen : null;
+                //if (gui != null) {
+                //    gui.name = packet.readString();
+                //    gui.pos = packet.readPos();
+                //    gui.dimension = packet.readInt();
+                //}
             }
-            case BCoreNetwork.C_INDEXED_MESSAGE -> BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), new MessageSignature(packet.readBytes())); //TODO [FoxMcloud5655]: Testing required.
+            case BCoreNetwork.C_INDEXED_MESSAGE -> BrandonsCore.proxy.sendIndexedMessage(mc.player, packet.readTextComponent(), new MessageSignature(packet.readBytes()));
             case BCoreNetwork.C_TILE_CAP_DATA -> {
                 BlockPos pos = packet.readPos();
                 if (mc.level.getBlockEntity(pos) instanceof TileBCore tile) {
@@ -74,7 +72,7 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
             case BCoreNetwork.C_SPAWN_ENTITY -> handleEntitySpawn(packet, mc);
             case BCoreNetwork.C_SPAWN_PARTICLE -> handleParticleSpawn(packet, mc);
             case BCoreNetwork.C_ENTITY_VELOCITY -> handleEntityVelocity(packet, mc);
-            case BCoreNetwork.C_OPEN_HUD_CONFIG -> mc.setScreen(new HudConfigGui());
+            //case BCoreNetwork.C_OPEN_HUD_CONFIG -> mc.setScreen(new HudConfigGui());
             case BCoreNetwork.C_MULTI_BLOCK_DEFINITIONS -> MultiBlockManager.receiveDefinitionsFromServer(packet);
             case BCoreNetwork.C_CONTRIBUTOR_CONFIG -> ContributorHandler.handleSettingsFromServer(packet);
         }

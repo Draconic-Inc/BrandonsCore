@@ -2,7 +2,6 @@ package com.brandon3055.brandonscore.client;
 
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import com.brandon3055.brandonscore.BCConfig;
-import com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout;
 import com.brandon3055.brandonscore.client.render.CustomSpriteUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -15,6 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -42,11 +42,11 @@ public class BCGuiSprites {
     );
 
 
-    public static void initialize(ColorHandlerEvent.Block event) {
+    public static void initialize(FMLClientSetupEvent event) { //TODO [FoxMcloud5655]: Probably not correct.
         customSpriteUploader = new CustomSpriteUploader(registeredSprites, BCGuiSprites.ATLAS_LOCATION, "gui");
 
         //Gui Backgrounds
-        Stream.of(GuiLayout.values()).filter(e -> e.xSize != -1).forEach(layout -> registerThemed(MODID, layout.textureName()));
+        //Stream.of(GuiLayout.values()).filter(e -> e.xSize != -1).forEach(layout -> registerThemed(MODID, layout.textureName()));
         registerThemed(MODID, "background_dynamic");
         registerThemed(MODID, "bg_dynamic_small");
         registerThemed(MODID, "borderless_bg_dynamic_small");
