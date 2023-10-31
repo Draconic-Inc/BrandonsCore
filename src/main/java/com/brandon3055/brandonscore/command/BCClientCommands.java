@@ -2,9 +2,6 @@ package com.brandon3055.brandonscore.command;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.ClientOnly;
-import com.brandon3055.brandonscore.client.gui.ContributorConfigGui;
-import com.brandon3055.brandonscore.client.gui.modulargui.GuiToolkitTest;
-import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiTest;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.init.ClientInit;
@@ -35,27 +32,27 @@ public class BCClientCommands {
 
         builder.then(contributor());
         if (BrandonsCore.inDev) {
-            builder.then(testGui());
+            //builder.then(testGui());
         }
 
         dispatcher.register(builder);
     }
 
 
-    private static ArgumentBuilder<CommandSourceStack, ?> testGui() {
-        return Commands.literal("testui")
-                .requires(cs -> cs.hasPermission(0))
-                .then(Commands.literal("mgui")
-                        .executes(context -> {
-                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ModularGuiTest(Component.literal("Test"))));
-                            return 0;
-                        }))
-                .then(Commands.literal("toolkit")
-                        .executes(context -> {
-                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new GuiToolkitTest(Component.literal("Test"))));
-                            return 0;
-                        }));
-    }
+//    private static ArgumentBuilder<CommandSourceStack, ?> testGui() {
+//        return Commands.literal("testui")
+//                .requires(cs -> cs.hasPermission(0))
+//                .then(Commands.literal("mgui")
+//                        .executes(context -> {
+//                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ModularGuiTest(Component.literal("Test"))));
+//                            return 0;
+//                        }))
+//                .then(Commands.literal("toolkit")
+//                        .executes(context -> {
+//                            DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new GuiToolkitTest(Component.literal("Test"))));
+//                            return 0;
+//                        }));
+//    }
 
     private static ArgumentBuilder<CommandSourceStack, ?> contributor() {
         return Commands.literal("contributor")
@@ -83,7 +80,7 @@ public class BCClientCommands {
                         return 0;
                     }
 
-                    DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ContributorConfigGui(player, props)));
+                    //DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ContributorConfigGui(player, props)));
                     return 0;
                 })
                 .then(Commands.literal("help")

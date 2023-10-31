@@ -105,7 +105,7 @@ public class GuiHelperOld {
     }
 
 //    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
-//        net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
+//        net.minecraftforge.fml.client.config.ScreenUtils.drawHoveringText(list, x, y, guiWidth, guiHeight, -1, font);
 //    }
 
 //    public static void drawHoveringTextScaled(List list, int mouseX, int mouseY, Font font, float fade, double scale, int guiWidth, int guiHeight) {

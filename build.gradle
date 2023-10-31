@@ -112,7 +112,6 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
 
-    shadow 'net.covers1624:Quack:0.4.7.72'
 //     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")
     implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
     implementation fg.deobf("mezz.jei:jei-${config.mc_version}-forge-api:${config.jei_version}")
