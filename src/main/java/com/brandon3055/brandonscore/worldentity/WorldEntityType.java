@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 /**
  * Created by brandon3055 on 15/12/20
  */
-public class WorldEntityType<T extends WorldEntity> extends net.minecraftforge.registries.ForgeRegistryEntry<WorldEntityType<?>> {
+public class WorldEntityType<T extends WorldEntity> {
     private Supplier<? extends T> factory;
 
     public WorldEntityType(Supplier<? extends T> factory) {

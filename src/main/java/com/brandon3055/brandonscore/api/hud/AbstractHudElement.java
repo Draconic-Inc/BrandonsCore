@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 
 import javax.annotation.Nullable;
 import java.awt.*;

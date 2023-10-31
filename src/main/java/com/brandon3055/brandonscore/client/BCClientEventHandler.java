@@ -38,6 +38,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
+import net.minecraftforge.client.event.RenderHighlightEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -119,7 +120,7 @@ public class BCClientEventHandler {
     }
 
     @SubscribeEvent
-    public void drawSelectionEvent(DrawSelectionEvent.HighlightBlock event) {
+    public void drawSelectionEvent(RenderHighlightEvent.Block event) {
         Level level = Minecraft.getInstance().level;
         if (event.getTarget().getType() == HitResult.Type.MISS || level == null) return;
         BlockState state = level.getBlockState(event.getTarget().getBlockPos());

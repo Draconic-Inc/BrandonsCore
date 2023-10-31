@@ -4,7 +4,6 @@ import com.brandon3055.brandonscore.BrandonsCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ScreenEvent;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
@@ -32,10 +31,10 @@ public class CursorHelper {
 
     private static long createCursor(ResourceLocation resource) {
         try {
-            BufferedImage bufferedimage = ImageIO.read(Minecraft.getInstance().getResourceManager().getResource(resource).getInputStream());
+            BufferedImage bufferedimage = ImageIO.read(Minecraft.getInstance().getResourceManager().getResource(resource).get().open());
             GLFWImage glfwImage = imageToGLFWImage(bufferedimage);
             return GLFW.glfwCreateCursor(glfwImage, 16, 16);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
         return 0;
@@ -68,10 +67,8 @@ public class CursorHelper {
         return result;
     }
 
-    public static void closeGui(ScreenEvent.Opening event) {
-        if (event.getScreen() == null) {
-            resetCursor();
-        }
+    public static void closeGui(ScreenEvent.Closing event) {
+        resetCursor();
     }
 
     public static void setCursor(@Nullable ResourceLocation cursor) {
@@ -81,8 +78,7 @@ public class CursorHelper {
             long newCursor = active == null ? 0 : cursors.computeIfAbsent(cursor, CursorHelper::createCursor);
             try {
                 GLFW.glfwSetCursor(window, newCursor);
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         }

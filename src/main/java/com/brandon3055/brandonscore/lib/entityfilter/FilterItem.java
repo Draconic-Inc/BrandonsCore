@@ -118,11 +118,8 @@ public class FilterItem extends FilterBase {
             //Check name/oreDict
             if (!itemName.isEmpty()) {
                 if (itemName.contains(":")) {
-                	Optional<ResourceKey<Item>> key = ForgeRegistries.ITEMS.getResourceKey(stack.getItem());
-                	match = key.isPresent();
-                	if (match) {
-                		match = key.get().toString().equals(itemName); //TODO [FoxMcloud5655]: Make sure this works.
-                	}
+                    String name = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
+                    match = name.equals(itemName);
                 }
                 else {
 //                    //TODO Support Tags
