@@ -44,64 +44,64 @@ public class GuiHelperOld {
     }
 
     public static void drawTexturedRect(int x, int y, int u, int v, int width, int height) {
-        drawTexturedRect(x, y, width, height, u, v, width, height, 0, PXL256);
+//        drawTexturedRect(x, y, width, height, u, v, width, height, 0, PXL256);
     }
 
     public static void drawTexturedRect(float x, float y, float width, float height, int u, int v, int uSize, int vSize, float zLevel, float pxl) {
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder vertexBuffer = tessellator.getBuilder();
-        vertexBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        vertexBuffer.vertex(x, y + height, zLevel).uv(u * pxl, (v + vSize) * pxl).endVertex();
-        vertexBuffer.vertex(x + width, y + height, zLevel).uv((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
-        vertexBuffer.vertex(x + width, y, zLevel).uv((u + uSize) * pxl, v * pxl).endVertex();
-        vertexBuffer.vertex(x, y, zLevel).uv(u * pxl, v * pxl).endVertex();
-        tessellator.end();
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder vertexBuffer = tessellator.getBuilder();
+//        vertexBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+//        vertexBuffer.vertex(x, y + height, zLevel).uv(u * pxl, (v + vSize) * pxl).endVertex();
+//        vertexBuffer.vertex(x + width, y + height, zLevel).uv((u + uSize) * pxl, (v + vSize) * pxl).endVertex();
+//        vertexBuffer.vertex(x + width, y, zLevel).uv((u + uSize) * pxl, v * pxl).endVertex();
+//        vertexBuffer.vertex(x, y, zLevel).uv(u * pxl, v * pxl).endVertex();
+//        tessellator.end();
     }
 
     public static void drawTiledTextureRectWithTrim(int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int texU, int texV, int texWidth, int texHeight, double zLevel) {
-        int trimWidth = texWidth - leftTrim - rightTrim;
-        int trimHeight = texHeight - topTrim - bottomTrim;
-        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
-
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-
-        for (int x = 0; x < xSize; ) {
-            int rWidth = Math.min(xSize - x, trimWidth);
-            int trimU = x == 0 ? texU : x + texWidth <= xSize ? texU + leftTrim : texU + (texWidth - (xSize - x));
-
-            //Top & Bottom trim
-            bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim, zLevel);
-            bufferTexturedModalRect(buffer, xPos + x, yPos + ySize - bottomTrim, trimU, texV + texHeight - bottomTrim, rWidth, bottomTrim, zLevel);
-
-
-            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
-            for (int y = 0; y < ySize; ) {
-                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
-                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + (texHeight - (ySize - y));
-
-                //Left & Right trim
-                if (x == 0) {
-                    bufferTexturedModalRect(buffer, xPos, yPos + y + topTrim, texU, trimV, leftTrim, rHeight, zLevel);
-                    bufferTexturedModalRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight, zLevel);
-                }
-
-                //Core
-                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight, zLevel);
-                y += trimHeight;
-            }
-            x += trimWidth;
-        }
-
-        tessellator.end();
+//        int trimWidth = texWidth - leftTrim - rightTrim;
+//        int trimHeight = texHeight - topTrim - bottomTrim;
+//        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+//
+//        Tesselator tessellator = Tesselator.getInstance();
+//        BufferBuilder buffer = tessellator.getBuilder();
+//        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+//
+//        for (int x = 0; x < xSize; ) {
+//            int rWidth = Math.min(xSize - x, trimWidth);
+//            int trimU = x == 0 ? texU : x + texWidth <= xSize ? texU + leftTrim : texU + (texWidth - (xSize - x));
+//
+//            //Top & Bottom trim
+//            bufferTexturedModalRect(buffer, xPos + x, yPos, trimU, texV, rWidth, topTrim, zLevel);
+//            bufferTexturedModalRect(buffer, xPos + x, yPos + ySize - bottomTrim, trimU, texV + texHeight - bottomTrim, rWidth, bottomTrim, zLevel);
+//
+//
+//            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
+//            for (int y = 0; y < ySize; ) {
+//                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
+//                int trimV = y + texHeight <= ySize ? texV + topTrim : texV + (texHeight - (ySize - y));
+//
+//                //Left & Right trim
+//                if (x == 0) {
+//                    bufferTexturedModalRect(buffer, xPos, yPos + y + topTrim, texU, trimV, leftTrim, rHeight, zLevel);
+//                    bufferTexturedModalRect(buffer, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight, zLevel);
+//                }
+//
+//                //Core
+//                bufferTexturedModalRect(buffer, xPos + x + leftTrim, yPos + y + topTrim, texU + leftTrim, texV + topTrim, rWidth, rHeight, zLevel);
+//                y += trimHeight;
+//            }
+//            x += trimWidth;
+//        }
+//
+//        tessellator.end();
     }
 
     private static void bufferTexturedModalRect(BufferBuilder buffer, int x, int y, int textureX, int textureY, int width, int height, double zLevel) {
-        buffer.vertex(x, y + height, zLevel).uv(((float) (textureX) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.vertex(x + width, y + height, zLevel).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
-        buffer.vertex(x + width, y, zLevel).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY) * 0.00390625F)).endVertex();
-        buffer.vertex(x, y, zLevel).uv(((float) (textureX) * 0.00390625F), ((float) (textureY) * 0.00390625F)).endVertex();
+//        buffer.vertex(x, y + height, zLevel).uv(((float) (textureX) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
+//        buffer.vertex(x + width, y + height, zLevel).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
+//        buffer.vertex(x + width, y, zLevel).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY) * 0.00390625F)).endVertex();
+//        buffer.vertex(x, y, zLevel).uv(((float) (textureX) * 0.00390625F), ((float) (textureY) * 0.00390625F)).endVertex();
     }
 
 //    public static void drawHoveringText(List list, int x, int y, FontRenderer font, int guiWidth, int guiHeight) {
@@ -257,13 +257,13 @@ public class GuiHelperOld {
 //    }
 
     public static void drawGuiBaseBackground(GuiComponent gui, int posX, int posY, int xSize, int ySize) {
-        ResourceHelperBC.bindTexture("textures/gui/light/background_dynamic.png");
-//        RenderSystem.color3f(1F, 1F, 1F);
-        PoseStack matrixstack = new PoseStack();
-        gui.blit(matrixstack, posX, posY, 0, 0, xSize - 4, ySize - 4);
-        gui.blit(matrixstack, posX + xSize - 4, posY, 252, 0, 4, ySize - 4);
-        gui.blit(matrixstack, posX, posY + ySize - 4, 0, 252, xSize - 4, 4);
-        gui.blit(matrixstack, posX + xSize - 4, posY + ySize - 4, 252, 252, 4, 4);
+//        ResourceHelperBC.bindTexture("textures/gui/light/background_dynamic.png");
+////        RenderSystem.color3f(1F, 1F, 1F);
+//        PoseStack matrixstack = new PoseStack();
+//        gui.blit(matrixstack, posX, posY, 0, 0, xSize - 4, ySize - 4);
+//        gui.blit(matrixstack, posX + xSize - 4, posY, 252, 0, 4, ySize - 4);
+//        gui.blit(matrixstack, posX, posY + ySize - 4, 0, 252, xSize - 4, 4);
+//        gui.blit(matrixstack, posX + xSize - 4, posY + ySize - 4, 252, 252, 4, 4);
     }
 
     /**
@@ -273,54 +273,54 @@ public class GuiHelperOld {
     @Deprecated
     public static void drawPlayerSlots(GuiComponent gui, int posX, int posY, boolean center) {
 //        RenderSystem.color4f(1F, 1F, 1F, 1F);
-        Material mat = BCGuiSprites.getThemed("slot");
-        ResourceHelperBC.bindTexture(mat.atlasLocation());
-        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
-
-        if (center) {
-            posX -= 81;
-        }
-
-        for (int y = 0; y < 3; y++) {
-            for (int x = 0; x < 9; x++) {
-                drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
-            }
-        }
-
-        for (int x = 0; x < 9; x++) {
-            drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
-        }
-        getter.endBatch();
+//        Material mat = BCGuiSprites.getThemed("slot");
+//        ResourceHelperBC.bindTexture(mat.atlasLocation());
+//        MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
+//
+//        if (center) {
+//            posX -= 81;
+//        }
+//
+//        for (int y = 0; y < 3; y++) {
+//            for (int x = 0; x < 9; x++) {
+//                drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), posX + x * 18, posY + y * 18, 18, 18, mat.sprite(), 0);
+//            }
+//        }
+//
+//        for (int x = 0; x < 9; x++) {
+//            drawSprite(getter.getBuffer(mat.renderType(BCGuiSprites::makeType)), posX + x * 18, posY + 58, 18, 18, mat.sprite(), 0);
+//        }
+//        getter.endBatch();
     }
 
     @Deprecated
     public static void drawCenteredString(Font fontRenderer, String text, int x, int y, int color, boolean dropShadow) {
-        PoseStack matrixstack = new PoseStack();
-        if (dropShadow) {
-            fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
-        } else {
-            fontRenderer.draw(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
-        }
+//        PoseStack matrixstack = new PoseStack();
+//        if (dropShadow) {
+//            fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
+//        } else {
+//            fontRenderer.draw(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
+//        }
     }
 
     public static void drawCenteredString(Font fontRenderer, PoseStack matrixstack, String text, int x, int y, int color, boolean dropShadow) {
-        if (dropShadow) {
-            fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
-        } else {
-            fontRenderer.draw(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
-        }
+//        if (dropShadow) {
+//            fontRenderer.drawShadow(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
+//        } else {
+//            fontRenderer.draw(matrixstack, text, (float) (x - fontRenderer.width(text) / 2), (float) y, color);
+//        }
     }
 
     public static void drawBackgroundString(VertexConsumer vertexBuilder, Font font, String text, float x, float y, int color, int background, int padding, boolean shadow, boolean centered) {
-        PoseStack matrixstack = new PoseStack();
-        int width = font.width(text);
-        x = centered ? x - width / 2F : x;
-        drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.lineHeight - 2 + padding * 2, background, 0);
-        if (shadow) {
-            font.drawShadow(matrixstack, text, x, y, color);
-        } else {
-            font.draw(matrixstack, text, x, y, color);
-        }
+//        PoseStack matrixstack = new PoseStack();
+//        int width = font.width(text);
+//        x = centered ? x - width / 2F : x;
+//        drawColouredRect(vertexBuilder, x - padding, y - padding, width + padding * 2, font.lineHeight - 2 + padding * 2, background, 0);
+//        if (shadow) {
+//            font.drawShadow(matrixstack, text, x, y, color);
+//        } else {
+//            font.draw(matrixstack, text, x, y, color);
+//        }
     }
 
 
@@ -393,120 +393,120 @@ public class GuiHelperOld {
     //New Stuff
 
     public static void drawShadedRect(VertexConsumer builder, double x, double y, double width, double height, double borderWidth, int fill, int topLeftColour, int bottomRightColour, int cornerMixColour, double zLevel) {
-        //Fill
-        drawColouredRect(builder, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill, zLevel);
-        //Top
-        drawColouredRect(builder, x, y, width - borderWidth, borderWidth, topLeftColour, zLevel);
-        //Left
-        drawColouredRect(builder, x, y + borderWidth, borderWidth, height - borderWidth * 2, topLeftColour, zLevel);
-        //Bottom
-        drawColouredRect(builder, x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour, zLevel);
-        //Right
-        drawColouredRect(builder, x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, bottomRightColour, zLevel);
-        //Top Right Corner
-        drawColouredRect(builder, x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour, zLevel);
-        //Bottom Left Corner
-        drawColouredRect(builder, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour, zLevel);
+//        //Fill
+//        drawColouredRect(builder, x + borderWidth, y + borderWidth, width - borderWidth * 2, height - borderWidth * 2, fill, zLevel);
+//        //Top
+//        drawColouredRect(builder, x, y, width - borderWidth, borderWidth, topLeftColour, zLevel);
+//        //Left
+//        drawColouredRect(builder, x, y + borderWidth, borderWidth, height - borderWidth * 2, topLeftColour, zLevel);
+//        //Bottom
+//        drawColouredRect(builder, x + borderWidth, y + height - borderWidth, width - borderWidth, borderWidth, bottomRightColour, zLevel);
+//        //Right
+//        drawColouredRect(builder, x + width - borderWidth, y + borderWidth, borderWidth, height - borderWidth * 2, bottomRightColour, zLevel);
+//        //Top Right Corner
+//        drawColouredRect(builder, x + width - borderWidth, y, borderWidth, borderWidth, cornerMixColour, zLevel);
+//        //Bottom Left Corner
+//        drawColouredRect(builder, x, y + height - borderWidth, borderWidth, borderWidth, cornerMixColour, zLevel);
     }
 
     public static void drawColouredRect(VertexConsumer builder, double posX, double posY, double xSize, double ySize, int colour, double zLevel) {
-        drawGradientRect(builder, posX, posY, posX + xSize, posY + ySize, colour, colour, zLevel);
+//        drawGradientRect(builder, posX, posY, posX + xSize, posY + ySize, colour, colour, zLevel);
     }
 
     public static void drawGradientRect(VertexConsumer builder, double left, double top, double right, double bottom, int startColor, int endColor, double zLevel) {
-        if (startColor == endColor && endColor == 0) return;
-        //@formatter:off
-        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
-        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
-        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
-        float startBlue  = (float)(startColor       & 255) / 255.0F;
-        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
-        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
-        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
-        float endBlue    = (float)(endColor         & 255) / 255.0F;
-        builder.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        builder.vertex( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-        builder.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-        builder.vertex(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-        //@formatter:on
+//        if (startColor == endColor && endColor == 0) return;
+//        //@formatter:off
+//        float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
+//        float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
+//        float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
+//        float startBlue  = (float)(startColor       & 255) / 255.0F;
+//        float endAlpha   = (float)(endColor   >> 24 & 255) / 255.0F;
+//        float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
+//        float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
+//        float endBlue    = (float)(endColor         & 255) / 255.0F;
+//        builder.vertex(right,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+//        builder.vertex( left,    top, zLevel).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+//        builder.vertex( left, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+//        builder.vertex(right, bottom, zLevel).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+//        //@formatter:on
     }
 
     public static void drawBorderedRect(VertexConsumer builder, double posX, double posY, double xSize, double ySize, double borderWidth, int fillColour, int borderColour, double zLevel) {
-        drawColouredRect(builder, posX, posY, xSize, borderWidth, borderColour, zLevel);
-        drawColouredRect(builder, posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour, zLevel);
-        drawColouredRect(builder, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
-        drawColouredRect(builder, posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
-        drawColouredRect(builder, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour, zLevel);
+//        drawColouredRect(builder, posX, posY, xSize, borderWidth, borderColour, zLevel);
+//        drawColouredRect(builder, posX, posY + ySize - borderWidth, xSize, borderWidth, borderColour, zLevel);
+//        drawColouredRect(builder, posX, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
+//        drawColouredRect(builder, posX + xSize - borderWidth, posY + borderWidth, borderWidth, ySize - 2 * borderWidth, borderColour, zLevel);
+//        drawColouredRect(builder, posX + borderWidth, posY + borderWidth, xSize - 2 * borderWidth, ySize - 2 * borderWidth, fillColour, zLevel);
     }
 
     public static void drawDynamicSprite(VertexConsumer builder, TextureAtlasSprite tex, int xPos, int yPos, int xSize, int ySize, int topTrim, int leftTrim, int bottomTrim, int rightTrim, int colour, double zLevel) {
-        int texWidth = tex.getWidth();
-        int texHeight = tex.getHeight();
-        int trimWidth = texWidth - leftTrim - rightTrim;
-        int trimHeight = texHeight - topTrim - bottomTrim;
-        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
-        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
-
-        for (int x = 0; x < xSize; ) {
-            int rWidth = Math.min(xSize - x, trimWidth);
-            int trimU = 0;
-            if (x != 0) {
-                if (x + leftTrim + trimWidth <= xSize) {
-                    trimU = leftTrim;
-                } else {
-                    trimU = (texWidth - (xSize - x));
-                }
-            }
-
-            //Top & Bottom trim
-            bufferTexturedModalRect(builder, tex, xPos + x, yPos, trimU, 0, rWidth, topTrim, colour, zLevel);
-            bufferTexturedModalRect(builder, tex, xPos + x, yPos + ySize - bottomTrim, trimU, texHeight - bottomTrim, rWidth, bottomTrim, colour, zLevel);
-
-
-            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
-            for (int y = 0; y < ySize; ) {
-                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
-                int trimV;
-                if (y + (texHeight - topTrim - bottomTrim) <= ySize) {
-                    trimV = topTrim;
-                } else {
-                    trimV = texHeight - (ySize - y);
-                }
-
-                //Left & Right trim
-                if (x == 0 && y + topTrim < ySize - bottomTrim) {
-                    bufferTexturedModalRect(builder, tex, xPos, yPos + y + topTrim, 0, trimV, leftTrim, rHeight, colour, zLevel);
-                    bufferTexturedModalRect(builder, tex, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight, colour, zLevel);
-                }
-
-                //Core
-                if (y + topTrim < ySize - bottomTrim && x + leftTrim < xSize - rightTrim) {
-                    bufferTexturedModalRect(builder, tex, xPos + x + leftTrim, yPos + y + topTrim, leftTrim, topTrim, rWidth, rHeight, colour, zLevel);
-                }
-                y += trimHeight;
-            }
-            x += trimWidth;
-        }
+//        int texWidth = tex.getWidth();
+//        int texHeight = tex.getHeight();
+//        int trimWidth = texWidth - leftTrim - rightTrim;
+//        int trimHeight = texHeight - topTrim - bottomTrim;
+//        if (xSize <= texWidth) trimWidth = Math.min(trimWidth, xSize - rightTrim);
+//        if (xSize <= 0 || ySize <= 0 || trimWidth <= 0 || trimHeight <= 0) return;
+//
+//        for (int x = 0; x < xSize; ) {
+//            int rWidth = Math.min(xSize - x, trimWidth);
+//            int trimU = 0;
+//            if (x != 0) {
+//                if (x + leftTrim + trimWidth <= xSize) {
+//                    trimU = leftTrim;
+//                } else {
+//                    trimU = (texWidth - (xSize - x));
+//                }
+//            }
+//
+//            //Top & Bottom trim
+//            bufferTexturedModalRect(builder, tex, xPos + x, yPos, trimU, 0, rWidth, topTrim, colour, zLevel);
+//            bufferTexturedModalRect(builder, tex, xPos + x, yPos + ySize - bottomTrim, trimU, texHeight - bottomTrim, rWidth, bottomTrim, colour, zLevel);
+//
+//
+//            rWidth = Math.min(xSize - x - leftTrim - rightTrim, trimWidth);
+//            for (int y = 0; y < ySize; ) {
+//                int rHeight = Math.min(ySize - y - topTrim - bottomTrim, trimHeight);
+//                int trimV;
+//                if (y + (texHeight - topTrim - bottomTrim) <= ySize) {
+//                    trimV = topTrim;
+//                } else {
+//                    trimV = texHeight - (ySize - y);
+//                }
+//
+//                //Left & Right trim
+//                if (x == 0 && y + topTrim < ySize - bottomTrim) {
+//                    bufferTexturedModalRect(builder, tex, xPos, yPos + y + topTrim, 0, trimV, leftTrim, rHeight, colour, zLevel);
+//                    bufferTexturedModalRect(builder, tex, xPos + xSize - rightTrim, yPos + y + topTrim, trimU + texWidth - rightTrim, trimV, rightTrim, rHeight, colour, zLevel);
+//                }
+//
+//                //Core
+//                if (y + topTrim < ySize - bottomTrim && x + leftTrim < xSize - rightTrim) {
+//                    bufferTexturedModalRect(builder, tex, xPos + x + leftTrim, yPos + y + topTrim, leftTrim, topTrim, rWidth, rHeight, colour, zLevel);
+//                }
+//                y += trimHeight;
+//            }
+//            x += trimWidth;
+//        }
     }
 
     private static void bufferTexturedModalRect(VertexConsumer builder, TextureAtlasSprite tex, int x, int y, double textureX, double textureY, int width, int height, int colour, double zLevel) {
-        int w = tex.getWidth();
-        int h = tex.getHeight();
-        int[] colours = ColourARGB.unpack(colour);
-        //@formatter:off
-        builder.vertex(x,         y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU((textureX / w) * 16D),          tex.getV(((textureY + height) / h) * 16)).endVertex();
-        builder.vertex(x + width, y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU(((textureX + width) / w) * 16), tex.getV(((textureY + height) / h) * 16)).endVertex();
-        builder.vertex(x + width, y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU(((textureX + width) / w) * 16), tex.getV(((textureY) / h) * 16)).endVertex();
-        builder.vertex(x,         y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU((textureX / w) * 16),           tex.getV(((textureY) / h) * 16)).endVertex();
-        //@formatter:on
+//        int w = tex.getWidth();
+//        int h = tex.getHeight();
+//        int[] colours = ColourARGB.unpack(colour);
+//        //@formatter:off
+//        builder.vertex(x,         y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU((textureX / w) * 16D),          tex.getV(((textureY + height) / h) * 16)).endVertex();
+//        builder.vertex(x + width, y + height, zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU(((textureX + width) / w) * 16), tex.getV(((textureY + height) / h) * 16)).endVertex();
+//        builder.vertex(x + width, y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU(((textureX + width) / w) * 16), tex.getV(((textureY) / h) * 16)).endVertex();
+//        builder.vertex(x,         y,          zLevel).color(colours[1], colours[2], colours[3], colours[0]).uv(tex.getU((textureX / w) * 16),           tex.getV(((textureY) / h) * 16)).endVertex();
+//        //@formatter:on
     }
 
     public static void drawSprite(VertexConsumer builder, float x, float y, float width, float height, TextureAtlasSprite sprite, double zLevel) {
-        //@formatter:off
-        builder.vertex(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
-        builder.vertex(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();
-        builder.vertex(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV0()).endVertex();
-        builder.vertex(x,          y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV0()).endVertex();
-        //@formatter:on
+//        //@formatter:off
+//        builder.vertex(x,          y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV1()).endVertex();
+//        builder.vertex(x + width,  y + height, zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV1()).endVertex();
+//        builder.vertex(x + width,  y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU1(), sprite.getV0()).endVertex();
+//        builder.vertex(x,          y,          zLevel).color(1F, 1F, 1F, 1F).uv(sprite.getU0(), sprite.getV0()).endVertex();
+//        //@formatter:on
     }
 }

@@ -2,6 +2,7 @@ package com.brandon3055.brandonscore.command;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.ClientOnly;
+import com.brandon3055.brandonscore.client.gui.ContributorConfigGui;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.init.ClientInit;
@@ -74,13 +75,13 @@ public class BCClientCommands {
                         player.sendSystemMessage(link.withStyle(BLUE, UNDERLINE));
                         player.sendSystemMessage(Component.literal(""));
                         MutableComponent notLinked = Component.literal("Please Click Here").setStyle(Style.EMPTY
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bcore_client contributor help"))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_client contributor help"))
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click for help"))));
                         player.sendSystemMessage(Component.literal("Already a contributor? ").withStyle(LIGHT_PURPLE).append(notLinked.withStyle(BLUE)));
                         return 0;
                     }
 
-                    //DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ContributorConfigGui(player, props)));
+                    DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new ContributorConfigGui.Screen(player, props)));
                     return 0;
                 })
                 .then(Commands.literal("help")

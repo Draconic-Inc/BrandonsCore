@@ -33,7 +33,7 @@ public class ClientInit {
         LOCK.lock();
 
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modBus.addListener(BCGuiSprites::initialize);
+        modBus.addListener(BCGuiSprites::onResourceReload);
         modBus.addListener(ClientInit::clientSetupEvent);
         modBus.addListener(ClientInit::onAddRenderLayers);
 

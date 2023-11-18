@@ -6,7 +6,9 @@ import codechicken.lib.data.MCDataOutput;
 import com.brandon3055.brandonscore.api.TechLevel;
 import com.brandon3055.brandonscore.handlers.FileHandler;
 import com.google.gson.Gson;
+import net.covers1624.quack.collection.FastStream;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -358,15 +360,15 @@ public class ContributorConfig {
         EXTEND_AND_FLAP("Extend and flap", "");
 
         private final String name;
-        private final String[] hover;
+        private final List<Component> hover;
 
         WingBehavior(String name, String... hover) {
             this.name = name;
-            this.hover = hover;
+            this.hover = FastStream.of(hover).map(e -> (Component) Component.literal(e)).toList();
         }
 
         @Override
-        public String[] getHoverText() {
+        public List<Component> getHoverText() {
             return hover;
         }
 
@@ -383,15 +385,15 @@ public class ContributorConfig {
         REPLACE("Elytra Only", "The wings will replace the Elytra model.", "And " + ChatFormatting.RED + "they will only be visible while wearing Elytra.");
 
         private final String name;
-        private final String[] hover;
+        private final List<Component> hover;
 
         WingElytraCompat(String name, String... hover) {
             this.name = name;
-            this.hover = hover;
+            this.hover = FastStream.of(hover).map(e -> (Component) Component.literal(e)).toList();
         }
 
         @Override
-        public String[] getHoverText() {
+        public List<Component> getHoverText() {
             return hover;
         }
 
@@ -414,15 +416,15 @@ public class ContributorConfig {
         CR("CR", "Creation Reborn");
 
         private final String name;
-        private final String[] hover;
+        private final List<Component> hover;
 
         Badge(String name, String... hover) {
             this.name = name;
-            this.hover = hover;
+            this.hover = FastStream.of(hover).map(e -> (Component) Component.literal(e)).toList();
         }
 
         @Override
-        public String[] getHoverText() {
+        public List<Component> getHoverText() {
             return hover;
         }
 
@@ -433,7 +435,7 @@ public class ContributorConfig {
     }
 
     public interface HoverText {
-        String[] getHoverText();
+        List<Component> getHoverText();
     }
 
 

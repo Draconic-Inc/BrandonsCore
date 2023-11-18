@@ -4,7 +4,6 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
-import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -31,6 +30,7 @@ import java.util.function.Consumer;
  * Created by brandon3055 on 28/3/2016.
  * Base class for all containers. Handles syncing on syncable objects inside an attached TileBCBase.
  */
+@Deprecated //TODO Figure out gui v3 impl
 public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
 
     /**
@@ -42,12 +42,12 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
         super(type, windowId, playerInv, extraData);
         this.tile = getClientTile(extraData);
     }
-
-    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<T> factory) {
-        super(type, windowId, player, extraData, factory);
-        this.tile = getClientTile(extraData);
-        this.buildSlotLayout();
-    }
+//
+//    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<T> factory) {
+//        super(type, windowId, player, extraData, factory);
+//        this.tile = getClientTile(extraData);
+//        this.buildSlotLayout();
+//    }
 
     public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile) {
         super(type, windowId, player);
@@ -55,17 +55,17 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
         this.tile.onPlayerOpenContainer(player.player);
     }
 
-    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile, LayoutFactory<T> factory) {
-        super(type, windowId, player, factory);
-        this.tile = tile;
-        this.tile.onPlayerOpenContainer(player.player);
-        this.buildSlotLayout();
-    }
+//    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile, LayoutFactory<T> factory) {
+//        super(type, windowId, player, factory);
+//        this.tile = tile;
+//        this.tile.onPlayerOpenContainer(player.player);
+//        this.buildSlotLayout();
+//    }
 
     @Override
     protected void buildSlotLayout() {
         if (tile != null){
-            this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlot);
+//            this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlot);
         }
     }
 
@@ -101,9 +101,9 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     @Override
     public ItemStack quickMoveStack(Player player, int i) {
         int playerSlots = 36;
-        if (slotLayout != null) {
-            playerSlots = slotLayout.getPlayerSlotCount();
-        }
+//        if (slotLayout != null) {
+//            playerSlots = slotLayout.getPlayerSlotCount();
+//        }
         LazyOptional<IItemHandler> optional = getItemHandler();
         if (optional.isPresent()) {
             IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
@@ -156,9 +156,9 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
         return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
     }
 
-    public ContainerSlotLayout getSlotLayout() {
-        return slotLayout;
-    }
+//    public ContainerSlotLayout getSlotLayout() {
+//        return slotLayout;
+//    }
 
     protected static <T extends BlockEntity> T getClientTile(FriendlyByteBuf extraData) {
         return (T) Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());

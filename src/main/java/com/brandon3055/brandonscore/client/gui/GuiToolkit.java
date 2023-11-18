@@ -1,75 +1,58 @@
-//package com.brandon3055.brandonscore.client.gui;
-//
-//import com.brandon3055.brandonscore.BCConfig;
-//import com.brandon3055.brandonscore.api.power.IOPStorage;
-//import com.brandon3055.brandonscore.api.render.GuiHelper;
-//import com.brandon3055.brandonscore.client.BCGuiSprites;
-//import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-//import com.brandon3055.brandonscore.client.gui.modulargui.IModularGui;
-//import com.brandon3055.brandonscore.client.gui.modulargui.ModularGuiContainer;
-//import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
-//import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiSlideControl;
-//import com.brandon3055.brandonscore.client.gui.modulargui.guielements.*;
-//import com.brandon3055.brandonscore.client.gui.modulargui.lib.GuiAlign;
-//import com.brandon3055.brandonscore.client.gui.modulargui.templates.IGuiTemplate;
-//import com.brandon3055.brandonscore.client.render.RenderUtils;
-//import com.brandon3055.brandonscore.inventory.ContainerBCore;
-//import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
-//import com.brandon3055.brandonscore.inventory.SlotMover;
-//import com.brandon3055.brandonscore.lib.IRSSwitchable;
-//import com.brandon3055.brandonscore.utils.MathUtils;
-//import com.mojang.blaze3d.vertex.PoseStack;
-//import com.mojang.blaze3d.vertex.Tesselator;
-//import com.mojang.blaze3d.vertex.VertexConsumer;
-//import net.minecraft.client.Minecraft;
-//import net.minecraft.client.gui.screens.Screen;
-//import net.minecraft.client.renderer.MultiBufferSource;
-//import net.minecraft.client.resources.language.I18n;
-//import net.minecraft.client.resources.model.Material;
-//import net.minecraft.resources.ResourceLocation;
-//import net.minecraft.world.entity.player.Player;
-//import net.minecraft.world.item.ItemStack;
-//import net.minecraftforge.common.util.LazyOptional;
-//import net.minecraftforge.items.IItemHandlerModifiable;
-//
-//import javax.annotation.Nullable;
-//import java.awt.*;
-//import java.util.List;
-//import java.util.*;
-//import java.util.concurrent.atomic.AtomicBoolean;
-//import java.util.function.BiFunction;
-//import java.util.function.Function;
-//import java.util.function.Predicate;
-//import java.util.function.Supplier;
-//
-//import static com.brandon3055.brandonscore.BCConfig.darkMode;
-//import static com.brandon3055.brandonscore.BrandonsCore.equipmentManager;
-//import static com.brandon3055.brandonscore.client.gui.GuiToolkit.GuiLayout.CUSTOM;
-//import static com.brandon3055.brandonscore.inventory.ContainerSlotLayout.SlotType.*;
-//
-///**
-// * Created by brandon3055 on 5/7/19.
-// */
-//public class GuiToolkit<T extends Screen & IModularGui<?>> {
-//    private static final String INTERNAL_TRANSLATION_PREFIX = "gui_tkt.brandonscore.";
-//
-//    private static Map<String, ResourceLocation> resourceCache = new HashMap<>();
+package com.brandon3055.brandonscore.client.gui;
+
+import codechicken.lib.gui.modular.elements.*;
+import codechicken.lib.gui.modular.lib.Constraints;
+import codechicken.lib.gui.modular.lib.geometry.GuiParent;
+import codechicken.lib.gui.modular.sprite.Material;
+import com.brandon3055.brandonscore.BCConfig;
+import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
+import com.brandon3055.brandonscore.lib.IRSSwitchable;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static codechicken.lib.gui.modular.lib.geometry.Constraint.*;
+import static codechicken.lib.gui.modular.lib.geometry.GeoParam.*;
+import static com.brandon3055.brandonscore.BCConfig.darkMode;
+
+
+/**
+ * Toolkit containing a bunch of standard gui code and elements for DE and BC Guis
+ * <p>
+ * Created by brandon3055 on 5/7/19.
+ */
+public class GuiToolkit {
+    public static final ResourceLocation CURSOR_DRAG = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/drag.png");
+    public static final ResourceLocation CURSOR_RESIZE_H = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_h.png");
+    public static final ResourceLocation CURSOR_RESIZE_V = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_v.png");
+    public static final ResourceLocation CURSOR_RESIZE_TRBL = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_diag_trbl.png");
+    public static final ResourceLocation CURSOR_RESIZE_TLBR = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_diag_tlbr.png");
+    public static final ResourceLocation[] CURSORS = {CURSOR_DRAG, CURSOR_RESIZE_H, CURSOR_RESIZE_V, CURSOR_RESIZE_TRBL, CURSOR_RESIZE_TLBR};
+
+    private static final String INTERNAL_TRANSLATION_PREFIX = "gui_tkt.brandonscore.";
+
 //    private List<GuiElement<?>> jeiExclusions = new ArrayList<>();
-//
-//    private T gui;
-//    private GuiLayout layout;
+
+    //    private T gui;
 //    private ContainerSlotLayout slotLayout;
-//    private String translationPrefix = "";
-//
-//    public GuiToolkit(T gui, GuiLayout layout) {
+    private String translationPrefix = "";
+
+//    public GuiToolkit(T gui) {
 //        this(gui, layout.xSize, layout.ySize);
-//        this.layout = layout;
-//        if (layout == CUSTOM) {
-//            throw new UnsupportedOperationException("For custom gui size use the alternate constructor that allows you to specify the size");
-//        }
+////        this.layout = layout;
+////        if (layout == CUSTOM) {
+////            throw new UnsupportedOperationException("For custom gui size use the alternate constructor that allows you to specify the size");
+////        }
 //    }
-//
-//    public GuiToolkit(T gui, int xSize, int ySize) {
+
+    public GuiToolkit() {
 //        this.gui = gui;
 //        this.layout = CUSTOM;
 //        this.gui.setUISize(xSize, ySize);
@@ -77,64 +60,55 @@
 //        if (gui instanceof ModularGuiContainer && ((ModularGuiContainer<?>) gui).getMenu() instanceof ContainerBCore) {
 //            setSlotLayout(((ContainerBCore) ((ModularGuiContainer) gui).getMenu()).getSlotLayout());
 //        }
-//    }
-//
-//    public GuiToolkit<T> setTranslationPrefix(String translationPrefix) {
-//        if (!translationPrefix.endsWith(".") && !translationPrefix.isEmpty()) {
-//            translationPrefix = translationPrefix + ".";
-//        }
-//        this.translationPrefix = translationPrefix;
-//        return this;
-//    }
-//
-//    public String i18n(String translationKey, Object... args) {
-//        if (translationKey.startsWith(".")) {
-//            translationKey = translationKey.substring(1);
-//        }
-//        return I18n.get(translationPrefix + translationKey, args);
-//    }
-//
-//    public Supplier<String> i18n(Supplier<String> translationKey) {
-//        return () -> I18n.get(translationPrefix + translationKey.get());
-//    }
-//
-//    /**
-//     * Internal translator for use inside Toolkit
-//     */
-//    protected static String i18ni(String translationKey) {
-//        if (translationKey.startsWith(".")) {
-//            translationKey = translationKey.substring(1);
-//        }
-//        return I18n.get(INTERNAL_TRANSLATION_PREFIX + translationKey);
-//    }
-//
-//    public GuiLayout getLayout() {
-//        return layout;
-//    }
-//
-//    public void setSlotLayout(ContainerSlotLayout slotLayout) {
-//        this.slotLayout = slotLayout;
-//    }
-//
-//    public GuiButton createRSSwitch(IRSSwitchable switchable) {
-//        GuiButton button = new GuiButton();
-//        addHoverHighlight(button);
-//        button.setHoverTextDelay(10);
-//        button.setSize(12, 12);
-//        GuiTexture icon = new GuiTexture(12, 12, () -> BCGuiSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
-//        button.addChild(icon);
-//        icon.setYPosMod(button::yPos);
-//        button.setHoverText(element -> i18ni("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
-//        button.onButtonPressed((pressed) -> switchable.setRSMode(switchable.getRSMode().next(Screen.hasShiftDown() || pressed == 1)));
-//        return button;
-//    }
-//
-//    public GuiButton createRSSwitch(GuiElement<?> parent, IRSSwitchable switchable) {
-//        GuiButton button = createRSSwitch(switchable);
-//        parent.addChild(button);
-//        return button;
-//    }
-//
+    }
+
+    public GuiToolkit(String translationPrefix) {
+        setTranslationPrefix(translationPrefix);
+    }
+
+    private GuiToolkit setTranslationPrefix(String translationPrefix) {
+        if (!translationPrefix.endsWith(".") && !translationPrefix.isEmpty()) {
+            translationPrefix = translationPrefix + ".";
+        }
+        this.translationPrefix = translationPrefix;
+        return this;
+    }
+
+    public MutableComponent translate(String translationKey, Object... args) {
+        if (translationKey.startsWith(".")) {
+            translationKey = translationKey.substring(1);
+        }
+        return Component.translatable(translationPrefix + translationKey, args);
+    }
+
+    public Supplier<MutableComponent> translate(Supplier<String> translationKey) {
+        return () -> Component.translatable(translationPrefix + translationKey.get());
+    }
+
+    /**
+     * Internal translator for use inside Toolkit
+     */
+    protected static MutableComponent translateIntern(String translationKey) {
+        if (translationKey.startsWith(".")) {
+            translationKey = translationKey.substring(1);
+        }
+        return Component.translatable(INTERNAL_TRANSLATION_PREFIX + translationKey);
+    }
+
+    public GuiButton createRSSwitch(GuiParent<?> parent, IRSSwitchable switchable) {
+        GuiButton button = new GuiButton(parent);
+        Constraints.size(button, 12, 12);
+        addHoverHighlight(button);
+
+        GuiTexture icon = new GuiTexture(button, () -> BCGuiSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
+        Constraints.bind(icon, button);
+
+        button.setTooltipSingle(() -> translateIntern("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
+        button.onPress(() -> switchable.setRSMode(switchable.getRSMode().next(Screen.hasShiftDown())), GuiButton.LEFT_CLICK);
+        button.onPress(() -> switchable.setRSMode(switchable.getRSMode().next(true)), GuiButton.RIGHT_CLICK);
+        return button;
+    }
+
 //    //Create Background (various sizes)
 //    public GuiTexture createBackground(boolean addToManager, boolean center) {
 //        if (layout.xSize == -1 || layout.ySize == -1) {  //TODO maybe add a way do provide a background builder in this case?
@@ -152,7 +126,7 @@
 //        }
 //        return texture;
 //    }
-//
+
 //    public GuiTexture createBackground(boolean center) {
 //        return createBackground(false, center);
 //    }
@@ -160,29 +134,26 @@
 //    public GuiTexture createBackground() {
 //        return createBackground(false);
 //    }
-//
-//    //UI Heading
-//    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement<?> parent, boolean layout) {
-//        GuiLabel heading = new GuiLabel(I18n.get(unlocalizedHeading));
-//        heading.setTextColGetter(Palette.BG::text);
-//        heading.setShadowStateSupplier(() -> darkMode);
-//        if (parent != null) {
-//            parent.addChild(heading);
-//            if (layout) {
-//                heading.setSize(parent.xSize(), 8).setAlignment(GuiAlign.CENTER).setRelPos(parent, 0, 4);
-//            }
-//        }
-//        return heading;
-//    }
-//
-//    public GuiLabel createHeading(String unlocalizedHeading, @Nullable GuiElement<?> parent) {
-//        return createHeading(unlocalizedHeading, parent, false);
-//    }
-//
-//    public GuiLabel createHeading(String unlocalizedHeading) {
-//        return createHeading(unlocalizedHeading, null, false);
-//    }
-//
+
+    //UI Heading
+    public GuiText createHeading(GuiParent<?> parent, Component heading, boolean layout) {
+        GuiText guiText = new GuiText(parent, heading);
+        guiText.setTextColour(Palette.BG::text);
+        guiText.setShadow(() -> darkMode);
+        if (layout) {
+            guiText.constrain(WIDTH, match(parent.get(WIDTH)));
+            guiText.constrain(HEIGHT, literal(8));
+            guiText.constrain(LEFT, match(parent.get(LEFT)));
+            guiText.constrain(TOP, relative(parent.get(TOP), 4));
+        }
+
+        return guiText;
+    }
+
+    public GuiText createHeading(GuiParent<?> parent, Component heading) {
+        return createHeading(parent, heading, false);
+    }
+
 //    /**
 //     * Creates a generic set of inventory slots with the specified dimensions.
 //     * background is an optional 16x16 sprite that will be used as the slot background.
@@ -313,7 +284,7 @@
 //        bar.setYPos(main.maxYPos() + 3);
 //
 //        if (title) {
-//            GuiLabel invTitle = new GuiLabel(i18ni("your_inventory"));
+//            GuiLabel invTitle = new GuiLabel(translateIntern("your_inventory"));
 //            invTitle.setAlignment(GuiAlign.LEFT).setHoverableTextCol(hovering -> Palette.BG.text());
 //            invTitle.setShadowStateSupplier(() -> darkMode);
 //            container.addChild(invTitle);
@@ -353,7 +324,7 @@
 //        bar.setYPos(main.maxYPos() + 3);
 //
 //        if (title) {
-//            GuiLabel invTitle = new GuiLabel(i18ni("your_inventory"));
+//            GuiLabel invTitle = new GuiLabel(translateIntern("your_inventory"));
 //            invTitle.setAlignment(GuiAlign.LEFT).setHoverableTextCol(hovering -> Palette.BG.text());
 //            invTitle.setShadowStateSupplier(() -> darkMode);
 //            container.addChild(invTitle);
@@ -405,10 +376,10 @@
 //    public GuiElement<?> createPlayerSlots() {
 //        return createPlayerSlots(null, true);
 //    }
-//
-//    //region  Buttons
-//    //####################################################################################################
-//
+
+    //region  Buttons
+    //####################################################################################################
+
 //    public GuiButton createVanillaButton(String unlocalizedText, @Nullable GuiElement<?> parent) {
 //        GuiButton button = new GuiButton(I18n.get(unlocalizedText));
 //        button.setHoverTextDelay(10);
@@ -422,26 +393,22 @@
 //    public GuiButton createVanillaButton(String unlocalizedText) {
 //        return createVanillaButton(unlocalizedText, null);
 //    }
-//
-//    public GuiButton createBorderlessButton(String unlocalizedText) {
-//        return createBorderlessButton(null, unlocalizedText);
-//    }
-//
-//    public GuiButton createBorderlessButton(@Nullable GuiElement<?> parent, String unlocalizedText) {
-//        GuiButton button = new GuiButton(I18n.get(unlocalizedText));
-//        button.setInsets(5, 2, 5, 2);
-//        button.setHoverTextDelay(10);
-//        button.set3dText(true);
-//        GuiTexture texture = GuiTexture.newDynamicTexture(() -> BCGuiSprites.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
-//        button.addChild(texture);
-//        addHoverHighlight(button, 0, 0, true);
-//        texture.bindSize(button, false);
-//        if (parent != null) {
-//            parent.addChild(button);
-//        }
-//        return button;
-//    }
-//
+
+
+    public GuiButton createBorderlessButton(GuiParent<?> parent, @Nullable Component text) {
+        GuiButton button = new GuiButton(parent);
+        GuiTexture texture = new GuiTexture(button, () -> BCGuiSprites.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
+        texture.dynamicTexture();
+        GuiRectangle highlight = new GuiRectangle(button).border(() -> button.hoverTime() > 0 ? 0xFFFFFFFF : 0);
+        Constraints.bind(texture, button);
+        Constraints.bind(highlight, button);
+        if (text != null) {
+            button.setLabel(new GuiText(button, text));
+            Constraints.bind(button.getLabel(), button, 0, 2, 0, 2);
+        }
+        return button;
+    }
+
 //    @Deprecated
 //    public GuiButton createButton_old(String unlocalizedText, @Nullable GuiElement<?> parent, boolean inset3d, double doubleBoarder) {
 //        GuiButton button = new GuiButton(I18n.get(unlocalizedText));
@@ -493,160 +460,150 @@
 //    public GuiButton createButton_old(String unlocalizedText) {
 //        return createButton_old(unlocalizedText, null, true);
 //    }
-//
-//    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement<?> parent, boolean inset3d, double doubleBoarder) {
-//        GuiButton button = new GuiButton().setDisplaySupplier(i18n(toolkitI18nText));
-//        button.setInsets(5, 2, 5, 2);
-//        button.setHoverTextDelay(10);
-//        if (inset3d) {
-//            button.set3dText(true);
-//            GuiBorderedRect buttonBG = new GuiBorderedRect().setDoubleBorder(doubleBoarder);
-//            //I use modifiers here to account for the possibility that this button may have modifiers. Something i need to account for when i re write modular gui
-//            buttonBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
-//            buttonBG.setFillColourL(hovering -> Palette.Ctrl.fill(hovering || button.isPressed()));
-//            buttonBG.setBorderColourL(Palette.Ctrl::border3D);
-//            buttonBG.set3dTopLeftColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentDark(true) : Palette.Ctrl.accentLight(hovering));
-//            buttonBG.set3dBottomRightColourL(hovering -> button.isPressed() ? Palette.Ctrl.accentLight(true) : Palette.Ctrl.accentDark(hovering));
-//            GuiTexture disabledBG = GuiTexture.newDynamicTexture(BCGuiSprites.themedGetter("button_disabled"));
-//            disabledBG.setPosModifiers(button::xPos, button::yPos).setSizeModifiers(button::xSize, button::ySize);
-//            disabledBG.setEnabledCallback(button::isDisabled);
-//            buttonBG.addChild(disabledBG);
-//
-//            button.addChild(buttonBG);
-//        } else {
-//            button.setRectFillColourGetter((hovering, disabled) -> Palette.Ctrl.fill(hovering));
-//            button.setRectBorderColourGetter((hovering, disabled) -> Palette.Ctrl.border(hovering));
-//        }
-//        button.setTextColGetter((hovering, disabled) -> disabled ? 0xa0a0a0 : Palette.Ctrl.textH(hovering));
-//
-//        if (parent != null) {
-//            parent.addChild(button);
-//        }
-//        return button;
-//    }
-//
-//    public GuiButton createButton(Supplier<String> toolkitI18nText, @Nullable GuiElement<?> parent) {
-//        return createButton(toolkitI18nText, parent, true, 1);
-//    }
-//
-//    public GuiButton createButton(String toolkitI18nText, @Nullable GuiElement<?> parent) {
-//        return createButton(() -> toolkitI18nText, parent, true, 1);
-//    }
-//
-//
-//    public GuiButton createThemeButton(GuiElement<?> parent) {
-//        GuiButton button = createThemedIconButton(parent, "theme");
-//        button.setHoverText(element -> darkMode ? i18ni("theme.light") : i18ni("theme.dark"));
-//        button.onPressed(() -> BCConfig.modifyClientProperty("darkMode", e -> e.setBoolean(!darkMode)));
-//        return button;
-//    }
-//
-//    public GuiButton createThemeButton() {
-//        return createThemeButton(null);
-//    }
-//
-//    public GuiButton createResizeButton() {
-//        return createResizeButton(null);
-//    }
-//
-//    public GuiButton createResizeButton(GuiElement<?> parent) {
-//        GuiButton button = createThemedIconButton(parent, "resize");
-//        button.setHoverText(element -> i18ni("large_view"));
-//        return button;
-//    }
-//
-//    public GuiButton createGearButton() {
-//        return createGearButton(null);
-//    }
-//
-//    public GuiButton createGearButton(GuiElement<?> parent) {
-//        return createThemedIconButton(parent, "gear");
-//    }
-//
-//    public GuiButton createAdvancedButton() {
-//        return createAdvancedButton(null);
-//    }
-//
-//    public GuiButton createAdvancedButton(GuiElement<?> parent) {
-//        return createThemedIconButton(parent, "advanced");
-//    }
-//
-//    public GuiButton createThemedIconButton(GuiElement<?> parent, String iconString) {
-//        return createThemedIconButton(parent, 12, iconString);
-//    }
-//
-//    public GuiButton createThemedIconButton(GuiElement<?> parent, int size, String iconString) {
-//        return createIconButton(parent, size, BCGuiSprites.themedGetter(iconString));
-//    }
-//
-//    public GuiButton createIconButton(GuiElement<?> parent, int size, Supplier<Material> iconSupplier) {
-//        return createIconButton(parent, size, size, iconSupplier);
-//    }
-//
-//    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, String iconString) {
-//        return createIconButton(parent, buttonSize, iconSize, BCGuiSprites.getter(iconString));
-//    }
-//
-//    public GuiButton createIconButton(GuiElement<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
-////        GuiButton button = new GuiButton();
-////        button.setHoverTextDelay(10);
-////        button.setSize(buttonSize, buttonSize);
-////        addHoverHighlight(button);
-////        GuiTexture icon = new GuiTexture(iconSize, iconSize, iconSupplier);
-////        icon.setPosModifiers(() -> button.xPos() + -((iconSize - buttonSize) / 2), () -> button.yPos() + -((iconSize - buttonSize) / 2));
-////        button.addChild(icon);
-////        if (parent != null) {
-////            parent.addChild(button);
-////        }
-//        return createIconButton(parent, buttonSize, buttonSize, iconSize, iconSize, iconSupplier);
-//    }
-//
-//    public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
-//        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCGuiSprites.getter(iconString));
-//    }
-//
-//    public GuiButton createIconButton(GuiElement<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {
+
+    public GuiButton createButton(GuiParent<?> parent, @Nullable Supplier<Component> text, boolean inset3d, int doubleBoarder) {
+        GuiButton button = new GuiButton(parent);
+
+        if (inset3d) {
+            GuiRectangle border = new GuiRectangle(button)
+                    .borderWidth(doubleBoarder)
+                    .border(() -> Palette.Ctrl.border3D(button.isMouseOver()));
+
+            GuiRectangle background = new GuiRectangle(button)
+                    .fill(() -> Palette.Ctrl.fill(button.isMouseOver() || button.isPressed()))
+                    .setShadeTopLeft(() -> button.isPressed() ? Palette.Ctrl.accentDark(true) : Palette.Ctrl.accentLight(button.isMouseOver()))
+                    .setShadeBottomRight(() -> button.isPressed() ? Palette.Ctrl.accentLight(true) : Palette.Ctrl.accentDark(button.isMouseOver()));
+
+            GuiTexture disabledBG = new GuiTexture(button, BCGuiSprites.themedGetter("button_disabled"))
+                    .dynamicTexture();
+
+            Constraints.bind(border, button);
+            Constraints.bind(disabledBG, button);
+            Constraints.bind(background, button, doubleBoarder);
+        } else {
+            GuiRectangle border = new GuiRectangle(button)
+                    .fill(() -> Palette.Ctrl.fill(button.isMouseOver()))
+                    .border(() -> Palette.Ctrl.border(button.isMouseOver()));
+            Constraints.bind(border, button);
+        }
+
+        if (text != null) {
+            button.setLabel(new GuiText(button, text)
+                    .setTextColour(() -> button.isDisabled() ? 0xa0a0a0 : Palette.Ctrl.textH(button.isMouseOver())));
+            Constraints.bind(button.getLabel(), button, 0, 2, 0, 2);
+        }
+        return button;
+    }
+
+    public GuiButton createButton(GuiParent<?> parent, @Nullable Supplier<Component> text) {
+        return createButton(parent, text, true, 1);
+    }
+
+    public GuiButton createThemeButton(GuiParent<?> parent) {
+        GuiButton button = createThemedIconButton(parent, "theme");
+        button.setTooltipSingle(() -> darkMode ? translateIntern("theme.light") : translateIntern("theme.dark"));
+        button.onPress(() -> BCConfig.modifyClientProperty("darkMode", e -> e.setBoolean(!darkMode)));
+        return button;
+    }
+
+    public GuiButton createThemeButton() {
+        return createThemeButton(null);
+    }
+
+    public GuiButton createResizeButton() {
+        return createResizeButton(null);
+    }
+
+    public GuiButton createResizeButton(GuiParent<?> parent) {
+        GuiButton button = createThemedIconButton(parent, "resize");
+        button.setTooltipSingle(() -> translateIntern("large_view"));
+        return button;
+    }
+
+    public GuiButton createGearButton() {
+        return createGearButton(null);
+    }
+
+    public GuiButton createGearButton(GuiParent<?> parent) {
+        return createThemedIconButton(parent, "gear");
+    }
+
+    public GuiButton createAdvancedButton() {
+        return createAdvancedButton(null);
+    }
+
+    public GuiButton createAdvancedButton(GuiParent<?> parent) {
+        return createThemedIconButton(parent, "advanced");
+    }
+
+    public GuiButton createThemedIconButton(GuiParent<?> parent, String iconString) {
+        return createThemedIconButton(parent, 12, iconString);
+    }
+
+    public GuiButton createThemedIconButton(GuiParent<?> parent, int size, String iconString) {
+        return createIconButton(parent, size, BCGuiSprites.themedGetter(iconString));
+    }
+
+    public GuiButton createIconButton(GuiParent<?> parent, int size, Supplier<Material> iconSupplier) {
+        return createIconButton(parent, size, size, iconSupplier);
+    }
+
+    public GuiButton createIconButton(GuiParent<?> parent, int buttonSize, int iconSize, String iconString) {
+        return createIconButton(parent, buttonSize, iconSize, BCGuiSprites.getter(iconString));
+    }
+
+    public GuiButton createIconButton(GuiParent<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
 //        GuiButton button = new GuiButton();
 //        button.setHoverTextDelay(10);
-//        button.setSize(buttonWidth, buttonHeight);
+//        button.setSize(buttonSize, buttonSize);
 //        addHoverHighlight(button);
-//        GuiTexture icon = new GuiTexture(iconWidth, iconHeight, iconSupplier);
-//        icon.setPosModifiers(() -> button.xPos() + -((iconWidth - buttonWidth) / 2), () -> button.yPos() + -((iconHeight - buttonHeight) / 2));
+//        GuiTexture icon = new GuiTexture(iconSize, iconSize, iconSupplier);
+//        icon.setPosModifiers(() -> button.xPos() + -((iconSize - buttonSize) / 2), () -> button.yPos() + -((iconSize - buttonSize) / 2));
 //        button.addChild(icon);
 //        if (parent != null) {
 //            parent.addChild(button);
 //        }
-//        return button;
-//    }
-//
-//    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button) {
-//        return addHoverHighlight(button, 0, 0);
-//    }
-//
-//    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button, int xOversize, int yOversize) {
-//        return addHoverHighlight(button, xOversize / 2, yOversize / 2, false);
-//    }
-//
-//    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button, int xOversize, int yOversize, boolean transparent) {
-//        return addHoverHighlight(button, xOversize, xOversize, yOversize, yOversize, transparent);
-//    }
-//
-//    public static GuiBorderedRect addHoverHighlight(GuiElement<?> button, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
-//        GuiBorderedRect rect = new GuiBorderedRect();
-//        rect.setBorderColourL(hovering -> Palette.Ctrl.fill(hovering) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF));
-//        rect.setPosModifiers(() -> button.xPos() - leftOversize, () -> button.yPos() - topOversize);
-//        rect.setSizeModifiers(() -> button.xSize() + leftOversize + rightOversize, () -> button.ySize() + topOversize + bottomOversize);
-//        rect.setEnabledCallback(() -> button.getHoverTime() > 0 || (button instanceof GuiButton b && b.getToggleState()));
-//        if (transparent) {
-//            button.addChild(rect);
-//        } else {
-//            button.addBackGroundChild(rect);
-//        }
-//        return rect;
-//    }
-//
+        return createIconButton(parent, buttonSize, buttonSize, iconSize, iconSize, iconSupplier);
+    }
+
+    public GuiButton createIconButton(GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
+        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCGuiSprites.getter(iconString));
+    }
+
+    public GuiButton createIconButton(GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {
+        GuiButton button = new GuiButton(parent);
+        Constraints.size(button, buttonWidth, buttonHeight);
+        addHoverHighlight(button);
+        GuiTexture icon = new GuiTexture(button, iconSupplier);
+        Constraints.size(icon, iconWidth, iconHeight);
+        Constraints.center(icon, button);
+
+        return button;
+    }
+
+    public static GuiRectangle addHoverHighlight(GuiElement<?> parent) {
+        return addHoverHighlight(parent, 0, 0);
+    }
+
+    public static GuiRectangle addHoverHighlight(GuiElement<?> parent, int xOversize, int yOversize) {
+        return addHoverHighlight(parent, xOversize / 2, yOversize / 2, false);
+    }
+
+    public static GuiRectangle addHoverHighlight(GuiElement<?> parent, int xOversize, int yOversize, boolean transparent) {
+        return addHoverHighlight(parent, xOversize, xOversize, yOversize, yOversize, transparent);
+    }
+
+    //TODO, Usage of this may need to be tweaked, "Adding behind" is no longer a thing, But with the new way buttons are built, that should be easy to work around.
+    public static GuiRectangle addHoverHighlight(GuiElement<?> parent, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
+        GuiRectangle rect = new GuiRectangle(parent)
+                .border(() -> Palette.Ctrl.fill(parent.isMouseOver()) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF))
+                .setEnabled(() -> parent.isMouseOver() || (parent instanceof GuiButton b && b.toggleState()));
+        Constraints.bind(rect, parent, topOversize, leftOversize, bottomOversize, rightOversize);
+        return rect;
+    }
+
 //    public GuiElement<?> createHighlightIcon(GuiElement<?> parent, int xSize, int ySize, int xOversize, int yOversize, Supplier<Material> matSupplier) {
-//        GuiElement<?> base = new GuiElement<>().setSize(xSize, ySize);
+//        GuiElement<?> base = new GuiElement<>(parent).setSize(xSize, ySize);
 //        GuiTexture icon = new GuiTexture(matSupplier).setSize(xSize, ySize);
 //        addHoverHighlight(base, xOversize, yOversize).setEnabledCallback(() -> base.getHoverTime() > 0);
 //        base.addChild(icon);
@@ -662,11 +619,11 @@
 //        parent.addChild(base);
 //        return base;
 //    }
-//
-//
-//    //endregion
-//    //Create Progress Bar..
-//
+
+
+    //endregion
+    //Create Progress Bar..
+
 //    //Create Power Bar
 //    public GuiEnergyBar createEnergyBar(GuiElement<?> parent) {
 //        GuiEnergyBar energyBar = new GuiEnergyBar();
@@ -696,7 +653,7 @@
 //    public GuiEnergyBar createEnergyBar() {
 //        return createEnergyBar((IOPStorage) null);
 //    }
-//
+
 //    //Info Panel
 //    public InfoPanel createInfoPanel(GuiElement<?> parent, boolean leftSide) {
 //        InfoPanel panel = new InfoPanel(parent, leftSide);
@@ -704,18 +661,18 @@
 //        jeiExclude(panel);
 //        return panel;
 //    }
-//
-//    //Create Text Field
-//    public GuiTextField createTextField() {
-//        return createTextField(null);
-//    }
-//
-//    public GuiTextField createTextField(GuiElement<?> parent) {
-//        return createTextField(parent, true);
-//    }
-//
-//    public GuiTextField createTextField(GuiElement<?> parent, boolean background) {
-//        GuiTextField textField = new GuiTextField();
+
+    //Create Text Field
+    public GuiTextField createTextField() {
+        return createTextField(null);
+    }
+
+    public GuiTextField createTextField(GuiElement<?> parent) {
+        return createTextField(parent, true);
+    }
+
+    public GuiTextField createTextField(GuiElement<?> parent, boolean background) {
+        GuiTextField textField = new GuiTextField(parent);
 //        textField.setTextColor(Palette.Ctrl::text);
 //        textField.setShadow(false);
 //
@@ -726,9 +683,9 @@
 //        if (parent != null) {
 //            parent.addChild(textField);
 //        }
-//        return textField;
-//    }
-//
+        return textField;
+    }
+
 //    //Create Scroll Bars
 //    public GuiSlideControl createVanillaScrollBar(GuiSlideControl.SliderRotation rotation, boolean forceEnabled) {
 //        GuiSlideControl scrollBar = new GuiSlideControl(rotation);
@@ -748,8 +705,8 @@
 //    public GuiSlideControl createVanillaScrollBar() {
 //        return createVanillaScrollBar(GuiSlideControl.SliderRotation.VERTICAL, true);
 //    }
-//
-//
+
+
 //    //LayoutUtils
 //    public void center(GuiElement<?> element, GuiElement<?> centerOn, int xOffset, int yOffset) {
 //        element.setXPos(centerOn.xPos() + ((centerOn.xSize() - element.xSize()) / 2) + xOffset);
@@ -768,7 +725,7 @@
 //    public void centerY(GuiElement<?> element, GuiElement<?> centerOn, int yOffset) {
 //        element.setYPos(centerOn.yPos() + ((centerOn.ySize() - element.ySize()) / 2) + yOffset);
 //    }
-//
+
 //    //Templates
 //    public <TEM extends IGuiTemplate> TEM loadTemplate(TEM template) {
 //        template.addElements(gui.getManager(), this);
@@ -810,15 +767,11 @@
 //        }
 //        //@formatter:on
 //    }
-//
-//    public void jeiExclude(GuiElement<?> element) {
+
+    public void jeiExclude(GuiElement<?> element) {
 //        jeiExclusions.add(element);
-//    }
-//
-//    public static ResourceLocation getRS(String resource) {
-//        return resourceCache.computeIfAbsent(resource, s -> new ResourceLocation(resource));
-//    }
-//
+    }
+
 //    public int guiLeft() {
 //        return gui.guiLeft();
 //    }
@@ -826,116 +779,28 @@
 //    public int guiTop() {
 //        return gui.guiTop();
 //    }
-//
-//    public Predicate<String> catchyValidator(Predicate<String> predicate) {
-//        return s -> {
-//            try {
-//                return predicate.test(s);
-//            }
-//            catch (Throwable e) {
-//                return false;
-//            }
-//        };
-//    }
-//
-//    //TODO add additional standard layouts as needed.
-//
-//    public static final int DEFAULT_WIDTH = 176;
-//    public static final int WIDE_WIDTH = 200;
-//    public static final int EXTRA_WIDE_WIDTH = 250;
-//
-//    public static final int DEFAULT_HEIGHT = 166;
-//    public static final int TALL_HEIGHT = 200;
-//    public static final int EXTRA_TALL_HEIGHT = 250;
-//
-//    public enum GuiLayout {
-//        //        FULL_SCREEN(-1, -1, true, true),
-//        DEFAULT(DEFAULT_WIDTH, DEFAULT_HEIGHT, false, false),
-//
-//        WIDE(WIDE_WIDTH, DEFAULT_HEIGHT, true, false),
-//        TALL(DEFAULT_WIDTH, TALL_HEIGHT, false, true),
-//
-//        WIDE_TALL(WIDE_WIDTH, TALL_HEIGHT, true, true),
-//
-//        EXTRA_WIDE(EXTRA_WIDE_WIDTH, DEFAULT_HEIGHT, true, false),
-//        EXTRA_TALL(DEFAULT_WIDTH, EXTRA_TALL_HEIGHT, false, true),
-//
-//        EXTRA_WIDE_TALL(EXTRA_WIDE_WIDTH, TALL_HEIGHT, true, true),
-//        WIDE_EXTRA_TALL(WIDE_WIDTH, EXTRA_TALL_HEIGHT, true, true),
-//        EXTRA_WIDE_EXTRA_TALL(EXTRA_WIDE_WIDTH, EXTRA_TALL_HEIGHT, true, true),
-//
-//        CUSTOM(-1, -1, false, false);
-//
-//        public final int xSize;
-//        public final int ySize;
-//        private final boolean wide;
-//        private final boolean tall;
-//
-//        GuiLayout(int xSize, int ySize, boolean wide, boolean tall) {
-//            this.xSize = xSize;
-//            this.ySize = ySize;
-//            this.wide = wide;
-//            this.tall = tall;
-//        }
-//
-//        public String textureName() {
-//            return "background-" + xSize + "x" + ySize;
-//        }
-//
-//        public boolean isTall() {
-//            return tall;
-//        }
-//
-//        public boolean isWide() {
-//            return wide;
-//        }
-//
-//        public static GuiLayout getBestFit(int width, int height) {
-//            GuiLayout bestFit = EXTRA_WIDE_EXTRA_TALL;
-//            int widthDeviation = bestFit.xSize - width;
-//            int heightDeviation = bestFit.ySize - height;
-//            for (GuiLayout layout : values()) {
-//                if (/*layout == FULL_SCREEN || */layout == CUSTOM) continue;
-//                int newXD = layout.xSize - width;
-//                int newYD = layout.ySize - height;
-//                if (newXD >= 0 && (newXD <= widthDeviation || widthDeviation < 0) && newYD >= 0 && (newYD <= heightDeviation || heightDeviation < 0)) {
-//                    bestFit = layout;
-//                    widthDeviation = newXD;
-//                    heightDeviation = newYD;
-//                }
-//            }
-//
-//            return bestFit;
-//        }
-//    }
-//
-//    public enum LayoutPos {
-//        TOP_LEFT,
-//        TOP_CENTER,
-//        TOP_RIGHT,
-//        MIDDLE_RIGHT,
-//        MIDDLE_LEFT,
-//        BOTTOM_RIGHT,
-//        BOTTOM_CENTER,
-//        BOTTOM_LEFT
-//    }
-//
-////    public static class SpriteData {
-////        private final ResourceLocation texture;
-//////        private final int x;
-//////        private final int y;
-//////        private final int width;
-//////        private final int height;
-////
-////        public SpriteData(ResourceLocation texture, int x, int y, int width, int height) {
-////            this.texture = texture;
-////            this.x = x;
-////            this.y = y;
-////            this.width = width;
-////            this.height = height;
-////        }
-////    }
-//
+
+    public Predicate<String> catchyValidator(Predicate<String> predicate) {
+        return s -> {
+            try {
+                return predicate.test(s);
+            } catch (Throwable e) {
+                return false;
+            }
+        };
+    }
+
+    public enum LayoutPos {
+        TOP_LEFT,
+        TOP_CENTER,
+        TOP_RIGHT,
+        MIDDLE_RIGHT,
+        MIDDLE_LEFT,
+        BOTTOM_RIGHT,
+        BOTTOM_CENTER,
+        BOTTOM_LEFT
+    }
+
 //    public static class InfoPanel extends GuiElement<InfoPanel> {
 //        private static AtomicBoolean globalExpanded = new AtomicBoolean(false);
 //        private Map<GuiElement<?>, Dimension> elementsDimMap = new LinkedHashMap<>();
@@ -1226,153 +1091,142 @@
 //            elementsDimMap.clear();
 //        }
 //    }
-//
-//    public static abstract class Palette {
-//        /**
-//         * Background colours. These match the colours used in the default background textures.
-//         */
-//        public static class BG {
-//            public static int fill() {
-//                return darkMode ? 0xFF3c3c3c : 0xFFc6c6c6;
-//            }
-//
+
+    public static abstract class Palette {
+        /**
+         * Background colours. These match the colours used in the default background textures.
+         */
+        public static class BG {
+            public static int fill() {
+                return darkMode ? 0xFF3c3c3c : 0xFFc6c6c6;
+            }
+
+            public static int border() {
+                return darkMode ? 0xFF141414 : 0xFF000000;
+            }
+
+            public static int accentLight() {
+                return darkMode ? 0xFF5b5b5b : 0xFFffffff;
+            }
+
+            public static int accentDark() {
+                return darkMode ? 0xFF282828 : 0xFF555555;
+            }
+
+            public static int text() {
+                return darkMode ? 0xAFB1B3 : 0x111111;
+            }
+        }
+
+        /**
+         * Slot Colours. These match the colours used in the default background textures.
+         */
+        public static class Slot {
+            public static int fill() {
+                return darkMode ? 0xFF6a6a6a : 0xFF8b8b8b;
+            }
+
+            public static int border3D(boolean hovering) {
+                return darkMode ? 0xFFFFFFFF : 0xFF000000;
+            }
+
+            public static int accentLight() {
+                return darkMode ? 0xFFc3c3c3 : 0xFFffffff;
+            }
+
+            public static int accentDark() {
+                return darkMode ? 0xFF2a2a2a : 0xFF373737;
+            }
+
+            public static int text() {
+                return darkMode ? 0xdee0e2 : 0x1e2027;
+            }
+
+            public static int textH(boolean hovering) {
+                return hovering ? darkMode ? 0 : 0 : text();
+            }
+        }
+
+        /**
+         * Things like items/controls in a display list that uses the slot background.
+         */
+        public static class SubItem {
+            public static int fill() {
+                return darkMode ? 0xFF5e5f66 : 0xFFbdc6cf;
+            }
+
 //            public static int border() {
 //                return darkMode ? 0xFF141414 : 0xFF000000;
 //            }
-//
-//            public static int accentLight() {
-//                return darkMode ? 0xFF5b5b5b : 0xFFffffff;
-//            }
-//
-//            public static int accentDark() {
-//                return darkMode ? 0xFF282828 : 0xFF555555;
-//            }
-//
-//            public static int text() {
-//                return darkMode ? 0xAFB1B3 : 0x111111;
-//            }
-//        }
-//
-//        /**
-//         * Slot Colours. These match the colours used in the default background textures.
-//         */
-//        public static class Slot {
-//            public static int fill() {
-//                return darkMode ? 0xFF6a6a6a : 0xFF8b8b8b;
-//            }
-//
-//            public static int border3D(boolean hovering) {
-//                return darkMode ? 0xFFFFFFFF : 0xFF000000;
-//            }
-//
-//            public static int accentLight() {
-//                return darkMode ? 0xFFc3c3c3 : 0xFFffffff;
-//            }
-//
-//            public static int accentDark() {
-//                return darkMode ? 0xFF2a2a2a : 0xFF373737;
-//            }
-//
-//            public static int text() {
-//                return darkMode ? 0xdee0e2 : 0x1e2027;
-//            }
-//
-//            public static int textH(boolean hovering) {
-//                return hovering ? darkMode ? 0 : 0 : text();
-//            }
-//        }
-//
-//        /**
-//         * Things like items/controls in a display list that uses the slot background.
-//         */
-//        public static class SubItem {
-//            public static int fill() {
-//                return darkMode ? 0xFF5e5f66 : 0xFFbdc6cf;
-//            }
-//
-////            public static int border() {
-////                return darkMode ? 0xFF141414 : 0xFF000000;
-////            }
-//
-//            public static int accentLight() {
-//                return darkMode ? 0xFF77787f : 0xFFffffff;
-//            }
-//
-//            public static int accentDark() {
-//                return darkMode ? 0xFF46474e : 0xFF4a5760;
-//            }
-//
-//            public static int text() {
-//                return darkMode ? 0xdee0e2 : 0x1e2012;
-//            }
-//
-//            public static int textH(boolean hovering) {
-//                return hovering ? darkMode ? 0 : 0 : text();
-//            }
-//
-//            public static int border3d() {
-//                return darkMode ? 0xFFFFFFFF : 0xFF000000;
-//            }
-//        }
-//
-//        /**
-//         * Buttons and other controls that require a colour pallet.
-//         */
-//        public static class Ctrl {
-//            public static int fill(boolean hovering) {
-//                if (hovering) {
-//                    return darkMode ? 0xFF475b6a : 0xFF647baf;
-//                } else {
-//                    return darkMode ? 0xFF5b5b5b : 0xFF808080;
-//                }
-//            }
-//
-//            public static int border(boolean hovering) {
-//                if (hovering) {
-//                    return darkMode ? 0xFFa8b0e1 : 0xFF000000;
-//                } else {
-//                    return darkMode ? 0xFFd3d3d3 : 0xFF000000;
-//                }
-//            }
-//
-//            public static int border3D(boolean hovering) {
-//                return 0xFF000000;
-//            }
-//
-//            public static int accentLight(boolean hovering) {
-//                if (hovering) {
-//                    return darkMode ? 0xFF75a8c2 : 0xFFa8afe1;
-//                } else {
-//                    return darkMode ? 0xFFa8a8a8 : 0xFFffffff;
-//                }
-//            }
-//
-//            public static int accentDark(boolean hovering) {
-//                if (hovering) {
-//                    return darkMode ? 0xFF21303f : 0xFF515a8a;
-//                } else {
-//                    return darkMode ? 0xFF303030 : 0xFF555555;
-//                }
-//            }
-//
-//            public static int text() {
-//                return darkMode ? 0xe1e3e5 : 0xFFFFFF;
-//            }
-//
-//            public static int textH(boolean hovering) {
-//                return hovering ? darkMode ? 0xffffa0 : 0xffffa0 : text();
-//            }
-//        }
-//
-////        public abstract int fill();
-////        public abstract int border();
-////        public abstract int accentLight();
-////        public abstract int accentDark();
-////        public abstract int text();
-////
-////        public static abstract class CtrlPallet extends Palette {
-////            public abstract int border3D(boolean hovering);
-////        }
-//
-//    }
-//}
+
+            public static int accentLight() {
+                return darkMode ? 0xFF77787f : 0xFFffffff;
+            }
+
+            public static int accentDark() {
+                return darkMode ? 0xFF46474e : 0xFF4a5760;
+            }
+
+            public static int text() {
+                return darkMode ? 0xdee0e2 : 0x1e2012;
+            }
+
+            public static int textH(boolean hovering) {
+                return hovering ? darkMode ? 0 : 0 : text();
+            }
+
+            public static int border3d() {
+                return darkMode ? 0xFFFFFFFF : 0xFF000000;
+            }
+        }
+
+        /**
+         * Buttons and other controls that require a colour pallet.
+         */
+        public static class Ctrl {
+            public static int fill(boolean hovering) {
+                if (hovering) {
+                    return darkMode ? 0xFF475b6a : 0xFF647baf;
+                } else {
+                    return darkMode ? 0xFF5b5b5b : 0xFF808080;
+                }
+            }
+
+            public static int border(boolean hovering) {
+                if (hovering) {
+                    return darkMode ? 0xFFa8b0e1 : 0xFF000000;
+                } else {
+                    return darkMode ? 0xFFd3d3d3 : 0xFF000000;
+                }
+            }
+
+            public static int border3D(boolean hovering) {
+                return 0xFF000000;
+            }
+
+            public static int accentLight(boolean hovering) {
+                if (hovering) {
+                    return darkMode ? 0xFF75a8c2 : 0xFFa8afe1;
+                } else {
+                    return darkMode ? 0xFFa8a8a8 : 0xFFffffff;
+                }
+            }
+
+            public static int accentDark(boolean hovering) {
+                if (hovering) {
+                    return darkMode ? 0xFF21303f : 0xFF515a8a;
+                } else {
+                    return darkMode ? 0xFF303030 : 0xFF555555;
+                }
+            }
+
+            public static int text() {
+                return darkMode ? 0xe1e3e5 : 0xFFFFFF;
+            }
+
+            public static int textH(boolean hovering) {
+                return hovering ? darkMode ? 0xffffa0 : 0xffffa0 : text();
+            }
+        }
+    }
+}

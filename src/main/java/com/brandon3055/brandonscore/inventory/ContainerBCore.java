@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.inventory;
 
-import com.brandon3055.brandonscore.inventory.ContainerSlotLayout.LayoutFactory;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -22,37 +21,38 @@ import java.util.List;
  * Created by brandon3055 on 28/3/2016.
  * Base class for all containers. Handles syncing on syncable objects inside an attached TileBCBase.
  */
+@Deprecated //TODO Figure out gui v3 impl
 public class ContainerBCore<D> extends AbstractContainerMenu {
 
     protected Player player;
-    protected LayoutFactory<D> factory;
-    protected ContainerSlotLayout slotLayout;
+//    protected LayoutFactory<D> factory;
+//    protected ContainerSlotLayout slotLayout;
 
     public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory playerInv, FriendlyByteBuf extraData) {
         super(type, windowId);
         this.player = playerInv.player;
     }
 
-    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<D> factory) {
-        this(type, windowId, player, extraData);
-        this.factory = factory;
-        this.buildSlotLayout();
-    }
+//    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<D> factory) {
+//        this(type, windowId, player, extraData);
+//        this.factory = factory;
+//        this.buildSlotLayout();
+//    }
 
     public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player) {
         super(type, windowId);
         this.player = player.player;
     }
 
-    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player, LayoutFactory<D> factory) {
-        this(type, windowId, player);
-        this.player = player.player;
-        this.factory = factory;
-        this.buildSlotLayout();
-    }
+//    public ContainerBCore(@Nullable MenuType<?> type, int windowId, Inventory player, LayoutFactory<D> factory) {
+//        this(type, windowId, player);
+//        this.player = player.player;
+//        this.factory = factory;
+//        this.buildSlotLayout();
+//    }
 
     protected void buildSlotLayout() {
-        this.slotLayout = factory.buildLayout(player, null).retrieveSlotsForContainer(this::addSlot);
+//        this.slotLayout = factory.buildLayout(player, null).retrieveSlotsForContainer(this::addSlot);
     }
 
     public ContainerBCore addPlayerSlots(int posX, int posY) {
@@ -87,9 +87,9 @@ public class ContainerBCore<D> extends AbstractContainerMenu {
     @Override
     public ItemStack quickMoveStack(Player player, int i) {
         int playerSlots = 36;
-        if (slotLayout != null) {
-            playerSlots = slotLayout.getPlayerSlotCount();
-        }
+//        if (slotLayout != null) {
+//            playerSlots = slotLayout.getPlayerSlotCount();
+//        }
         LazyOptional<IItemHandler> optional = getItemHandler();
         if (optional.isPresent()) {
             IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
@@ -165,10 +165,11 @@ public class ContainerBCore<D> extends AbstractContainerMenu {
         return LazyOptional.empty();
     }
 
-    public ContainerSlotLayout getSlotLayout() {
-        return slotLayout;
-    }
+//    public ContainerSlotLayout getSlotLayout() {
+//        return slotLayout;
+//    }
 
     @OnlyIn(Dist.CLIENT)
     public void clientTick() {}
 }
+

@@ -1,98 +1,84 @@
-//package com.brandon3055.brandonscore.client.gui.modulargui.templates;
-//
-//import com.brandon3055.brandonscore.api.power.IOPStorage;
-//import com.brandon3055.brandonscore.client.BCGuiSprites;
-//import com.brandon3055.brandonscore.client.gui.GuiToolkit;
-//import com.brandon3055.brandonscore.client.gui.GuiToolkit.InfoPanel;
-//import com.brandon3055.brandonscore.client.gui.modulargui.GuiElement;
-//import com.brandon3055.brandonscore.client.gui.modulargui.IGuiParentElement;
-//import com.brandon3055.brandonscore.client.gui.modulargui.baseelements.GuiButton;
-//import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiEnergyBar;
-//import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiLabel;
-//import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiManipulable;
-//import com.brandon3055.brandonscore.client.gui.modulargui.guielements.GuiTexture;
-//import com.brandon3055.brandonscore.inventory.ContainerSlotLayout;
-//import com.brandon3055.brandonscore.inventory.SlotMover;
-//import com.brandon3055.brandonscore.lib.datamanager.ManagedBool;
-//import com.brandon3055.brandonscore.utils.LogHelperBC;
-//import net.minecraft.client.gui.screens.Screen;
-//import net.minecraft.client.resources.language.I18n;
-//
-//import javax.annotation.Nullable;
-//import java.awt.*;
-//import java.util.ArrayList;
-//import java.util.LinkedList;
-//import java.util.List;
-//import java.util.function.Consumer;
-//
-///**
-// * Created by brandon3055 on 9/7/19.
-// * This is the base template for DE gui's. This includes most of the basic features common to all DE GUI's Such as
-// * - The standard background with light / dark theme selector
-// * - Title
-// * - Info Panel
-// * As well as the base code for adding
-// * - Player slots with automatic container slot layout support
-// * - Power slots with optional energy flow direction control
-// * - Energy bar
-// */
-//public class TGuiBase implements IGuiTemplate {
-//
-//    private boolean isInitialized = false;
-//    public GuiElement<?> background;
-//    public GuiLabel title;
-//    public GuiElement<?> playerSlots;
-//    public GuiEnergyBar energyBar;
-//    public GuiElement<?> powerSlot;
-//    public boolean makeDraggable = true;
-//    public int dragZoneHeight = 20;
-//
+package com.brandon3055.brandonscore.client.gui.modulargui.templates;
+
+import codechicken.lib.gui.modular.ModularGui;
+import codechicken.lib.gui.modular.elements.GuiButton;
+import codechicken.lib.gui.modular.elements.GuiElement;
+import codechicken.lib.gui.modular.elements.GuiEnergyBar;
+import codechicken.lib.gui.modular.elements.GuiText;
+import com.brandon3055.brandonscore.api.power.IOPStorage;
+import com.brandon3055.brandonscore.client.BCGuiSprites;
+import com.brandon3055.brandonscore.client.gui.GuiToolkit;
+import com.brandon3055.brandonscore.inventory.SlotMover;
+import com.brandon3055.brandonscore.lib.datamanager.ManagedBool;
+import com.brandon3055.brandonscore.utils.LogHelperBC;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+
+import javax.annotation.Nullable;
+import java.awt.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Consumer;
+
+/**
+ * Created by brandon3055 on 9/7/19.
+ * This is the base template for DE gui's. This includes most of the basic features common to all DE GUI's Such as
+ * - The standard background with light / dark theme selector
+ * - Title
+ * - Info Panel
+ * As well as the base code for adding
+ * - Player slots with automatic container slot layout support
+ * - Power slots with optional energy flow direction control
+ * - Energy bar
+ */
+public class TGuiBase implements IGuiTemplate {
+
+    private boolean isInitialized = false;
+    public GuiElement<?> root;
+    public GuiText title;
+    public GuiElement<?> playerSlots;
+    public GuiEnergyBar energyBar;
+    public GuiElement<?> powerSlot;
+    public boolean makeDraggable = true;
+    public int dragZoneHeight = 20;
+
 //    protected Screen gui;
-//    protected GuiToolkit<?> toolkit;
-//    protected ContainerSlotLayout slotLayout;
+    protected GuiToolkit toolkit;
 //    protected GuiManipulable draggable;
-//
-//    //Dynamic Buttons
-//    public LinkedList<GuiElement<?>> dynamicButtons = new LinkedList<>();
-//    public Consumer<List<GuiElement<?>>> buttonPlacer = this::positionDynamicButtons;
-//    public GuiButton themeButton;
+
+    //Dynamic Buttons
+    public LinkedList<GuiElement<?>> dynamicButtons = new LinkedList<>();
+    public Consumer<List<GuiElement<?>>> buttonPlacer = this::positionDynamicButtons;
+    public GuiButton themeButton;
 //    public InfoPanel infoPanel;
-//    private Consumer<LinkedList<GuiElement<?>>> buttonListListener;
-//
-//
-//    public TGuiBase(Screen gui) {this.gui = gui;}
-//
-//    public TGuiBase(Screen gui, ContainerSlotLayout slotLayout) {
-//        this.slotLayout = slotLayout;
+    private Consumer<LinkedList<GuiElement<?>>> buttonListListener;
+
+
+//    public TGuiBase(Screen gui) {
+//        this.gui = gui;
 //    }
-//
-//    @Override
-//    public void addElements(IGuiParentElement<?> parent, GuiToolkit<?> toolkit) {
-//        this.toolkit = toolkit;
-//
-//        //Background
-//        if (background == null) {
-//            background = toolkit.createBackground(true);
-//        }
-//
-//        if (parent.hasChild(background)) {
-//            parent.removeChild(background);
-//        }
-//
+
+
+    @Override
+    public void addElements(ModularGui parent, GuiToolkit toolkit) {
+        this.toolkit = toolkit;
+        root = parent.getRoot();
+
+        //Yea this will
 //        if (makeDraggable) {
 //            draggable = new GuiManipulable();
 //            parent.addChild(draggable);
-//            draggable.addChild(background);
-//            draggable.bindPosition(background);
-//            draggable.setSizeModifiers(() -> background.xSize(), () -> background.ySize());
+//            draggable.addChild(root);
+//            draggable.bindPosition(root);
+//            draggable.setSizeModifiers(() -> root.xSize(), () -> root.ySize());
 //            draggable.setDragBarHeight(dragZoneHeight);
 //            toolkit.jeiExclude(draggable);
 //        } else {
-//            parent.addChild(background);
+//            parent.addChild(root);
 //        }
-//
-//        //Title
-//        title = toolkit.createHeading(getTitle(), background, true);//setEnabled(false);
+
+        //Title
+//        title = toolkit.createHeading(getTitle(), root, true);//setEnabled(false);
 //
 //        addDynamicButtons(dynamicButtons);
 //        if (buttonListListener != null) {
@@ -101,36 +87,36 @@
 //        if (buttonPlacer != null) {
 //            buttonPlacer.accept(dynamicButtons);
 //        }
-//
-//        isInitialized = true;
-//    }
-//
-//    public void addDynamicButtons(List<GuiElement<?>> dynamicButtons) {
-//        //Theme Button
-//        themeButton = toolkit.createThemeButton(background);
-//        dynamicButtons.add(themeButton);
-//
+
+        isInitialized = true;
+    }
+
+    public void addDynamicButtons(List<GuiElement<?>> dynamicButtons) {
+        //Theme Button
+        themeButton = toolkit.createThemeButton(root);
+        dynamicButtons.add(themeButton);
+
 //        //Info Panel
 //        GuiElement<?> panelPosition = new GuiElement<>().setSize(12, 12);
-//        background.addChild(panelPosition);
-//        infoPanel = toolkit.createInfoPanel(background, false);
-//        background.removeChild(infoPanel);
+//        root.addChild(panelPosition);
+//        infoPanel = toolkit.createInfoPanel(root, false);
+//        root.removeChild(infoPanel);
 //        panelPosition.addChild(infoPanel);
 //        infoPanel.setOrigin(() -> new Point(panelPosition.xPos(), panelPosition.yPos()));
 //        infoPanel.setEnabled(false);
 //        panelPosition.setEnabledCallback(() -> infoPanel.isEnabled());
 //        dynamicButtons.add(panelPosition);
-//    }
-//
-//    public void dynamicButtonPrePosition(Consumer<LinkedList<GuiElement<?>>> buttonListListener) {
-//        if (isInitialized) throw new IllegalStateException("dynamicButtonPrePosition must be called before template is loaded with toolkit.loadTemplate");
-//        this.buttonListListener = buttonListListener;
-//    }
-//
-//    public void positionDynamicButtons(List<GuiElement<?>> dynamicButtons) {
+    }
+
+    public void dynamicButtonPrePosition(Consumer<LinkedList<GuiElement<?>>> buttonListListener) {
+        if (isInitialized) throw new IllegalStateException("dynamicButtonPrePosition must be called before template is loaded with toolkit.loadTemplate");
+        this.buttonListListener = buttonListListener;
+    }
+
+    public void positionDynamicButtons(List<GuiElement<?>> dynamicButtons) {
 //        for (int i = 0; i < dynamicButtons.size(); i++) {
 //            GuiElement<?> button = dynamicButtons.get(i);
-//            button.setXPos(background.maxXPos() - 15);
+//            button.setXPos(root.maxXPos() - 15);
 //
 //            int finalI = i;
 //            button.setYPosMod(() -> {
@@ -141,48 +127,48 @@
 //                   }
 //                   index--;
 //               }
-//               return index < 0 ? background.yPos() + 3 : dynamicButtons.get(index).maxYPos() + 1;
+//               return index < 0 ? root.yPos() + 3 : dynamicButtons.get(index).maxYPos() + 1;
 //            });
 //        }
-//    }
-//
-//    public void setButtonPlacer(Consumer<List<GuiElement<?>>> buttonPlacer) {
-//        this.buttonPlacer = buttonPlacer;
-//    }
-//
-//    public void addPlayerSlots() {
-//        addPlayerSlots(true, false, false);
-//    }
-//
-//    public void addPlayerSlots(boolean title, boolean armor, boolean offHand) {
+    }
+
+    public void setButtonPlacer(Consumer<List<GuiElement<?>>> buttonPlacer) {
+        this.buttonPlacer = buttonPlacer;
+    }
+
+    public void addPlayerSlots() {
+        addPlayerSlots(true, false, false);
+    }
+
+    public void addPlayerSlots(boolean title, boolean armor, boolean offHand) {
 //        if (playerSlots != null && playerSlots.getParent() != null) {
 //            playerSlots.getParent().removeChild(playerSlots);
 //        }
-//        playerSlots = toolkit.createPlayerSlots(background, title, armor, offHand);
-//        toolkit.placeInside(playerSlots, background, GuiToolkit.LayoutPos.BOTTOM_CENTER, 0, -7);
-//    }
-//
-//    public void addEnergyBar(IOPStorage opStorage, boolean inventoryAligned) {
+//        playerSlots = toolkit.createPlayerSlots(root, title, armor, offHand);
+//        toolkit.placeInside(playerSlots, root, GuiToolkit.LayoutPos.BOTTOM_CENTER, 0, -7);
+    }
+
+    public void addEnergyBar(IOPStorage opStorage, boolean inventoryAligned) {
 //        checkInit();
-//        energyBar = toolkit.createEnergyBar(background, opStorage);
+//        energyBar = toolkit.createEnergyBar(root, opStorage);
 //        if (inventoryAligned)
-//            energyBar.setPos(playerSlots.xPos(), background.yPos() + 6);
+//            energyBar.setPos(playerSlots.xPos(), root.yPos() + 6);
 //        else
-//            energyBar.setPos(background.xPos() + 6, background.yPos() + 6);
+//            energyBar.setPos(root.xPos() + 6, root.yPos() + 6);
 //        energyBar.setXSize(14).setMaxYPos(playerSlots.yPos() - 4, true);
-//    }
-//
-//    public void addEnergyBar(IOPStorage opStorage) {
+    }
+
+    public void addEnergyBar(IOPStorage opStorage) {
 //        addEnergyBar(opStorage, !toolkit.getLayout().isWide());
-//    }
-//
-//    @Deprecated //Needs Fix (Textures broken)
-//    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar, SlotMover slotMover) {
+    }
+
+    @Deprecated //Needs Fix (Textures broken)
+    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar, SlotMover slotMover) {
 //        if (energyBar == null) {
 //            throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
 //        }
 //
-//        background.addChild(powerSlot = GuiTexture.newSlot());
+//        root.addChild(powerSlot = GuiTexture.newSlot());
 //        GuiTexture bgTexture = new GuiTexture(16, 16, BCGuiSprites.get("slot_energy")).setPos(1, 1);
 //        powerSlot.addChild(bgTexture);
 //
@@ -218,31 +204,31 @@
 //            } else {
 //                powerToggle.setPos(powerSlot.xPos() + 2, powerSlot.yPos() - powerToggle.ySize() - 2);
 //            }
-//            background.addChild(powerToggle);
+//            root.addChild(powerToggle);
 //        }
-//    }
-//
-//    @Deprecated //Needs Fix
-//    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar) {
-//        addEnergyItemSlot(chargeItem, bellowBar, null);
-//    }
-//
-//    @Deprecated //Needs Fix
-//    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, SlotMover slotMover) {
+    }
+
+    @Deprecated //Needs Fix
+    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, boolean bellowBar) {
+        addEnergyItemSlot(chargeItem, bellowBar, null);
+    }
+
+    @Deprecated //Needs Fix
+    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem, SlotMover slotMover) {
 //        addEnergyItemSlot(chargeItem, toolkit.getLayout().isTall());
-//    }
-//
-//    @Deprecated //Needs Fix
-//    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem) {
-//        addEnergyItemSlot(chargeItem, null);
-//    }
-//
-//    public void addEnergyItemSlot(boolean chargeItem, boolean bellowBar, SlotMover slotMover) {
-//        if (energyBar == null) {
-//            throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
-//        }
-//
-//        background.addChild(powerSlot = GuiTexture.newSlot());
+    }
+
+    @Deprecated //Needs Fix
+    public void addEnergyItemSlot(@Nullable ManagedBool chargeItem) {
+        addEnergyItemSlot(chargeItem, null);
+    }
+
+    public void addEnergyItemSlot(boolean chargeItem, boolean bellowBar, SlotMover slotMover) {
+        if (energyBar == null) {
+            throw new RuntimeException("Must call addEnergyBar before you can add an energy item slot!");
+        }
+
+//        root.addChild(powerSlot = GuiTexture.newSlot());
 //        GuiTexture bgTexture = new GuiTexture(16, 16, BCGuiSprites.get("slots/energy")).setPos(1, 1);
 //        powerSlot.addChild(bgTexture);
 //
@@ -267,28 +253,28 @@
 //            }
 //        }
 //        powerSlot.addChild(toggleTex);
-//    }
-//
-//    public void addEnergyItemSlot(boolean chargeItem, boolean bellowBar) {
-//        addEnergyItemSlot(chargeItem, bellowBar, null);
-//    }
-//
-//    public void addEnergyItemSlot(boolean chargeItem) {
-//        addEnergyItemSlot(chargeItem, null);
-//    }
-//
-//    public void addEnergyItemSlot(boolean chargeItem, SlotMover slotMover) {
+    }
+
+    public void addEnergyItemSlot(boolean chargeItem, boolean bellowBar) {
+        addEnergyItemSlot(chargeItem, bellowBar, null);
+    }
+
+    public void addEnergyItemSlot(boolean chargeItem) {
+        addEnergyItemSlot(chargeItem, null);
+    }
+
+    public void addEnergyItemSlot(boolean chargeItem, SlotMover slotMover) {
 //        addEnergyItemSlot(chargeItem, toolkit.getLayout().isTall(), slotMover);
-//    }
-//
-//    private boolean checkInit() {
-//        if (!isInitialized) {
-//            LogHelperBC.bigError("Machine template must be initialized before applying any other operations.");
-//        }
-//        return isInitialized;
-//    }
-//
-//    public String getTitle() {
-//        return gui.getTitle().getString();
-//    }
-//}
+    }
+
+    private boolean checkInit() {
+        if (!isInitialized) {
+            LogHelperBC.bigError("Machine template must be initialized before applying any other operations.");
+        }
+        return isInitialized;
+    }
+
+    public String getTitle() {
+        return "TODO";//gui.getTitle().getString();
+    }
+}
