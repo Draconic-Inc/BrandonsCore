@@ -1,6 +1,7 @@
 package com.brandon3055.brandonscore.init;
 
 import com.brandon3055.brandonscore.client.*;
+import com.brandon3055.brandonscore.client.hud.HudManager;
 import com.brandon3055.brandonscore.client.model.EquippedItemModelLayer;
 import com.brandon3055.brandonscore.client.shader.BCShaders;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
@@ -40,7 +41,7 @@ public class ClientInit {
         MinecraftForge.EVENT_BUS.addListener(CursorHelper::closeGui);
         MinecraftForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> ContributorHandler.onClientLogin(event.getPlayer()));
         ProcessHandlerClient.init();
-        //HudManager.init();
+        HudManager.init();
         BCShaders.init();
         BCProfiler.init();
         DLRSCache.init();

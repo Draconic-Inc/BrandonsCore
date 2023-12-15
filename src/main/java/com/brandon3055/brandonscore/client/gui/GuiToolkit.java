@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.gui;
 
+import codechicken.lib.gui.modular.ModularGui;
 import codechicken.lib.gui.modular.elements.*;
 import codechicken.lib.gui.modular.lib.Constraints;
 import codechicken.lib.gui.modular.lib.geometry.GuiParent;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -88,14 +90,14 @@ public class GuiToolkit {
     /**
      * Internal translator for use inside Toolkit
      */
-    protected static MutableComponent translateIntern(String translationKey) {
+    protected static MutableComponent translateInternal(String translationKey) {
         if (translationKey.startsWith(".")) {
             translationKey = translationKey.substring(1);
         }
         return Component.translatable(INTERNAL_TRANSLATION_PREFIX + translationKey);
     }
 
-    public GuiButton createRSSwitch(GuiParent<?> parent, IRSSwitchable switchable) {
+    public static GuiButton createRSSwitch(@NotNull GuiParent<?> parent, IRSSwitchable switchable) {
         GuiButton button = new GuiButton(parent);
         Constraints.size(button, 12, 12);
         addHoverHighlight(button);
@@ -103,7 +105,7 @@ public class GuiToolkit {
         GuiTexture icon = new GuiTexture(button, () -> BCGuiSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
         Constraints.bind(icon, button);
 
-        button.setTooltipSingle(() -> translateIntern("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
+        button.setTooltipSingle(() -> translateInternal("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
         button.onPress(() -> switchable.setRSMode(switchable.getRSMode().next(Screen.hasShiftDown())), GuiButton.LEFT_CLICK);
         button.onPress(() -> switchable.setRSMode(switchable.getRSMode().next(true)), GuiButton.RIGHT_CLICK);
         return button;
@@ -136,7 +138,7 @@ public class GuiToolkit {
 //    }
 
     //UI Heading
-    public GuiText createHeading(GuiParent<?> parent, Component heading, boolean layout) {
+    public GuiText createHeading(@NotNull GuiParent<?> parent, Component heading, boolean layout) {
         GuiText guiText = new GuiText(parent, heading);
         guiText.setTextColour(Palette.BG::text);
         guiText.setShadow(() -> darkMode);
@@ -150,10 +152,27 @@ public class GuiToolkit {
         return guiText;
     }
 
-    public GuiText createHeading(GuiParent<?> parent, Component heading) {
+    public GuiText createHeading(@NotNull GuiParent<?> parent, Component heading) {
         return createHeading(parent, heading, false);
     }
 
+    public GuiElement<?> floatingHeading(ModularGui gui) {
+        return floatingHeading(gui.getRoot(), gui.getGuiTitle());
+    }
+
+    public GuiElement<?> floatingHeading(@NotNull GuiElement<?> parent, Component heading) {
+        GuiManipulable titleMovable = new GuiManipulable(parent)
+                .addMoveHandle(13)
+                .setCursors(GuiToolkit.CURSORS);
+        Constraints.size(titleMovable, () -> parent.font().width(heading) + 10D, () -> 13D);
+        
+        GuiElement<?> titleBackground = new GuiRectangle(titleMovable.getContentElement())
+                .fill(0x80000000);
+        Constraints.bind(titleBackground, titleMovable.getContentElement());
+        Constraints.bind(createHeading(titleBackground, heading).setTextColour(0xDFD1D3), titleBackground);
+        return titleMovable;
+    }
+    
 //    /**
 //     * Creates a generic set of inventory slots with the specified dimensions.
 //     * background is an optional 16x16 sprite that will be used as the slot background.
@@ -395,7 +414,7 @@ public class GuiToolkit {
 //    }
 
 
-    public GuiButton createBorderlessButton(GuiParent<?> parent, @Nullable Component text) {
+    public GuiButton createBorderlessButton(@NotNull GuiParent<?> parent, @Nullable Component text) {
         GuiButton button = new GuiButton(parent);
         GuiTexture texture = new GuiTexture(button, () -> BCGuiSprites.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
         texture.dynamicTexture();
@@ -461,7 +480,7 @@ public class GuiToolkit {
 //        return createButton_old(unlocalizedText, null, true);
 //    }
 
-    public GuiButton createButton(GuiParent<?> parent, @Nullable Supplier<Component> text, boolean inset3d, int doubleBoarder) {
+    public GuiButton createButton(@NotNull GuiParent<?> parent, @Nullable Supplier<Component> text, boolean inset3d, int doubleBoarder) {
         GuiButton button = new GuiButton(parent);
 
         if (inset3d) {
@@ -495,13 +514,13 @@ public class GuiToolkit {
         return button;
     }
 
-    public GuiButton createButton(GuiParent<?> parent, @Nullable Supplier<Component> text) {
+    public GuiButton createButton(@NotNull GuiParent<?> parent, @Nullable Supplier<Component> text) {
         return createButton(parent, text, true, 1);
     }
 
-    public GuiButton createThemeButton(GuiParent<?> parent) {
+    public GuiButton createThemeButton(@NotNull GuiParent<?> parent) {
         GuiButton button = createThemedIconButton(parent, "theme");
-        button.setTooltipSingle(() -> darkMode ? translateIntern("theme.light") : translateIntern("theme.dark"));
+        button.setTooltipSingle(() -> darkMode ? translateInternal("theme.light") : translateInternal("theme.dark"));
         button.onPress(() -> BCConfig.modifyClientProperty("darkMode", e -> e.setBoolean(!darkMode)));
         return button;
     }
@@ -516,7 +535,7 @@ public class GuiToolkit {
 
     public GuiButton createResizeButton(GuiParent<?> parent) {
         GuiButton button = createThemedIconButton(parent, "resize");
-        button.setTooltipSingle(() -> translateIntern("large_view"));
+        button.setTooltipSingle(() -> translateInternal("large_view"));
         return button;
     }
 
@@ -524,7 +543,7 @@ public class GuiToolkit {
         return createGearButton(null);
     }
 
-    public GuiButton createGearButton(GuiParent<?> parent) {
+    public GuiButton createGearButton(@NotNull GuiParent<?> parent) {
         return createThemedIconButton(parent, "gear");
     }
 
@@ -532,27 +551,27 @@ public class GuiToolkit {
         return createAdvancedButton(null);
     }
 
-    public GuiButton createAdvancedButton(GuiParent<?> parent) {
+    public GuiButton createAdvancedButton(@NotNull GuiParent<?> parent) {
         return createThemedIconButton(parent, "advanced");
     }
 
-    public GuiButton createThemedIconButton(GuiParent<?> parent, String iconString) {
+    public GuiButton createThemedIconButton(@NotNull GuiParent<?> parent, String iconString) {
         return createThemedIconButton(parent, 12, iconString);
     }
 
-    public GuiButton createThemedIconButton(GuiParent<?> parent, int size, String iconString) {
+    public GuiButton createThemedIconButton(@NotNull GuiParent<?> parent, int size, String iconString) {
         return createIconButton(parent, size, BCGuiSprites.themedGetter(iconString));
     }
 
-    public GuiButton createIconButton(GuiParent<?> parent, int size, Supplier<Material> iconSupplier) {
+    public GuiButton createIconButton(@NotNull GuiParent<?> parent, int size, Supplier<Material> iconSupplier) {
         return createIconButton(parent, size, size, iconSupplier);
     }
 
-    public GuiButton createIconButton(GuiParent<?> parent, int buttonSize, int iconSize, String iconString) {
+    public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonSize, int iconSize, String iconString) {
         return createIconButton(parent, buttonSize, iconSize, BCGuiSprites.getter(iconString));
     }
 
-    public GuiButton createIconButton(GuiParent<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
+    public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
 //        GuiButton button = new GuiButton();
 //        button.setHoverTextDelay(10);
 //        button.setSize(buttonSize, buttonSize);
@@ -566,11 +585,11 @@ public class GuiToolkit {
         return createIconButton(parent, buttonSize, buttonSize, iconSize, iconSize, iconSupplier);
     }
 
-    public GuiButton createIconButton(GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
+    public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
         return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCGuiSprites.getter(iconString));
     }
 
-    public GuiButton createIconButton(GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {
+    public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {
         GuiButton button = new GuiButton(parent);
         Constraints.size(button, buttonWidth, buttonHeight);
         addHoverHighlight(button);
@@ -581,22 +600,21 @@ public class GuiToolkit {
         return button;
     }
 
-    public static GuiRectangle addHoverHighlight(GuiElement<?> parent) {
+    public static GuiRectangle addHoverHighlight(@NotNull GuiElement<?> parent) {
         return addHoverHighlight(parent, 0, 0);
     }
 
-    public static GuiRectangle addHoverHighlight(GuiElement<?> parent, int xOversize, int yOversize) {
+    public static GuiRectangle addHoverHighlight(@NotNull GuiElement<?> parent, int xOversize, int yOversize) {
         return addHoverHighlight(parent, xOversize / 2, yOversize / 2, false);
     }
 
-    public static GuiRectangle addHoverHighlight(GuiElement<?> parent, int xOversize, int yOversize, boolean transparent) {
+    public static GuiRectangle addHoverHighlight(@NotNull GuiElement<?> parent, int xOversize, int yOversize, boolean transparent) {
         return addHoverHighlight(parent, xOversize, xOversize, yOversize, yOversize, transparent);
     }
 
-    //TODO, Usage of this may need to be tweaked, "Adding behind" is no longer a thing, But with the new way buttons are built, that should be easy to work around.
-    public static GuiRectangle addHoverHighlight(GuiElement<?> parent, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
+    public static GuiRectangle addHoverHighlight(@NotNull GuiElement<?> parent, int leftOversize, int rightOversize, int topOversize, int bottomOversize, boolean transparent) {
         GuiRectangle rect = new GuiRectangle(parent)
-                .border(() -> Palette.Ctrl.fill(parent.isMouseOver()) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF))
+                .fill(() -> Palette.Ctrl.fill(parent.isMouseOver()) & (transparent ? 0x80FFFFFF : 0xFFFFFFFF))
                 .setEnabled(() -> parent.isMouseOver() || (parent instanceof GuiButton b && b.toggleState()));
         Constraints.bind(rect, parent, topOversize, leftOversize, bottomOversize, rightOversize);
         return rect;
@@ -667,11 +685,11 @@ public class GuiToolkit {
         return createTextField(null);
     }
 
-    public GuiTextField createTextField(GuiElement<?> parent) {
+    public GuiTextField createTextField(@NotNull GuiElement<?> parent) {
         return createTextField(parent, true);
     }
 
-    public GuiTextField createTextField(GuiElement<?> parent, boolean background) {
+    public GuiTextField createTextField(@NotNull GuiElement<?> parent, boolean background) {
         GuiTextField textField = new GuiTextField(parent);
 //        textField.setTextColor(Palette.Ctrl::text);
 //        textField.setShadow(false);

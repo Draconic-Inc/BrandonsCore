@@ -3,6 +3,7 @@ package com.brandon3055.brandonscore.command;
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.client.ClientOnly;
 import com.brandon3055.brandonscore.client.gui.ContributorConfigGui;
+import com.brandon3055.brandonscore.client.gui.HudConfigGui;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.init.ClientInit;
@@ -32,6 +33,7 @@ public class BCClientCommands {
         var builder = Commands.literal("bcore_client");
 
         builder.then(contributor());
+        builder.then(hudConfig());
         if (BrandonsCore.inDev) {
             //builder.then(testGui());
         }
@@ -54,6 +56,15 @@ public class BCClientCommands {
 //                            return 0;
 //                        }));
 //    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> hudConfig() {
+        return Commands.literal("hudconfig")
+                .requires(cs -> cs.hasPermission(0))
+                .executes(context -> {
+                    DelayedTask.client(10, () -> Minecraft.getInstance().setScreen(new HudConfigGui.Screen()));
+                    return 0;
+                });
+    }
 
     private static ArgumentBuilder<CommandSourceStack, ?> contributor() {
         return Commands.literal("contributor")

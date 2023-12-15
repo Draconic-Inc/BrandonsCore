@@ -18,7 +18,7 @@
 //import net.minecraft.world.entity.player.Inventory;
 //
 ///**
-// * Created by brandon3055 on 6/23/2018.
+// * Created by brandon3055 on 6/23/2018. TODO Switch to NEU implementation
 // */
 //public class GuiPlayerAccess extends ModularGuiContainer<ContainerPlayerAccess> {
 //
