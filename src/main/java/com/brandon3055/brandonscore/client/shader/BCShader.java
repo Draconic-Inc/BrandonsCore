@@ -54,7 +54,7 @@ public class BCShader<T extends BCShader<T>> {
     // @formatter:on
 
     private void onRegisterShaders(RegisterShadersEvent event) {
-        event.registerShader(CCShaderInstance.create(event.getResourceManager(), location, format), e -> {
+        event.registerShader(CCShaderInstance.create(event.getResourceProvider(), location, format), e -> {
             shaderInstance = (CCShaderInstance) e;
             onShaderLoaded();
             shaderInstance.onApply(() -> {

@@ -24,7 +24,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -42,6 +42,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.joml.Vector3f;
 
 import java.util.Map;
 
@@ -296,7 +297,7 @@ public class ContributorModel<T extends LivingEntity> extends HumanoidModel<T> i
         //Initial Matrix Setup
         poseStack.pushPose();
         body.translateAndRotate(poseStack);
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180));
         poseStack.translate(0, -1.5, 0);
         Matrix4 mat = new Matrix4(poseStack);
         poseStack.popPose();

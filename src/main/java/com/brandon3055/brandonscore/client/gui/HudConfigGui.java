@@ -3,8 +3,6 @@ package com.brandon3055.brandonscore.client.gui;
 import codechicken.lib.gui.modular.ModularGui;
 import codechicken.lib.gui.modular.ModularGuiScreen;
 import codechicken.lib.gui.modular.elements.GuiButton;
-import codechicken.lib.gui.modular.elements.GuiContextMenu;
-import codechicken.lib.gui.modular.elements.GuiDialog;
 import codechicken.lib.gui.modular.elements.GuiElement;
 import codechicken.lib.gui.modular.lib.BackgroundRender;
 import codechicken.lib.gui.modular.lib.Constraints;
@@ -17,11 +15,10 @@ import com.brandon3055.brandonscore.client.hud.HudData;
 import com.brandon3055.brandonscore.client.hud.HudManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 
 import java.awt.*;
 
@@ -33,7 +30,6 @@ import static codechicken.lib.gui.modular.lib.Constraints.LayoutPos.*;
  */
 public class HudConfigGui implements GuiProvider {
     protected GuiToolkit toolkit = new GuiToolkit("gui.brandonscore.hud_config");
-
 
     @Override
     public void buildGui(ModularGui gui) {
@@ -73,27 +69,14 @@ public class HudConfigGui implements GuiProvider {
             Constraints.size(this, element::width, element::height);
             Constraints.pos(this, element::xPos, element::yPos);
 
-
             settings = toolkit.createIconButton(this, 10, BCGuiSprites.getter("dark/gear"));
             settings.setTooltip(toolkit.translate("settings"));
             Constraints.placeInside(settings, this, TOP_RIGHT, -2, 2);
 
-            settings.onPress(() -> {
-                GuiDialog.optionsDialog(settings,
-                        Component.literal("Test Title").withStyle(ChatFormatting.GREEN),
-                        Component.literal("Text sdfjfg nsflkg jnlfngl flg hsfljhgjlsfjhfglj flgjh dflg jhfdghj ldf gdfhj g  msdlkj lsdj dsfj sdf jdsklfj lfdjlg jfdlg j").withStyle(ChatFormatting.GRAY),
-                        200,
-                        GuiDialog.primary(Component.literal("Primary Op"), () -> {}),
-                        GuiDialog.neutral(Component.literal("Op 2"), () -> {}),
-                        GuiDialog.neutral(Component.literal("Op 3"), () -> {}),
-                        GuiDialog.caution(Component.literal("Caution!"), () -> {})
-                        );
-
-
-//                element.createConfigDialog(settings)
-//                        .setNormalizedPos(settings.xMax(), settings.yMin())
-//                        .setCloseOnItemClicked(false);
-            });
+            settings.onPress(() -> element.createConfigDialog(settings)
+                    .setNormalizedPos(settings.xMax(), settings.yMin())
+                    .setCloseOnItemClicked(false)
+            );
 
             String infoKey = String.format("hud.%s.%s.info", HudManager.HUD_REGISTRY.getKey(element).getNamespace(), HudManager.HUD_REGISTRY.getKey(element).getPath());
             String translatedInfo = I18n.get(infoKey);

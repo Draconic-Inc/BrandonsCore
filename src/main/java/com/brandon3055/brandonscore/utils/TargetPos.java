@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.lib.TeleportUtils;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -54,7 +55,7 @@ public class TargetPos {
 
     public void update(Entity player) {
         pos = Vector3.fromEntity(player);
-        dimension = player.level.dimension();
+        dimension = player.level().dimension();
         pitch = player.getXRot();
         yaw = player.getYRot();
     }
@@ -151,7 +152,7 @@ public class TargetPos {
 
     public void readFromNBT(CompoundTag nbt) {
         pos = Vector3.fromNBT(nbt);
-        dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dim")));
+        dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dim")));
         includeHeading = nbt.getBoolean("heading");
         if (includeHeading) {
             pitch = nbt.getFloat("pitch");
@@ -171,7 +172,7 @@ public class TargetPos {
 
     public void read(MCDataInput input) {
         pos = input.readVector();
-        dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, input.readResourceLocation());
+        dimension = ResourceKey.create(Registries.DIMENSION, input.readResourceLocation());
         includeHeading = input.readBoolean();
         if (includeHeading) {
             pitch = input.readFloat();

@@ -2,8 +2,8 @@ package com.brandon3055.brandonscore.api.hud;
 
 import codechicken.lib.gui.modular.elements.GuiContextMenu;
 import codechicken.lib.gui.modular.elements.GuiElement;
+import codechicken.lib.gui.modular.lib.GuiRender;
 import com.brandon3055.brandonscore.api.math.Vector2;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -64,7 +64,7 @@ public abstract class AbstractHudElement {
      * @param mStack      The matrix stack.
      * @param configuring This will be true when the hud config gui is open.
      */
-    public abstract void render(PoseStack mStack, float partialTicks, boolean configuring);
+    public abstract void render(GuiRender render, float partialTicks, boolean configuring);
 
     public boolean shouldRender(boolean preRenderEvent) {
         return preRenderEvent;

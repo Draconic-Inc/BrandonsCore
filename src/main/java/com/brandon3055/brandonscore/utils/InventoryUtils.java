@@ -27,7 +27,7 @@ public class InventoryUtils {
             ItemStack s = inventory.getItem(i);
 
             //TODO Do i still need to check damage?
-            if (ItemStack.isSame(stack, s) && stack.getDamageValue() == s.getDamageValue() && s.getCount() >= stack.getCount()) {
+            if (ItemStack.isSameItemSameTags(stack, s) && stack.getDamageValue() == s.getDamageValue() && s.getCount() >= stack.getCount()) {
                 return true;
             }
         }
@@ -47,7 +47,7 @@ public class InventoryUtils {
             }
 
             //TODO Do i still need to check damage?
-            if (ItemStack.isSame(stack, s) && stack.getDamageValue() == s.getDamageValue() && s.getCount() >= stack.getCount()) {
+            if (ItemStack.isSameItemSameTags(stack, s) && stack.getDamageValue() == s.getDamageValue() && s.getCount() >= stack.getCount()) {
                 s.shrink(stack.getCount());
                 inventory.setChanged();
                 return true;
@@ -67,7 +67,7 @@ public class InventoryUtils {
      * Will not transfer partial stacks.
      */
     public static void handleHeldStackTransfer(int slot, Container inventory, Player player) {
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return;
         }
 
@@ -90,7 +90,7 @@ public class InventoryUtils {
     }
 
     public static void handleHeldStackTransfer(int slot, IItemHandlerModifiable inventory, Player player) {
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return;
         }
 
@@ -124,7 +124,7 @@ public class InventoryUtils {
      * Will prioritize putting it in their hand if their hand is empty.
      * */
     public static void givePlayerStack(Player player, ItemStack stack) {
-        if (player.level.isClientSide) {
+        if (player.level().isClientSide) {
             return;
         }
 
@@ -135,7 +135,7 @@ public class InventoryUtils {
 
         player.getInventory().add(stack);
         if (stack.getCount() > 0) {
-            dropItemNoDelay(stack, player.level, Vector3.fromEntity(player));
+            dropItemNoDelay(stack, player.level(), Vector3.fromEntity(player));
         }
     }
 

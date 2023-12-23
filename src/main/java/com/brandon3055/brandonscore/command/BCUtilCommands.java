@@ -119,7 +119,7 @@ public class BCUtilCommands {
                         .executes(context -> {
                             BlockPos pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
                             ServerPlayer player = context.getSource().getPlayerOrException();
-                            if (!(player.level.getBlockEntity(pos) instanceof TileBCore tile) || !tile.toggleDebugOutput(player)) {
+                            if (!(player.level().getBlockEntity(pos) instanceof TileBCore tile) || !tile.toggleDebugOutput(player)) {
                                 player.sendSystemMessage(Component.literal("This tile does not support Brandon's Core Debugging"));
                             }
                             return 0;
@@ -139,7 +139,7 @@ public class BCUtilCommands {
                 .requires(cs -> cs.hasPermission(3))
                 .executes(context -> {
                     ContributorHandler.reload();
-                    context.getSource().sendSuccess(Component.literal("Reset complete"), false);
+                    context.getSource().sendSuccess(() -> Component.literal("Reset complete"), false);
                     return 0;
                 });
     }
@@ -296,13 +296,13 @@ public class BCUtilCommands {
         boolean flag = player.getInventory().add(stack);
         if (flag && stack.isEmpty()) {
             stack.setCount(1);
-            player.level.playSound((Player) null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+            player.level().playSound((Player) null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
             player.inventoryMenu.broadcastChanges();
         } else {
             ItemEntity itementity = player.drop(stack, false);
             if (itementity != null) {
                 itementity.setNoPickUpDelay();
-                itementity.setOwner(player.getUUID());
+                itementity.setThrower(player.getUUID());
             }
         }
         return 0;
@@ -370,11 +370,11 @@ public class BCUtilCommands {
         if (enabled) {
             BCEventHandler.noClipPlayers.remove(player.getUUID());
             BCoreNetwork.sendNoClip(player, false);
-            source.sendSuccess(Component.literal("NoClip Disabled!"), true);
+            source.sendSuccess(() -> Component.literal("NoClip Disabled!"), true);
         } else {
             BCEventHandler.noClipPlayers.add(player.getUUID());
             BCoreNetwork.sendNoClip(player, true);
-            source.sendSuccess(Component.literal("NoClip Enabled!"), true);
+            source.sendSuccess(() -> Component.literal("NoClip Enabled!"), true);
         }
         return 0;
     }
@@ -383,7 +383,7 @@ public class BCUtilCommands {
         MutableComponent comp = Component.literal(player.getName().getString() + "'s UUID: " + ChatFormatting.UNDERLINE + player.getUUID());
         comp.setStyle(comp.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, player.getUUID().toString())));
         comp.setStyle(comp.getStyle().withHoverEvent(new HoverEvent(SHOW_TEXT, Component.literal("Click to copy to clipboard"))));
-        source.sendSuccess(comp, true);
+        source.sendSuccess(() -> comp, true);
         return 0;
     }
 
@@ -415,7 +415,7 @@ public class BCUtilCommands {
 
         LogHelperBC.info(builder.toString());
         for (String s : builder.toString().split("\n")) {
-            source.sendSuccess(Component.literal(s), true);
+            source.sendSuccess(() -> Component.literal(s), true);
         }
         return 0;
     }
@@ -572,7 +572,7 @@ public class BCUtilCommands {
 //        }
 
         if (target == null) {
-            source.sendSuccess(Component.literal("################## All Known Players ##################"), false);
+            source.sendSuccess(() -> Component.literal("################## All Known Players ##################"), false);
             for (UUID uuid : playerMap.keySet()) {
                 GameProfile profile = playerMap.get(uuid);
 
@@ -599,7 +599,7 @@ public class BCUtilCommands {
                 msgStyle.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bcore_util player_access " + uuid));
                 msgStyle.withHoverEvent(new HoverEvent(SHOW_TEXT, messageHover));
                 message.setStyle(msgStyle);
-                source.sendSuccess(message, false);
+                source.sendSuccess(() -> message, false);
             }
             return 0;
         }

@@ -1,8 +1,6 @@
 package com.brandon3055.brandonscore.inventory;
 
-import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.PacketCustom;
-import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import net.minecraft.client.Minecraft;
@@ -15,16 +13,12 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Created by brandon3055 on 28/3/2016.
@@ -153,7 +147,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
      * @return the item handler for the tile entity.
      */
     public LazyOptional<IItemHandler> getItemHandler() {
-        return tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        return tile.getCapability(ForgeCapabilities.ITEM_HANDLER, null);
     }
 
 //    public ContainerSlotLayout getSlotLayout() {

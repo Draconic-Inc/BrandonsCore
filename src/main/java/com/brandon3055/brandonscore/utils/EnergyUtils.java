@@ -13,9 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class EnergyUtils {
         if (op.isPresent()) {
             return op.orElseThrow(ImpossibleException::new);
         }
-        LazyOptional<IEnergyStorage> fe = provider.getCapability(CapabilityEnergy.ENERGY, side);
+        LazyOptional<IEnergyStorage> fe = provider.getCapability(ForgeCapabilities.ENERGY, side);
         if (fe.isPresent()) {
             return new OPWrappers.FE(fe.orElseThrow(ImpossibleException::new));
         }

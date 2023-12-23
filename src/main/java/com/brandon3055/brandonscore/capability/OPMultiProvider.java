@@ -3,9 +3,9 @@ package com.brandon3055.brandonscore.capability;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,7 +31,7 @@ public class OPMultiProvider implements ICapabilityProvider {
         if (facing == null || facing == side) {
             if (cap == CapabilityOP.OP) {
                 return instance.cast();
-            } else if (cap == CapabilityEnergy.ENERGY) {
+            } else if (cap == ForgeCapabilities.ENERGY) {
                 return instance.cast();
             }
         }

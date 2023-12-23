@@ -70,7 +70,7 @@ public class BCShaders {
     }
 
     private static void onRegisterShaders(RegisterShadersEvent event) {
-        event.registerShader(CCShaderInstance.create(event.getResourceManager(), new ResourceLocation(BrandonsCore.MODID, "energy_bar"), DefaultVertexFormat.POSITION), e -> {
+        event.registerShader(CCShaderInstance.create(event.getResourceProvider(), new ResourceLocation(BrandonsCore.MODID, "energy_bar"), DefaultVertexFormat.POSITION), e -> {
             energyBarShader = (CCShaderInstance) e;
             energyBarTime = energyBarShader.getUniform("time");
             energyBarCharge = energyBarShader.getUniform("charge");
@@ -80,7 +80,7 @@ public class BCShaders {
             energyBarShader.onApply(() -> energyBarTime.glUniform1f(BCClientEventHandler.elapsedTicks / 10F));
         });
 
-        event.registerShader(CCShaderInstance.create(event.getResourceManager(), new ResourceLocation(BrandonsCore.MODID, "position_color_tex_alpha0"), DefaultVertexFormat.POSITION_COLOR_TEX), e -> {
+        event.registerShader(CCShaderInstance.create(event.getResourceProvider(), new ResourceLocation(BrandonsCore.MODID, "position_color_tex_alpha0"), DefaultVertexFormat.POSITION_COLOR_TEX), e -> {
             posColourTexAlpha0 = (CCShaderInstance) e;
         });
     }

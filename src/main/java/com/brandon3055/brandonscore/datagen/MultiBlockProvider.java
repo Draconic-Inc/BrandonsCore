@@ -1,26 +1,26 @@
 package com.brandon3055.brandonscore.datagen;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by brandon3055 on 26/06/2022
@@ -38,23 +38,20 @@ public abstract class MultiBlockProvider implements DataProvider {
     }
 
     @Override
-    public void run(CachedOutput cache) throws IOException {
+    public CompletableFuture<?> run(CachedOutput pOutput) {
         builtMultiBlocks.clear();
         buildMultiBlocks();
+
+        List<CompletableFuture<?>> futures = new LinkedList<>();
         for (String name : builtMultiBlocks.keySet()) {
-            saveMultiBlock(cache, new ResourceLocation(modid, name), builtMultiBlocks.get(name));
+            futures.add(saveMultiBlock(pOutput, new ResourceLocation(modid, name), builtMultiBlocks.get(name)));
         }
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
     }
 
-    private void saveMultiBlock(CachedOutput cache, ResourceLocation id, JsonObject multiBlockJson) {
-        Path mainOutput = gen.getOutputFolder();
-        String pathSuffix = "data/" + id.getNamespace() + "/multiblocks/" + id.getPath() + ".json";
-        Path outputPath = mainOutput.resolve(pathSuffix);
-        try {
-            DataProvider.saveStable(cache, multiBlockJson, outputPath);
-        } catch (IOException e) {
-            LOGGER.error("Couldn't save multiblock structure to {}", outputPath, e);
-        }
+    private CompletableFuture<?> saveMultiBlock(CachedOutput cache, ResourceLocation id, JsonObject multiBlockJson) {
+        Path output = gen.getPackOutput().getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(modid + "/data/" + id.getNamespace() + "/multiblocks/" + id.getPath() + ".json");
+        return DataProvider.saveStable(cache, multiBlockJson, output);
     }
 
     protected abstract void buildMultiBlocks();

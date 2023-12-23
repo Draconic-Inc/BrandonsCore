@@ -5,17 +5,12 @@ import codechicken.lib.packet.PacketCustomChannelBuilder;
 import codechicken.lib.util.ServerUtils;
 import codechicken.lib.vec.Vector3;
 import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.handlers.FileHandler;
-import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorProperties;
 import com.brandon3055.brandonscore.multiblock.MultiBlockDefinition;
 import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import com.google.gson.JsonParser;
-import com.mojang.math.Vector3f;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
@@ -29,13 +24,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.event.EventNetworkChannel;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -147,7 +138,7 @@ public class BCoreNetwork {
      */
     public static Packet<?> getEntitySpawnPacket(Entity entity) {
         PacketCustom packet = new PacketCustom(CHANNEL, C_SPAWN_ENTITY);
-        packet.writeVarInt(Registry.ENTITY_TYPE.getId(entity.getType()));
+        packet.writeRegistryId(ForgeRegistries.ENTITY_TYPES, entity.getType());
         packet.writeInt(entity.getId());
         packet.writeUUID(entity.getUUID());
         packet.writeDouble(entity.getX());
@@ -166,12 +157,12 @@ public class BCoreNetwork {
     public static Packet<?> sendEntityVelocity(Entity entity, boolean movement) {
         PacketCustom packet = new PacketCustom(CHANNEL, C_ENTITY_VELOCITY);
         packet.writeInt(entity.getId());
-        packet.writeVec3f(new Vector3f(entity.getDeltaMovement()));
+        packet.writeVec3f(entity.getDeltaMovement().toVector3f());
         packet.writeBoolean(movement);
         if (movement) {
             packet.writeFloat(entity.getXRot());
             packet.writeFloat(entity.getYRot());
-            packet.writeBoolean(entity.isOnGround());
+            packet.writeBoolean(entity.onGround());
         }
         return packet.toPacket(NetworkDirection.PLAY_TO_CLIENT);
     }

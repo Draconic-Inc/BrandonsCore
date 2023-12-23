@@ -4,9 +4,11 @@ import com.brandon3055.brandonscore.utils.DataUtils;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
@@ -70,7 +72,7 @@ public class IntParticleType extends ParticleType<IntParticleType.IntParticleDat
 
         @Override
         public String writeToString() {
-            return String.format(Locale.ROOT, "%s %sb", Registry.PARTICLE_TYPE.getKey(this.getType()), DataUtils.stringArrayConcat(DataUtils.arrayToString(data), " "));
+            return String.format(Locale.ROOT, "%s %sb", BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()), DataUtils.stringArrayConcat(DataUtils.arrayToString(data), " "));
         }
     }
 }

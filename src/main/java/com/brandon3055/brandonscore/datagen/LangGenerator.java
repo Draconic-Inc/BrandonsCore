@@ -13,7 +13,7 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 //@formatter:off
 public class LangGenerator extends LanguageProvider {
     public LangGenerator(DataGenerator gen) {
-        super(gen, MODID, "en_us");
+        super(gen.getPackOutput(), MODID, "en_us");
     }
 
     private void addModularGui(PrefixHelper helper) {

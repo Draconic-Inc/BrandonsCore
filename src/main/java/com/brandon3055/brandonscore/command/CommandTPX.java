@@ -11,12 +11,14 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.server.commands.TeleportCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
@@ -73,13 +75,13 @@ public class CommandTPX {
 
     private static int teleportToEntity(CommandSourceStack source, Collection<? extends Entity> targets, Entity destination) {
         for (Entity entity : targets) {
-            teleport(source, entity, (ServerLevel) destination.level, destination.getX(), destination.getY(), destination.getZ(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class), destination.getYRot(), destination.getXRot());
+            teleport(source, entity, (ServerLevel) destination.level(), destination.getX(), destination.getY(), destination.getZ(), EnumSet.noneOf(RelativeMovement.class), destination.getYRot(), destination.getXRot());
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(Component.translatable("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
+            source.sendSuccess(() -> Component.translatable("commands.teleport.success.entity.single", targets.iterator().next().getDisplayName(), destination.getDisplayName()), true);
         } else {
-            source.sendSuccess(Component.translatable("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
+            source.sendSuccess(() -> Component.translatable("commands.teleport.success.entity.multiple", targets.size(), destination.getDisplayName()), true);
         }
 
         return targets.size();
@@ -104,7 +106,7 @@ public class CommandTPX {
                     if (!state.getFluidState().isEmpty()) {
                         continue;
                     }
-                    if (state.getMaterial().blocksMotion()) {
+                    if (state.blocksMotion()) {
                         break;
                     }
                 }
@@ -114,29 +116,29 @@ public class CommandTPX {
 
         Vec3 vec3d = position.getPosition(source);
         Vec2 vec2f = rotationIn == null ? null : rotationIn.getRotation(source);
-        Set<ClientboundPlayerPositionPacket.RelativeArgument> set = EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class);
+        Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
         if (position.isXRelative()) {
-            set.add(ClientboundPlayerPositionPacket.RelativeArgument.X);
+            set.add(RelativeMovement.X);
         }
 
         if (position.isYRelative()) {
-            set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y);
+            set.add(RelativeMovement.Y);
         }
 
         if (position.isZRelative()) {
-            set.add(ClientboundPlayerPositionPacket.RelativeArgument.Z);
+            set.add(RelativeMovement.Z);
         }
 
         if (rotationIn == null) {
-            set.add(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT);
-            set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT);
+            set.add(RelativeMovement.X_ROT);
+            set.add(RelativeMovement.Y_ROT);
         } else {
             if (rotationIn.isXRelative()) {
-                set.add(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT);
+                set.add(RelativeMovement.X_ROT);
             }
 
             if (rotationIn.isYRelative()) {
-                set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT);
+                set.add(RelativeMovement.Y_ROT);
             }
         }
 
@@ -149,24 +151,24 @@ public class CommandTPX {
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(Component.translatable("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(() -> Component.translatable("commands.teleport.success.location.single", targets.iterator().next().getDisplayName(), vec3d.x, vec3d.y, vec3d.z), true);
         } else {
-            source.sendSuccess(Component.translatable("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
+            source.sendSuccess(() -> Component.translatable("commands.teleport.success.location.multiple", targets.size(), vec3d.x, vec3d.y, vec3d.z), true);
         }
 
         return targets.size();
     }
 
-    private static void teleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z, Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeList, float yaw, float pitch) {
+    private static void teleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z, Set<RelativeMovement> relativeList, float yaw, float pitch) {
         if (entityIn instanceof ServerPlayer) {
-            ChunkPos chunkpos = new ChunkPos(new BlockPos(x, y, z));
+            ChunkPos chunkpos = new ChunkPos(BlockPos.containing(x, y, z));
             worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
             entityIn.stopRiding();
             if (((ServerPlayer) entityIn).isSleeping()) {
                 ((ServerPlayer) entityIn).stopSleeping();
             }
 
-            if (worldIn == entityIn.level) {
+            if (worldIn == entityIn.level()) {
                 ((ServerPlayer) entityIn).connection.teleport(x, y, z, yaw, pitch, relativeList);
             } else {
                 ((ServerPlayer) entityIn).teleportTo(worldIn, x, y, z, yaw, pitch);
@@ -177,7 +179,7 @@ public class CommandTPX {
             float f1 = Mth.wrapDegrees(yaw);
             float f = Mth.wrapDegrees(pitch);
             f = Mth.clamp(f, -90.0F, 90.0F);
-            if (worldIn == entityIn.level) {
+            if (worldIn == entityIn.level()) {
                 entityIn.moveTo(x, y, z, f1, f);
                 entityIn.setYHeadRot(f1);
             } else {

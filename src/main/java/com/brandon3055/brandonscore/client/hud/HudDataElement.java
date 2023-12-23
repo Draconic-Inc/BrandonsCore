@@ -1,14 +1,12 @@
 package com.brandon3055.brandonscore.client.hud;
 
+import codechicken.lib.gui.modular.lib.GuiRender;
 import com.brandon3055.brandonscore.api.hud.AbstractHudElement;
 import com.brandon3055.brandonscore.api.hud.IHudBlock;
 import com.brandon3055.brandonscore.api.hud.IHudDisplay;
 import com.brandon3055.brandonscore.api.hud.IHudItem;
 import com.brandon3055.brandonscore.api.math.Vector2;
-import com.brandon3055.brandonscore.api.render.GuiHelper;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
@@ -56,15 +54,15 @@ public class HudDataElement extends AbstractHudElement {
             HitResult traceResult = Minecraft.getInstance().player.pick(5, 0, false);
             if (traceResult instanceof BlockHitResult && traceResult.getType() != HitResult.Type.MISS) {
                 BlockPos pos = ((BlockHitResult) traceResult).getBlockPos();
-                BlockState state = player.level.getBlockState(pos);
-                BlockEntity tile = player.level.getBlockEntity(pos);
+                BlockState state = player.level().getBlockState(pos);
+                BlockEntity tile = player.level().getBlockEntity(pos);
                 if (state.getBlock() instanceof IHudBlock) {
                     activeHud = (IHudBlock) state.getBlock();
                 } else if (tile instanceof IHudBlock) {
                     activeHud = (IHudBlock) tile;
                 }
-                if (activeHud != null && ((IHudBlock) activeHud).shouldDisplayHudText(player.level, pos, player)) {
-                    ((IHudBlock) activeHud).generateHudText(player.level, pos, player, displayList);
+                if (activeHud != null && ((IHudBlock) activeHud).shouldDisplayHudText(player.level(), pos, player)) {
+                    ((IHudBlock) activeHud).generateHudText(player.level(), pos, player, displayList);
                     if (displayList.isEmpty()) {
                         activeHud = null;
                     }
@@ -100,17 +98,17 @@ public class HudDataElement extends AbstractHudElement {
     }
 
     @Override
-    public void render(PoseStack mStack, float partialTicks, boolean configuring) {
+    public void render(GuiRender render, float partialTicks, boolean configuring) {
         if (!enabled || (activeHud == null && !configuring)) return;
         MultiBufferSource.BufferSource getter = RenderUtils.getGuiBuffers();
-        mStack.translate(xPos(), yPos(), 0);
+        render.pose().translate(xPos(), yPos(), 0);
         if (activeHud == null) {
-            GuiHelper.drawHoverRect(getter, mStack, 0, 0, width(), height());
+            render.toolTipBackground(0, 0, width(), height());
             getter.endBatch();
             return;
         }
-        activeHud.renderHudBackground(getter, mStack, width(), height(), displayList);
+        activeHud.renderHudBackground(render, width(), height(), displayList);
         getter.endBatch();
-        activeHud.renderHudContent(Minecraft.getInstance().font, mStack, width(), height(), displayList);
+        activeHud.renderHudContent(render, width(), height(), displayList);
     }
 }

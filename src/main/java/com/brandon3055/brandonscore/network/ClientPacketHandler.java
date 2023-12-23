@@ -9,7 +9,6 @@ import com.brandon3055.brandonscore.handlers.BCEventHandler;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorHandler;
 import com.brandon3055.brandonscore.lib.datamanager.IDataManagerProvider;
 import com.brandon3055.brandonscore.multiblock.MultiBlockManager;
-import com.mojang.math.Vector3f;
 import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -22,8 +21,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.joml.Vector3f;
 
 import java.util.UUID;
 
@@ -93,7 +93,8 @@ public class ClientPacketHandler implements ICustomPacketHandler.IClientPacketHa
         if (mc.level == null) {
             return;
         }
-        EntityType<?> type = Registry.ENTITY_TYPE.byId(packet.readVarInt());
+
+        EntityType<?> type = packet.readRegistryId();//ForgeRegistries.ENTITY_TYPES.byId(packet.readVarInt());
         int entityID = packet.readInt();
         UUID uuid = packet.readUUID();
         double posX = packet.readDouble();

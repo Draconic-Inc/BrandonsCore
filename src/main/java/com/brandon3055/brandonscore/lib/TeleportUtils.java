@@ -24,7 +24,7 @@ import java.util.LinkedList;
 public class TeleportUtils {
 
     public static Entity teleportEntity(Entity entity, Entity destination) {
-        return teleportEntity(entity, destination.level.dimension(), destination.getX(), destination.getY(), destination.zOld, destination.getYRot(), destination.getXRot());
+        return teleportEntity(entity, destination.level().dimension(), destination.getX(), destination.getY(), destination.zOld, destination.getYRot(), destination.getXRot());
     }
 
     /**
@@ -37,12 +37,12 @@ public class TeleportUtils {
      * @return the entity. This may be a new instance so be sure to keep that in mind.
      */
     public static Entity teleportEntity(Entity entity, ResourceKey<Level> dimension, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
-        if (entity == null || entity.level.isClientSide) {
+        if (entity == null || entity.level().isClientSide) {
             return entity;
         }
 
         MinecraftServer server = entity.getServer();
-        ResourceKey<Level> sourceDim = entity.level.dimension();
+        ResourceKey<Level> sourceDim = entity.level().dimension();
 
         if (!entity.isVehicle() && !entity.isPassenger()) {
             return handleEntityTeleport(entity, server, sourceDim, dimension, xCoord, yCoord, zCoord, yaw, pitch);
@@ -81,7 +81,7 @@ public class TeleportUtils {
      * This is the base teleport method that figures out how to handle the teleport and makes it happen!
      */
     private static Entity handleEntityTeleport(Entity entity, MinecraftServer server, ResourceKey<Level> sourceDim, ResourceKey<Level> targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
-        if (entity == null || entity.level.isClientSide || targetDim == null) {
+        if (entity == null || entity.level().isClientSide || targetDim == null) {
             return entity;
         }
 
@@ -131,7 +131,7 @@ public class TeleportUtils {
             movedEntity.moveTo(xCoord, yCoord, zCoord, yaw, pitch);
             targetWorld.addDuringTeleport(movedEntity);
             entity.remove(Entity.RemovalReason.CHANGED_DIMENSION);
-            ((ServerLevel) entity.level).resetEmptyTime();
+            ((ServerLevel) entity.level()).resetEmptyTime();
             targetWorld.resetEmptyTime();
             return movedEntity;
         }
@@ -144,7 +144,7 @@ public class TeleportUtils {
      * This is the black magic responsible for teleporting players between dimensions!
      */
     private static Player teleportPlayerInterdimentional(ServerPlayer player, MinecraftServer server, ResourceKey<Level> targetDim, double xCoord, double yCoord, double zCoord, float yaw, float pitch) {
-        ServerLevel originWorld = player.getLevel();
+        ServerLevel originWorld = player.serverLevel();
         ServerLevel targetWorld = server.getLevel(targetDim);
         if (!player.isAlive() || targetWorld == null) {
             return player;

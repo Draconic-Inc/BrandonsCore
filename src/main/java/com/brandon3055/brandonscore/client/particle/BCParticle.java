@@ -1,6 +1,5 @@
 package com.brandon3055.brandonscore.client.particle;
 
-import com.brandon3055.brandonscore.lib.Vec3D;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -10,6 +9,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Created by brandon3055 on 2/5/2016.
@@ -22,11 +22,11 @@ public class BCParticle extends Particle {
     protected float airResistance = 0;
     protected float baseScale = 1;
 
-    public BCParticle(ClientLevel worldIn, Vec3D pos) {
+    public BCParticle(ClientLevel worldIn, Vec3 pos) {
         super(worldIn, pos.x, pos.y, pos.z);
     }
 
-    public BCParticle(ClientLevel worldIn, Vec3D pos, Vec3D speed) {
+    public BCParticle(ClientLevel worldIn, Vec3 pos, Vec3 speed) {
         super(worldIn, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z);
     }
 
@@ -38,17 +38,17 @@ public class BCParticle extends Particle {
 //        return super.getFXLayer();
 //    }
 
-    public IGLFXHandler getFXHandler(){
+    public IGLFXHandler getFXHandler() {
         return DEFAULT_FX_HANDLER;
     }
 
     /**
      * This is to ensure particles are spawned using the correct methods because raw gl particles are handled very differently<br>
      * and attempting to render them with the default pipeline will break things.<br><br>
-     *
+     * <p>
      * Raw gl particles are pretty much what they sound like. The renderer wont bind a texture or start a draw call before rendering them.<br>
      * So you can do whatever you like!<br><br>
-     *
+     * <p>
      * Raw gl particles are rendered with blend enabled. depthMask disabled and GL_GREATER set to 0.<br>
      * Be sure to leave the render call in this state when you are done!
      *
@@ -89,15 +89,16 @@ public class BCParticle extends Particle {
         return this;
     }
 
-    public Vec3D getPos() {
-        return new Vec3D(x, y, z);
+    @Override
+    public Vec3 getPos() {
+        return new Vec3(x, y, z);
     }
 
     public Level getWorld() {
         return level;
     }
 
-    public BCParticle setPosition(Vec3D pos) {
+    public BCParticle setPosition(Vec3 pos) {
         setPos(pos.x, pos.y, pos.z);
         return this;
     }
@@ -108,8 +109,6 @@ public class BCParticle extends Particle {
         this.setBoundingBox(this.getBoundingBox().move(0.0D, 0.0D, z));
         this.setLocationFromBoundingbox();
     }
-
-
 
     @Override
     public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks) {

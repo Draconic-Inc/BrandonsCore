@@ -1,10 +1,9 @@
 package com.brandon3055.brandonscore.api.hud;
 
-import com.brandon3055.brandonscore.api.render.GuiHelper;
+import codechicken.lib.gui.modular.lib.GuiRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -34,16 +33,16 @@ public interface IHudDisplay {
     }
 
     @OnlyIn(Dist.CLIENT)
-    default void renderHudBackground(MultiBufferSource getter, PoseStack mStack, double width, double height, List<Component> displayList) {
-        GuiHelper.drawHoverRect(getter, mStack, 0, 0, width, height);
+    default void renderHudBackground(GuiRender render, double width, double height, List<Component> displayList) {
+        render.toolTipBackground(0, 0, width, height);
     }
 
     @OnlyIn(Dist.CLIENT)
-    default void renderHudContent(Font font, PoseStack mStack, double width, double height, List<Component> displayList) {
-        mStack.translate(4, 4, 0);
+    default void renderHudContent(GuiRender render, double width, double height, List<Component> displayList) {
+        render.pose().translate(4, 4, 0);
         for (Component text : displayList) {
-            font.drawShadow(mStack, text, 0, 0, 0xFFFFFF);
-            mStack.translate(0, 10, 0);
+            render.drawString(text, 0, 0, 0xFFFFFF, true);
+            render.pose().translate(0, 10, 0);
         }
     }
 }

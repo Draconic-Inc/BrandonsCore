@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
@@ -158,7 +159,7 @@ public class MultiBlockDefinition {
             JsonObject keyVal = entry.getValue().getAsJsonObject();
             if (keyVal.has("tag")) {
                 ResourceLocation resourcelocation = new ResourceLocation(keyVal.get("tag").getAsString());
-                TagKey<Block> tagkey = TagKey.create(Registry.BLOCK_REGISTRY, resourcelocation);
+                TagKey<Block> tagkey = TagKey.create(Registries.BLOCK, resourcelocation);
                 keyMap.put(key, new TagPart(tagkey));
             } else if (keyVal.has("block")) {
                 ResourceLocation resourcelocation = new ResourceLocation(keyVal.get("block").getAsString());

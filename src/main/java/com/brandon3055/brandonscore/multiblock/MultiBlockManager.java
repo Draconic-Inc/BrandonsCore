@@ -11,7 +11,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.math.Quaternion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -29,10 +28,13 @@ import net.minecraftforge.fml.DistExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static codechicken.lib.math.MathHelper.torad;
 
 /**
  * Created by brandon3055 on 26/06/2022
@@ -121,8 +123,7 @@ public class MultiBlockManager extends SimpleJsonResourceReloadListener {
         MultiBlockDefinition definition = getDefinition(id);
 
         if (definition != null) {
-            for (Map.Entry<BlockPos, MultiBlockPart> entry : definition.getBlocks(new Rotation(new Quat(new Quaternion((float) rotation.x, (float) rotation.y, (float) rotation.z, true)))).entrySet()) {
-//            for (Map.Entry<BlockPos, MultiBlockPart> entry : definition.getBlocksWithRotation(new Rotation(1, new Vector3(rotation))).entrySet()) {
+            for (Map.Entry<BlockPos, MultiBlockPart> entry : definition.getBlocks(new Rotation(new Quat(new Quaternionf().rotationXYZ((float) rotation.x * (float) torad, (float) rotation.y * (float) torad, (float) rotation.z * (float) torad)))).entrySet()) {
                 BlockPos offset = entry.getKey();
                 List<Block> blocks = Lists.newArrayList(entry.getValue().validBlocks());
                 if (!blocks.isEmpty()) {

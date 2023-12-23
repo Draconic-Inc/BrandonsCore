@@ -58,7 +58,7 @@ public class EquippedItemModelLayer<T extends LivingEntity, M extends HumanoidMo
 
     private void renderItemModel(PoseStack poseStack, MultiBufferSource source, T entity, ItemStack stack, @Nullable EquipmentSlot slot, int packedlight, float partialTicks) {
         if (stack.getItem() instanceof EquippedModelItem modelItem) {
-            if (slot != null && stack.getItem() instanceof ArmorItem armorItem && armorItem.getSlot() != slot) {
+            if (slot != null && stack.getItem() instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() != slot) {
                 return;
             }
 

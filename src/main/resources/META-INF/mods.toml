@@ -19,7 +19,7 @@ license="CoFH \"Don't Be a Jerk\" License"
 [[dependencies.brandonscore]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2]"
+    versionRange="[1.20.1]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.brandonscore]]

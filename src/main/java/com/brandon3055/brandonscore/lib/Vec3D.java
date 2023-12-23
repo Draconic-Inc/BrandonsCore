@@ -137,7 +137,7 @@ public class Vec3D {
     }
 
     public BlockPos getPos() {
-        return new BlockPos(x, y, z);
+        return BlockPos.containing(x, y, z);
     }
 
     public Vector3 toVector3() { return new Vector3(x, y, z); }

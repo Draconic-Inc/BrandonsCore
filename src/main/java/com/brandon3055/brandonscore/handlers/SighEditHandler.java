@@ -37,8 +37,8 @@ public class SighEditHandler {
 
         BlockEntity entity = level.getBlockEntity(event.getHitVec().getBlockPos());
         if (entity instanceof SignBlockEntity signEntity) {
-            signEntity.setEditable(true);
-            player.openTextEdit(signEntity);
+//            signEntity.setEditable(true);
+            player.openTextEdit(signEntity, true); //TODO Side
             event.setCanceled(true);
         }
     }

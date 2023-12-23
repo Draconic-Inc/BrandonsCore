@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.client.hud;
 
+import codechicken.lib.gui.modular.lib.GuiRender;
 import com.brandon3055.brandonscore.api.hud.AbstractHudElement;
 import com.brandon3055.brandonscore.api.math.Vector2;
 import com.brandon3055.brandonscore.client.gui.HudConfigGui;
@@ -50,27 +51,27 @@ public class HudManager {
 
     public static void onDrawOverlayPre(RenderGuiEvent.Pre event) {
         if (event.isCanceled()) return;
-        PoseStack stack = event.getPoseStack();
+        GuiRender render = GuiRender.convert(event.getGuiGraphics());
         boolean configuring = Minecraft.getInstance().screen instanceof HudConfigGui.Screen;
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F); //Fixes broken hud when underwater
         for (AbstractHudElement element : hudElements.values()) {
             if (element.shouldRender(true)) {
-                stack.pushPose();
-                element.render(stack, event.getPartialTick(), configuring);
-                stack.popPose();
+                render.pose().pushPose();
+                element.render(render, event.getPartialTick(), configuring);
+                render.pose().popPose();
             }
         }
     }
 
     public static void onDrawOverlayPost(RenderGuiEvent.Post event) {
         if (event.isCanceled()) return;
-        PoseStack stack = event.getPoseStack();
+        GuiRender render = GuiRender.convert(event.getGuiGraphics());
         boolean configuring = Minecraft.getInstance().screen instanceof HudConfigGui.Screen;
         for (AbstractHudElement element : hudElements.values()) {
             if (element.shouldRender(false)) {
-                stack.pushPose();
-                element.render(stack, event.getPartialTick(), configuring);
-                stack.popPose();
+                render.pose().pushPose();
+                element.render(render, event.getPartialTick(), configuring);
+                render.pose().popPose();
             }
         }
     }
