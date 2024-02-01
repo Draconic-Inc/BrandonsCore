@@ -108,7 +108,7 @@ public class WorldEntityHandler {
         ID_ENTITY_MAP.entrySet().removeIf(entry -> {
             WorldEntity entity = entry.getValue();
             if (entity.isRemoved()) {
-                ResourceKey<Level> removeKey = entity.world.dimension();
+                ResourceKey<Level> removeKey = entity.level.dimension();
                 if (WORLD_ENTITY_MAP.containsKey(removeKey)) {
                     WORLD_ENTITY_MAP.get(removeKey).remove(entity);
                 }
@@ -150,8 +150,8 @@ public class WorldEntityHandler {
                     if (entity instanceof ITickableWorldEntity && !worldTickingEntities.contains(entity)) {
                         worldTickingEntities.add((ITickableWorldEntity) entity);
                     }
-                    if (entity.getWorld() != world) {
-                        entity.setWorld(world);
+                    if (entity.getLevel() != world) {
+                        entity.setLevel(world);
                     }
                     entity.onLoad();
                 }
@@ -164,7 +164,7 @@ public class WorldEntityHandler {
         if (!(world instanceof ServerLevel)) return;
         ResourceKey<Level> key = world.dimension();
         ADDED_WORLD_ENTITIES.computeIfAbsent(key, e -> new ArrayList<>()).add(entity);
-        entity.setWorld(world);
+        entity.setLevel(world);
     }
 
     @Nullable
@@ -187,7 +187,7 @@ public class WorldEntityHandler {
     }
 
     protected static void onEntityRemove(WorldEntity entity) {
-        ResourceKey<Level> key = entity.getWorld().dimension();
+        ResourceKey<Level> key = entity.getLevel().dimension();
         if (ADDED_WORLD_ENTITIES.containsKey(key)) {
             ADDED_WORLD_ENTITIES.get(key).remove(entity);
         }

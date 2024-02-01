@@ -15,7 +15,7 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 /**
  * Created by brandon3055 on 3/09/2016.
  */
-public class BCGuiSprites {
+public class BCGuiTextures {
 
     private static final ModAtlasHolder ATLAS_HOLDER = new ModAtlasHolder(MODID, "textures/atlas/gui.png", "gui");
     private static final Map<String, Material> MATERIAL_CACHE = new HashMap<>();

@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Created by brandon3055 on 26/06/2022
@@ -101,6 +102,10 @@ public abstract class MultiBlockProvider implements DataProvider {
 
         public Builder key(char key, Block block) {
             return key(key, "block", ForgeRegistries.BLOCKS.getKey(block).toString());
+        }
+
+        public Builder key(char key, Supplier<? extends Block> block) {
+            return key(key, "block", ForgeRegistries.BLOCKS.getKey(block.get()).toString());
         }
 
         /**

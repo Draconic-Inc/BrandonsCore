@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  * When implementing this capability cap should be provided as both {@link net.minecraftforge.energy.CapabilityEnergy#ENERGY} and {@link CapabilityOP#OP}
  * So any mod that implements FE will find the FE cap and interact with it normally. However any mod that implements OP will fist check for the OP cap before falling back to RF.
  */
-public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable, IOPStorageModifiable {
+public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable, IOPStorage {
 
     protected long energy;
     protected long capacity;

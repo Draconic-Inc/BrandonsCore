@@ -9,7 +9,6 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -19,19 +18,19 @@ public abstract class WorldEntity {
     private WorldEntityType<?> worldEntityType;
     protected final RandomSource rand = RandomSource.create();
     private UUID uniqueID = Mth.createInsecureUUID(this.rand);
-    protected Level world;
+    protected Level level;
     protected boolean removed;
 
     protected WorldEntity(WorldEntityType<?> worldEntityType) {
         this.worldEntityType = worldEntityType;
     }
 
-    public void setWorld(Level world) {
-        this.world = world;
+    public void setLevel(Level level) {
+        this.level = level;
     }
 
-    public Level getWorld() {
-        return world;
+    public Level getLevel() {
+        return level;
     }
 
     public WorldEntityType<?> getType() {

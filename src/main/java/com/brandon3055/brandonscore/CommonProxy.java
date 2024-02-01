@@ -13,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by Brandon on 14/5/2015.
  */
@@ -44,6 +46,10 @@ public class CommonProxy {
 
     public void sendIndexedMessage(Player player, Component message, MessageSignature signature) {
         BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, signature);
+    }
+
+    public void sendIndexedMessage(Player player, Component message, int index) {
+        BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, new MessageSignature(ByteBuffer.allocate(4).putInt(index + 0xE3055000).array()));
     }
 
     public void setClipboardString(String text) {}

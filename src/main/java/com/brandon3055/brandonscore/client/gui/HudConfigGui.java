@@ -4,13 +4,10 @@ import codechicken.lib.gui.modular.ModularGui;
 import codechicken.lib.gui.modular.ModularGuiScreen;
 import codechicken.lib.gui.modular.elements.GuiButton;
 import codechicken.lib.gui.modular.elements.GuiElement;
-import codechicken.lib.gui.modular.lib.BackgroundRender;
-import codechicken.lib.gui.modular.lib.Constraints;
-import codechicken.lib.gui.modular.lib.GuiProvider;
-import codechicken.lib.gui.modular.lib.GuiRender;
+import codechicken.lib.gui.modular.lib.*;
 import codechicken.lib.gui.modular.lib.geometry.GuiParent;
 import com.brandon3055.brandonscore.api.hud.AbstractHudElement;
-import com.brandon3055.brandonscore.client.BCGuiSprites;
+import com.brandon3055.brandonscore.client.BCGuiTextures;
 import com.brandon3055.brandonscore.client.hud.HudData;
 import com.brandon3055.brandonscore.client.hud.HudManager;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -69,7 +66,7 @@ public class HudConfigGui implements GuiProvider {
             Constraints.size(this, element::width, element::height);
             Constraints.pos(this, element::xPos, element::yPos);
 
-            settings = toolkit.createIconButton(this, 10, BCGuiSprites.getter("dark/gear"));
+            settings = toolkit.createIconButton(this, 10, BCGuiTextures.getter("dark/gear"));
             settings.setTooltip(toolkit.translate("settings"));
             Constraints.placeInside(settings, this, TOP_RIGHT, -2, 2);
 
@@ -81,7 +78,7 @@ public class HudConfigGui implements GuiProvider {
             String infoKey = String.format("hud.%s.%s.info", HudManager.HUD_REGISTRY.getKey(element).getNamespace(), HudManager.HUD_REGISTRY.getKey(element).getPath());
             String translatedInfo = I18n.get(infoKey);
             if (!infoKey.equals(translatedInfo)) {
-                GuiButton infoButton = toolkit.createIconButton(this, 10, BCGuiSprites.getter("dark/info_icon"));
+                GuiButton infoButton = toolkit.createIconButton(this, 10, BCGuiTextures.getter("dark/info_icon"));
                 Constraints.placeInside(infoButton, this, TOP_LEFT, 2, 2);
                 infoButton.setTooltip(Component.literal(translatedInfo));
                 infoButton.setTooltipDelay(0);
@@ -89,7 +86,7 @@ public class HudConfigGui implements GuiProvider {
         }
 
         @Override
-        public void renderBehind(GuiRender render, double mouseX, double mouseY, float partialTicks) {
+        public void renderBackground(GuiRender render, double mouseX, double mouseY, float partialTicks) {
             int rgb = Color.HSBtoRGB((tick + partialTicks) / 200F, 1F, 1F);
             drawBackground(render, xMin(), yMin(), xSize(), ySize(), partialTicks, rgb);
 
@@ -110,7 +107,7 @@ public class HudConfigGui implements GuiProvider {
             tick++;
 
             if (isMouseOver() && getChildren().stream().noneMatch(GuiElement::isMouseOver)) {
-                getModularGui().setCursor(GuiToolkit.CURSOR_DRAG);
+                getModularGui().setCursor(CursorHelper.DRAG);
             }
 
             super.tick(mouseX, mouseY);

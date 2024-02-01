@@ -6,16 +6,12 @@ import codechicken.lib.gui.modular.elements.GuiElement;
 import codechicken.lib.gui.modular.elements.GuiEnergyBar;
 import codechicken.lib.gui.modular.elements.GuiText;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
-import com.brandon3055.brandonscore.client.BCGuiSprites;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit;
 import com.brandon3055.brandonscore.inventory.SlotMover;
 import com.brandon3055.brandonscore.lib.datamanager.ManagedBool;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;

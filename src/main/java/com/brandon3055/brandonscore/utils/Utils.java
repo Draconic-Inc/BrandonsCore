@@ -422,17 +422,17 @@ public class Utils {
         return stringbuilder.toString();
     }
 
-    @Deprecated //Use world.isLoaded or world this.getChunkSource().hasChunk
-    public static boolean isAreaLoaded(Level world, BlockPos pos, FullChunkStatus minimum) {
-        ChunkPos chunkPos = new ChunkPos(pos);
-        ChunkAccess ichunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
-        if (!(ichunk instanceof LevelChunk)) {
-            return false;
-        }
-
-        FullChunkStatus locationType = ((LevelChunk) ichunk).getFullStatus();
-        return locationType.isOrAfter(minimum);
-    }
+//    @Deprecated //Use world.isLoaded or world this.getChunkSource().hasChunk
+//    public static boolean isAreaLoaded(Level world, BlockPos pos, FullChunkStatus minimum) {
+//        ChunkPos chunkPos = new ChunkPos(pos);
+//        ChunkAccess ichunk = world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
+//        if (!(ichunk instanceof LevelChunk)) {
+//            return false;
+//        }
+//
+//        FullChunkStatus locationType = ((LevelChunk) ichunk).getFullStatus();
+//        return locationType.isOrAfter(minimum);
+//    }
 
     public static long safeAdd(long x, long y) {
         long r = x + y;
@@ -512,6 +512,31 @@ public class Utils {
             int z = j1 / height;
             callback.accept(cursor.set(xmin + x, ymin + y, zmin + z));
         }
+    }
+
+    public static boolean isInRect(double x, double y, double xSize, double ySize, double mouseX, double mouseY) {
+        return ((mouseX >= x && mouseX < x + xSize) && (mouseY >= y && mouseY < y + ySize));
+    }
+
+    public static double distToRect(double x, double y, double xSize, double ySize, double mouseX, double mouseY) {
+        if (isInRect(x, y, xSize, ySize, mouseX, mouseY)) {
+            return 0;
+        }
+
+        //Inside Height (Simply distance from Left or Right)
+        if (mouseY >= y && mouseY < y + ySize) {
+            return mouseX >= x + xSize ? mouseX - (x + xSize) : x - mouseX;
+        }
+
+        //Inside Width (Simply distance from Top or Bottom)
+        if (mouseX >= x && mouseX < x + xSize) {
+            return mouseY < y ? y - mouseY : mouseY - (y + ySize);
+        }
+
+        //Distance from corner
+        double cx = mouseX < x ? x : x + xSize;
+        double cy = mouseY < y ? y : y + ySize;
+        return Utils.getDistance(cx, cy, mouseX, mouseY);
     }
 }
 

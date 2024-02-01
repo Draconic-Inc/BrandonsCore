@@ -12,14 +12,17 @@ public class RenderUtils {
     /**
      * * @return The buffer source used for GUI rendering. You must ALWAYS call endBatch on this when you are done with it.
      */
+    @Deprecated
     public static MultiBufferSource.BufferSource getGuiBuffers() {
         return MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
     }
 
+    @Deprecated
     public static MultiBufferSource.BufferSource getBuffers() {
         return Minecraft.getInstance().renderBuffers().bufferSource();
     }
 
+    @Deprecated
     public static void endBatch(MultiBufferSource getter) {
         if (getter instanceof MultiBufferSource.BufferSource) {
             ((MultiBufferSource.BufferSource) getter).endBatch();

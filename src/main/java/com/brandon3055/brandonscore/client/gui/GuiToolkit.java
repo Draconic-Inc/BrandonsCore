@@ -6,13 +6,11 @@ import codechicken.lib.gui.modular.lib.Constraints;
 import codechicken.lib.gui.modular.lib.geometry.GuiParent;
 import codechicken.lib.gui.modular.sprite.Material;
 import com.brandon3055.brandonscore.BCConfig;
-import com.brandon3055.brandonscore.BrandonsCore;
-import com.brandon3055.brandonscore.client.BCGuiSprites;
+import com.brandon3055.brandonscore.client.BCGuiTextures;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,13 +29,6 @@ import static com.brandon3055.brandonscore.BCConfig.darkMode;
  * Created by brandon3055 on 5/7/19.
  */
 public class GuiToolkit {
-    public static final ResourceLocation CURSOR_DRAG = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/drag.png");
-    public static final ResourceLocation CURSOR_RESIZE_H = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_h.png");
-    public static final ResourceLocation CURSOR_RESIZE_V = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_v.png");
-    public static final ResourceLocation CURSOR_RESIZE_TRBL = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_diag_trbl.png");
-    public static final ResourceLocation CURSOR_RESIZE_TLBR = new ResourceLocation(BrandonsCore.MODID, "textures/gui/cursors/resize_diag_tlbr.png");
-    public static final ResourceLocation[] CURSORS = {CURSOR_DRAG, CURSOR_RESIZE_H, CURSOR_RESIZE_V, CURSOR_RESIZE_TRBL, CURSOR_RESIZE_TLBR};
-
     private static final String INTERNAL_TRANSLATION_PREFIX = "gui_tkt.brandonscore.";
 
 //    private List<GuiElement<?>> jeiExclusions = new ArrayList<>();
@@ -102,7 +93,7 @@ public class GuiToolkit {
         Constraints.size(button, 12, 12);
         addHoverHighlight(button);
 
-        GuiTexture icon = new GuiTexture(button, () -> BCGuiSprites.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
+        GuiTexture icon = new GuiTexture(button, () -> BCGuiTextures.get("redstone/" + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
         Constraints.bind(icon, button);
 
         button.setTooltipSingle(() -> translateInternal("rs_mode." + switchable.getRSMode().name().toLowerCase(Locale.ENGLISH)));
@@ -163,7 +154,7 @@ public class GuiToolkit {
     public GuiElement<?> floatingHeading(@NotNull GuiElement<?> parent, Component heading) {
         GuiManipulable titleMovable = new GuiManipulable(parent)
                 .addMoveHandle(13)
-                .setCursors(GuiToolkit.CURSORS);
+                .enableCursors(true);
         Constraints.size(titleMovable, () -> parent.font().width(heading) + 10D, () -> 13D);
         
         GuiElement<?> titleBackground = new GuiRectangle(titleMovable.getContentElement())
@@ -416,7 +407,7 @@ public class GuiToolkit {
 
     public GuiButton createBorderlessButton(@NotNull GuiParent<?> parent, @Nullable Component text) {
         GuiButton button = new GuiButton(parent);
-        GuiTexture texture = new GuiTexture(button, () -> BCGuiSprites.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
+        GuiTexture texture = new GuiTexture(button, () -> BCGuiTextures.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
         texture.dynamicTexture();
         GuiRectangle highlight = new GuiRectangle(button).border(() -> button.hoverTime() > 0 ? 0xFFFFFFFF : 0);
         Constraints.bind(texture, button);
@@ -493,7 +484,7 @@ public class GuiToolkit {
                     .setShadeTopLeft(() -> button.isPressed() ? Palette.Ctrl.accentDark(true) : Palette.Ctrl.accentLight(button.isMouseOver()))
                     .setShadeBottomRight(() -> button.isPressed() ? Palette.Ctrl.accentLight(true) : Palette.Ctrl.accentDark(button.isMouseOver()));
 
-            GuiTexture disabledBG = new GuiTexture(button, BCGuiSprites.themedGetter("button_disabled"))
+            GuiTexture disabledBG = new GuiTexture(button, BCGuiTextures.themedGetter("button_disabled"))
                     .dynamicTexture();
 
             Constraints.bind(border, button);
@@ -560,7 +551,7 @@ public class GuiToolkit {
     }
 
     public GuiButton createThemedIconButton(@NotNull GuiParent<?> parent, int size, String iconString) {
-        return createIconButton(parent, size, BCGuiSprites.themedGetter(iconString));
+        return createIconButton(parent, size, BCGuiTextures.themedGetter(iconString));
     }
 
     public GuiButton createIconButton(@NotNull GuiParent<?> parent, int size, Supplier<Material> iconSupplier) {
@@ -568,7 +559,7 @@ public class GuiToolkit {
     }
 
     public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonSize, int iconSize, String iconString) {
-        return createIconButton(parent, buttonSize, iconSize, BCGuiSprites.getter(iconString));
+        return createIconButton(parent, buttonSize, iconSize, BCGuiTextures.getter(iconString));
     }
 
     public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonSize, int iconSize, Supplier<Material> iconSupplier) {
@@ -586,7 +577,7 @@ public class GuiToolkit {
     }
 
     public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, String iconString) {
-        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCGuiSprites.getter(iconString));
+        return createIconButton(parent, buttonWidth, buttonHeight, iconWidth, iconHeight, BCGuiTextures.getter(iconString));
     }
 
     public GuiButton createIconButton(@NotNull GuiParent<?> parent, int buttonWidth, int buttonHeight, int iconWidth, int iconHeight, Supplier<Material> iconSupplier) {

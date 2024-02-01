@@ -8,7 +8,7 @@ import codechicken.lib.gui.modular.lib.Constraints;
 import codechicken.lib.gui.modular.lib.GuiProvider;
 import codechicken.lib.gui.modular.lib.geometry.GeoParam;
 import codechicken.lib.math.MathHelper;
-import com.brandon3055.brandonscore.client.BCGuiSprites;
+import com.brandon3055.brandonscore.client.BCGuiTextures;
 import com.brandon3055.brandonscore.client.gui.GuiToolkit.Palette;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig;
 import com.brandon3055.brandonscore.handlers.contributor.ContributorConfig.WingBehavior;
@@ -83,7 +83,7 @@ public class ContributorConfigGui implements GuiProvider {
 
         container = new GuiManipulable(root)
                 .addMoveHandle(100)
-                .setCursors(GuiToolkit.CURSORS);
+                .enableCursors(true);
         Constraints.size(container, 100, 100);
         Constraints.center(container, root);
         gui.onResize(() -> container.resetBounds());
@@ -283,7 +283,7 @@ public class ContributorConfigGui implements GuiProvider {
     }
 
     private GuiButton colourPickerButton(GuiElement<?> parent, ColourState state, int index, Supplier<Integer> defCol) {
-        GuiButton button = toolkit.createIconButton(parent, 14, BCGuiSprites.getter("color_picker"));
+        GuiButton button = toolkit.createIconButton(parent, 14, BCGuiTextures.getter("color_picker"));
         button.onPress(() -> {
             GuiColourPicker picker = pickers.remove(index);
             if (picker != null && !picker.isRemoved()) {
@@ -293,7 +293,7 @@ public class ContributorConfigGui implements GuiProvider {
 
             pickers.put(index, (picker = GuiColourPicker.create(parent, state, true)));
             picker.addMoveHandle((int) picker.ySize());
-            picker.setCursors(GuiToolkit.CURSORS);
+            picker.enableCursors(true);
 
             if (index < 2) {
                 Constraints.placeInside(picker, parent, TOP_LEFT, 4 + ((picker.xSize() + 4) * index), 4);
@@ -305,7 +305,7 @@ public class ContributorConfigGui implements GuiProvider {
     }
 
     private GuiButton colourRGBButton(GuiElement<?> parent, Supplier<Boolean> getter, Consumer<Boolean> setter) {
-        return toolkit.createIconButton(parent, 14, BCGuiSprites.getter("rgb_checker"))
+        return toolkit.createIconButton(parent, 14, BCGuiTextures.getter("rgb_checker"))
                 .setToggleMode(getter)
                 .setTooltip(Component.literal("Enable rainbow RGB mode."),
                         Component.literal("Use the colour picker to configure,"),
