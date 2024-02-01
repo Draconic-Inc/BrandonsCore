@@ -42,7 +42,7 @@ if (System.getenv("KEY_STORE")) {
 config.mod_version = "${config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "9999")
 version = "${config.mc_version}-${config.mod_version}"
 println "Starting build of ${archivesBaseName}, Version: ${config.mod_version}"
-println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}"
+println "Using Neoforged: ${config.forge_version}, for Minecraft: ${config.mc_version}"
 
 minecraft {
     mappings channel: 'official', version: config.mc_version
@@ -83,9 +83,6 @@ processResources {
     }
 }
 
-
-
-
 configurations {
     shadow
     implementation.extendsFrom shadow
@@ -96,7 +93,7 @@ configurations {
 repositories {
     mavenLocal()
     maven { url = "https://maven.covers1624.net/" }
-    maven { url = "https://dvs1.progwml6.com/files/maven" }
+    maven { url = "https://maven.blamejared.com/" }
 }
 
 dependencies {
