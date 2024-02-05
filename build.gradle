@@ -42,7 +42,7 @@ if (System.getenv("KEY_STORE")) {
 config.mod_version = "${config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "9999")
 version = "${config.mc_version}-${config.mod_version}"
 println "Starting build of ${archivesBaseName}, Version: ${config.mod_version}"
-println "Using Neoforged: ${config.forge_version}, for Minecraft: ${config.mc_version}"
+println "Using Neoforged: ${config.neo_version}, for Minecraft: ${config.mc_version}"
 
 minecraft {
     mappings channel: 'official', version: config.mc_version
@@ -76,9 +76,9 @@ processResources {
     filesMatching('META-INF/mods.toml') {
         expand 'file': ['jarVersion': config.mod_version],
                 'mc_version': config.mc_version,
-                'forge_version': config.forge_version,
+                'neo_version': config.neo_version,
                 'pi_version': config.pi_version,
-                'lang_version': config.forge_version.split('\\.')[0],
+                'lang_version': config.neo_version.split('\\.')[0],
                 'ccl_version': "[${config.ccl_version.replace(".+", "")},${config.ccl_version_max})"
     }
 }
@@ -97,7 +97,7 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.neoforged:forge:${config.mc_version}-${config.forge_version}"
+    minecraft "net.neoforged:forge:${config.mc_version}-${config.neo_version}"
 
 
 //     implementation fg.deobf("com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:universal")

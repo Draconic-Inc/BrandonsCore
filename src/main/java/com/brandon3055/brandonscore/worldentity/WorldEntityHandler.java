@@ -30,7 +30,7 @@ import static com.brandon3055.brandonscore.BrandonsCore.MODID;
 public class WorldEntityHandler {
     private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
-    public static final ResourceKey<Registry<WorldEntity>> ENTITY_TYPE = ResourceKey.createRegistryKey(new ResourceLocation(MODID, "world_entity"));
+    public static final ResourceKey<Registry<WorldEntityType<?>>> ENTITY_TYPE = ResourceKey.createRegistryKey(new ResourceLocation(MODID, "world_entity"));
     public static IForgeRegistry<WorldEntityType<?>> REGISTRY;
     private static final Map<UUID, WorldEntity> ID_ENTITY_MAP = new HashMap<>();
     private static final Map<ResourceKey<Level>, List<WorldEntity>> WORLD_ENTITY_MAP = new HashMap<>();

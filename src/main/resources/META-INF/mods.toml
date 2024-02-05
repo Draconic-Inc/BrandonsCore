@@ -13,7 +13,7 @@ license="CoFH \"Don't Be a Jerk\" License"
 [[dependencies.brandonscore]]
     modId="forge"
     mandatory=true
-    versionRange="[${forge_version},)"
+    versionRange="[${neo_version},)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.brandonscore]]
