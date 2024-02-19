@@ -43,4 +43,9 @@ public class EntityBlockBCore extends BlockBCore implements EntityBlock {
         }
         return null;
     }
+
+    @Deprecated //Probably dont need this?
+    protected boolean hasBlockEntity() {
+        return this instanceof EntityBlockBCore;
+    }
 }

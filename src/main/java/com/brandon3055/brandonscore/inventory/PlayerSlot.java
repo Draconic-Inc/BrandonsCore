@@ -1,5 +1,6 @@
 package com.brandon3055.brandonscore.inventory;
 
+import codechicken.lib.data.MCDataInput;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.world.InteractionHand;
@@ -46,6 +47,12 @@ public class PlayerSlot {
     }
 
     public static PlayerSlot fromBuff(ByteBuf buf) {
+        EnumInvCategory category = EnumInvCategory.fromIndex(buf.readByte());
+        int slot = buf.readByte();
+        return new PlayerSlot(slot, category);
+    }
+
+    public static PlayerSlot fromBuff(MCDataInput buf) {
         EnumInvCategory category = EnumInvCategory.fromIndex(buf.readByte());
         int slot = buf.readByte();
         return new PlayerSlot(slot, category);

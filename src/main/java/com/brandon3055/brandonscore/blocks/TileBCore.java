@@ -43,6 +43,8 @@ import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.items.IItemHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -583,7 +585,6 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
         return level.getBestNeighborSignal(getBlockPos());
     }
 
-
     @Override
     public Component getName() {
         if (hasCustomName()) {
@@ -626,7 +627,7 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
      * playerAccessTracking must be enabled in this tile's constructor in order for this to work.
      */
     public Set<Player> getAccessingPlayers() {
-        accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCore) || ((ContainerBCTile) e.containerMenu).tile != this); //Clean up set
+        accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCTile<?> container) || container.tile != this); //Clean up set
         return accessingPlayers;
     }
 
@@ -636,7 +637,7 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
 
     public void onPlayerCloseContainer(Player player) {
         accessingPlayers.remove(player);
-        accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCore) || ((ContainerBCTile) e.containerMenu).tile != this); //Clean up set
+        accessingPlayers.removeIf(e -> !(e.containerMenu instanceof ContainerBCTile<?> container) || container.tile != this); //Clean up set
     }
 
     public int posSeed() {

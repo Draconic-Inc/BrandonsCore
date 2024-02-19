@@ -27,9 +27,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin implements EntityAccessor{
 
-    @Shadow public abstract boolean isFallFlying();
+//    @Shadow public abstract boolean isFallFlying();
 
-    @Shadow protected int fallFlyTicks;
+//    @Shadow protected int fallFlyTicks;
 
     private LivingEntity getThis() {
         return (LivingEntity) (Object) this;
@@ -47,13 +47,13 @@ public abstract class LivingEntityMixin implements EntityAccessor{
             cancellable = true
     )
     private void updateFallFlying(CallbackInfo ci, boolean flag, ItemStack itemstack) {
-        if (itemstack.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(itemstack, getThis()) && item.elytraFlightTickBC(itemstack, getThis(), fallFlyTicks)) {
+        if (itemstack.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(itemstack, getThis()) && item.elytraFlightTickBC(itemstack, getThis(), getThis().getFallFlyingTicks())) {
             ci.cancel();
         }
 
         if (BrandonsCore.equipmentManager != null) {
             ItemStack stack = BrandonsCore.equipmentManager.findMatchingItem(e -> e.getItem() instanceof ElytraEnabledItem item && item.canElytraFlyBC(e, getThis()), getThis());
-            if (stack.getItem() instanceof ElytraEnabledItem item && item.elytraFlightTickBC(stack, getThis(), fallFlyTicks)) {
+            if (stack.getItem() instanceof ElytraEnabledItem item && item.elytraFlightTickBC(stack, getThis(), getThis().getFallFlyingTicks())) {
                 ci.cancel();
             }
         }

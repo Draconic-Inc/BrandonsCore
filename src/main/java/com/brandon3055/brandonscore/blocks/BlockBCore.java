@@ -15,10 +15,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -49,6 +46,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     protected boolean canProvidePower = false;
     protected boolean isMobResistant = false;
+    protected boolean isExplosionResistant = false;
     private boolean blockSpawns = false;
     private boolean isLightTransparent = false;
 
@@ -66,9 +64,9 @@ public class BlockBCore extends Block implements IBCoreBlock {
         return this;
     }
 
-    @Deprecated //TODO move block entity specific code to EntityBlockBCore
-    protected boolean hasBlockEntity() {
-        return this instanceof EntityBlockBCore;
+    public BlockBCore setExplosionResistant() {
+        isExplosionResistant = true;
+        return this;
     }
 
     @Override
@@ -111,7 +109,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = world.getBlockEntity(pos);
             return tile instanceof IRedstoneEmitter;
         }
@@ -126,7 +124,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public boolean shouldCheckWeakPower(BlockState state, SignalGetter world, BlockPos pos, Direction side) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = world.getBlockEntity(pos);
             return tile instanceof IChangeListener;
         }
@@ -136,7 +134,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public int getSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = blockAccess.getBlockEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
                 return ((IRedstoneEmitter) tile).getWeakPower(blockState, side);
@@ -147,7 +145,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public int getDirectSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = blockAccess.getBlockEntity(pos);
             if (tile instanceof IRedstoneEmitter) {
                 return ((IRedstoneEmitter) tile).getStrongPower(blockState, side);
@@ -158,7 +156,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = world.getBlockEntity(pos);
             if (tile instanceof IChangeListener) {
                 ((IChangeListener) tile).onNeighborChange(fromPos);
@@ -169,7 +167,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = world.getBlockEntity(pos);
             if (tile instanceof IInteractTile) {
                 return ((IInteractTile) tile).onBlockUse(state, player, hand, hit);
@@ -181,7 +179,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public void attack(BlockState state, Level world, BlockPos pos, Player player) {
-        if (hasBlockEntity()) {
+        if (this instanceof EntityBlockBCore) {
             BlockEntity tile = world.getBlockEntity(pos);
             if (tile instanceof IInteractTile) {
                 ((IInteractTile) tile).onBlockAttack(state, player);
@@ -247,17 +245,18 @@ public class BlockBCore extends Block implements IBCoreBlock {
 
     @Override
     public void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
-        if (!isMobResistant) {
-            super.onBlockExploded(state, world, pos, explosion);
+        if ((explosion.getIndirectSourceEntity() instanceof Mob && isMobResistant) || isExplosionResistant) {
+            return;
         }
+        super.onBlockExploded(state, world, pos, explosion);
     }
 
     @Override
-    public boolean dropFromExplosion(Explosion explosionIn) {
-        if (!isMobResistant) {
-            return super.dropFromExplosion(explosionIn);
+    public boolean dropFromExplosion(Explosion explosion) {
+        if ((explosion.getIndirectSourceEntity() instanceof Mob && isMobResistant) || isExplosionResistant) {
+            return false;
         }
-        return false;
+        return super.dropFromExplosion(explosion);
     }
 
     public static int getRedstonePower(LevelReader world, BlockPos pos, Direction facing) {
@@ -287,8 +286,7 @@ public class BlockBCore extends Block implements IBCoreBlock {
                         if (i >= 15) {
                             return i;
                         } else {
-                            i = Math.max(i, world.getDirectSignal(pos.east(), Direction.EAST));
-                            return i >= 15 ? i : i;
+                            return Math.max(i, world.getDirectSignal(pos.east(), Direction.EAST));
                         }
                     }
                 }

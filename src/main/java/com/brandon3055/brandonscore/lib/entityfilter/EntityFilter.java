@@ -262,21 +262,10 @@ public class EntityFilter extends FilterGroup {
         return super.test(entity) && fixedPass;
     }
     //endregion
-//    /**
-//     * This has no type because it is the main parent filter object not a filter node.
-//     */
-//    @Override
-//    public FilterType getType() {
 
-//        return null;
-
-//    }
-
-
-    public com.google.common.base.Predicate<Entity> predicate() {
+    public Predicate<Entity> predicate() {
         return filterPredicate;
     }
-
 
     @Override
     public EntityFilter getFilter() {

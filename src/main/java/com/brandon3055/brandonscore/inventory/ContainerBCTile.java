@@ -1,5 +1,7 @@
 package com.brandon3055.brandonscore.inventory;
 
+import codechicken.lib.data.MCDataInput;
+import codechicken.lib.inventory.container.modular.ModularGuiContainerMenu;
 import codechicken.lib.packet.PacketCustom;
 import com.brandon3055.brandonscore.blocks.TileBCore;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
@@ -11,12 +13,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.EmptyHandler;
 
 import javax.annotation.Nullable;
 
@@ -24,49 +24,31 @@ import javax.annotation.Nullable;
  * Created by brandon3055 on 28/3/2016.
  * Base class for all containers. Handles syncing on syncable objects inside an attached TileBCBase.
  */
-@Deprecated //TODO Figure out gui v3 impl
-public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
+public abstract class ContainerBCTile<T extends TileBCore> extends ModularGuiContainerMenu {
 
     /**
      * A reference to the attached tile. This may be null if the container is not attached to a tile
      */
     public T tile;
+    public Player player;
 
     public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory playerInv, FriendlyByteBuf extraData) {
-        super(type, windowId, playerInv, extraData);
-        this.tile = getClientTile(extraData);
+        super(type, windowId, playerInv);
+        this.player = playerInv.player;
+        this.tile = getClientTile(playerInv, extraData);
     }
-//
-//    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, FriendlyByteBuf extraData, LayoutFactory<T> factory) {
-//        super(type, windowId, player, extraData, factory);
-//        this.tile = getClientTile(extraData);
-//        this.buildSlotLayout();
-//    }
 
-    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile) {
-        super(type, windowId, player);
+    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory playerInv, T tile) {
+        super(type, windowId, playerInv);
+        this.player = playerInv.player;
         this.tile = tile;
-        this.tile.onPlayerOpenContainer(player.player);
-    }
-
-//    public ContainerBCTile(@Nullable MenuType<?> type, int windowId, Inventory player, T tile, LayoutFactory<T> factory) {
-//        super(type, windowId, player, factory);
-//        this.tile = tile;
-//        this.tile.onPlayerOpenContainer(player.player);
-//        this.buildSlotLayout();
-//    }
-
-    @Override
-    protected void buildSlotLayout() {
-        if (tile != null){
-//            this.slotLayout = factory.buildLayout(player, tile).retrieveSlotsForContainer(this::addSlot);
-        }
+        this.tile.onPlayerOpenContainer(playerInv.player);
     }
 
     @Override
-    public void removed(Player playerIn) {
-        super.removed(playerIn);
-        tile.onPlayerCloseContainer(playerIn);
+    public void removed(Player player) {
+        super.removed(player);
+        tile.onPlayerCloseContainer(player);
     }
 
     @Override
@@ -84,7 +66,7 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     }
 
     @Override
-    public boolean stillValid(Player playerIn) {
+    public boolean stillValid(Player player) {
         if (tile.getLevel().getBlockEntity(tile.getBlockPos()) != tile) {
             return false;
         } else {
@@ -92,46 +74,46 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
         }
     }
 
-    @Override
-    public ItemStack quickMoveStack(Player player, int i) {
-        int playerSlots = 36;
-//        if (slotLayout != null) {
-//            playerSlots = slotLayout.getPlayerSlotCount();
+//    @Override
+//    public ItemStack quickMoveStack(Player player, int i) {
+//        int playerSlots = 36;
+////        if (slotLayout != null) {
+////            playerSlots = slotLayout.getPlayerSlotCount();
+////        }
+//        LazyOptional<IItemHandler> optional = getItemHandler();
+//        if (optional.isPresent()) {
+//            IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
+//            Slot slot = getSlot(i);
+//
+//            if (slot != null && slot.hasItem()) {
+//                ItemStack stack = slot.getItem();
+//                ItemStack result = stack.copy();
+//
+//                //Transferring from tile to player
+//                if (i >= playerSlots) {
+//                    if (!moveItemStackTo(stack, 0, playerSlots, false)) {
+//                        return ItemStack.EMPTY; //Return if failed to merge
+//                    }
+//                } else {
+//                    //Transferring from player to tile
+//                    if (!moveItemStackTo(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
+//                        return ItemStack.EMPTY;  //Return if failed to merge
+//                    }
+//                }
+//
+//                if (stack.getCount() == 0) {
+//                    slot.set(ItemStack.EMPTY);
+//                } else {
+//                    slot.setChanged();
+//                }
+//
+//                slot.onTake(player, stack);
+//
+//                return result;
+//            }
 //        }
-        LazyOptional<IItemHandler> optional = getItemHandler();
-        if (optional.isPresent()) {
-            IItemHandler handler = optional.orElse(EmptyHandler.INSTANCE);
-            Slot slot = getSlot(i);
-
-            if (slot != null && slot.hasItem()) {
-                ItemStack stack = slot.getItem();
-                ItemStack result = stack.copy();
-
-                //Transferring from tile to player
-                if (i >= playerSlots) {
-                    if (!moveItemStackTo(stack, 0, playerSlots, false)) {
-                        return ItemStack.EMPTY; //Return if failed to merge
-                    }
-                } else {
-                    //Transferring from player to tile
-                    if (!moveItemStackTo(stack, playerSlots, playerSlots + handler.getSlots(), false)) {
-                        return ItemStack.EMPTY;  //Return if failed to merge
-                    }
-                }
-
-                if (stack.getCount() == 0) {
-                    slot.set(ItemStack.EMPTY);
-                } else {
-                    slot.setChanged();
-                }
-
-                slot.onTake(player, stack);
-
-                return result;
-            }
-        }
-        return ItemStack.EMPTY;
-    }
+//        return ItemStack.EMPTY;
+//    }
 
     //The following are some safety checks to handle conditions vanilla normally does not have to deal with.
 
@@ -146,16 +128,13 @@ public class ContainerBCTile<T extends TileBCore> extends ContainerBCore<T> {
     /**
      * @return the item handler for the tile entity.
      */
+    @Deprecated
     public LazyOptional<IItemHandler> getItemHandler() {
         return tile.getCapability(ForgeCapabilities.ITEM_HANDLER, null);
     }
 
-//    public ContainerSlotLayout getSlotLayout() {
-//        return slotLayout;
-//    }
-
-    protected static <T extends BlockEntity> T getClientTile(FriendlyByteBuf extraData) {
-        return (T) Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());
+    protected static <T extends BlockEntity> T getClientTile(Inventory playerInv, FriendlyByteBuf extraData) {
+        return (T) playerInv.player.level().getBlockEntity(extraData.readBlockPos());
     }
 
     public PacketCustom createServerBoundPacket(int packetType) {

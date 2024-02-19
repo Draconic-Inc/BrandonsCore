@@ -3,159 +3,161 @@ package com.brandon3055.brandonscore.lib.entityfilter;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Created by brandon3055 on 7/11/19.
  */
 public class FilterItem extends FilterBase {
+    protected boolean whitelistMode = true;
+    protected String tagString = "";
+    protected boolean tagMode = false;
+    protected ItemStack filterStack = ItemStack.EMPTY;
+    protected boolean fussyMatch = false;
+    protected boolean matchCount = false;
 
-    protected boolean whitelistItem = true;
-    protected String itemName = "";
-    protected int count = 0;
-    protected int damage = -1;
-    protected CompoundTag nbt = null;
     protected boolean filterBlocks = false;
     protected boolean filterItems = false;
+
     public boolean dataChanged = false;
+    private TagKey<Item> tagCache = null;
 
     public FilterItem(EntityFilter filter) {
         super(filter);
     }
 
-    public void setWhitelistItem(boolean whitelistItem) {
-        boolean prev = this.whitelistItem;
-        this.whitelistItem = whitelistItem;
-        getFilter().nodeModified(this);
-        this.whitelistItem = prev;
+    private void clearCache() {
+        tagCache = null;
     }
 
-    public boolean isWhitelistItem() {
-        return whitelistItem;
+    public boolean isWhitelistMode() {
+        return whitelistMode;
     }
 
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-        getFilter().nodeModified(this);
+    public String getTagString() {
+        return tagString;
     }
 
-    public String getItemName() {
-        return itemName;
+    public boolean isTagMode() {
+        return tagMode;
     }
 
-    public void setCount(int count) {
-        this.count = count;
-        getFilter().nodeModified(this);
+    public ItemStack getFilterStack() {
+        return filterStack;
     }
 
-    public int getCount() {
-        return count;
+    public boolean isFussyMatch() {
+        return fussyMatch;
     }
 
-    public void setDamage(int damage) {
-        this.damage = damage;
-        getFilter().nodeModified(this);
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public void setNbt(CompoundTag nbt) {
-        this.nbt = nbt;
-        if (nbt != null && nbt.isEmpty()) {
-            this.nbt = null;
-        }
-        getFilter().nodeModified(this);
-    }
-
-    public CompoundTag getNbt() {
-        return nbt;
+    public boolean isMatchCount() {
+        return matchCount;
     }
 
     public boolean isFilterBlocks() {
         return filterBlocks;
     }
 
+    public boolean isFilterItems() {
+        return filterItems;
+    }
+
+    public void setWhitelistMode(boolean whitelistMode) {
+        boolean prev = this.whitelistMode;
+        this.whitelistMode = whitelistMode;
+        getFilter().nodeModified(this);
+        this.whitelistMode = prev;
+    }
+
+    public void setTagString(String tagString) {
+        this.tagString = tagString;
+        clearCache();
+        getFilter().nodeModified(this);
+    }
+
+    public void setTagMode(boolean tagMode) {
+        this.tagMode = tagMode;
+        getFilter().nodeModified(this);
+    }
+
+    public void setFilterStack(ItemStack filterStack) {
+        this.filterStack = filterStack;
+        getFilter().nodeModified(this);
+    }
+
+    public void setFussyMatch(boolean fussyMatch) {
+        this.fussyMatch = fussyMatch;
+        getFilter().nodeModified(this);
+    }
+
+    public void setMatchCount(boolean matchCount) {
+        this.matchCount = matchCount;
+        getFilter().nodeModified(this);
+    }
+
+    public void cycleItemsBlocks() {
+        if (isFilterItems()) {
+            setFilterItemsBlocks(false, true);
+        } else if (isFilterBlocks()) {
+            setFilterItemsBlocks(false, false);
+        } else {
+            setFilterItemsBlocks(true, false);
+        }
+    }
+
     public void setFilterItemsBlocks(boolean filterItems, boolean filterBlocks) {
         boolean prev = this.filterItems;
         boolean prevBlocks = this.filterBlocks;
-
         this.filterItems = filterItems;
         this.filterBlocks = filterBlocks;
-
         getFilter().nodeModified(this);
         this.filterItems = prev;
         this.filterBlocks = prevBlocks;
     }
 
-    public boolean isFilterItems() {
-        return filterItems;
-    }
-
     @Override
     public boolean test(Entity entity) {
-        if (entity instanceof ItemEntity) {
-            ItemStack stack = ((ItemEntity) entity).getItem();
-            if (stack.isEmpty()) {
-                return !whitelistItem;
-            }
-
-            boolean match = true;
-
-            //Check name/oreDict
-            if (!itemName.isEmpty()) {
-                if (itemName.contains(":")) {
-                    String name = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
-                    match = name.equals(itemName);
-                }
-                else {
-//                    //TODO Support Tags
-//                    Collection<ResourceLocation> tags = ItemTags.getAllTags().getMatchingTags(stack.getItem());
-////                    int[] ids = OreDictionary.getOreIDs(stack);
-//                    match = false;
-//                    for (ResourceLocation tag : tags) {
-//                        if (tag.toString().equals(itemName)) {
-//                            match = true;
-//                            break;
-//                        }
-//                    }
-                }
-            }
-            if (match && count > 0) {
-                match = stack.getCount() == count;
-            }
-            if (match && damage != -1) {
-                match = stack.getDamageValue() == damage;
-            }
-            if (match && nbt != null) {
-                match = nbt.equals(stack.getTag());
-            }
-
-            if (itemName.isEmpty()) {
-                if (filterBlocks) {
-                    match = stack.getItem() instanceof BlockItem;
-                }
-                else if (filterItems) {
-                    match = !(stack.getItem() instanceof BlockItem);
-                }
-            }
-
-            return match == whitelistItem;
+        if (!(entity instanceof ItemEntity item)) {
+            return !whitelistMode;
         }
-        return !whitelistItem;
+
+        return testItem(item.getItem());
+    }
+
+    public boolean testItem(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return !whitelistMode;
+        }
+
+        boolean match = true;
+        if (isTagMode()) {
+            match = stack.is(getTag());
+        } else if (filterStack.isEmpty()) {
+            match = fussyMatch ? ItemStack.isSameItem(filterStack, stack) : ItemStack.isSameItemSameTags(filterStack, stack) && (filterStack.getCount() == stack.getCount() || !matchCount);
+        }
+
+        if (filterStack.isEmpty() && !isTagMode()) {
+            if (filterBlocks) {
+                match = stack.getItem() instanceof BlockItem;
+            } else if (filterItems) {
+                match = !(stack.getItem() instanceof BlockItem);
+            }
+        }
+        return match == whitelistMode;
+    }
+
+    public TagKey<Item> getTag() {
+        if (tagCache == null) {
+            tagCache = ItemTags.create(new ResourceLocation(tagString));
+        }
+        return tagCache;
     }
 
     @Override
@@ -166,66 +168,54 @@ public class FilterItem extends FilterBase {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag compound = super.serializeNBT();
-        compound.putBoolean("include", whitelistItem);
-        compound.putString("name", itemName);
-        compound.putShort("count", (short) count);
-        compound.putShort("damage", (short) count);
-        compound.putBoolean("items", filterItems);
-        compound.putBoolean("blocks", filterBlocks);
-        if (nbt != null) {
-            compound.put("nbt", nbt);
-        }
+        compound.putBoolean("whitelist_mode", whitelistMode);
+        compound.putString("tag_string", tagString);
+        compound.putBoolean("tag_mode", tagMode);
+        compound.put("filter_stack", filterStack.serializeNBT());
+        compound.putBoolean("fussy_match", fussyMatch);
+        compound.putBoolean("match_count", matchCount);
+        compound.putBoolean("filter_blocks", filterBlocks);
+        compound.putBoolean("filter_items", filterItems);
         return compound;
     }
 
     @Override
     public void deserializeNBT(CompoundTag compound) {
         super.deserializeNBT(compound);
-        whitelistItem = compound.getBoolean("include");
-        itemName = compound.getString("name");
-        count = compound.getShort("count");
-        damage = compound.getShort("damage");
-        filterItems = compound.getBoolean("items");
-        filterBlocks = compound.getBoolean("blocks");
-        nbt = null;
-        if (compound.contains("nbt", 10)) {
-            nbt = compound.getCompound("nbt");
-        }
+        whitelistMode = compound.getBoolean("whitelist_mode");
+        tagString = compound.getString("tag_string");
+        tagMode = compound.getBoolean("tag_mode");
+        filterStack = ItemStack.of(compound.getCompound("filter_stack"));
+        fussyMatch = compound.getBoolean("fussy_match");
+        matchCount = compound.getBoolean("match_count");
+        filterBlocks = compound.getBoolean("filter_blocks");
+        filterItems = compound.getBoolean("filter_items");
     }
 
     @Override
     public void serializeMCD(MCDataOutput output) {
         super.serializeMCD(output);
-        output.writeBoolean(whitelistItem);
-        output.writeString(itemName);
-        output.writeVarInt(count);
-        output.writeVarInt(damage);
-        output.writeBoolean(filterItems);
+        output.writeBoolean(whitelistMode);
+        output.writeString(tagString);
+        output.writeBoolean(tagMode);
+        output.writeItemStack(filterStack);
+        output.writeBoolean(fussyMatch);
+        output.writeBoolean(matchCount);
         output.writeBoolean(filterBlocks);
-        output.writeCompoundNBT(nbt);
+        output.writeBoolean(filterItems);
     }
 
     @Override
     public void deSerializeMCD(MCDataInput input) {
         super.deSerializeMCD(input);
-        whitelistItem = input.readBoolean();
-        itemName = input.readString();
-        count = input.readVarInt();
-        damage = input.readVarInt();
-        filterItems = input.readBoolean();
+        whitelistMode = input.readBoolean();
+        tagString = input.readString();
+        tagMode = input.readBoolean();
+        filterStack = input.readItemStack();
+        fussyMatch = input.readBoolean();
+        matchCount = input.readBoolean();
         filterBlocks = input.readBoolean();
-        nbt = input.readCompoundNBT();
+        filterItems = input.readBoolean();
         dataChanged = true;
     }
 }
-/*
- * Include / Exclude Filtered Stacks        (Include Matching Stacks | Ignore Matching Stacks)
- * - ItemType or Ore Dictionary
- * - Count (With Wiled card option)
- * - Item Damage (With Wiled card option)
- *   - Does not apply to ore dict items
- * - NBT (WIll have an enable option Once enabled the current stack nbt will be loaded into a text field where it can be edited by the player)
- *   - Does not apply to ore dict items
- * Include / Exclude Blocks                 (Include Stacks Containing Blocks | Exclude Stacks Containing Blocks)
- *   - Option is disabled if any other options are set.
- */
