@@ -313,9 +313,11 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
                 .setEnabled(() -> !node.getNode().isTagMode());
         Constraints.size(slot, 18, 18);
         Constraints.placeInside(slot, node, Constraints.LayoutPos.BOTTOM_LEFT, 2, -2);
+
         GuiItemStack stack = new GuiItemStack(slot)
                 .setStack(() -> node.getNode().getFilterStack());
         Constraints.bind(stack, slot, 1);
+
         GuiButton setStack = new GuiButton(slot)
                 .onPress(() -> node.getNode().setFilterStack(ItemStack.EMPTY), GuiButton.RIGHT_CLICK)
                 .onPress(() -> {

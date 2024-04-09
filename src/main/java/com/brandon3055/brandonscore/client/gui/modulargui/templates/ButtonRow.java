@@ -98,25 +98,25 @@ public class ButtonRow extends GuiElement<ButtonRow> {
     }
 
     public static ButtonRow topRightInside(GuiElement<?> parent, Direction layoutDirection, int xOffset, int yOffset) {
-        ButtonRow buttonRow = new ButtonRow(parent);
+        ButtonRow buttonRow = new ButtonRow(parent, layoutDirection);
         Constraints.placeInside(buttonRow, parent, Constraints.LayoutPos.TOP_RIGHT, -xOffset, yOffset);
         return buttonRow;
     }
 
     public static ButtonRow topLeftInside(GuiElement<?> parent, Direction layoutDirection, int xOffset, int yOffset) {
-        ButtonRow buttonRow = new ButtonRow(parent);
+        ButtonRow buttonRow = new ButtonRow(parent, layoutDirection);
         Constraints.placeInside(buttonRow, parent, Constraints.LayoutPos.TOP_LEFT, xOffset, yOffset);
         return buttonRow;
     }
 
     public static ButtonRow bottomRightInside(GuiElement<?> parent, Direction layoutDirection, int xOffset, int yOffset) {
-        ButtonRow buttonRow = new ButtonRow(parent);
+        ButtonRow buttonRow = new ButtonRow(parent, layoutDirection);
         Constraints.placeInside(buttonRow, parent, Constraints.LayoutPos.BOTTOM_RIGHT, -xOffset, -yOffset);
         return buttonRow;
     }
 
     public static ButtonRow bottomLeftInside(GuiElement<?> parent, Direction layoutDirection, int xOffset, int yOffset) {
-        ButtonRow buttonRow = new ButtonRow(parent);
+        ButtonRow buttonRow = new ButtonRow(parent, layoutDirection);
         Constraints.placeInside(buttonRow, parent, Constraints.LayoutPos.BOTTOM_LEFT, xOffset, -yOffset);
         return buttonRow;
     }

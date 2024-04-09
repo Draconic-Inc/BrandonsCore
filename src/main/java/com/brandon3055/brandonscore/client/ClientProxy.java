@@ -6,7 +6,10 @@ import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.lib.DLRSCache;
 import com.brandon3055.brandonscore.utils.BCProfiler;
+import net.minecraft.client.GuiMessage;
+import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
@@ -17,6 +20,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+
+import javax.annotation.Nullable;
+import java.util.ListIterator;
 
 /**
  * Created by Brandon on 14/5/2015.
@@ -55,10 +61,25 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void sendIndexedMessage(Player player, Component message, MessageSignature signature) {
+        Minecraft mc = Minecraft.getInstance();
         if (message == null) {
-            Minecraft.getInstance().gui.getChat().deleteMessage(signature);
+            deleteMessage(signature);
         } else {
-            Minecraft.getInstance().gui.getChat().addMessage(message, signature, null);
+            deleteMessage(signature);
+            mc.gui.getChat().addMessage(message, signature, null);
+        }
+    }
+
+    public void deleteMessage(MessageSignature signature) {
+        Minecraft mc = Minecraft.getInstance();
+        ListIterator<GuiMessage> listiterator = mc.gui.getChat().allMessages.listIterator();
+
+        while(listiterator.hasNext()) {
+            GuiMessage guimessage = listiterator.next();
+            if (signature.equals(guimessage.signature())) {
+                listiterator.remove();
+                mc.gui.getChat().refreshTrimmedMessage();
+            }
         }
     }
 

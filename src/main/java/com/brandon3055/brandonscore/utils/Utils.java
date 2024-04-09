@@ -7,6 +7,7 @@ import com.google.common.collect.HashBiMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
@@ -30,9 +31,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -537,6 +540,14 @@ public class Utils {
         double cx = mouseX < x ? x : x + xSize;
         double cy = mouseY < y ? y : y + ySize;
         return Utils.getDistance(cx, cy, mouseX, mouseY);
+    }
+
+    public static MessageSignature uuidToSig(UUID uuid) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(256);
+        byteBuffer.position(32);
+        byteBuffer.putLong(uuid.getMostSignificantBits());
+        byteBuffer.putLong(uuid.getLeastSignificantBits());
+        return new MessageSignature(byteBuffer.array());
     }
 }
 

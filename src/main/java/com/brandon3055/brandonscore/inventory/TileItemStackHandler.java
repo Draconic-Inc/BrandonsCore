@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -20,6 +21,7 @@ import java.util.function.Supplier;
  */
 public class TileItemStackHandler extends ItemStackHandler {
 
+    private final BlockEntity tile;
     private BiPredicate<Integer, ItemStack> stackValidator = null;
     private Runnable loadListener = null;
     private Consumer<Integer> contentsChangeListener = null;
@@ -28,16 +30,18 @@ public class TileItemStackHandler extends ItemStackHandler {
     private Supplier<Integer> perSlotLimit = null;
     private int slotLimit = 64;
 
-
-    public TileItemStackHandler() {
+    public TileItemStackHandler(BlockEntity tile) {
+        this.tile = tile;
     }
 
-    public TileItemStackHandler(int size) {
+    public TileItemStackHandler(BlockEntity tile, int size) {
         super(size);
+        this.tile = tile;
     }
 
-    public TileItemStackHandler(NonNullList<ItemStack> stacks) {
+    public TileItemStackHandler(BlockEntity tile, NonNullList<ItemStack> stacks) {
         super(stacks);
+        this.tile = tile;
     }
 
     public TileItemStackHandler setStackValidator(BiPredicate<Integer, ItemStack> stackValidator) {
@@ -138,6 +142,7 @@ public class TileItemStackHandler extends ItemStackHandler {
         if (contentsChangeListener != null) {
             contentsChangeListener.accept(slot);
         }
+        tile.setChanged();
     }
 
     @Override

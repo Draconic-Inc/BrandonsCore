@@ -30,6 +30,7 @@ public class InfoPanel extends GuiElement<InfoPanel> {
     private double animState = 0; //0 = collapsed, 1 = expanded
     private List<GuiElement<?>> items = new ArrayList<>();
     private GuiElement<?> lastItem;
+    private GuiElement<?> initialItem;
     private Borders borders = Borders.create(4, 3);
     private double maxWidth = 200;
 
@@ -39,7 +40,7 @@ public class InfoPanel extends GuiElement<InfoPanel> {
         setInfoPos(InfoPos.RIGHT_TOP, 2);
         animState = expanded() ? 1 : 0;
         setEnabled(() -> expanded() || animState > 0);
-        lastItem = new GuiElement<>(this);
+        initialItem = lastItem = new GuiElement<>(this);
         Constraints.size(lastItem, 0, 0);
         lastItem.constrain(TOP, relative(get(TOP), () -> borders.top));
         lastItem.constrain(LEFT, relative(get(LEFT), () -> borders.left));
@@ -148,6 +149,39 @@ public class InfoPanel extends GuiElement<InfoPanel> {
 
         lastItem = container;
         return this;
+    }
+
+    public InfoPanel label(Component labelComp) {
+        GuiElement<?> container = new GuiElement<>(this);
+        container.setEnabled(this::fullExpansion);
+
+        GuiText label = new GuiText(container, labelComp)
+                .constrain(TOP, match(container.get(TOP)))
+                .constrain(LEFT, match(container.get(LEFT)))
+                .constrain(WIDTH, dynamic(() -> Math.min(font().width(labelComp), maxWidth)))
+                .setAlignment(Align.LEFT)
+                .setWrap(true)
+                .autoHeight();
+
+        container.constrain(WIDTH, match(label.get(WIDTH)));
+        container.constrain(HEIGHT, relative(label.get(HEIGHT), 2));
+
+        items.add(container);
+        container.constrain(TOP, relative(lastItem.get(BOTTOM), 0));
+        container.constrain(LEFT, relative(lastItem.get(LEFT), 0));
+
+        lastItem = container;
+        return this;
+    }
+
+    public void clear() {
+        removeChild(initialItem);
+        items.forEach(this::removeChild);
+        items.clear();
+        initialItem = lastItem = new GuiElement<>(this);
+        Constraints.size(lastItem, 0, 0);
+        lastItem.constrain(TOP, relative(get(TOP), () -> borders.top));
+        lastItem.constrain(LEFT, relative(get(LEFT), () -> borders.left));
     }
 
     @Override
