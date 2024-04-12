@@ -13,6 +13,7 @@ import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.client.BCGuiTextures;
 import com.brandon3055.brandonscore.client.render.RenderUtils;
 import com.brandon3055.brandonscore.client.shader.BCShaders;
+import com.brandon3055.brandonscore.utils.EnergyUtils;
 import com.brandon3055.brandonscore.utils.Utils;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,6 +27,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -135,6 +137,12 @@ public class ShaderEnergyBar extends GuiEnergyBar {
         } else {
             setEnergy(storage::getOPStored).setCapacity(storage::getMaxOPStored);
         }
+        return this;
+    }
+
+    public ShaderEnergyBar setItemSupplier(Supplier<ItemStack> stackSupplier) {
+        setCapacity(() -> EnergyUtils.isEnergyItem(stackSupplier.get()) ? EnergyUtils.getMaxEnergyStored(stackSupplier.get()) : 0);
+        setEnergy(() -> EnergyUtils.isEnergyItem(stackSupplier.get()) ? EnergyUtils.getEnergyStored(stackSupplier.get()) : 0);
         return this;
     }
 
