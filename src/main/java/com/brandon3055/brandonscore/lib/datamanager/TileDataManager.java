@@ -7,6 +7,7 @@ import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.blocks.BlockBCore;
 import com.brandon3055.brandonscore.inventory.ContainerBCTile;
 import com.brandon3055.brandonscore.inventory.ContainerBCore;
+import com.brandon3055.brandonscore.lib.DelayedTask;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.DataUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -201,7 +202,8 @@ public class TileDataManager<T extends BlockEntity & IDataManagerProvider> imple
                     PacketCustom syncPacket = createSyncPacket();
                     syncPacket.writeByte((byte) data.getIndex());
                     data.toBytes(syncPacket);
-                    syncPacket.sendToChunk(tile);
+                    //TODO, THis may not be the best solution, Issue is client side tile is placed after server side.
+                    DelayedTask.server(1, () -> syncPacket.sendToChunk(tile));
                 }
             }
         }

@@ -233,8 +233,8 @@ public class GuiToolkit {
 
     public GuiButton createBorderlessButton(@NotNull GuiParent<?> parent, @Nullable Supplier<Component> label) {
         GuiButton button = new GuiButton(parent);
-        GuiTexture texture = new GuiTexture(button, () -> BCGuiTextures.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")));
-        texture.dynamicTexture();
+        GuiTexture texture = new GuiTexture(button, () -> BCGuiTextures.getThemed("button_borderless" + (button.isPressed() ? "_invert" : "")))
+                .dynamicTexture();
         GuiRectangle highlight = new GuiRectangle(button).border(() -> button.hoverTime() > 0 ? 0xFFFFFFFF : 0);
         Constraints.bind(texture, button);
         Constraints.bind(highlight, button);
@@ -245,7 +245,7 @@ public class GuiToolkit {
             button.setLabel(new GuiText(button, label)
                     .constrain(TOP, Constraint.relative(button.get(TOP), () -> button.isPressed() ? (-0.5D - xp) : -0.5D).precise())
                     .constrain(LEFT, Constraint.relative(button.get(LEFT), () -> button.isPressed() ? (1.5D - yp) : 1.5D).precise())
-                    .constrain(WIDTH, Constraint.relative(button.get(WIDTH), -4))
+                    .constrain(WIDTH, Constraint.relative(button.get(WIDTH), -3))
                     .constrain(HEIGHT, Constraint.match(button.get(HEIGHT)))
             );
         }
@@ -760,27 +760,20 @@ public class GuiToolkit {
 
 
     //Create Text Field
-    public GuiTextField createTextField() {
-        return createTextField(null);
-    }
 
-    public GuiTextField createTextField(@NotNull GuiElement<?> parent) {
-        return createTextField(parent, true);
-    }
+    public GuiTextField.TextField createTextField(@NotNull GuiElement<?> parent) {
+        GuiRectangle bg = new GuiRectangle(parent);
+        bg.rectangle(() -> Palette.Ctrl.fill(bg.isMouseOver()), () -> Palette.Ctrl.accentLight(false));
 
-    public GuiTextField createTextField(@NotNull GuiElement<?> parent, boolean background) {
-        GuiTextField textField = new GuiTextField(parent);
-//        textField.setTextColor(Palette.Ctrl::text);
-//        textField.setShadow(false);
-//
-//        if (background) {
-//            textField.addBackground(Palette.Ctrl::fill, hovering -> Palette.Ctrl.accentLight(false));
-//        }
-//
-//        if (parent != null) {
-//            parent.addChild(textField);
-//        }
-        return textField;
+        GuiTextField textField = new GuiTextField(bg)
+                .setTextColor(Palette.Ctrl::text)
+                .setShadow(false)
+                .constrain(TOP, Constraint.relative(bg.get(TOP), 1))
+                .constrain(BOTTOM, Constraint.relative(bg.get(BOTTOM), -1))
+                .constrain(LEFT, Constraint.relative(bg.get(LEFT), 4))
+                .constrain(RIGHT, Constraint.relative(bg.get(RIGHT), -4));
+
+        return new GuiTextField.TextField(bg, textField);
     }
 
 //    //Create Scroll Bars
@@ -910,16 +903,16 @@ public class GuiToolkit {
         };
     }
 
-    public enum LayoutPos {
-        TOP_LEFT,
-        TOP_CENTER,
-        TOP_RIGHT,
-        MIDDLE_RIGHT,
-        MIDDLE_LEFT,
-        BOTTOM_RIGHT,
-        BOTTOM_CENTER,
-        BOTTOM_LEFT
-    }
+//    public enum LayoutPos {
+//        TOP_LEFT,
+//        TOP_CENTER,
+//        TOP_RIGHT,
+//        MIDDLE_RIGHT,
+//        MIDDLE_LEFT,
+//        BOTTOM_RIGHT,
+//        BOTTOM_CENTER,
+//        BOTTOM_LEFT
+//    }
 
     public static abstract class Palette {
         /**

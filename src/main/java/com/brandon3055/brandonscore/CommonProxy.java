@@ -5,6 +5,7 @@ import com.brandon3055.brandonscore.api.TimeKeeper;
 import com.brandon3055.brandonscore.handlers.IProcess;
 import com.brandon3055.brandonscore.handlers.ProcessHandler;
 import com.brandon3055.brandonscore.network.BCoreNetwork;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.server.MinecraftServer;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 /**
  * Created by Brandon on 14/5/2015.
@@ -48,8 +50,8 @@ public class CommonProxy {
         BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, signature);
     }
 
-    public void sendIndexedMessage(Player player, Component message, int index) {
-        BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, new MessageSignature(ByteBuffer.allocate(4).putInt(index + 0xE3055000).array()));
+    public void sendIndexedMessage(Player player, Component message, UUID sig) {
+        BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, Utils.uuidToSig(sig));
     }
 
     public void setClipboardString(String text) {}

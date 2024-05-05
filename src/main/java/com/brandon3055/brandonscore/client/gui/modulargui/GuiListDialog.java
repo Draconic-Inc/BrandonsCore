@@ -50,7 +50,6 @@ public class GuiListDialog<T> extends GuiElement<GuiListDialog<T>> {
                 .constrain(LEFT, relative(dialog.get(LEFT), 3))
                 .constrain(RIGHT, relative(dialog.get(RIGHT), () -> dialog.list.hiddenSize() > 0 ? -8D : -3D))
                 .constrain(BOTTOM, relative(dialog.get(BOTTOM), -15));
-        Constraints.bind(new GuiRectangle(dialog.list).fill(0x30FFFFFF), dialog.list);
 
         dialog.scrollBar = new GuiSlider(dialog, Axis.Y)
                 .setEnabled(() -> dialog.list.hiddenSize() > 0)
@@ -82,6 +81,39 @@ public class GuiListDialog<T> extends GuiElement<GuiListDialog<T>> {
 
         dialog.list.setFilter(c -> search.getValue().isEmpty() || dialog.searchStringFunc.apply(c).toLowerCase(Locale.ROOT).contains(search.getValue().toLowerCase(Locale.ROOT)));
 
+        return dialog;
+    }
+
+    public static <C> GuiListDialog<C> createNoSearch(GuiParent<?> parent) {
+        return createNoSearch(parent, GuiRectangle::toolTipBackground);
+    }
+
+    public static <C> GuiListDialog<C> createNoSearch(GuiParent<?> parent, Function<GuiListDialog<C>, GuiElement<?>> backgroundFunc) {
+        GuiListDialog<C> dialog = new GuiListDialog<>(parent.getModularGui());
+        Constraints.bind(backgroundFunc.apply(dialog), dialog);
+
+        dialog.list = new GuiList<C>(dialog)
+                .setZStacking(false)
+                .constrain(TOP, relative(dialog.get(TOP), 3))
+                .constrain(LEFT, relative(dialog.get(LEFT), 3))
+                .constrain(RIGHT, relative(dialog.get(RIGHT), () -> dialog.list.hiddenSize() > 0 ? -8D : -3D))
+                .constrain(BOTTOM, relative(dialog.get(BOTTOM), -3));
+
+        dialog.scrollBar = new GuiSlider(dialog, Axis.Y)
+                .setEnabled(() -> dialog.list.hiddenSize() > 0)
+                .setSliderState(dialog.list.scrollState())
+                .setScrollableElement(dialog.list)
+                .constrain(TOP, match(dialog.list.get(TOP)))
+                .constrain(LEFT, relative(dialog.list.get(RIGHT), 1))
+                .constrain(BOTTOM, match(dialog.list.get(BOTTOM)))
+                .constrain(WIDTH, literal(4));
+
+        Constraints.bind(new GuiRectangle(dialog.scrollBar).fill(0x20FFFFFF), dialog.scrollBar);
+
+        dialog.scrollBar
+                .installSlider(new GuiRectangle(dialog.scrollBar).fill(0x50FFFFFF))
+                .bindSliderLength()
+                .bindSliderWidth();
         return dialog;
     }
 

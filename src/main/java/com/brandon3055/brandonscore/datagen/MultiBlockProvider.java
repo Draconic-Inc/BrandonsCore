@@ -51,7 +51,7 @@ public abstract class MultiBlockProvider implements DataProvider {
     }
 
     private CompletableFuture<?> saveMultiBlock(CachedOutput cache, ResourceLocation id, JsonObject multiBlockJson) {
-        Path output = gen.getPackOutput().getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(modid + "/data/" + id.getNamespace() + "/multiblocks/" + id.getPath() + ".json");
+        Path output = gen.getPackOutput().getOutputFolder(PackOutput.Target.DATA_PACK).resolve(modid + "/multiblocks/" + id.getPath() + ".json");
         return DataProvider.saveStable(cache, multiBlockJson, output);
     }
 

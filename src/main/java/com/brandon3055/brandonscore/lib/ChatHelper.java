@@ -1,9 +1,11 @@
 package com.brandon3055.brandonscore.lib;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 import com.brandon3055.brandonscore.BrandonsCore;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
+import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.Util;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -44,11 +46,8 @@ public class ChatHelper {
      * @param message The message
      * @param index   message index.
      */
-    public static void sendIndexed(Player player, Component message, int index) {
-        //0xE3055000 is an arbitrary number. Combine that with the relatively limited range and chances if my indexes conflicting with
-        //another mod doing something similar are pretty low. But even if there is a conflict its hardly a game breaking issue. 
-        if (index < -1000 || index > 1000) LogHelperBC.bigWarn("Message index is out of bounds. Message: " + message.getString());
-        BrandonsCore.proxy.sendIndexedMessage(player, message, new MessageSignature(ByteBuffer.allocate(4).putInt(index + 0xE3055000).array()));
+    public static void sendIndexed(Player player, Component message, UUID messageId) {
+        BrandonsCore.proxy.sendIndexedMessage(player, message, Utils.uuidToSig(messageId));
     }
 
     /**
@@ -77,7 +76,7 @@ public class ChatHelper {
      * @param index   message index.
      * @see #sendIndexed(PlayerEntity, ITextComponent, int) 
      */
-    public static void sendDeDupeIndexed(Player player, Component message, int index) {
+    public static void sendDeDupeIndexed(Player player, Component message, UUID index) {
         if (player instanceof ServerPlayer) {
             sendIndexed(player, message, index);
         }
@@ -107,7 +106,7 @@ public class ChatHelper {
      * @param index   message index.
      * @see #sendIndexed(PlayerEntity, ITextComponent, int)
      */
-    public static void sendDeDupeIndexedClient(Player player, Component message, int index) {
+    public static void sendDeDupeIndexedClient(Player player, Component message, UUID index) {
         if (player instanceof LocalPlayer) {
             sendIndexed(player, message, index);
         }
