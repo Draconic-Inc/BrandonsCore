@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -42,6 +43,7 @@ public class FilterAdults extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
+        if (entity instanceof Player) return false;
         boolean isAgeable = entity instanceof AgeableMob;
         if (isAgeable) {
             AgeableMob ageable = (AgeableMob) entity;

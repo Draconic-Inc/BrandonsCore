@@ -139,7 +139,7 @@ public class FilterItem extends FilterBase {
         boolean match = true;
         if (isTagMode()) {
             match = stack.is(getTag());
-        } else if (filterStack.isEmpty()) {
+        } else if (!filterStack.isEmpty()) {
             match = fussyMatch ? ItemStack.isSameItem(filterStack, stack) : ItemStack.isSameItemSameTags(filterStack, stack) && (filterStack.getCount() == stack.getCount() || !matchCount);
         }
 

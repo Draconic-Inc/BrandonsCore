@@ -46,10 +46,12 @@ public class CommonProxy {
         ProcessHandler.addProcess(process);
     }
 
+    @Deprecated //Local Multiplayer issue
     public void sendIndexedMessage(Player player, Component message, MessageSignature signature) {
         BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, signature);
     }
 
+    @Deprecated //Local Multiplayer issue
     public void sendIndexedMessage(Player player, Component message, UUID sig) {
         BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, Utils.uuidToSig(sig));
     }

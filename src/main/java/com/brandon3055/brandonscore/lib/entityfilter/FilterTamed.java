@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -42,6 +43,7 @@ public class FilterTamed extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
+        if (entity instanceof Player) return false;
         boolean isTamable = entity instanceof TamableAnimal;
         if (isTamable) {
             TamableAnimal ownable = (TamableAnimal) entity;

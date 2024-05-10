@@ -8,6 +8,7 @@ import com.brandon3055.brandonscore.lib.IValueHashable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
@@ -22,7 +23,7 @@ import javax.annotation.Nullable;
  * So any mod that implements FE will find the FE cap and interact with it normally. However any mod that implements OP will fist check for the OP cap before falling back to RF.
  */
 public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<OPStorage.ComparableValue>, IMCDataSerializable, IOPStorage {
-
+    protected Runnable changeListener;
     protected long energy;
     protected long capacity;
     protected long maxReceive;
@@ -35,8 +36,18 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
         this(capacity, capacity);
     }
 
+    public OPStorage(BlockEntity tile, long capacity) {
+        this(capacity, capacity);
+        setChangeListener(tile::setChanged);
+    }
+
     public OPStorage(long capacity, long maxTransfer) {
         this(capacity, maxTransfer, maxTransfer);
+    }
+
+    public OPStorage(BlockEntity tile, long capacity, long maxTransfer) {
+        this(capacity, maxTransfer, maxTransfer);
+        setChangeListener(tile::setChanged);
     }
 
     public OPStorage(long capacity, long maxReceive, long maxExtract) {
@@ -45,12 +56,16 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
         this.maxExtract = maxExtract;
     }
 
-    @Deprecated
-    public OPStorage(long capacity, long maxReceive, long maxExtract, long energy) {
+    public OPStorage(BlockEntity tile, long capacity, long maxReceive, long maxExtract) {
         this.capacity = capacity;
         this.maxReceive = maxReceive;
         this.maxExtract = maxExtract;
-        this.energy = energy;
+        setChangeListener(tile::setChanged);
+    }
+
+    public OPStorage setChangeListener(Runnable changeListener) {
+        this.changeListener = changeListener;
+        return this;
     }
 
     public OPStorage setIOMode(boolean allowExtract, boolean allowReceive) {
@@ -86,6 +101,9 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
             if (ioTracker != null) {
                 ioTracker.energyInserted(energyReceived);
             }
+            if (energyReceived != 0) {
+                markDirty();
+            }
         }
         return energyReceived;
     }
@@ -101,6 +119,9 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
             energy -= energyExtracted;
             if (ioTracker != null) {
                 ioTracker.energyExtracted(energyExtracted);
+            }
+            if (energyExtracted != 0) {
+                markDirty();
             }
         }
         return energyExtracted;
@@ -137,6 +158,9 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
         energy += amount;
         if (ioTracker != null) {
             ioTracker.energyModified(amount);
+        }
+        if (amount != 0) {
+            markDirty();
         }
         return Math.abs(amount);
     }
@@ -215,6 +239,10 @@ public class OPStorage implements INBTSerializable<CompoundTag>, IValueHashable<
             return ((NumericTag) tag).getAsLong();
         }
         return 0;
+    }
+
+    public void markDirty() {
+        if (changeListener != null) changeListener.run();
     }
 
     @Override

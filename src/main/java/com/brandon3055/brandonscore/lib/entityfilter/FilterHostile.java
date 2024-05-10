@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Created by brandon3055 on 7/11/19.
@@ -30,6 +31,7 @@ public class FilterHostile extends FilterBase {
 
     @Override
     public boolean test(Entity entity) {
+        if (entity instanceof Player) return false;
         boolean isHostile = entity instanceof Enemy;
         return isHostile == whitelistHostile;
     }

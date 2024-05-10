@@ -89,6 +89,7 @@ public class ContributorConfigGui implements GuiProvider {
         gui.onResize(() -> container.resetBounds());
 
         playerRender = new GuiEntityRenderer(container.getContentElement())
+                .setForce2dSize(true)
                 .setEntity(player);
         Constraints.size(playerRender, 100, 100);
         Constraints.center(playerRender, container.getContentElement());

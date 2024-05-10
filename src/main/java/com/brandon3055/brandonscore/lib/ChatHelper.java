@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import com.brandon3055.brandonscore.BrandonsCore;
+import com.brandon3055.brandonscore.network.BCoreNetwork;
 import com.brandon3055.brandonscore.utils.LogHelperBC;
 import com.brandon3055.brandonscore.utils.Utils;
 import net.minecraft.Util;
@@ -47,7 +48,11 @@ public class ChatHelper {
      * @param index   message index.
      */
     public static void sendIndexed(Player player, Component message, UUID messageId) {
-        BrandonsCore.proxy.sendIndexedMessage(player, message, Utils.uuidToSig(messageId));
+        if (player.level().isClientSide()){
+            BrandonsCore.proxy.sendIndexedMessage(player, message, Utils.uuidToSig(messageId));
+        } else {
+            BCoreNetwork.sendIndexedMessage((ServerPlayer) player, message, Utils.uuidToSig(messageId));
+        }
     }
 
     /**
