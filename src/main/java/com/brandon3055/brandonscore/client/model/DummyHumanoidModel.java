@@ -11,6 +11,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 
@@ -19,14 +21,12 @@ import java.util.Collections;
  */
 public class DummyHumanoidModel<T extends LivingEntity> extends HumanoidModel<T> {
     public static final DummyHumanoidModel<?> INSTANCE = new DummyHumanoidModel<>();
-    /*
-    public static final IItemRenderProperties DUMMY_ITEM_RENDER_PROPS = new IItemRenderProperties() {
+    public static final IClientItemExtensions DUMMY_ITEM_RENDER_PROPS = new IClientItemExtensions() {
         @Override
-        public HumanoidModel<?> getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, HumanoidModel<?> _default) {
+        public @NotNull HumanoidModel<?> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, HumanoidModel<?> original) {
             return INSTANCE;
         }
-    }; //TODO [FoxMcloud5655]: I have no idea what to do with this.
-    */
+    };
 
     public DummyHumanoidModel() {
         super(createMesh(new CubeDeformation(1), 0).getRoot().bake(64, 64));

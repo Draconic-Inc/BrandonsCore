@@ -38,6 +38,7 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.*;
@@ -58,6 +59,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -792,6 +795,12 @@ public class BCUtilCommands {
                 .executes(ctx -> {
                     ServerLevel level = ctx.getSource().getLevel();
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
+
+//                    level.getChunk(player.getOnPos()).setLightCorrect(false); //Works for chunk after reload
+//                    level.getLightEngine().checkBlock(player.getOnPos()); //Updates block after reload
+//                    level.getLightEngine().propagateLightSources(new ChunkPos(player.getOnPos())); //Works on chunk after reload
+
+                    player.sendSystemMessage(Component.literal("Ligwewht!4dfdsf"));
 
 //                    level
 

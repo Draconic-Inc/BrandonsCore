@@ -328,11 +328,11 @@ public class GuiEntityFilter extends GuiElement<GuiEntityFilter> {
         Constraints.bind(setStack, slot);
         slot.setJeiDropTarget(node.getNode()::setFilterStack, true);
 
-        GuiButton matchMode = textButton(node, () -> Component.translatable("mod_gui.brandonscore.entity_filter.item.fussy." + node.getNode().isFussyMatch()))
+        GuiButton matchMode = textButton(node, () -> Component.translatable("mod_gui.brandonscore.entity_filter.item.fuzzy." + node.getNode().isFuzzyMatch()))
                 .setEnabled(() -> slot.isEnabled() && !node.getNode().getFilterStack().isEmpty())
                 .constrain(HEIGHT, literal(9))
-                .setTooltip(Component.translatable("mod_gui.brandonscore.entity_filter.item.fussy.info"))
-                .onPress(() -> node.getNode().setFussyMatch(!node.getNode().isFussyMatch()));
+                .setTooltip(Component.translatable("mod_gui.brandonscore.entity_filter.item.fuzzy.info"))
+                .onPress(() -> node.getNode().setFuzzyMatch(!node.getNode().isFuzzyMatch()));
         Constraints.placeOutside(matchMode, slot, Constraints.LayoutPos.TOP_RIGHT, 1, 9);
 
         GuiButton matchCount = textButton(node, () -> Component.translatable("mod_gui.brandonscore.entity_filter.item.match_count." + node.getNode().isMatchCount()))

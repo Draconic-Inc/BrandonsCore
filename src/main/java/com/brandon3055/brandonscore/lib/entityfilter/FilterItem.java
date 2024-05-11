@@ -20,7 +20,7 @@ public class FilterItem extends FilterBase {
     protected String tagString = "";
     protected boolean tagMode = false;
     protected ItemStack filterStack = ItemStack.EMPTY;
-    protected boolean fussyMatch = false;
+    protected boolean fuzzyMatch = false;
     protected boolean matchCount = false;
 
     protected boolean filterBlocks = false;
@@ -53,8 +53,8 @@ public class FilterItem extends FilterBase {
         return filterStack;
     }
 
-    public boolean isFussyMatch() {
-        return fussyMatch;
+    public boolean isFuzzyMatch() {
+        return fuzzyMatch;
     }
 
     public boolean isMatchCount() {
@@ -92,8 +92,8 @@ public class FilterItem extends FilterBase {
         getFilter().nodeModified(this);
     }
 
-    public void setFussyMatch(boolean fussyMatch) {
-        this.fussyMatch = fussyMatch;
+    public void setFuzzyMatch(boolean fuzzyMatch) {
+        this.fuzzyMatch = fuzzyMatch;
         getFilter().nodeModified(this);
     }
 
@@ -140,7 +140,7 @@ public class FilterItem extends FilterBase {
         if (isTagMode()) {
             match = stack.is(getTag());
         } else if (!filterStack.isEmpty()) {
-            match = fussyMatch ? ItemStack.isSameItem(filterStack, stack) : ItemStack.isSameItemSameTags(filterStack, stack) && (filterStack.getCount() == stack.getCount() || !matchCount);
+            match = fuzzyMatch ? ItemStack.isSameItem(filterStack, stack) : ItemStack.isSameItemSameTags(filterStack, stack) && (filterStack.getCount() == stack.getCount() || !matchCount);
         }
 
         if (filterStack.isEmpty() && !isTagMode()) {
@@ -172,7 +172,7 @@ public class FilterItem extends FilterBase {
         compound.putString("tag_string", tagString);
         compound.putBoolean("tag_mode", tagMode);
         compound.put("filter_stack", filterStack.serializeNBT());
-        compound.putBoolean("fussy_match", fussyMatch);
+        compound.putBoolean("fuzzy_match", fuzzyMatch);
         compound.putBoolean("match_count", matchCount);
         compound.putBoolean("filter_blocks", filterBlocks);
         compound.putBoolean("filter_items", filterItems);
@@ -186,7 +186,7 @@ public class FilterItem extends FilterBase {
         tagString = compound.getString("tag_string");
         tagMode = compound.getBoolean("tag_mode");
         filterStack = ItemStack.of(compound.getCompound("filter_stack"));
-        fussyMatch = compound.getBoolean("fussy_match");
+        fuzzyMatch = compound.getBoolean("fuzzy_match");
         matchCount = compound.getBoolean("match_count");
         filterBlocks = compound.getBoolean("filter_blocks");
         filterItems = compound.getBoolean("filter_items");
@@ -199,7 +199,7 @@ public class FilterItem extends FilterBase {
         output.writeString(tagString);
         output.writeBoolean(tagMode);
         output.writeItemStack(filterStack);
-        output.writeBoolean(fussyMatch);
+        output.writeBoolean(fuzzyMatch);
         output.writeBoolean(matchCount);
         output.writeBoolean(filterBlocks);
         output.writeBoolean(filterItems);
@@ -212,7 +212,7 @@ public class FilterItem extends FilterBase {
         tagString = input.readString();
         tagMode = input.readBoolean();
         filterStack = input.readItemStack();
-        fussyMatch = input.readBoolean();
+        fuzzyMatch = input.readBoolean();
         matchCount = input.readBoolean();
         filterBlocks = input.readBoolean();
         filterItems = input.readBoolean();

@@ -65,9 +65,9 @@ public class LangGenerator extends LanguageProvider {
         helper.add("item.tag.false",                        "Mode: Item Stack");
         helper.add("item.match_count.true",                 "Stack Size: Must match");
         helper.add("item.match_count.false",                "Stack Size: Ignored");
-        helper.add("item.fussy.true",                       "Match Mode: Fussy match");
-        helper.add("item.fussy.false",                      "Match Mode: Exact match");
-        helper.add("item.fussy.info",                       "Fussy match will ignore damage and NBT.\nExact match will only detect an identical item stack.");
+        helper.add("item.fuzzy.true",                       "Match Mode: Fuzzy match");
+        helper.add("item.fuzzy.false",                      "Match Mode: Exact match");
+        helper.add("item.fuzzy.info",                       "Fuzzy match will ignore damage and NBT.\nExact match will only detect an identical item stack.");
         helper.add("item.tag_matches",                      "Found %s matching items!");
         helper.add("item.invalid_tag",                      "Unknown / Invalid tag");
         helper.add("item.find_tag",                         "Search available item tags.");
@@ -90,7 +90,7 @@ public class LangGenerator extends LanguageProvider {
         helper.add("and_group.true",                        "An entity will be accepted if it matches ALL of the filters in this group.");
         helper.add("and_group.false",                       "An entity will be accepted if it matches ANY of the filters in this group.");
         helper.add("delete.node",                           "Double-Click to delete filter node");
-        helper.add("delete.all",                            "Tripple-Click to clear all nodes");
+        helper.add("delete.all",                            "Triple-Click to clear all nodes");
         helper.add("search",                                "Search...");
 
         helper.setPrefix("mod_gui.brandonscore.button");

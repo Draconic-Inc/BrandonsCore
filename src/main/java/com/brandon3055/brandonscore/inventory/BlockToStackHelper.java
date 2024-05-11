@@ -21,9 +21,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by brandon3055 on 26/08/2016.
@@ -36,7 +34,6 @@ public class BlockToStackHelper {
 
     public static void init() {
         LOCK.lock();
-
         MinecraftForge.EVENT_BUS.addListener(BlockToStackHelper::entityJoinWorld);
     }
 
@@ -98,4 +95,15 @@ public class BlockToStackHelper {
 
         return harvester;
     }
+
+    public static void startItemCapture() {
+        itemCollection = new ArrayList<>();
+    }
+
+    public static Set<ItemStack> collectAndEndCapture() {
+        Set<ItemStack> dropsCopy = new LinkedHashSet<>(itemCollection);
+        itemCollection = null;
+        return dropsCopy;
+    }
+
 }
