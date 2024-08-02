@@ -15,6 +15,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -67,6 +68,8 @@ public class BCClientEventHandler {
     private static LinkedList<ResourceKey<Level>> sortingOrder = new LinkedList<>();
     public static int elapsedTicks = 0;
 
+    private static final Set<BlockEntity> translucentBlockEntities = new ObjectOpenHashSet<>();
+
     private static Comparator<ResourceKey<Level>> sorter = (value, compare) -> {
         long totalValue = 0;
         for (Integer time : dimTickTimes.get(value)) {
@@ -95,6 +98,10 @@ public class BCClientEventHandler {
         if (mc.player != null) {
             BCEventHandler.noClipPlayers.remove(mc.player.getUUID());
         }
+    }
+
+    public static <T extends BlockEntity> void addTranslucentBlockEntity(T blockEntity) {
+        translucentBlockEntities.add(blockEntity);
     }
 
     @SubscribeEvent
@@ -166,7 +173,6 @@ public class BCClientEventHandler {
 
         BlockEntityRenderDispatcher tileRenderDispatcher = Minecraft.getInstance().getBlockEntityRenderDispatcher();
         MultiBufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
-        LevelRenderer levelRenderer = event.getLevelRenderer();
         PoseStack poseStack = event.getPoseStack();
         Camera camera = event.getCamera();
         Vec3 vec3 = event.getCamera().getPosition();
@@ -174,34 +180,15 @@ public class BCClientEventHandler {
         double camY = vec3.y();
         double camZ = vec3.z();
 
-        for (LevelRenderer.RenderChunkInfo renderChunkInfo : levelRenderer.renderChunksInFrustum) {
-            List<BlockEntity> list = renderChunkInfo.chunk.getCompiledChunk().getRenderableBlockEntities();
-            for (BlockEntity tile : list) {
-                if (!event.getFrustum().isVisible(tile.getRenderBoundingBox())) continue;
-                BlockEntityRenderer<BlockEntity> renderer = tileRenderDispatcher.getRenderer(tile);
-                if (renderer instanceof BlockEntityRendererTransparent<BlockEntity> rendererTransparent) {
-                    BlockPos pos = tile.getBlockPos();
-                    poseStack.pushPose();
-                    poseStack.translate((double) pos.getX() - camX, (double) pos.getY() - camY, (double) pos.getZ() - camZ);
-                    renderTransparent(camera, rendererTransparent, tile, event.getPartialTick(), poseStack, buffers);
-                    poseStack.popPose();
-                }
-            }
+        for (BlockEntity tile : translucentBlockEntities) {
+            BlockPos pos = tile.getBlockPos();
+            poseStack.pushPose();
+            poseStack.translate((double) pos.getX() - camX, (double) pos.getY() - camY, (double) pos.getZ() - camZ);
+            renderTransparent(camera, (BlockEntityRendererTransparent<BlockEntity>) tileRenderDispatcher.getRenderer(tile), tile, event.getPartialTick(), poseStack, buffers);
+            poseStack.popPose();
         }
 
-        synchronized (levelRenderer.globalBlockEntities) {
-            for (BlockEntity tile : levelRenderer.globalBlockEntities) {
-                if (!event.getFrustum().isVisible(tile.getRenderBoundingBox())) continue;
-                BlockEntityRenderer<BlockEntity> renderer = tileRenderDispatcher.getRenderer(tile);
-                if (renderer instanceof BlockEntityRendererTransparent<BlockEntity> rendererTransparent) {
-                    BlockPos blockpos3 = tile.getBlockPos();
-                    poseStack.pushPose();
-                    poseStack.translate((double) blockpos3.getX() - camX, (double) blockpos3.getY() - camY, (double) blockpos3.getZ() - camZ);
-                    renderTransparent(camera, rendererTransparent, tile, event.getPartialTick(), poseStack, buffers);
-                    poseStack.popPose();
-                }
-            }
-        }
+        translucentBlockEntities.clear();
     }
 
     public <E extends BlockEntity> void renderTransparent(Camera camera, BlockEntityRendererTransparent<E> renderer, E tile, float partialTicks, PoseStack poseStack, MultiBufferSource buffers) {

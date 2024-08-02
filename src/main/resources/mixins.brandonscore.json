@@ -7,6 +7,6 @@
     "compatibilityLevel": "JAVA_17",
     "mixins":             ["EntityAccessor", "LivingEntityMixin", "PlayerMixin"],
     "client":             [
-        "ElytraLayerMixin", "LocalPlayerMixin"
+        "BlockEntityRenderDispatcherMixin", "ElytraLayerMixin", "LocalPlayerMixin"
     ]
 }
