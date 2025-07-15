@@ -9,6 +9,7 @@ import com.brandon3055.brandonscore.api.event.TileBCoreInitEvent;
 import com.brandon3055.brandonscore.api.power.IOPStorage;
 import com.brandon3055.brandonscore.api.power.IOTracker;
 import com.brandon3055.brandonscore.api.power.OPStorage;
+import com.brandon3055.brandonscore.capability.CapabilityOP;
 import com.brandon3055.brandonscore.inventory.ContainerBCTile;
 import com.brandon3055.brandonscore.inventory.TileItemStackHandler;
 import com.brandon3055.brandonscore.lib.IRSSwitchable;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.INBTSerializable;
@@ -93,6 +95,11 @@ public class TileBCore extends BlockEntity implements IDataManagerProvider, IDat
 
     protected static <T, BE extends TileBCore> void capability(RegisterCapabilitiesEvent event, Supplier<BlockEntityType<BE>> type, BlockCapability<T, Direction> capability) {
         event.registerBlockEntity(capability, type.get(), (tile, side) -> tile.getCapManager().getCapability(capability, side));
+    }
+
+    protected static <BE extends TileBCore> void energyCapability(RegisterCapabilitiesEvent event, Supplier<BlockEntityType<BE>> type) {
+        event.registerBlockEntity(CapabilityOP.BLOCK, type.get(), (tile, side) -> tile.getCapManager().getCapability(CapabilityOP.BLOCK, side));
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, type.get(), (tile, side) -> tile.getCapManager().getCapability(CapabilityOP.BLOCK, side));
     }
 
     /**
